@@ -1,0 +1,15 @@
+a:
+  s: "text"
+  i: 1
+  b: yes
+  ss:
+    - "a"
+    - "b"
+  is:
+    - 1
+    - 2
+  bs:
+    - yes
+    - no
+  m:
+    k: "v"
