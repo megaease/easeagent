@@ -27,8 +27,7 @@ After finished your works, do `git push origin <your branch>`, and new a pull re
 
 ## Add new [Transformation][t]
 
-Normally, there is no need to implement {@code Transformation} directly, but extend [AbstractTransformation][at] instead.
-
+Normally, there is no need to implement [Transformation][t] directly, but extend [AbstractTransformation][at] instead.
 A good example you can find is [StackTrace][st].
 
 ## Configuration
@@ -44,7 +43,7 @@ class JDBCTransformation extends AbstractTransformation {
 }
 ```
 
-And then you just put the configuration in a YAML file, eg:
+And then you just append the configuration to the YAML file named [easeagent.yml][yml]:
 
 ```yml
 jdbc:
@@ -62,7 +61,7 @@ More about supported configuration value types you can find in [ConfigurationTes
 A new transformation may introduce some external dependencies, like a json lib.
 
 For avoiding the conflict of classes in the host JVM process, you should always remember to add a `relocation` to `maven-shade-plugin`
-in [build/pom.xml][rl], as blow:
+in [build/pom.xml][rl], eg:
 
 ```xml
 <relocation>
@@ -77,7 +76,7 @@ The shade plugin would change the package named `org.slf4j` to `com.hexdecteam.j
 > **Important Rule:** the `shadedPattern` must be like `com.hexdecteam.jar.<xxx>`,
 > then the dependencies classes would not be transformed during transformation.
 > It could avoid problem of `StackOverflowError`.
-> Your can find the magic of it works in [AbstractTransformation#withDescription][at].
+> Your can find the magic that it work in [AbstractTransformation#withDescription][at].
 
 ## Add new module
 
@@ -93,3 +92,4 @@ just like the **trace** module.
 [st]: https://github.com/hexdecteam/easeagent/blob/master/trace/src/main/java/com/hexdecteam/easeagent/StackTrace.java
 [ct]: https://github.com/hexdecteam/easeagent/blob/master/agent/src/test/java/com/hexdecteam/easeagent/ConfigurationTest.java
 [rl]: https://github.com/hexdecteam/easeagent/blob/master/build/pom.xml
+[yml]: https://github.com/hexdecteam/easeagent/blob/master/build/src/main/resources/easeagent.yml
