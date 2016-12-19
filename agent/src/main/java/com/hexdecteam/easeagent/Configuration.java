@@ -1,4 +1,4 @@
-package com.hexdecteam.javagent;
+package com.hexdecteam.easeagent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import java.util.Optional;
 public abstract class Configuration {
 
     private static final Logger LOGGER  = LoggerFactory.getLogger(Configuration.class);
-    public static final  String DEFAULT = "javagent.yml";
+    public static final  String DEFAULT = "easeagent.yml";
 
     @SuppressWarnings("unchecked")
     public static Configuration load(String args) {

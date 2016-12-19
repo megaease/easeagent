@@ -1,4 +1,4 @@
-package com.hexdecteam.javagent;
+package com.hexdecteam.easeagent;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Optional;
@@ -9,7 +9,7 @@ import static java.util.ServiceLoader.load;
 public class Main {
 
     private static final String LOGBACK_CONFIGURATION_FILE = "logback.configurationFile";
-    private static final String JAVAGENT_LOGGING_FILE      = "javagent.logging.file";
+    private static final String JAVAGENT_LOGGING_FILE      = "easeagent.logging.file";
 
     public static void premain(String args, Instrumentation inst) {
         final Configuration c = Configuration.load(args);

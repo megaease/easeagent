@@ -9,12 +9,12 @@
 mvn clean package
 ```
 
-A generated `./build/target/hexdecteam-javagent.jar` is the java agent jar with all the dependencies.
+A generated `./build/target/easeagent.jar` is the java agent jar with all the dependencies.
 
 # Usage
 
 ```
-java -javaagent:hexdecteam-javagent.jar ...
+java -javaagent:easeagent.jar ...
 ```
 
 # To be continued

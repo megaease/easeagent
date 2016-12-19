@@ -1,4 +1,4 @@
-package com.hexdecteam.javagent;
+package com.hexdecteam.easeagent;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;

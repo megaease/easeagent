@@ -1,4 +1,4 @@
-package com.hexdecteam.javagent;
+package com.hexdecteam.easeagent;
 
 import org.junit.Test;
 
