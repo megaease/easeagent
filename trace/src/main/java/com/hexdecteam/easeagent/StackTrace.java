@@ -20,7 +20,7 @@ public interface StackTrace {
         List<String> classes = Collections.singletonList(".+");
 
         @Override
-        protected ElementMatcher.Junction<TypeDescription> matcher() {
+        protected ElementMatcher.Junction<TypeDescription> typesMatched() {
             return classes.stream()
                           .map(ElementMatchers::<TypeDescription>nameMatches)
                           .reduce(ElementMatcher.Junction::or)
@@ -28,7 +28,7 @@ public interface StackTrace {
         }
 
         @Override
-        protected AgentBuilder.Transformer transformer() {
+        protected AgentBuilder.Transformer withTransformer() {
             return (b, td, cl) -> b.visit(Advice.to(Delegation.class).on(methods()));
         }
 
