@@ -30,6 +30,11 @@ After finished your works, do `git push origin <your branch>`, and new a pull re
 Normally, there is no need to implement [Transformation][t] directly, but extend [AbstractTransformation][at] instead.
 A good example you can find is [StackTrace][st].
 
+## [ServiceLoader][sl]
+
+Every transformation would be found in runtime by [ServiceLoader][sl], just like it be done in stagemonitor.
+So, your transformation supposed to declare in `META-INF/services/com.hexdecteam.easeagent.Transformation`.
+
 ## Configuration
 
 It is so easy to configure your transformation by annotation with `@Configurable`, as blow:
@@ -93,3 +98,4 @@ just like the **trace** module.
 [ct]: https://github.com/hexdecteam/easeagent/blob/master/agent/src/test/java/com/hexdecteam/easeagent/ConfigurationTest.java
 [rl]: https://github.com/hexdecteam/easeagent/blob/master/build/pom.xml
 [yml]: https://github.com/hexdecteam/easeagent/blob/master/build/src/main/resources/easeagent.yml
+[sl]: http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html
