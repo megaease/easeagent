@@ -83,12 +83,20 @@ The shade plugin would change the package named `org.slf4j` to `com.hexdecteam.j
 > It could avoid problem of `StackOverflowError`.
 > Your can find the magic that it work in [AbstractTransformation#withDescription][at].
 
+## Logging
+
+`slf4j-api` has already be depended in **core** module, that means you can use it whenever you need.
+
+> **Important Rule:** No more other logging framework in this project.
+
 ## Add new module
 
 Sometime you want to add new transformation, which could probe SQL execution for example,
 but there is no module existed to place. This is the time to add new module named **jdbc**,
 just like the **trace** module.
 
+Don't forget let your module be a dependency of the **build** module if you like your contribution 
+be included in the final jar. 
 
 # To be continued
 
