@@ -9,12 +9,11 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Optional;
 
 public abstract class Configuration {
 
     private static final Logger LOGGER  = LoggerFactory.getLogger(Configuration.class);
-    public static final  String DEFAULT = "easeagent.yml";
+    private static final String DEFAULT = "easeagent.yml";
 
     @SuppressWarnings("unchecked")
     public static Configuration load(String args) {
@@ -22,13 +21,10 @@ public abstract class Configuration {
         final Map<String, Object> map = (Map<String, Object>) yaml.load(inputStream(args));
         return new Configuration() {
             @Override
-            public <T> Optional<T> configure(T bean) {
+            public <T> T configure(T bean) {
                 final Configurable ann = bean.getClass().getAnnotation(Configurable.class);
-                if (ann == null) {
-                    LOGGER.error("{} should annotate with {}", bean.getClass(), Configurable.class);
-                    return Optional.empty();
-                }
-                return Optional.of(bind(bean, (Map<String, Object>) map.get(ann.prefix())));
+                if (ann == null || !map.containsKey(ann.prefix())) return bean;
+                return bind(bean, (Map<String, Object>) map.get(ann.prefix()));
             }
         };
     }
@@ -76,5 +72,5 @@ public abstract class Configuration {
 
     private Configuration() {}
 
-    public abstract <T> Optional<T> configure(T bean);
+    public abstract <T> T configure(T bean);
 }

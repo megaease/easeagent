@@ -1,7 +1,6 @@
 package com.hexdecteam.easeagent;
 
 import java.lang.instrument.Instrumentation;
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static java.util.ServiceLoader.load;
@@ -16,11 +15,8 @@ public class Main {
             final Configuration c = Configuration.load(args);
             StreamSupport.stream(load(Transformation.class).spliterator(), false)
                          .map(c::configure)
-                         .filter(Optional::isPresent)
-                         .map(Optional::get)
                          .forEach(t -> t.apply(inst));
-        })
-        ;
+        });
     }
 
     private static void loggingContext(Runnable runnable) {
