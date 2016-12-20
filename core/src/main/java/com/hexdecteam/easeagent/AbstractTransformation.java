@@ -1,7 +1,6 @@
 package com.hexdecteam.easeagent;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.AgentBuilder.LocationStrategy.ForClassLoader;
 import net.bytebuddy.agent.builder.AgentBuilder.RawMatcher.ForElementMatchers;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
 import net.bytebuddy.description.type.TypeDescription;
@@ -27,7 +26,6 @@ public abstract class AbstractTransformation implements Transformation {
     @Override
     public void apply(Instrumentation inst) {
         new AgentBuilder.Default()
-                .with(ForClassLoader.WEAK)
                 .with(new DebugListener())
                 .type(withDescription())
                 .transform(withTransformer())
