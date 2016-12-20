@@ -12,12 +12,14 @@ public class Main {
     private static final String JAVAGENT_LOGGING_FILE      = "easeagent.logging.file";
 
     public static void premain(String args, Instrumentation inst) {
-        final Configuration c = Configuration.load(args);
-        loggingContext(() -> StreamSupport.stream(load(Transformation.class).spliterator(), false)
-                                          .map(c::configure)
-                                          .filter(Optional::isPresent)
-                                          .map(Optional::get)
-                                          .forEach(t -> t.apply(inst)))
+        loggingContext(() -> {
+            final Configuration c = Configuration.load(args);
+            StreamSupport.stream(load(Transformation.class).spliterator(), false)
+                         .map(c::configure)
+                         .filter(Optional::isPresent)
+                         .map(Optional::get)
+                         .forEach(t -> t.apply(inst));
+        })
         ;
     }
 
