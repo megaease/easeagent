@@ -4,7 +4,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.util.Collections;
@@ -20,11 +20,11 @@ public interface StackTrace {
         List<String> classes = Collections.singletonList(".+");
 
         @Override
-        protected ElementMatcher.Junction<TypeDescription> typesMatched() {
+        protected Junction<TypeDescription> typesMatched() {
             return classes.stream()
                           .map(ElementMatchers::<TypeDescription>nameMatches)
-                          .reduce(ElementMatcher.Junction::or)
-                          .orElse(nameMatches(classes.get(0)));
+                          .reduce(Junction::or)
+                          .orElse(none());
         }
 
         @Override
@@ -32,7 +32,7 @@ public interface StackTrace {
             return (b, td, cl) -> b.visit(Advice.to(Delegation.class).on(methods()));
         }
 
-        private ElementMatcher.Junction<MethodDescription.InDefinedShape> methods() {
+        private Junction<MethodDescription.InDefinedShape> methods() {
             return not(isAbstract())
                     .and(not(isFinalizer()))
                     .and(not(isHashCode()))
