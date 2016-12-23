@@ -59,30 +59,6 @@ When your transformation loaded in runtime, the value in the YAML file would be 
 
 More about supported configuration value types you can find in [ConfigurationTest][ct].
 
-## Dependency
-
-> **Important Rule:** New a dependency is your last option!
-
-A new transformation may introduce some external dependencies, like a json lib.
-
-For avoiding the conflict of classes in the host JVM process, you should always remember to add a `relocation` to `maven-shade-plugin`
-in [build/pom.xml][rl], eg:
-
-```xml
-<relocation>
-    <pattern>org.slf4j</pattern>
-    <shadedPattern>com.hexdecteam.jar.slf4j</shadedPattern>
-</relocation>
-```
-
-
-The shade plugin would change the package named `org.slf4j` to `com.hexdecteam.jar.slf4j` automatically in compile phase.
-
-> **Important Rule:** the `shadedPattern` must be like `com.hexdecteam.jar.<xxx>`,
-> then the dependencies classes would not be transformed during transformation.
-> It could avoid problem of `StackOverflowError`.
-> Your can find the magic that it work in [AbstractTransformation#withDescription][at].
-
 ## Logging
 
 `slf4j-api` has already be depended in **core** module, that means you can use it whenever you need.
