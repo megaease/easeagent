@@ -45,43 +45,26 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.0.0</version>
                 <configuration>
-                    <transformers>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <manifestEntries>
-                                <Premain-Class>com.hexdecteam.easeagent.Main</Premain-Class>
-                            </manifestEntries>
-                        </transformer>
-                    </transformers>
-                    <relocations>
-                        <relocation>
-                            <pattern>net.bytebuddy</pattern>
-                            <shadedPattern>com.hexdecteam.jar.bytebuddy</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.slf4j</pattern>
-                            <shadedPattern>com.hexdecteam.jar.slf4j</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>ch.qos.logback</pattern>
-                            <shadedPattern>com.hexdecteam.jar.logback</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.yaml.snakeyaml</pattern>
-                            <shadedPattern>com.hexdecteam.jar.snakeyaml</shadedPattern>
-                        </relocation>
-                    </relocations>
+                    <descriptors>
+                        <descriptor>src/assembly/src.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifestEntries>
+                            <Premain-Class>com.hexdecteam.easeagent.Main</Premain-Class>
+                        </manifestEntries>
+                    </archive>
+                    <archiverConfig>
+                        <compress>false</compress>
+                    </archiverConfig>
                 </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>

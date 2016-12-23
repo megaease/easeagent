@@ -1,13 +1,10 @@
 package com.hexdecteam.easeagent;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.AgentBuilder.RawMatcher.ForElementMatchers;
-import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatcher.Junction;
+import net.bytebuddy.matcher.ElementMatcher;
 
 import java.lang.instrument.Instrumentation;
-import java.util.Arrays;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -16,8 +13,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * <p>
  * You properly need to care about two things:
  * <ul>
- * <li>What kind of classes would be transform ? And, </li>
- * <li>how to transform those classes?</li>
+ * <li>What kind of classes would be transformed, and </li>
+ * <li>how to transformWith them ?  </li>
  * </ul>
  *
  * @see AgentBuilder
@@ -25,29 +22,25 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class AbstractTransformation implements Transformation {
     @Override
     public void apply(Instrumentation inst) {
-        new AgentBuilder.Default()
-                .with(new DebugListener())
-                .type(withDescription())
-                .transform(withTransformer())
-                .installOn(inst);
+        transformWith(
+                new AgentBuilder.Default()
+                        .with(new DebugListener())
+                        .ignore(any(), isBootstrapClassLoader())
+                        .or(is(selfClassLoader()))
+                        .or(isInterface())
+                        .or(isAnnotation())
+                        .or(nameStartsWith("sun."))
+                        .or(nameStartsWith("com.sun."))
+                        .or(ignores())
+        ).installOn(inst);
     }
 
-    protected abstract Junction<TypeDescription> typesMatched();
+    protected abstract ElementMatcher<? super TypeDescription> ignores();
 
-    protected abstract Transformer withTransformer();
+    protected abstract AgentBuilder transformWith(AgentBuilder builder);
 
-    private AgentBuilder.RawMatcher withDescription() {
-        final Junction<TypeDescription> tdm =
-                not(nameStartsWith(packagePrefixOfItSelf())).and(typesMatched());
-
-        return new ForElementMatchers(tdm, not(isBootstrapClassLoader()), any());
+    private ClassLoader selfClassLoader() {
+        return getClass().getClassLoader();
     }
 
-    private String packagePrefixOfItSelf() {
-        final String name = Transformation.class.getPackage().getName();
-        return Arrays.stream(name.split("\\."))
-                     .limit(2)
-                     .reduce((l, r) -> l + '.' + r)
-                     .orElseThrow(IllegalStateException::new);
-    }
 }

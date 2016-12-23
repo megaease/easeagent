@@ -12,27 +12,41 @@
     <artifactId>agent</artifactId>
 
     <properties>
-        <logback.version>1.1.8</logback.version>
-        <snakeyaml.version>1.17</snakeyaml.version>
+        <spring.boot.version>1.4.2.RELEASE</spring.boot.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>${snakeyaml.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-loader</artifactId>
+            <version>${spring.boot.version}</version>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.springframework</pattern>
+                            <shadedPattern>spring</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

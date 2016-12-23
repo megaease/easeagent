@@ -17,5 +17,10 @@
             <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>6.0.44</version>
+        </dependency>
     </dependencies>
 </project>

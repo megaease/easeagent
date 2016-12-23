@@ -12,7 +12,8 @@
     <artifactId>core</artifactId>
 
     <properties>
-        <bytebuddy.version>1.5.8</bytebuddy.version>
+        <snakeyaml.version>1.17</snakeyaml.version>
+        <bytebuddy.version>1.5.11</bytebuddy.version>
         <slf4j.version>1.7.21</slf4j.version>
     </properties>
 
@@ -26,6 +27,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
         </dependency>
     </dependencies>
 
