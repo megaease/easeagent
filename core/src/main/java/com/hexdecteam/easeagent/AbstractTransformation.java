@@ -14,7 +14,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * You properly need to care about two things:
  * <ul>
  * <li>What kind of classes would be transformed, and </li>
- * <li>how to transformWith them ?  </li>
+ * <li>how to transform them ?  </li>
  * </ul>
  *
  * @see AgentBuilder
@@ -25,8 +25,7 @@ public abstract class AbstractTransformation implements Transformation {
         transformWith(
                 new AgentBuilder.Default()
                         .with(new DebugListener())
-                        .ignore(any(), isBootstrapClassLoader())
-                        .or(is(selfClassLoader()))
+                        .ignore(any(), isBootstrapClassLoader().or(is(selfClassLoader())))
                         .or(isInterface())
                         .or(isAnnotation())
                         .or(nameStartsWith("sun."))
