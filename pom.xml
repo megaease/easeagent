@@ -7,18 +7,37 @@
     <groupId>com.hexdecteam.easeagent</groupId>
     <artifactId>parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
+    <modules>
+        <module>core</module>
+        <module>build</module>
+        <module>agent</module>
+        <module>metric</module>
+        <module>trace</module>
+        <module>test</module>
+    </modules>
 
     <properties>
+        <encoding.file>UTF-8</encoding.file>
         <version.java>1.6</version.java>
         <version.junit>4.12</version.junit>
-        <encoding.file>UTF-8</encoding.file>
         <version.mockito>1.10.19</version.mockito>
+        <version.guava>20.0</version.guava>
+        <version.slf4j>1.7.21</version.slf4j>
+        <version.byte-buddy>1.6.2</version.byte-buddy>
+        <version.auto-service>1.0-rc2</version.auto-service>
+        <version.lombok>1.16.8</version.lombok>
+        <version.config>1.3.1</version.config>
     </properties>
 
     <packaging>pom</packaging>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${version.guava}</version>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -28,6 +47,31 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${version.mockito}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${version.slf4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${version.byte-buddy}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe</groupId>
+                <artifactId>config</artifactId>
+                <version>${version.config}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>${version.auto-service}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${version.lombok}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
