@@ -23,7 +23,7 @@
         <version.mockito>1.10.19</version.mockito>
         <version.guava>20.0</version.guava>
         <version.slf4j>1.7.21</version.slf4j>
-        <version.byte-buddy>1.6.2</version.byte-buddy>
+        <version.byte-buddy>1.6.5</version.byte-buddy>
         <version.auto-service>1.0-rc2</version.auto-service>
         <version.lombok>1.16.8</version.lombok>
         <version.config>1.3.1</version.config>

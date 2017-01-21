@@ -12,6 +12,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
+import net.bytebuddy.utility.JavaModule;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -94,7 +95,7 @@ public class MetricAnnotations extends Transformation<MetricAnnotations.Configur
         public final AgentBuilder.Transformer transformer() {
             return new AgentBuilder.Transformer() {
                 @Override
-                public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld) {
+                public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader ld, JavaModule m) {
                     return b.visit(Advice.withCustomMapping()
                                          .bind(MetricName.class, new MetricNameForFixedValue(type))
                                          .bind(Cause.class, new CauseForMixedValue(type))

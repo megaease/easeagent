@@ -8,14 +8,6 @@ import java.net.URLClassLoader;
 
 public class Classes {
 
-    public static Class<?> transform(Class<?> type,
-                                     Transformation.Feature feature,
-                                     ClassLoader loader,
-                                     TypeDescription td) {
-        return feature.transformer().transform(new ByteBuddy().redefine(type), td, null)
-                      .make().load(loader).getLoaded();
-    }
-
     public static By transform(Class<?> type) {
         return new By(type);
     }
@@ -53,6 +45,7 @@ public class Classes {
         Class<?> load() {
             return new Loading(type, feature, new TypeDescription.ForLoadedType(type), null).load();
         }
+
         Class<?> load(ClassLoader target) {
             return new Loading(type, feature, new TypeDescription.ForLoadedType(type), null).load(target);
         }
@@ -77,7 +70,7 @@ public class Classes {
         }
 
         public Class<?> load(ClassLoader target) {
-            return feature.transformer().transform(new ByteBuddy().redefine(type), td, loader)
+            return feature.transformer().transform(new ByteBuddy().redefine(type), td, loader, null)
                                      .make().load(target).getLoaded();
         }
     }

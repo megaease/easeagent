@@ -9,6 +9,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -61,7 +62,7 @@ public class TraceStack extends Transformation<TraceStack.Configuration> {
             public AgentBuilder.Transformer transformer() {
                 return new AgentBuilder.Transformer() {
                     @Override
-                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld) {
+                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
                         return b.visit(Advice.to(FrameAdvice.class).on(not(
                                 isTypeInitializer().or(isSetter())
                                                    .or(isGetter())

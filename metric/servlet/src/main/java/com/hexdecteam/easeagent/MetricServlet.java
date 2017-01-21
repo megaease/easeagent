@@ -6,6 +6,7 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
+import net.bytebuddy.utility.JavaModule;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +34,7 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
                 final String key = UUID.randomUUID().toString();
                 return new AgentBuilder.Transformer() {
                     @Override
-                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld) {
+                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
                         return b.visit(Advice.withCustomMapping()
                                              .bind(Key.class, key)
                                              .to(MarkAdvice.class)

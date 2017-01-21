@@ -11,6 +11,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
 
 import javax.sql.DataSource;
 import java.lang.annotation.Retention;
@@ -59,7 +60,7 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
                 final String statementKey = UUID.randomUUID().toString();
                 return new AgentBuilder.Transformer() {
                     @Override
-                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld) {
+                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
                         if (td.isAssignableTo(DataSource.class)) {
                             final Junction<MethodDescription> getConnection = named("getConnection")
                                     .and(returns(isSubTypeOf(Connection.class)));
