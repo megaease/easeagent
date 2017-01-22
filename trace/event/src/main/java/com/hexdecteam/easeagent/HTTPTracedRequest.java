@@ -9,15 +9,15 @@ import java.util.UUID;
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public class HTTPTracedRequest implements TracedRequest {
 
-    private final String              id;
-    private final String              name;
-    private final long                timeElapse;
-    private final long                cpuTimeElapse;
-    private final StackFrame          rootFrame;
-    private final boolean             error;
-    private final String              url;
-    private final String              method;
-    private final int                 statusCode;
+    private final String     id;
+    private final String     name;
+    private final long       timeElapse;
+    private final long       cpuTimeElapse;
+    private final StackFrame rootFrame;
+    private final boolean    error;
+    private final String     url;
+    private final String     method;
+    private final int        statusCode;
 
     public HTTPTracedRequest(String id, String name, long timeElapse, long cpuTimeElapse, StackFrame rootFrame,
                              boolean error, String url, String method, int statusCode) {
@@ -56,12 +56,12 @@ public class HTTPTracedRequest implements TracedRequest {
 
     // TODO remove stagemonitor's legacy
     public Map<String, String> headers() {
-        return Collections.singletonMap("TODO","@zhongl");
+        return Collections.singletonMap("TODO", "@zhongl");
     }
 
     // TODO remove stagemonitor's legacy
     public Map<String, String> userAgent() {
-        return Collections.singletonMap("TODO","@zhongl");
+        return Collections.singletonMap("TODO", "@zhongl");
     }
 
     @Override
@@ -126,6 +126,6 @@ public class HTTPTracedRequest implements TracedRequest {
 
     @Override
     public Map<String, String> parameters() {
-        return Collections.singletonMap("TODO","@zhongl");
+        return Collections.singletonMap("TODO", "@zhongl");
     }
 }
