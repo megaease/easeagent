@@ -32,7 +32,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @AutoService(Plugin.class)
 public class MetricsXReport implements Plugin<MetricsXReport.Configuration> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetricsXReport.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("metrics");
 
     @Override
     public void hook(final Configuration conf, Instrumentation inst, Subscription subs) {

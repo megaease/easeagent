@@ -25,7 +25,7 @@ import static java.text.MessageFormat.format;
 @AutoService(Plugin.class)
 public class TraceEvents implements Plugin<TraceEvents.Configuration> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TraceEvents.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger("requests");
 
     @Override
     public void hook(Configuration conf, Instrumentation inst, Subscription subs) {

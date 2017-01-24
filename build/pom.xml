@@ -16,17 +16,17 @@
         <dependency>
             <groupId>com.hexdecteam.easeagent</groupId>
             <artifactId>agent-loader</artifactId>
-            <version>${version.easeagent}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.hexdecteam.easeagent</groupId>
             <artifactId>agent-bootstrap</artifactId>
-            <version>${version.easeagent}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.hexdecteam.easeagent</groupId>
             <artifactId>metric-event</artifactId>
-            <version>${version.easeagent}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -42,7 +42,6 @@
 
     <properties>
         <version.log4j>2.7</version.log4j>
-        <version.easeagent>${project.parent.version}</version.easeagent>
     </properties>
 
     <build>
@@ -108,21 +107,26 @@
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>metric-stagemonitor</artifactId>
-                    <version>${version.easeagent}</version>
+                    <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>metric-servlet</artifactId>
-                    <version>${version.easeagent}</version>
+                    <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>trace-servlet</artifactId>
-                    <version>${version.easeagent}</version>
+                    <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>metric-jdbc</artifactId>
+                    <version>${project.parent.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <artifactId>log4j2-http-appender</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
             </dependencies>
@@ -136,12 +140,12 @@
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>metric-annotation</artifactId>
-                    <version>${version.easeagent}</version>
+                    <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>metric-standard</artifactId>
-                    <version>${version.easeagent}</version>
+                    <version>${project.parent.version}</version>
                 </dependency>
             </dependencies>
         </profile>
