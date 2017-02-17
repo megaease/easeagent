@@ -11,11 +11,32 @@
 
     <artifactId>agent-loader</artifactId>
 
+    <properties>
+        <version.javax.servlet-api>3.1.0</version.javax.servlet-api>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-loader</artifactId>
             <version>1.4.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${version.javax.servlet-api}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>${version.byte-buddy}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -30,6 +51,10 @@
                         <relocation>
                             <pattern>org.springframework</pattern>
                             <shadedPattern>spring</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.bytebuddy.agent</pattern>
+                            <shadedPattern>bba</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
