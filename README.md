@@ -3,7 +3,7 @@
 
 
 ```
-source /dev/stdin <<< "$(curl -Lk https://gist.github.com/zhongl/50b42ed44c21f6e9eff7a817e682421c/raw/setup_easeagent.sh)"
+source /dev/stdin <<< "$(curl -SL https://git.io/vD7Bp)"
 java $JAVA_OPTS <rest of your command line>
 ```
 
