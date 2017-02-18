@@ -1,21 +1,17 @@
-# Build from source
-
-```
-mvn clean package -pl build -P sm -am
-```
-
-A generated `./build/target/easeagent-sm.jar` is the java agent jar with all the dependencies.
 
 # Usage
 
+
 ```
-java -javaagent:easeagent-sm.jar <rest of your command line>
+curl -Lk https://github.com/hexdecteam/stagemonitor/releases/download/v0.25.1-easestack/easeagent-sm.jar -O
+export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-sm.jar"
+java $JAVA_OPTS <rest of your command line>
 ```
 
 ## Use an `application.conf`
 
 ```
-java -javaagent:easeagent-sm.jar=/path/to/application.conf <rest of your command line>
+export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-sm.jar=/path/to/application.conf" 
 ```
 
 > [applicaiton.conf](build/src/main/resources/application.conf)
@@ -23,7 +19,16 @@ java -javaagent:easeagent-sm.jar=/path/to/application.conf <rest of your command
 ## Use a log configuration file
 
 ```
-java -Deaseagent.log.conf=/path/to/file -javaagent:easeagent-sm.jar <rest of your command line>
+export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j2.xml -javaagent:easeagent-sm.jar"
 ```
 
 > [log configuration](build/src/main/resources/log4j2.xml)
+
+
+# Build from source
+
+```
+mvn clean package -pl build -P sm -am
+```
+
+A generated `./build/target/easeagent-sm.jar` is the java agent jar with all the dependencies.
