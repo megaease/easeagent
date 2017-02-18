@@ -3,8 +3,7 @@
 
 
 ```
-curl -Lk https://github.com/hexdecteam/stagemonitor/releases/download/v0.25.1-easestack/easeagent-sm.jar -O
-export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-sm.jar"
+source /dev/stdin <<< "$(curl -Lk https://gist.github.com/zhongl/50b42ed44c21f6e9eff7a817e682421c/raw/setup_easeagent.sh)"
 java $JAVA_OPTS <rest of your command line>
 ```
 
