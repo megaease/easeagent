@@ -4,19 +4,14 @@ import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.jar.Attributes;
 
-/** A main class of java agent to load {@link Agent} service with a {@link LaunchedURLClassLoader}. */
+/** A main class of java agent to load easeagent with a {@link LaunchedURLClassLoader}. */
 public class Main {
     private static final ClassLoader BOOTSTRAP_CLASS_LOADER = null;
     private static final String      LIB                    = "lib/";
@@ -24,7 +19,7 @@ public class Main {
     private static final String      EASEAGENT_LOG_CONF     = "easeagent.log.conf";
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-        final JarFileArchive archive = new JarFileArchive(getArchiveFileContains(Main.class));
+        final JarFileArchive archive = new JarFileArchive(Archives.getArchiveFileContains(Main.class));
         final Attributes attributes = archive.getManifest().getMainAttributes();
         final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
         final String bootstrap = attributes.getValue("Bootstrap-Class");
@@ -79,22 +74,6 @@ public class Main {
         }
 
         return urls;
-    }
-
-    private static File getArchiveFileContains(Class<?> klass) throws URISyntaxException {
-        ProtectionDomain protectionDomain = klass.getProtectionDomain();
-        CodeSource codeSource = protectionDomain.getCodeSource();
-        URI location = (codeSource == null ? null : codeSource.getLocation().toURI());
-        String path = (location == null ? null : location.getSchemeSpecificPart());
-        if (path == null) {
-            throw new IllegalStateException("Unable to determine code source archive");
-        }
-        File root = new File(path);
-        if (!root.exists() || root.isDirectory()) {
-            throw new IllegalStateException(
-                    "Unable to determine code source archive from " + root);
-        }
-        return root;
     }
 
 }
