@@ -53,7 +53,7 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
             try {
                 final long timestamp = System.currentTimeMillis();
                 final JsonGenerator json = jsonFactory.createGenerator(writer);
-                if (Strings.isNullOrEmpty(bulkTemplate)) {
+                if (!Strings.isNullOrEmpty(bulkTemplate)) {
                     // https://github.com/hexdecteam/easeagent/wiki/message_protocol_for_gateway
                     final String bulk = format(bulkTemplate, new Date(timestamp));
                     json.writeRaw(bulk);
