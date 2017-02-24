@@ -38,7 +38,7 @@ class ConfigurationDecorator {
 
     static ConfigurationDecorator configurationDecorator(String args) {
         final Config config = isNullOrEmpty(args) ? load(ConfigurationDecorator.class.getClassLoader())
-                                                  : parseFile(new File(args));
+                                                  : parseFile(new File(args)).resolve();
 
         if (LOGGER.isDebugEnabled())
             LOGGER.debug(config.root().render(defaults().setOriginComments(false).setJson(false)));
