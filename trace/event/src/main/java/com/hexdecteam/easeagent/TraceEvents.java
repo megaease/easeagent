@@ -16,6 +16,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -59,7 +60,7 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
                     json.writeRaw(bulk);
                 }
                 json.writeStartObject();
-                json.writeNumberField("@timestamp", timestamp);
+                json.writeStringField("@timestamp", stringFormat(timestamp));
                 write(json, this.hostInfo);
                 json.writeObject(request);
                 json.writeEndObject();
@@ -69,6 +70,11 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
                 throw new MayBeABug(e);
             }
 
+        }
+
+        // TODO fix remaining problem of stagemonitor
+        private String stringFormat(long timestamp) {
+            return MessageFormat.format("{0,date,yyyy-MM-dd'T'HH:mm:ss.SSSZ}", new Date(timestamp));
         }
 
         private void write(JsonGenerator json, Map<String, String> map) throws IOException {
