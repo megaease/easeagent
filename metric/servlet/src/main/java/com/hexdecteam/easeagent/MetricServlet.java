@@ -76,12 +76,13 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
             // TODO lazy calculation in streaming
             EventBus.publish(new MetricEvents.Mark("request_throughput").tag("request_name", "All").tag("url", "All"));
 
+            final String http_code = Integer.toString(status);
             EventBus.publish(new MetricEvents.Mark("request_throughput").tag("request_name", signature)
-                                                                        .tag("http_code", Integer.toString(status))
+                                                                        .tag("http_code", http_code)
                                                                         .tag("url", uri));
             // TODO lazy calculation in streaming
             EventBus.publish(new MetricEvents.Mark("request_throughput").tag("request_name", "All")
-                                                                        .tag("http_code", "All")
+                                                                        .tag("http_code", http_code)
                                                                         .tag("url", "All"));
             if (status >= 400) {
                 EventBus.publish(new MetricEvents.Mark("request_error_throughput").tag("request_name", signature)

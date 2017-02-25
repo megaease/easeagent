@@ -42,7 +42,7 @@ public class MetricServletTest {
                                                                          .tag("request_name", method.toString())));
 
         assertThat(poll(), is(new MetricEvents.Mark("request_throughput").tag("url", "All")
-                                                                         .tag("http_code", "All")
+                                                                         .tag("http_code", "200")
                                                                          .tag("request_name", "All")));
 
     }
