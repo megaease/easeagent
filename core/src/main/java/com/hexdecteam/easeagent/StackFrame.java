@@ -22,25 +22,28 @@ public final class StackFrame {
     private volatile long endCPUTime;
 
     public static boolean setRootIfAbsent(String signature) {
-        if (CURRENT.get() != null) return false;
+        if (current() != null) return false;
 
         CURRENT.set(new StackFrame(signature));
         return true;
     }
 
     public static boolean fork(String signature) {
-        final StackFrame frame = CURRENT.get();
+        final StackFrame frame = current();
         if (frame == null) return false;
-
         CURRENT.set(fork(frame, signature));
         return true;
     }
 
     public static StackFrame join() {
-        final StackFrame frame = CURRENT.get();
+        final StackFrame frame = current();
         if (frame == null) return null;
         CURRENT.set(join(frame));
         return frame;
+    }
+
+    public static StackFrame current() {
+        return CURRENT.get();
     }
 
     public String getSignature() {

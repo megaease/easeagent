@@ -137,7 +137,12 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
             final long duration = System.nanoTime() - started;
 
             EventBus.publish(new Update("jdbc_statement", duration, NANOSECONDS).tag("signature", "All"));
-            // TODO support get signature
+
+            final StackFrame current = StackFrame.current();
+
+            if (current == null) return;
+
+            EventBus.publish(new Update("jdbc_statement", duration, NANOSECONDS).tag("signature", current.getSignature()));
         }
     }
 }

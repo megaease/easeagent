@@ -4,13 +4,18 @@ import com.google.auto.service.AutoService;
 import com.google.common.base.Function;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.method.ParameterDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -23,21 +28,21 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @AutoService(Plugin.class)
 public class TraceStack extends Transformation<TraceStack.Configuration> {
 
-    private static final Function<String, Junction<TypeDescription>>                    NAME_START_WITHS =
+    private static final Function<String, Junction<TypeDescription>> NAME_START_WITHS =
             new Function<String, Junction<TypeDescription>>() {
                 @Override
                 public Junction<TypeDescription> apply(String input) {
                     return nameStartsWith(input);
                 }
             };
-    private static final Function<Junction<TypeDescription>, Junction<TypeDescription>> NOT              =
+    private static final Function<Junction<TypeDescription>, Junction<TypeDescription>> NOT =
             new Function<Junction<TypeDescription>, Junction<TypeDescription>>() {
                 @Override
                 public Junction<TypeDescription> apply(Junction<TypeDescription> input) {
                     return not(input);
                 }
             };
-    private static final ReduceF.BiFunction<Junction<TypeDescription>>                  OR               =
+    private static final ReduceF.BiFunction<Junction<TypeDescription>> OR =
             new ReduceF.BiFunction<Junction<TypeDescription>>() {
                 @Override
                 public Junction<TypeDescription> apply(Junction<TypeDescription> l, Junction<TypeDescription> r) {
@@ -63,20 +68,22 @@ public class TraceStack extends Transformation<TraceStack.Configuration> {
                 return new AgentBuilder.Transformer() {
                     @Override
                     public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
-                        return b.visit(Advice.to(FrameAdvice.class).on(not(
-                                isTypeInitializer().or(isSetter())
-                                                   .or(isGetter())
-                                                   .or(isConstructor())
-                                                   .or(isClone())
-                                                   .or(isEquals())
-                                                   .or(isHashCode())
-                                                   .or(isToString())
-                                                   .or(ElementMatchers.<MethodDescription>isSynthetic())
-                                                   .or(ElementMatchers.<MethodDescription>isBridge())
-                                                   .or(ElementMatchers.<MethodDescription>isAbstract())
-                                                   .or(ElementMatchers.<MethodDescription>isNative())
-                                                   .or(ElementMatchers.<MethodDescription>isStrict())
-                        )));
+                        return b.visit(Advice.withCustomMapping()
+                                             .bind(Signature.class, new SignatureForFixedValue())
+                                             .to(FrameAdvice.class).on(not(
+                                        isTypeInitializer().or(isSetter())
+                                                           .or(isGetter())
+                                                           .or(isConstructor())
+                                                           .or(isClone())
+                                                           .or(isEquals())
+                                                           .or(isHashCode())
+                                                           .or(isToString())
+                                                           .or(ElementMatchers.<MethodDescription>isSynthetic())
+                                                           .or(ElementMatchers.<MethodDescription>isBridge())
+                                                           .or(ElementMatchers.<MethodDescription>isAbstract())
+                                                           .or(ElementMatchers.<MethodDescription>isNative())
+                                                           .or(ElementMatchers.<MethodDescription>isStrict())
+                                )));
                     }
                 };
             }
@@ -101,15 +108,27 @@ public class TraceStack extends Transformation<TraceStack.Configuration> {
 
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Signature {}
+
     static class FrameAdvice {
         @Advice.OnMethodEnter
-        public static boolean enter(@Advice.Origin String method) {
-            return StackFrame.fork(method);
+        public static boolean enter(@Signature String signature) {
+            return StackFrame.fork(signature);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Advice.Enter boolean forked) {
             if (forked) StackFrame.join();
+        }
+    }
+
+    static class SignatureForFixedValue extends Advice.DynamicValue.ForFixedValue<Signature> {
+
+        @Override
+        protected Object doResolve(TypeDescription it, MethodDescription im, ParameterDescription.InDefinedShape t,
+                                   AnnotationDescription.Loadable<Signature> ad, Assigner as, boolean initialized) {
+            return it.getSimpleName() + '#' + im.getName();
         }
     }
 }

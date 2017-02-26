@@ -38,7 +38,7 @@ public class TraceStackTest {
         bar.invoke(instance);
         final List<StackFrame> children = StackFrame.join().getChildren();
         assertThat(children.size(), is(1));
-        assertThat(children.get(0).getSignature(), is(bar.toString()));
+        assertThat(children.get(0).getSignature(), is("Foo#bar"));
     }
 
     static Transformation.Feature featureOf(final List<String> includes, final List<String> excludes) {

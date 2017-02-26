@@ -66,7 +66,7 @@ public class TraceServlet extends Transformation<TraceServlet.Configuration> {
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
         public static boolean enter(@Advice.Argument(0) HttpServletRequest request,
-                                    @Advice.Origin String method,
+                                    @Advice.Origin("#t\\##m") String method,
                                     @EnableTraceHeader String regex) {
 
             final Enumeration<String> names = request.getHeaderNames();
