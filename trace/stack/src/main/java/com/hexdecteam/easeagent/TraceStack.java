@@ -58,9 +58,10 @@ public class TraceStack extends Transformation<TraceStack.Configuration> {
         return new Feature() {
             @Override
             public Junction<TypeDescription> type() {
-                if (!excludes.hasNext()) return reduce(transform(includes, NAME_START_WITHS), OR);
-                return reduce(transform(includes, NAME_START_WITHS), OR)
-                        .and(reduce(transform(excludes, compose(NOT, NAME_START_WITHS)), OR));
+                Junction<TypeDescription> junction = reduce(transform(includes, NAME_START_WITHS), OR);
+                if (excludes.hasNext())
+                    junction = junction.and(reduce(transform(excludes, compose(NOT, NAME_START_WITHS)), OR));
+                return junction.and(not(nameContains("CGLIB$$")));
             }
 
             @Override
