@@ -99,7 +99,7 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
             return new Object[]{ForwardDetection.markIfAbsent(key), System.nanoTime()};
         }
 
-        @Advice.OnMethodExit
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Key String key, @Advice.Enter Object[] enter, @Advice.Return Connection connection)
                 throws SQLException {
             final boolean marked = (Boolean) enter[0];
@@ -125,7 +125,7 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
             return new Object[]{ForwardDetection.markIfAbsent(key), System.nanoTime()};
         }
 
-        @Advice.OnMethodExit
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Key String key, @Advice.Enter Object[] enter) throws SQLException {
             final boolean marked = (Boolean) enter[0];
 

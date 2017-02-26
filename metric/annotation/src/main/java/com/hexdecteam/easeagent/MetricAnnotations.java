@@ -138,7 +138,7 @@ public class MetricAnnotations extends Transformation<MetricAnnotations.Configur
             return System.nanoTime();
         }
 
-        @Advice.OnMethodExit
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Advice.Enter long started, @MetricName String name) {
             EventBus.publish(new MetricEvents.Update(name, System.nanoTime() - started, NANOSECONDS));
         }

@@ -107,7 +107,7 @@ public class TraceStack extends Transformation<TraceStack.Configuration> {
             return StackFrame.fork(method);
         }
 
-        @Advice.OnMethodExit
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Advice.Enter boolean forked) {
             if (forked) StackFrame.join();
         }
