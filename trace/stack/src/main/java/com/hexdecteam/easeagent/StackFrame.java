@@ -6,6 +6,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public final class StackFrame {
@@ -51,11 +52,11 @@ public final class StackFrame {
     }
 
     public long getExecutionTime() {
-        return endTime - beginTime;
+        return TimeUnit.NANOSECONDS.toMillis(endTime - beginTime);
     }
 
     public long getExecutionCPUTime() {
-        return endCPUTime - beginCPUTime;
+        return TimeUnit.NANOSECONDS.toMillis(endCPUTime - beginCPUTime);
     }
 
     // TODO remove stagemonitor's legacy
