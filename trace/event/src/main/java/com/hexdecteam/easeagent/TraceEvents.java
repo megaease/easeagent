@@ -37,11 +37,11 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
 
     static class Reporter {
 
-        private final Map<String, String> hostInfo;
+        private final Map<String, Object> hostInfo;
         private final JsonFactory         jsonFactory;
         private final String              bulkTemplate;
 
-        Reporter(Map<String, String> hostInfo, JsonFactory jsonFactory, String bulkTemplate) {
+        Reporter(Map<String, Object> hostInfo, JsonFactory jsonFactory, String bulkTemplate) {
             this.hostInfo = hostInfo;
             this.jsonFactory = jsonFactory;
             this.bulkTemplate = bulkTemplate;
@@ -77,18 +77,23 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
             return MessageFormat.format("{0,date,yyyy-MM-dd'T'HH:mm:ss.SSSZ}", new Date(timestamp));
         }
 
-        private void write(JsonGenerator json, Map<String, String> map) throws IOException {
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                json.writeStringField(entry.getKey(), entry.getValue());
+        private void write(JsonGenerator json, Map<String, Object> map) throws IOException {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+                if(value instanceof Long) {
+                    json.writeNumberField(entry.getKey(), (Long) value);
+                } else {
+                    json.writeStringField(entry.getKey(), value.toString());
+                }
             }
         }
 
     }
 
-    private Map<String, String> hostInfo(Configuration conf) {
+    private Map<String, Object> hostInfo(Configuration conf) {
         final long startTime = ManagementFactory.getRuntimeMXBean().getStartTime();
-        Map<String, String> map = Maps.newHashMap();
-        map.put("measurement_start", Long.toString(startTime));
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("measurement_start", startTime);
         map.put("gid", conf.gid());
         map.put("host", conf.host());
         map.put("host_ipv4", conf.host_ipv4());
