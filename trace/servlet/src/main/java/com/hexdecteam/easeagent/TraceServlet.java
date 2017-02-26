@@ -82,8 +82,7 @@ public class TraceServlet extends Transformation<TraceServlet.Configuration> {
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Advice.Argument(0) HttpServletRequest request,
                                 @Advice.Argument(1) HttpServletResponse response,
-                                @Advice.Enter boolean forked,
-                                @Advice.Thrown Throwable error) {
+                                @Advice.Enter boolean forked) {
 
             if (forked) {
                 final String uri = request.getRequestURI();
@@ -92,7 +91,7 @@ public class TraceServlet extends Transformation<TraceServlet.Configuration> {
                 final String id = (String) request.getAttribute("stagemonitor-request-id");
                 final String method = request.getMethod();
                 EventBus.publish(new HTTPTracedRequest(id, root.getSignature(), root.getExecutionTime(),
-                                                       root.getExecutionCPUTime(), root, error != null,
+                                                       root.getExecutionCPUTime(), root, status >= 400,
                                                        uri, method, status));
             }
         }
