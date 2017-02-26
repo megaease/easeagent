@@ -57,7 +57,7 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
             return ForwardDetection.markIfAbsent(key);
         }
 
-        @Advice.OnMethodExit
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Advice.Argument(0) HttpServletRequest request,
                                 @Advice.Argument(1) HttpServletResponse response,
                                 @Advice.Origin String signature, @Advice.Enter boolean marked,
@@ -65,8 +65,6 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
             if (!marked) return;
 
             ForwardDetection.clear(key);
-
-            if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) return;
 
             final String uri = request.getRequestURI();
             final int status = response.getStatus();
