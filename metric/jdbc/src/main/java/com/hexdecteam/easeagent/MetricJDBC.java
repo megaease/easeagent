@@ -1,83 +1,51 @@
 package com.hexdecteam.easeagent;
 
 import com.google.auto.service.AutoService;
-import com.google.common.base.Function;
 import com.hexdecteam.easeagent.MetricEvents.Update;
-import com.hexdecteam.easeagent.ReduceF.BiFunction;
-import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
-import net.bytebuddy.utility.JavaModule;
 
 import javax.sql.DataSource;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static com.google.common.collect.Iterators.transform;
-import static com.hexdecteam.easeagent.ReduceF.reduce;
+import static com.hexdecteam.easeagent.TypeMatchers.*;
+import static com.hexdecteam.easeagent.TypeMatchers.any;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
 public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
 
-    public static final BiFunction<Junction<TypeDescription>>       OR    = new BiFunction<Junction<TypeDescription>>() {
-        @Override
-        public Junction<TypeDescription> apply(Junction<TypeDescription> l, Junction<TypeDescription> r) {
-            return l.or(r);
-        }
-    };
-    public static final Function<String, Junction<TypeDescription>> NAMED = new Function<String, Junction<TypeDescription>>() {
-        @Override
-        public Junction<TypeDescription> apply(String input) {
-            return named(input);
-        }
-    };
-
     @Override
     protected Feature feature(Configuration conf) {
-        final List<String> names = conf.data_source_classes();
-        return new Feature() {
-            @Override
-            public Junction<TypeDescription> type() {
-                return (names.isEmpty() ? isSubTypeOf(DataSource.class)
-                                        : reduce(transform(names.iterator(), NAMED), OR))
-                        .or(isSubTypeOf(PreparedStatement.class))
-                        .or(isSubTypeOf(Statement.class));
-            }
 
-            @Override
-            public AgentBuilder.Transformer transformer() {
-                final String connectionKey = UUID.randomUUID().toString();
-                final String statementKey = UUID.randomUUID().toString();
-                return new AgentBuilder.Transformer() {
-                    @Override
-                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
-                        if (td.isAssignableTo(DataSource.class)) {
-                            final Junction<MethodDescription> getConnection = named("getConnection")
-                                    .and(returns(isSubTypeOf(Connection.class)));
-                            return b.visit(Advice.withCustomMapping()
-                                                 .bind(Key.class, connectionKey)
-                                                 .to(DataSourceAdvice.class).on(getConnection));
-                        } else {
-                            final Junction<MethodDescription> execute = nameStartsWith("execute")
-                                    .and(ElementMatchers.<MethodDescription>isPublic());
-                            return b.visit(Advice.withCustomMapping()
-                                                 .bind(Key.class, statementKey)
-                                                 .to(StatementAdvice.class).on(execute));
-                        }
-                    }
-                };
-            }
-        };
+        final BindKeyFeature jdbcStatement = new BindKeyFeature(
+                isSubTypeOf(PreparedStatement.class).or(isSubTypeOf(Statement.class)),
+                nameStartsWith("execute").and(ElementMatchers.<MethodDescription>isPublic()),
+                StatementAdvice.class
+        );
+        final BindKeyFeature getConnection = new BindKeyFeature(
+                conf.data_source_classes().isEmpty() ? isSubTypeOf(DataSource.class) : any(NAMED, conf.data_source_classes()),
+                named("getConnection").and(returns(isSubTypeOf(Connection.class))),
+                DataSourceAdvice.class
+        );
+        final Caller.Feature callerFeature = new Caller.Feature(compound(
+                NAME_STARTS_WITH,
+                conf.include_caller_class_prefix_list(),
+                conf.exclude_caller_class_prefix_list()
+        ).and(not(nameContains("CGLIB$$"))));
+
+        return new Feature.Compound(Arrays.asList(jdbcStatement, getConnection, callerFeature));
     }
 
     @ConfigurationDecorator.Binding("metric.jdbc")
@@ -88,7 +56,32 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
          * @return empty as default.
          */
         List<String> data_source_classes() {return Collections.emptyList();}
+
+        List<String> exclude_caller_class_prefix_list() { return Collections.emptyList();}
+
+        List<String> include_caller_class_prefix_list() { return Collections.emptyList();}
+
     }
+
+    static class BindKeyFeature extends Feature.Compoundable {
+
+        final Junction<MethodDescription> method;
+        final String key;
+        final Class<?> adviceClass;
+
+        BindKeyFeature(Junction<TypeDescription> type, Junction<MethodDescription> method, Class<?> adviceClass) {
+            super(type);
+            this.method = method;
+            this.adviceClass = adviceClass;
+            key = UUID.randomUUID().toString();
+        }
+
+        @Override
+        protected Builder<?> config(Builder<?> b) {
+            return b.visit(Advice.withCustomMapping().bind(Key.class, key).to(adviceClass).on(method));
+        }
+    }
+
 
     @Retention(RetentionPolicy.RUNTIME)
     @interface Key {}
@@ -138,11 +131,12 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
 
             EventBus.publish(new Update("jdbc_statement", duration, NANOSECONDS).tag("signature", "All"));
 
-            final StackFrame current = StackFrame.current();
+            final String caller = SignatureHolder.CALLER.get();
 
-            if (current == null) return;
+            if (caller == null) return;
 
-            EventBus.publish(new Update("jdbc_statement", duration, NANOSECONDS).tag("signature", current.getSignature()));
+            EventBus.publish(new Update("jdbc_statement", duration, NANOSECONDS).tag("signature", caller));
         }
     }
+
 }

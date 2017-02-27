@@ -129,6 +129,30 @@ public abstract class Transformation<Configuration> implements Plugin<Configurat
                 return transformer;
             }
         }
+
+        abstract class Compoundable implements Feature {
+            final Junction<TypeDescription> type;
+
+            protected Compoundable(Junction<TypeDescription> type) {this.type = type;}
+
+            @Override
+            public Junction<TypeDescription> type() {
+                return type;
+            }
+
+            @Override
+            public Transformer transformer() {
+                return new Transformer() {
+                    @Override
+                    public DynamicType.Builder<?> transform(DynamicType.Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
+                        return (!type.matches(td)) ? b : config(b);
+                    }
+                };
+
+            }
+
+            protected abstract DynamicType.Builder<?> config(DynamicType.Builder<?> b);
+        }
     }
 
 }
