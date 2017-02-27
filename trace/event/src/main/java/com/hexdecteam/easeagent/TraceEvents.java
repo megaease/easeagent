@@ -61,6 +61,7 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
                 }
                 json.writeStartObject();
                 json.writeStringField("@timestamp", stringFormat(timestamp));
+                json.writeStringField("type", "http_request");
                 write(json, this.hostInfo);
                 json.writeObject(request);
                 json.writeEndObject();
