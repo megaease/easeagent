@@ -64,6 +64,7 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
                 write(json, this.hostInfo);
                 json.writeObject(request);
                 json.writeEndObject();
+                json.writeRaw('\n'); // logstash need a '\n' as delimiter
                 json.flush();
                 LOGGER.info(sb.toString());
             } catch (IOException e) {
