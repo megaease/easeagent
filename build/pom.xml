@@ -110,10 +110,6 @@
                     <artifactId>log4j2-http-appender</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
-                <dependency>
-                    <groupId>org.apache.kafka</groupId>
-                    <artifactId>kafka-clients</artifactId>
-                </dependency>
             </dependencies>
         </profile>
         <profile>
