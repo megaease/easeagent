@@ -10,26 +10,16 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>
         </Console>
-        <Failover name="requests" primary="post-requests">
-            <Failovers>
-                <AppenderRef ref="Console"/>
-            </Failovers>
-        </Failover>
-        <Failover name="metrics" primary="post-metrics">
-            <Failovers>
-                <AppenderRef ref="Console"/>
-            </Failovers>
-        </Failover>
     </Appenders>
     <Loggers>
         <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>
         <Logger name="metrics" level="info" additivity="false">
-            <AppenderRef ref="metrics"/>
+            <AppenderRef ref="post-metrics"/>
         </Logger>
         <Logger name="requests" level="info" additivity="false">
-            <AppenderRef ref="requests"/>
+            <AppenderRef ref="post-requests"/>
         </Logger>
     </Loggers>
 </Configuration>
