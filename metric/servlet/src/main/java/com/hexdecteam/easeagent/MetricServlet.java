@@ -22,6 +22,8 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
     @Override
     protected Feature feature(final NoConfiguration conf) {
         return new Feature() {
+            final String key = UUID.randomUUID().toString();
+
             @Override
             public Junction<TypeDescription> type() {
                 return isSubTypeOf(HttpServlet.class);
@@ -29,7 +31,6 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
 
             @Override
             public AgentBuilder.Transformer transformer() {
-                final String key = UUID.randomUUID().toString();
                 return new AgentBuilder.Transformer() {
                     @Override
                     public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {

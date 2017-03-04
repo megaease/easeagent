@@ -156,6 +156,24 @@
             </dependencies>
         </profile>
         <profile>
+            <id>ot</id>
+            <properties>
+                <assembly.id>ot</assembly.id>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <artifactId>opentracing-servlet</artifactId>
+                    <version>${project.parent.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <artifactId>opentracing-spring-resttemplate</artifactId>
+                    <version>${project.parent.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>git</id>
             <build>
                 <plugins>
