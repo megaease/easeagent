@@ -78,12 +78,12 @@ public final class StackFrame {
 
     // TODO remove stagemonitor's legacy
     public String getShortSignature() {
-        return "TODO @zhongl";
+        return getSignature();
     }
 
     // TODO remove stagemonitor's legacy
     public String getSignatureRaw() {
-        return "TODO @zhongl";
+        return getSignature();
     }
 
     private static StackFrame fork(StackFrame parent, String name) {
