@@ -85,7 +85,7 @@ public class OpenTracingServlet extends Transformation<OpenTracingServlet.NoConf
             final Span span = tracer().buildSpan("http_recv")
                                       .asChildOf(tracer().extract(HTTP_HEADERS, new TextMapExtractAdapter(headers)))
                                       .start();
-            span.log(headers);
+            span.log("sr");
             push(span);
 
             return marked;
@@ -104,7 +104,8 @@ public class OpenTracingServlet extends Transformation<OpenTracingServlet.NoConf
             final String query = request.getQueryString();
             final String url = query == null ? requestURL.toString() : requestURL.append('?').append(query).toString();
 
-            pop().setTag("component", "servlet")
+            pop().log("ss")
+                 .setTag("component", "servlet")
                  .setTag("span.kind", "server")
                  .setTag("http.url", url)
                  .setTag("http.method", request.getMethod())

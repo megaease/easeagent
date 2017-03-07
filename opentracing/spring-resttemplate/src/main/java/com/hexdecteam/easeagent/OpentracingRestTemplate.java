@@ -74,9 +74,7 @@ public class OpentracingRestTemplate extends Transformation<OpentracingRestTempl
                 headers.add(entry.getKey(), entry.getValue());
             }
 
-            span.log(ctx);
-
-            push(span);
+            push(span.log("cs"));
 
             return marked;
         }
@@ -91,7 +89,8 @@ public class OpentracingRestTemplate extends Transformation<OpentracingRestTempl
             ForwardDetection.Mark.clear(key);
 
             try {
-                pop().setTag("component", "spring-rest-template")
+                pop().log("cr")
+                     .setTag("component", "spring-rest-template")
                      .setTag("span.kind", "client")
                      .setTag("http.url", request.getURI().toString())
                      .setTag("http.method", request.getMethod().toString())
