@@ -1,15 +1,10 @@
 package com.hexdecteam.log4j2.appender;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.entity.GzipCompressingEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
+import okhttp3.*;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.GzipSink;
+import okio.Okio;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -20,62 +15,35 @@ import org.apache.logging.log4j.core.config.plugins.*;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.net.URI;
-import java.util.AbstractList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.net.URL;
 
 @Plugin(name = "Http", category = "Core", elementType = Appender.ELEMENT_TYPE, printObject = true)
 public class PostAppender extends AbstractAppender {
 
-    private final URI                 uri;
-    private final String              contentType;
-    private final boolean             compress;
-    private final CloseableHttpClient client;
+    private final OkHttpClient client;
+    private final Request.Builder builder;
+    private final MediaType contentType;
 
-    private PostAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignore, URI uri,
-                         String contentType, boolean compress, CloseableHttpClient client) {
+    public PostAppender(String name, Filter filter, Layout layout, boolean ignore,
+                        OkHttpClient client, Request.Builder builder, MediaType contentType) {
         super(name, filter, layout, ignore);
-        this.uri = uri;
-        this.contentType = contentType;
-        this.compress = compress;
         this.client = client;
+        this.builder = builder;
+        this.contentType = contentType;
     }
 
     public void append(LogEvent event) {
-        final HttpPost post = new HttpPost(uri);
-
-        final HttpEntity entity = entity(event, contentType);
-
-        post.setEntity(compress ? new GzipCompressingEntity(entity) : entity);
+        final RequestBody body = RequestBody.create(contentType, event.getMessage().getFormattedMessage());
 
         try {
-            check(client.execute(post));
+            final Response response = client.newCall(builder.post(body).build()).execute();
+            final boolean successful = response.isSuccessful();
+            response.close();
+            if (!successful) {
+                throw new AppenderLoggingException("HTTP response: " + response.message());
+            }
         } catch (IOException e) {
             throw new AppenderLoggingException(e);
-        }
-    }
-
-    @Override
-    public boolean stop(long timeout, TimeUnit timeUnit) {
-        try { client.close(); } catch (IOException ignore) { }
-        return super.stop(timeout, timeUnit);
-    }
-
-    private static HttpEntity entity(LogEvent event, String contentType) {
-        final String content = event.getMessage().getFormattedMessage();
-        return new StringEntity(content, ContentType.create(contentType));
-    }
-
-    private static void check(CloseableHttpResponse response) {
-        try {
-            final StatusLine line = response.getStatusLine();
-            if (line.getStatusCode() >= 400) {
-                throw new AppenderLoggingException("HTTP response: " + line);
-            }
-        } finally {
-            try { response.close(); } catch (IOException ignore) { }
         }
     }
 
@@ -84,32 +52,25 @@ public class PostAppender extends AbstractAppender {
             @Required @PluginAttribute("name") final String name,
             @PluginAttribute(value = "ignoreExceptions") final boolean ignore,
             @PluginElement("Filter") final Filter filter,
-            @Required @PluginAttribute("uri") final URI uri,
+            @PluginElement("Layout") final Layout layout,
+            @Required @PluginAttribute("uri") final URL uri,
             @Required @PluginAttribute("contentType") final String contentType,
             @Required @PluginAttribute("userAgent") final String userAgent,
             @PluginAttribute("compress") final boolean compress,
             @PluginElement("Headers") final Header[] headers
 
     ) throws Exception {
-
-        return new PostAppender(name, filter, null, ignore, uri, contentType, compress,
-                                HttpClients.custom()
-                                           .setUserAgent(userAgent)
-                                           .setDefaultHeaders(asHttpHeaders(headers))
-                                           .build());
+        final Request.Builder builder = new Request.Builder().url(uri).header("User-Agent", userAgent);
+        for (Header header : headers) {
+            builder.header(header.name, header.value);
+        }
+        return new PostAppender(name, filter, layout, ignore, client(compress), builder, MediaType.parse(contentType));
     }
 
-    private static List<org.apache.http.Header> asHttpHeaders(final Header[] headers) {
-        return new AbstractList<org.apache.http.Header>() {
-            public int size() {
-                return headers == null ? 0 : headers.length;
-            }
-
-            public org.apache.http.Header get(int index) {
-                final Header header = headers[index];
-                return new BasicHeader(header.name, header.value);
-            }
-        };
+    private static OkHttpClient client(boolean compress) {
+        final OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (compress) builder.addInterceptor(new GzipRequestInterceptor());
+        return builder.build();
     }
 
     @Plugin(name = "header", category = "Core", printObject = true)
@@ -148,6 +109,67 @@ public class PostAppender extends AbstractAppender {
         @Override
         public String toString() {
             return "Header{value='" + value + '\'' + '}';
+        }
+    }
+
+    static class GzipRequestInterceptor implements Interceptor {
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            if (originalRequest.body() == null || originalRequest.header("Content-Encoding") != null) {
+                return chain.proceed(originalRequest);
+            }
+
+            Request compressedRequest = originalRequest.newBuilder()
+                                                       .header("Content-Encoding", "gzip")
+                                                       .method(originalRequest.method(), forceContentLength(gzip(originalRequest.body())))
+                                                       .build();
+            return chain.proceed(compressedRequest);
+        }
+
+        /**
+         * https://github.com/square/okhttp/issues/350
+         */
+        private RequestBody forceContentLength(final RequestBody requestBody) throws IOException {
+            final Buffer buffer = new Buffer();
+            requestBody.writeTo(buffer);
+            return new RequestBody() {
+                @Override
+                public MediaType contentType() {
+                    return requestBody.contentType();
+                }
+
+                @Override
+                public long contentLength() {
+                    return buffer.size();
+                }
+
+                @Override
+                public void writeTo(BufferedSink sink) throws IOException {
+                    sink.write(buffer.snapshot());
+                }
+            };
+        }
+
+        private RequestBody gzip(final RequestBody body) {
+            return new RequestBody() {
+                @Override
+                public MediaType contentType() {
+                    return body.contentType();
+                }
+
+                @Override
+                public long contentLength() {
+                    return -1; // We don't know the compressed length in advance!
+                }
+
+                @Override
+                public void writeTo(BufferedSink sink) throws IOException {
+                    BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
+                    body.writeTo(gzipSink);
+                    gzipSink.close();
+                }
+            };
         }
     }
 

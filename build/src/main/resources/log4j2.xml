@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Properties>
-        <Property name="address">${env:GATEWAY_ADDR:-gateway.easeapm.com:10443}</Property>
+        <Property name="address">${env:GATEWAY_ADDR:-https://gateway.easeapm.com:10443}</Property>
         <Property name="version">${env:GATEWAY_VER:-v1}</Property>
     </Properties>
     <Appenders>
-        <Http name="post-requests" uri="https://${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
-        <Http name="post-metrics" uri="https://${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>
+        <Http name="post-requests" uri="${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
+        <Http name="post-metrics" uri="${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>
         </Console>

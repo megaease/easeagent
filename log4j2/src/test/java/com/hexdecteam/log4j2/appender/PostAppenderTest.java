@@ -5,13 +5,14 @@ import com.github.dreamhead.moco.HttpServer;
 import com.github.dreamhead.moco.HttpsCertificate;
 import com.github.dreamhead.moco.HttpsServer;
 import com.github.dreamhead.moco.Runnable;
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.appender.AppenderLoggingException;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.net.ConnectException;
 
 import static com.github.dreamhead.moco.HttpsCertificate.certificate;
 import static com.github.dreamhead.moco.Moco.*;
@@ -31,7 +32,7 @@ public class PostAppenderTest {
         final HttpServer server = httpServer(8080, log());
         server.post(and(
                 by(uri("/requests")),
-                eq(header("Content-Type"), "text/plain"),
+                eq(header("Content-Type"), "text/plain; charset=utf-8"),
                 by(text("message"))
         )).response(status(200));
 
@@ -45,7 +46,7 @@ public class PostAppenderTest {
     @Test()
     public void should_complaint_error() throws Exception {
         thrown.expect(AppenderLoggingException.class);
-        thrown.expectCause(IsInstanceOf.<Throwable>instanceOf(HttpHostConnectException.class));
+        thrown.expectCause(IsInstanceOf.<Throwable>instanceOf(ConnectException.class));
         LogManager.getLogger("http").info("message");
     }
 
@@ -57,7 +58,7 @@ public class PostAppenderTest {
 
         server.post(and(
                 by(uri("/requests")),
-                eq(header("Content-Type"), "text/plain"),
+                eq(header("Content-Type"), "text/plain; charset=utf-8"),
                 by(text("message"))
         )).response(status(200));
 
