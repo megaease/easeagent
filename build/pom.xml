@@ -15,6 +15,11 @@
     <dependencies>
         <dependency>
             <groupId>com.hexdecteam.easeagent</groupId>
+            <artifactId>core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hexdecteam.easeagent</groupId>
             <artifactId>agent-loader</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -26,6 +31,21 @@
         <dependency>
             <groupId>com.hexdecteam.easeagent</groupId>
             <artifactId>metric-event</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hexdecteam.easeagent</groupId>
+            <artifactId>metric-spi</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hexdecteam.easeagent</groupId>
+            <artifactId>trace-event</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hexdecteam.easeagent</groupId>
+            <artifactId>trace-stack</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

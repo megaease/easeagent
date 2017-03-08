@@ -20,17 +20,17 @@
             <groupId>com.hexdecteam.easeagent</groupId>
             <artifactId>metric-event</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
-            <artifactId>test</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
