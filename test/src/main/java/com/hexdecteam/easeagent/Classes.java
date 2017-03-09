@@ -2,6 +2,9 @@ package com.hexdecteam.easeagent;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.ClassFileLocator;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.pool.TypePool;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -9,69 +12,50 @@ import java.net.URLClassLoader;
 public class Classes {
 
     public static By transform(Class<?> type) {
-        return new By(type);
+        return new By(new ByteBuddy().redefine(type), new TypeDescription.ForLoadedType(type), new URLClassLoader(new URL[0]));
+    }
+
+    public static By transform(String name, ClassLoader loader) {
+        final TypeDescription type = TypePool.Default.of(loader).describe(name).resolve();
+        return new By(new ByteBuddy().redefine(type, ClassFileLocator.ForClassLoader.of(loader)), type, loader);
     }
 
     public static class By {
-        private final Class<?> type;
+        private final DynamicType.Builder<?> builder;
+        private final TypeDescription td;
+        private final ClassLoader loader;
 
-        By(Class<?> type) {
-            this.type = type;
+        By(DynamicType.Builder<?> builder, TypeDescription td, ClassLoader loader) {
+            this.builder = builder;
+            this.td = td;
+            this.loader = loader;
         }
 
-        public With by(Transformation.Feature feature) {
-            return new With(type, feature);
-        }
-    }
-
-    public static class With {
-
-        private final Class<?>               type;
-        private final Transformation.Feature feature;
-
-        With(Class<?> type, Transformation.Feature feature) {
-            this.type = type;
-            this.feature = feature;
-        }
-
-        Loading with(ClassLoader loader) {
-            return new Loading(type, feature, null, loader);
-        }
-
-        Loading with(TypeDescription td) {
-            return new Loading(type, feature, td, null);
-        }
-
-        Class<?> load() {
-            return new Loading(type, feature, new TypeDescription.ForLoadedType(type), null).load();
-        }
-
-        Class<?> load(ClassLoader target) {
-            return new Loading(type, feature, new TypeDescription.ForLoadedType(type), null).load(target);
+        public Loading by(Transformation.Feature feature) {
+            return new Loading(builder, feature, td, loader);
         }
     }
 
     public static class Loading {
 
-        private final Class<?>               type;
+        private final DynamicType.Builder<?> builder;
         private final Transformation.Feature feature;
-        private final TypeDescription        td;
-        private final ClassLoader            loader;
+        private final TypeDescription td;
+        private final ClassLoader loader;
 
-        Loading(Class<?> type, Transformation.Feature feature, TypeDescription td, ClassLoader loader) {
-            this.type = type;
+        Loading(DynamicType.Builder<?> builder, Transformation.Feature feature, TypeDescription td, ClassLoader loader) {
+            this.builder = builder;
             this.feature = feature;
             this.td = td;
             this.loader = loader;
         }
 
-        public Class<?> load(){
-            return load(new URLClassLoader(new URL[0]));
+        public Class<?> load() {
+            return load(loader);
         }
 
         public Class<?> load(ClassLoader target) {
-            return feature.transformer().transform(new ByteBuddy().redefine(type), td, loader, null)
-                                     .make().load(target).getLoaded();
+            return feature.transformer().transform(builder, td, target, null).make().load(target).getLoaded();
         }
     }
 
