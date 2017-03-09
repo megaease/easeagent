@@ -17,6 +17,7 @@
         <module>stack</module>
         <module>servlet</module>
         <module>event</module>
+        <module>jdbc</module>
     </modules>
 
     <dependencies>

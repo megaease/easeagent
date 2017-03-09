@@ -13,6 +13,7 @@ public final class StackFrame {
     private final static ThreadLocal<StackFrame> CURRENT = new ThreadLocal<StackFrame>();
 
     private final StackFrame       parent;
+    private boolean ioquery;
     private final String           signature;
     private final long             beginTime;
     private final long             beginCPUTime;
@@ -28,10 +29,24 @@ public final class StackFrame {
         return true;
     }
 
+    public static boolean setRootIfAbsent(String signature, boolean ioquery) {
+        if (current() != null) return false;
+
+        CURRENT.set(new StackFrame(signature,ioquery));
+        return true;
+    }
+
     public static boolean fork(String signature) {
         final StackFrame frame = current();
         if (frame == null) return false;
-        CURRENT.set(fork(frame, signature));
+        CURRENT.set(fork(frame, signature, false));
+        return true;
+    }
+
+    public static boolean fork(String signature, boolean ioquery) {
+        final StackFrame frame = current();
+        if (frame == null) return false;
+        CURRENT.set(fork(frame, signature, ioquery));
         return true;
     }
 
@@ -73,7 +88,7 @@ public final class StackFrame {
 
     // TODO remove stagemonitor's legacy
     public boolean getIoquery() {
-        return false;
+        return ioquery;
     }
 
     // TODO remove stagemonitor's legacy
@@ -86,8 +101,8 @@ public final class StackFrame {
         return getSignature();
     }
 
-    private static StackFrame fork(StackFrame parent, String name) {
-        final StackFrame frame = new StackFrame(name, parent);
+    private static StackFrame fork(StackFrame parent, String name, boolean ioquery) {
+        final StackFrame frame = new StackFrame(name, parent, ioquery);
         parent.children.add(frame);
         return frame;
     }
@@ -99,12 +114,17 @@ public final class StackFrame {
     }
 
     private StackFrame(String signature) {
-        this(signature, null);
+        this(signature, null, false);
     }
 
-    private StackFrame(String signature, StackFrame parent) {
+    public StackFrame(String signature, boolean ioquery) {
+        this(signature, null, ioquery);
+    }
+
+    private StackFrame(String signature, StackFrame parent, boolean ioquery) {
         this.signature = signature;
         this.parent = parent;
+        this.ioquery = ioquery;
         beginTime = System.nanoTime();
         beginCPUTime = CPU_TIME_SUPPORTED ? THREAD_MX_BEAN.getCurrentThreadCpuTime() : 0L;
         children = new LinkedList<StackFrame>();
