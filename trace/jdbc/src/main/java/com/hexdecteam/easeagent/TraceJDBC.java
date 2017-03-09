@@ -38,14 +38,18 @@ public class TraceJDBC extends Transformation<TraceJDBC.NoConfiguration> {
                 },
                 new Compoundable(
                         ElementMatchers.isSubTypeOf(PreparedStatement.class)
-                                .and(declaresMethod(ElementMatchers.<MethodDescription>isPublic()
-                                        .and(named("asSql"))
-                                        .and(returns(String.class))
-                                        .and(takesArguments(0))))
+                                       .and(declaresMethod(ElementMatchers.<MethodDescription>isPublic()
+                                               .and(named("asSql"))
+                                               .and(returns(String.class))
+                                               .and(takesArguments(0))))
                 ) {
+                    final String key = UUID.randomUUID().toString();
+
                     @Override
                     protected Builder<?> config(Builder<?> b) {
-                        return b.visit(Advice.to(MySQLAdvice.class).on(nameStartsWith("execute")));
+                        return b.visit(Advice.withCustomMapping()
+                                             .bind(ForwardDetection.Key.class, key)
+                                             .to(MySQLAdvice.class).on(nameStartsWith("execute")));
                     }
                 },
                 new Compoundable(
@@ -82,18 +86,23 @@ public class TraceJDBC extends Transformation<TraceJDBC.NoConfiguration> {
 
     static class MySQLAdvice {
         @Advice.OnMethodEnter
-        public static boolean enter(@Advice.This Object self) {
+        public static byte enter(@ForwardDetection.Key String key, @Advice.This Object self) {
+            final boolean marked = ForwardDetection.Mark.markIfAbsent(key);
+            // A union value for both marked and forked with bit operation.
+            if (!marked) return 0;
+
             try {
                 final Method method = self.getClass().getMethod("asSql");
-                return StackFrame.fork(method.invoke(self).toString(), true);
+                return (byte) (1 | (StackFrame.fork(method.invoke(self).toString(), true) ? 2 : 0));
             } catch (Exception e) {
-                return false;
+                return 1;
             }
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        public static void exit(@Advice.Enter boolean forked) {
-            if (forked) StackFrame.join();
+        public static void exit(@ForwardDetection.Key String key, @Advice.Enter byte enter) {
+            if ((enter & 1) == 1) ForwardDetection.Mark.clear(key);
+            if ((enter & 2) == 2) StackFrame.join();
         }
 
     }
