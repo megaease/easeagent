@@ -37,7 +37,7 @@ public class TraceJDBC extends Transformation<TraceJDBC.NoConfiguration> {
                     }
                 },
                 new Compoundable(
-                        ElementMatchers.<TypeDescription>named("com.mysql.cj.jdbc.PreparedStatement")
+                        ElementMatchers.isSubTypeOf(PreparedStatement.class)
                                 .and(declaresMethod(ElementMatchers.<MethodDescription>isPublic()
                                         .and(named("asSql"))
                                         .and(returns(String.class))
@@ -84,7 +84,7 @@ public class TraceJDBC extends Transformation<TraceJDBC.NoConfiguration> {
         @Advice.OnMethodEnter
         public static boolean enter(@Advice.This Object self) {
             try {
-                final Method method = self.getClass().getDeclaredMethod("asSql");
+                final Method method = self.getClass().getMethod("asSql");
                 return StackFrame.fork(method.invoke(self).toString(), true);
             } catch (Exception e) {
                 return false;

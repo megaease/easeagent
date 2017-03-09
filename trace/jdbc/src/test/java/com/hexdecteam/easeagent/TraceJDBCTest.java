@@ -1,8 +1,7 @@
 package com.hexdecteam.easeagent;
 
 import com.hexdecteam.easeagent.Transformation.Feature;
-import com.mysql.cj.api.jdbc.JdbcConnection;
-import com.mysql.cj.jdbc.JdbcPropertySetImpl;
+import com.mysql.jdbc.MySQLConnection;
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Test;
 
@@ -13,7 +12,8 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
 
 public class TraceJDBCTest {
     final Feature feature = new TraceJDBC().feature(null);
@@ -21,15 +21,14 @@ public class TraceJDBCTest {
     @Test
     public void should_get_sql_from_mysql() throws Exception {
         final ClassLoader loader = getClass().getClassLoader();
-        final Class<PreparedStatement> load = Classes.<PreparedStatement>transform("com.mysql.cj.jdbc.PreparedStatement", loader)
+        final Class<PreparedStatement> load = Classes.<PreparedStatement>transform("com.mysql.jdbc.PreparedStatement", loader)
                 .by(feature).load();
 
         assertTrue(feature.type().matches(new TypeDescription.ForLoadedType(load)));
 
-        final JdbcConnection connection = mock(JdbcConnection.class, RETURNS_DEEP_STUBS);
-        when(connection.getPropertySet()).thenReturn(new JdbcPropertySetImpl());
+        final MySQLConnection connection = mock(MySQLConnection.class, RETURNS_DEEP_STUBS);
 
-        assertSqlWith(load.getConstructor(JdbcConnection.class, String.class, String.class)
+        assertSqlWith(load.getConstructor(MySQLConnection.class, String.class, String.class)
                           .newInstance(connection, "sql", "cat"), "sql");
     }
 
