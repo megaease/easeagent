@@ -32,6 +32,7 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>${version.javax.servlet-api}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

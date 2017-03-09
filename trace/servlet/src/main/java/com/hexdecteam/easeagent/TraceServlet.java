@@ -4,20 +4,17 @@ import com.google.auto.service.AutoService;
 import com.google.common.base.Strings;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
-import net.bytebuddy.utility.JavaModule;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Enumeration;
 
-import static net.bytebuddy.matcher.ElementMatchers.isSubTypeOf;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
 public class TraceServlet extends Transformation<TraceServlet.Configuration> {
@@ -27,22 +24,19 @@ public class TraceServlet extends Transformation<TraceServlet.Configuration> {
         final String regex = conf.tracing_header_regex();
         if (Strings.isNullOrEmpty(regex)) return Feature.NO_OP;
         return new Feature() {
+
             @Override
             public Junction<TypeDescription> type() {
-                return isSubTypeOf(HttpServlet.class);
+                return hasSuperType(named("javax.servlet.http.HttpServlet"));
             }
 
             @Override
             public AgentBuilder.Transformer transformer() {
-                return new AgentBuilder.Transformer() {
-                    @Override
-                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
-                        return b.visit(Advice.withCustomMapping()
-                                             .bind(EnableTraceHeader.class, regex)
-                                             .to(TracingAdvice.class)
-                                             .on(takesArguments(HttpServletRequest.class, HttpServletResponse.class)));
-                    }
-                };
+                final Junction<MethodDescription> method = takesArgument(0, named("javax.servlet.http.HttpServletRequest"))
+                        .and(takesArgument(1, named("javax.servlet.http.HttpServletResponse")));
+                return new AgentBuilder.Transformer.ForAdvice(Advice.withCustomMapping().bind(EnableTraceHeader.class, regex))
+                        .include(getClass().getClassLoader())
+                        .advice(method, "com.hexdecteam.easeagent.TraceServlet$TracingAdvice");
             }
         };
     }

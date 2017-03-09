@@ -3,18 +3,15 @@ package com.hexdecteam.easeagent;
 import com.google.auto.service.AutoService;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
-import net.bytebuddy.utility.JavaModule;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
-import static net.bytebuddy.matcher.ElementMatchers.isSubTypeOf;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
 public class MetricServlet extends Transformation<MetricServlet.NoConfiguration> {
@@ -26,20 +23,16 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
 
             @Override
             public Junction<TypeDescription> type() {
-                return isSubTypeOf(HttpServlet.class);
+                return hasSuperType(named("javax.servlet.http.HttpServlet"));
             }
 
             @Override
             public AgentBuilder.Transformer transformer() {
-                return new AgentBuilder.Transformer() {
-                    @Override
-                    public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
-                        return b.visit(Advice.withCustomMapping()
-                                             .bind(ForwardDetection.Key.class, key)
-                                             .to(MarkAdvice.class)
-                                             .on(takesArguments(HttpServletRequest.class, HttpServletResponse.class)));
-                    }
-                };
+                final Junction<MethodDescription> method = takesArgument(0, named("javax.servlet.http.HttpServletRequest"))
+                        .and(takesArgument(1, named("javax.servlet.http.HttpServletResponse")));
+                return new AgentBuilder.Transformer.ForAdvice(Advice.withCustomMapping().bind(ForwardDetection.Key.class, key))
+                        .include(getClass().getClassLoader())
+                        .advice(method, "com.hexdecteam.easeagent.MetricServlet$MarkAdvice");
             }
         };
     }

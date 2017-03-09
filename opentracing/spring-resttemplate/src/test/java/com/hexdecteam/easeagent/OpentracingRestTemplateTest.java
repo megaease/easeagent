@@ -3,6 +3,7 @@ package com.hexdecteam.easeagent;
 import brave.Tracer;
 import brave.internal.Platform;
 import brave.opentracing.BraveTracer;
+import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,7 @@ import static com.hexdecteam.easeagent.TraceContext.init;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,10 +50,14 @@ public class OpentracingRestTemplateTest {
 
         final Transformation.Feature feature = new OpentracingRestTemplate().feature(null);
 
-        ((ClientHttpRequest) Classes.transform(Foo.class).by(feature).load().newInstance()).execute();
+        final Class<ClientHttpRequest> loaded = Classes.<ClientHttpRequest>transform(FooClientHttpRequest.class).by(feature).load();
+
+        assertTrue(feature.type().matches(new TypeDescription.ForLoadedType(loaded)));
+
+        loaded.newInstance().execute();
     }
 
-    public static class Foo extends AbstractClientHttpRequest {
+    public static class FooClientHttpRequest extends AbstractClientHttpRequest {
 
         @Override
         protected OutputStream getBodyInternal(HttpHeaders httpHeaders) throws IOException {

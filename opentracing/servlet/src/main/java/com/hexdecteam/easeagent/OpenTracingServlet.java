@@ -4,13 +4,12 @@ import com.google.auto.service.AutoService;
 import io.opentracing.Span;
 import io.opentracing.propagation.TextMapExtractAdapter;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.agent.builder.AgentBuilder.Transformer.ForAdvice;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType.Builder;
-import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.utility.JavaModule;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Enumeration;
@@ -20,8 +19,7 @@ import java.util.UUID;
 
 import static com.hexdecteam.easeagent.TraceContext.*;
 import static io.opentracing.propagation.Format.Builtin.HTTP_HEADERS;
-import static net.bytebuddy.matcher.ElementMatchers.isSubTypeOf;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
 public class OpenTracingServlet extends Transformation<OpenTracingServlet.NoConfiguration> {
@@ -32,21 +30,17 @@ public class OpenTracingServlet extends Transformation<OpenTracingServlet.NoConf
             final String key = UUID.randomUUID().toString();
 
             @Override
-            public ElementMatcher.Junction<TypeDescription> type() {
-                return isSubTypeOf(HttpServlet.class);
+            public Junction<TypeDescription> type() {
+                return hasSuperType(named("javax.servlet.http.HttpServlet"));
             }
 
             @Override
             public AgentBuilder.Transformer transformer() {
-                return new AgentBuilder.Transformer() {
-                    @Override
-                    public Builder<?> transform(Builder<?> builder, TypeDescription td, ClassLoader cl, JavaModule m) {
-                        return builder.visit(Advice.withCustomMapping()
-                                                   .bind(ForwardDetection.Key.class, key)
-                                                   .to(TraceAdvice.class)
-                                                   .on(takesArguments(HttpServletRequest.class, HttpServletResponse.class)));
-                    }
-                };
+                final Junction<MethodDescription> method = takesArgument(0, named("javax.servlet.http.HttpServletRequest"))
+                        .and(takesArgument(1, named("javax.servlet.http.HttpServletResponse")));
+                return new ForAdvice(Advice.withCustomMapping().bind(ForwardDetection.Key.class, key))
+                        .include(getClass().getClassLoader())
+                        .advice(method, "com.hexdecteam.easeagent.OpenTracingServlet$TraceAdvice");
             }
         };
     }
