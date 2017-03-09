@@ -2,16 +2,13 @@ package com.hexdecteam.easeagent;
 
 import com.google.auto.service.AutoService;
 import com.hexdecteam.easeagent.MetricEvents.Update;
+import com.hexdecteam.easeagent.Transformation.Feature.Compoundable;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
-import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import javax.sql.DataSource;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,24 +25,42 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
 
     @Override
     protected Feature feature(Configuration conf) {
+        return new Feature.Compound(Arrays.asList(
+                new Compoundable(
+                        isSubTypeOf(PreparedStatement.class).or(isSubTypeOf(Statement.class))
+                ) {
+                    final String key = UUID.randomUUID().toString();
 
-        final BindKeyFeature jdbcStatement = new BindKeyFeature(
-                isSubTypeOf(PreparedStatement.class).or(isSubTypeOf(Statement.class)),
-                nameStartsWith("execute").and(ElementMatchers.<MethodDescription>isPublic()),
-                StatementAdvice.class
-        );
-        final BindKeyFeature getConnection = new BindKeyFeature(
-                conf.data_source_classes().isEmpty() ? isSubTypeOf(DataSource.class) : any(NAMED, conf.data_source_classes()),
-                named("getConnection").and(returns(isSubTypeOf(Connection.class))),
-                DataSourceAdvice.class
-        );
-        final Caller.Feature callerFeature = new Caller.Feature(compound(
-                NAME_STARTS_WITH,
-                conf.include_caller_class_prefix_list(),
-                conf.exclude_caller_class_prefix_list()
-        ).and(not(nameContains("CGLIB$$"))));
+                    @Override
+                    protected Builder<?> config(Builder<?> b) {
+                        return b.visit(Advice.withCustomMapping()
+                                             .bind(ForwardDetection.Key.class, key)
+                                             .to(StatementAdvice.class)
+                                             .on(nameStartsWith("execute")
+                                                     .and(ElementMatchers.<MethodDescription>isPublic())));
+                    }
+                },
+                new Compoundable(
+                        conf.data_source_classes().isEmpty()
+                                ? isSubTypeOf(DataSource.class)
+                                : any(NAMED, conf.data_source_classes())
+                ) {
+                    final String key = UUID.randomUUID().toString();
 
-        return new Feature.Compound(Arrays.asList(jdbcStatement, getConnection, callerFeature));
+                    @Override
+                    protected Builder<?> config(Builder<?> b) {
+                        return b.visit(Advice.withCustomMapping()
+                                             .bind(ForwardDetection.Key.class, key)
+                                             .to(DataSourceAdvice.class)
+                                             .on(named("getConnection").and(returns(isSubTypeOf(Connection.class)))));
+                    }
+                },
+                new Caller.Feature(compound(
+                        NAME_STARTS_WITH,
+                        conf.include_caller_class_prefix_list(),
+                        conf.exclude_caller_class_prefix_list()
+                ).and(not(nameContains("CGLIB$$"))))
+        ));
     }
 
     @ConfigurationDecorator.Binding("metric.jdbc")
@@ -63,43 +78,21 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
 
     }
 
-    static class BindKeyFeature extends Feature.Compoundable {
-
-        final Junction<MethodDescription> method;
-        final String key;
-        final Class<?> adviceClass;
-
-        BindKeyFeature(Junction<TypeDescription> type, Junction<MethodDescription> method, Class<?> adviceClass) {
-            super(type);
-            this.method = method;
-            this.adviceClass = adviceClass;
-            key = UUID.randomUUID().toString();
-        }
-
-        @Override
-        protected Builder<?> config(Builder<?> b) {
-            return b.visit(Advice.withCustomMapping().bind(Key.class, key).to(adviceClass).on(method));
-        }
-    }
-
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface Key {}
 
     static class DataSourceAdvice {
         @Advice.OnMethodEnter
-        public static Object[] enter(@Key String key) {
-            return new Object[]{ForwardDetection.markIfAbsent(key), System.nanoTime()};
+        public static Object[] enter(@ForwardDetection.Key String key) {
+            return new Object[]{ForwardDetection.Mark.markIfAbsent(key), System.nanoTime()};
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        public static void exit(@Key String key, @Advice.Enter Object[] enter, @Advice.Return Connection connection)
+        public static void exit(@ForwardDetection.Key String key, @Advice.Enter Object[] enter, @Advice.Return Connection connection)
                 throws SQLException {
             final boolean marked = (Boolean) enter[0];
 
             if (!marked) return;
 
-            ForwardDetection.clear(key);
+            ForwardDetection.Mark.clear(key);
 
             final long started = (Long) enter[1];
 
@@ -114,17 +107,17 @@ public class MetricJDBC extends Transformation<MetricJDBC.Configuration> {
 
     static class StatementAdvice {
         @Advice.OnMethodEnter
-        public static Object[] enter(@Key String key) {
-            return new Object[]{ForwardDetection.markIfAbsent(key), System.nanoTime()};
+        public static Object[] enter(@ForwardDetection.Key String key) {
+            return new Object[]{ForwardDetection.Mark.markIfAbsent(key), System.nanoTime()};
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        public static void exit(@Key String key, @Advice.Enter Object[] enter) throws SQLException {
+        public static void exit(@ForwardDetection.Key String key, @Advice.Enter Object[] enter) throws SQLException {
             final boolean marked = (Boolean) enter[0];
 
             if (!marked) return;
 
-            ForwardDetection.clear(key);
+            ForwardDetection.Mark.clear(key);
 
             final long started = (Long) enter[1];
             final long duration = System.nanoTime() - started;
