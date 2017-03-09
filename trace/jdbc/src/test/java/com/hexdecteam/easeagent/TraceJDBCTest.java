@@ -3,11 +3,11 @@ package com.hexdecteam.easeagent;
 import com.hexdecteam.easeagent.Transformation.Feature;
 import com.mysql.cj.api.jdbc.JdbcConnection;
 import com.mysql.cj.jdbc.JdbcPropertySetImpl;
-import com.mysql.cj.jdbc.PreparedStatement;
 import net.bytebuddy.description.type.TypeDescription;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
+import java.sql.PreparedStatement;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -21,22 +21,23 @@ public class TraceJDBCTest {
     @Test
     public void should_get_sql_from_mysql() throws Exception {
         final ClassLoader loader = getClass().getClassLoader();
-        final Class<?> load = Classes.transform("com.mysql.cj.jdbc.PreparedStatement", loader).by(feature).load();
+        final Class<PreparedStatement> load = Classes.<PreparedStatement>transform("com.mysql.cj.jdbc.PreparedStatement", loader)
+                .by(feature).load();
 
         assertTrue(feature.type().matches(new TypeDescription.ForLoadedType(load)));
-
 
         final JdbcConnection connection = mock(JdbcConnection.class, RETURNS_DEEP_STUBS);
         when(connection.getPropertySet()).thenReturn(new JdbcPropertySetImpl());
 
-        assertSqlWith((PreparedStatement) load.getConstructor(JdbcConnection.class, String.class, String.class)
-                                              .newInstance(connection, "sql", "cat"), "sql");
+        assertSqlWith(load.getConstructor(JdbcConnection.class, String.class, String.class)
+                          .newInstance(connection, "sql", "cat"), "sql");
     }
 
     @Test
     public void should_get_sql_from_h2() throws Exception {
         final ClassLoader loader = getClass().getClassLoader();
-        final Class<?> load = Classes.transform("org.h2.jdbc.JdbcPreparedStatement", loader).by(feature).load(loader);
+        final Class<PreparedStatement> load = Classes.<PreparedStatement>transform("org.h2.jdbc.JdbcPreparedStatement", loader)
+                .by(feature).load(loader);
         assertTrue(feature.type().matches(new TypeDescription.ForLoadedType(load)));
 
         final Class<org.h2.jdbc.JdbcConnection> connectionClass = org.h2.jdbc.JdbcConnection.class;
@@ -44,10 +45,10 @@ public class TraceJDBCTest {
 
         final Constructor<?> constructor = load.getDeclaredConstructor(connectionClass, String.class, int.class, int.class, int.class, boolean.class);
         constructor.setAccessible(true);
-        assertSqlWith((java.sql.PreparedStatement) constructor.newInstance(mock(connectionClass, RETURNS_DEEP_STUBS), sql, 1, 1, 1, false), sql);
+        assertSqlWith((PreparedStatement) constructor.newInstance(mock(connectionClass, RETURNS_DEEP_STUBS), sql, 1, 1, 1, false), sql);
     }
 
-    private void assertSqlWith(java.sql.PreparedStatement s, String sql) {
+    private void assertSqlWith(PreparedStatement s, String sql) {
         StackFrame.setRootIfAbsent("test");
 
         try { s.execute(); } catch (Exception ignore) { }

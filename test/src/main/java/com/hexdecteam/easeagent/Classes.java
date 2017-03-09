@@ -11,51 +11,53 @@ import java.net.URLClassLoader;
 
 public class Classes {
 
-    public static By transform(Class<?> type) {
-        return new By(new ByteBuddy().redefine(type), new TypeDescription.ForLoadedType(type), new URLClassLoader(new URL[0]));
+    public static <T> By<T> transform(Class<? extends T> type) {
+        return new By<T>(new ByteBuddy().redefine(type), new TypeDescription.ForLoadedType(type), new URLClassLoader(new URL[0]));
     }
 
-    public static By transform(String name, ClassLoader loader) {
+    public static <T> By<T> transform(String name, ClassLoader loader) {
         final TypeDescription type = TypePool.Default.of(loader).describe(name).resolve();
-        return new By(new ByteBuddy().redefine(type, ClassFileLocator.ForClassLoader.of(loader)), type, loader);
+        final DynamicType.Builder<? extends T> builder = new ByteBuddy().redefine(type, ClassFileLocator.ForClassLoader.of(loader));
+        return new By<T>(builder, type, loader);
     }
 
-    public static class By {
-        private final DynamicType.Builder<?> builder;
+    public static class By<T> {
+        private final DynamicType.Builder<? extends T> builder;
         private final TypeDescription td;
         private final ClassLoader loader;
 
-        By(DynamicType.Builder<?> builder, TypeDescription td, ClassLoader loader) {
+        By(DynamicType.Builder<? extends T> builder, TypeDescription td, ClassLoader loader) {
             this.builder = builder;
             this.td = td;
             this.loader = loader;
         }
 
-        public Loading by(Transformation.Feature feature) {
-            return new Loading(builder, feature, td, loader);
+        public Loading<T> by(Transformation.Feature feature) {
+            return new Loading<T>(builder, feature, td, loader);
         }
     }
 
-    public static class Loading {
+    public static class Loading<T> {
 
-        private final DynamicType.Builder<?> builder;
+        private final DynamicType.Builder<? extends T> builder;
         private final Transformation.Feature feature;
         private final TypeDescription td;
         private final ClassLoader loader;
 
-        Loading(DynamicType.Builder<?> builder, Transformation.Feature feature, TypeDescription td, ClassLoader loader) {
+        Loading(DynamicType.Builder<? extends T> builder, Transformation.Feature feature, TypeDescription td, ClassLoader loader) {
             this.builder = builder;
             this.feature = feature;
             this.td = td;
             this.loader = loader;
         }
 
-        public Class<?> load() {
+        public Class<T> load() {
             return load(loader);
         }
 
-        public Class<?> load(ClassLoader target) {
-            return feature.transformer().transform(builder, td, target, null).make().load(target).getLoaded();
+        @SuppressWarnings("unchecked")
+        public Class<T> load(ClassLoader target) {
+            return (Class<T>) feature.transformer().transform(builder, td, target, null).make().load(target).getLoaded();
         }
     }
 
