@@ -127,6 +127,11 @@
                 </dependency>
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
+                    <artifactId>trace-jdbc</artifactId>
+                    <version>${project.parent.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>log4j2-http-appender</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>

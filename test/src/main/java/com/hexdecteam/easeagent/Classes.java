@@ -2,76 +2,62 @@ package com.hexdecteam.easeagent;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.ClassFileLocator;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.pool.TypePool;
 
 import java.net.URL;
 import java.net.URLClassLoader;
 
 public class Classes {
 
-    public static By transform(Class<?> type) {
-        return new By(type);
+    public static <T> By<T> transform(Class<? extends T> type) {
+        return new By<T>(new ByteBuddy().redefine(type), new TypeDescription.ForLoadedType(type), new URLClassLoader(new URL[0]));
     }
 
-    public static class By {
-        private final Class<?> type;
+    public static <T> By<T> transform(String name, ClassLoader loader) {
+        final TypeDescription type = TypePool.Default.of(loader).describe(name).resolve();
+        final DynamicType.Builder<? extends T> builder = new ByteBuddy().redefine(type, ClassFileLocator.ForClassLoader.of(loader));
+        return new By<T>(builder, type, loader);
+    }
 
-        By(Class<?> type) {
-            this.type = type;
+    public static class By<T> {
+        private final DynamicType.Builder<? extends T> builder;
+        private final TypeDescription td;
+        private final ClassLoader loader;
+
+        By(DynamicType.Builder<? extends T> builder, TypeDescription td, ClassLoader loader) {
+            this.builder = builder;
+            this.td = td;
+            this.loader = loader;
         }
 
-        public With by(Transformation.Feature feature) {
-            return new With(type, feature);
+        public Loading<T> by(Transformation.Feature feature) {
+            return new Loading<T>(builder, feature, td, loader);
         }
     }
 
-    public static class With {
+    public static class Loading<T> {
 
-        private final Class<?>               type;
+        private final DynamicType.Builder<? extends T> builder;
         private final Transformation.Feature feature;
+        private final TypeDescription td;
+        private final ClassLoader loader;
 
-        With(Class<?> type, Transformation.Feature feature) {
-            this.type = type;
-            this.feature = feature;
-        }
-
-        Loading with(ClassLoader loader) {
-            return new Loading(type, feature, null, loader);
-        }
-
-        Loading with(TypeDescription td) {
-            return new Loading(type, feature, td, null);
-        }
-
-        Class<?> load() {
-            return new Loading(type, feature, new TypeDescription.ForLoadedType(type), null).load();
-        }
-
-        Class<?> load(ClassLoader target) {
-            return new Loading(type, feature, new TypeDescription.ForLoadedType(type), null).load(target);
-        }
-    }
-
-    public static class Loading {
-
-        private final Class<?>               type;
-        private final Transformation.Feature feature;
-        private final TypeDescription        td;
-        private final ClassLoader            loader;
-
-        Loading(Class<?> type, Transformation.Feature feature, TypeDescription td, ClassLoader loader) {
-            this.type = type;
+        Loading(DynamicType.Builder<? extends T> builder, Transformation.Feature feature, TypeDescription td, ClassLoader loader) {
+            this.builder = builder;
             this.feature = feature;
             this.td = td;
             this.loader = loader;
         }
 
-        public Class<?> load(){
-            return load(new URLClassLoader(new URL[0]));
+        public Class<T> load() {
+            return load(loader);
         }
 
-        public Class<?> load(ClassLoader target) {
-            return feature.transformer().transform(new ByteBuddy().redefine(type), td, loader, null)
-                                     .make().load(target).getLoaded();
+        @SuppressWarnings("unchecked")
+        public Class<T> load(ClassLoader target) {
+            return (Class<T>) feature.transformer().transform(builder, td, target, null).make().load(target).getLoaded();
         }
     }
 

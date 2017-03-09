@@ -11,8 +11,6 @@ import net.bytebuddy.utility.JavaModule;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.UUID;
 
 import static net.bytebuddy.matcher.ElementMatchers.isSubTypeOf;
@@ -36,7 +34,7 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
                     @Override
                     public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cld, JavaModule m) {
                         return b.visit(Advice.withCustomMapping()
-                                             .bind(Key.class, key)
+                                             .bind(ForwardDetection.Key.class, key)
                                              .to(MarkAdvice.class)
                                              .on(takesArguments(HttpServletRequest.class, HttpServletResponse.class)));
                     }
@@ -47,24 +45,21 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
 
     interface NoConfiguration {}
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface Key {}
-
     static class MarkAdvice {
 
         @Advice.OnMethodEnter
-        public static boolean enter(@Key String key) {
-            return ForwardDetection.markIfAbsent(key);
+        public static boolean enter(@ForwardDetection.Key String key) {
+            return ForwardDetection.Mark.markIfAbsent(key);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@Advice.Argument(0) HttpServletRequest request,
                                 @Advice.Argument(1) HttpServletResponse response,
                                 @Advice.Origin String signature, @Advice.Enter boolean marked,
-                                @Key String key) {
+                                @ForwardDetection.Key String key) {
             if (!marked) return;
 
-            ForwardDetection.clear(key);
+            ForwardDetection.Mark.clear(key);
 
             final String uri = request.getRequestURI();
             final int status = response.getStatus();
