@@ -11,22 +11,4 @@
 
     <artifactId>trace-stack</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
-            <artifactId>test</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>
