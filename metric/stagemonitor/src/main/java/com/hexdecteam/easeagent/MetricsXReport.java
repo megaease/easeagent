@@ -20,7 +20,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.hexdecteam.easeagent.DaemonExecutors.newScheduled;
@@ -57,32 +56,32 @@ public class MetricsXReport implements Plugin<MetricsXReport.Configuration> {
     abstract static class Configuration {
         int period_seconds() {return 10;}
 
-        String gid() { return UUID.randomUUID().toString(); }
-
         String rate_unit() { return SECONDS.toString(); }
 
         String duration_unit() { return MILLISECONDS.toString(); }
 
-        String host() {
-            return LocalhostAddress.getLocalhostName();
-        }
+        String system() { return "unknown"; }
+
+        String application() {return "unknown";}
+
+        String instance() {return "unknown";}
 
         String host_ipv4() {
             try {
-                return InetAddress.getByName(host()).getHostAddress();
+                return InetAddress.getByName(hostname()).getHostAddress();
             } catch (UnknownHostException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        String hostname() {
+            return LocalhostAddress.getLocalhostName();
         }
 
         // TODO remove stagemonitor's legacy
         String bulk_header_template() {
             return "";
         }
-
-        String application() {return null;}
-
-        String instance() {return null;}
     }
 
     private static class Reporting implements Runnable {
@@ -110,9 +109,9 @@ public class MetricsXReport implements Plugin<MetricsXReport.Configuration> {
             final long startTime = ManagementFactory.getRuntimeMXBean().getStartTime();
             Map<String, String> map = Maps.newHashMap();
             map.put("measurement_start", Long.toString(startTime));
-            map.put("gid", conf.gid());
-            map.put("host", conf.host());
-            map.put("host_ipv4", conf.host_ipv4());
+            map.put("system", conf.system());
+            map.put("hostname", conf.hostname());
+            map.put("hostipv4", conf.host_ipv4());
             map.put("instance", conf.instance());
             map.put("application", conf.application());
             return map;
