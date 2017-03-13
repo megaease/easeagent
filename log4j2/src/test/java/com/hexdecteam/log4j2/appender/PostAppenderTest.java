@@ -32,7 +32,7 @@ public class PostAppenderTest {
         final HttpServer server = httpServer(8080, log());
         server.post(and(
                 by(uri("/requests")),
-                eq(header("Content-Type"), "text/plain; charset=utf-8"),
+                eq(header("Content-Type"), "text/plain"),
                 by(text("message"))
         )).response(status(200));
 
@@ -58,7 +58,7 @@ public class PostAppenderTest {
 
         server.post(and(
                 by(uri("/requests")),
-                eq(header("Content-Type"), "text/plain; charset=utf-8"),
+                eq(header("Content-Type"), "text/plain"),
                 by(text("message"))
         )).response(status(200));
 

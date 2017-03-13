@@ -1,10 +1,8 @@
 package com.hexdecteam.log4j2.appender;
 
 import okhttp3.*;
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.GzipSink;
-import okio.Okio;
+import okhttp3.internal.Util;
+import okio.*;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -33,7 +31,9 @@ public class PostAppender extends AbstractAppender {
     }
 
     public void append(LogEvent event) {
-        final RequestBody body = RequestBody.create(contentType, event.getMessage().getFormattedMessage());
+        final String content = event.getMessage().getFormattedMessage();
+        final ByteString bs = ByteString.encodeString(content, Util.UTF_8);
+        final RequestBody body = RequestBody.create(contentType, bs);
 
         try {
             final Response response = client.newCall(builder.post(body).build()).execute();
