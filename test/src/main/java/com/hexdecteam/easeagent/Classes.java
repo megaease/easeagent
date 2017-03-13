@@ -16,8 +16,9 @@ public class Classes {
     }
 
     public static <T> By<T> transform(String name, ClassLoader loader) {
-        final TypeDescription type = TypePool.Default.of(loader).describe(name).resolve();
-        final DynamicType.Builder<? extends T> builder = new ByteBuddy().redefine(type, ClassFileLocator.ForClassLoader.of(loader));
+        final ClassFileLocator locator = ClassFileLocator.ForClassLoader.of(loader);
+        final TypeDescription type = TypePool.Default.of(locator).describe(name).resolve();
+        final DynamicType.Builder<? extends T> builder = new ByteBuddy().redefine(type, locator);
         return new By<T>(builder, type, loader);
     }
 
