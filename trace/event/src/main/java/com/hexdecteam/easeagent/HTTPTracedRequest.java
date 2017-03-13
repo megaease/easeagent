@@ -2,9 +2,7 @@ package com.hexdecteam.easeagent;
 
 import com.google.auto.service.AutoService;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public class HTTPTracedRequest implements TracedRequest {
@@ -18,6 +16,8 @@ public class HTTPTracedRequest implements TracedRequest {
     private final String     url;
     private final String     method;
     private final int        statusCode;
+    private final long       timeDb;
+    private final int        countDb;
 
     public HTTPTracedRequest(String id, String name, long timeElapse, long cpuTimeElapse, StackFrame rootFrame,
                              boolean error, String url, String method, int statusCode) {
@@ -30,6 +30,12 @@ public class HTTPTracedRequest implements TracedRequest {
         this.url = url;
         this.method = method;
         this.statusCode = statusCode;
+
+        final List<Long> ioqs = new ArrayList<Long>();
+        collectIoQueris(rootFrame, ioqs);
+
+        this.timeDb = sumOf(ioqs);
+        this.countDb = ioqs.size();
     }
 
     public String url() {
@@ -111,12 +117,12 @@ public class HTTPTracedRequest implements TracedRequest {
 
     @Override
     public long executionTimeDb() {
-        return -1;
+        return timeDb;
     }
 
     @Override
     public long executionCountDb() {
-        return -1;
+        return countDb;
     }
 
     @Override
@@ -127,5 +133,24 @@ public class HTTPTracedRequest implements TracedRequest {
     @Override
     public Map<String, String> parameters() {
         return Collections.singletonMap("TODO", "@zhongl");
+    }
+
+    private long sumOf(List<Long> ioqs) {
+        long sum = 0L;
+        for (Long v : ioqs) {
+            sum += v;
+        }
+        return sum;
+    }
+
+    private void collectIoQueris(StackFrame frame, List<Long> ioqs) {
+        final List<StackFrame> children = frame.getChildren();
+        if(children.isEmpty() && frame.getIoquery()) {
+            ioqs.add(frame.getExecutionTime());
+        }
+
+        for (StackFrame child : children) {
+            collectIoQueris(child, ioqs);
+        }
     }
 }
