@@ -96,9 +96,9 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
         final long startTime = ManagementFactory.getRuntimeMXBean().getStartTime();
         Map<String, Object> map = Maps.newHashMap();
         map.put("measurement_start", startTime);
-        map.put("gid", conf.gid());
-        map.put("host", conf.host());
-        map.put("host_ipv4", conf.host_ipv4());
+        map.put("system", conf.system());
+        map.put("hostname", conf.hostname());
+        map.put("hostipv4", conf.host_ipv4());
         map.put("instance", conf.instance());
         map.put("application", conf.application());
         return map;
@@ -107,23 +107,23 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
 
     @ConfigurationDecorator.Binding("trace.report")
     static abstract class Configuration {
-        String gid() { return UUID.randomUUID().toString(); }
+        String system() { return UUID.randomUUID().toString(); }
 
-        String host() {
-            return LocalhostAddress.getLocalhostName();
-        }
+        String application() {return null;}
+
+        String instance() {return null;}
 
         String host_ipv4() {
             try {
-                return InetAddress.getByName(host()).getHostAddress();
+                return InetAddress.getByName(hostname()).getHostAddress();
             } catch (UnknownHostException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        String application() {return null;}
-
-        String instance() {return null;}
+        String hostname() {
+            return LocalhostAddress.getLocalhostName();
+        }
 
         // TODO remove stagemonitor's legacy
         String bulk_header_template() {
