@@ -22,4 +22,6 @@ import java.lang.instrument.Instrumentation;
  */
 public interface Plugin<Configuration> {
     void hook(Configuration conf, Instrumentation inst, Subscription subs);
+
+    interface Noop {}
 }

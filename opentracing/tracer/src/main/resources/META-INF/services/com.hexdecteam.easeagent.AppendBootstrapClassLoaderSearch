@@ -1,0 +1,16 @@
+io.opentracing.tag.IntTag
+io.opentracing.tag.AbstractTag
+io.opentracing.tag.ShortTag
+io.opentracing.tag.BooleanTag
+io.opentracing.tag.Tags
+io.opentracing.tag.StringTag
+io.opentracing.Span
+io.opentracing.SpanContext
+io.opentracing.propagation.TextMapExtractAdapter
+io.opentracing.propagation.TextMap
+io.opentracing.propagation.Format$Builtin
+io.opentracing.propagation.Format
+io.opentracing.propagation.TextMapInjectAdapter
+io.opentracing.References
+io.opentracing.Tracer$SpanBuilder
+io.opentracing.Tracer

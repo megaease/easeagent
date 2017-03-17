@@ -19,10 +19,10 @@ import java.util.UUID;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
-public class TraceJDBC extends Transformation<TraceJDBC.NoConfiguration> {
+public class TraceJDBC extends Transformation<Transformation.Noop> {
 
     @Override
-    protected Feature feature(NoConfiguration conf) {
+    protected Feature feature(Noop conf) {
         return new Compound(Arrays.asList(
                 new Compoundable(isSubTypeOf(Statement.class).and(not(isSubTypeOf(PreparedStatement.class)))) {
                     final String key = UUID.randomUUID().toString();
@@ -64,8 +64,6 @@ public class TraceJDBC extends Transformation<TraceJDBC.NoConfiguration> {
         ));
 
     }
-
-    interface NoConfiguration {}
 
     static class StatementAdvice {
         @Advice.OnMethodEnter

@@ -15,6 +15,7 @@
         <module>trace</module>
         <module>test</module>
         <module>log4j2</module>
+        <module>opentracing</module>
     </modules>
 
     <properties>

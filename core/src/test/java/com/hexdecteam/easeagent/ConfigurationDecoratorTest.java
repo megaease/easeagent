@@ -54,7 +54,7 @@ public class ConfigurationDecoratorTest {
 
     @Test
     public void should_be_ok_with_no_configuration() throws Exception {
-        new ConfigurationDecorator(config("")).newInstance(NoConfiguration.class);
+        new ConfigurationDecorator(config("")).newInstance(Transformation.Noop.class);
     }
 
     private static Config config(String s) {
@@ -81,6 +81,5 @@ public class ConfigurationDecoratorTest {
         abstract List<Double> ld();
     }
 
-    interface NoConfiguration {}
 
 }

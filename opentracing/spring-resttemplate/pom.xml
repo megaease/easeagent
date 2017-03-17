@@ -3,41 +3,27 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>metric</artifactId>
+        <artifactId>opentracing</artifactId>
         <groupId>com.hexdecteam.easeagent</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>metric-servlet</artifactId>
-
-    <properties>
-        <version.javax.servlet-api>3.1.0</version.javax.servlet-api>
-    </properties>
+    <artifactId>opentracing-spring-resttemplate</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.hexdecteam.easeagent</groupId>
-            <artifactId>metric-event</artifactId>
+            <artifactId>opentracing-tracer</artifactId>
             <version>${project.parent.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${version.javax.servlet-api}</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>4.3.6.RELEASE</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
