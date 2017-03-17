@@ -23,7 +23,7 @@ import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 @AutoService(Plugin.class)
-public class OpenTracingHttpClient extends Transformation<Transformation.Noop>{
+public class OpenTracingHttpClient extends Transformation<Plugin.Noop>{
     @Override
     protected Feature feature(Noop conf) {
         final String key = UUID.randomUUID().toString();

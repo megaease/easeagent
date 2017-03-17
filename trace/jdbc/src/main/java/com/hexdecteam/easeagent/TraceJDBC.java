@@ -19,7 +19,7 @@ import java.util.UUID;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
-public class TraceJDBC extends Transformation<Transformation.Noop> {
+public class TraceJDBC extends Transformation<Plugin.Noop> {
 
     @Override
     protected Feature feature(Noop conf) {

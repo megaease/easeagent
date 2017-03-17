@@ -54,7 +54,7 @@ public class ConfigurationDecoratorTest {
 
     @Test
     public void should_be_ok_with_no_configuration() throws Exception {
-        new ConfigurationDecorator(config("")).newInstance(Transformation.Noop.class);
+        new ConfigurationDecorator(config("")).newInstance(Plugin.Noop.class);
     }
 
     private static Config config(String s) {

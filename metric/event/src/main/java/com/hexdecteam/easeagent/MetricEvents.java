@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @AutoService(Plugin.class)
-public class MetricEvents implements Plugin<Transformation.Noop> {
+public class MetricEvents implements Plugin<Plugin.Noop> {
 
     @Override
     public void hook(Transformation.Noop conf, Instrumentation inst, Subscription subs) {
