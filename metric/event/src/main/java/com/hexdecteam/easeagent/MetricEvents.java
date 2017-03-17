@@ -13,14 +13,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @AutoService(Plugin.class)
-public class MetricEvents implements Plugin<MetricEvents.NoConfiguration> {
+public class MetricEvents implements Plugin<Transformation.Noop> {
 
     @Override
-    public void hook(NoConfiguration conf, Instrumentation inst, Subscription subs) {
+    public void hook(Transformation.Noop conf, Instrumentation inst, Subscription subs) {
         subs.register(this);
     }
 
-    interface NoConfiguration {}
 
     @Subscription.Consume
     public void receive(final Register register) {

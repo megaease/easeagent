@@ -14,10 +14,10 @@ import java.util.UUID;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
-public class MetricServlet extends Transformation<MetricServlet.NoConfiguration> {
+public class MetricServlet extends Transformation<Plugin.Noop> {
 
     @Override
-    protected Feature feature(final NoConfiguration conf) {
+    protected Feature feature(final Noop conf) {
         return new Feature() {
             final String key = UUID.randomUUID().toString();
 
@@ -37,7 +37,6 @@ public class MetricServlet extends Transformation<MetricServlet.NoConfiguration>
         };
     }
 
-    interface NoConfiguration {}
 
     static class MarkAdvice {
 

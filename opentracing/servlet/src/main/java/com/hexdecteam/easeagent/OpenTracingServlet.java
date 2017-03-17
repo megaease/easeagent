@@ -22,10 +22,10 @@ import static io.opentracing.propagation.Format.Builtin.HTTP_HEADERS;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @AutoService(Plugin.class)
-public class OpenTracingServlet extends Transformation<OpenTracingServlet.NoConfiguration> {
+public class OpenTracingServlet extends Transformation<Plugin.Noop> {
 
     @Override
-    protected Feature feature(NoConfiguration conf) {
+    protected Feature feature(Noop conf) {
         return new Feature() {
             final String key = UUID.randomUUID().toString();
 
@@ -45,7 +45,6 @@ public class OpenTracingServlet extends Transformation<OpenTracingServlet.NoConf
         };
     }
 
-    interface NoConfiguration {}
 
     static class TraceAdvice {
         @Advice.OnMethodEnter

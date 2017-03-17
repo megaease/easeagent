@@ -23,10 +23,10 @@ import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 @AutoService(Plugin.class)
-public class OpentracingRestTemplate extends Transformation<OpentracingRestTemplate.NoConfiguration> {
+public class OpentracingRestTemplate extends Transformation<Plugin.Noop> {
 
     @Override
-    protected Feature feature(NoConfiguration conf) {
+    protected Feature feature(Noop conf) {
         final String key = UUID.randomUUID().toString();
         return new Feature() {
             @Override
@@ -42,8 +42,6 @@ public class OpentracingRestTemplate extends Transformation<OpentracingRestTempl
             }
         };
     }
-
-    interface NoConfiguration {}
 
     static class TraceAdvice {
         @Advice.OnMethodEnter

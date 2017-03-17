@@ -78,7 +78,7 @@ public class MetricServletTest {
     }
 
     private Transformation.Feature feature() {
-        return new MetricServlet().feature(new MetricServlet.NoConfiguration() {});
+        return new MetricServlet().feature(null);
     }
 
     public static class Foo extends HttpServlet {
