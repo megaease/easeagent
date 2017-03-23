@@ -25,7 +25,13 @@
         </dependency>
         <dependency>
             <groupId>io.zipkin.reporter</groupId>
-            <artifactId>zipkin-sender-urlconnection</artifactId>
+            <artifactId>zipkin-reporter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dreamhead</groupId>
+            <artifactId>moco-core</artifactId>
+            <version>LATEST</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
