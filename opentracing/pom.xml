@@ -18,6 +18,7 @@
         <module>httpclient</module>
         <module>tracer</module>
         <module>spring-resttemplate</module>
+        <module>jdbc</module>
     </modules>
 
     <dependencies>

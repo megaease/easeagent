@@ -10,7 +10,6 @@ import net.bytebuddy.agent.builder.AgentBuilder.Transformer.ForAdvice;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
@@ -23,7 +22,7 @@ import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 @AutoService(Plugin.class)
-public class OpenTracingHttpClient extends Transformation<Plugin.Noop>{
+public class OpenTracingHttpClient extends Transformation<Plugin.Noop> {
     @Override
     protected Feature feature(Noop conf) {
         final String key = UUID.randomUUID().toString();
@@ -36,7 +35,7 @@ public class OpenTracingHttpClient extends Transformation<Plugin.Noop>{
             @Override
             public AgentBuilder.Transformer transformer() {
 
-                return new ForAdvice(Advice.withCustomMapping().bind(ForwardDetection.Key.class,key))
+                return new ForAdvice(Advice.withCustomMapping().bind(ForwardDetection.Key.class, key))
                         .include(getClass().getClassLoader())
                         .advice(named("doExecute"), "com.hexdecteam.easeagent.OpenTracingHttpClient$Probe");
             }
@@ -73,25 +72,19 @@ public class OpenTracingHttpClient extends Transformation<Plugin.Noop>{
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@ForwardDetection.Key String key,
                                 @Advice.Enter boolean marked,
-                                @Advice.Argument(0) HttpHost host,
                                 @Advice.Argument(1) HttpRequest request,
                                 @Advice.Return HttpResponse response) {
             if (!marked) return;
 
             ForwardDetection.Mark.clear(key);
 
-            try {
-                pop().log("cr")
-                     .setTag("component", "apache-http-client")
-                     .setTag("span.kind", "client")
-                     .setTag("http.url", request.getRequestLine().getUri())
-                     .setTag("http.method", request.getRequestLine().getMethod())
-                     .setTag("http.status_code", Integer.toString(response.getStatusLine().getStatusCode()))
-                     .finish();
-            } catch (Exception ignore) {
-                ignore.printStackTrace();
-                // never be here
-            }
+            pop().log("cr")
+                 .setTag("component", "apache-http-client")
+                 .setTag("span.kind", "client")
+                 .setTag("http.url", request.getRequestLine().getUri())
+                 .setTag("http.method", request.getRequestLine().getMethod())
+                 .setTag("http.status_code", Integer.toString(response.getStatusLine().getStatusCode()))
+                 .finish();
         }
 
 
