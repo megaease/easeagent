@@ -178,6 +178,11 @@
                 </dependency>
                 <dependency>
                     <groupId>com.hexdecteam.easeagent</groupId>
+                    <artifactId>opentracing-jdbc</artifactId>
+                    <version>${project.parent.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.hexdecteam.easeagent</groupId>
                     <artifactId>opentracing-tracer</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>

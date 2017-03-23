@@ -3,6 +3,7 @@ package com.hexdecteam.easeagent;
 import com.hexdecteam.easeagent.Transformation.Feature;
 import com.mysql.jdbc.MySQLConnection;
 import net.bytebuddy.description.type.TypeDescription;
+import org.h2.jdbc.JdbcConnection;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
@@ -39,12 +40,11 @@ public class TraceJDBCTest {
                 .by(feature).load(loader);
         assertTrue(feature.type().matches(new TypeDescription.ForLoadedType(load)));
 
-        final Class<org.h2.jdbc.JdbcConnection> connectionClass = org.h2.jdbc.JdbcConnection.class;
         final String sql = "select 1";
 
-        final Constructor<?> constructor = load.getDeclaredConstructor(connectionClass, String.class, int.class, int.class, int.class, boolean.class);
+        final Constructor<?> constructor = load.getDeclaredConstructor(JdbcConnection.class, String.class, int.class, int.class, int.class, boolean.class);
         constructor.setAccessible(true);
-        assertSqlWith((PreparedStatement) constructor.newInstance(mock(connectionClass, RETURNS_DEEP_STUBS), sql, 1, 1, 1, false), sql);
+        assertSqlWith((PreparedStatement) constructor.newInstance(mock(JdbcConnection.class, RETURNS_DEEP_STUBS), sql, 1, 1, 1, false), sql);
     }
 
     private void assertSqlWith(PreparedStatement s, String sql) {
