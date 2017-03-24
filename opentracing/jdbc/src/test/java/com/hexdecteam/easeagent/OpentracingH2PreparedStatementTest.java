@@ -26,7 +26,7 @@ public class OpentracingH2PreparedStatementTest {
     public static final String JDBC_URL = "jdbc:h2:mem:test";
     public static final String SQL = "select 1";
 
-    final Transformation.Feature feature = new OpentracingH2PrepareStatement().feature(null);
+    final Transformation.Feature feature = new OpentracingH2PreparedStatement().feature(null);
 
     @Test
     public void should_get_a_span_about_the_statement() throws Exception {

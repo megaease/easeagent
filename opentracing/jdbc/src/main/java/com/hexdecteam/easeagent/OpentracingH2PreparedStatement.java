@@ -18,7 +18,7 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 // TODO Clean code to share one plugin
 @AutoService(Plugin.class)
-public class OpentracingH2PrepareStatement extends Transformation<Plugin.Noop> {
+public class OpentracingH2PreparedStatement extends Transformation<Plugin.Noop> {
     @Override
     protected Feature feature(Noop conf) {
         return new Feature() {
@@ -31,7 +31,7 @@ public class OpentracingH2PrepareStatement extends Transformation<Plugin.Noop> {
             public AgentBuilder.Transformer transformer() {
                 return new ForAdvice()
                         .include(getClass().getClassLoader())
-                        .advice(nameStartsWith("execute"), "com.hexdecteam.easeagent.OpentracingH2PrepareStatement$Probe");
+                        .advice(nameStartsWith("execute"), "com.hexdecteam.easeagent.OpentracingH2PreparedStatement$Probe");
             }
         };
     }
@@ -57,7 +57,7 @@ public class OpentracingH2PrepareStatement extends Transformation<Plugin.Noop> {
                      .setTag("span.kind", "client")
                      .setTag("jdbc.url", stmt.getConnection().getMetaData().getURL())
                      .setTag("jdbc.sql", sql)
-                     .setTag("jdbc.result", String.valueOf(error == null))
+                     .setTag("jdbc.result", error == null)
                      .finish();
             } catch (Exception ignore) { }
 

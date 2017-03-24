@@ -84,7 +84,7 @@ public class OpentracingRestTemplate extends Transformation<Plugin.Noop> {
                      .setTag("span.kind", "client")
                      .setTag("http.url", request.getURI().toString())
                      .setTag("http.method", request.getMethod().toString())
-                     .setTag("http.status_code", Integer.toString(response.getRawStatusCode()))
+                     .setTag("http.status_code", response.getRawStatusCode())
                      .finish();
             } catch (Exception ignore) {
                 // never be here

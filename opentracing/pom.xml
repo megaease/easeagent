@@ -19,6 +19,7 @@
         <module>tracer</module>
         <module>spring-resttemplate</module>
         <module>jdbc</module>
+        <module>jedis</module>
     </modules>
 
     <dependencies>

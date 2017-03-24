@@ -21,7 +21,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 // TODO Clean code to share one plugin
 @AutoService(Plugin.class)
-public class OpentracingMySQLPrepareStatement extends Transformation<Plugin.Noop> {
+public class OpentracingMySQLPreparedStatement extends Transformation<Plugin.Noop> {
     @Override
     protected Feature feature(Noop conf) {
         final String key = UUID.randomUUID().toString();
@@ -39,7 +39,7 @@ public class OpentracingMySQLPrepareStatement extends Transformation<Plugin.Noop
             public AgentBuilder.Transformer transformer() {
                 return new ForAdvice(Advice.withCustomMapping().bind(ForwardDetection.Key.class, key))
                         .include(getClass().getClassLoader())
-                        .advice(nameStartsWith("execute"), "com.hexdecteam.easeagent.OpentracingMySQLPrepareStatement$Probe");
+                        .advice(nameStartsWith("execute"), "com.hexdecteam.easeagent.OpentracingMySQLPreparedStatement$Probe");
             }
         };
     }
@@ -77,7 +77,7 @@ public class OpentracingMySQLPrepareStatement extends Transformation<Plugin.Noop
                      .setTag("span.kind", "client")
                      .setTag("jdbc.url", stmt.getConnection().getMetaData().getURL())
                      .setTag("jdbc.sql", sql)
-                     .setTag("jdbc.result", String.valueOf(error == null))
+                     .setTag("jdbc.result", error == null)
                      .finish();
             } catch (Exception ignore) { }
 
