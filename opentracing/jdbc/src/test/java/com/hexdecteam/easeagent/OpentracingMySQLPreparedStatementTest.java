@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class OpentracingMySQLPreparedStatementTest {
     public static final String JDBC_URL = "jdbc:mysql://localhost/test";
 
-    final Transformation.Feature feature = new OpentracingMySQLPrepareStatement().feature(null);
+    final Transformation.Feature feature = new OpentracingMySQLPreparedStatement().feature(null);
 
     @Test
     public void should_get_a_span_about_the_statement() throws Exception {
