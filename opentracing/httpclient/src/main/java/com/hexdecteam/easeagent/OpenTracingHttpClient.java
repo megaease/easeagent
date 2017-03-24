@@ -83,7 +83,7 @@ public class OpenTracingHttpClient extends Transformation<Plugin.Noop> {
                  .setTag("span.kind", "client")
                  .setTag("http.url", request.getRequestLine().getUri())
                  .setTag("http.method", request.getRequestLine().getMethod())
-                 .setTag("http.status_code", Integer.toString(response.getStatusLine().getStatusCode()))
+                 .setTag("http.status_code", response.getStatusLine().getStatusCode())
                  .finish();
         }
 

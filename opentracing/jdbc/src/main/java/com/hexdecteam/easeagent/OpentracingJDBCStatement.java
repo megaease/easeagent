@@ -68,7 +68,7 @@ public class OpentracingJDBCStatement extends Transformation<Plugin.Noop> {
                      .setTag("span.kind", "client")
                      .setTag("jdbc.url", stmt.getConnection().getMetaData().getURL())
                      .setTag("jdbc.sql", sql)
-                     .setTag("jdbc.result", String.valueOf(error == null))
+                     .setTag("jdbc.result", error == null)
                      .finish();
             } catch (SQLException ignore) { }
         }
