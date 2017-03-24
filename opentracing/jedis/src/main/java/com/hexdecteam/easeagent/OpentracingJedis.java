@@ -49,9 +49,8 @@ public class OpentracingJedis extends Transformation<Plugin.Noop> {
                                                        .withTag("redis.cmd", command.name());
             final Span parent = TraceContext.peek();
             push((parent == null ? builder : builder.asChildOf(parent)).start().log("cs"));
-            if (error != null) {
-                pop().log("cr").setTag("redis.result", error == null).finish();
-            }
+
+            if (error != null) pop().log("cr").setTag("redis.result", false).finish();
         }
 
     }
