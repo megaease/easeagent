@@ -31,7 +31,7 @@ public class GatewaySenderTest {
 
                     @Override
                     public boolean send_compression() {
-                        return true;
+                        return false;
                     }
                 }, null, null);
 

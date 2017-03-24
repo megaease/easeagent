@@ -6,8 +6,10 @@ import io.opentracing.Tracer;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer.ForAdvice;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
+import net.bytebuddy.matcher.ElementMatchers;
 import redis.clients.jedis.Connection;
 import redis.clients.jedis.Protocol;
 
@@ -21,14 +23,14 @@ public class OpentracingJedis extends Transformation<Plugin.Noop> {
     protected Feature feature(Noop conf) {
         return new Feature() {
             @Override
-            public ElementMatcher.Junction<TypeDescription> type() {
+            public Junction<TypeDescription> type() {
                 return named("redis.clients.jedis.Connection");
             }
 
             @Override
             public AgentBuilder.Transformer transformer() {
                 return new ForAdvice().include(getClass().getClassLoader())
-                                      .advice(named("sendCommand").and(takesArgument(1, byte[][].class)),
+                                      .advice(named("sendCommand").and(ElementMatchers.<MethodDescription>isVarArgs()).and(takesArgument(1, byte[][].class)),
                                               "com.hexdecteam.easeagent.OpentracingJedis$ProbeSend")
                                       .advice(named("readProtocolWithCheckingBroken"),
                                               "com.hexdecteam.easeagent.OpentracingJedis$ProbeRead");
@@ -37,8 +39,8 @@ public class OpentracingJedis extends Transformation<Plugin.Noop> {
     }
 
     static class ProbeSend {
-        @Advice.OnMethodEnter
-        static void enter(@Advice.Argument(0) Protocol.Command command, @Advice.This Connection conn) {
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
+        static void exit(@Advice.Argument(0) Protocol.Command command, @Advice.This Connection conn, @Advice.Thrown Throwable error) {
             final Tracer.SpanBuilder builder = tracer().buildSpan("redis_command")
                                                        .withTag("component", "jedis")
                                                        .withTag("span.kind", "client")
@@ -47,7 +49,11 @@ public class OpentracingJedis extends Transformation<Plugin.Noop> {
                                                        .withTag("redis.cmd", command.name());
             final Span parent = TraceContext.peek();
             push((parent == null ? builder : builder.asChildOf(parent)).start().log("cs"));
+            if (error != null) {
+                pop().log("cr").setTag("redis.result", error == null).finish();
+            }
         }
+
     }
 
     static class ProbeRead {
