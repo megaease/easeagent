@@ -1,11 +1,14 @@
 package com.hexdecteam.easeagent;
 
 import brave.Tracer;
+import brave.internal.Platform;
 import brave.opentracing.BraveTracer;
 import brave.sampler.CountingSampler;
 import com.google.auto.service.AutoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import zipkin.Codec;
+import zipkin.Endpoint;
 import zipkin.Span;
 import zipkin.reporter.*;
 
@@ -19,11 +22,13 @@ import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static zipkin.BinaryAnnotation.create;
 
 @AutoService(Plugin.class)
 public class TracerInitializer implements Plugin<TracerInitializer.Configuration> {
 
     final static Logger LOGGER = LoggerFactory.getLogger(TracerInitializer.class);
+    static final Endpoint ENDPOINT = Platform.get().localEndpoint();
 
     @Override
     public void hook(final Configuration conf, Instrumentation inst, Subscription subs) {
@@ -31,7 +36,7 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
         final Reporter<Span> reporter = AsyncReporter.builder(new GatewaySender(conf))
                                                      .queuedMaxSpans(conf.reporter_queued_max_spans())
                                                      .messageTimeout(conf.reporter_message_timeout_seconds(), SECONDS)
-                                                     .build();
+                                                     .build(encoder(conf.system()));
         final Tracer tracer = Tracer.newBuilder()
                                     .localServiceName(conf.service_name())
                                     .traceId128Bit(conf.trace_id_128b())
@@ -42,12 +47,30 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
         TraceContext.init(BraveTracer.wrap(tracer));
     }
 
+    private Encoder<Span> encoder(final String system) {
+        return new Encoder<Span>() {
+            @Override
+            public Encoding encoding() {
+                return Encoding.JSON;
+            }
+
+            @Override
+            public byte[] encode(Span span) {
+                return Codec.JSON.writeSpan(span.toBuilder()
+                                                .addBinaryAnnotation(create("system", system, ENDPOINT))
+                                                .build());
+            }
+        };
+    }
+
     @ConfigurationDecorator.Binding("opentracing.tracer")
     static abstract class Configuration {
 
         public abstract String send_endpoint();
 
         public abstract String service_name();
+
+        public abstract String system();
 
         public float sample_rate() {
             return 1f;
@@ -175,7 +198,7 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
                 } finally {
                     in.close();
                 }
-                if(code >= 400) throw new IOException(connection.getResponseMessage());
+                if (code >= 400) throw new IOException(connection.getResponseMessage());
             } catch (IOException e) {
                 InputStream err = connection.getErrorStream();
                 try {
