@@ -27,7 +27,7 @@ import static zipkin.BinaryAnnotation.create;
 @AutoService(Plugin.class)
 public class TracerInitializer implements Plugin<TracerInitializer.Configuration> {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(TracerInitializer.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(TracerInitializer.class);
     static final Endpoint ENDPOINT = Platform.get().localEndpoint();
 
     @Override
