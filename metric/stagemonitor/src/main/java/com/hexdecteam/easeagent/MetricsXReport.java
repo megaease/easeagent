@@ -62,8 +62,6 @@ public class MetricsXReport implements Plugin<MetricsXReport.Configuration> {
 
         String application() {return "unknown";}
 
-        String instance() {return "unknown";}
-
         String host_ipv4() {
             return LocalhostAddress.getLocalhostAddr().getHostAddress();
         }
@@ -106,7 +104,6 @@ public class MetricsXReport implements Plugin<MetricsXReport.Configuration> {
             map.put("system", conf.system());
             map.put("hostname", conf.hostname());
             map.put("hostipv4", conf.host_ipv4());
-            map.put("instance", conf.instance());
             map.put("application", conf.application());
             return map;
         }

@@ -97,7 +97,6 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
         map.put("system", conf.system());
         map.put("hostname", conf.hostname());
         map.put("hostipv4", conf.host_ipv4());
-        map.put("instance", conf.instance());
         map.put("application", conf.application());
         return map;
     }
@@ -108,8 +107,6 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
         String system() { return UUID.randomUUID().toString(); }
 
         String application() {return null;}
-
-        String instance() {return null;}
 
         String host_ipv4() {
             return LocalhostAddress.getLocalhostAddr().getHostAddress();
