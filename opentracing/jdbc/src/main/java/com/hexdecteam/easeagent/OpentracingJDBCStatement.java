@@ -9,6 +9,7 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
+import java.net.URI;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
@@ -63,12 +64,16 @@ public class OpentracingJDBCStatement extends Transformation<Plugin.Noop> {
             ForwardDetection.Mark.clear(key);
 
             try {
+                final String url = stmt.getConnection().getMetaData().getURL();
+                final URI uri = URI.create(url.substring(5));
                 pop().log("cr")
                      .setTag("component", "jdbc")
                      .setTag("span.kind", "client")
-                     .setTag("jdbc.url", stmt.getConnection().getMetaData().getURL())
+                     .setTag("jdbc.url", url)
                      .setTag("jdbc.sql", sql)
                      .setTag("jdbc.result", error == null)
+                     .setTag("has.error", error != null)
+                     .setTag("remote.address", uri.getHost() + ":" + (uri.getPort() == -1 ? 3306 : uri.getPort()))
                      .finish();
             } catch (SQLException ignore) { }
         }

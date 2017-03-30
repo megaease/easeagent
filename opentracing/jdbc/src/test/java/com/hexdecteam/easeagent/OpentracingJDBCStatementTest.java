@@ -37,7 +37,9 @@ public class OpentracingJDBCStatementTest {
                         BinaryAnnotation.create("span.kind", "client", endpoint),
                         BinaryAnnotation.create("jdbc.url", JDBC_URL, endpoint),
                         BinaryAnnotation.create("jdbc.sql", "sql", endpoint),
-                        BinaryAnnotation.create("jdbc.result", "true", endpoint)
+                        BinaryAnnotation.create("jdbc.result", "true", endpoint),
+                        BinaryAnnotation.create("has.error", "false", endpoint),
+                        BinaryAnnotation.create("remote.address", "localhost:3306", endpoint)
                 ));
             }
         });

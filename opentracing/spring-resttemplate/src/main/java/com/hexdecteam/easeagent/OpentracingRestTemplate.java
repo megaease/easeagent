@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -79,12 +80,15 @@ public class OpentracingRestTemplate extends Transformation<Plugin.Noop> {
             ForwardDetection.Mark.clear(key);
 
             try {
+                final URI uri = request.getURI();
                 pop().log("cr")
                      .setTag("component", "spring-rest-template")
                      .setTag("span.kind", "client")
-                     .setTag("http.url", request.getURI().toString())
+                     .setTag("http.url", uri.toString())
                      .setTag("http.method", request.getMethod().toString())
                      .setTag("http.status_code", response.getRawStatusCode())
+                     .setTag("has.error", response.getRawStatusCode() >= 400)
+                     .setTag("remote.address", uri.getHost() + (uri.getPort() == -1 ? "" : ":" + uri.getPort()))
                      .finish();
             } catch (Exception ignore) {
                 // never be here

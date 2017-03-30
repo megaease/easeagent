@@ -46,7 +46,8 @@ public class OpentracingJedis extends Transformation<Plugin.Noop> {
                                                        .withTag("span.kind", "client")
                                                        .withTag("redis.host", conn.getHost())
                                                        .withTag("redis.port", conn.getPort())
-                                                       .withTag("redis.cmd", command.name());
+                                                       .withTag("redis.cmd", command.name())
+                                                       .withTag("remote.address", conn.getHost() + ":" + conn.getPort());
             final Span parent = TraceContext.peek();
             push((parent == null ? builder : builder.asChildOf(parent)).start().log("cs"));
 
@@ -58,7 +59,10 @@ public class OpentracingJedis extends Transformation<Plugin.Noop> {
     static class ProbeRead {
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         static void exit(@Advice.Thrown Throwable error) {
-            pop().log("cr").setTag("redis.result", error == null).finish();
+            pop().log("cr")
+                 .setTag("redis.result", error == null)
+                 .setTag("has.error", error != null)
+                 .finish();
         }
     }
 }

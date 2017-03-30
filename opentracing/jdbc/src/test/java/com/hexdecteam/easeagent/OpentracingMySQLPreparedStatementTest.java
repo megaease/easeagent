@@ -39,7 +39,9 @@ public class OpentracingMySQLPreparedStatementTest {
                         BinaryAnnotation.create("span.kind", "client", endpoint),
                         BinaryAnnotation.create("jdbc.url", JDBC_URL, endpoint),
                         BinaryAnnotation.create("jdbc.sql", "sql", endpoint),
-                        BinaryAnnotation.create("jdbc.result", "false", endpoint)
+                        BinaryAnnotation.create("jdbc.result", "false", endpoint),
+                        BinaryAnnotation.create("has.error", "true", endpoint),
+                        BinaryAnnotation.create("remote.address", "localhost:3306", endpoint)
                 ));
             }
         });

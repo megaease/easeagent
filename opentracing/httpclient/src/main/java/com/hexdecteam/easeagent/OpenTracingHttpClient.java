@@ -10,6 +10,7 @@ import net.bytebuddy.agent.builder.AgentBuilder.Transformer.ForAdvice;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
@@ -72,6 +73,7 @@ public class OpenTracingHttpClient extends Transformation<Plugin.Noop> {
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         public static void exit(@ForwardDetection.Key String key,
                                 @Advice.Enter boolean marked,
+                                @Advice.Argument(0) HttpHost host,
                                 @Advice.Argument(1) HttpRequest request,
                                 @Advice.Return HttpResponse response) {
             if (!marked) return;
@@ -84,6 +86,8 @@ public class OpenTracingHttpClient extends Transformation<Plugin.Noop> {
                  .setTag("http.url", request.getRequestLine().getUri())
                  .setTag("http.method", request.getRequestLine().getMethod())
                  .setTag("http.status_code", response.getStatusLine().getStatusCode())
+                 .setTag("remote.address", host.getHostName() + (host.getPort() == -1 ? "" : ":" + host.getPort()))
+                 .setTag("has.error", response.getStatusLine().getStatusCode() >= 400)
                  .finish();
         }
 

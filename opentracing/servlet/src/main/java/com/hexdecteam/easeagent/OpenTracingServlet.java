@@ -106,6 +106,8 @@ public class OpenTracingServlet extends Transformation<Plugin.Noop> {
                  .setTag("peer.hostname", request.getRemoteHost())
                  .setTag("peer.ipv4", request.getRemoteAddr())
                  .setTag("peer.port", request.getRemotePort())
+                 .setTag("has.error", response.getStatus() >= 400)
+                 .setTag("remote.address", request.getRemoteHost() + ":" + request.getRemotePort())
                  .finish();
         }
     }
