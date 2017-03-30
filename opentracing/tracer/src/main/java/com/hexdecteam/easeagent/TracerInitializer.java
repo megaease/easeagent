@@ -59,7 +59,7 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
                 return Codec.JSON.writeSpan(span.toBuilder()
                                                 .addBinaryAnnotation(create("system", conf.system(), endpoint))
                                                 .addBinaryAnnotation(create("application", conf.application(), endpoint))
-                                                .addBinaryAnnotation(create("host_ipv4", conf.host_ipv4(), endpoint))
+                                                .addBinaryAnnotation(create("hostipv4", conf.host_ipv4(), endpoint))
                                                 .addBinaryAnnotation(create("hostname", conf.hostname(), endpoint))
                                                 .build());
             }
