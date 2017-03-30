@@ -35,6 +35,11 @@ public class GatewaySenderTest {
                     }
 
                     @Override
+                    String application() {
+                        return "app";
+                    }
+
+                    @Override
                     public boolean send_compression() {
                         return false;
                     }

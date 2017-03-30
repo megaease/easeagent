@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Map;
@@ -114,11 +112,7 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
         String instance() {return null;}
 
         String host_ipv4() {
-            try {
-                return InetAddress.getByName(hostname()).getHostAddress();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+            return LocalhostAddress.getLocalhostAddr().getHostAddress();
         }
 
         String hostname() {

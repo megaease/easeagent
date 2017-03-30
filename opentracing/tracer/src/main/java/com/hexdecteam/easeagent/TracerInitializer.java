@@ -36,7 +36,7 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
         final Reporter<Span> reporter = AsyncReporter.builder(new GatewaySender(conf))
                                                      .queuedMaxSpans(conf.reporter_queued_max_spans())
                                                      .messageTimeout(conf.reporter_message_timeout_seconds(), SECONDS)
-                                                     .build(encoder(conf.system()));
+                                                     .build(encoder(conf));
         final Tracer tracer = Tracer.newBuilder()
                                     .localServiceName(conf.service_name())
                                     .traceId128Bit(conf.trace_id_128b())
@@ -47,7 +47,7 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
         TraceContext.init(BraveTracer.wrap(tracer));
     }
 
-    private Encoder<Span> encoder(final String system) {
+    private Encoder<Span> encoder(final Configuration conf) {
         return new Encoder<Span>() {
             @Override
             public Encoding encoding() {
@@ -57,7 +57,10 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
             @Override
             public byte[] encode(Span span) {
                 return Codec.JSON.writeSpan(span.toBuilder()
-                                                .addBinaryAnnotation(create("system", system, ENDPOINT))
+                                                .addBinaryAnnotation(create("system", conf.system(), ENDPOINT))
+                                                .addBinaryAnnotation(create("application", conf.application(), ENDPOINT))
+                                                .addBinaryAnnotation(create("host_ipv4", conf.host_ipv4(), ENDPOINT))
+                                                .addBinaryAnnotation(create("hostname", conf.hostname(), ENDPOINT))
                                                 .build());
             }
         };
@@ -66,47 +69,60 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
     @ConfigurationDecorator.Binding("opentracing.tracer")
     static abstract class Configuration {
 
-        public abstract String send_endpoint();
+        abstract String send_endpoint();
 
-        public abstract String service_name();
+        abstract String system();
 
-        public abstract String system();
+        abstract String application();
 
-        public float sample_rate() {
+        String service_name() {
+            return system() + "-" + application() + "-" + hostname();
+        }
+
+        float sample_rate() {
             return 1f;
         }
 
-        public boolean send_compression() {
+        boolean send_compression() {
             return false;
         }
 
-        public int reporter_queued_max_spans() {
+        int reporter_queued_max_spans() {
             return 10000;
         }
 
-        public long reporter_message_timeout_seconds() {
+        long reporter_message_timeout_seconds() {
             return 1;
         }
 
-        public boolean trace_id_128b() {
+        boolean trace_id_128b() {
             return false;
         }
 
-        public int message_max_bytes() {
+        int message_max_bytes() {
             return 5 * 1024 * 10240;
         }
 
-        public int connect_timeout() {
+        int connect_timeout() {
             return 10 * 1000;
         }
 
-        public int read_timeout() {
+        int read_timeout() {
             return 60 * 1000;
         }
 
-        public String user_agent() {
+        String user_agent() {
             return "easeagent/0.1.0";
         }
+
+        String host_ipv4() {
+            return LocalhostAddress.getLocalhostAddr().getHostAddress();
+        }
+
+        String hostname() {
+            return LocalhostAddress.getLocalhostName();
+        }
+
     }
 
     private static class GatewaySender implements Sender {
