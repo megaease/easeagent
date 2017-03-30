@@ -28,7 +28,6 @@ import static zipkin.BinaryAnnotation.create;
 public class TracerInitializer implements Plugin<TracerInitializer.Configuration> {
 
     static final Logger LOGGER = LoggerFactory.getLogger(TracerInitializer.class);
-    static final Endpoint ENDPOINT = Platform.get().localEndpoint();
 
     @Override
     public void hook(final Configuration conf, Instrumentation inst, Subscription subs) {
@@ -48,6 +47,7 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
     }
 
     private Encoder<Span> encoder(final Configuration conf) {
+        final Endpoint endpoint = Platform.get().localEndpoint().toBuilder().serviceName(conf.service_name()).build();
         return new Encoder<Span>() {
             @Override
             public Encoding encoding() {
@@ -57,10 +57,10 @@ public class TracerInitializer implements Plugin<TracerInitializer.Configuration
             @Override
             public byte[] encode(Span span) {
                 return Codec.JSON.writeSpan(span.toBuilder()
-                                                .addBinaryAnnotation(create("system", conf.system(), ENDPOINT))
-                                                .addBinaryAnnotation(create("application", conf.application(), ENDPOINT))
-                                                .addBinaryAnnotation(create("host_ipv4", conf.host_ipv4(), ENDPOINT))
-                                                .addBinaryAnnotation(create("hostname", conf.hostname(), ENDPOINT))
+                                                .addBinaryAnnotation(create("system", conf.system(), endpoint))
+                                                .addBinaryAnnotation(create("application", conf.application(), endpoint))
+                                                .addBinaryAnnotation(create("host_ipv4", conf.host_ipv4(), endpoint))
+                                                .addBinaryAnnotation(create("hostname", conf.hostname(), endpoint))
                                                 .build());
             }
         };
