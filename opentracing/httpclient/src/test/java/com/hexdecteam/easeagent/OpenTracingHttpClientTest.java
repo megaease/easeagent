@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import static com.hexdecteam.easeagent.TraceContext.init;
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -34,13 +33,14 @@ public class OpenTracingHttpClientTest {
             @Override
             public void report(Span span) {
                 final Endpoint endpoint = Platform.get().localEndpoint();
-                assertThat(span.name, is("http_send"));
                 assertThat(span.binaryAnnotations, hasItems(
                         BinaryAnnotation.create("component", "apache-http-client", endpoint),
                         BinaryAnnotation.create("span.kind", "client", endpoint),
                         BinaryAnnotation.create("http.url", "http://www.easeteam.com/index", endpoint),
                         BinaryAnnotation.create("http.method", "GET", endpoint),
-                        BinaryAnnotation.create("http.status_code", "200", endpoint)
+                        BinaryAnnotation.create("http.status_code", "200", endpoint),
+                        BinaryAnnotation.create("remote.address", "www.easeteam.com", endpoint),
+                        BinaryAnnotation.create("has.error", "false", endpoint)
                 ));
             }
         });

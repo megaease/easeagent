@@ -10,6 +10,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.sql.Statement;
 
 import static com.hexdecteam.easeagent.TraceContext.*;
@@ -52,12 +53,17 @@ public class OpentracingH2PreparedStatement extends Transformation<Plugin.Noop> 
                 field.setAccessible(true);
                 final String sql = field.get(stmt).toString();
 
+                final String url = stmt.getConnection().getMetaData().getURL();
+                final URI uri = URI.create(url.substring(5));
+
                 pop().log("cr")
                      .setTag("component", "jdbc")
                      .setTag("span.kind", "client")
-                     .setTag("jdbc.url", stmt.getConnection().getMetaData().getURL())
+                     .setTag("jdbc.url", url)
                      .setTag("jdbc.sql", sql)
                      .setTag("jdbc.result", error == null)
+                     .setTag("has.error", error != null)
+                     .setTag("remote.address", uri.getHost() == null ? "null" : uri.getPort() + ":" + (uri.getPort() == -1 ? 9092 : uri.getPort()))
                      .finish();
             } catch (Exception ignore) { }
 

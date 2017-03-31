@@ -12,6 +12,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.UUID;
@@ -72,12 +73,16 @@ public class OpentracingMySQLPreparedStatement extends Transformation<Plugin.Noo
             try {
                 final Method method = stmt.getClass().getMethod("asSql");
                 final String sql = method.invoke(stmt).toString();
+                final String url = stmt.getConnection().getMetaData().getURL();
+                final URI uri = URI.create(url.substring(5));
                 pop().log("cr")
                      .setTag("component", "jdbc")
                      .setTag("span.kind", "client")
-                     .setTag("jdbc.url", stmt.getConnection().getMetaData().getURL())
+                     .setTag("jdbc.url", url)
                      .setTag("jdbc.sql", sql)
                      .setTag("jdbc.result", error == null)
+                     .setTag("has.error", error != null)
+                     .setTag("remote.address", uri.getHost() + ":" + (uri.getPort() == -1 ? 3306 : uri.getPort()))
                      .finish();
             } catch (Exception ignore) { }
 

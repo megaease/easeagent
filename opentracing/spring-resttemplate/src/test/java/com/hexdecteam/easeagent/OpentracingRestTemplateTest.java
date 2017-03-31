@@ -41,7 +41,9 @@ public class OpentracingRestTemplateTest {
                         BinaryAnnotation.create("span.kind", "client", endpoint),
                         BinaryAnnotation.create("http.url", "http://www.easeteam.com/index", endpoint),
                         BinaryAnnotation.create("http.method", "GET", endpoint),
-                        BinaryAnnotation.create("http.status_code", "200", endpoint)
+                        BinaryAnnotation.create("http.status_code", "200", endpoint),
+                        BinaryAnnotation.create("has.error", "false", endpoint),
+                        BinaryAnnotation.create("remote.address", "www.easeteam.com", endpoint)
                 ));
             }
         };

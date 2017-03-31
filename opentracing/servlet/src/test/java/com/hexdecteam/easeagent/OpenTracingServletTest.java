@@ -45,7 +45,9 @@ public class OpenTracingServletTest {
                         BinaryAnnotation.create("http.status_code", "200", endpoint),
                         BinaryAnnotation.create("peer.hostname", "host", endpoint),
                         BinaryAnnotation.create("peer.ipv4", "addr", endpoint),
-                        BinaryAnnotation.create("peer.port", "12306", endpoint)
+                        BinaryAnnotation.create("peer.port", "12306", endpoint),
+                        BinaryAnnotation.create("has.error", "false", endpoint),
+                        BinaryAnnotation.create("remote.address", "host:12306", endpoint)
                 ));
             }
         };

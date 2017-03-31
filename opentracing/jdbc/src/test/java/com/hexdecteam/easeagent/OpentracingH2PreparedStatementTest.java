@@ -41,7 +41,9 @@ public class OpentracingH2PreparedStatementTest {
                         BinaryAnnotation.create("span.kind", "client", endpoint),
                         BinaryAnnotation.create("jdbc.url", JDBC_URL, endpoint),
                         BinaryAnnotation.create("jdbc.sql", SQL, endpoint),
-                        BinaryAnnotation.create("jdbc.result", "true", endpoint)
+                        BinaryAnnotation.create("jdbc.result", "true", endpoint),
+                        BinaryAnnotation.create("has.error", "false", endpoint),
+                        BinaryAnnotation.create("remote.address", "null", endpoint)
                 ));
             }
         });

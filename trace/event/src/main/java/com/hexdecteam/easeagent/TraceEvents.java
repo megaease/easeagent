@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Map;
@@ -99,7 +97,6 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
         map.put("system", conf.system());
         map.put("hostname", conf.hostname());
         map.put("hostipv4", conf.host_ipv4());
-        map.put("instance", conf.instance());
         map.put("application", conf.application());
         return map;
     }
@@ -111,14 +108,8 @@ public class TraceEvents implements Plugin<TraceEvents.Configuration> {
 
         String application() {return null;}
 
-        String instance() {return null;}
-
         String host_ipv4() {
-            try {
-                return InetAddress.getByName(hostname()).getHostAddress();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+            return LocalhostAddress.getLocalhostAddr().getHostAddress();
         }
 
         String hostname() {

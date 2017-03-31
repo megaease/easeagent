@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -64,14 +62,8 @@ public class MetricsXReport implements Plugin<MetricsXReport.Configuration> {
 
         String application() {return "unknown";}
 
-        String instance() {return "unknown";}
-
         String host_ipv4() {
-            try {
-                return InetAddress.getByName(hostname()).getHostAddress();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+            return LocalhostAddress.getLocalhostAddr().getHostAddress();
         }
 
         String hostname() {
@@ -112,7 +104,6 @@ public class MetricsXReport implements Plugin<MetricsXReport.Configuration> {
             map.put("system", conf.system());
             map.put("hostname", conf.hostname());
             map.put("hostipv4", conf.host_ipv4());
-            map.put("instance", conf.instance());
             map.put("application", conf.application());
             return map;
         }

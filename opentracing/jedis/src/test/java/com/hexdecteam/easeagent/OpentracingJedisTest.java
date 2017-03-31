@@ -50,7 +50,9 @@ public class OpentracingJedisTest {
                         BinaryAnnotation.create("span.kind", "client", endpoint),
                         BinaryAnnotation.create("redis.host", "localhost", endpoint),
                         BinaryAnnotation.create("redis.port", String.valueOf(port), endpoint),
-                        BinaryAnnotation.create("redis.result", "true", endpoint)
+                        BinaryAnnotation.create("redis.result", "true", endpoint),
+                        BinaryAnnotation.create("has.error", "false", endpoint),
+                        BinaryAnnotation.create("remote.address", "localhost:" + port, endpoint)
                 ));
             }
         });
