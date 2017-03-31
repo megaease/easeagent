@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>parent</artifactId>
-        <groupId>com.hexdecteam.easeagent</groupId>
+        <groupId>com.megaease.easeagent</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -22,7 +22,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
             <scope>provided</scope>
@@ -43,7 +43,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>test</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>

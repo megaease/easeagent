@@ -19,19 +19,19 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>com.hexdecteam.easeagent:*</include>
+                <include>com.megaease.easeagent:*</include>
                 <include>org.apache.logging.log4j:*</include>
                 <include>org.slf4j:slf4j-api</include>
                 <include>io.opentracing:opentracing-api</include>
             </includes>
             <excludes>
-                <exclude>com.hexdecteam.easeagent:agent-loader</exclude>
+                <exclude>com.megaease.easeagent:agent-loader</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
             <outputDirectory/>
             <includes>
-                <include>com.hexdecteam.easeagent:agent-loader</include>
+                <include>com.megaease.easeagent:agent-loader</include>
             </includes>
             <unpack>true</unpack>
         </dependencySet>

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>parent</artifactId>
-        <groupId>com.hexdecteam.easeagent</groupId>
+        <groupId>com.megaease.easeagent</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -14,37 +14,37 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>agent-loader</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>agent-bootstrap</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>metric-event</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>metric-spi</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>trace-event</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hexdecteam.easeagent</groupId>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>trace-stack</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -77,8 +77,8 @@
                     </descriptors>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>com.hexdecteam.easeagent.Main</Premain-Class>
-                            <Bootstrap-Class>com.hexdecteam.easeagent.Bootstrap</Bootstrap-Class>
+                            <Premain-Class>com.megaease.easeagent.Main</Premain-Class>
+                            <Bootstrap-Class>com.megaease.easeagent.Bootstrap</Bootstrap-Class>
                             <Logging-Property>log4j.configurationFile</Logging-Property>
                         </manifestEntries>
                     </archive>
@@ -106,32 +106,32 @@
             </properties>
             <dependencies>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>metric-stagemonitor</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>metric-servlet</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>trace-servlet</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>metric-jdbc</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>trace-jdbc</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>log4j2-http-appender</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
@@ -144,12 +144,12 @@
             </properties>
             <dependencies>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>metric-annotation</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>metric-standard</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
@@ -162,32 +162,32 @@
             </properties>
             <dependencies>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>opentracing-servlet</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>opentracing-spring-resttemplate</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>opentracing-httpclient</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>opentracing-jdbc</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>opentracing-jedis</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.hexdecteam.easeagent</groupId>
+                    <groupId>com.megaease.easeagent</groupId>
                     <artifactId>opentracing-tracer</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
