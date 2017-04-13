@@ -48,7 +48,7 @@ class Register {
         try {
             parent.getClass().getDeclaredMethod("add", ClassLoader.class).invoke(parent, external);
         } catch (Exception e) {
-            LOGGER.warn("This may be a bug if it was running in production", e);
+            LOGGER.warn("{}, this may be a bug if it was running in production", e.toString());
         }
         return parent;
     }
