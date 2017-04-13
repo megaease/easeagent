@@ -19,7 +19,7 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>com.megaease.easeagent:build-all</include>
+                <include>com.megaease.easeagent:build</include>
                 <include>com.megaease.easeagent:log4j2</include>
                 <include>org.apache.logging.log4j:*</include>
             </includes>

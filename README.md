@@ -24,7 +24,7 @@ export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j2.xml -javaagent
 # Build from source
 
 ```
-mvn clean package -am -pl build/all
+mvn clean package -am -pl build
 ```
 
 A generated `./build/all/target/easeagent-sm.jar` is the java agent jar with all the dependencies.

@@ -1,5 +1,5 @@
 #! /bin/bash
-# After `mvn clean package -am -pl build/all`, this script can help you to release `easeagent-dep.jar` to github.
+# After `mvn clean package -am -pl build`, this script can help you to release `easeagent-dep.jar` to github.
 
 RELEASE_URL="https://api.github.com/repos/hexdecteam/stagemonitor/releases/5497247"
 UPLOAD_URL="https://uploads.github.com/repos/hexdecteam/stagemonitor/releases/5497247/assets?name=easeagent-sm.jar"
