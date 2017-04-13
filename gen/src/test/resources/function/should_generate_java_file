@@ -1,0 +1,4 @@
+package com.megaease.easeagent.gen;
+
+public class GenBar extends Bar {
+}

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>parent</artifactId>
+        <groupId>com.megaease.easeagent</groupId>
+        <version>0.2.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>log4j2</artifactId>
+
+    <properties>
+        <version.log4j>2.8.2</version.log4j>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${version.log4j}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${version.log4j}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dreamhead</groupId>
+            <artifactId>moco-core</artifactId>
+            <version>0.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <executions>
+                    <execution>
+                        <id>log4j-plugin-processor</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <proc>only</proc>
+                            <annotationProcessors>
+                                <annotationProcessor>org.apache.logging.log4j.core.config.plugins.processor.PluginProcessor</annotationProcessor>
+                            </annotationProcessors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

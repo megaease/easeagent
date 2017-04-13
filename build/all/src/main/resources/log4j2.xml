@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="address">${env:GATEWAY_ADDR:-https://gateway.easeapm.com:10443}</Property>
+        <Property name="version">${env:GATEWAY_VER:-v1}</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="RollingFile" fileName="logs/easeagent.log" filePattern="logs/easeagent-%d{MM-dd-yyyy}.log"
+                     ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>%d [%10.10t] %-p %10.10c{1} - %msg%n</Pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy />
+        </RollingFile>
+        <Http name="post-requests" uri="${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
+        <Http name="post-metrics" uri="${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+        <Logger name="metrics" level="info" additivity="false">
+            <AppenderRef ref="post-metrics"/>
+        </Logger>
+        <Logger name="requests" level="info" additivity="false">
+            <AppenderRef ref="post-requests"/>
+        </Logger>
+    </Loggers>
+</Configuration>

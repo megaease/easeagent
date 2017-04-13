@@ -1,0 +1,12 @@
+class GenFoo {
+  final com.typesafe.config.Config conf;
+
+  public GenFoo(com.typesafe.config.Config conf) {
+    this.conf = conf;
+  }
+
+  @java.lang.Override
+  java.util.List<java.lang.String> bar() {
+    return conf.getStringList("bar");
+  }
+}
