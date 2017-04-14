@@ -53,8 +53,8 @@ public abstract class MeasureJdbcGetConnection implements Transformation {
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.Enter long begin, @Advice.Return Connection conn)  {
-            if (!lock.release(method)) return;
+        void exit(@Advice.Origin String method, @Advice.Enter long begin, @Advice.Return Connection conn) {
+            if (!lock.release(method) || conn == null) return;
 
             try {
                 final DatabaseMetaData meta = conn.getMetaData();
