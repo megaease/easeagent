@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -57,12 +58,15 @@ public abstract class TraceJdbcStatement implements Transformation {
         @Override
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         void exit(@Advice.Origin String method, @Advice.This Statement stmt, @Advice.Thrown Throwable error, @Advice.Argument(0) String sql) {
-            exit(method, stmt, error, sql);
+            try {
+                super.exit(method, stmt, error, sql);
+            } catch (SQLException e) {
+                logger.error("Unexpected", e);
+            }
         }
     }
 
     static class ExecutePreparedSql extends AbstractExecuteSql {
-        private final Logger logger = LoggerFactory.getLogger(getClass());
 
         @Injection.Autowire
         ExecutePreparedSql(CallTrace trace, Tracer tracer) {
@@ -78,14 +82,15 @@ public abstract class TraceJdbcStatement implements Transformation {
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         void exit(@Advice.Origin String method, @Advice.This Statement stmt, @Advice.Thrown Throwable error) {
             try {
-                exit(method, stmt, error, stmt.getClass().getMethod("asSql").invoke(stmt).toString());
+                super.exit(method, stmt, error, stmt.getClass().getMethod("asSql").invoke(stmt).toString());
             } catch (Exception e) {
-                logger.error("Failed to get sql", e);
+                logger.error("Unexpected", e);
             }
         }
     }
 
     static abstract class AbstractExecuteSql {
+        final Logger logger;
         final CallTrace trace;
         final ForwardLock lock;
         final Tracer tracer;
@@ -94,6 +99,7 @@ public abstract class TraceJdbcStatement implements Transformation {
             this.trace = trace;
             this.lock = new ForwardLock();
             this.tracer = tracer;
+            logger = LoggerFactory.getLogger(getClass());
         }
 
         void enter(String method) {
@@ -102,7 +108,7 @@ public abstract class TraceJdbcStatement implements Transformation {
             trace.push(tracer.newChild(trace.peek().<Span>context().context()).start());
         }
 
-        void exit(String method, Statement stmt, Throwable error, String sql) throws Exception {
+        void exit(String method, Statement stmt, Throwable error, String sql) throws SQLException {
             if (!lock.release(method) || trace.peek() == null) return;
 
             final String url = stmt.getConnection().getMetaData().getURL();
