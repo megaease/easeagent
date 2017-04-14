@@ -68,7 +68,6 @@ public abstract class TraceHttpClient implements Transformation {
                   @Advice.Return HttpResponse res, @Advice.Thrown Throwable error) {
             if (!lock.release(method) || trace.peek() == null) return;
 
-            final int statusCode = res.getStatusLine().getStatusCode();
             trace.pop().<Span>context()
                     .name("http_send")
                     .kind(Span.Kind.CLIENT)
@@ -77,9 +76,9 @@ public abstract class TraceHttpClient implements Transformation {
                     .tag("http.url", req.getRequestLine().getUri())
                     .tag("http.method", req.getRequestLine().getMethod())
                     // An error means request did not send out.
-                    .tag("http.status_code", error == null ? String.valueOf(statusCode) : "999")
+                    .tag("http.status_code", error == null ? String.valueOf(res.getStatusLine().getStatusCode()) : "999")
                     .tag("remote.address", host.getHostName() + (host.getPort() == -1 ? "" : ":" + host.getPort()))
-                    .tag("has.error", error == null ? String.valueOf(statusCode >= 400) : "true")
+                    .tag("has.error", error == null ? String.valueOf(res.getStatusLine().getStatusCode() >= 400) : "true")
                     .finish();
 
         }
