@@ -114,13 +114,4 @@ public class TraceJedisTest {
         return Tracer.newBuilder().reporter(reporter).build();
     }
 
-    private Map<String, Object> beans(Object... objects) {
-        return from(objects).uniqueIndex(new Function<Object, String>() {
-            @Override
-            public String apply(Object input) {
-                return input.getClass().getName();
-            }
-        });
-    }
-
 }
