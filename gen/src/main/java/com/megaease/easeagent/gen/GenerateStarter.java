@@ -2,10 +2,7 @@ package com.megaease.easeagent.gen;
 
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.Transformation;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 
 import javax.lang.model.element.Modifier;
 import java.lang.instrument.Instrumentation;
@@ -25,13 +22,14 @@ class GenerateStarter {
     JavaFile apply() {
         final MethodSpec main = MethodSpec.methodBuilder("premain")
                                           .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                                          .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "unchecked").build())
                                           .addParameter(String.class, "args")
                                           .addParameter(Instrumentation.class, "inst")
                                           .addException(Exception.class)
                                           .returns(TypeName.VOID)
-                                          .addStatement("final $T<Class<?>> providers = $T.<Class<?>>asList($L)",
+                                          .addStatement("final $T<Class<?>> providers = $T.<Class<?>>asList(\n$L\n)",
                                                         Iterable.class, Arrays.class, providerClasses)
-                                          .addStatement("@SuppressWarnings(\"unchecked\") final $T<Class<? extends $T>> transformations = $T.<Class<? extends $T>>asList($L)",
+                                          .addStatement("final $T<Class<? extends $T>> transformations = $T.<Class<? extends $T>>asList(\n$L\n)",
                                                         Iterable.class, Transformation.class, Arrays.class, Transformation.class, transformationClasses)
                                           .addStatement("$T.start(args, inst, providers, transformations)", Bootstrap.class)
                                           .build();

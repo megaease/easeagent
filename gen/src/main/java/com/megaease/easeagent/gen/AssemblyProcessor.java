@@ -117,7 +117,7 @@ public class AssemblyProcessor extends AbstractProcessor {
         }
     };
 
-    private static final Joiner ON_COMMA = Joiner.on(",");
+    private static final Joiner ON_COMMA = Joiner.on(",\n");
 
     private static final Iterable<? extends GenerateSpecFactory> FOR_PROVIDER = singleton(new GenerateSpecFactory() {
         @Override

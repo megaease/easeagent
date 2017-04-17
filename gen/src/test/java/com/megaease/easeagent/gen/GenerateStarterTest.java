@@ -17,13 +17,19 @@ public class GenerateStarterTest {
                                               "import java.lang.Exception;\n" +
                                               "import java.lang.Iterable;\n" +
                                               "import java.lang.String;\n" +
+                                              "import java.lang.SuppressWarnings;\n" +
                                               "import java.lang.instrument.Instrumentation;\n" +
                                               "import java.util.Arrays;\n" +
                                               "\n" +
                                               "public final class StartBootstrap {\n" +
+                                              "  @SuppressWarnings(\"unchecked\")\n" +
                                               "  public static void premain(String args, Instrumentation inst) throws Exception {\n" +
-                                              "    final Iterable<Class<?>> providers = Arrays.<Class<?>>asList(Provider.class);\n" +
-                                              "    @SuppressWarnings(\"unchecked\") final Iterable<Class<? extends Transformation>> transformations = Arrays.<Class<? extends Transformation>>asList(Transformation.class);\n" +
+                                              "    final Iterable<Class<?>> providers = Arrays.<Class<?>>asList(\n" +
+                                              "        Provider.class\n" +
+                                              "        );\n" +
+                                              "    final Iterable<Class<? extends Transformation>> transformations = Arrays.<Class<? extends Transformation>>asList(\n" +
+                                              "        Transformation.class\n" +
+                                              "        );\n" +
                                               "    Bootstrap.start(args, inst, providers, transformations);\n" +
                                               "  }\n" +
                                               "}\n"));
