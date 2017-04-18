@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 @Plugin(name = "Http", category = "Core", elementType = Appender.ELEMENT_TYPE, printObject = true)
 public class PostAppender extends AbstractAppender {
 
-    public static final Charset UTF8 = Charset.forName("UTF-8");
+    private static final Charset UTF8 = Charset.forName("UTF-8");
     private final OkHttpClient client;
     private final Request.Builder builder;
     private final MediaType contentType;
