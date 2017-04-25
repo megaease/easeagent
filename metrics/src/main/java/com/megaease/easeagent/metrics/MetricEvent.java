@@ -84,11 +84,6 @@ class MetricEvent {
             out.writeFieldValue(SEPARATOR, "m1_rate", metered.getOneMinuteRate() * factor);
             out.writeFieldValue(SEPARATOR, "m5_rate", metered.getFiveMinuteRate() * factor);
             out.writeFieldValue(SEPARATOR, "m15_rate", metered.getFifteenMinuteRate() * factor);
-            // TODO remove blew and count by ES
-            out.writeFieldValue(SEPARATOR, "m1_count", 0);
-            out.writeFieldValue(SEPARATOR, "m5_count", 0);
-            out.writeFieldValue(SEPARATOR, "m15_count", 0);
-
         }
 
         private void serialize(SerializeWriter out, Snapshot snapshot, double factor) {
