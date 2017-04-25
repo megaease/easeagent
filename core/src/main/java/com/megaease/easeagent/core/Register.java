@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +43,7 @@ class Register {
         }
     }
 
-    private ClassLoader compound(ClassLoader parent, ClassLoader external) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    private ClassLoader compound(ClassLoader parent, ClassLoader external) throws Exception {
         try {
             parent.getClass().getDeclaredMethod("add", ClassLoader.class).invoke(parent, external);
         } catch (Exception e) {
@@ -125,7 +124,8 @@ class Register {
                     @Override
                     public QualifiedBean get() {
                         final String append = Strings.isNullOrEmpty(qualifier) ? "" : "[" + qualifier + "]";
-                        final String msg = String.format("Miss bean %s%s for %s", aClass.getCanonicalName(), append, cons.getDeclaringClass());
+                        final String msg = String.format("Miss bean %s%s for %s",
+                                                         aClass.getCanonicalName(), append, cons.getDeclaringClass());
                         throw new IllegalStateException(msg);
                     }
                 });

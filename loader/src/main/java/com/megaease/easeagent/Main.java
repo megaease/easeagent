@@ -90,17 +90,16 @@ public class Main {
     }
 
     private static File getArchiveFileContains(Class<?> klass) throws URISyntaxException {
-        ProtectionDomain protectionDomain = klass.getProtectionDomain();
-        CodeSource codeSource = protectionDomain.getCodeSource();
-        URI location = (codeSource == null ? null : codeSource.getLocation().toURI());
-        String path = (location == null ? null : location.getSchemeSpecificPart());
+        final ProtectionDomain protectionDomain = klass.getProtectionDomain();
+        final CodeSource codeSource = protectionDomain.getCodeSource();
+        final URI location = (codeSource == null ? null : codeSource.getLocation().toURI());
+        final String path = (location == null ? null : location.getSchemeSpecificPart());
         if (path == null) {
             throw new IllegalStateException("Unable to determine code source archive");
         }
-        File root = new File(path);
+        final File root = new File(path);
         if (!root.exists() || root.isDirectory()) {
-            throw new IllegalStateException(
-                    "Unable to determine code source archive from " + root);
+            throw new IllegalStateException("Unable to determine code source archive from " + root);
         }
         return root;
     }
@@ -122,9 +121,7 @@ public class Main {
                 for (ClassLoader external : externals) {
                     try {
                         final Class<?> aClass = external.loadClass(name);
-                        if (resolve) {
-                            resolveClass(aClass);
-                        }
+                        if (resolve) resolveClass(aClass);
                         return aClass;
                     } catch (ClassNotFoundException ignore) { }
                 }
