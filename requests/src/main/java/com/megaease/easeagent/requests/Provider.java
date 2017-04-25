@@ -17,7 +17,7 @@ abstract class Provider {
 
     @Injection.Bean
     public Sampler sampler() {
-        return CountingSampler.create((float) capture_rate());
+        return capture_rate() > 0.0 ? CountingSampler.create((float) capture_rate()) : JmxSampler.create();
     }
 
     @Injection.Bean
