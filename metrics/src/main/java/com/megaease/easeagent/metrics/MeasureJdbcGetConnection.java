@@ -34,7 +34,6 @@ public abstract class MeasureJdbcGetConnection implements Transformation {
     static class GetConnection {
         static final String GET_JDBC_CONNECTION = "get_jdbc_connection";
         static final String URL = "url";
-        static final String ALL = "All";
 
         private final ForwardLock lock;
         private final Metrics metrics;

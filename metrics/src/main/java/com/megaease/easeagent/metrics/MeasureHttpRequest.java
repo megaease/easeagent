@@ -18,12 +18,10 @@ public abstract class MeasureHttpRequest extends HttpServletService {
     protected abstract Definition.Transformer service(ElementMatcher<? super MethodDescription> matcher);
 
     static class Service {
-        private static final String ALL = "All";
         private static final String REQUEST_THROUGHPUT = "request_throughput";
         private static final String REQUEST_NAME = "request_name";
         private static final String URL = "url";
         private static final String HTTP_CODE = "http_code";
-        private static final String REQUEST_ERROR_THROUGHPUT = "request_error_throughput";
 
         private final CallTrace trace;
         private final Metrics metrics;
@@ -53,15 +51,6 @@ public abstract class MeasureHttpRequest extends HttpServletService {
             final String code = Integer.toString(status);
 
             metrics.meter(REQUEST_THROUGHPUT).tag(REQUEST_NAME, signature).tag(URL, uri).tag(HTTP_CODE, code).get().mark();
-
-            // TODO lazy calculation in streaming
-            metrics.meter(REQUEST_THROUGHPUT).tag(REQUEST_NAME, signature).tag(URL, uri).get().mark();
-            metrics.meter(REQUEST_THROUGHPUT).tag(REQUEST_NAME, ALL).tag(URL, ALL).get().mark();
-            metrics.meter(REQUEST_THROUGHPUT).tag(REQUEST_NAME, ALL).tag(URL, ALL).tag(HTTP_CODE, code).get().mark();
-            if (status >= 400) {
-                metrics.meter(REQUEST_ERROR_THROUGHPUT).tag(REQUEST_NAME, signature).tag(URL, uri).get().mark();
-                metrics.meter(REQUEST_ERROR_THROUGHPUT).tag(REQUEST_NAME, ALL).tag(URL, ALL).get().mark();
-            }
         }
     }
 }

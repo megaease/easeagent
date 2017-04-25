@@ -69,7 +69,6 @@ public abstract class MeasureJdbcStatement implements Transformation {
                     metrics.timer(JDBC_STATEMENT).tag(SIGNATURE, "All").get().update(duration, NANOSECONDS);
                 }
             });
-
         }
     }
 }
