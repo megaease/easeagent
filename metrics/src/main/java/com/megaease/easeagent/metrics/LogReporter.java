@@ -38,8 +38,6 @@ class LogReporter implements Runnable {
             final Map<String, String> tags = ImmutableMap.<String, String>builder()
                     .putAll(Splitter.on(',').withKeyValueSeparator('=').split(iterator.next()))
                     .putAll(hostInfo)
-                    // TODO remove stagemonitor's legacy
-                    .put("measurement_start", START_TIME)
                     .build();
             final MetricEvent event = new MetricEvent(entry.getValue(), name, tags, rate, duration);
             logger.info("{}\n", JSON.toJSONString(event, SerializerFeature.DisableCircularReferenceDetect));
