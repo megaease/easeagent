@@ -8,6 +8,7 @@ import java.lang.management.ManagementFactory;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class JmxSampler extends Sampler implements JmxSamplerMBean {
 
@@ -33,27 +34,26 @@ class JmxSampler extends Sampler implements JmxSamplerMBean {
 
     private final ScheduledExecutorService service;
 
-    private volatile boolean sampled = false;
+    private final AtomicBoolean sampled;
 
     private JmxSampler() {
+        sampled = new AtomicBoolean(false);
         service = Executors.newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory("easeagent-jmx-sampler"));
     }
 
     @Override
     public boolean isSampled(long traceId) {
-        return sampled;
+        return sampled.get();
     }
 
     @Override
     public boolean enable(int timeoutSeconds) {
-        if (sampled) return false;
-
-        sampled = true;
+        if (!sampled.compareAndSet(false, true)) return false;
 
         service.schedule(new Runnable() {
             @Override
             public void run() {
-                sampled = false;
+                sampled.set(false);
             }
         }, timeoutSeconds, TimeUnit.SECONDS);
 
