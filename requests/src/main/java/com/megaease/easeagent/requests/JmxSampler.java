@@ -3,7 +3,6 @@ package com.megaease.easeagent.requests;
 import brave.sampler.Sampler;
 import com.megaease.easeagent.common.NamedDaemonThreadFactory;
 
-import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.Executors;
@@ -18,10 +17,9 @@ class JmxSampler extends Sampler implements JmxSamplerMBean {
 
         static {
             SINGLETON = new JmxSampler();
-            final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
             try {
                 NAME = new ObjectName("com.megaease.easeagent:type=JmxSampler");
-                server.registerMBean(SINGLETON, NAME);
+                ManagementFactory.getPlatformMBeanServer().registerMBean(SINGLETON, NAME);
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
