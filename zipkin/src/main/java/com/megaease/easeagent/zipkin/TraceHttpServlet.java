@@ -65,15 +65,11 @@ public abstract class TraceHttpServlet extends HttpServletService {
                   @Advice.Argument(1) HttpServletResponse response) {
             if (!lock.release(method)) return;
 
-            final StringBuffer requestURL = request.getRequestURL();
-            final String query = request.getQueryString();
-            final String url = query == null ? requestURL.toString() : requestURL.append('?').append(query).toString();
-
             trace.pop().<Span>context().name("http_recv")
                                        .kind(Span.Kind.SERVER)
                                        .tag("component", "servlet")
                                        .tag("span.kind", "server")
-                                       .tag("http.url", url)
+                                       .tag("http.url", request.getRequestURL().toString())
                                        .tag("http.method", request.getMethod())
                                        .tag("http.status_code", String.valueOf(response.getStatus()))
                                        .tag("peer.hostname", request.getRemoteHost())
