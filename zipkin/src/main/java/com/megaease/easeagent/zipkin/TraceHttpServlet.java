@@ -48,36 +48,47 @@ public abstract class TraceHttpServlet extends HttpServletService {
         }
 
         @Advice.OnMethodEnter
-        void enter(@Advice.Origin("#m") String method, @Advice.Argument(0) final HttpServletRequest request) {
-            if (!lock.acquire(method)) return;
+        ForwardLock.Release<Void> enter(@Advice.Argument(0) final HttpServletRequest request) {
+            return lock.acquire(new ForwardLock.Supplier<Void>() {
+                @Override
+                public Void get() {
+                    final TraceContextOrSamplingFlags result = EXTRACTOR.extract(request);
 
-            final TraceContextOrSamplingFlags result = EXTRACTOR.extract(request);
+                    final TraceContext context = result.context() == null
+                            ? tracer.newTrace(result.samplingFlags()).context()
+                            : result.context().toBuilder().shared(true).build();
 
-            final TraceContext context = result.context() == null
-                    ? tracer.newTrace(result.samplingFlags()).context()
-                    : result.context().toBuilder().shared(true).build();
+                    trace.push(tracer.newChild(context).start());
+                    return null;
+                }
+            });
 
-            trace.push(tracer.newChild(context).start());
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin("#m") String method, @Advice.Argument(0) HttpServletRequest request,
-                  @Advice.Argument(1) HttpServletResponse response) {
-            if (!lock.release(method)) return;
+        void exit(@Advice.Enter ForwardLock.Release<Void> release, @Advice.Argument(0) final HttpServletRequest request,
+                  @Advice.Argument(1) final HttpServletResponse response) {
 
-            trace.pop().<Span>context().name("http_recv")
-                                       .kind(Span.Kind.SERVER)
-                                       .tag("component", "servlet")
-                                       .tag("span.kind", "server")
-                                       .tag("http.url", request.getRequestURL().toString())
-                                       .tag("http.method", request.getMethod())
-                                       .tag("http.status_code", String.valueOf(response.getStatus()))
-                                       .tag("peer.hostname", request.getRemoteHost())
-                                       .tag("peer.ipv4", request.getRemoteAddr())
-                                       .tag("peer.port", String.valueOf(request.getRemotePort()))
-                                       .tag("has.error", String.valueOf(response.getStatus() >= 400))
-                                       .tag("remote.address", request.getRemoteHost() + ":" + request.getRemotePort())
-                                       .finish();
+            release.apply(new ForwardLock.Consumer<Void>() {
+                @Override
+                public void accept(Void aVoid) {
+                    trace.pop().<Span>context()
+                            .name("http_recv")
+                            .kind(Span.Kind.SERVER)
+                            .tag("component", "servlet")
+                            .tag("span.kind", "server")
+                            .tag("http.url", request.getRequestURL().toString())
+                            .tag("http.method", request.getMethod())
+                            .tag("http.status_code", String.valueOf(response.getStatus()))
+                            .tag("peer.hostname", request.getRemoteHost())
+                            .tag("peer.ipv4", request.getRemoteAddr())
+                            .tag("peer.port", String.valueOf(request.getRemotePort()))
+                            .tag("has.error", String.valueOf(response.getStatus() >= 400))
+                            .tag("remote.address", request.getRemoteHost() + ":" + request.getRemotePort())
+                            .finish();
+                }
+            });
+
         }
     }
 }

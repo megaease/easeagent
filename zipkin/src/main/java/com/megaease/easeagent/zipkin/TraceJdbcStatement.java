@@ -51,15 +51,16 @@ public abstract class TraceJdbcStatement implements Transformation {
 
         @Override
         @Advice.OnMethodEnter
-        void enter(@Advice.Origin String method) {
-            super.enter(method);
+        ForwardLock.Release<Void> enter() {
+            return super.enter();
         }
 
         @Override
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.This Statement stmt, @Advice.Thrown Throwable error, @Advice.Argument(0) String sql) {
+        void exit(@Advice.Enter ForwardLock.Release<Void> release, @Advice.This Statement stmt,
+                  @Advice.Thrown Throwable error, @Advice.Argument(0) String sql) {
             try {
-                super.exit(method, stmt, error, sql);
+                super.exit(release, stmt, error, sql);
             } catch (SQLException e) {
                 logger.error("Unexpected", e);
             }
@@ -75,14 +76,15 @@ public abstract class TraceJdbcStatement implements Transformation {
 
         @Override
         @Advice.OnMethodEnter
-        void enter(@Advice.Origin String method) {
-            super.enter(method);
+        ForwardLock.Release<Void> enter() {
+            return super.enter();
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.This Statement stmt, @Advice.Thrown Throwable error) {
+        void exit(@Advice.Enter ForwardLock.Release<Void> release, @Advice.This Statement stmt,
+                  @Advice.Thrown Throwable error) {
             try {
-                super.exit(method, stmt, error, stmt.getClass().getMethod("asSql").invoke(stmt).toString());
+                super.exit(release, stmt, error, stmt.getClass().getMethod("asSql").invoke(stmt).toString());
             } catch (Exception e) {
                 logger.error("Unexpected", e);
             }
@@ -102,27 +104,42 @@ public abstract class TraceJdbcStatement implements Transformation {
             logger = LoggerFactory.getLogger(getClass());
         }
 
-        void enter(String method) {
-            if (!lock.acquire(method) || trace.peek() == null) return;
+        ForwardLock.Release<Void> enter() {
+            return lock.acquire(new ForwardLock.Supplier<Void>() {
+                @Override
+                public Void get() {
+                    if (trace.peek() != null)
+                        trace.push(tracer.newChild(trace.peek().<Span>context().context()).start());
+                    return null;
+                }
+            });
 
-            trace.push(tracer.newChild(trace.peek().<Span>context().context()).start());
         }
 
-        void exit(String method, Statement stmt, Throwable error, String sql) throws SQLException {
-            if (!lock.release(method) || trace.peek() == null) return;
-
+        void exit(ForwardLock.Release<Void> release, final Statement stmt, final Throwable error, final String sql)
+                throws SQLException {
             final String url = stmt.getConnection().getMetaData().getURL();
-            final URI uri = URI.create(url.substring(5));
-            trace.pop().<Span>context().name("jdbc_statement")
-                                       .kind(Span.Kind.CLIENT)
-                                       .tag("component", "jdbc")
-                                       .tag("span.kind", "client")
-                                       .tag("jdbc.url", url)
-                                       .tag("jdbc.sql", sql)
-                                       .tag("jdbc.result", String.valueOf(error == null))
-                                       .tag("has.error", String.valueOf(error != null))
-                                       .tag("remote.address", uri.getHost() + ":" + (uri.getPort() == -1 ? 3306 : uri.getPort()))
-                                       .finish();
+
+            release.apply(new ForwardLock.Consumer<Void>() {
+                @Override
+                public void accept(Void aVoid) {
+                    if (trace.peek() == null) return;
+
+                    final URI uri = URI.create(url.substring(5));
+                    trace.pop().<Span>context()
+                            .name("jdbc_statement")
+                            .kind(Span.Kind.CLIENT)
+                            .tag("component", "jdbc")
+                            .tag("span.kind", "client")
+                            .tag("jdbc.url", url)
+                            .tag("jdbc.sql", sql)
+                            .tag("jdbc.result", String.valueOf(error == null))
+                            .tag("has.error", String.valueOf(error != null))
+                            .tag("remote.address", uri.getHost() + ":" + (uri.getPort() == -1 ? 3306 : uri.getPort()))
+                            .finish();
+                }
+            });
+
         }
     }
 }

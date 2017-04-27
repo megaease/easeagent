@@ -27,7 +27,7 @@ import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Collections.list;
 import static net.bytebuddy.dynamic.loading.ClassInjector.UsingInstrumentation.Target.BOOTSTRAP;
 
-final class AppendBootstrapClassLoaderSearch {
+public final class AppendBootstrapClassLoaderSearch {
     private static final File TMP_FILE = new File(AccessController.doPrivileged(
             new PrivilegedAction<String>() {
                 @Override

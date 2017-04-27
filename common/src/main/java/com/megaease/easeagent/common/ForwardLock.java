@@ -1,28 +1,48 @@
 package com.megaease.easeagent.common;
 
-import com.google.common.collect.Maps;
+import com.google.auto.service.AutoService;
+import com.google.common.collect.Sets;
+import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 
-import java.util.Map;
+import java.util.Set;
 
 public class ForwardLock {
-    private static final ThreadLocal<Map<Object, Object>> MARK = new ThreadLocal<Map<Object, Object>>() {
+    private static final ThreadLocal<Set<ForwardLock>> MARK = new ThreadLocal<Set<ForwardLock>>(){
         @Override
-        protected Map<Object, Object> initialValue() {
-            return Maps.newHashMap();
+        protected Set<ForwardLock> initialValue() {
+            return Sets.newHashSet();
         }
     };
 
-    public boolean acquire(Object token) {
-        final Map<Object, Object> map = MARK.get();
-        if (map.containsKey(this)) return false;
-        map.put(this, token);
-        return true;
+    public <T> Release<T> acquire(Supplier<T> supplier) {
+        if (!MARK.get().add(this)) return new Release<T>() {
+            @Override
+            public void apply(Consumer<T> c) { }
+        };
+
+        final T value = supplier.get();
+
+        return new Release<T>() {
+            @Override
+            public void apply(Consumer<T> c) {
+                MARK.get().remove(ForwardLock.this);
+                c.accept(value);
+            }
+        };
     }
 
-    public boolean release(Object token) {
-        final Map<Object, Object> map = MARK.get();
-        if (token != map.get(this)) return false;
-        map.remove(this);
-        return true;
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
+    public interface Release<T> {
+        void apply(Consumer<T> c);
+
+    }
+
+    public interface Supplier<T> {
+        T get();
+    }
+
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
+    public interface Consumer<T> {
+        void accept(T t);
     }
 }

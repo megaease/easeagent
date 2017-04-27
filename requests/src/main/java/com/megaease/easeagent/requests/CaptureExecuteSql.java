@@ -48,19 +48,22 @@ public abstract class CaptureExecuteSql implements Transformation {
         }
 
         @Advice.OnMethodEnter
-        boolean enter(@Advice.Origin String method, @Advice.Origin Class<?> aClass, @Advice.Origin("#m") String methodName,
-                      @Advice.This Object self) {
+        ForwardLock.Release<Boolean> enter(@Advice.Origin Class<?> aClass, @Advice.Origin("#m") String methodName,
+                                           @Advice.This Object self) {
             try {
-                return super.enter(method, aClass, methodName, self.getClass().getMethod("asSql").invoke(self).toString());
+                return super.enter(aClass, methodName, self.getClass().getMethod("asSql").invoke(self).toString());
             } catch (Exception e) {
                 logger.error("Failed to get sql", e);
-                return false;
+                return new ForwardLock.Release<Boolean>() {
+                    @Override
+                    public void apply(ForwardLock.Consumer<Boolean> c) { }
+                };
             }
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.Enter boolean forked) {
-            super.exit(method, forked);
+        void exit(@Advice.Enter ForwardLock.Release<Boolean> release) {
+            super.exit(release);
         }
 
     }
@@ -73,15 +76,15 @@ public abstract class CaptureExecuteSql implements Transformation {
 
         @Override
         @Advice.OnMethodEnter
-        boolean enter(@Advice.Origin String method, @Advice.Origin Class<?> aClass, @Advice.Origin("#m") String methodName,
-                      @Advice.Argument(0) String sql) {
-            return super.enter(method, aClass, methodName, sql);
+        ForwardLock.Release<Boolean> enter(@Advice.Origin Class<?> aClass, @Advice.Origin("#m") String methodName,
+                                           @Advice.Argument(0) String sql) {
+            return super.enter(aClass, methodName, sql);
         }
 
         @Override
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.Enter boolean forked) {
-            super.exit(method, forked);
+        void exit(@Advice.Enter ForwardLock.Release<Boolean> release) {
+            super.exit(release);
         }
 
     }
@@ -95,13 +98,22 @@ public abstract class CaptureExecuteSql implements Transformation {
             this.trace = trace;
         }
 
-        boolean enter(String method, Class<?> aClass, String methodName, String sql) {
-            return lock.acquire(method) && Context.forkIo(trace, aClass, methodName, sql);
+        ForwardLock.Release<Boolean> enter(final Class<?> aClass, final String methodName, final String sql) {
+            return lock.acquire(new ForwardLock.Supplier<Boolean>() {
+                @Override
+                public Boolean get() {
+                    return Context.forkIo(trace, aClass, methodName, sql);
+                }
+            });
         }
 
-        void exit(String method, boolean forked) {
-            lock.release(method);
-            if (forked) Context.join(trace);
+        void exit(ForwardLock.Release<Boolean> release) {
+            release.apply(new ForwardLock.Consumer<Boolean>() {
+                @Override
+                public void accept(Boolean forked) {
+                    if (forked) Context.join(trace);
+                }
+            });
         }
     }
 }

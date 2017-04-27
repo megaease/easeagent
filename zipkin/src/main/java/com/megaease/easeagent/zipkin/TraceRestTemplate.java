@@ -63,35 +63,49 @@ public abstract class TraceRestTemplate implements Transformation {
         }
 
         @Advice.OnMethodEnter
-        void enter(@Advice.Origin String method, @Advice.Argument(0) HttpHeaders headers) {
-            if (!lock.acquire(method) || trace.peek() == null) return;
+        ForwardLock.Release<Void> enter(@Advice.Argument(0) final HttpHeaders headers) {
+            return lock.acquire(new ForwardLock.Supplier<Void>() {
+                @Override
+                public Void get() {
+                    if (trace.peek() != null) {
+                        final TraceContext context = trace.peek().<Span>context().context();
+                        trace.push(tracer.newChild(context).start());
+                        INJECTOR.inject(context, headers);
+                    }
 
-            final TraceContext context = trace.peek().<Span>context().context();
-            trace.push(tracer.newChild(context).start());
-            INJECTOR.inject(context, headers);
+                    return null;
+                }
+            });
+
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.This ClientHttpRequest req,
-                  @Advice.Return ClientHttpResponse res, @Advice.Thrown Throwable error) {
-            if (!lock.release(method) || trace.peek() == null) return;
+        void exit(@Advice.Enter ForwardLock.Release<Void> release, @Advice.This final ClientHttpRequest req,
+                  @Advice.Return final ClientHttpResponse res, @Advice.Thrown final Throwable error) {
 
-            final URI uri = req.getURI();
-            try {
-                trace.pop().<Span>context()
-                        .name("http_send")
-                        .kind(Span.Kind.CLIENT)
-                        .tag("component", "spring-rest-template")
-                        .tag("span.kind", "client")
-                        .tag("http.url", uri.toString())
-                        .tag("http.method", req.getMethod().toString())
-                        .tag("http.status_code", error == null ? String.valueOf(res.getRawStatusCode()) : "999")
-                        .tag("has.error", error == null ? String.valueOf(res.getRawStatusCode() >= 400) : "true")
-                        .tag("remote.address", uri.getHost() + (uri.getPort() == -1 ? "" : ":" + uri.getPort()))
-                        .finish();
-            } catch (IOException e) {
-                logger.error("Unexpected", e);
-            }
+            release.apply(new ForwardLock.Consumer<Void>() {
+                @Override
+                public void accept(Void aVoid) {
+                    if (trace.peek() == null) return;
+
+                    final URI uri = req.getURI();
+                    try {
+                        trace.pop().<Span>context()
+                                .name("http_send")
+                                .kind(Span.Kind.CLIENT)
+                                .tag("component", "spring-rest-template")
+                                .tag("span.kind", "client")
+                                .tag("http.url", uri.toString())
+                                .tag("http.method", req.getMethod().toString())
+                                .tag("http.status_code", error == null ? String.valueOf(res.getRawStatusCode()) : "999")
+                                .tag("has.error", error == null ? String.valueOf(res.getRawStatusCode() >= 400) : "true")
+                                .tag("remote.address", uri.getHost() + (uri.getPort() == -1 ? "" : ":" + uri.getPort()))
+                                .finish();
+                    } catch (IOException e) {
+                        logger.error("Unexpected", e);
+                    }
+                }
+            });
         }
 
     }

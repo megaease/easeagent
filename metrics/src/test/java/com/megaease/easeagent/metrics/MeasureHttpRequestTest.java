@@ -30,7 +30,7 @@ public class MeasureHttpRequestTest {
         final HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getMethod()).thenReturn("GET");
         when(request.getProtocol()).thenReturn("HTTP/1.1");
-        when(request.getRequestURI()).thenReturn("/");
+        when(request.getRequestURL()).thenReturn(new StringBuffer("/"));
         final HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.getStatus()).thenReturn(400);
 

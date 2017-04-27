@@ -125,20 +125,24 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
 
                     final String format;
                     final Object[] args;
+                    final List<? extends VariableElement> parameters = e.getParameters();
+
+                    final String join = parameters.isEmpty() ? "null" : join(parameters);
+
                     if (TypeName.VOID == returnType) {
                         format = "$T.execute($S, $L)";
-                        args = new Object[]{Dispatcher.class, generateClassName + "#advice_" + name, join(e.getParameters())};
+                        args = new Object[]{Dispatcher.class, generateClassName + "#advice_" + name, join};
                     } else {
                         format = "return ($T) $T.execute($S, $L)";
                         args = new Object[]{
                                 returnType.isPrimitive() ? returnType.box() : returnType,
-                                Dispatcher.class, generateClassName + "#advice_" + name, join(e.getParameters())
+                                Dispatcher.class, generateClassName + "#advice_" + name, join
                         };
                     }
                     return MethodSpec.methodBuilder(name)
                                      .addModifiers(Modifier.STATIC)
                                      .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
-                                     .addParameters(utils.asParameterSpecs(e.getParameters()))
+                                     .addParameters(utils.asParameterSpecs(parameters))
                                      .returns(returnType)
                                      .addStatement(format, args)
                                      .build();

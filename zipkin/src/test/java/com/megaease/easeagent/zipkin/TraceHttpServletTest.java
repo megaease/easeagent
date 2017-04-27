@@ -52,7 +52,6 @@ public class TraceHttpServletTest {
         when(request.getMethod()).thenReturn("GET");
         when(request.getRequestURL()).thenReturn(new StringBuffer("/home"));
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.<String>emptySet()));
-        when(request.getQueryString()).thenReturn("a=b");
         when(request.getRemoteHost()).thenReturn("host");
         when(request.getRemoteAddr()).thenReturn("addr");
         when(request.getRemotePort()).thenReturn(12306);
@@ -72,7 +71,7 @@ public class TraceHttpServletTest {
                 .put("has.error", "false")
                 .put("http.method", "GET")
                 .put("http.status_code", "200")
-                .put("http.url", "/home?a=b")
+                .put("http.url", "/home")
                 .put("peer.hostname", "host")
                 .put("peer.ipv4", "addr")
                 .put("peer.port", "12306")

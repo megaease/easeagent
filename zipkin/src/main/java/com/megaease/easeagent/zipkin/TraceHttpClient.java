@@ -55,31 +55,44 @@ public abstract class TraceHttpClient implements Transformation {
         }
 
         @Advice.OnMethodEnter
-        void enter(@Advice.Origin String method, @Advice.Argument(1) HttpRequest request) {
-            if (!lock.acquire(method) || trace.peek() == null) return;
+        ForwardLock.Release<Void> enter(@Advice.Argument(1) final HttpRequest request) {
+            return lock.acquire(new ForwardLock.Supplier<Void>() {
+                @Override
+                public Void get() {
+                    if (trace.peek() != null) {
+                        final TraceContext context = trace.peek().<Span>context().context();
+                        trace.push(tracer.newChild(context).start());
+                        INJECTOR.inject(context, request);
+                    }
 
-            final TraceContext context = trace.peek().<Span>context().context();
-            trace.push(tracer.newChild(context).start());
-            INJECTOR.inject(context, request);
+                    return null;
+                }
+            });
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.Argument(0) HttpHost host, @Advice.Argument(1) HttpRequest req,
-                  @Advice.Return HttpResponse res, @Advice.Thrown Throwable error) {
-            if (!lock.release(method) || trace.peek() == null) return;
+        void exit(@Advice.Enter ForwardLock.Release<Void> release, @Advice.Argument(0) final HttpHost host,
+                  @Advice.Argument(1) final HttpRequest req, @Advice.Return final HttpResponse res,
+                  @Advice.Thrown final Throwable error) {
+            release.apply(new ForwardLock.Consumer<Void>() {
+                @Override
+                public void accept(Void aVoid) {
+                    if (trace.peek() == null) return;
 
-            trace.pop().<Span>context()
-                    .name("http_send")
-                    .kind(Span.Kind.CLIENT)
-                    .tag("component", "apache-http-client")
-                    .tag("span.kind", "client")
-                    .tag("http.url", req.getRequestLine().getUri())
-                    .tag("http.method", req.getRequestLine().getMethod())
-                    // An error means request did not send out.
-                    .tag("http.status_code", error == null ? String.valueOf(res.getStatusLine().getStatusCode()) : "999")
-                    .tag("remote.address", host.getHostName() + (host.getPort() == -1 ? "" : ":" + host.getPort()))
-                    .tag("has.error", error == null ? String.valueOf(res.getStatusLine().getStatusCode() >= 400) : "true")
-                    .finish();
+                    trace.pop().<Span>context()
+                            .name("http_send")
+                            .kind(Span.Kind.CLIENT)
+                            .tag("component", "apache-http-client")
+                            .tag("span.kind", "client")
+                            .tag("http.url", req.getRequestLine().getUri())
+                            .tag("http.method", req.getRequestLine().getMethod())
+                            // An error means request did not send out.
+                            .tag("http.status_code", error == null ? String.valueOf(res.getStatusLine().getStatusCode()) : "999")
+                            .tag("remote.address", host.getHostName() + (host.getPort() == -1 ? "" : ":" + host.getPort()))
+                            .tag("has.error", error == null ? String.valueOf(res.getStatusLine().getStatusCode() >= 400) : "true")
+                            .finish();
+                }
+            });
 
         }
     }

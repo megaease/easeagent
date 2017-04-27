@@ -45,22 +45,31 @@ public abstract class MeasureJdbcStatement implements Transformation {
         }
 
         @Advice.OnMethodEnter
-        long enter(@Advice.Origin String method) {
-            return lock.acquire(method) ? System.nanoTime() : -1L;
+        ForwardLock.Release<Long> enter() {
+            return lock.acquire(new ForwardLock.Supplier<Long>() {
+                @Override
+                public Long get() {
+                    return System.nanoTime();
+                }
+            }) ;
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.Enter long begin) {
-            if (!lock.release(method)) return;
+        void exit(@Advice.Enter ForwardLock.Release<Long> release) {
+            release.apply(new ForwardLock.Consumer<Long>() {
+                @Override
+                public void accept(Long begin) {
+                    final CallTrace.Frame frame = trace.peek();
+                    if (frame == null) return;
 
-            final CallTrace.Frame frame = trace.peek();
-            if (frame == null) return;
+                    final long duration = System.nanoTime() - begin;
 
-            final long duration = System.nanoTime() - begin;
+                    metrics.timer(JDBC_STATEMENT).tag(SIGNATURE, frame.<Context>context().signature).get().update(duration, NANOSECONDS);
+                    // TODO lazy calculation in streaming
+                    metrics.timer(JDBC_STATEMENT).tag(SIGNATURE, "All").get().update(duration, NANOSECONDS);
+                }
+            });
 
-            metrics.timer(JDBC_STATEMENT).tag(SIGNATURE, frame.<Context>context().signature).get().update(duration, NANOSECONDS);
-            // TODO lazy calculation in streaming
-            metrics.timer(JDBC_STATEMENT).tag(SIGNATURE, "All").get().update(duration, NANOSECONDS);
         }
     }
 }

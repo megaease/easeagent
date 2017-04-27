@@ -1,23 +1,40 @@
 package com.megaease.easeagent.common;
 
+import com.google.common.collect.Lists;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class ForwardLockTest {
     @Test
     public void should_work() throws Exception {
         final ForwardLock detector = new ForwardLock();
-        final Object first = new Object();
-        final Object second = new Object();
+        final List<Boolean> bools = Lists.newArrayList();
 
-        assertTrue(detector.acquire(first));
-        assertFalse(detector.acquire(second));
-        assertFalse(detector.release(second));
-        assertTrue(detector.release(first));
+        final ForwardLock.Supplier<Boolean> supplier = new ForwardLock.Supplier<Boolean>() {
+            @Override
+            public Boolean get() {
+                return true;
+            }
+        };
 
-        assertTrue(detector.acquire(second));
-        assertTrue(detector.release(second));
+
+        final ForwardLock.Consumer<Boolean> consumer = new ForwardLock.Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+                bools.add(aBoolean);
+            }
+        };
+
+        final ForwardLock.Release<Boolean> release = detector.acquire(supplier);
+        detector.acquire(supplier).apply(consumer);
+        release.apply(consumer);
+
+        assertThat(bools.size(), is(1));
+        assertTrue(bools.get(0));
     }
 }

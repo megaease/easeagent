@@ -48,24 +48,33 @@ public abstract class MeasureJdbcGetConnection implements Transformation {
         }
 
         @Advice.OnMethodEnter
-        long enter(@Advice.Origin String method) {
-            return lock.acquire(method) ? System.nanoTime() : -1L;
+        ForwardLock.Release<Long> enter() {
+            return lock.acquire(new ForwardLock.Supplier<Long>() {
+                @Override
+                public Long get() {
+                    return System.nanoTime();
+                }
+            });
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Origin String method, @Advice.Enter long begin, @Advice.Return Connection conn) {
-            if (!lock.release(method) || conn == null) return;
-
-            try {
-                final DatabaseMetaData meta = conn.getMetaData();
-                final long duration = System.nanoTime() - begin;
-                final String url = meta.getURL() + "-" + meta.getUserName();
-                metrics.timer(GET_JDBC_CONNECTION).tag(URL, url).get().update(duration, NANOSECONDS);
-                // TODO lazy calculation in streaming
-                metrics.timer(GET_JDBC_CONNECTION).tag(URL, ALL).get().update(duration, NANOSECONDS);
-            } catch (SQLException e) {
-                logger.error("Unexpected", e);
-            }
+        void exit(@Advice.Enter ForwardLock.Release<Long> release, @Advice.Return final Connection conn) {
+            release.apply(new ForwardLock.Consumer<Long>() {
+                @Override
+                public void accept(Long begin) {
+                    if (conn == null) return;
+                    try {
+                        final DatabaseMetaData meta = conn.getMetaData();
+                        final long duration = System.nanoTime() - begin;
+                        final String url = meta.getURL() + "-" + meta.getUserName();
+                        metrics.timer(GET_JDBC_CONNECTION).tag(URL, url).get().update(duration, NANOSECONDS);
+                        // TODO lazy calculation in streaming
+                        metrics.timer(GET_JDBC_CONNECTION).tag(URL, ALL).get().update(duration, NANOSECONDS);
+                    } catch (SQLException e) {
+                        logger.error("Unexpected", e);
+                    }
+                }
+            });
         }
     }
 
