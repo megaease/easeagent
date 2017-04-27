@@ -48,7 +48,7 @@ public abstract class MeasureHttpRequest extends HttpServletService {
             final Context context = trace.pop().context();
             final String signature = context.next == null ? context.signature : context.next.signature;
 
-            final String uri = request.getRequestURI();
+            final String uri = request.getRequestURL().toString();
             final int status = response.getStatus();
             final String code = Integer.toString(status);
 
