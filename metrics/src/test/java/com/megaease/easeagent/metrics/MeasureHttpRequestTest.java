@@ -1,8 +1,6 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
@@ -13,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -45,15 +42,6 @@ public class MeasureHttpRequestTest {
         assertThat(registry.meter("request_throughput:request_name=All,url=All,http_code=400").getCount(), is(1L));
         assertThat(registry.meter("request_error_throughput:request_name=Foo#doGet,url=/").getCount(), is(1L));
         assertThat(registry.meter("request_error_throughput:request_name=All,url=All").getCount(), is(1L));
-    }
-
-    private Map<String, Object> beans(Object... objs) {
-        return FluentIterable.from(objs).uniqueIndex(new Function<Object, String>() {
-            @Override
-            public String apply(Object input) {
-                return input.getClass().getName();
-            }
-        });
     }
 
     public static class Foo extends HttpServlet {

@@ -1,7 +1,6 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Function;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
@@ -13,10 +12,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.Map;
 import java.util.logging.Logger;
 
-import static com.google.common.collect.FluentIterable.from;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -37,15 +34,6 @@ public class MeasureJdbcGetConnectionTest {
 
         assertThat(registry.timer("get_jdbc_connection:url=url-username").getCount(), is(1L));
         assertThat(registry.timer("get_jdbc_connection:url=All").getCount(), is(1L));
-    }
-
-    private Map<String, Object> beans(Object... objects) {
-        return from(objects).uniqueIndex(new Function<Object, String>() {
-            @Override
-            public String apply(Object input) {
-                return input.getClass().getName();
-            }
-        });
     }
 
     static class Foo implements DataSource {

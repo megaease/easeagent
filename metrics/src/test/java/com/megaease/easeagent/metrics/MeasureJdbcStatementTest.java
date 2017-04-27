@@ -1,7 +1,6 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Function;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.Classes;
@@ -9,9 +8,7 @@ import com.megaease.easeagent.core.Definition;
 import org.junit.Test;
 
 import java.sql.*;
-import java.util.Map;
 
-import static com.google.common.collect.FluentIterable.from;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -35,15 +32,6 @@ public class MeasureJdbcStatementTest {
 
         assertThat(registry.timer("jdbc_statement:signature=MeasureJdbcStatementTest#should_work").getCount(), is(1L));
         assertThat(registry.timer("jdbc_statement:signature=All").getCount(), is(1L));
-    }
-
-    private Map<String, Object> beans(Object... objects) {
-        return from(objects).uniqueIndex(new Function<Object, String>() {
-            @Override
-            public String apply(Object input) {
-                return input.getClass().getName();
-            }
-        });
     }
 
     static class Foo implements Statement {
