@@ -32,7 +32,6 @@ class GatewaySender implements Sender {
     private volatile boolean closeCalled;
 
 
-
     GatewaySender(int messageMaxBytes, String sendEndpoint, int connectTimeout, int readTimeout,
                   boolean sendCompression, String userAgent) {
         this.messageMaxBytes = messageMaxBytes;
@@ -122,12 +121,12 @@ class GatewaySender implements Sender {
             if (code >= 400) throw new IOException(connection.getResponseMessage());
         } catch (IOException e) {
             InputStream err = connection.getErrorStream();
-            try {
-                if (err != null) { // possible, if the connection was dropped
+            if (err != null) { // possible, if the connection was dropped
+                try {
                     while (err.read() != -1) ; // skip
+                } finally {
+                    err.close();
                 }
-            } finally {
-                err.close();
             }
             LOGGER.error("Send failed", e);
         }
