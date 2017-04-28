@@ -8,7 +8,7 @@
         <RollingFile name="RollingFile" fileName="logs/easeagent.log" filePattern="logs/easeagent-%d{MM-dd-yyyy}.log"
                      ignoreExceptions="false">
             <PatternLayout>
-                <Pattern>%d [%10.10t] %-p %10.10c{1} - %msg%n</Pattern>
+                <Pattern>%d [%10.10t] %5p %10.10c{1} - %msg%n</Pattern>
             </PatternLayout>
             <TimeBasedTriggeringPolicy />
         </RollingFile>
