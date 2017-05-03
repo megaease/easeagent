@@ -32,7 +32,10 @@ public abstract class TraceHttpServlet extends HttpServletService {
         private static final Extractor<HttpServletRequest> EXTRACTOR = B3_STRING.extractor(new Propagation.Getter<HttpServletRequest, String>() {
             @Override
             public String get(HttpServletRequest carrier, String key) {
-                return carrier.getHeader(key.toLowerCase());
+                final String header = carrier.getHeader(key);
+                return header != null ? header
+                        // fix the lower case header name bug in tomcat.
+                        : carrier.getHeader(key.toLowerCase());
             }
         });
 

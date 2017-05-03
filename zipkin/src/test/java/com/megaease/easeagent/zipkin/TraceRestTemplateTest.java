@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static com.google.common.collect.FluentIterable.from;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -47,6 +48,9 @@ public class TraceRestTemplateTest {
                                                                  .load(loader).get(0).newInstance();
 
         req.execute();
+
+        assertThat(req.getHeaders().getFirst("X-B3-TraceId"), is(notNullValue()));
+
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
         final Span span = captor.getValue();

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static com.google.common.collect.FluentIterable.from;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -43,13 +44,18 @@ public class TraceHttpClientTest {
         final String name = "com.megaease.easeagent.zipkin.TraceHttpClientTest$Foo";
 
         final Definition.Default def = new GenTraceHttpClient().define(Definition.Default.EMPTY);
+
         trace.push(tracer.newTrace().start());
 
         final CloseableHttpClient c = (CloseableHttpClient) Classes.transform(name)
                                                                    .with(def, trace, new ForwardLock(), tracer)
                                                                    .load(getClass().getClassLoader())
                                                                    .get(0).newInstance();
-        c.execute(new HttpGet("http://localhost"));
+        final HttpGet request = new HttpGet("http://localhost");
+
+        c.execute(request);
+
+        assertThat(request.getFirstHeader("X-B3-TraceId"), is(notNullValue()));
 
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
