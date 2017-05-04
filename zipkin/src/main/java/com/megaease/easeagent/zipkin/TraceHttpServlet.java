@@ -59,7 +59,7 @@ public abstract class TraceHttpServlet extends HttpServletService {
 
                     final TraceContext context = result.context() == null
                             ? tracer.newTrace(result.samplingFlags()).context()
-                            : result.context().toBuilder().shared(true).build();
+                            : result.context().toBuilder().build();
 
                     trace.push(tracer.newChild(context).start());
                     return null;
