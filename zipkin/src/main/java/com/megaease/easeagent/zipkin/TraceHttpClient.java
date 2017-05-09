@@ -3,7 +3,6 @@ package com.megaease.easeagent.zipkin;
 import brave.Span;
 import brave.Tracer;
 import brave.propagation.Propagation;
-import brave.propagation.TraceContext;
 import brave.propagation.TraceContext.Injector;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
@@ -60,9 +59,9 @@ public abstract class TraceHttpClient implements Transformation {
                 @Override
                 public Void get() {
                     if (trace.peek() != null) {
-                        final TraceContext context = trace.peek().<Span>context().context();
-                        trace.push(tracer.newChild(context).start());
-                        INJECTOR.inject(context, request);
+                        final Span span = tracer.newChild(trace.peek().<Span>context().context()).start();
+                        INJECTOR.inject(span.context(), request);
+                        trace.push(span);
                     }
 
                     return null;

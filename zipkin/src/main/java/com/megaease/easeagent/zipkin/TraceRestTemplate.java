@@ -68,9 +68,9 @@ public abstract class TraceRestTemplate implements Transformation {
                 @Override
                 public Void get() {
                     if (trace.peek() != null) {
-                        final TraceContext context = trace.peek().<Span>context().context();
-                        trace.push(tracer.newChild(context).start());
-                        INJECTOR.inject(context, headers);
+                        final Span span = tracer.newChild(trace.peek().<Span>context().context()).start();
+                        INJECTOR.inject(span.context(), headers);
+                        trace.push(span);
                     }
 
                     return null;
