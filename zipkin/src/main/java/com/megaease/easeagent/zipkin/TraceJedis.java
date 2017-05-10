@@ -62,7 +62,9 @@ public abstract class TraceJedis implements Transformation {
             if (error == null) {
                 trace.push(span);
             } else {
-                span.tag("redis.result", String.valueOf(false)).finish();
+                span.tag("redis.result", String.valueOf(false))
+                    .tag("has.error", String.valueOf(true))
+                    .finish();
             }
         }
     }
