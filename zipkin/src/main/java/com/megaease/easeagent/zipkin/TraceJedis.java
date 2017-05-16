@@ -44,8 +44,8 @@ public abstract class TraceJedis implements Transformation {
             this.tracer = tracer;
         }
 
-        @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Argument(0) Protocol.Command command, @Advice.This Connection conn, @Advice.Thrown Throwable error) {
+        @Advice.OnMethodEnter
+        void enter(@Advice.Argument(0) Protocol.Command command, @Advice.This Connection conn) {
             if (trace.peek() == null) return;
 
             final Span span = tracer.newChild(trace.peek().<Span>context().context())
@@ -59,13 +59,17 @@ public abstract class TraceJedis implements Transformation {
                                     .tag("remote.address", conn.getHost() + ":" + conn.getPort())
                                     .start();
 
-            if (error == null) {
-                trace.push(span);
-            } else {
-                span.tag("redis.result", String.valueOf(false))
+            trace.push(span);
+        }
+
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
+        void exit(@Advice.Thrown Throwable error) {
+            if (error == null || trace.peek() == null) return;
+
+            trace.pop().<Span>context()
+                    .tag("redis.result", String.valueOf(false))
                     .tag("has.error", String.valueOf(true))
                     .finish();
-            }
         }
     }
 
