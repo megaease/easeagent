@@ -1,9 +1,10 @@
 package com.megaease.easeagent.common;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public abstract class LocalhostAddress {
+public abstract class HostAddress {
     private static final InetAddress LOCALHOST_ADDR;
     private static final String      LOCALHOST_NAME;
 
@@ -17,14 +18,22 @@ public abstract class LocalhostAddress {
 
     }
 
-    public static InetAddress getLocalhostAddr() {
+    public static InetAddress localaddr() {
         return LOCALHOST_ADDR;
     }
 
-    public static String getLocalhostName() {
+    public static String localhost() {
         return LOCALHOST_NAME;
     }
 
+    public static String address(String host) {
+        try {
+            return Inet4Address.getByName(host).getHostAddress();
+        } catch (UnknownHostException e) {
+            return host;
+        }
+    }
 
-    private LocalhostAddress() { }
+
+    private HostAddress() { }
 }

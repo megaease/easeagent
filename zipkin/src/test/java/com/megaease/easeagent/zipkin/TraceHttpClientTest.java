@@ -70,7 +70,7 @@ public class TraceHttpClientTest {
                 .put("http.method", "GET")
                 .put("http.status_code", "200")
                 .put("http.url", "http://localhost")
-                .put("remote.address", "localhost")
+                .put("remote.address", "127.0.0.1")
                 .put("span.kind", "client")
                 .build().entrySet();
         assertThat(asEntries(span.binaryAnnotations), is(entries));

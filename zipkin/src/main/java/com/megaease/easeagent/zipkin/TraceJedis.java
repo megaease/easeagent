@@ -3,6 +3,7 @@ package com.megaease.easeagent.zipkin;
 import brave.Span;
 import brave.Tracer;
 import com.megaease.easeagent.common.CallTrace;
+import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
@@ -56,7 +57,7 @@ public abstract class TraceJedis implements Transformation {
                                     .tag("redis.host", conn.getHost())
                                     .tag("redis.port", String.valueOf(conn.getPort()))
                                     .tag("redis.cmd", command.name())
-                                    .tag("remote.address", conn.getHost() + ":" + conn.getPort())
+                                    .tag("remote.address", HostAddress.address(conn.getHost()))
                                     .start();
 
             trace.push(span);

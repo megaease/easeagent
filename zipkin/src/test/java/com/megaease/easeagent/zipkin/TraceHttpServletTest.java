@@ -53,7 +53,7 @@ public class TraceHttpServletTest {
                 .put("peer.hostname", "host")
                 .put("peer.ipv4", "addr")
                 .put("peer.port", "12306")
-                .put("remote.address", "host:12306")
+                .put("remote.address", "addr")
                 .put("span.kind", "server")
                 .build().entrySet();
         assertThat(asEntries(span.binaryAnnotations), is(entries));

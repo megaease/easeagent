@@ -3,7 +3,7 @@ package com.megaease.easeagent.requests;
 import brave.sampler.CountingSampler;
 import brave.sampler.Sampler;
 import com.megaease.easeagent.common.CallTrace;
-import com.megaease.easeagent.common.LocalhostAddress;
+import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
 import org.slf4j.LoggerFactory;
@@ -38,12 +38,12 @@ abstract class Provider {
 
     @Configurable.Item
     String hostipv4() {
-        return LocalhostAddress.getLocalhostAddr().getHostAddress();
+        return HostAddress.localaddr().getHostAddress();
     }
 
     @Configurable.Item
     String hostname() {
-        return LocalhostAddress.getLocalhostName();
+        return HostAddress.localhost();
     }
 
     @Configurable.Item

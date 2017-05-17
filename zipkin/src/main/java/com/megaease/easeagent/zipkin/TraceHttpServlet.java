@@ -87,7 +87,7 @@ public abstract class TraceHttpServlet extends HttpServletService {
                             .tag("peer.ipv4", request.getRemoteAddr())
                             .tag("peer.port", String.valueOf(request.getRemotePort()))
                             .tag("has.error", String.valueOf(response.getStatus() >= 400))
-                            .tag("remote.address", request.getRemoteHost() + ":" + request.getRemotePort())
+                            .tag("remote.address", request.getRemoteAddr())
                             .finish();
                 }
             });
