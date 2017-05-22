@@ -67,6 +67,7 @@ abstract class Provider {
                                                 .addBinaryAnnotation(create("application", application(), endpoint))
                                                 .addBinaryAnnotation(create("hostipv4", host_ipv4(), endpoint))
                                                 .addBinaryAnnotation(create("hostname", hostname(), endpoint))
+                                                .addBinaryAnnotation(create("instance", instance(), endpoint))
                                                 .build());
             }
         };
@@ -80,6 +81,9 @@ abstract class Provider {
 
     @Configurable.Item
     abstract String application();
+
+    @Configurable.Item
+    String instance() {return "unknown";}
 
     @Configurable.Item
     String service_name() {
