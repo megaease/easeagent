@@ -6,6 +6,7 @@ import brave.propagation.Propagation;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
+import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
@@ -99,7 +100,7 @@ public abstract class TraceRestTemplate implements Transformation {
                                 .tag("http.method", req.getMethod().toString())
                                 .tag("http.status_code", error == null ? String.valueOf(res.getRawStatusCode()) : "999")
                                 .tag("has.error", error == null ? String.valueOf(res.getRawStatusCode() >= 400) : "true")
-                                .tag("remote.address", uri.getHost() + (uri.getPort() == -1 ? "" : ":" + uri.getPort()))
+                                .tag("remote.address", HostAddress.address(uri.getHost()))
                                 .finish();
                     } catch (IOException e) {
                         logger.error("Unexpected", e);

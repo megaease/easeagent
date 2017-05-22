@@ -68,7 +68,7 @@ public class TraceJdbcStatementTest {
                 .put("jdbc.result", "false")
                 .put("jdbc.sql", "sql")
                 .put("jdbc.url", JDBC_URL)
-                .put("remote.address", "localhost:3306")
+                .put("remote.address", "127.0.0.1")
                 .put("span.kind", "client")
                 .build().entrySet();
         assertThat(asEntries(span.binaryAnnotations), is(entries));

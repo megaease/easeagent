@@ -4,6 +4,7 @@ import brave.Span;
 import brave.Tracer;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
+import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
@@ -135,7 +136,7 @@ public abstract class TraceJdbcStatement implements Transformation {
                             .tag("jdbc.sql", sql)
                             .tag("jdbc.result", String.valueOf(error == null))
                             .tag("has.error", String.valueOf(error != null))
-                            .tag("remote.address", uri.getHost() + ":" + (uri.getPort() == -1 ? 3306 : uri.getPort()))
+                            .tag("remote.address", HostAddress.address(uri.getHost()))
                             .finish();
                 }
             });
