@@ -89,6 +89,7 @@ public abstract class TraceHttpClient implements Transformation {
                             // An error means request did not send out.
                             .tag("http.status_code", error == null ? String.valueOf(res.getStatusLine().getStatusCode()) : "999")
                             .tag("remote.address", HostAddress.address(host.getHostName()))
+                            .tag("remote.type", "web")
                             .tag("has.error", error == null ? String.valueOf(res.getStatusLine().getStatusCode() >= 400) : "true")
                             .finish();
                 }

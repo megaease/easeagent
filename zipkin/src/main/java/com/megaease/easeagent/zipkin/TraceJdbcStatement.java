@@ -137,6 +137,7 @@ public abstract class TraceJdbcStatement implements Transformation {
                             .tag("jdbc.result", String.valueOf(error == null))
                             .tag("has.error", String.valueOf(error != null))
                             .tag("remote.address", HostAddress.address(uri.getHost()))
+                            .tag("remote.type", "mysql")
                             .finish();
                 }
             });

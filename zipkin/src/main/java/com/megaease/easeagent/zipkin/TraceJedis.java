@@ -58,6 +58,7 @@ public abstract class TraceJedis implements Transformation {
                                     .tag("redis.port", String.valueOf(conn.getPort()))
                                     .tag("redis.cmd", command.name())
                                     .tag("remote.address", HostAddress.address(conn.getHost()))
+                                    .tag("remote.type", "redis")
                                     .start();
 
             trace.push(span);
