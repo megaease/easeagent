@@ -78,6 +78,7 @@ public class TraceJedisTest {
                 .put("redis.port", String.valueOf(port))
                 .put("redis.result", "true")
                 .put("remote.address", "127.0.0.1")
+                .put("remote.type", "redis")
                 .put("span.kind", "client")
                 .build().entrySet();
         assertThat(asEntries(span.binaryAnnotations), is(entries));

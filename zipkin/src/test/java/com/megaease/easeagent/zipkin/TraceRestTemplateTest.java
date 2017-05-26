@@ -65,6 +65,7 @@ public class TraceRestTemplateTest {
                 .put("http.status_code", "200")
                 .put("http.url", "http://localhost")
                 .put("remote.address", "127.0.0.1")
+                .put("remote.type", "web")
                 .put("span.kind", "client")
                 .build().entrySet();
         assertThat(asEntries(span.binaryAnnotations), is(entries));

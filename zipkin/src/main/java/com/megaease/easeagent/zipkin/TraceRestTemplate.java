@@ -101,6 +101,7 @@ public abstract class TraceRestTemplate implements Transformation {
                                 .tag("http.status_code", error == null ? String.valueOf(res.getRawStatusCode()) : "999")
                                 .tag("has.error", error == null ? String.valueOf(res.getRawStatusCode() >= 400) : "true")
                                 .tag("remote.address", HostAddress.address(uri.getHost()))
+                                .tag("remote.type", "web")
                                 .finish();
                     } catch (IOException e) {
                         logger.error("Unexpected", e);
