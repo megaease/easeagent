@@ -78,7 +78,7 @@ public abstract class TraceHttpServlet extends HttpServletService {
                     trace.pop().<Span>context()
                             .name("http_recv")
                             .kind(Span.Kind.SERVER)
-                            .tag("component", "servlet")
+                            .tag("component", "web")
                             .tag("span.kind", "server")
                             .tag("http.url", request.getRequestURL().toString())
                             .tag("http.method", request.getMethod())

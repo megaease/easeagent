@@ -45,7 +45,7 @@ public class TraceHttpServletTest {
         assertThat(span.annotations.get(1).value, is("ss"));
 
         final Iterable<Map.Entry<String, String>> entries = ImmutableMap.<String, String>builder()
-                .put("component", "servlet")
+                .put("component", "web")
                 .put("has.error", "false")
                 .put("http.method", "GET")
                 .put("http.status_code", "200")
