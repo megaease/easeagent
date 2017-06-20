@@ -57,9 +57,14 @@ public abstract class TraceHttpServlet extends HttpServletService {
                 public Void get() {
                     final TraceContextOrSamplingFlags result = EXTRACTOR.extract(request);
 
+                    final long mil = System.currentTimeMillis();
+                    final long mic = tracer.clock().currentTimeMicroseconds();
+
                     final TraceContext context = result.context() == null
                             ? tracer.newTrace(result.samplingFlags()).context()
                             : result.context().toBuilder().build();
+
+                    System.out.printf("%s - millis: %d, micros: %d\n", context.traceIdString(), mil, mic);
 
                     trace.push(tracer.newChild(context).start());
                     return null;
