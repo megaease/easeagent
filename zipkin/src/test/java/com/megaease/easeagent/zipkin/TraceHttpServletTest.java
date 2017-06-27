@@ -2,6 +2,7 @@ package com.megaease.easeagent.zipkin;
 
 import brave.Tracer;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.megaease.easeagent.common.CallTrace;
@@ -112,7 +113,12 @@ public class TraceHttpServletTest {
 
 
     private Iterable<Map.Entry<String, String>> asEntries(List<BinaryAnnotation> bas) {
-        return from(bas).transform(new Function<BinaryAnnotation, Map.Entry<String, String>>() {
+        return from(bas).filter(new Predicate<BinaryAnnotation>() {
+            @Override
+            public boolean apply(BinaryAnnotation input) {
+                return !input.key.equals("current.milliseconds");
+            }
+        }).transform(new Function<BinaryAnnotation, Map.Entry<String, String>>() {
             @Override
             public Map.Entry<String, String> apply(BinaryAnnotation input) {
                 return new AbstractMap.SimpleEntry<String, String>(input.key, new String(input.value));

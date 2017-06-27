@@ -57,16 +57,17 @@ public abstract class TraceHttpServlet extends HttpServletService {
                 public Void get() {
                     final TraceContextOrSamplingFlags result = EXTRACTOR.extract(request);
 
-                    final long mil = System.currentTimeMillis();
-                    final long mic = tracer.clock().currentTimeMicroseconds();
-
                     final TraceContext context = result.context() == null
                             ? tracer.newTrace(result.samplingFlags()).context()
                             : result.context().toBuilder().build();
 
-                    System.out.printf("%s - millis: %d, micros: %d\n", context.traceIdString(), mil, mic);
-
-                    trace.push(tracer.newChild(context).start());
+                    trace.push(
+                            tracer.newChild(context)
+                                  // To fix bug of timestamp drift in distribution.
+                                  // Honestly i don't know why it can fix, but it fixed.
+                                  .tag("current.milliseconds", String.valueOf(System.currentTimeMillis()))
+                                  .start()
+                    );
                     return null;
                 }
             });
