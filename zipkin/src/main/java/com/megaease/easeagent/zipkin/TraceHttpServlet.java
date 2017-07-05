@@ -61,7 +61,13 @@ public abstract class TraceHttpServlet extends HttpServletService {
                             ? tracer.newTrace(result.samplingFlags()).context()
                             : result.context().toBuilder().build();
 
-                    trace.push(tracer.newChild(context).start());
+                    trace.push(
+                            tracer.newChild(context)
+                                  // To fix bug of timestamp drift in distribution.
+                                  // Honestly i don't know why it can fix, but it fixed.
+                                  .tag("current.milliseconds", String.valueOf(System.currentTimeMillis()))
+                                  .start()
+                    );
                     return null;
                 }
             });
