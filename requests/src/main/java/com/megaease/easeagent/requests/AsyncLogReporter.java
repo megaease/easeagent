@@ -7,8 +7,10 @@ import com.megaease.easeagent.common.NamedDaemonThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.management.ManagementFactory;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
@@ -17,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import static com.alibaba.fastjson.serializer.SerializerFeature.DisableCircularReferenceDetect;
 
 class AsyncLogReporter implements Reporter {
-    private static final long START_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncLogReporter.class);
 
     private final BlockingQueue<TracedRequestEvent> queue;
@@ -60,11 +61,6 @@ class AsyncLogReporter implements Reporter {
             }
 
             @Override
-            public String getUniqueVisitorId() {
-                return "@Deprecated";
-            }
-
-            @Override
             public String getName() {
                 return context.getShortSignature();
             }
@@ -72,11 +68,6 @@ class AsyncLogReporter implements Reporter {
             @Override
             public String getType() {
                 return type;
-            }
-
-            @Override
-            public String getStatus() {
-                return getError() ? "Error" : "OK";
             }
 
             @Override
@@ -90,28 +81,8 @@ class AsyncLogReporter implements Reporter {
             }
 
             @Override
-            public String getCallStack() {
-                return "";
-            }
-
-            @Override
             public Context getCallStackJson() {
                 return context;
-            }
-
-            @Override
-            public Map<String, String> getHeaders() {
-                return headers;
-            }
-
-            @Override
-            public Map<String, String> getParameters() {
-                return queries;
-            }
-
-            @Override
-            public Map<String, String> getUserAgent() {
-                return Collections.singletonMap("@Deprecated", "@Deprecated");
             }
 
             @Override
@@ -127,11 +98,6 @@ class AsyncLogReporter implements Reporter {
             @Override
             public int getStatusCode() {
                 return status;
-            }
-
-            @Override
-            public long getBytesWritten() {
-                return -1;
             }
 
             @Override
@@ -174,16 +140,12 @@ class AsyncLogReporter implements Reporter {
                 return application;
             }
 
-            @Override
-            public long getStartTime() {
-                return START_TIME;
-            }
         };
 
         queue.offer(event);
     }
 
-    static long sum(Iterable<Long> ios) {
+    private static long sum(Iterable<Long> ios) {
         long sum = 0L;
         for (Long io : ios) {
             sum += io;
@@ -191,7 +153,7 @@ class AsyncLogReporter implements Reporter {
         return sum;
     }
 
-    static ImmutableList.Builder<Long> collectIo(Context context, ImmutableList.Builder<Long> builder) {
+    private static ImmutableList.Builder<Long> collectIo(Context context, ImmutableList.Builder<Long> builder) {
         final Iterable<Context> children = context.getChildren();
         if (Iterables.isEmpty(children) && context.getIoquery()) {
             builder.add(context.getExecutionTime());
