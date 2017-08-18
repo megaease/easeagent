@@ -38,9 +38,6 @@ public class MetricEventTest {
         assertThat(jsono.containsKey("m5_rate"), is(true));
         assertThat(jsono.containsKey("m15_rate"), is(true));
         assertThat(jsono.containsKey("mean_rate"), is(true));
-        assertThat(jsono.containsKey("m1_count"), is(true));
-        assertThat(jsono.containsKey("m5_count"), is(true));
-        assertThat(jsono.containsKey("m15_count"), is(true));
         assertThat(jsono.containsKey("min"), is(true));
         assertThat(jsono.containsKey("max"), is(true));
         assertThat(jsono.containsKey("mean"), is(true));
