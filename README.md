@@ -14,7 +14,7 @@ export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-xxx.jar=/path/to/application.c
 ## Use a customized log configuration
 
 ```
-export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j.xml -javaagent:easeagent-xxx.jar"
+export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j2.xml -javaagent:easeagent-xxx.jar"
 ```
 
 
