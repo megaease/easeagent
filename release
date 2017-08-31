@@ -1,11 +1,11 @@
 #! /bin/bash
 # After `mvn clean package -am -pl build`, this script can help you to release `easeagent-dep.jar` to github.
 
-RELEASE_URL="https://api.github.com/repos/hexdecteam/stagemonitor/releases/5497247"
-UPLOAD_URL="https://uploads.github.com/repos/hexdecteam/stagemonitor/releases/5497247/assets?name=easeagent-sm.jar"
+RELEASE_URL="https://api.github.com/repos/megaease/release/releases/7534404"
+UPLOAD_URL="https://uploads.github.com/repos/megaease/release/releases/7534404/assets?name=easeagent-0.2.x.jar"
 TOKEN=`cat ~/.github/pat/hexdecteam`
 AUTH_HEAD="Authorization: token $TOKEN"
-LIB_PATH="build/all/target/easeagent-dep.jar"
+LIB_PATH="build/target/easeagent-dep.jar"
 
 ASSET_URL=`curl -X GET -H "$AUTH_HEAD" "$RELEASE_URL" | jq --raw-output '.assets[0].url'`
 
@@ -17,8 +17,8 @@ MD5=`md5 -q $LIB_PATH`
 
 echo "Update easeagent hash: $MD5"
 
-curl -X PATCH -H "$AUTH_HEAD" -H "Content-Type: application/json" -d "{\"body\":\"MD5(easeagent-sm.jar) = \`$MD5\`\"}" "$RELEASE_URL" > /dev/null
+curl -X PATCH -H "$AUTH_HEAD" -H "Content-Type: application/json" -d "{\"body\":\"MD5(easeagent-0.2.x.jar) = \`$MD5\`\"}" "$RELEASE_URL" > /dev/null
 
-echo "Upload easeagent-sm.jar"
+echo "Upload easeagent-0.2.x.jar"
 
 curl -X POST -H "$AUTH_HEAD" -H "Content-Type: application/java-archive" --progress-bar --data-binary @$LIB_PATH "$UPLOAD_URL" > /dev/null
