@@ -45,6 +45,10 @@ class Context {
         return frame.<Context>context().stop(frame.children());
     }
 
+    static Context empty() {
+        return new Context(null, null, null, false, 0,0);
+    }
+
     private static Supplier<Context> supplier(final Class<?> aClass, final String method) {
         return new Supplier<Context>() {
             @Override

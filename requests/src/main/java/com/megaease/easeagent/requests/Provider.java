@@ -23,7 +23,7 @@ abstract class Provider {
     @Injection.Bean
     public Reporter reporter() {
         return new AsyncLogReporter(LoggerFactory.getLogger(reporter_name()), reporter_queue_capacity(), hostipv4(),
-                                    hostname(), system(), application(), type());
+                                    hostname(), system(), application(), type(), callstack());
     }
 
     @Configurable.Item
@@ -34,6 +34,11 @@ abstract class Provider {
     @Configurable.Item
     String type() {
         return "http_request";
+    }
+
+    @Configurable.Item
+    boolean callstack() {
+        return false;
     }
 
     @Configurable.Item
