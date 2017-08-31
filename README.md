@@ -1,23 +1,20 @@
 
 # Usage
 
+1. Download easeagent-xxx.jar from [here](https://github.com/megaease/release/releases/tag/easeagent)
+1. Setup `export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-xxx.jar"`, then run your java program with `$JAVA_OPTS`
+
+## Use a customized `application.conf`
 
 ```
-source /dev/stdin <<< "$(curl -SL https://git.io/vD7Bp)"
-java $JAVA_OPTS <rest of your command line>
-```
-
-## Use an `application.conf`
-
-```
-export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-sm.jar=/path/to/application.conf" 
+export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-xxx.jar=/path/to/application.conf" 
 ```
 
 
-## Use a log configuration file
+## Use a customized log configuration
 
 ```
-export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j2.xml -javaagent:easeagent-sm.jar"
+export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j.xml -javaagent:easeagent-xxx.jar"
 ```
 
 
@@ -27,4 +24,4 @@ export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j2.xml -javaagent
 mvn clean package -am -pl build
 ```
 
-A generated `./build/all/target/easeagent-sm.jar` is the java agent jar with all the dependencies.
+A generated `./build/target/easeagent-dep.jar` is the java agent jar with all the dependencies.
