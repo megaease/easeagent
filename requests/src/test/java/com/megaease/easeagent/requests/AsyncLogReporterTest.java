@@ -20,11 +20,11 @@ import static org.mockito.Mockito.verify;
 public class AsyncLogReporterTest {
     final Logger logger = mock(Logger.class);
     final CallTrace trace = new CallTrace();
-    final AsyncLogReporter reporter = new AsyncLogReporter(logger, 1, "ip", "hostname", "system", "application", "type");
     final Map<String, String> map = Collections.singletonMap("k", "v");
 
     @Test
     public void should_not_contain_call_tree() throws Exception {
+        final AsyncLogReporter reporter = new AsyncLogReporter(logger, 1, "ip", "hostname", "system", "application", "type", false);
         Context.pushIfRootCall(trace, HttpServlet.class, "service");
 
         final Context root = Context.pop(trace);
@@ -42,6 +42,7 @@ public class AsyncLogReporterTest {
 
     @Test
     public void should_contain_call_tree() throws Exception {
+        final AsyncLogReporter reporter = new AsyncLogReporter(logger, 1, "ip", "hostname", "system", "application", "type", true);
         Context.pushIfRootCall(trace, HttpServlet.class, "service");
 
         Context.forkCall(trace, String.class, "toString");

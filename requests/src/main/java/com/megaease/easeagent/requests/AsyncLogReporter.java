@@ -27,9 +27,10 @@ class AsyncLogReporter implements Reporter {
     private final String system;
     private final String application;
     private final String type;
+    private final boolean callstack;
     private final Logger logger;
 
-    AsyncLogReporter(Logger logger, int capacity, String hostipv4, String hostname, String system, String application, String type) {
+    AsyncLogReporter(Logger logger, int capacity, String hostipv4, String hostname, String system, String application, String type, boolean callstack) {
         this.logger = logger;
         this.queue = new ArrayBlockingQueue<TracedRequestEvent>(capacity);
         this.hostipv4 = hostipv4;
@@ -37,6 +38,7 @@ class AsyncLogReporter implements Reporter {
         this.system = system;
         this.application = application;
         this.type = type;
+        this.callstack = callstack;
 
         Executors.newSingleThreadExecutor(new NamedDaemonThreadFactory("easeagent-requests-report")).submit(new LoggingDaemon());
     }
@@ -82,12 +84,12 @@ class AsyncLogReporter implements Reporter {
 
             @Override
             public Context getCallStackJson() {
-                return context;
+                return callstack ? context : Context.empty();
             }
 
             @Override
             public boolean getContainsCallTree() {
-                return context.getChildren().size() > 0;
+                return !getCallStackJson().getChildren().isEmpty();
             }
 
             @Override
