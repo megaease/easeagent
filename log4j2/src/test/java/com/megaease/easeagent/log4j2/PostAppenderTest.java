@@ -74,4 +74,27 @@ public class PostAppenderTest {
         });
     }
 
+    @Test
+    public void should_close_abnormal_connection() throws Exception {
+        final HttpServer server = httpServer(8080, log());
+        server.post(and(
+                by(uri("/requests")),
+                eq(header("Content-Type"), "text/plain"),
+                by(text("message"))
+        )).response(status(200));
+        server.post(and(
+                by(uri("/requests")),
+                eq(header("Content-Type"), "text/plain"),
+                by(text("error"))
+        )).response(status(503));
+
+        running(server, new Runnable() {
+            public void run() throws Exception {
+                LogManager.getLogger("http").info("error");
+                Thread.sleep(1100);
+                LogManager.getLogger("http").info("message");
+            }
+        });
+
+    }
 }

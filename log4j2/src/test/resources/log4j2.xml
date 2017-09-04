@@ -6,13 +6,18 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>
         </Console>
+        <Failover name="Failover" primary="http" retryIntervalSeconds="1">
+            <Failovers>
+                <AppenderRef ref="Console"/>
+            </Failovers>
+        </Failover>
     </Appenders>
     <Loggers>
         <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>
         <Logger name="http" level="info" additivity="false">
-            <AppenderRef ref="http"/>
+            <AppenderRef ref="Failover"/>
         </Logger>
         <Logger name="https" level="info" additivity="false">
             <AppenderRef ref="https"/>
