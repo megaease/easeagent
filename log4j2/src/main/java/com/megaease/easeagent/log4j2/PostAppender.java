@@ -92,6 +92,7 @@ public class PostAppender extends AbstractAppender {
     private static OkHttpClient client(boolean compress) {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (compress) builder.addInterceptor(new GzipRequestInterceptor());
+        builder.addNetworkInterceptor(new CloseAbnormalConnectionInterceptor());
         return builder.build();
     }
 
@@ -195,4 +196,14 @@ public class PostAppender extends AbstractAppender {
         }
     }
 
+    private static class CloseAbnormalConnectionInterceptor implements Interceptor {
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            final Response response = chain.proceed(chain.request());
+            if (!response.isSuccessful()) {
+                chain.connection().socket().close();
+            }
+            return response;
+        }
+    }
 }
