@@ -75,7 +75,7 @@ public class PostAppenderTest {
     }
 
     @Test
-    public void should_close_abnormal_connection() throws Exception {
+    public void should_failover_exception() throws Exception {
         final HttpServer server = httpServer(8080, log());
         server.post(and(
                 by(uri("/requests")),
