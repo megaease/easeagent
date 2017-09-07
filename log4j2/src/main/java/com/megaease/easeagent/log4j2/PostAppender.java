@@ -79,6 +79,7 @@ public class PostAppender extends AbstractAppender {
             @Required @PluginAttribute("contentType") final String contentType,
             @Required @PluginAttribute("userAgent") final String userAgent,
             @PluginAttribute("compress") final boolean compress,
+            @PluginAttribute("reconnect") final boolean reconnect,
             @PluginElement("Headers") final Header[] headers
 
     ) throws Exception {
@@ -86,13 +87,13 @@ public class PostAppender extends AbstractAppender {
         for (Header header : headers) {
             builder.header(header.name, header.value);
         }
-        return new PostAppender(name, filter, layout, ignore, client(compress), builder, MediaType.parse(contentType));
+        return new PostAppender(name, filter, layout, ignore, client(compress, reconnect), builder, MediaType.parse(contentType));
     }
 
-    private static OkHttpClient client(boolean compress) {
+    private static OkHttpClient client(boolean compress, boolean reconnect) {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (compress) builder.addInterceptor(new GzipRequestInterceptor());
-        builder.addNetworkInterceptor(new CloseAbnormalConnectionInterceptor());
+        if (reconnect) builder.addNetworkInterceptor(new CloseAbnormalConnectionInterceptor());
         return builder.build();
     }
 
