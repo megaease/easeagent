@@ -81,16 +81,11 @@ public class PostAppenderTest {
                 by(uri("/requests")),
                 eq(header("Content-Type"), "text/plain"),
                 by(text("message"))
-        )).response(status(200));
-        server.post(and(
-                by(uri("/requests")),
-                eq(header("Content-Type"), "text/plain"),
-                by(text("error"))
-        )).response(status(503));
+        )).response(seq(status(503),status(200)));
 
         running(server, new Runnable() {
             public void run() throws Exception {
-                LogManager.getLogger("http").info("error");
+                LogManager.getLogger("http").info("message");
                 Thread.sleep(1100);
                 LogManager.getLogger("http").info("message");
             }

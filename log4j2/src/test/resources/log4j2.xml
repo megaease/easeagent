@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <Http name="http" uri="http://localhost:8080/requests" contentType="text/plain" userAgent="iOS/x.x.x" reconnect="true"/>
+        <Http name="http" uri="http://localhost:8080/requests" contentType="text/plain" userAgent="iOS/x.x.x" />
         <Http name="https" uri="https://localhost:8443/requests" contentType="text/plain" userAgent="iOS/x.x.x"/>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>
         </Console>
-        <Failover name="Failover" primary="http" retryIntervalSeconds="1">
+        <Failover name="failover" primary="http" retryIntervalSeconds="1">
             <Failovers>
                 <AppenderRef ref="Console"/>
             </Failovers>
@@ -17,7 +17,7 @@
             <AppenderRef ref="Console"/>
         </Root>
         <Logger name="http" level="info" additivity="false">
-            <AppenderRef ref="Failover"/>
+            <AppenderRef ref="failover"/>
         </Logger>
         <Logger name="https" level="info" additivity="false">
             <AppenderRef ref="https"/>
