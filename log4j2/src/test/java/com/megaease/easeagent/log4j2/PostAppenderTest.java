@@ -74,4 +74,22 @@ public class PostAppenderTest {
         });
     }
 
+    @Test
+    public void should_failover_exception() throws Exception {
+        final HttpServer server = httpServer(8080, log());
+        server.post(and(
+                by(uri("/requests")),
+                eq(header("Content-Type"), "text/plain"),
+                by(text("message"))
+        )).response(seq(status(503),status(200)));
+
+        running(server, new Runnable() {
+            public void run() throws Exception {
+                LogManager.getLogger("http").info("message");
+                Thread.sleep(1100);
+                LogManager.getLogger("http").info("message");
+            }
+        });
+
+    }
 }

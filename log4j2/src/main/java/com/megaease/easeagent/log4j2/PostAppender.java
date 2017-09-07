@@ -194,5 +194,4 @@ public class PostAppender extends AbstractAppender {
             };
         }
     }
-
 }

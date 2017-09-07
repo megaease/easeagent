@@ -14,16 +14,26 @@
         </RollingFile>
         <Http name="post-requests" uri="${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
         <Http name="post-metrics" uri="${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>
+        <Failover name="failover-requests" primary="post-request" retryIntervalSeconds="1">
+            <Failovers>
+                <AppenderRef ref="RollingFile"/>
+            </Failovers>
+        </Failover>
+        <Failover name="failover-metrics" primary="post-metrics" retryIntervalSeconds="1">
+            <Failovers>
+                <AppenderRef ref="RollingFile"/>
+            </Failovers>
+        </Failover>
     </Appenders>
     <Loggers>
         <Root level="debug">
             <AppenderRef ref="RollingFile"/>
         </Root>
         <Logger name="metrics" level="info" additivity="false">
-            <AppenderRef ref="post-metrics"/>
+            <AppenderRef ref="failover-metrics"/>
         </Logger>
         <Logger name="requests" level="info" additivity="false">
-            <AppenderRef ref="post-requests"/>
+            <AppenderRef ref="failover-requests"/>
         </Logger>
     </Loggers>
 </Configuration>
