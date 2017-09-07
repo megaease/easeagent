@@ -47,11 +47,11 @@ public class PostAppenderTest {
         thrown.expect(AppenderLoggingException.class);
         thrown.expectCause(IsInstanceOf.<Throwable>instanceOf(ConnectException.class));
         try {
-            LogManager.getLogger("http").info("message");
+            LogManager.getLogger("https").info("message");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LogManager.getLogger("http").info("message");
+        LogManager.getLogger("https").info("message");
     }
 
     @Test
