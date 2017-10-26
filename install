@@ -1,0 +1,20 @@
+#! /bin/bash
+
+# This script for install easeagent in your host.
+
+CUR=`pwd`
+
+function download() {
+    curl -Lk https://github.com/megaease/release/releases/download/easeagent/easeagent.jar -O
+}
+
+function extract_configuration() {
+    jar vxf easeagent.jar application.conf log4j2.xml
+}
+
+function setup_javaopts() {
+    export JAVA_OPTS="${JAVA_OPTS} -javaagent:$CUR/easeagent.jar=$CUR/application.conf -Deaseagent.log.conf=$CUR/log4j2.xml"
+    echo "Export JAVA_OPTS=$JAVA_OPTS"
+}
+
+download && extract_configuration && setup_javaopts && echo "Done."
