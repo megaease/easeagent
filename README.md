@@ -1,22 +1,30 @@
 
-# Usage
+# Installation
 
-1. Download easeagent-xxx.jar from [here](https://github.com/megaease/release/releases/tag/easeagent)
-1. Setup `export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-xxx.jar"`, then run your java program with `$JAVA_OPTS`
 
-## Use a customized `application.conf`
+## Download 
 
 ```
-export JAVA_OPTS="$JAVA_OPTS -javaagent:easeagent-xxx.jar=/path/to/application.conf" 
+curl -Lk https://github.com/megaease/release/releases/download/easeagent/easeagent.jar -O
 ```
 
+> **How to get the version of easeagent?**
+> 
+> `unzip -p easeagent.jar git.properties`
 
-## Use a customized log configuration
+## Extract default configuration files
 
 ```
-export JAVA_OPTS="$JAVA_OPTS -Deaseagent.log.conf=/path/to/log4j2.xml -javaagent:easeagent-xxx.jar"
+jar xf easeagent.jar application.conf log4j2.xml
 ```
 
+## Setup JAVA_OPTS, then run your java program with `$JAVA_OPTS`
+
+```
+export JAVA_OPTS="${JAVA_OPTS} -javaagent:/path/to/easeagent.jar=/path/to/application.conf -Deaseagent.log.conf=/path/to/log4j2.xml"
+```
+
+> Use `CATALINA_OPTS` instead when tomcat was used.
 
 # Build from source
 
@@ -25,3 +33,4 @@ mvn clean package -am -pl build
 ```
 
 A generated `./build/target/easeagent-dep.jar` is the java agent jar with all the dependencies.
+
