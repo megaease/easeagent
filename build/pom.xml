@@ -115,6 +115,9 @@
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
                     </generateGitPropertiesFilename>
+                    <includeOnlyProperties>
+                         <includeOnlyProperty>git.commit.*</includeOnlyProperty>
+                    </includeOnlyProperties>
                 </configuration>
             </plugin>
             <plugin>
