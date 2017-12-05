@@ -47,6 +47,7 @@ abstract class Provider {
 
     private AsyncReporter<Span> reporter(Sender sender) {
         return AsyncReporter.builder(sender)
+                            .metrics(new ErrorReporterMetrics())
                             .queuedMaxSpans(reporter_queued_max_spans())
                             .messageTimeout(reporter_message_timeout_seconds(), SECONDS)
                             .build(encoder());
@@ -117,7 +118,7 @@ abstract class Provider {
 
     @Configurable.Item
     int message_max_bytes() {
-        return 5 * 1024 * 1024;
+        return 1024 * 1024;
     }
 
     @Configurable.Item

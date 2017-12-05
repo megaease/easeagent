@@ -1,7 +1,5 @@
 package com.megaease.easeagent.zipkin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import zipkin.reporter.BytesMessageEncoder;
 import zipkin.reporter.Callback;
 import zipkin.reporter.Encoding;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 class GatewaySender implements Sender {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GatewaySender.class);
 
     private final Encoding encoding;
     private final int messageMaxBytes;
