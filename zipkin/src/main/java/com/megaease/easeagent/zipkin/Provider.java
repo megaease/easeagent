@@ -117,7 +117,7 @@ abstract class Provider {
 
     @Configurable.Item
     int message_max_bytes() {
-        return 5 * 1024 * 10240;
+        return 5 * 1024 * 1024;
     }
 
     @Configurable.Item

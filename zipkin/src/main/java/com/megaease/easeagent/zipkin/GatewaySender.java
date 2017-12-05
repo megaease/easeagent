@@ -111,24 +111,22 @@ class GatewaySender implements Sender {
         connection.getOutputStream().write(body);
 
         try {
+            discard(connection.getInputStream());
             final int code = connection.getResponseCode();
-            InputStream in = connection.getInputStream();
-            try {
-                while (in.read() != -1) ; // skip
-            } finally {
-                in.close();
-            }
             if (code >= 400) throw new IOException(connection.getResponseMessage());
-        } catch (IOException e) {
+        } finally {
             InputStream err = connection.getErrorStream();
             if (err != null) { // possible, if the connection was dropped
-                try {
-                    while (err.read() != -1) ; // skip
-                } finally {
-                    err.close();
-                }
+                discard(err);
             }
-            LOGGER.error("Send failed", e);
+        }
+    }
+
+    private void discard(InputStream in) throws IOException {
+        try {
+            while (in.read() != -1) ; // skip
+        } finally {
+            in.close();
         }
     }
 
