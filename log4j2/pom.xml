@@ -32,6 +32,12 @@
             <version>3.6.0</version>
         </dependency>
         <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${disruptorVersion}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.dreamhead</groupId>
             <artifactId>moco-core</artifactId>
             <version>0.10.2</version>
