@@ -34,3 +34,30 @@ mvn clean package -am -pl build
 
 A generated `./build/target/easeagent-dep.jar` is the java agent jar with all the dependencies.
 
+
+# Configuration
+
+configurations can be configured by environment, examples:
+[Service name as application of easeagent](https://github.com/megaease/spring-petclinic-microservices/blob/master/entrypoint/application.conf#L3)
+
+Examples:
+[spring petclinic microservices demo](https://github.com/megaease/spring-petclinic-microservices/blob/master/entrypoint/application.conf)
+
+Some options:
+## Enable callstack
+```
+requests {
+  report = ${host.info} {
+    callstack = true
+  }
+  ...
+}
+```
+## Enable zipkin
+configure service_name and send_endpoint
+```
+zipkin.tracer = ${host.info} {
+  service_name = ${SERVICE_NAME}
+  send_endpoint = "https://gateway.easeapm.com:10443/v1/zipkin_spans"
+}
+```
