@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
-            <version>${disruptorVersion}</version>
+            <version>${version.disruptor}</version>
         </dependency>
 
         <dependency>
