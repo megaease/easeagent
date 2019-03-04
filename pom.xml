@@ -36,6 +36,7 @@
         <version.servlet>3.1.0</version.servlet>
         <version.brave>4.0.6</version.brave>
         <version.moco>0.11.0</version.moco>
+        <version.disruptor>3.3.11</version.disruptor>
     </properties>
 
     <dependencies>
