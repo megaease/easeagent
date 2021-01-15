@@ -47,7 +47,7 @@ public class AsyncLogReporterTest {
         final Context root = Context.pop(trace);
 
         reporter.report("/", "GET", 200, map, map, root);
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(logger).info(eq("{}\n"), captor.capture());

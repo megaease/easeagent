@@ -24,13 +24,17 @@ import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
-import com.mysql.jdbc.MySQLConnection;
+import com.mysql.cj.NativeSession;
+import com.mysql.cj.conf.HostInfo;
+import com.mysql.cj.jdbc.*;
+import com.mysql.cj.protocol.a.NativeServerSession;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import zipkin.BinaryAnnotation;
 import zipkin.Span;
 import zipkin.reporter.Reporter;
 
+import java.lang.reflect.Method;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.util.AbstractMap;
@@ -52,23 +56,37 @@ public class TraceJdbcStatementTest {
         final Reporter<Span> reporter = mock(Reporter.class);
         final Tracer tracer = tracer(reporter);
         final ClassLoader loader = getClass().getClassLoader();
-        final String name = "com.mysql.jdbc.PreparedStatement";
+        final String name = "com.mysql.cj.jdbc.ClientPreparedStatement";
 
         trace.push(tracer.newTrace().start());
 
         final Definition.Default def = new GenTraceJdbcStatement().define(Definition.Default.EMPTY);
-        final Class<?> aClass = Classes.transform(name)
-                                       .with(def, trace, new ForwardLock(), tracer)
-                                       .load(loader).get(0);
+        Classes.transform(name)
+                .with(def, trace, new ForwardLock(), tracer).load(loader);
 
-        final MySQLConnection conn = mock(MySQLConnection.class, RETURNS_DEEP_STUBS);
+        final ConnectionImpl conn = mock(ConnectionImpl.class, RETURNS_DEEP_STUBS);
         final DatabaseMetaData metaData = mock(DatabaseMetaData.class);
         when(metaData.getURL()).thenReturn(JDBC_URL);
         when(conn.getMetaData()).thenReturn(metaData);
 
-        final PreparedStatement stat = (PreparedStatement) aClass
-                .getConstructor(MySQLConnection.class, String.class, String.class)
-                .newInstance(conn, "sql", "cat");
+        //mock server info
+        JdbcPropertySet jdbcPropertySet = new JdbcPropertySetImpl();
+        when(conn.getPropertySet()).thenReturn(jdbcPropertySet);
+        HostInfo hostInfo = new HostInfo();
+        NativeSession nativeSession = new NativeSession(hostInfo, jdbcPropertySet);
+        nativeSession = spy(nativeSession);
+        doReturn(new NativeServerSession(jdbcPropertySet)).when(nativeSession).getServerSession();
+        when(conn.getSession()).thenReturn(nativeSession);
+
+        /*
+         * In mysql-connector version>=8, com.mysql.cj.PreparedStatement is deleted.
+         * We can use ClientPreparedStatement for test. But ClientPreparedStatement not has public constructor.
+         * We can use protected static getInstance method by reflect.
+         */
+        Method method = ClientPreparedStatement.class.getDeclaredMethod(
+                "getInstance", JdbcConnection.class, String.class, String.class);
+        method.setAccessible(true);
+        PreparedStatement stat = (PreparedStatement) method.invoke(null, conn, "sql", "cat");
 
         try { stat.execute(); } catch (Exception ignore) { }
 
