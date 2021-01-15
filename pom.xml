@@ -23,7 +23,7 @@
     <properties>
         <encoding.file>UTF-8</encoding.file>
         <version.java>1.6</version.java>
-        <version.junit>4.12</version.junit>
+        <version.junit>4.13.1</version.junit>
         <version.mockito>1.10.19</version.mockito>
         <version.guava>20.0</version.guava>
         <version.slf4j>1.7.21</version.slf4j>
