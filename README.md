@@ -61,3 +61,6 @@ zipkin.tracer = ${host.info} {
   send_endpoint = "https://gateway.easeapm.com:10443/v1/zipkin_spans"
 }
 ```
+# Licensing
+
+EaseAgent is licensed under the Apache License, Version 2.0. See (LICENSE.md)[./LICENSE.md] for the full license text.
