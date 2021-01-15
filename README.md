@@ -63,4 +63,4 @@ zipkin.tracer = ${host.info} {
 ```
 # Licensing
 
-EaseAgent is licensed under the Apache License, Version 2.0. See (LICENSE.md)[./LICENSE.md] for the full license text.
+EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
