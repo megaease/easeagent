@@ -20,16 +20,20 @@
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
-import com.mysql.jdbc.MySQLConnection;
+import com.mysql.cj.NativeSession;
+import com.mysql.cj.conf.HostInfo;
+import com.mysql.cj.jdbc.*;
+import com.mysql.cj.protocol.a.NativeServerSession;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 public class CaptureExecuteSqlTest {
 
@@ -40,13 +44,33 @@ public class CaptureExecuteSqlTest {
         final ClassLoader loader = getClass().getClassLoader();
         final CallTrace trace = new CallTrace();
 
-        final List<Class<?>> classes = Classes.transform("com.mysql.jdbc.StatementImpl", "com.mysql.jdbc.PreparedStatement")
-                                              .with(new GenCaptureExecuteSql().define(Definition.Default.EMPTY), trace)
-                                              .load(loader);
+        Classes.transform("com.mysql.cj.jdbc.StatementImpl", "com.mysql.cj.jdbc.ClientPreparedStatement")
+                .with(new GenCaptureExecuteSql().define(Definition.Default.EMPTY), trace)
+                .load(loader);
 
-        final PreparedStatement stat = (PreparedStatement) classes
-                .get(1).getConstructor(MySQLConnection.class, String.class, String.class)
-                .newInstance(mock(MySQLConnection.class, RETURNS_DEEP_STUBS), sql0, "cat");
+//        final PreparedStatement stat = (PreparedStatement) classes
+//                .get(1).getConstructor(MySQLConnection.class, String.class, String.class)
+//                .newInstance(mock(MySQLConnection.class, RETURNS_DEEP_STUBS), sql0, "cat");
+
+        //mock server info
+        final ConnectionImpl conn = mock(ConnectionImpl.class, RETURNS_DEEP_STUBS);
+        JdbcPropertySet jdbcPropertySet = new JdbcPropertySetImpl();
+        when(conn.getPropertySet()).thenReturn(jdbcPropertySet);
+        HostInfo hostInfo = new HostInfo();
+        NativeSession nativeSession = new NativeSession(hostInfo, jdbcPropertySet);
+        nativeSession = spy(nativeSession);
+        doReturn(new NativeServerSession(jdbcPropertySet)).when(nativeSession).getServerSession();
+        when(conn.getSession()).thenReturn(nativeSession);
+
+        /*
+         * In mysql-connector version>=8, com.mysql.cj.PreparedStatement is deleted.
+         * We can use ClientPreparedStatement for test. But ClientPreparedStatement not has public constructor.
+         * We can use protected static getInstance method by reflect.
+         */
+        Method method = ClientPreparedStatement.class.getDeclaredMethod(
+                "getInstance", JdbcConnection.class, String.class, String.class);
+        method.setAccessible(true);
+        PreparedStatement stat = (PreparedStatement) method.invoke(null, conn, sql0, "cat");
 
         Context.pushIfRootCall(trace, CaptureExecuteSqlTest.class, "should_capture_method_without_sql");
         try { stat.execute(); } catch (Exception ignore) { }
@@ -56,7 +80,7 @@ public class CaptureExecuteSqlTest {
 
         final Context context0 = children.get(0);
         assertThat(context0.getSignature(), is(sql0));
-        assertThat(context0.getShortSignature(), is("PreparedStatement#execute"));
+        assertThat(context0.getShortSignature(), is("ClientPreparedStatement#execute"));
         assertThat(context0.getIoquery(), is(true));
 
         final Context context1 = children.get(1);
