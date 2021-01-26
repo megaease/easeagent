@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <Http name="http" uri="http://localhost:8080/requests" contentType="text/plain" userAgent="iOS/x.x.x" />
-        <Http name="https" uri="https://localhost:8443/requests" contentType="text/plain" userAgent="iOS/x.x.x"/>
+        <EaseHttp name="http" uri="http://localhost:8080/requests" contentType="text/plain; charset=utf-8"
+                  userAgent="iOS/x.x.x"/>
+        <EaseHttp name="https" uri="https://localhost:8443/requests" contentType="text/plain; charset=utf-8"
+                  userAgent="iOS/x.x.x"/>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>
         </Console>

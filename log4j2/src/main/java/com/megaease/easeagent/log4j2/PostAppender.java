@@ -15,36 +15,36 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.log4j2;
+package com.megaease.easeagent.log4j2;
 
 import okhttp3.*;
-import okhttp3.internal.Util;
-import okio.*;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.LogEvent;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.GzipSink;
+import okio.Okio;
+import org.apache.logging.log4j.core.*;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.appender.AppenderLoggingException;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.*;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
-@Plugin(name = "Http", category = "Core", elementType = Appender.ELEMENT_TYPE, printObject = true)
+@Plugin(name = "EaseHttp", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
 public class PostAppender extends AbstractAppender {
 
-    private static final Charset UTF8 = Charset.forName("UTF-8");
     private final OkHttpClient client;
     private final Request.Builder builder;
     private final MediaType contentType;
 
     public PostAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignore,
                         OkHttpClient client, Request.Builder builder, MediaType contentType) {
-        super(name, filter, layout, ignore);
+        super(name, filter, layout, ignore, new Property[]{});
         this.client = client;
         this.builder = builder;
         this.contentType = contentType;
@@ -52,14 +52,10 @@ public class PostAppender extends AbstractAppender {
 
     public void append(LogEvent event) {
         final String content = event.getMessage().getFormattedMessage();
-        final ByteString bs = ByteString.encodeString(content, Util.UTF_8);
-        final RequestBody body = RequestBody.create(contentType, bs);
-
-        try {
-            final Request request = builder.post(body).build();
-            final Response response = client.newCall(request).execute();
+        RequestBody body = RequestBody.create(content, contentType);
+        final Request request = builder.post(body).build();
+        try (final Response response = client.newCall(request).execute()) {
             final boolean successful = response.isSuccessful();
-            response.close();
             if (!successful) {
                 throw new AppenderLoggingException(describe(request, response));
             }
@@ -73,8 +69,9 @@ public class PostAppender extends AbstractAppender {
         try {
             final Buffer sink = new Buffer();
             request.body().writeTo(sink);
-            body = sink.readString(UTF8);
-        } catch (IOException ignore) { }
+            body = sink.readString(StandardCharsets.UTF_8);
+        } catch (IOException ignore) {
+        }
         return String.format("%d %s -> %s %s\n%s\n%s"
                 , response.code()
                 , response.message()
@@ -98,7 +95,7 @@ public class PostAppender extends AbstractAppender {
             @PluginAttribute("compress") final boolean compress,
             @PluginElement("Headers") final Header[] headers
 
-    ) throws Exception {
+    ) {
         final Request.Builder builder = new Request.Builder().url(uri).header("User-Agent", userAgent);
         for (Header header : headers) {
             builder.header(header.name, header.value);
@@ -137,7 +134,7 @@ public class PostAppender extends AbstractAppender {
 
             Header header = (Header) o;
 
-            return value != null ? value.equals(header.value) : header.value == null;
+            return Objects.equals(value, header.value);
         }
 
         @Override
@@ -160,9 +157,9 @@ public class PostAppender extends AbstractAppender {
             }
 
             Request compressedRequest = originalRequest.newBuilder()
-                                                       .header("Content-Encoding", "gzip")
-                                                       .method(originalRequest.method(), forceContentLength(gzip(originalRequest.body())))
-                                                       .build();
+                    .header("Content-Encoding", "gzip")
+                    .method(originalRequest.method(), forceContentLength(gzip(originalRequest.body())))
+                    .build();
             return chain.proceed(compressedRequest);
         }
 
