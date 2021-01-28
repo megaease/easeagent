@@ -38,10 +38,10 @@
 
     <properties>
         <encoding.file>UTF-8</encoding.file>
-        <version.java>1.6</version.java>
+        <version.java>8</version.java>
         <version.junit>4.13.1</version.junit>
         <version.mockito>1.10.19</version.mockito>
-        <version.guava>20.0</version.guava>
+        <version.guava>30.1-jre</version.guava>
         <version.slf4j>1.7.21</version.slf4j>
         <version.byte-buddy>1.6.13</version.byte-buddy>
         <version.auto-service>1.0-rc2</version.auto-service>
@@ -51,7 +51,7 @@
         <version.fastjson>1.2.31</version.fastjson>
         <version.servlet>3.1.0</version.servlet>
         <version.brave>4.0.6</version.brave>
-        <version.moco>0.11.0</version.moco>
+        <version.moco>1.1.0</version.moco>
         <version.disruptor>3.4.2</version.disruptor>
     </properties>
 

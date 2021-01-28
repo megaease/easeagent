@@ -12,8 +12,8 @@
             </PatternLayout>
             <TimeBasedTriggeringPolicy />
         </RollingFile>
-        <Http name="post-requests" uri="${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
-        <Http name="post-metrics" uri="${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>
+        <EaseHttp name="post-requests" uri="${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
+        <EaseHttp name="post-metrics" uri="${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>
         <Failover name="failover-requests" primary="post-requests" retryIntervalSeconds="1">
             <Failovers>
                 <AppenderRef ref="RollingFile"/>
