@@ -52,7 +52,7 @@ public class PostAppender extends AbstractAppender {
 
     public void append(LogEvent event) {
         final String content = event.getMessage().getFormattedMessage();
-        RequestBody body = RequestBody.create(content, contentType);
+        final RequestBody body = RequestBody.create(content, contentType);
         final Request request = builder.post(body).build();
         try (final Response response = client.newCall(request).execute()) {
             final boolean successful = response.isSuccessful();
