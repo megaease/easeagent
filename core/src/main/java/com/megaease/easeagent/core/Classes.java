@@ -25,6 +25,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 
@@ -88,7 +89,7 @@ public class Classes {
                                 for (AgentBuilder.Transformer transformer : transformers.get(matcher)) {
                                     builder = transformer.transform(builder, input, loader, null);
                                 }
-                                return builder.make().load(loader).getLoaded();
+                                return builder.make().load(loader, ClassLoadingStrategy.Default.INJECTION).getLoaded();
                             }
                         }
                         return null;

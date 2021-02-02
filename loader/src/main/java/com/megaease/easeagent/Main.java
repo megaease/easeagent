@@ -17,6 +17,7 @@
 
  package com.megaease.easeagent;
 
+import com.google.common.collect.Lists;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.JarFileArchive;
@@ -29,7 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -90,13 +91,10 @@ public class Main {
     }
 
     private static URL[] nestArchiveUrls(Archive archive) throws IOException {
-        final List<Archive> archives = archive.getNestedArchives(new Archive.EntryFilter() {
-            @Override
-            public boolean matches(Archive.Entry e) {
-                return !e.isDirectory() && e.getName().startsWith(LIB);
-            }
-        });
-
+        ArrayList<Archive> archives = Lists.newArrayList(
+                archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(LIB),
+                        entry -> true
+                ));
         final URL[] urls = new URL[archives.size()];
 
         for (int i = 0; i < urls.length; i++) {

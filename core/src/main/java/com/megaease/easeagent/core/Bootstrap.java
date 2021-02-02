@@ -29,6 +29,7 @@ import net.bytebuddy.agent.builder.AgentBuilder.Default;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.DynamicType.Builder;
+import net.bytebuddy.dynamic.loading.ClassInjector;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
 import org.slf4j.Logger;
@@ -37,7 +38,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +55,7 @@ public class Bootstrap {
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
         final long begin = System.nanoTime();
 
-        LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst));
+        LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
 
         final Config conf = load(args);
 
@@ -102,8 +105,7 @@ public class Bootstrap {
 
             for (Map.Entry<ElementMatcher<? super TypeDescription>, Iterable<Definition.Transformer>> entry :
                     newInstance(conf, tc).define(Definition.Default.EMPTY).asMap().entrySet()) {
-
-                ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register)).asDecorator();
+                ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register)).asTerminalTransformation();
             }
 
             LOGGER.debug("Defined {}", tc);
@@ -112,7 +114,7 @@ public class Bootstrap {
     }
 
     private static AgentBuilder.Transformer compound(Iterable<Definition.Transformer> transformers, final Register register) {
-        return new AgentBuilder.Transformer.Compound(from(transformers).transform(
+        return new CompoundTransformer(from(transformers).transform(
                 new Function<Definition.Transformer, AgentBuilder.Transformer>() {
                     @Override
                     public AgentBuilder.Transformer apply(final Definition.Transformer input) {
@@ -157,6 +159,10 @@ public class Bootstrap {
     private static final AgentBuilder.Listener LISTENER = new AgentBuilder.Listener() {
 
         @Override
+        public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
+        }
+
+        @Override
         public void onTransformation(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded, DynamicType dt) {
             LOGGER.debug("Transform {} from {}", td, ld);
         }
@@ -168,7 +174,7 @@ public class Bootstrap {
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-            LOGGER.error(name, error);
+            LOGGER.error("onError {}, {}", name, error);
         }
 
         @Override
@@ -193,6 +199,30 @@ public class Bootstrap {
         public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
             register.apply(adviceFactoryClassName, cl);
             return transformer.transform(b, td, cl, m);
+        }
+    }
+
+    private static class CompoundTransformer implements AgentBuilder.Transformer {
+
+        private final List<AgentBuilder.Transformer> transformers;
+
+        public CompoundTransformer(List<AgentBuilder.Transformer> transformers) {
+            this.transformers = new ArrayList<>();
+            for (AgentBuilder.Transformer transformer : transformers) {
+                if (transformer instanceof CompoundTransformer) {
+                    this.transformers.addAll(((CompoundTransformer) transformer).transformers);
+                    continue;
+                }
+                this.transformers.add(transformer);
+            }
+        }
+
+        @Override
+        public Builder<?> transform(Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+            for (AgentBuilder.Transformer transformer : this.transformers) {
+                builder = transformer.transform(builder, typeDescription, classLoader, module);
+            }
+            return builder;
         }
     }
 }

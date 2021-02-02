@@ -24,7 +24,7 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
-import net.bytebuddy.dynamic.loading.ClassInjector.UsingInstrumentation;
+import net.bytebuddy.dynamic.loading.ClassInjector;
 import net.bytebuddy.pool.TypePool;
 
 import java.io.File;
@@ -42,7 +42,6 @@ import java.util.Set;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Collections.list;
-import static net.bytebuddy.dynamic.loading.ClassInjector.UsingInstrumentation.Target.BOOTSTRAP;
 
 public final class AppendBootstrapClassLoaderSearch {
     private static final File TMP_FILE = new File(AccessController.doPrivileged(
@@ -52,9 +51,9 @@ public final class AppendBootstrapClassLoaderSearch {
             })
     );
 
-    static Set<String> by(Instrumentation inst) throws IOException {
+    static Set<String> by(Instrumentation inst, ClassInjector.UsingInstrumentation.Target target) throws IOException {
         final Set<String> names = findClassAnnotatedAutoService(AppendBootstrapClassLoaderSearch.class);
-        UsingInstrumentation.of(TMP_FILE, BOOTSTRAP, inst).inject(types(names));
+        ClassInjector.UsingInstrumentation.of(TMP_FILE, target, inst).inject(types(names));
         return names;
     }
 
