@@ -46,11 +46,8 @@ public class CaptureExecuteSqlTest {
 
         Classes.transform("com.mysql.cj.jdbc.StatementImpl", "com.mysql.cj.jdbc.ClientPreparedStatement")
                 .with(new GenCaptureExecuteSql().define(Definition.Default.EMPTY), trace)
-                .load(loader);
-
-//        final PreparedStatement stat = (PreparedStatement) classes
-//                .get(1).getConstructor(MySQLConnection.class, String.class, String.class)
-//                .newInstance(mock(MySQLConnection.class, RETURNS_DEEP_STUBS), sql0, "cat");
+                .load(loader)
+        ;
 
         //mock server info
         final ConnectionImpl conn = mock(ConnectionImpl.class, RETURNS_DEEP_STUBS);
