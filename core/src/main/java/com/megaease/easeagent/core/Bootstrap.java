@@ -105,7 +105,7 @@ public class Bootstrap {
 
             for (Map.Entry<ElementMatcher<? super TypeDescription>, Iterable<Definition.Transformer>> entry :
                     newInstance(conf, tc).define(Definition.Default.EMPTY).asMap().entrySet()) {
-                ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register)).asTerminalTransformation();
+                ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register));
             }
 
             LOGGER.debug("Defined {}", tc);
