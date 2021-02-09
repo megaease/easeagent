@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.zipkin;
+package com.megaease.easeagent.zipkin;
 
 import brave.Tracer;
-import com.google.common.base.Function;
+import brave.Tracing;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
@@ -33,21 +33,15 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import zipkin.BinaryAnnotation;
-import zipkin.Span;
-import zipkin.reporter.Reporter;
+import zipkin2.Span;
+import zipkin2.reporter.Reporter;
 
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.FluentIterable.from;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
@@ -65,23 +59,21 @@ public class TraceHttpClientTest {
         trace.push(tracer.newTrace().start());
 
         final CloseableHttpClient c = (CloseableHttpClient) Classes.transform(name)
-                                                                   .with(def, trace, new ForwardLock(), tracer)
-                                                                   .load(getClass().getClassLoader())
-                                                                   .get(0).newInstance();
+                .with(def, trace, new ForwardLock(), tracer)
+                .load(getClass().getClassLoader())
+                .get(0).newInstance();
         final HttpGet request = new HttpGet("http://localhost");
 
         c.execute(request);
 
-        assertThat(request.getFirstHeader("X-B3-TraceId"), is(notNullValue()));
+        Assert.assertNotNull(request.getFirstHeader("X-B3-TraceId"));
 
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
         final Span span = captor.getValue();
-        assertThat(span.name, is("http_send"));
-        assertThat(span.annotations.get(0).value, is("cs"));
-        assertThat(span.annotations.get(1).value, is("cr"));
+        Assert.assertEquals(span.name(), "http_send");
 
-        final Iterable<Map.Entry<String, String>> entries = ImmutableMap.<String, String>builder()
+        final Map<String, String> map = ImmutableMap.<String, String>builder()
                 .put("component", "apache-http-client")
                 .put("has.error", "false")
                 .put("http.method", "GET")
@@ -90,22 +82,14 @@ public class TraceHttpClientTest {
                 .put("remote.address", "127.0.0.1")
                 .put("remote.type", "web")
                 .put("span.kind", "client")
-                .build().entrySet();
-        assertThat(asEntries(span.binaryAnnotations), is(entries));
+                .build();
+        Assert.assertEquals(span.tags(), map);
         trace.pop();
     }
 
-    private Iterable<Map.Entry<String, String>> asEntries(List<BinaryAnnotation> bas) {
-        return from(bas).transform(new Function<BinaryAnnotation, Map.Entry<String, String>>() {
-            @Override
-            public Map.Entry apply(BinaryAnnotation input) {
-                return new AbstractMap.SimpleEntry(input.key, new String(input.value));
-            }
-        }).toSet();
-    }
 
     private Tracer tracer(Reporter<Span> reporter) {
-        return Tracer.newBuilder().reporter(reporter).build();
+        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
     }
 
     static class Foo extends CloseableHttpClient {

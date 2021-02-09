@@ -19,7 +19,7 @@
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zipkin.reporter.ReporterMetrics;
+import zipkin2.reporter.ReporterMetrics;
 
 public class DebugReporterMetrics implements ReporterMetrics {
 

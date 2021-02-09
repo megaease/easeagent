@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.zipkin;
+package com.megaease.easeagent.zipkin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zipkin.reporter.BytesMessageEncoder;
-import zipkin.reporter.Callback;
-import zipkin.reporter.Encoding;
-import zipkin.reporter.Sender;
+import zipkin2.Call;
+import zipkin2.codec.Encoding;
+import zipkin2.reporter.BytesMessageEncoder;
+import zipkin2.reporter.Sender;
 
-import java.io.IOException;
 import java.util.List;
 
-class LogSender implements Sender {
+class LogSender extends Sender {
     static final Logger LOGGER = LoggerFactory.getLogger(LogSender.class);
 
     @Override
@@ -46,17 +45,9 @@ class LogSender implements Sender {
     }
 
     @Override
-    public void sendSpans(List<byte[]> encodedSpans, Callback callback) {
+    public Call<Void> sendSpans(List<byte[]> encodedSpans) {
         final byte[] bytes = BytesMessageEncoder.JSON.encode(encodedSpans);
         LOGGER.info("{}", new String(bytes));
-        callback.onComplete();
+        return Call.create(null);
     }
-
-    @Override
-    public CheckResult check() {
-        return CheckResult.OK;
-    }
-
-    @Override
-    public void close() throws IOException { }
 }

@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.zipkin;
+package com.megaease.easeagent.zipkin;
 
 import brave.Tracer;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
+import brave.Tracing;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import zipkin.BinaryAnnotation;
-import zipkin.Span;
-import zipkin.reporter.Reporter;
+import zipkin2.Span;
+import zipkin2.reporter.Reporter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -39,11 +38,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
-import static com.google.common.collect.FluentIterable.from;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 public class TraceHttpServletTest {
@@ -58,11 +56,11 @@ public class TraceHttpServletTest {
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
         final Span span = captor.getValue();
-        assertThat(span.name, is("http_recv"));
-        assertThat(span.annotations.get(0).value, is("sr"));
-        assertThat(span.annotations.get(1).value, is("ss"));
+        Assert.assertEquals(span.name(), "http_recv");
+//        assertThat(span.annotations().get(0).value(), is("sr"));
+//        assertThat(span.annotations().get(1).value(), is("ss"));
 
-        final Iterable<Map.Entry<String, String>> entries = ImmutableMap.<String, String>builder()
+        final Map<String, String> map = ImmutableMap.<String, String>builder()
                 .put("component", "web")
                 .put("has.error", "false")
                 .put("http.method", "GET")
@@ -73,8 +71,10 @@ public class TraceHttpServletTest {
                 .put("peer.port", "12306")
                 .put("remote.address", "addr")
                 .put("span.kind", "server")
-                .build().entrySet();
-        assertThat(asEntries(span.binaryAnnotations), is(entries));
+                .build();
+        Map<String, String> tags = span.tags();
+        tags.remove("current.milliseconds");
+        Assert.assertEquals(tags, map);
     }
 
     @Test
@@ -90,7 +90,8 @@ public class TraceHttpServletTest {
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
         final Span span = captor.getValue();
-        assertThat(span.traceId, is(1L));
+//        Assert.assertEquals(span.traceId(), 1L);
+        Assert.assertNotNull(span.traceId());
     }
 
     private void callService(Reporter<Span> reporter, HttpServletRequest request, HttpServletResponse response) throws InstantiationException, IllegalAccessException, ServletException, IOException {
@@ -101,8 +102,8 @@ public class TraceHttpServletTest {
         final Definition.Default def = new GenTraceHttpServlet().define(Definition.Default.EMPTY);
 
         final HttpServlet hs = (HttpServlet) Classes.transform("com.megaease.easeagent.zipkin.TraceHttpServletTest$Foo")
-                                                    .with(def, trace, new ForwardLock(), tracer)
-                                                    .load(loader).get(0).newInstance();
+                .with(def, trace, new ForwardLock(), tracer)
+                .load(loader).get(0).newInstance();
 
 
         hs.service(request, response);
@@ -128,27 +129,13 @@ public class TraceHttpServletTest {
         return request;
     }
 
-
-    private Iterable<Map.Entry<String, String>> asEntries(List<BinaryAnnotation> bas) {
-        return from(bas).filter(new Predicate<BinaryAnnotation>() {
-            @Override
-            public boolean apply(BinaryAnnotation input) {
-                return !input.key.equals("current.milliseconds");
-            }
-        }).transform(new Function<BinaryAnnotation, Map.Entry<String, String>>() {
-            @Override
-            public Map.Entry<String, String> apply(BinaryAnnotation input) {
-                return new AbstractMap.SimpleEntry<String, String>(input.key, new String(input.value));
-            }
-        }).toSet();
-    }
-
     private Tracer tracer(Reporter<Span> reporter) {
-        return Tracer.newBuilder().reporter(reporter).build();
+        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
     }
 
     public static class Foo extends HttpServlet {
         @Override
-        protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException { }
+        protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        }
     }
 }

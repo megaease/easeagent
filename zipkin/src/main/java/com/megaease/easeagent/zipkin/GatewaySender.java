@@ -17,10 +17,11 @@
 
  package com.megaease.easeagent.zipkin;
 
-import zipkin.reporter.BytesMessageEncoder;
-import zipkin.reporter.Callback;
-import zipkin.reporter.Encoding;
-import zipkin.reporter.Sender;
+import zipkin2.Call;
+import zipkin2.CheckResult;
+import zipkin2.codec.Encoding;
+import zipkin2.reporter.BytesMessageEncoder;
+import zipkin2.reporter.Sender;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-class GatewaySender implements Sender {
+class GatewaySender extends Sender {
 
     private final Encoding encoding;
     private final int messageMaxBytes;
@@ -73,16 +74,15 @@ class GatewaySender implements Sender {
     }
 
     @Override
-    public void sendSpans(List<byte[]> encodedSpans, Callback callback) {
+    public Call<Void> sendSpans(List<byte[]> encodedSpans) {
         if (closeCalled) throw new IllegalStateException("close");
         try {
             byte[] message = BytesMessageEncoder.JSON.encode(encodedSpans);
             send(message, "application/json");
-            callback.onComplete();
         } catch (Throwable e) {
-            callback.onError(e);
             if (e instanceof Error) throw (Error) e;
         }
+        return Call.create(null);
     }
 
     @Override
@@ -96,7 +96,6 @@ class GatewaySender implements Sender {
 
     }
 
-    @Override
     public void close() throws IOException {
         closeCalled = true;
     }
