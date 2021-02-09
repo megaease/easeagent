@@ -18,6 +18,7 @@
  package com.megaease.easeagent.zipkin;
 
 import brave.Tracer;
+import brave.Tracing;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
@@ -25,12 +26,12 @@ import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import redis.clients.jedis.Protocol;
-import zipkin.BinaryAnnotation;
-import zipkin.Span;
-import zipkin.reporter.Reporter;
+import zipkin2.Span;
+import zipkin2.reporter.Reporter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -83,11 +84,11 @@ public class TraceJedisTest {
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
         final Span span = captor.getValue();
-        assertThat(span.name, is("redis_command"));
-        assertThat(span.annotations.get(0).value, is("cs"));
-        assertThat(span.annotations.get(1).value, is("cr"));
+        Assert.assertEquals(span.name(), "redis_command");
+//        assertThat(span.annotations().get(0).value(), is("cs"));
+//        assertThat(span.annotations().get(1).value(), is("cr"));
 
-        final Iterable<Map.Entry<String, String>> entries = ImmutableMap.<String, String>builder()
+        final Map<String, String> map = ImmutableMap.<String, String>builder()
                 .put("component", "jedis")
                 .put("has.error", "false")
                 .put("redis.cmd", "PING")
@@ -97,8 +98,8 @@ public class TraceJedisTest {
                 .put("remote.address", "127.0.0.1")
                 .put("remote.type", "redis")
                 .put("span.kind", "client")
-                .build().entrySet();
-        assertThat(asEntries(span.binaryAnnotations), is(entries));
+                .build();
+        Assert.assertEquals(span.tags(),map);
         trace.pop();
     }
 
@@ -119,17 +120,8 @@ public class TraceJedisTest {
         }, "testcase-runner");
     }
 
-    private Iterable<Map.Entry<String, String>> asEntries(List<BinaryAnnotation> bas) {
-        return from(bas).transform(new Function<BinaryAnnotation, Map.Entry<String, String>>() {
-            @Override
-            public Map.Entry apply(BinaryAnnotation input) {
-                return new AbstractMap.SimpleEntry(input.key, new String(input.value));
-            }
-        }).toSet();
-    }
-
     private Tracer tracer(Reporter<Span> reporter) {
-        return Tracer.newBuilder().reporter(reporter).build();
+        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
     }
 
 }

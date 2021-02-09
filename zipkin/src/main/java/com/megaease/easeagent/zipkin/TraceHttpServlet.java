@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.zipkin;
+package com.megaease.easeagent.zipkin;
 
 import brave.Span;
 import brave.Tracer;
@@ -74,16 +74,20 @@ public abstract class TraceHttpServlet extends HttpServletService {
                 public Void get() {
                     final TraceContextOrSamplingFlags result = EXTRACTOR.extract(request);
 
-                    final TraceContext context = result.context() == null
-                            ? tracer.newTrace(result.samplingFlags()).context()
+//                    final TraceContext context = result.context() == null
+//                            ? tracer.newTrace(result.samplingFlags()).context()
+//                            : result.context().toBuilder().build();
+
+                    TraceContext context = result.context() == null
+                            ? tracer.nextSpan(result).context()
                             : result.context().toBuilder().build();
 
                     trace.push(
                             tracer.newChild(context)
-                                  // To fix bug of timestamp drift in distribution.
-                                  // Honestly i don't know why it can fix, but it fixed.
-                                  .tag("current.milliseconds", String.valueOf(System.currentTimeMillis()))
-                                  .start()
+                                    // To fix bug of timestamp drift in distribution.
+                                    // Honestly i don't know why it can fix, but it fixed.
+                                    .tag("current.milliseconds", String.valueOf(System.currentTimeMillis()))
+                                    .start()
                     );
                     return null;
                 }

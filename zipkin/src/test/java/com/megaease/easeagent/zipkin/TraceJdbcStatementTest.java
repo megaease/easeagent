@@ -18,7 +18,7 @@
  package com.megaease.easeagent.zipkin;
 
 import brave.Tracer;
-import com.google.common.base.Function;
+import brave.Tracing;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
@@ -28,22 +28,17 @@ import com.mysql.cj.NativeSession;
 import com.mysql.cj.conf.HostInfo;
 import com.mysql.cj.jdbc.*;
 import com.mysql.cj.protocol.a.NativeServerSession;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import zipkin.BinaryAnnotation;
-import zipkin.Span;
-import zipkin.reporter.Reporter;
+import zipkin2.Span;
+import zipkin2.reporter.Reporter;
 
 import java.lang.reflect.Method;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
-import java.util.AbstractMap;
-import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.FluentIterable.from;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
@@ -93,11 +88,9 @@ public class TraceJdbcStatementTest {
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
         final Span span = captor.getValue();
-        assertThat(span.name, is("jdbc_statement"));
-        assertThat(span.annotations.get(0).value, is("cs"));
-        assertThat(span.annotations.get(1).value, is("cr"));
+        Assert.assertEquals(span.name(), "jdbc_statement");
 
-        final Iterable<Map.Entry<String, String>> entries = ImmutableMap.<String, String>builder()
+        final Map<String, String> map = ImmutableMap.<String, String>builder()
                 .put("component", "jdbc")
                 .put("has.error", "true")
                 .put("jdbc.result", "false")
@@ -106,22 +99,14 @@ public class TraceJdbcStatementTest {
                 .put("remote.address", "127.0.0.1")
                 .put("remote.type", "mysql")
                 .put("span.kind", "client")
-                .build().entrySet();
-        assertThat(asEntries(span.binaryAnnotations), is(entries));
+                .build();
+        Assert.assertEquals(span.tags(),map);
         trace.pop();
     }
 
-    private Iterable<Map.Entry<String, String>> asEntries(List<BinaryAnnotation> bas) {
-        return from(bas).transform(new Function<BinaryAnnotation, Map.Entry<String, String>>() {
-            @Override
-            public Map.Entry apply(BinaryAnnotation input) {
-                return new AbstractMap.SimpleEntry(input.key, new String(input.value));
-            }
-        }).toSet();
-    }
 
     private Tracer tracer(Reporter<Span> reporter) {
-        return Tracer.newBuilder().reporter(reporter).build();
+        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
     }
 
 }

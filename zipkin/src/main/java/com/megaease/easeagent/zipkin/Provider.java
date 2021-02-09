@@ -15,26 +15,19 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.zipkin;
+package com.megaease.easeagent.zipkin;
 
 import brave.Tracer;
-import brave.internal.Platform;
+import brave.Tracing;
+import brave.handler.SpanHandler;
 import brave.sampler.CountingSampler;
 import com.google.common.base.Strings;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
-import zipkin.Codec;
-import zipkin.Endpoint;
-import zipkin.Span;
-import zipkin.reporter.AsyncReporter;
-import zipkin.reporter.Encoder;
-import zipkin.reporter.Encoding;
-import zipkin.reporter.Sender;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static zipkin.BinaryAnnotation.create;
+import zipkin2.reporter.Sender;
+import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 @Configurable(bind = "zipkin.tracer")
 abstract class Provider {
@@ -46,12 +39,13 @@ abstract class Provider {
 
     @Injection.Bean
     public Tracer tracer() {
-        return Tracer.newBuilder()
-                     .localServiceName(service_name())
-                     .traceId128Bit(trace_id_128b())
-                     .sampler(CountingSampler.create((float) sample_rate()))
-                     .reporter(reporter(sender()))
-                     .build();
+
+        return Tracing.newBuilder()
+                .localServiceName(service_name())
+                .traceId128Bit(trace_id_128b())
+                .sampler(CountingSampler.create((float) sample_rate()))
+                .addSpanHandler(spanHandler())
+                .build().tracer();
 
     }
 
@@ -59,36 +53,11 @@ abstract class Provider {
         return Strings.isNullOrEmpty(send_endpoint())
                 ? new LogSender()
                 : new GatewaySender(message_max_bytes(), send_endpoint(), connect_timeout(), read_timeout(),
-                                    send_compression(), user_agent());
+                send_compression(), user_agent());
     }
 
-    private AsyncReporter<Span> reporter(Sender sender) {
-        return AsyncReporter.builder(sender)
-                            .metrics(new DebugReporterMetrics())
-                            .queuedMaxSpans(reporter_queued_max_spans())
-                            .messageTimeout(reporter_message_timeout_seconds(), SECONDS)
-                            .build(encoder());
-    }
-
-    private Encoder<Span> encoder() {
-        final Endpoint endpoint = Platform.get().localEndpoint().toBuilder().serviceName(service_name()).build();
-        return new Encoder<Span>() {
-            @Override
-            public Encoding encoding() {
-                return Encoding.JSON;
-            }
-
-            @Override
-            public byte[] encode(Span span) {
-                return Codec.JSON.writeSpan(span.toBuilder()
-                                                .addBinaryAnnotation(create("system", system(), endpoint))
-                                                .addBinaryAnnotation(create("application", application(), endpoint))
-                                                .addBinaryAnnotation(create("hostipv4", host_ipv4(), endpoint))
-                                                .addBinaryAnnotation(create("hostname", hostname(), endpoint))
-                                                .addBinaryAnnotation(create("instance", instance(), endpoint))
-                                                .build());
-            }
-        };
+    private SpanHandler spanHandler() {
+        return AsyncZipkinSpanHandler.create(sender());
     }
 
     @Configurable.Item
@@ -101,7 +70,9 @@ abstract class Provider {
     abstract String application();
 
     @Configurable.Item
-    String instance() {return "unknown";}
+    String instance() {
+        return "unknown";
+    }
 
     @Configurable.Item
     String service_name() {

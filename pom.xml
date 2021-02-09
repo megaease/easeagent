@@ -50,7 +50,7 @@
         <version.logback>1.1.11</version.logback>
         <version.fastjson>1.2.31</version.fastjson>
         <version.servlet>3.1.0</version.servlet>
-        <version.brave>4.0.6</version.brave>
+        <version.brave>5.13.3</version.brave>
         <version.moco>1.1.0</version.moco>
         <version.disruptor>3.4.2</version.disruptor>
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
