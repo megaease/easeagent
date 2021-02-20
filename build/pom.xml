@@ -100,6 +100,14 @@
                                 implementation="com.github.edwgiz.maven_shade_plugin.log4j2_cache_transformer.PluginsCacheFileTransformer">
                         </transformer>
                     </transformers>
+                    <filters>
+                        <filter>
+                            <artifact>org.apache.logging.log4j:*</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>

@@ -33,6 +33,10 @@
             <artifactId>spring-boot-loader</artifactId>
             <version>2.3.8.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -47,6 +51,10 @@
                         <relocation>
                             <pattern>org.springframework</pattern>
                             <shadedPattern>spring</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.google</pattern>
+                            <shadedPattern>com.megaease.easeagent.google</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
