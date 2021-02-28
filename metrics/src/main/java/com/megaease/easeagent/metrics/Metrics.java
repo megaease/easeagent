@@ -34,6 +34,10 @@ class Metrics {
 
     Metrics(MetricRegistry registry) {this.registry = registry;}
 
+    public MetricRegistry getRegistry() {
+        return registry;
+    }
+
     MeterName meter(String name) {
         return new MeterName(name, Collections.<String, String>emptyMap());
     }

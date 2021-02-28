@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.zipkin;
+package com.megaease.easeagent.zipkin;
 
 import brave.Tracer;
 import brave.Tracing;
+import brave.propagation.StrictCurrentTraceContext;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.common.CallTrace;
 import com.megaease.easeagent.common.ForwardLock;
@@ -28,6 +29,7 @@ import com.mysql.cj.NativeSession;
 import com.mysql.cj.conf.HostInfo;
 import com.mysql.cj.jdbc.*;
 import com.mysql.cj.protocol.a.NativeServerSession;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,7 +44,7 @@ import java.util.Map;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
-public class TraceJdbcStatementTest {
+public class TraceJdbcStatementTest extends BaseZipkinTest {
     static final String JDBC_URL = "jdbc:mysql://localhost/test";
 
     @Test
@@ -83,7 +85,10 @@ public class TraceJdbcStatementTest {
         method.setAccessible(true);
         PreparedStatement stat = (PreparedStatement) method.invoke(null, conn, "sql", "cat");
 
-        try { stat.execute(); } catch (Exception ignore) { }
+        try {
+            stat.execute();
+        } catch (Exception ignore) {
+        }
 
         final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(reporter).report(captor.capture());
@@ -100,13 +105,9 @@ public class TraceJdbcStatementTest {
                 .put("remote.type", "mysql")
                 .put("span.kind", "client")
                 .build();
-        Assert.assertEquals(span.tags(),map);
+        Assert.assertEquals(span.tags(), map);
         trace.pop();
     }
 
-
-    private Tracer tracer(Reporter<Span> reporter) {
-        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
-    }
 
 }

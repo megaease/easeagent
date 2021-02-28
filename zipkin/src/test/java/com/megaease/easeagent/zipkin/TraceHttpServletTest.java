@@ -44,7 +44,7 @@ import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
-public class TraceHttpServletTest {
+public class TraceHttpServletTest extends BaseZipkinTest {
 
 
     @Test
@@ -127,10 +127,6 @@ public class TraceHttpServletTest {
         when(request.getHeader("X-B3-TraceId".toLowerCase())).thenReturn("1");
         when(request.getHeader("X-B3-SpanId".toLowerCase())).thenReturn("2");
         return request;
-    }
-
-    private Tracer tracer(Reporter<Span> reporter) {
-        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
     }
 
     public static class Foo extends HttpServlet {

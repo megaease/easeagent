@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.metrics;
+package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 @Configurable(bind = "metrics.report")
 public abstract class Provider {
 
+    private static final MetricRegistry registry = new MetricRegistry();
+
     @Injection.Bean
     public CallTrace callTrace() {
         return new CallTrace();
@@ -41,19 +43,18 @@ public abstract class Provider {
 
     @Injection.Bean
     public Metrics metrics() {
-        final MetricRegistry registry = new MetricRegistry();
         final Logger logger = LoggerFactory.getLogger(reporter_name());
         final Map<String, String> hostInfo = ImmutableMap.<String, String>builder()
                 .put("system", system())
                 .put("application", application())
                 .put("hostname", hostname())
-                .put("hostipv4",hostipv4())
+                .put("hostipv4", hostipv4())
                 .build();
         Executors.newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory("easeagent-metrics-report"))
-                 .scheduleWithFixedDelay(
-                         new LogReporter(logger, registry, hostInfo, TimeUnit.valueOf(rate_unit()), TimeUnit.valueOf(duration_unit())),
-                         period_seconds(), period_seconds(), TimeUnit.SECONDS
-                 );
+                .scheduleWithFixedDelay(
+                        new LogReporter(logger, registry, hostInfo, TimeUnit.valueOf(rate_unit()), TimeUnit.valueOf(duration_unit())),
+                        period_seconds(), period_seconds(), TimeUnit.SECONDS
+                );
         return new Metrics(registry);
     }
 
@@ -68,7 +69,7 @@ public abstract class Provider {
     }
 
     @Configurable.Item
-    String duration_unit(){
+    String duration_unit() {
         return TimeUnit.MILLISECONDS.toString();
     }
 

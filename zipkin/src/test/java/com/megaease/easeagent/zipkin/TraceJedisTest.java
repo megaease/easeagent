@@ -48,7 +48,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("unchecked")
-public class TraceJedisTest {
+public class TraceJedisTest  extends BaseZipkinTest {
 
 
     @Test
@@ -118,10 +118,6 @@ public class TraceJedisTest {
                 }
             }
         }, "testcase-runner");
-    }
-
-    private Tracer tracer(Reporter<Span> reporter) {
-        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
     }
 
 }

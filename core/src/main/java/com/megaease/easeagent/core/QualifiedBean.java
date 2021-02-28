@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.core;
+package com.megaease.easeagent.core;
 
 import com.google.common.base.Objects;
 
-class QualifiedBean {
+public class QualifiedBean {
     final String qualifier;
     final Object bean;
 
-    QualifiedBean(String qualifier, Object bean) {
+    public QualifiedBean(String qualifier, Object bean) {
         this.qualifier = qualifier;
         this.bean = bean;
     }

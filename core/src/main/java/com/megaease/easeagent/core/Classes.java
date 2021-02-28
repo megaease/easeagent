@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.core;
+package com.megaease.easeagent.core;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -31,6 +31,8 @@ import net.bytebuddy.pool.TypePool;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.FluentIterable.from;
 
@@ -55,6 +57,11 @@ public class Classes {
                     return new QualifiedBean("", input);
                 }
             }));
+            return new Loaded(register, def.asMap());
+        }
+
+        public Loaded with(Definition.Default def, final QualifiedBean... beans) {
+            final Register register = new Register(Stream.of(beans).collect(Collectors.toList()));
             return new Loaded(register, def.asMap());
         }
 
@@ -100,7 +107,9 @@ public class Classes {
             private class Mapping implements Function<Iterable<Definition.Transformer>, Iterable<AgentBuilder.Transformer>> {
                 private final ClassLoader loader;
 
-                Mapping(ClassLoader loader) {this.loader = loader;}
+                Mapping(ClassLoader loader) {
+                    this.loader = loader;
+                }
 
                 @Override
                 public Iterable<AgentBuilder.Transformer> apply(Iterable<Definition.Transformer> input) {

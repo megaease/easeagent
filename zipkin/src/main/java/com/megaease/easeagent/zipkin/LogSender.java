@@ -26,7 +26,7 @@ import zipkin2.reporter.Sender;
 
 import java.util.List;
 
-class LogSender extends Sender {
+public class LogSender extends Sender {
     static final Logger LOGGER = LoggerFactory.getLogger(LogSender.class);
 
     @Override

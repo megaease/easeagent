@@ -34,6 +34,7 @@
         <module>zipkin</module>
         <module>log4j2</module>
         <module>loader</module>
+        <module>sniffer</module>
     </modules>
 
     <properties>

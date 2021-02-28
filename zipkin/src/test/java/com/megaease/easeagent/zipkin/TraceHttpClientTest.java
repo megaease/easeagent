@@ -45,7 +45,7 @@ import java.util.Map;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
-public class TraceHttpClientTest {
+public class TraceHttpClientTest  extends BaseZipkinTest{
 
     @Test
     public void should_work() throws Exception {
@@ -85,11 +85,6 @@ public class TraceHttpClientTest {
                 .build();
         Assert.assertEquals(span.tags(), map);
         trace.pop();
-    }
-
-
-    private Tracer tracer(Reporter<Span> reporter) {
-        return Tracing.newBuilder().spanReporter(reporter).build().tracer();
     }
 
     static class Foo extends CloseableHttpClient {

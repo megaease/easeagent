@@ -79,6 +79,11 @@
         </dependency>
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
+            <artifactId>sniffer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>loader</artifactId>
             <version>${project.version}</version>
         </dependency>

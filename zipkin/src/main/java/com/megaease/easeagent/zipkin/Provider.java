@@ -39,7 +39,6 @@ abstract class Provider {
 
     @Injection.Bean
     public Tracer tracer() {
-
         return Tracing.newBuilder()
                 .localServiceName(service_name())
                 .traceId128Bit(trace_id_128b())
