@@ -19,16 +19,10 @@ package com.megaease.easeagent;
 
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
-import com.megaease.easeagent.metrics.CaptureCaller;
-import com.megaease.easeagent.metrics.MeasureHttpRequest;
-import com.megaease.easeagent.requests.CaptureExecuteSql;
-import com.megaease.easeagent.requests.CaptureHttpRequest;
 import com.megaease.easeagent.requests.CaptureTrace;
-import com.megaease.easeagent.sniffer.HttpServletAdvice;
+import com.megaease.easeagent.sniffer.HttpFilterAdvice;
 import com.megaease.easeagent.sniffer.JdbcDataSourceAdvice;
 import com.megaease.easeagent.sniffer.JdbcStatementAdvice;
-import com.megaease.easeagent.zipkin.TraceHttpClient;
-import com.megaease.easeagent.zipkin.TraceHttpServlet;
 
 @Assembly({
         CaptureTrace.class
@@ -43,7 +37,8 @@ import com.megaease.easeagent.zipkin.TraceHttpServlet;
 //        , MeasureJdbcGetConnection.class
 //        , MeasureHttpRequest.class
 //        , CaptureCaller.class
-        , HttpServletAdvice.class
+//        , HttpServletAdvice.class
+        , HttpFilterAdvice.class
         , JdbcDataSourceAdvice.class
         , JdbcStatementAdvice.class
 

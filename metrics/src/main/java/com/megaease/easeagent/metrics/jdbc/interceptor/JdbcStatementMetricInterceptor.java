@@ -53,11 +53,6 @@ public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implement
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
-        context.put(BEGIN_TIME, System.currentTimeMillis());
-    }
-
-    @Override
     public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
         JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
         ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);

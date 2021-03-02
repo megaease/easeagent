@@ -22,7 +22,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 
@@ -30,19 +29,13 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractJdbcMetric implements AgentInterceptor {
+public abstract class AbstractJdbcMetric extends AbstractMetric {
 
     public static final String ERR_CON_METRIC_KEY = "err-con";
 
-    public static final String BEGIN_TIME = "beginTime";
-
-    protected MetricRegistry metricRegistry;
-
-    protected MetricNameFactory metricNameFactory;
-
     public AbstractJdbcMetric(MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
-        metricNameFactory = MetricNameFactory.createBuilder()
+        this.metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
                         ImmutableMap.<MetricField, MetricValueFetcher>builder()
                                 .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
@@ -79,7 +72,7 @@ public abstract class AbstractJdbcMetric implements AgentInterceptor {
     }
 
     protected void collectMetric(String key, boolean success, Map<Object, Object> context) {
-        Long beginTime = (Long) context.get(BEGIN_TIME);
+        Long beginTime = getBeginTime(context);
         Timer timer = this.metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT));
         timer.update(Duration.ofMillis(beginTime));
         Counter counter = this.metricRegistry.counter(this.metricNameFactory.counterName(key, MetricSubType.DEFAULT));

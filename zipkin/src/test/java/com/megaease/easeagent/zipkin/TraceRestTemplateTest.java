@@ -45,64 +45,64 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("unchecked")
 public class TraceRestTemplateTest  extends BaseZipkinTest{
 
-    @Test
-    public void should_work() throws Exception {
-        final CallTrace trace = new CallTrace();
-        final Reporter<Span> reporter = mock(Reporter.class);
-        final Tracer tracer = tracer(reporter);
-        final ClassLoader loader = getClass().getClassLoader();
-        final String name = "com.megaease.easeagent.zipkin.TraceRestTemplateTest$Foo";
-
-        trace.push(tracer.newTrace().start());
-        final Definition.Default def = new GenTraceRestTemplate().define(Definition.Default.EMPTY);
-        final ClientHttpRequest req = (ClientHttpRequest) Classes.transform(name).with(def, trace, new ForwardLock(), tracer)
-                                                                 .load(loader).get(0).newInstance();
-
-        req.execute();
-
-        Assert.assertNotNull(req.getHeaders().getFirst("X-B3-TraceId"));
-
-        final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
-        verify(reporter).report(captor.capture());
-        final Span span = captor.getValue();
-        Assert.assertEquals(span.name(), "http_send");
-
-        final Map<String, String> map = ImmutableMap.<String, String>builder()
-                .put("component", "spring-rest-template")
-                .put("has.error", "false")
-                .put("http.method", "GET")
-                .put("http.status_code", "200")
-                .put("http.url", "http://localhost")
-                .put("remote.address", "127.0.0.1")
-                .put("remote.type", "web")
-                .put("span.kind", "client")
-                .build();
-        Assert.assertEquals(span.tags(),map);
-        trace.pop();
-    }
-
-    static class Foo extends AbstractClientHttpRequest {
-
-        @Override
-        protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
-            return null;
-        }
-
-        @Override
-        protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
-            final ClientHttpResponse res = mock(ClientHttpResponse.class);
-            when(res.getRawStatusCode()).thenReturn(200);
-            return res;
-        }
-
-        @Override
-        public HttpMethod getMethod() {
-            return HttpMethod.GET;
-        }
-
-        @Override
-        public URI getURI() {
-            return URI.create("http://localhost");
-        }
-    }
+//    @Test
+//    public void should_work() throws Exception {
+//        final CallTrace trace = new CallTrace();
+//        final Reporter<Span> reporter = mock(Reporter.class);
+//        final Tracer tracer = tracer(reporter);
+//        final ClassLoader loader = getClass().getClassLoader();
+//        final String name = "com.megaease.easeagent.zipkin.TraceRestTemplateTest$Foo";
+//
+//        trace.push(tracer.newTrace().start());
+//        final Definition.Default def = new GenTraceRestTemplate().define(Definition.Default.EMPTY);
+//        final ClientHttpRequest req = (ClientHttpRequest) Classes.transform(name).with(def, trace, new ForwardLock(), tracer)
+//                                                                 .load(loader).get(0).newInstance();
+//
+//        req.execute();
+//
+//        Assert.assertNotNull(req.getHeaders().getFirst("X-B3-TraceId"));
+//
+//        final ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
+//        verify(reporter).report(captor.capture());
+//        final Span span = captor.getValue();
+//        Assert.assertEquals(span.name(), "http_send");
+//
+//        final Map<String, String> map = ImmutableMap.<String, String>builder()
+//                .put("component", "spring-rest-template")
+//                .put("has.error", "false")
+//                .put("http.method", "GET")
+//                .put("http.status_code", "200")
+//                .put("http.url", "http://localhost")
+//                .put("remote.address", "127.0.0.1")
+//                .put("remote.type", "web")
+//                .put("span.kind", "client")
+//                .build();
+//        Assert.assertEquals(span.tags(),map);
+//        trace.pop();
+//    }
+//
+//    static class Foo extends AbstractClientHttpRequest {
+//
+//        @Override
+//        protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
+//            return null;
+//        }
+//
+//        @Override
+//        protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
+//            final ClientHttpResponse res = mock(ClientHttpResponse.class);
+//            when(res.getRawStatusCode()).thenReturn(200);
+//            return res;
+//        }
+//
+//        @Override
+//        public HttpMethod getMethod() {
+//            return HttpMethod.GET;
+//        }
+//
+//        @Override
+//        public URI getURI() {
+//            return URI.create("http://localhost");
+//        }
+//    }
 }

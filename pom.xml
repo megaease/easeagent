@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.megaease.easeagent</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>easeagent</artifactId>
     <packaging>pom</packaging>
     <version>0.2.0-SNAPSHOT</version>
     <modules>
@@ -54,7 +54,10 @@
         <version.brave>5.13.3</version.brave>
         <version.moco>1.1.0</version.moco>
         <version.disruptor>3.4.2</version.disruptor>
+        <version.spring-boot>2.3.9.RELEASE</version.spring-boot>
+        <version.spring>5.2.13.RELEASE</version.spring>
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
+
     </properties>
 
     <dependencies>
@@ -125,6 +128,16 @@
             <dependency>
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-http</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-servlet</artifactId>
                 <version>${version.brave}</version>
             </dependency>
             <dependency>
