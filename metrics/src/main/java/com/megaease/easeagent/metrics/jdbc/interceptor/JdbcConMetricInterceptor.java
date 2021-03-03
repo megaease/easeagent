@@ -32,8 +32,13 @@ public class JdbcConMetricInterceptor extends AbstractJdbcMetric {
     }
 
     @Override
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+
+    }
+
+    @Override
     public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
-        Connection connection = (Connection) context.get(Connection.class);
+        Connection connection = (Connection) retValue;
         try {
             String key;
             boolean success = true;

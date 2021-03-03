@@ -22,6 +22,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
+import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 
@@ -71,10 +72,14 @@ public abstract class AbstractJdbcMetric extends AbstractMetric {
                 .build();
     }
 
+      @Override
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+
+    }
+
     protected void collectMetric(String key, boolean success, Map<Object, Object> context) {
-        Long beginTime = getBeginTime(context);
         Timer timer = this.metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT));
-        timer.update(Duration.ofMillis(beginTime));
+        timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
         Counter counter = this.metricRegistry.counter(this.metricNameFactory.counterName(key, MetricSubType.DEFAULT));
         Meter meter = this.metricRegistry.meter(this.metricNameFactory.meterName(key, MetricSubType.DEFAULT));
         meter.mark();

@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.sniffer;
 
+import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
@@ -34,7 +35,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -149,9 +149,9 @@ public abstract class JdbcStatementAdvice implements Transformation {
                                                        @Advice.Origin("#m") String method,
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
+                Map<Object, Object> map = ContextUtils.createContext();
                 Object[] objs = getArgs(args);
                 JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
-                Map<Object, Object> map = new HashMap<>();
                 map.put(JdbcContextInfo.class, jdbcContextInfo);
                 this.jdbcListenerDispatcher.dispatchBefore(jdbcContextInfo, invoker, method, objs);
                 agentInterceptor.before(invoker, method, objs, map);
@@ -167,6 +167,7 @@ public abstract class JdbcStatementAdvice implements Transformation {
                   @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
                   @Advice.Thrown Exception exception) {
             release.apply(map -> {
+                ContextUtils.setEndTime(map);
                 Object[] objs = getArgs(args);
                 JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
                 jdbcListenerDispatcher.dispatchAfter(jdbcContextInfo, invoker, method, objs, retValue);

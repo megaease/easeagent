@@ -2,7 +2,8 @@ package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
-import com.megaease.easeagent.common.ServletUtils;
+import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -53,11 +54,12 @@ public class HttpFilterMetricsInterceptorTest {
         httpServletRequest.setAttribute(ServletUtils.BEST_MATCHING_PATTERN_ATTRIBUTE, "/path/users/{userId}/info");
 
         Object[] args = new Object[]{httpServletRequest, httpServletResponse, filterChain};
-        Map<Object, Object> context = new HashMap<>();
+        Map<Object, Object> context = ContextUtils.createContext();
 
         interceptor.before(filter, "doFilterInternal", args, context);
         //mock do something
         //mock do something end
+        ContextUtils.setEndTime(context);
         interceptor.after(filter, "doFilterInternal", args, null, null, context);
 
         String key = ServletUtils.getHttpRouteAttribute(httpServletRequest);
@@ -101,11 +103,12 @@ public class HttpFilterMetricsInterceptorTest {
         httpServletRequest.setAttribute(ServletUtils.BEST_MATCHING_PATTERN_ATTRIBUTE, "/path/users/{userId}/info");
 
         Object[] args = new Object[]{httpServletRequest, httpServletResponse, filterChain};
-        Map<Object, Object> context = new HashMap<>();
+        Map<Object, Object> context = ContextUtils.createContext();
 
         interceptor.before(filter, "doFilterInternal", args, context);
         //mock do something
         //mock do something end
+        ContextUtils.setEndTime(context);
         interceptor.after(filter, "doFilterInternal", args, null, null, context);
 
         String key = ServletUtils.getHttpRouteAttribute(httpServletRequest);

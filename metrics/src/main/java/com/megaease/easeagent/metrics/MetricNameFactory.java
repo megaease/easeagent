@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.megaease.easeagent.common.MutableObject;
+import com.megaease.easeagent.core.utils.MutableObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;

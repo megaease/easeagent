@@ -9,7 +9,7 @@ import brave.http.HttpTracing;
 import brave.propagation.CurrentTraceContext;
 import brave.servlet.HttpServletRequestWrapper;
 import brave.servlet.HttpServletResponseWrapper;
-import com.megaease.easeagent.common.ServletUtils;
+import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,20 +21,18 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
     private final HttpTracing httpTracing;
     private final HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler;
 
-    public HttpFilterTracingInterceptor() {
-        this.httpTracing = HttpTracing.create(Tracing.current());
+    public HttpFilterTracingInterceptor(Tracing tracing) {
+        this.httpTracing = HttpTracing.create(tracing);
         this.httpServerHandler = HttpServerHandler.create(httpTracing);
     }
 
     @Override
     public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
-
         HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler = HttpServerHandler.create(httpTracing);
         HttpServerRequest requestWrapper = HttpServletRequestWrapper.create(httpServletRequest);
         Span span = httpServerHandler.handleReceive(requestWrapper);
         context.put(Span.class, span);
-
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
         currentTraceContext.newScope(span.context());
     }

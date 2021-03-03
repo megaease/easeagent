@@ -1,7 +1,8 @@
 package com.megaease.easeagent.sniffer;
 
+import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.common.ForwardLock;
-import com.megaease.easeagent.common.ServletUtils;
+import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
@@ -12,7 +13,6 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -58,7 +58,7 @@ public abstract class HttpFilterAdvice implements Transformation {
                 @Advice.AllArguments Object[] args
         ) {
             return lock.acquire(() -> {
-                Map<Object, Object> map = new HashMap<>();
+                Map<Object, Object> map = ContextUtils.createContext();
                 HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
                 ServletUtils.setHttpRouteAttribute(httpServletRequest);
                 this.agentInterceptor.before(invoker, method, args, map);
@@ -75,6 +75,7 @@ public abstract class HttpFilterAdvice implements Transformation {
                   @Advice.Thrown Exception exception
         ) {
             release.apply(map -> {
+                ContextUtils.setEndTime(map);
                 this.agentInterceptor.after(invoker, method, args, null, exception, map);
             });
         }

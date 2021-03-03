@@ -25,7 +25,7 @@ import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.StrictCurrentTraceContext;
 import brave.propagation.TraceContext;
-import com.megaease.easeagent.common.SQLCompression;
+import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import org.junit.Assert;

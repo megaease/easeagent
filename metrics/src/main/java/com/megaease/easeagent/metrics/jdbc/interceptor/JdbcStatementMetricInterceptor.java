@@ -23,7 +23,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
-import com.megaease.easeagent.common.SQLCompression;
+import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.jdbc.ExecutionInfo;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;

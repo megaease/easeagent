@@ -1,4 +1,4 @@
-package com.megaease.easeagent.common;
+package com.megaease.easeagent.core.utils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

@@ -4,7 +4,8 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.megaease.easeagent.common.ServletUtils;
+import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.model.ErrorPercentModelGauge;
 
@@ -21,6 +22,11 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric {
     }
 
     @Override
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+
+    }
+
+    @Override
     public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
@@ -30,9 +36,8 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric {
 
     public void collectMetric(String key, HttpServletResponse httpServletResponse, Exception exception, Map<Object, Object> context) {
         int status = httpServletResponse.getStatus();
-        Long beginTime = getBeginTime(context);
         Timer timer = metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT));
-        timer.update(Duration.ofMillis(System.currentTimeMillis() - beginTime));
+        timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
         final Meter errorMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.ERROR));
         final Meter meter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
         Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR));

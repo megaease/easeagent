@@ -19,7 +19,7 @@ package com.megaease.easeagent.zipkin.jdbc;
 
 import brave.Span;
 import brave.propagation.ThreadLocalSpan;
-import com.megaease.easeagent.common.SQLCompression;
+import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.jdbc.*;
 

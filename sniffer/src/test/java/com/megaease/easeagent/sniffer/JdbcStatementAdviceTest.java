@@ -19,7 +19,7 @@ package com.megaease.easeagent.sniffer;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
-import com.megaease.easeagent.common.SQLCompression;
+import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;

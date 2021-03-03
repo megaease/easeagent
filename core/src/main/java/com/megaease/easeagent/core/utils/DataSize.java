@@ -1,6 +1,4 @@
-package com.megaease.easeagent.common;
-
-import java.util.regex.Pattern;
+package com.megaease.easeagent.core.utils;
 
 public class DataSize {
 
