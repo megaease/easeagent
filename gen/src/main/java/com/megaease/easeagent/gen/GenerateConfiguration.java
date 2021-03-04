@@ -17,11 +17,11 @@
 
  package com.megaease.easeagent.gen;
 
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Configurable.Item;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import com.typesafe.config.Config;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;

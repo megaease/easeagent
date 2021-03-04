@@ -18,12 +18,13 @@
  package com.megaease.easeagent.metrics;
 
 import com.megaease.easeagent.common.CallTrace;
+import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -33,7 +34,7 @@ public class CaptureCallerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void should_work() throws Exception {
-        final Config conf = ConfigFactory.parseString("include_class_prefix_list = [\"com.\"]");
+        final Config conf = new Configs(Collections.singletonMap("include_class_prefix_list", "com."));
         final CallTrace trace = new CallTrace();
         final Callable<String> c = (Callable<String>) Classes.transform("com.megaease.easeagent.metrics.CaptureCallerTest$Foo")
                                                              .with(new GenCaptureCaller(conf).define(Definition.Default.EMPTY), trace)

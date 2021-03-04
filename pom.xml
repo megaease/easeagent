@@ -35,6 +35,7 @@
         <module>log4j2</module>
         <module>loader</module>
         <module>sniffer</module>
+        <module>config</module>
     </modules>
 
     <properties>
@@ -106,11 +107,11 @@
                 <artifactId>guava</artifactId>
                 <version>${version.guava}</version>
             </dependency>
-            <dependency>
-                <groupId>com.typesafe</groupId>
-                <artifactId>config</artifactId>
-                <version>${version.config}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.typesafe</groupId>-->
+<!--                <artifactId>config</artifactId>-->
+<!--                <version>${version.config}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>

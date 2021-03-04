@@ -22,8 +22,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
+import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.config.ConfigFactory;
+import com.megaease.easeagent.config.Configs;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
 import net.bytebuddy.description.type.TypeDescription;
@@ -32,11 +33,15 @@ import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.dynamic.loading.ClassInjector;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
+import org.jolokia.jvmagent.JvmAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +50,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.FluentIterable.from;
-import static com.typesafe.config.ConfigRenderOptions.defaults;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class Bootstrap {
@@ -57,10 +61,10 @@ public class Bootstrap {
 
         LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
 
-        final Config conf = load(args);
+        final Configs conf = load(args);
 
         if (LOGGER.isDebugEnabled()) {
-            final String repr = conf.root().render(defaults().setOriginComments(false).setJson(false));
+            final String repr = conf.toPrettyDisplay();
             LOGGER.debug("Loaded conf:\n{}", repr);
         }
 
@@ -76,11 +80,19 @@ public class Bootstrap {
                         .or(isSynthetic())
                         .or(nameStartsWith("sun.reflect."))
         ).installOn(inst);
-
+        registerMBeans(conf,inst);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
-    private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Config conf) {
+    static void registerMBeans(Configs conf,Instrumentation inst) throws Exception {
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
+        mbs.registerMBean(conf, mxbeanName);
+        LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName.toString());
+        JvmAgent.premain("",inst);
+    }
+
+    private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf) {
         return ImmutableMap.copyOf(Maps.transformValues(
                 from(providers).uniqueIndex(new Function<Class<?>, Class<?>>() {
                     @Override
@@ -99,7 +111,7 @@ public class Bootstrap {
         return isBootstrapClassLoader().or(is(Bootstrap.class.getClassLoader()));
     }
 
-    private static AgentBuilder define(Config conf, Iterable<Class<? extends Transformation>> transformations,
+    private static AgentBuilder define(Configs conf, Iterable<Class<? extends Transformation>> transformations,
                                        Map<Class<?>, Iterable<QualifiedBean>> scopedBeans, AgentBuilder ab) {
 
         for (Class<? extends Transformation> tc : transformations) {
@@ -127,7 +139,7 @@ public class Bootstrap {
                 }).toList());
     }
 
-    private static Iterable<QualifiedBean> beans(Config conf, Class<?> provider) {
+    private static Iterable<QualifiedBean> beans(Configs conf, Class<?> provider) {
         final ImmutableList.Builder<QualifiedBean> builder = ImmutableList.builder();
         final Object instance = newInstance(conf, provider);
         for (Method method : provider.getMethods()) {
@@ -144,7 +156,7 @@ public class Bootstrap {
         return builder.build();
     }
 
-    private static <T> T newInstance(Config conf, Class<T> aClass) {
+    private static <T> T newInstance(Configs conf, Class<T> aClass) {
         final Configurable configurable = aClass.getAnnotation(Configurable.class);
         try {
             return configurable == null ? aClass.newInstance()
@@ -154,10 +166,10 @@ public class Bootstrap {
         }
     }
 
-    private static Config load(String pathname) {
+    private static Configs load(String pathname) {
         return Strings.isNullOrEmpty(pathname)
-                ? ConfigFactory.load(Bootstrap.class.getClassLoader())
-                : ConfigFactory.parseFile(new File(pathname)).resolve();
+                ? ConfigFactory.loadFromClasspath(Bootstrap.class.getClassLoader())
+                : ConfigFactory.loadFromFile(new File(pathname));
     }
 
     private static final AgentBuilder.Listener LISTENER = new AgentBuilder.Listener() {
