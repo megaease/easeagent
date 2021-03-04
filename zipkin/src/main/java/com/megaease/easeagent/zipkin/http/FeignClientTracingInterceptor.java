@@ -15,18 +15,6 @@ import java.util.Map;
 
 public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<Request, Response> {
 
-    private static final Logger logger = LoggerFactory.getLogger(FeignClientTracingInterceptor.class);
-    private static Field headersField;
-
-    static {
-        try {
-            headersField = Request.class.getDeclaredField("headers");
-            headersField.setAccessible(true);
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-        }
-    }
-
     public FeignClientTracingInterceptor(Tracing tracing) {
         super(tracing);
     }
@@ -51,9 +39,9 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
         return new FeignClientResponseWrapper(response);
     }
 
-
     @SuppressWarnings("unchecked")
     static Map<String, Collection<String>> headers(Request request) {
+        Field headersField = HeadersFieldFinder.getHeadersField();
         if (headersField == null) {
             return null;
         }
@@ -63,7 +51,6 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
             return null;
         }
     }
-
 
     static class FeignClientRequestWrapper extends HttpClientRequest {
 
@@ -138,6 +125,27 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
         @Override
         public Object unwrap() {
             return response;
+        }
+    }
+
+    static class HeadersFieldFinder {
+
+        private static final Logger logger = LoggerFactory.getLogger(HeadersFieldFinder.class);
+
+        private static Field headersField;
+
+        static Field getHeadersField() {
+            if (headersField != null) {
+                return headersField;
+            }
+            try {
+                headersField = Request.class.getDeclaredField("headers");
+                headersField.setAccessible(true);
+                return headersField;
+            } catch (Exception e) {
+                logger.warn(e.getMessage());
+                return null;
+            }
         }
     }
 }

@@ -31,7 +31,10 @@ import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.zipkin.LogSender;
-import com.megaease.easeagent.zipkin.http.*;
+import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
+import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 

@@ -36,10 +36,10 @@ import com.megaease.easeagent.sniffer.*;
 //        , CaptureCaller.class
 //        , HttpServletAdvice.class
         HttpFilterAdvice.class
-        , RestTemplateAdvice.class
+//        , RestTemplateAdvice.class
         , FeignClientAdvice.class
-        , JdbcDataSourceAdvice.class
-        , JdbcStatementAdvice.class
+//        , JdbcDataSourceAdvice.class
+//        , JdbcStatementAdvice.classeaseagent-dep.jar
 
 })
 abstract class Easeagent {
