@@ -23,6 +23,7 @@ import com.megaease.easeagent.requests.CaptureTrace;
 import com.megaease.easeagent.sniffer.HttpFilterAdvice;
 import com.megaease.easeagent.sniffer.JdbcDataSourceAdvice;
 import com.megaease.easeagent.sniffer.JdbcStatementAdvice;
+import com.megaease.easeagent.sniffer.RestTemplateAdvice;
 
 @Assembly({
 //        CaptureTrace.class
@@ -39,6 +40,7 @@ import com.megaease.easeagent.sniffer.JdbcStatementAdvice;
 //        , CaptureCaller.class
 //        , HttpServletAdvice.class
         HttpFilterAdvice.class
+        , RestTemplateAdvice.class
         , JdbcDataSourceAdvice.class
         , JdbcStatementAdvice.class
 

@@ -23,10 +23,10 @@ public class HttpFilterAdviceTest {
     @Test
     public void testInvoke() throws Exception {
         AgentInterceptor agentInterceptor = mock(AgentInterceptor.class);
-        final Definition.Default def = new GenHttpFilterAdvice().define(Definition.Default.EMPTY);
+        Definition.Default def = new GenHttpFilterAdvice().define(Definition.Default.EMPTY);
         String baseName = this.getClass().getName();
-        final ClassLoader loader = new URLClassLoader(new URL[0]);
-        final CharacterEncodingFilter filter = (CharacterEncodingFilter) Classes.transform(baseName + "$MyCharacterEncodingFilter")
+        ClassLoader loader = this.getClass().getClassLoader();
+        CharacterEncodingFilter filter = (CharacterEncodingFilter) Classes.transform(baseName + "$MyCharacterEncodingFilter")
                 .with(def, new QualifiedBean("agentInterceptor4HttpFilter", agentInterceptor))
                 .load(loader).get(0).newInstance();
 

@@ -67,9 +67,9 @@ public class Bootstrap {
         define(
                 conf, transformations, scoped(providers, conf),
                 new Default()
-                        .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
-                        .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
-                        .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
+//                        .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
+//                        .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+//                        .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
                         .with(LISTENER)
                         .ignore(any(), protectedLoaders())
                         .or(isInterface())

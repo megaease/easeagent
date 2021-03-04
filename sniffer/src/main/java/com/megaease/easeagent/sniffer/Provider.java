@@ -34,6 +34,7 @@ import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpServletTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -46,14 +47,22 @@ public abstract class Provider {
 
     private final SQLCompression sqlCompression = SQLCompression.DEFAULT;
 
-    @Injection.Bean
-    public Tracer tracer() {
-        return Tracing.newBuilder()
-                .localServiceName(service_name())
-                .traceId128Bit(trace_id_128b())
-                .sampler(CountingSampler.create((float) sample_rate()))
-                .addSpanHandler(spanHandler())
-                .build().tracer();
+    private Tracer tracer;
+
+    private Tracing tracing;
+
+    public void loadTracing() {
+        if (tracer == null) {
+            Tracing tracing = Tracing.newBuilder()
+                    .localServiceName(service_name())
+                    .traceId128Bit(trace_id_128b())
+                    .sampler(CountingSampler.create((float) sample_rate()))
+                    .addSpanHandler(spanHandler())
+                    .build();
+            Tracer tracer = tracing.tracer();
+            this.tracing = tracing;
+            this.tracer = tracer;
+        }
     }
 
     @Injection.Bean("agentInterceptor4Con")
@@ -69,17 +78,27 @@ public abstract class Provider {
                 .build();
     }
 
-    @Injection.Bean("agentInterceptor4HttpServlet")
-    public AgentInterceptor agentInterceptor4HttpServlet() {
-        return new HttpServletTracingInterceptor();
-    }
+//    @Injection.Bean("agentInterceptor4HttpServlet")
+//    public AgentInterceptor agentInterceptor4HttpServlet() {
+//        this.loadTracing();
+//        return new HttpServletTracingInterceptor();
+//    }
 
     @Injection.Bean("agentInterceptor4HttpFilter")
     public AgentInterceptor agentInterceptor4HttpFilter() {
+        this.loadTracing();
         return new AgentInterceptor.Builder()
                 .addInterceptor(new HttpFilterMetricsInterceptor(metricRegistry))
-                .addInterceptor(new HttpFilterTracingInterceptor(Tracing.current()))
+                .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
                 .addInterceptor(new HttpFilterLogInterceptor())
+                .build();
+    }
+
+    @Injection.Bean("agentInterceptor4RestTemplate")
+    public AgentInterceptor agentInterceptor4RestTemplate() {
+        this.loadTracing();
+        return new AgentInterceptor.Builder()
+                .addInterceptor(new RestTemplateTracingInterceptor(this.tracing))
                 .build();
     }
 
