@@ -51,7 +51,8 @@ public class JdbcDataSourceAdviceTest {
         final DataSource ds = (DataSource) Classes.transform("com.megaease.easeagent.sniffer.JdbcDataSourceAdviceTest$MyDataSource")
                 .with(def, new QualifiedBean("agentInterceptor4Con", agentInterceptor))
                 .load(getClass().getClassLoader()).get(0).newInstance();
-        ds.getConnection();
+        Connection connection = ds.getConnection();
+        System.out.println(connection);
         String key = "url";
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())

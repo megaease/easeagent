@@ -98,12 +98,12 @@ public class GenerateConfigurationTest extends GenerateSpecTestBase {
             when(name.toString()).thenReturn("bar");
 
             when(returnType.getKind()).thenReturn(returnTypeKind());
-            when(returnType.accept(any(TypeVisitor.class), Matchers.anyObject())).thenReturn(returnTypeName());
+            when(returnType.accept(any(TypeVisitor.class), Matchers.any())).thenReturn(returnTypeName());
 
             when(ee.getAnnotation(Configurable.Item.class)).thenReturn(mock(Configurable.Item.class));
             when(ee.getSimpleName()).thenReturn(name);
             when(ee.getReturnType()).thenReturn(returnType);
-            when(ee.accept(any(ElementKindVisitor6.class), Matchers.anyObject())).thenAnswer(new Answer<Object>() {
+            when(ee.accept(any(ElementKindVisitor6.class), Matchers.any())).thenAnswer(new Answer<Object>() {
                 @Override
                 public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
                     final ElementKindVisitor6 visitor = invocationOnMock.getArgumentAt(0, ElementKindVisitor6.class);

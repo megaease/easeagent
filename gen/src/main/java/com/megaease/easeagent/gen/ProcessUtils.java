@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
@@ -41,7 +41,8 @@ import static com.google.common.collect.Iterables.transform;
 abstract class ProcessUtils {
 
     static ProcessUtils of(final ProcessingEnvironment pe) {
-        return new ProcessUtils(pe) {};
+        return new ProcessUtils(pe) {
+        };
     }
 
     private final Elements elements;
@@ -53,7 +54,7 @@ abstract class ProcessUtils {
     }
 
     boolean isSameType(TypeMirror t, Class<?> c, Class<?>... typeParams) {
-        if(typeParams.length == 0) return isSameType(t, c.getCanonicalName());
+        if (typeParams.length == 0) return isSameType(t, c.getCanonicalName());
 
         if (!isSameType(asElement(t).asType(), c.getCanonicalName())) return false;
 
@@ -145,9 +146,9 @@ abstract class ProcessUtils {
         @Override
         public ParameterSpec apply(VariableElement input) {
             return ParameterSpec.builder(TypeName.get(input.asType()), input.getSimpleName().toString())
-                                .addModifiers(Modifier.FINAL)
-                                .addAnnotations(transform(input.getAnnotationMirrors(), ANNOTATION_MIRROR_TO_SPEC))
-                                .build();
+//                                .addModifiers(Modifier.FINAL)
+                    .addAnnotations(transform(input.getAnnotationMirrors(), ANNOTATION_MIRROR_TO_SPEC))
+                    .build();
 
         }
     };

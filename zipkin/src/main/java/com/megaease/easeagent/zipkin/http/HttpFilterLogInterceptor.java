@@ -1,4 +1,4 @@
-package com.megaease.easeagent.zipkin.servlet;
+package com.megaease.easeagent.zipkin.http;
 
 import brave.Tracing;
 import brave.propagation.TraceContext;

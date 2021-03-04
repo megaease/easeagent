@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.core;
+package com.megaease.easeagent.core;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
@@ -66,11 +66,15 @@ public class Bootstrap {
 
         define(
                 conf, transformations, scoped(providers, conf),
-                new Default().with(LISTENER)
-                             .ignore(any(), protectedLoaders())
-                             .or(isInterface())
-                             .or(isSynthetic())
-                             .or(nameStartsWith("sun.reflect."))
+                new Default()
+                        .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
+                        .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+                        .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
+                        .with(LISTENER)
+                        .ignore(any(), protectedLoaders())
+                        .or(isInterface())
+                        .or(isSynthetic())
+                        .or(nameStartsWith("sun.reflect."))
         ).installOn(inst);
 
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
@@ -192,7 +196,7 @@ public class Bootstrap {
             this.register = register;
             this.adviceFactoryClassName = transformer.adviceFactoryClassName;
             this.transformer = new ForAdvice().include(getClass().getClassLoader())
-                                              .advice(transformer.matcher, transformer.inlineAdviceClassName);
+                    .advice(transformer.matcher, transformer.inlineAdviceClassName);
         }
 
         @Override

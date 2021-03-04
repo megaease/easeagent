@@ -5,7 +5,7 @@ import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.utils.ServletUtils;
-import com.megaease.easeagent.zipkin.servlet.HttpFilterTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.web.filter.CharacterEncodingFilter;

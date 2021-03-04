@@ -1,4 +1,4 @@
-package com.megaease.easeagent.zipkin.servlet;
+package com.megaease.easeagent.zipkin.http;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

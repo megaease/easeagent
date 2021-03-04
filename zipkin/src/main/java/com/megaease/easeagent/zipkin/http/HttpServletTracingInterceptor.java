@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.zipkin.servlet;
+package com.megaease.easeagent.zipkin.http;
 
 import brave.Span;
 import brave.Tracer;

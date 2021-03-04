@@ -23,17 +23,18 @@ import brave.handler.SpanHandler;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.HostAddress;
-import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.zipkin.LogSender;
+import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
+import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.HttpServletTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
-import com.megaease.easeagent.zipkin.servlet.HttpFilterTracingInterceptor;
-import com.megaease.easeagent.zipkin.servlet.HttpServletTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 import java.util.concurrent.TimeUnit;
@@ -78,6 +79,7 @@ public abstract class Provider {
         return new AgentInterceptor.Builder()
                 .addInterceptor(new HttpFilterMetricsInterceptor(metricRegistry))
                 .addInterceptor(new HttpFilterTracingInterceptor(Tracing.current()))
+                .addInterceptor(new HttpFilterLogInterceptor())
                 .build();
     }
 

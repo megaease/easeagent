@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -54,7 +54,9 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
     }
 
     private class GenerateTransformerFactoryMethod extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
-        GenerateTransformerFactoryMethod(TypeSpec.Builder builder) {super(builder);}
+        GenerateTransformerFactoryMethod(TypeSpec.Builder builder) {
+            super(builder);
+        }
 
         @Override
         public TypeSpec.Builder visitExecutableAsMethod(final ExecutableElement e, ProcessUtils utils) {
@@ -114,7 +116,7 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
             public TypeSpec.Builder visitTypeAsClass(TypeElement e, ProcessUtils utils) {
 
                 final TypeSpec.Builder builder = TypeSpec.classBuilder(utils.simpleNameOf(e) + "_inline")
-                                                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
                 for (Element member : e.getEnclosedElements()) {
                     member.accept(new GenerateMethods(builder), utils);
                 }
@@ -123,7 +125,9 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
 
             private class GenerateMethods extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
 
-                GenerateMethods(TypeSpec.Builder builder) { super(builder); }
+                GenerateMethods(TypeSpec.Builder builder) {
+                    super(builder);
+                }
 
                 @Override
                 public TypeSpec.Builder visitExecutableAsMethod(ExecutableElement e, ProcessUtils utils) {
@@ -150,19 +154,38 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                         format = "$T.execute($S, $L)";
                         args = new Object[]{Dispatcher.class, generateClassName + "#advice_" + name, join};
                     } else {
-                        format = "return ($T) $T.execute($S, $L)";
+//                        format = "return ($T) $T.execute($S, $L)";
+                        if (!parameters.isEmpty()) {
+                            String retArg = null;
+                            int i = 0;
+                            for (VariableElement parameter : parameters) {
+                                if (parameter.getAnnotation(Advice.Return.class) != null) {
+                                    retArg = "arg" + i;
+                                    break;
+                                }
+                                i++;
+                            }
+                            if (retArg == null) {
+                                format = "return ($T) $T.execute($S, $L)";
+                            } else {
+                                format = retArg + " = ($T) $T.execute($S, $L);\nreturn " + retArg;
+                            }
+
+                        } else {
+                            format = "return ($T) $T.execute($S, $L)";
+                        }
                         args = new Object[]{
                                 returnType.isPrimitive() ? returnType.box() : returnType,
                                 Dispatcher.class, generateClassName + "#advice_" + name, join
                         };
                     }
                     return MethodSpec.methodBuilder(name)
-                                     .addModifiers(Modifier.STATIC)
-                                     .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
-                                     .addParameters(utils.asParameterSpecs(parameters))
-                                     .returns(returnType)
-                                     .addStatement(format, args)
-                                     .build();
+                            .addModifiers(Modifier.STATIC)
+                            .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
+                            .addParameters(utils.asParameterSpecs(parameters))
+                            .returns(returnType)
+                            .addStatement(format, args)
+                            .build();
 
                 }
 
@@ -172,14 +195,16 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
 
         private class GenerateAdviceFactoryClass extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
 
-            GenerateAdviceFactoryClass(TypeSpec.Builder builder) { super(builder); }
+            GenerateAdviceFactoryClass(TypeSpec.Builder builder) {
+                super(builder);
+            }
 
             @Override
             public TypeSpec.Builder visitTypeAsClass(TypeElement e, ProcessUtils utils) {
 
                 final TypeSpec.Builder builder = TypeSpec.classBuilder(utils.simpleNameOf(e) + "_factory")
-                                                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                                                         .superclass(utils.classNameOf(e));
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .superclass(utils.classNameOf(e));
                 for (Element member : e.getEnclosedElements()) {
                     member.accept(new GenerateMethods(builder), utils);
                 }
@@ -189,7 +214,9 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
 
             private class GenerateMethods extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
 
-                GenerateMethods(TypeSpec.Builder builder) {super(builder);}
+                GenerateMethods(TypeSpec.Builder builder) {
+                    super(builder);
+                }
 
                 @Override
                 public TypeSpec.Builder visitExecutableAsConstructor(ExecutableElement e, final ProcessUtils utils) {
@@ -202,12 +229,12 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                         throw new ElementException(e, "should have parameters for autowire");
 
                     return super.visitExecutableAsConstructor(e, utils)
-                                .addMethod(MethodSpec.constructorBuilder()
-                                                     .addModifiers(Modifier.PUBLIC)
-                                                     .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
-                                                     .addParameters(utils.asParameterSpecs(parameters))
-                                                     .addStatement("super($L)", join(parameters))
-                                                     .build());
+                            .addMethod(MethodSpec.constructorBuilder()
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
+                                    .addParameters(utils.asParameterSpecs(parameters))
+                                    .addStatement("super($L)", join(parameters))
+                                    .build());
                 }
 
                 @Override
@@ -244,12 +271,12 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                     }
 
                     return MethodSpec.methodBuilder("advice_" + name)
-                                     .addModifiers(Modifier.PUBLIC)
-                                     .returns(Dispatcher.Advice.class)
-                                     .addStatement("return $L", TypeSpec.anonymousClassBuilder("")
-                                                                        .addSuperinterface(Dispatcher.Advice.class)
-                                                                        .addMethod(builder.build())
-                                                                        .build()).build();
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(Dispatcher.Advice.class)
+                            .addStatement("return $L", TypeSpec.anonymousClassBuilder("")
+                                    .addSuperinterface(Dispatcher.Advice.class)
+                                    .addMethod(builder.build())
+                                    .build()).build();
                 }
             }
         }
