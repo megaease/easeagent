@@ -4,33 +4,37 @@ import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import feign.Client;
+import feign.Request;
+import feign.Response;
 import org.junit.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.AbstractClientHttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class RestTemplateAdviceTest {
+public class FeignClientAdviceTest {
 
     @Test
     public void testInvoke() throws Exception {
+        Map<String, Collection<String>> headers = new HashMap<>();
+        String url = "http://google.com";
         AgentInterceptor agentInterceptor = mock(AgentInterceptor.class);
-        Definition.Default def = new GenRestTemplateAdvice().define(Definition.Default.EMPTY);
+        Definition.Default def = new GenFeignClientAdvice().define(Definition.Default.EMPTY);
         String baseName = this.getClass().getName();
         ClassLoader loader = this.getClass().getClassLoader();
-        MyRequest request = (MyRequest) Classes.transform(baseName + "$MyRequest")
-                .with(def, new QualifiedBean("agentInterceptor4RestTemplate", agentInterceptor))
+        MyClient client = (MyClient) Classes.transform(baseName + "$MyClient")
+                .with(def, new QualifiedBean("agentInterceptor4FeignClient", agentInterceptor))
                 .load(loader).get(0).newInstance();
 
-        HttpHeaders headers = new HttpHeaders();
-        request.executeInternal(headers);
+        Request request = Request.create(Request.HttpMethod.GET, url, headers, "ok".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8, null);
+        Request.Options options = new Request.Options();
+
+        client.execute(request, options);
 
         verify(agentInterceptor, times(1))
                 .before(any(), any(String.class),
@@ -44,25 +48,10 @@ public class RestTemplateAdviceTest {
 
     }
 
-    public static class MyRequest extends AbstractClientHttpRequest {
+    static class MyClient implements Client {
 
         @Override
-        protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
-            return null;
-        }
-
-        @Override
-        protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
-            return null;
-        }
-
-        @Override
-        public String getMethodValue() {
-            return null;
-        }
-
-        @Override
-        public URI getURI() {
+        public Response execute(Request request, Request.Options options) {
             return null;
         }
     }

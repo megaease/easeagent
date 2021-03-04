@@ -19,11 +19,7 @@ package com.megaease.easeagent;
 
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
-import com.megaease.easeagent.requests.CaptureTrace;
-import com.megaease.easeagent.sniffer.HttpFilterAdvice;
-import com.megaease.easeagent.sniffer.JdbcDataSourceAdvice;
-import com.megaease.easeagent.sniffer.JdbcStatementAdvice;
-import com.megaease.easeagent.sniffer.RestTemplateAdvice;
+import com.megaease.easeagent.sniffer.*;
 
 @Assembly({
 //        CaptureTrace.class
@@ -41,6 +37,7 @@ import com.megaease.easeagent.sniffer.RestTemplateAdvice;
 //        , HttpServletAdvice.class
         HttpFilterAdvice.class
         , RestTemplateAdvice.class
+        , FeignClientAdvice.class
         , JdbcDataSourceAdvice.class
         , JdbcStatementAdvice.class
 

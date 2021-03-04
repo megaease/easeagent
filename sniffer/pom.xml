@@ -44,6 +44,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>${version.spring-cloud-openfeign}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>gen</artifactId>
             <version>${project.version}</version>

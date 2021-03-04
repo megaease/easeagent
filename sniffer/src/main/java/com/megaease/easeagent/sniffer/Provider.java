@@ -31,10 +31,7 @@ import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.zipkin.LogSender;
-import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
-import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.HttpServletTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.*;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -97,9 +94,13 @@ public abstract class Provider {
     @Injection.Bean("agentInterceptor4RestTemplate")
     public AgentInterceptor agentInterceptor4RestTemplate() {
         this.loadTracing();
-        return new AgentInterceptor.Builder()
-                .addInterceptor(new RestTemplateTracingInterceptor(this.tracing))
-                .build();
+        return new RestTemplateTracingInterceptor(this.tracing);
+    }
+
+    @Injection.Bean("agentInterceptor4FeignClient")
+    public AgentInterceptor agentInterceptor4FeignClient() {
+        this.loadTracing();
+        return new FeignClientTracingInterceptor(this.tracing);
     }
 
     private SpanHandler spanHandler() {

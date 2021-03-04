@@ -1,44 +1,36 @@
 package com.megaease.easeagent.zipkin.http;
 
-import brave.Span;
 import brave.Tracing;
-import brave.http.HttpClientHandler;
 import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
-import brave.http.HttpTracing;
-import brave.propagation.CurrentTraceContext;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import lombok.SneakyThrows;
 import org.springframework.http.client.AbstractClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
-import java.util.Map;
-
-public class RestTemplateTracingInterceptor implements AgentInterceptor {
-
-    private final HttpClientHandler<HttpClientRequest, HttpClientResponse> clientHandler;
+public class RestTemplateTracingInterceptor extends BaseClientTracingInterceptor<AbstractClientHttpRequest, ClientHttpResponse> {
 
     public RestTemplateTracingInterceptor(Tracing tracing) {
-        HttpTracing httpTracing = HttpTracing.create(tracing);
-        this.clientHandler = HttpClientHandler.create(httpTracing);
+        super(tracing);
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
-        AbstractClientHttpRequest request = (AbstractClientHttpRequest) invoker;
-        HttpClientRequestWrapper requestWrapper = new HttpClientRequestWrapper(request);
-        Span span = clientHandler.handleSend(requestWrapper);
-        context.put(Span.class, span);
-        CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
-        currentTraceContext.newScope(span.context());
+    public AbstractClientHttpRequest getRequest(Object invoker, Object[] args) {
+        return (AbstractClientHttpRequest) invoker;
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
-        Span span = (Span) context.get(Span.class);
-        ClientHttpResponse clientHttpResponse = (ClientHttpResponse) retValue;
-        ClientResponseWrapper responseWrapper = new ClientResponseWrapper(clientHttpResponse);
-        clientHandler.handleReceive(responseWrapper, span);
+    public ClientHttpResponse getResponse(Object invoker, Object[] args, Object retValue) {
+        return (ClientHttpResponse) retValue;
+    }
+
+    @Override
+    public HttpClientRequest buildHttpClientRequest(AbstractClientHttpRequest abstractClientHttpRequest) {
+        return new HttpClientRequestWrapper(abstractClientHttpRequest);
+    }
+
+    @Override
+    public HttpClientResponse buildHttpClientResponse(ClientHttpResponse clientHttpResponse) {
+        return new ClientResponseWrapper(clientHttpResponse);
     }
 
     static class HttpClientRequestWrapper extends HttpClientRequest {
