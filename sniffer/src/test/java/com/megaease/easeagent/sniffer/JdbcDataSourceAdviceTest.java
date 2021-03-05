@@ -23,6 +23,7 @@ import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentListInterceptor;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
@@ -67,7 +68,7 @@ public class JdbcDataSourceAdviceTest {
     @Test
     public void should_throw_exception() throws Exception {
         final MetricRegistry registry = new MetricRegistry();
-        AgentInterceptor agentInterceptor = new AgentInterceptor.Builder()
+        AgentInterceptor agentInterceptor = new AgentListInterceptor.Builder()
                 .addInterceptor(new JdbcConMetricInterceptor(registry))
                 .build();
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);

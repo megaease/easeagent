@@ -26,6 +26,7 @@ import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentListInterceptor;
 import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
@@ -35,6 +36,7 @@ import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.flux.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -72,7 +74,7 @@ public abstract class Provider {
 
     @Injection.Bean("agentInterceptor4Stm")
     public AgentInterceptor agentInterceptor4Stm() {
-        return new AgentInterceptor.Builder()
+        return new AgentListInterceptor.Builder()
                 .addInterceptor(new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression))
                 .addInterceptor(new JdbcStatementTracingInterceptor(sqlCompression))
                 .build();
@@ -87,7 +89,7 @@ public abstract class Provider {
     @Injection.Bean("agentInterceptor4HttpFilter")
     public AgentInterceptor agentInterceptor4HttpFilter() {
         this.loadTracing();
-        return new AgentInterceptor.Builder()
+        return new AgentListInterceptor.Builder()
                 .addInterceptor(new HttpFilterMetricsInterceptor(metricRegistry))
                 .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
                 .addInterceptor(new HttpFilterLogInterceptor())
@@ -104,6 +106,12 @@ public abstract class Provider {
     public AgentInterceptor agentInterceptor4FeignClient() {
         this.loadTracing();
         return new FeignClientTracingInterceptor(this.tracing);
+    }
+
+    @Injection.Bean("agentInterceptor4Gateway")
+    public AgentInterceptor agentInterceptor4Gateway() {
+        this.loadTracing();
+        return new SpringGatewayInitGlobalFilterInterceptor();
     }
 
     private SpanHandler spanHandler() {

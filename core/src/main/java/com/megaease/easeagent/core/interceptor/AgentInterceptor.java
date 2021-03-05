@@ -1,7 +1,5 @@
 package com.megaease.easeagent.core.interceptor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public interface AgentInterceptor {
@@ -28,17 +26,4 @@ public interface AgentInterceptor {
      */
     void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context);
 
-    class Builder {
-
-        private final List<AgentInterceptor> list = new ArrayList<>();
-
-        public Builder addInterceptor(AgentInterceptor agentInterceptor) {
-            list.add(agentInterceptor);
-            return this;
-        }
-
-        public AgentInterceptor build() {
-            return new AgentListInterceptor(list);
-        }
-    }
 }

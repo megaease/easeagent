@@ -50,6 +50,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+            <version>${version.spring-cloud-starter-gateway}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>gen</artifactId>
             <version>${project.version}</version>
