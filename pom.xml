@@ -36,6 +36,7 @@
         <module>loader</module>
         <module>sniffer</module>
         <module>config</module>
+        <module>report</module>
     </modules>
 
     <properties>
@@ -59,7 +60,8 @@
         <version.spring-boot>2.3.9.RELEASE</version.spring-boot>
         <version.spring-cloud-openfeign>2.2.7.RELEASE</version.spring-cloud-openfeign>
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
-
+        <version.log4j>2.14.0</version.log4j>
+        <version.kafka>2.3.1</version.kafka>
     </properties>
 
     <dependencies>
@@ -146,6 +148,36 @@
                 <groupId>com.github.dreamhead</groupId>
                 <artifactId>moco-core</artifactId>
                 <version>${version.moco}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${version.log4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${version.log4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>${version.disruptor}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.11</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${version.kafka}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-log4j-appender</artifactId>
+                <version>${version.kafka}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
