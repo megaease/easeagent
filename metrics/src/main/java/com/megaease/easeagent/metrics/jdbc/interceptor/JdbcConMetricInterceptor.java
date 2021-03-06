@@ -37,7 +37,7 @@ public class JdbcConMetricInterceptor extends AbstractJdbcMetric {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         Connection connection = (Connection) retValue;
         try {
             String key;
@@ -46,15 +46,15 @@ public class JdbcConMetricInterceptor extends AbstractJdbcMetric {
                 key = ERR_CON_METRIC_KEY;
                 success = false;
             } else {
-                key = getMetricKey(connection, exception);
+                key = getMetricKey(connection, throwable);
             }
             this.collectMetric(key, success, context);
         } catch (SQLException ignored) {
         }
     }
 
-    private static String getMetricKey(Connection con, Exception exception) throws SQLException {
-        if (exception != null) {
+    private static String getMetricKey(Connection con, Throwable throwable) throws SQLException {
+        if (throwable != null) {
             return ERR_CON_METRIC_KEY;
         }
         return JdbcUtils.getUrl(con);

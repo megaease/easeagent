@@ -32,7 +32,7 @@ public abstract class BaseClientTracingInterceptor<T, E> implements AgentInterce
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         E response = this.getResponse(invoker, args, retValue);
         Span span = (Span) context.get(Span.class);
         HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);

@@ -37,6 +37,7 @@ import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayInitGlobalFilterInterceptor;
+import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -111,7 +112,7 @@ public abstract class Provider {
     @Injection.Bean("agentInterceptor4Gateway")
     public AgentInterceptor agentInterceptor4Gateway() {
         this.loadTracing();
-        return new SpringGatewayInitGlobalFilterInterceptor();
+        return new SpringGatewayInitGlobalFilterInterceptor(new SpringGatewayServerTracingInterceptor(this.tracing));
     }
 
     private SpanHandler spanHandler() {

@@ -1,8 +1,10 @@
 package com.megaease.easeagent.zipkin.http.flux;
 
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
+import reactor.util.context.Context;
 
 @Slf4j
 public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
@@ -14,6 +16,11 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
     public AgentCoreSubscriber(AgentMono<T> agentMono, CoreSubscriber<T> coreSubscriberObj) {
         this.agentMono = agentMono;
         this.coreSubscriberObj = coreSubscriberObj;
+    }
+
+    @Override
+    public Context currentContext() {
+        return this.coreSubscriberObj.currentContext();
     }
 
     @Override
@@ -32,6 +39,8 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
     public void onError(Throwable t) {
         log.info("begin onError");
         coreSubscriberObj.onError(t);
+        AgentInterceptor agentInterceptor = this.agentMono.getAgentInterceptor();
+        agentInterceptor.after(this.agentMono.getAgentInterceptor(), "filter", this.agentMono.getArgs(), this.agentMono, t, this.agentMono.getContext());
     }
 
     @Override

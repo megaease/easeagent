@@ -53,12 +53,12 @@ public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implement
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
         ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
         String sql = executionInfo.getSql();
         String key = this.sqlCompression.compress(sql);
-        this.collectMetric(key, exception == null, context);
+        this.collectMetric(key, throwable == null, context);
         String value = cache.getIfPresent(key);
         if (value == null) {
             cache.put(key, "");

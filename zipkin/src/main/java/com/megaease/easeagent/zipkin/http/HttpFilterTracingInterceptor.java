@@ -36,12 +36,12 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
         ServletUtils.setHttpRouteAttribute(httpServletRequest);
         Span span = (Span) context.get(Span.class);
-        HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, exception);
+        HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, throwable);
         span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
         httpServerHandler.handleSend(responseWrapper, span);
     }

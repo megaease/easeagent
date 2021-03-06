@@ -27,14 +27,14 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
         String httpRoute = ServletUtils.getHttpRouteAttribute(httpServletRequest);
-        this.collectMetric(httpRoute, httpServletResponse, exception, context);
+        this.collectMetric(httpRoute, httpServletResponse, throwable, context);
     }
 
-    public void collectMetric(String key, HttpServletResponse httpServletResponse, Exception exception, Map<Object, Object> context) {
+    public void collectMetric(String key, HttpServletResponse httpServletResponse, Throwable throwable, Map<Object, Object> context) {
         int status = httpServletResponse.getStatus();
         Timer timer = metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT));
         timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
@@ -42,7 +42,7 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric {
         final Meter meter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
         Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR));
         Counter counter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT));
-        boolean hasException = exception != null;
+        boolean hasException = throwable != null;
         if (status >= 400 || hasException) {
             errorMeter.mark();
             errorCounter.inc();

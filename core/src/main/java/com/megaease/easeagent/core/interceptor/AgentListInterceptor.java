@@ -18,8 +18,8 @@ public class AgentListInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
-        this.agentInterceptors.forEach(interceptor -> interceptor.after(invoker, method, args, retValue, exception, context));
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+        this.agentInterceptors.forEach(interceptor -> interceptor.after(invoker, method, args, retValue, throwable, context));
     }
 
     public static class Builder {

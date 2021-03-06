@@ -66,20 +66,20 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         Optional.ofNullable(ThreadLocalSpan.CURRENT_TRACER.remove()).ifPresent(span -> {
             JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
             ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
-            if (exception == null) {
+            if (throwable == null) {
 //                span.tag(SPAN_ROW_COUNT_TAG_NAME, String.valueOf(executionInfo.getResult()));
             } else {
-                span.tag(SPAN_ERROR_TAG_NAME, getExceptionMessage(exception));
+                span.tag(SPAN_ERROR_TAG_NAME, getExceptionMessage(throwable));
             }
             span.finish();
         });
     }
 
-    private String getExceptionMessage(Exception e) {
-        return e.getMessage() != null ? e.getMessage() : e.toString();
+    private String getExceptionMessage(Throwable throwable) {
+        return throwable.getMessage() != null ? throwable.getMessage() : throwable.toString();
     }
 }

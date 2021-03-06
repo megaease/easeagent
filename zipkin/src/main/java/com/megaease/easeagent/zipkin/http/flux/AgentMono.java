@@ -1,6 +1,10 @@
 package com.megaease.easeagent.zipkin.http.flux;
 
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
@@ -12,21 +16,39 @@ public class AgentMono<T> extends Mono<T> {
 
     private final Mono<T> monoObj;
 
-    private final Map<Object, Object> context = new HashMap<>();
+    private final Object invoker;
 
-    public AgentMono(Mono<T> monoObj) {
+    private final Object[] args;
+
+    private final AgentInterceptor agentInterceptor;
+
+    private final Map<Object, Object> context;
+
+    public AgentMono(Mono<T> monoObj, Object invoker, Object[] args, AgentInterceptor agentInterceptor, Map<Object, Object> context) {
         this.monoObj = monoObj;
+        this.invoker = invoker;
+        this.args = args;
+        this.agentInterceptor = agentInterceptor;
+        this.context = context;
     }
 
-    public void addToContext(Object key, Object value) {
-        context.put(key, value);
+    public Object getInvoker() {
+        return invoker;
     }
 
-    public Object getFromContext(Object key) {
-        return context.get(key);
+    public Object[] getArgs() {
+        return args;
     }
 
-    @SuppressWarnings("rawtypes")
+    public AgentInterceptor getAgentInterceptor() {
+        return agentInterceptor;
+    }
+
+    public Map<Object, Object> getContext() {
+        return context;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void subscribe(CoreSubscriber<? super T> actual) {
         log.info("begin subscribe");

@@ -34,7 +34,7 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Exception exception, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         Long beginTime = ContextUtils.getBeginTime(context);
         TraceContext traceContext = Tracing.current().currentTraceContext().get();
