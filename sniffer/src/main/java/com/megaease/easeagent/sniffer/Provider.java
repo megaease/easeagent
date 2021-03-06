@@ -36,6 +36,7 @@ import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
@@ -113,6 +114,12 @@ public abstract class Provider {
     public AgentInterceptor agentInterceptor4Gateway() {
         this.loadTracing();
         return new SpringGatewayInitGlobalFilterInterceptor(new SpringGatewayServerTracingInterceptor(this.tracing));
+    }
+
+    @Injection.Bean("agentInterceptor4GatewayHeaders")
+    public AgentInterceptor agentInterceptor4GatewayHeaders() {
+        this.loadTracing();
+        return new SpringGatewayHttpHeadersInterceptor(this.tracing);
     }
 
     private SpanHandler spanHandler() {

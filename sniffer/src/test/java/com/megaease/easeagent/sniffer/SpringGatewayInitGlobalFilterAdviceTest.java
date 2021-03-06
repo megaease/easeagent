@@ -15,13 +15,13 @@ import java.util.Map;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class SpringGatewayAdviceTest {
+public class SpringGatewayInitGlobalFilterAdviceTest {
 
     @SuppressWarnings("unchecked")
     @Test
     public void testInvoke() throws Exception {
         AgentInterceptor agentInterceptor = mock(AgentInterceptor.class);
-        Definition.Default def = new GenSpringGatewayAdvice().define(Definition.Default.EMPTY);
+        Definition.Default def = new GenSpringGatewayInitGlobalFilterAdvice().define(Definition.Default.EMPTY);
         ClassLoader loader = this.getClass().getClassLoader();
         List<GlobalFilter> list = new ArrayList<>();
         GatewayAutoConfiguration instance = (GatewayAutoConfiguration) Classes.transform("org.springframework.cloud.gateway.config.GatewayAutoConfiguration")

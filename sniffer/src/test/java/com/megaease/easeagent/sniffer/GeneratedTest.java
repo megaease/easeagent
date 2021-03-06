@@ -19,6 +19,6 @@ package com.megaease.easeagent.sniffer;
 
 import com.megaease.easeagent.gen.Assembly;
 
-@Assembly({JdbcDataSourceAdvice.class, JdbcStatementAdvice.class, HttpServletAdvice.class, HttpFilterAdvice.class, RestTemplateAdvice.class, FeignClientAdvice.class, SpringGatewayAdvice.class})
+@Assembly({JdbcDataSourceAdvice.class, JdbcStatementAdvice.class, HttpServletAdvice.class, HttpFilterAdvice.class, RestTemplateAdvice.class, FeignClientAdvice.class, SpringGatewayInitGlobalFilterAdvice.class, SpringGatewayHttpHeadersFilterAdvice.class})
 public interface GeneratedTest {
 }
