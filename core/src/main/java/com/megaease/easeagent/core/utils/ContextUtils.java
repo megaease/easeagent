@@ -32,4 +32,18 @@ public class ContextUtils {
         setBeginTime(map);
         return map;
     }
+
+    /**
+     * Get data from context
+     *
+     * @param context Store data
+     * @param key     key is the type of data. Like {@code value.getClass()}
+     * @param <T>     The type of data
+     * @return data
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getFromContext(Map<Object, Object> context, Object key) {
+        return (T) context.get(key);
+    }
+
 }

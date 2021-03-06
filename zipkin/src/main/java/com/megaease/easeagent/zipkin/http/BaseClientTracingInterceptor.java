@@ -11,7 +11,7 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 
 import java.util.Map;
 
-public abstract class BaseClientTracingInterceptor<T, E> implements AgentInterceptor {
+public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentInterceptor {
 
     protected final HttpClientHandler<HttpClientRequest, HttpClientResponse> clientHandler;
 
@@ -23,28 +23,31 @@ public abstract class BaseClientTracingInterceptor<T, E> implements AgentInterce
 
     @Override
     public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
-        T request = getRequest(invoker, args);
+        Req request = getRequest(invoker, args);
         HttpClientRequest requestWrapper = this.buildHttpClientRequest(request);
         Span span = clientHandler.handleSend(requestWrapper);
         context.put(Span.class, span);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
-        currentTraceContext.newScope(span.context());
+        CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
+        context.put(CurrentTraceContext.Scope.class, newScope);
     }
 
     @Override
     public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
-        E response = this.getResponse(invoker, args, retValue);
-        Span span = (Span) context.get(Span.class);
-        HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
-        clientHandler.handleReceive(responseWrapper, span);
+        try (CurrentTraceContext.Scope ignored = (CurrentTraceContext.Scope) context.get(CurrentTraceContext.Scope.class)) {
+            Resp response = this.getResponse(invoker, args, retValue);
+            Span span = (Span) context.get(Span.class);
+            HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
+            clientHandler.handleReceive(responseWrapper, span);
+        }
     }
 
-    public abstract T getRequest(Object invoker, Object[] args);
+    public abstract Req getRequest(Object invoker, Object[] args);
 
-    public abstract E getResponse(Object invoker, Object[] args, Object retValue);
+    public abstract Resp getResponse(Object invoker, Object[] args, Object retValue);
 
-    public abstract HttpClientRequest buildHttpClientRequest(T t);
+    public abstract HttpClientRequest buildHttpClientRequest(Req req);
 
-    public abstract HttpClientResponse buildHttpClientResponse(E e);
+    public abstract HttpClientResponse buildHttpClientResponse(Resp resp);
 
 }

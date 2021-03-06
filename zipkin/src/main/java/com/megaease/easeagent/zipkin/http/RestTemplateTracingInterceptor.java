@@ -25,19 +25,19 @@ public class RestTemplateTracingInterceptor extends BaseClientTracingInterceptor
 
     @Override
     public HttpClientRequest buildHttpClientRequest(AbstractClientHttpRequest abstractClientHttpRequest) {
-        return new HttpClientRequestWrapper(abstractClientHttpRequest);
+        return new RestTemplateRequest(abstractClientHttpRequest);
     }
 
     @Override
     public HttpClientResponse buildHttpClientResponse(ClientHttpResponse clientHttpResponse) {
-        return new ClientResponseWrapper(clientHttpResponse);
+        return new RestTemplateResponse(clientHttpResponse);
     }
 
-    static class HttpClientRequestWrapper extends HttpClientRequest {
+    static class RestTemplateRequest extends HttpClientRequest {
 
         private final AbstractClientHttpRequest request;
 
-        public HttpClientRequestWrapper(AbstractClientHttpRequest request) {
+        public RestTemplateRequest(AbstractClientHttpRequest request) {
             this.request = request;
         }
 
@@ -72,11 +72,11 @@ public class RestTemplateTracingInterceptor extends BaseClientTracingInterceptor
         }
     }
 
-    static class ClientResponseWrapper extends HttpClientResponse {
+    static class RestTemplateResponse extends HttpClientResponse {
 
         private final ClientHttpResponse response;
 
-        public ClientResponseWrapper(ClientHttpResponse response) {
+        public RestTemplateResponse(ClientHttpResponse response) {
             this.response = response;
         }
 

@@ -30,9 +30,10 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServerRequest requestWrapper = HttpServletRequestWrapper.create(httpServletRequest);
         Span span = httpServerHandler.handleReceive(requestWrapper);
-        context.put(Span.class, span);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
-        currentTraceContext.newScope(span.context());
+        CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
+        context.put(Span.class, span);
+        context.put(CurrentTraceContext.Scope.class, newScope);
     }
 
     @Override
@@ -41,9 +42,12 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
         ServletUtils.setHttpRouteAttribute(httpServletRequest);
         Span span = (Span) context.get(Span.class);
-        HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, throwable);
-        span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
-        httpServerHandler.handleSend(responseWrapper, span);
+        try (CurrentTraceContext.Scope ignored = (CurrentTraceContext.Scope) context.get(CurrentTraceContext.Scope.class)) {
+            HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, throwable);
+            span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
+            httpServerHandler.handleSend(responseWrapper, span);
+        }
+
     }
 
 }
