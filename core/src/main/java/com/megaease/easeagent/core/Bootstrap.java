@@ -71,25 +71,27 @@ public class Bootstrap {
         define(
                 conf, transformations, scoped(providers, conf),
                 new Default()
-//                        .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
-//                        .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
-//                        .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
                         .with(LISTENER)
                         .ignore(any(), protectedLoaders())
-                        .or(isInterface())
                         .or(isSynthetic())
                         .or(nameStartsWith("sun.reflect."))
+                        .or(nameStartsWith("net.bytebuddy."))
+                        .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
+                        .or(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
+                        .or(nameStartsWith("org.junit."))
+                        .or(nameStartsWith("junit."))
+                        .or(nameStartsWith("com.intellij."))
         ).installOn(inst);
         registerMBeans(conf,inst);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
-    static void registerMBeans(Configs conf,Instrumentation inst) throws Exception {
+    static void registerMBeans(Configs conf, Instrumentation inst) throws Exception {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
         mbs.registerMBean(conf, mxbeanName);
         LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName.toString());
-        JvmAgent.premain("",inst);
+        JvmAgent.premain("", inst);
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf) {
@@ -176,26 +178,27 @@ public class Bootstrap {
 
         @Override
         public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
+//            LOGGER.debug("onDiscovery {} from classLoader {}", typeName, classLoader);
         }
 
         @Override
         public void onTransformation(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded, DynamicType dt) {
-            LOGGER.debug("Transform {} from {}", td, ld);
+            LOGGER.info("onTransformation: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
         public void onIgnored(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded) {
-            LOGGER.trace("Ignored {} from {}", td, ld);
+            LOGGER.debug("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-            LOGGER.error("onError {}, {}", name, error);
+            LOGGER.error("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
         }
 
         @Override
         public void onComplete(String name, ClassLoader ld, JavaModule m, boolean loaded) {
-            LOGGER.trace("Complete {} from {}", name, ld);
+            LOGGER.debug("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
         }
     };
 

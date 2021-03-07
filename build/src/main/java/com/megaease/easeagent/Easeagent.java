@@ -35,13 +35,13 @@ import com.megaease.easeagent.sniffer.*;
 //        , MeasureHttpRequest.class
 //        , CaptureCaller.class
 //        , HttpServletAdvice.class
-        HttpFilterAdvice.class
-        , SpringGatewayHttpHeadersFilterAdvice.class
-        , SpringGatewayInitGlobalFilterAdvice.class
-        , RestTemplateAdvice.class
-        , FeignClientAdvice.class
-        , JdbcDataSourceAdvice.class
-        , JdbcStatementAdvice.class
+        HttpFilterAdvice.class,
+        SpringGatewayHttpHeadersFilterAdvice.class,
+        SpringGatewayInitGlobalFilterAdvice.class,
+        RestTemplateAdvice.class,
+        FeignClientAdvice.class,
+        JdbcDataSourceAdvice.class,
+        JdbcStatementAdvice.class
 
 })
 abstract class Easeagent {

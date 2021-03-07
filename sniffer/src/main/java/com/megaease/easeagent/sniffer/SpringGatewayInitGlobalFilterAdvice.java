@@ -14,16 +14,14 @@ import net.bytebuddy.matcher.ElementMatcher;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 @Injection.Provider(Provider.class)
 public abstract class SpringGatewayInitGlobalFilterAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type((named("org.springframework.cloud.gateway.config.GatewayAutoConfiguration")))
+        return def.type(named("org.springframework.cloud.gateway.config.GatewayAutoConfiguration"))
                 .transform(initBeans(named("filteringWebHandler")
-                        .or(takesArguments(1))
                         .or(named("gatewayControllerEndpoint"))
                         .or(named("gatewayLegacyControllerEndpoint"))
                 )).end();

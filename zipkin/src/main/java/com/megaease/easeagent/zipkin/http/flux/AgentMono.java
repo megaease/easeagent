@@ -7,6 +7,7 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 @Slf4j
 public class AgentMono<T> extends Mono<T> {
@@ -17,14 +18,21 @@ public class AgentMono<T> extends Mono<T> {
 
     private final ServerWebExchange exchange;
 
-    public AgentMono(Mono<T> monoObj, ServerWebExchange exchange, AgentInterceptor agentInterceptor) {
+    private final Map<Object, Object> context;
+
+    public AgentMono(Mono<T> monoObj, ServerWebExchange exchange, AgentInterceptor agentInterceptor, Map<Object, Object> context) {
         this.monoObj = monoObj;
         this.agentInterceptor = agentInterceptor;
         this.exchange = exchange;
+        this.context = context;
     }
 
     public AgentInterceptor getAgentInterceptor() {
         return agentInterceptor;
+    }
+
+    public Map<Object, Object> getContext() {
+        return context;
     }
 
     public ServerWebExchange getExchange() {

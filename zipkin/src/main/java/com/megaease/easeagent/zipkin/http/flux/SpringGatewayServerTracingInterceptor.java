@@ -6,6 +6,7 @@ import brave.http.HttpServerHandler;
 import brave.http.HttpServerRequest;
 import brave.http.HttpServerResponse;
 import brave.http.HttpTracing;
+import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.utils.ContextUtils;
@@ -20,8 +21,6 @@ import java.util.Map;
 
 public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
-    static final String TRACE_CONTEXT_ATTR = SpringGatewayServerTracingInterceptor.class.getName() + ".TraceContext";
-
     private final HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler;
 
     public SpringGatewayServerTracingInterceptor(Tracing tracing) {
@@ -33,27 +32,33 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
     public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
         ServerWebExchange exchange = (ServerWebExchange) args[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
-        TraceContext traceContext = Tracing.current().currentTraceContext().get();
         Span span = this.httpServerHandler.handleReceive(httpServerRequest);
+        CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
+        CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
+        TraceContext traceContext = currentTraceContext.get();
+
+        context.put(CurrentTraceContext.Scope.class, newScope);
         context.put(Span.class, span);
-        context.put(TraceContext.class, traceContext);
         context.put(FluxHttpServerRequest.class, httpServerRequest);
-        exchange.getAttributes().put(TRACE_CONTEXT_ATTR, traceContext);
+
+        exchange.getAttributes().put(GatewayCons.TRACE_CONTEXT_ATTR, traceContext);
+        exchange.getAttributes().put(GatewayCons.CURRENT_TRACE_CONTEXT_ATTR, currentTraceContext);
     }
 
     @Override
     public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
-        ServerWebExchange exchange = (ServerWebExchange) args[0];
-        ContextUtils.getFromContext(context, TraceContext.class);
-        FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
-        Span span = ContextUtils.getFromContext(context, Span.class);
-        PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-        String route = null;
-        if (bestPattern != null) {
-            route = bestPattern.getPatternString();
+        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, CurrentTraceContext.Scope.class)) {
+            ServerWebExchange exchange = (ServerWebExchange) args[0];
+            FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
+            Span span = ContextUtils.getFromContext(context, Span.class);
+            PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+            String route = null;
+            if (bestPattern != null) {
+                route = bestPattern.getPatternString();
+            }
+            HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
+            this.httpServerHandler.handleSend(response, span);
         }
-        HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
-        this.httpServerHandler.handleSend(response, span);
     }
 
     static class FluxHttpServerRequest extends HttpServerRequest {

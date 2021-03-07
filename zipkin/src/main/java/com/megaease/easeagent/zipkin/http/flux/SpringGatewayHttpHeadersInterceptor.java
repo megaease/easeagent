@@ -8,6 +8,7 @@ import brave.http.HttpClientResponse;
 import brave.http.HttpTracing;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.utils.ContextUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -28,22 +29,25 @@ public class SpringGatewayHttpHeadersInterceptor implements AgentInterceptor {
 
     @Override
     public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+
+    }
+
+    @Override
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         ServerWebExchange exchange = (ServerWebExchange) args[1];
-        TraceContext traceContext = exchange.getAttribute(SpringGatewayServerTracingInterceptor.TRACE_CONTEXT_ATTR);
+        HttpHeaders retHttpHeaders = (HttpHeaders) retValue;
+        TraceContext traceContext = exchange.getAttribute(GatewayCons.TRACE_CONTEXT_ATTR);
         if (traceContext == null) {
             return;
         }
         GatewayClientRequest request = new GatewayClientRequest(exchange);
         Span span = clientHandler.handleSendWithParent(request, traceContext);
         Map<String, String> map = request.getHeadersFromExchange();
-        HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
+        map.putAll(retHttpHeaders.toSingleValueMap());
+        HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAll(map);
         span.abandon();
-    }
-
-    @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
-
+        ContextUtils.setRetValue(context, httpHeaders);
     }
 
     static class GatewayClientRequest extends HttpClientRequest {

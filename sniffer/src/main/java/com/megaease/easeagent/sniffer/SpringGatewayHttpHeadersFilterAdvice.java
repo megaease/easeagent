@@ -9,9 +9,11 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
@@ -21,9 +23,9 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type((named("org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter")))
-                .transform(filterRequest(named("filterRequest")
-                )).end();
+        return def.type(named("org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter"))
+                .transform(filterRequest(named("filterRequest")))
+                .end();
     }
 
     @AdviceTo(FilterRequest.class)
@@ -52,12 +54,21 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                  @Advice.This(optional = true) Object invoker,
-                  @Advice.Origin("#m") String method,
-                  @Advice.AllArguments Object[] args,
-                  @Advice.Thrown Exception exception) {
-            release.apply(context -> agentInterceptor.after(invoker, method, args, null, exception, context));
+        Object exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
+                    @Advice.This(optional = true) Object invoker,
+                    @Advice.Origin("#m") String method,
+                    @Advice.AllArguments Object[] args,
+                    @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
+                    @Advice.Thrown Throwable throwable) {
+            AtomicReference<Object> tmpRet = new AtomicReference<>(retValue);
+            release.apply(context -> {
+                agentInterceptor.after(invoker, method, args, retValue, throwable, context);
+                Object newRetValue = ContextUtils.getRetValue(context);
+                if (newRetValue != null) {
+                    tmpRet.set(newRetValue);
+                }
+            });
+            return tmpRet.get();
         }
     }
 }

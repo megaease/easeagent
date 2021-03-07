@@ -5,8 +5,6 @@ import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import org.junit.Test;
-import org.springframework.cloud.gateway.config.GatewayAutoConfiguration;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -23,11 +21,10 @@ public class SpringGatewayHttpHeadersFilterAdviceTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testInvoke() throws Exception {
+    public void testInvoke() {
         AgentInterceptor agentInterceptor = mock(AgentInterceptor.class);
         Definition.Default def = new GenSpringGatewayHttpHeadersFilterAdvice().define(Definition.Default.EMPTY);
         ClassLoader loader = this.getClass().getClassLoader();
-        List<GlobalFilter> list = new ArrayList<>();
         Classes.transform("org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter")
                 .with(def, new QualifiedBean("agentInterceptor4GatewayHeaders", agentInterceptor))
                 .load(loader);
@@ -38,7 +35,8 @@ public class SpringGatewayHttpHeadersFilterAdviceTest {
         HttpHeaders httpHeaders = new HttpHeaders();
         when(request.getHeaders()).thenReturn(httpHeaders);
 
-        HttpHeadersFilter.filterRequest(new ArrayList<>(), exchange);
+        List<HttpHeadersFilter> list = new ArrayList<>();
+        HttpHeadersFilter.filterRequest(list, exchange);
 
         verify(agentInterceptor, times(1))
                 .before(any(), any(String.class),
