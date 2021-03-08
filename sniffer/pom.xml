@@ -46,13 +46,11 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <version>${version.spring-cloud-openfeign}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
-            <version>${version.spring-cloud-starter-gateway}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
