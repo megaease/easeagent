@@ -55,6 +55,7 @@
         <version.jackson>2.12.1</version.jackson>
         <version.servlet>3.1.0</version.servlet>
         <version.brave>5.13.3</version.brave>
+        <version.zipkin-sender-kafka11>2.8.0</version.zipkin-sender-kafka11>
         <version.moco>1.1.0</version.moco>
         <version.disruptor>3.4.2</version.disruptor>
         <version.spring-boot>2.3.8.RELEASE</version.spring-boot>
@@ -152,6 +153,17 @@
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-instrumentation-servlet</artifactId>
                 <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-sender-kafka11</artifactId>
+                <version>${version.zipkin-sender-kafka11}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>*</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.github.dreamhead</groupId>

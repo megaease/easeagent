@@ -10,7 +10,7 @@ public class LoggerFactory {
 
     /**
      * Adapt to the {@link Logger} from {@link org.apache.logging.log4j.core.Logger} as
-     * the {@code sdk.metrics.reporter.SpdbcccSlf4jReporter} write metrics via {@link Logger}
+     * the {@code sdk.metrics.reporter.AgentSlf4jReporter} write metrics via {@link Logger}
      *
      * @param name logger name
      * @return a wrapped {@link Logger}
