@@ -4,6 +4,7 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
 import org.junit.Assert;
@@ -64,10 +65,10 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
         Object[] args = new Object[]{exchange};
         Map<Object, Object> context = ContextUtils.createContext();
 
-        interceptor.before(null, null, args, context);
+        interceptor.before(null, null, args, context, mock(AgentInterceptorChain.class));
         // mock do something
         // mock do something end
-        interceptor.after(null, "doFilterInternal", args, null, null, context);
+        interceptor.after(null, "doFilterInternal", args, null, null, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.path", "/anything");
@@ -114,10 +115,10 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
         Object[] args = new Object[]{exchange};
         Map<Object, Object> context = ContextUtils.createContext();
 
-        interceptor.before(null, null, args, context);
+        interceptor.before(null, null, args, context, mock(AgentInterceptorChain.class));
         // mock do something
         // mock do something end
-        interceptor.after(null, "doFilterInternal", args, null, null, context);
+        interceptor.after(null, "doFilterInternal", args, null, null, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.path", "/anything");

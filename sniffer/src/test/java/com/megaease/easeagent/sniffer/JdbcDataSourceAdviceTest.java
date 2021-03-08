@@ -22,8 +22,7 @@ import com.google.common.collect.Maps;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentListInterceptor;
+import com.megaease.easeagent.core.interceptor.*;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
@@ -38,8 +37,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class JdbcDataSourceAdviceTest {
 
@@ -47,10 +45,11 @@ public class JdbcDataSourceAdviceTest {
     @SuppressWarnings("unchecked")
     public void should_work() throws Exception {
         final MetricRegistry registry = new MetricRegistry();
-        AgentInterceptor agentInterceptor = new JdbcConMetricInterceptor(registry);
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
+        AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
         final DataSource ds = (DataSource) Classes.transform("com.megaease.easeagent.sniffer.JdbcDataSourceAdviceTest$MyDataSource")
-                .with(def, new QualifiedBean("agentInterceptor4Con", agentInterceptor))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4Con", builder))
                 .load(getClass().getClassLoader()).get(0).newInstance();
         Connection connection = ds.getConnection();
         System.out.println(connection);
@@ -68,12 +67,11 @@ public class JdbcDataSourceAdviceTest {
     @Test
     public void should_throw_exception() throws Exception {
         final MetricRegistry registry = new MetricRegistry();
-        AgentInterceptor agentInterceptor = new AgentListInterceptor.Builder()
-                .addInterceptor(new JdbcConMetricInterceptor(registry))
-                .build();
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
+        AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
         final DataSource ds = (DataSource) Classes.transform("com.megaease.easeagent.sniffer.JdbcDataSourceAdviceTest$ErrDataSource")
-                .with(def, new QualifiedBean("agentInterceptor4Con", agentInterceptor))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4Con", builder))
                 .load(getClass().getClassLoader()).get(0).newInstance();
         try {
             ds.getConnection();

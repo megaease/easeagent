@@ -19,6 +19,7 @@ package com.megaease.easeagent.zipkin.jdbc;
 
 import brave.Span;
 import brave.propagation.ThreadLocalSpan;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.jdbc.*;
@@ -43,7 +44,7 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
         Optional.ofNullable(ThreadLocalSpan.CURRENT_TRACER.next()).ifPresent(span -> {
             JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
             ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
@@ -63,10 +64,11 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
             }
             span.start();
         });
+        chain.doBefore(invoker, method, args, context);
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         Optional.ofNullable(ThreadLocalSpan.CURRENT_TRACER.remove()).ifPresent(span -> {
             JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
             ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
@@ -77,6 +79,7 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
             }
             span.finish();
         });
+        chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     private String getExceptionMessage(Throwable throwable) {

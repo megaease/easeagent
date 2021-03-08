@@ -6,20 +6,16 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.flux.GatewayCons;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersInterceptor;
-import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,8 +57,8 @@ public class SpringGatewayHttpHeadersInterceptorTest extends BaseZipkinTest {
         SpringGatewayHttpHeadersInterceptor interceptor = new SpringGatewayHttpHeadersInterceptor(Tracing.current());
 
         Map<Object, Object> context = ContextUtils.createContext();
-        interceptor.before(null, null, new Object[]{null, exchange}, context);
-        interceptor.after(null, null, new Object[]{null, exchange}, httpHeaders, null, context);
+        interceptor.before(null, null, new Object[]{null, exchange}, context, mock(AgentInterceptorChain.class));
+        interceptor.after(null, null, new Object[]{null, exchange}, httpHeaders, null, context, mock(AgentInterceptorChain.class));
 
         root.finish();
         HttpHeaders retValue = ContextUtils.getRetValue(context);

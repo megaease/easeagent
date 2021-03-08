@@ -1,13 +1,14 @@
 package com.megaease.easeagent.sniffer;
 
-import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.common.ForwardLock;
-import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.core.utils.ServletUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -43,12 +44,15 @@ public abstract class HttpFilterAdvice implements Transformation {
     static class DoFilterInternal {
 
         private final ForwardLock lock;
-        private final AgentInterceptor agentInterceptor;
+        final AgentInterceptorChain.Builder builder;
+        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
-        DoFilterInternal(@Injection.Qualifier("agentInterceptor4HttpFilter") AgentInterceptor agentInterceptor) {
+        DoFilterInternal(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
+                         @Injection.Qualifier("agentInterceptorChainBuilder4Filter") AgentInterceptorChain.Builder builder) {
             this.lock = new ForwardLock();
-            this.agentInterceptor = agentInterceptor;
+            this.builder = builder;
+            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -61,7 +65,7 @@ public abstract class HttpFilterAdvice implements Transformation {
                 Map<Object, Object> map = ContextUtils.createContext();
                 HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
                 ServletUtils.setHttpRouteAttribute(httpServletRequest);
-                this.agentInterceptor.before(invoker, method, args, map);
+                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, map);
                 return map;
             });
 
@@ -76,7 +80,7 @@ public abstract class HttpFilterAdvice implements Transformation {
         ) {
             release.apply(map -> {
                 ContextUtils.setEndTime(map);
-                this.agentInterceptor.after(invoker, method, args, null, exception, map);
+                agentInterceptorChainInvoker.doAfter(invoker, method, args, null, exception, map);
             });
         }
     }

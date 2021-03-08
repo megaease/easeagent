@@ -5,7 +5,8 @@ import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -31,12 +32,15 @@ public abstract class RestTemplateAdvice implements Transformation {
     static class Execute {
 
         final ForwardLock lock;
-        final AgentInterceptor agentInterceptor;
+        final AgentInterceptorChain.Builder builder;
+        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
-        Execute(@Injection.Qualifier("agentInterceptor4RestTemplate") AgentInterceptor agentInterceptor) {
+        Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
+                @Injection.Qualifier("agentInterceptorChainBuilder4RestTemplate") AgentInterceptorChain.Builder builder) {
             this.lock = new ForwardLock();
-            this.agentInterceptor = agentInterceptor;
+            this.builder = builder;
+            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -45,7 +49,7 @@ public abstract class RestTemplateAdvice implements Transformation {
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
                 Map<Object, Object> context = ContextUtils.createContext();
-                agentInterceptor.before(invoker, method, args, context);
+                this.agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, context);
                 return context;
             });
 
@@ -57,7 +61,7 @@ public abstract class RestTemplateAdvice implements Transformation {
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
                   @Advice.Thrown Exception exception) {
-            release.apply(context -> agentInterceptor.after(invoker, method, args, null, exception, context));
+            release.apply(context -> this.agentInterceptorChainInvoker.doAfter(invoker, method, args, null, exception, context));
         }
     }
 }

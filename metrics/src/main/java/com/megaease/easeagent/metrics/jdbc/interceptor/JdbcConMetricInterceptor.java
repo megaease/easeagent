@@ -18,6 +18,7 @@
 package com.megaease.easeagent.metrics.jdbc.interceptor;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.jdbc.JdbcUtils;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
 
@@ -32,12 +33,7 @@ public class JdbcConMetricInterceptor extends AbstractJdbcMetric {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
-
-    }
-
-    @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         Connection connection = (Connection) retValue;
         try {
             String key;
@@ -51,6 +47,7 @@ public class JdbcConMetricInterceptor extends AbstractJdbcMetric {
             this.collectMetric(key, success, context);
         } catch (SQLException ignored) {
         }
+        chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     private static String getMetricKey(Connection con, Throwable throwable) throws SQLException {

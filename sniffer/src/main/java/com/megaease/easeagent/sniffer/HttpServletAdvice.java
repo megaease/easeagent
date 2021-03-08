@@ -1,12 +1,13 @@
 package com.megaease.easeagent.sniffer;
 
-import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.common.HttpServletService;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -24,12 +25,15 @@ public abstract class HttpServletAdvice extends HttpServletService {
     static class Service {
 
         private final ForwardLock lock;
-        private final AgentInterceptor agentInterceptor;
+        private final AgentInterceptorChain.Builder builder;
+        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
-        Service(@Injection.Qualifier("agentInterceptor4HttpServlet") AgentInterceptor agentInterceptor) {
+        Service(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
+                @Injection.Qualifier("agentInterceptorChainBuilder4Filter") AgentInterceptorChain.Builder builder) {
             this.lock = new ForwardLock();
-            this.agentInterceptor = agentInterceptor;
+            this.builder = builder;
+            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -40,7 +44,7 @@ public abstract class HttpServletAdvice extends HttpServletService {
         ) {
             return lock.acquire(() -> {
                 Map<Object, Object> map = ContextUtils.createContext();
-                agentInterceptor.before(invoker, method, args, map);
+                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, map);
                 return map;
             });
 
@@ -55,7 +59,7 @@ public abstract class HttpServletAdvice extends HttpServletService {
         ) {
             release.apply(map -> {
                 ContextUtils.setEndTime(map);
-                this.agentInterceptor.after(invoker, method, args, null, exception, map);
+                agentInterceptorChainInvoker.doAfter(invoker, method, args, null, exception, map);
             });
         }
     }

@@ -12,7 +12,7 @@ public interface AgentInterceptor {
      * @param args    The arguments of instrumented method. If no args exist,args=null
      * @param context Interceptor can pass data, method `after` of interceptor can receive context data
      */
-    void before(Object invoker, String method, Object[] args, Map<Object, Object> context);
+    void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain);
 
     /**
      * instrumen
@@ -24,6 +24,6 @@ public interface AgentInterceptor {
      * @param throwable Throwable is exist if method throws exception. Otherwise it is null.
      * @param context   Interceptor can pass data, method `after` of interceptor can receive context data
      */
-    void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context);
+    void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain);
 
 }

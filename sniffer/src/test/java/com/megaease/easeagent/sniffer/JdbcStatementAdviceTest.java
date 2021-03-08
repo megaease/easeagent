@@ -19,13 +19,15 @@ package com.megaease.easeagent.sniffer;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
-import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.core.jdbc.listener.JdbcListener;
+import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
@@ -45,6 +47,7 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 public class JdbcStatementAdviceTest {
     private static List<Class<?>> classList;
@@ -54,15 +57,15 @@ public class JdbcStatementAdviceTest {
     public void before() {
         if (classList == null) {
             registry = new MetricRegistry();
-            AgentInterceptor agentInterceptor = new JdbcStatementMetricInterceptor(registry, SQLCompression.DEFAULT);
+            AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcStatementMetricInterceptor(registry, SQLCompression.DEFAULT));
             String baeName = JdbcStatementAdviceTest.class.getName();
             ClassLoader loader = getClass().getClassLoader();
             String conName = baeName + "$MyConnection";
             String stmName = baeName + "$MyStatement";
-
+            AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
             Definition.Default def = new GenJdbcStatementAdvice().define(Definition.Default.EMPTY);
             classList = Classes.transform(conName, stmName)
-                    .with(def, new QualifiedBean("agentInterceptor4Stm", agentInterceptor))
+                    .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4Stm", builder))
                     .load(loader);
         }
     }

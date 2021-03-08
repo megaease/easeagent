@@ -9,6 +9,7 @@ import brave.http.HttpTracing;
 import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -29,7 +30,7 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
         ServerWebExchange exchange = (ServerWebExchange) args[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
         Span span = this.httpServerHandler.handleReceive(httpServerRequest);
@@ -43,10 +44,11 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
         exchange.getAttributes().put(GatewayCons.TRACE_CONTEXT_ATTR, traceContext);
         exchange.getAttributes().put(GatewayCons.CURRENT_TRACE_CONTEXT_ATTR, currentTraceContext);
+        chain.doBefore(invoker, method, args, context);
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, CurrentTraceContext.Scope.class)) {
             ServerWebExchange exchange = (ServerWebExchange) args[0];
             FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
@@ -59,6 +61,7 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
             HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
             this.httpServerHandler.handleSend(response, span);
         }
+        chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     static class FluxHttpServerRequest extends HttpServerRequest {

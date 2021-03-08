@@ -17,15 +17,16 @@
 
 package com.megaease.easeagent.sniffer;
 
-import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.core.jdbc.listener.JdbcListenerDispatcher;
+import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -135,13 +136,16 @@ public abstract class JdbcStatementAdvice implements Transformation {
 
         private final ForwardLock lock;
         private final JdbcListenerDispatcher jdbcListenerDispatcher;
-        private final AgentInterceptor agentInterceptor;
+        private final AgentInterceptorChain.Builder builder;
+        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
-        Execute(@Injection.Qualifier("agentInterceptor4Stm") AgentInterceptor agentInterceptor4Stm) {
+        Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
+                @Injection.Qualifier("agentInterceptorChainBuilder4Stm") AgentInterceptorChain.Builder builder) {
             this.lock = new ForwardLock();
             this.jdbcListenerDispatcher = JdbcListenerDispatcher.DEFAULT;
-            this.agentInterceptor = agentInterceptor4Stm;
+            this.builder = builder;
+            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -149,13 +153,13 @@ public abstract class JdbcStatementAdvice implements Transformation {
                                                        @Advice.Origin("#m") String method,
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
-                Map<Object, Object> map = ContextUtils.createContext();
+                Map<Object, Object> context = ContextUtils.createContext();
                 Object[] objs = getArgs(args);
                 JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
-                map.put(JdbcContextInfo.class, jdbcContextInfo);
+                context.put(JdbcContextInfo.class, jdbcContextInfo);
                 this.jdbcListenerDispatcher.dispatchBefore(jdbcContextInfo, invoker, method, objs);
-                agentInterceptor.before(invoker, method, objs, map);
-                return map;
+                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, objs, context);
+                return context;
             });
         }
 
@@ -166,12 +170,12 @@ public abstract class JdbcStatementAdvice implements Transformation {
                   @Advice.AllArguments Object[] args,
                   @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
                   @Advice.Thrown Exception exception) {
-            release.apply(map -> {
-                ContextUtils.setEndTime(map);
+            release.apply(context -> {
+                ContextUtils.setEndTime(context);
                 Object[] objs = getArgs(args);
                 JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
                 jdbcListenerDispatcher.dispatchAfter(jdbcContextInfo, invoker, method, objs, retValue);
-                agentInterceptor.after(invoker, method, objs, retValue, exception, map);
+                agentInterceptorChainInvoker.doAfter(invoker, method, objs, retValue, exception, context);
             });
 
         }

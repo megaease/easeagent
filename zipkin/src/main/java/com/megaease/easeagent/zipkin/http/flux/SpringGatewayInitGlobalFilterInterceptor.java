@@ -1,6 +1,8 @@
 package com.megaease.easeagent.zipkin.http.flux;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 
 import java.util.List;
@@ -8,17 +10,17 @@ import java.util.Map;
 
 public class SpringGatewayInitGlobalFilterInterceptor implements AgentInterceptor {
 
-    private final AgentInterceptor agentInterceptor;
-
     private boolean loadAgentFilter;
 
-    public SpringGatewayInitGlobalFilterInterceptor(AgentInterceptor agentInterceptor) {
-        this.agentInterceptor = agentInterceptor;
+    private final AgentInterceptorChain.Builder agentInterceptorChainBuilder;
+
+    public SpringGatewayInitGlobalFilterInterceptor(AgentInterceptorChain.Builder agentInterceptorChainBuilder) {
+        this.agentInterceptorChainBuilder = agentInterceptorChainBuilder;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
         List<GlobalFilter> list = null;
         switch (method) {
             case "filteringWebHandler":
@@ -35,11 +37,13 @@ public class SpringGatewayInitGlobalFilterInterceptor implements AgentIntercepto
         if (this.loadAgentFilter) {
             return;
         }
-        list.add(0, new AgentGlobalFilter(agentInterceptor));
+        list.add(0, new AgentGlobalFilter(agentInterceptorChainBuilder));
+        this.loadAgentFilter = true;
+        chain.doBefore(invoker, method, args, context);
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
-
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+        chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 }

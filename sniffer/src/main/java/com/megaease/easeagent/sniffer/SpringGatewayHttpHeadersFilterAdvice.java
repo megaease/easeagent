@@ -5,7 +5,8 @@ import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 @Injection.Provider(Provider.class)
 public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transformation {
@@ -34,12 +34,15 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
     static class FilterRequest {
 
         final ForwardLock lock;
-        final AgentInterceptor agentInterceptor;
+        final AgentInterceptorChain.Builder builder;
+        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
-        FilterRequest(@Injection.Qualifier("agentInterceptor4GatewayHeaders") AgentInterceptor agentInterceptor) {
+        FilterRequest(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
+                      @Injection.Qualifier("agentInterceptorChainBuilder4GatewayHeaders") AgentInterceptorChain.Builder builder) {
             this.lock = new ForwardLock();
-            this.agentInterceptor = agentInterceptor;
+            this.builder = builder;
+            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -48,7 +51,7 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
                 Map<Object, Object> context = ContextUtils.createContext();
-                agentInterceptor.before(invoker, method, args, context);
+                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, context);
                 return context;
             });
         }
@@ -62,7 +65,7 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
                     @Advice.Thrown Throwable throwable) {
             AtomicReference<Object> tmpRet = new AtomicReference<>(retValue);
             release.apply(context -> {
-                agentInterceptor.after(invoker, method, args, retValue, throwable, context);
+                agentInterceptorChainInvoker.doAfter(invoker, method, args, retValue, throwable, context);
                 Object newRetValue = ContextUtils.getRetValue(context);
                 if (newRetValue != null) {
                     tmpRet.set(newRetValue);

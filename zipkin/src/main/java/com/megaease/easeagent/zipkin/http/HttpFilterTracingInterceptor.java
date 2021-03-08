@@ -9,6 +9,7 @@ import brave.http.HttpTracing;
 import brave.propagation.CurrentTraceContext;
 import brave.servlet.HttpServletRequestWrapper;
 import brave.servlet.HttpServletResponseWrapper;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 
@@ -26,7 +27,7 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServerRequest requestWrapper = HttpServletRequestWrapper.create(httpServletRequest);
         Span span = httpServerHandler.handleReceive(requestWrapper);
@@ -34,10 +35,11 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
         CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
         context.put(Span.class, span);
         context.put(CurrentTraceContext.Scope.class, newScope);
+        chain.doBefore(invoker, method, args, context);
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
         ServletUtils.setHttpRouteAttribute(httpServletRequest);
@@ -47,7 +49,7 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
             span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
             httpServerHandler.handleSend(responseWrapper, span);
         }
-
+        chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
 }

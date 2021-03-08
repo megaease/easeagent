@@ -21,6 +21,7 @@ import brave.Tracing;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 
@@ -30,11 +31,12 @@ import java.util.Map;
 public class HttpFilterLogInterceptor implements AgentInterceptor {
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
+        chain.doBefore(invoker, method, args, context);
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         Long beginTime = ContextUtils.getBeginTime(context);
         TraceContext traceContext = Tracing.current().currentTraceContext().get();
@@ -60,7 +62,7 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
 
         // TODO: 2021/3/3 send info
 
-
+        chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
 }

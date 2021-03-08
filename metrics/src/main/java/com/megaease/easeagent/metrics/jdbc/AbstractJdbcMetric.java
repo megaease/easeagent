@@ -22,6 +22,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
@@ -72,9 +73,9 @@ public abstract class AbstractJdbcMetric extends AbstractMetric {
                 .build();
     }
 
-      @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
-
+    @Override
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
+        chain.doBefore(invoker, method, args, context);
     }
 
     protected void collectMetric(String key, boolean success, Map<Object, Object> context) {

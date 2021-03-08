@@ -1,6 +1,6 @@
 package com.megaease.easeagent.zipkin.http.flux;
 
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.CoreSubscriber;
@@ -14,21 +14,21 @@ public class AgentMono<T> extends Mono<T> {
 
     private final Mono<T> monoObj;
 
-    private final AgentInterceptor agentInterceptor;
+    private final AgentInterceptorChain agentInterceptorChain;
 
     private final ServerWebExchange exchange;
 
     private final Map<Object, Object> context;
 
-    public AgentMono(Mono<T> monoObj, ServerWebExchange exchange, AgentInterceptor agentInterceptor, Map<Object, Object> context) {
+    public AgentMono(Mono<T> monoObj, ServerWebExchange exchange, AgentInterceptorChain agentInterceptorChain, Map<Object, Object> context) {
         this.monoObj = monoObj;
-        this.agentInterceptor = agentInterceptor;
+        this.agentInterceptorChain = agentInterceptorChain;
         this.exchange = exchange;
         this.context = context;
     }
 
-    public AgentInterceptor getAgentInterceptor() {
-        return agentInterceptor;
+    public AgentInterceptorChain getAgentInterceptorChain() {
+        return agentInterceptorChain;
     }
 
     public Map<Object, Object> getContext() {

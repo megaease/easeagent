@@ -22,7 +22,8 @@ import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -53,13 +54,16 @@ public abstract class JdbcDataSourceAdvice implements Transformation {
 
         private final ForwardLock lock;
         private final Logger logger;
-        private final AgentInterceptor agentInterceptor;
+        private final AgentInterceptorChain.Builder builder;
+        private final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
-        GetConnection(@Injection.Qualifier("agentInterceptor4Con") AgentInterceptor agentInterceptor4Con) {
+        GetConnection(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
+                      @Injection.Qualifier("agentInterceptorChainBuilder4Con") AgentInterceptorChain.Builder builder) {
             this.lock = new ForwardLock();
             logger = LoggerFactory.getLogger(getClass());
-            this.agentInterceptor = agentInterceptor4Con;
+            this.builder = builder;
+            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -67,9 +71,9 @@ public abstract class JdbcDataSourceAdvice implements Transformation {
                                                        @Advice.Origin("#m") String method,
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
-                Map<Object, Object> map = ContextUtils.createContext();
-                agentInterceptor.before(dataSource, method, args, map);
-                return map;
+                Map<Object, Object> context = ContextUtils.createContext();
+                agentInterceptorChainInvoker.doBefore(this.builder, dataSource, method, args, context);
+                return context;
             });
         }
 
@@ -80,10 +84,10 @@ public abstract class JdbcDataSourceAdvice implements Transformation {
                   @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
                   @Advice.Origin("#m") String method,
                   @Advice.Thrown Exception exception) {
-            release.apply(map -> {
+            release.apply(context -> {
                 try {
-                    ContextUtils.setEndTime(map);
-                    this.agentInterceptor.after(dataSource, method, args, retValue, exception, map);
+                    ContextUtils.setEndTime(context);
+                    agentInterceptorChainInvoker.doAfter(dataSource, method, args, retValue, exception, context);
                 } catch (Exception e) {
                     logger.error(e.toString());
                 }

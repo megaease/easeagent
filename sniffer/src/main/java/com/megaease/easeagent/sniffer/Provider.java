@@ -25,8 +25,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentListInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
@@ -38,7 +39,6 @@ import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayInitGlobalFilterInterceptor;
-import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -69,57 +69,64 @@ public abstract class Provider {
         }
     }
 
-    @Injection.Bean("agentInterceptor4Con")
-    public AgentInterceptor agentInterceptor4Con() {
-        return new JdbcConMetricInterceptor(metricRegistry);
+    @Injection.Bean
+    public AgentInterceptorChainInvoker agentInterceptorChainInvoker() {
+        return AgentInterceptorChainInvoker.getInstance();
     }
 
-    @Injection.Bean("agentInterceptor4Stm")
-    public AgentInterceptor agentInterceptor4Stm() {
-        return new AgentListInterceptor.Builder()
+    @Injection.Bean("agentInterceptorChainBuilder4Con")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Con() {
+        return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new JdbcConMetricInterceptor(metricRegistry));
+    }
+
+    @Injection.Bean("agentInterceptorChainBuilder4Stm")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Stm() {
+        return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression))
                 .addInterceptor(new JdbcStatementTracingInterceptor(sqlCompression))
-                .build();
+                ;
     }
 
-//    @Injection.Bean("agentInterceptor4HttpServlet")
-//    public AgentInterceptor agentInterceptor4HttpServlet() {
-//        this.loadTracing();
-//        return new HttpServletTracingInterceptor();
-//    }
-
-    @Injection.Bean("agentInterceptor4HttpFilter")
-    public AgentInterceptor agentInterceptor4HttpFilter() {
-        this.loadTracing();
-        return new AgentListInterceptor.Builder()
+    @Injection.Bean("agentInterceptorChainBuilder4Filter")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Filter() {
+        loadTracing();
+        return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new HttpFilterMetricsInterceptor(metricRegistry))
                 .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
                 .addInterceptor(new HttpFilterLogInterceptor())
-                .build();
+                ;
     }
 
-    @Injection.Bean("agentInterceptor4RestTemplate")
-    public AgentInterceptor agentInterceptor4RestTemplate() {
-        this.loadTracing();
-        return new RestTemplateTracingInterceptor(this.tracing);
+    @Injection.Bean("agentInterceptorChainBuilder4RestTemplate")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4RestTemplate() {
+        loadTracing();
+        return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new RestTemplateTracingInterceptor(tracing))
+                ;
     }
 
-    @Injection.Bean("agentInterceptor4FeignClient")
-    public AgentInterceptor agentInterceptor4FeignClient() {
-        this.loadTracing();
-        return new FeignClientTracingInterceptor(this.tracing);
+    @Injection.Bean("agentInterceptorChainBuilder4FeignClient")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4FeignClient() {
+        loadTracing();
+        return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new FeignClientTracingInterceptor(tracing))
+                ;
     }
 
-    @Injection.Bean("agentInterceptor4Gateway")
-    public AgentInterceptor agentInterceptor4Gateway() {
-        this.loadTracing();
-        return new SpringGatewayInitGlobalFilterInterceptor(new SpringGatewayServerTracingInterceptor(this.tracing));
+    @Injection.Bean("agentInterceptorChainBuilder4Gateway")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Gateway() {
+        DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
+        builder.addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(builder));
+        return builder;
     }
 
-    @Injection.Bean("agentInterceptor4GatewayHeaders")
-    public AgentInterceptor agentInterceptor4GatewayHeaders() {
-        this.loadTracing();
-        return new SpringGatewayHttpHeadersInterceptor(this.tracing);
+    @Injection.Bean("agentInterceptorChainBuilder4GatewayHeaders")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4GatewayHeaders() {
+        loadTracing();
+        return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing))
+                ;
     }
 
     private SpanHandler spanHandler() {

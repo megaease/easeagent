@@ -4,6 +4,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.MetricSubType;
@@ -22,16 +23,17 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
-
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
+        chain.doBefore(invoker, method, args, context);
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
         String httpRoute = ServletUtils.getHttpRouteAttribute(httpServletRequest);
         this.collectMetric(httpRoute, httpServletResponse, throwable, context);
+        chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     public void collectMetric(String key, HttpServletResponse httpServletResponse, Throwable throwable, Map<Object, Object> context) {

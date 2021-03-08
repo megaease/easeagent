@@ -5,7 +5,8 @@ import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -34,12 +35,15 @@ public abstract class FeignClientAdvice implements Transformation {
     static class Execute {
 
         final ForwardLock lock;
-        final AgentInterceptor agentInterceptor;
+        final AgentInterceptorChain.Builder builder;
+        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
-        Execute(@Injection.Qualifier("agentInterceptor4FeignClient") AgentInterceptor agentInterceptor) {
+        Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
+                @Injection.Qualifier("agentInterceptorChainBuilder4FeignClient") AgentInterceptorChain.Builder builder) {
             this.lock = new ForwardLock();
-            this.agentInterceptor = agentInterceptor;
+            this.builder = builder;
+            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -48,10 +52,9 @@ public abstract class FeignClientAdvice implements Transformation {
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
                 Map<Object, Object> context = ContextUtils.createContext();
-                agentInterceptor.before(invoker, method, args, context);
+                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, context);
                 return context;
             });
-
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
@@ -60,7 +63,7 @@ public abstract class FeignClientAdvice implements Transformation {
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
                   @Advice.Thrown Exception exception) {
-            release.apply(context -> agentInterceptor.after(invoker, method, args, null, exception, context));
+            release.apply(context -> agentInterceptorChainInvoker.doAfter(invoker, method, args, null, exception, context));
         }
     }
 }

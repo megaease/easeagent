@@ -13,13 +13,13 @@ public class AgentListInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context) {
-        this.agentInterceptors.forEach(interceptor -> interceptor.before(invoker, method, args, context));
+    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
+        this.agentInterceptors.forEach(interceptor -> interceptor.before(invoker, method, args, context, chain));
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
-        this.agentInterceptors.forEach(interceptor -> interceptor.after(invoker, method, args, retValue, throwable, context));
+    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+        this.agentInterceptors.forEach(interceptor -> interceptor.after(invoker, method, args, retValue, throwable, context, chain));
     }
 
     public static class Builder {

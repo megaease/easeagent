@@ -1,13 +1,11 @@
 package com.megaease.easeagent.zipkin.http.flux;
 
-import com.megaease.easeagent.core.utils.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.util.context.Context;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
 
 @Slf4j
 public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
@@ -43,13 +41,13 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
     public void onError(Throwable t) {
         log.info("begin onError");
         coreSubscriberObj.onError(t);
-        this.agentMono.getAgentInterceptor().after(this, null, new Object[]{this.agentMono.getExchange()}, null, t, this.agentMono.getContext());
+        this.agentMono.getAgentInterceptorChain().doAfter(this, null, new Object[]{this.agentMono.getExchange()}, null, t, this.agentMono.getContext());
     }
 
     @Override
     public void onComplete() {
         log.info("begin onComplete");
         coreSubscriberObj.onComplete();
-        this.agentMono.getAgentInterceptor().after(this, null, new Object[]{this.agentMono.getExchange()}, null, null, this.agentMono.getContext());
+        this.agentMono.getAgentInterceptorChain().doAfter(this, null, new Object[]{this.agentMono.getExchange()}, null, null, this.agentMono.getContext());
     }
 }
