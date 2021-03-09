@@ -22,6 +22,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.*;
@@ -31,12 +32,12 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractJdbcMetric extends AbstractMetric {
+public abstract class AbstractJdbcMetric extends AbstractMetric implements AgentInterceptor {
 
     public static final String ERR_CON_METRIC_KEY = "err-con";
 
     public AbstractJdbcMetric(MetricRegistry metricRegistry) {
-        this.metricRegistry = metricRegistry;
+        super(metricRegistry);
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
                         ImmutableMap.<MetricField, MetricValueFetcher>builder()

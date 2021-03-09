@@ -9,7 +9,7 @@ import java.util.HashMap;
 public abstract class AbstractServerMetric extends AbstractMetric {
 
     public AbstractServerMetric(MetricRegistry metricRegistry) {
-        this.metricRegistry = metricRegistry;
+        super(metricRegistry);
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)

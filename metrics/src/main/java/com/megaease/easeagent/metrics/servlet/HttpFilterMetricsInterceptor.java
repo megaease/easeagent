@@ -4,6 +4,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
@@ -16,7 +17,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Map;
 
-public class HttpFilterMetricsInterceptor extends AbstractServerMetric {
+public class HttpFilterMetricsInterceptor extends AbstractServerMetric  implements AgentInterceptor {
 
     public HttpFilterMetricsInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);

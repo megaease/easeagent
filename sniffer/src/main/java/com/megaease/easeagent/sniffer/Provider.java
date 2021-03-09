@@ -22,6 +22,7 @@ import brave.Tracing;
 import brave.handler.SpanHandler;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Slf4jReporter;
 import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
@@ -31,6 +32,8 @@ import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
+import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
+import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
@@ -41,6 +44,7 @@ import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersIntercept
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
+import org.slf4j.LoggerFactory;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 import java.util.concurrent.TimeUnit;
@@ -70,6 +74,27 @@ public abstract class Provider {
             this.tracing = tracing;
             this.tracer = tracer;
         }
+    }
+
+    @Injection.Bean
+    public MetricRegistry metricRegistry() {
+        Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
+                .outputTo(LoggerFactory.getLogger(JVMMemoryMetric.class))
+                .convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .build();
+        reporter.start(10, 30, TimeUnit.SECONDS);
+        return metricRegistry;
+    }
+
+    @Injection.Bean
+    public JVMMemoryMetric jvmMemoryMetric() {
+        return new JVMMemoryMetric(this.metricRegistry);
+    }
+
+    @Injection.Bean
+    public JVMGCMetric jvmgcMetric() {
+        return new JVMGCMetric(this.metricRegistry);
     }
 
     @Injection.Bean

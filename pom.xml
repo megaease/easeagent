@@ -57,11 +57,12 @@
         <version.brave>5.13.3</version.brave>
         <version.zipkin-sender-kafka11>2.8.0</version.zipkin-sender-kafka11>
         <version.moco>1.1.0</version.moco>
+        <version.okhttp3>4.9.0</version.okhttp3>
         <version.disruptor>3.4.2</version.disruptor>
         <version.spring-boot>2.3.8.RELEASE</version.spring-boot>
         <version.spring.cloud>Hoxton.SR10</version.spring.cloud>
-<!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
-<!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
+        <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
+        <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
         <version.log4j>2.14.0</version.log4j>
         <version.kafka>2.3.1</version.kafka>
@@ -209,6 +210,11 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${version.okhttp3}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

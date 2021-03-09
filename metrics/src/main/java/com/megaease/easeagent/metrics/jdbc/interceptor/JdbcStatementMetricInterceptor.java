@@ -24,6 +24,7 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
 import com.megaease.easeagent.core.Bootstrap;
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.jdbc.ExecutionInfo;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
@@ -37,7 +38,7 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.Optional;
 
-public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implements RemovalListener<String, String> {
+public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implements RemovalListener<String, String>, AgentInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 

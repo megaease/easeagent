@@ -18,6 +18,7 @@
 package com.megaease.easeagent.metrics.jdbc.interceptor;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.jdbc.JdbcUtils;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
@@ -26,7 +27,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-public class JdbcConMetricInterceptor extends AbstractJdbcMetric {
+public class JdbcConMetricInterceptor extends AbstractJdbcMetric  implements AgentInterceptor {
 
     public JdbcConMetricInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
