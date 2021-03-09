@@ -48,7 +48,7 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, CurrentTraceContext.Scope.class)) {
             ServerWebExchange exchange = (ServerWebExchange) args[0];
             FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
@@ -61,7 +61,7 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
             HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
             this.httpServerHandler.handleSend(response, span);
         }
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     static class FluxHttpServerRequest extends HttpServerRequest {

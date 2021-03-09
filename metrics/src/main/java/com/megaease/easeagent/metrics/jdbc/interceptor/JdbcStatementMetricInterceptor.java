@@ -54,7 +54,7 @@ public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implement
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
         ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
         String sql = executionInfo.getSql();
@@ -64,7 +64,7 @@ public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implement
         if (value == null) {
             cache.put(key, "");
         }
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
 

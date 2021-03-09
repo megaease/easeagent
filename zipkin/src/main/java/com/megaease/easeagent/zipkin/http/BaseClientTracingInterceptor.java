@@ -35,14 +35,14 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         try (CurrentTraceContext.Scope ignored = (CurrentTraceContext.Scope) context.get(CurrentTraceContext.Scope.class)) {
             Resp response = this.getResponse(invoker, args, retValue);
             Span span = (Span) context.get(Span.class);
             HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
             clientHandler.handleReceive(responseWrapper, span);
         }
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     public abstract Req getRequest(Object invoker, Object[] args);

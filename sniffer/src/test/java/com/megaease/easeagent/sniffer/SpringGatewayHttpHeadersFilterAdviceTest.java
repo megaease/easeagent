@@ -50,7 +50,7 @@ public class SpringGatewayHttpHeadersFilterAdviceTest {
         verify(chainInvoker, times(1))
                 .doAfter(any(), any(String.class),
                         any(Object[].class),
-                        any(Object.class), any(Exception.class),
+                        any(), any(Throwable.class),
                         any(Map.class));
     }
 }

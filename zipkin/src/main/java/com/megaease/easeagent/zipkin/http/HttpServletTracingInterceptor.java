@@ -46,7 +46,7 @@ public class HttpServletTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
         Span span = (Span) context.get(Span.class);
@@ -63,6 +63,6 @@ public class HttpServletTracingInterceptor implements AgentInterceptor {
                 .tag("has.error", String.valueOf(httpServletResponse.getStatus() >= 400))
                 .tag("remote.address", httpServletRequest.getRemoteAddr())
                 .finish();
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 }

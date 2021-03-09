@@ -12,10 +12,12 @@ public class SpringGatewayInitGlobalFilterInterceptor implements AgentIntercepto
 
     private boolean loadAgentFilter;
 
-    private final AgentInterceptorChain.Builder agentInterceptorChainBuilder;
+    private final AgentInterceptorChain.Builder headersFilterChainBuilder;
+    private final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
-    public SpringGatewayInitGlobalFilterInterceptor(AgentInterceptorChain.Builder agentInterceptorChainBuilder) {
-        this.agentInterceptorChainBuilder = agentInterceptorChainBuilder;
+    public SpringGatewayInitGlobalFilterInterceptor(AgentInterceptorChain.Builder headersFilterChainBuilder, AgentInterceptorChainInvoker agentInterceptorChainInvoker) {
+        this.headersFilterChainBuilder = headersFilterChainBuilder;
+        this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
     }
 
     @SuppressWarnings("unchecked")
@@ -37,13 +39,13 @@ public class SpringGatewayInitGlobalFilterInterceptor implements AgentIntercepto
         if (this.loadAgentFilter) {
             return;
         }
-        list.add(0, new AgentGlobalFilter(agentInterceptorChainBuilder));
+        list.add(0, new AgentGlobalFilter(headersFilterChainBuilder, agentInterceptorChainInvoker));
         this.loadAgentFilter = true;
         chain.doBefore(invoker, method, args, context);
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 }

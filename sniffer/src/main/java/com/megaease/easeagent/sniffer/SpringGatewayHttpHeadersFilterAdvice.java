@@ -65,9 +65,8 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
                     @Advice.Thrown Throwable throwable) {
             AtomicReference<Object> tmpRet = new AtomicReference<>(retValue);
             release.apply(context -> {
-                agentInterceptorChainInvoker.doAfter(invoker, method, args, retValue, throwable, context);
-                Object newRetValue = ContextUtils.getRetValue(context);
-                if (newRetValue != null) {
+                Object newRetValue = agentInterceptorChainInvoker.doAfter(invoker, method, args, retValue, throwable, context);
+                if (newRetValue != retValue) {
                     tmpRet.set(newRetValue);
                 }
             });

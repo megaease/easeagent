@@ -27,13 +27,13 @@ public class DefaultAgentInterceptorChain implements AgentInterceptorChain {
     }
 
     @Override
-    public void doAfter(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public Object doAfter(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         pos--;
         if (pos < 0) {
-            return;
+            return retValue;
         }
         AgentInterceptor interceptor = this.agentInterceptors.get(pos);
-        interceptor.after(invoker, method, args, retValue, throwable, context, this);
+        return interceptor.after(invoker, method, args, retValue, throwable, context, this);
     }
 
     public static class Builder implements AgentInterceptorChain.Builder {

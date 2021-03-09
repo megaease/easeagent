@@ -39,6 +39,7 @@ import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayInitGlobalFilterInterceptor;
+import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -48,6 +49,8 @@ import java.util.concurrent.TimeUnit;
 public abstract class Provider {
 
     private final MetricRegistry metricRegistry = new MetricRegistry();
+
+    private final AgentInterceptorChainInvoker agentInterceptorChainInvoker = AgentInterceptorChainInvoker.getInstance();
 
     private final SQLCompression sqlCompression = SQLCompression.DEFAULT;
 
@@ -71,7 +74,7 @@ public abstract class Provider {
 
     @Injection.Bean
     public AgentInterceptorChainInvoker agentInterceptorChainInvoker() {
-        return AgentInterceptorChainInvoker.getInstance();
+        return agentInterceptorChainInvoker;
     }
 
     @Injection.Bean("agentInterceptorChainBuilder4Con")
@@ -116,8 +119,10 @@ public abstract class Provider {
 
     @Injection.Bean("agentInterceptorChainBuilder4Gateway")
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Gateway() {
-        DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
-        builder.addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(builder));
+        AgentInterceptorChain.Builder headersFilterChainBuilder = new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing));
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
+        builder.addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, agentInterceptorChainInvoker));
         return builder;
     }
 

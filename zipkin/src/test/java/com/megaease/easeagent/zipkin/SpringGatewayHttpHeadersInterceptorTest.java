@@ -3,10 +3,9 @@ package com.megaease.easeagent.zipkin;
 import brave.ScopedSpan;
 import brave.Tracer;
 import brave.Tracing;
-import brave.handler.MutableSpan;
-import brave.handler.SpanHandler;
-import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.flux.GatewayCons;
 import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersInterceptor;
@@ -26,19 +25,11 @@ import static org.mockito.Mockito.when;
 public class SpringGatewayHttpHeadersInterceptorTest extends BaseZipkinTest {
     @Test
     public void success() {
-        Map<String, String> spanInfoMap = new HashMap<>();
         Tracer tracer = Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
-                .addSpanHandler(new SpanHandler() {
-                    @Override
-                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-                        Map<String, String> tmpMap = new HashMap<>(span.tags());
-                        spanInfoMap.putAll(tmpMap);
-                        return super.end(context, span, cause);
-                    }
-                })
                 .build().tracer();
-
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new SpringGatewayHttpHeadersInterceptor(Tracing.current()));
         ScopedSpan root = tracer.startScopedSpan("root");
 
         Map<String, Object> attrMap = new HashMap<>();
@@ -54,14 +45,12 @@ public class SpringGatewayHttpHeadersInterceptorTest extends BaseZipkinTest {
         HttpHeaders httpHeaders = new HttpHeaders();
         when(request.getHeaders()).thenReturn(httpHeaders);
 
-        SpringGatewayHttpHeadersInterceptor interceptor = new SpringGatewayHttpHeadersInterceptor(Tracing.current());
 
         Map<Object, Object> context = ContextUtils.createContext();
-        interceptor.before(null, null, new Object[]{null, exchange}, context, mock(AgentInterceptorChain.class));
-        interceptor.after(null, null, new Object[]{null, exchange}, httpHeaders, null, context, mock(AgentInterceptorChain.class));
-
+        AgentInterceptorChainInvoker.getInstance().doBefore(builder, null, null, new Object[]{null, exchange}, context);
+        Object ret = AgentInterceptorChainInvoker.getInstance().doAfter(null, null, new Object[]{null, exchange}, httpHeaders, null, context);
         root.finish();
-        HttpHeaders retValue = ContextUtils.getRetValue(context);
+        HttpHeaders retValue = (HttpHeaders) ret;
         Assert.assertNotNull(retValue);
     }
 }

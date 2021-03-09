@@ -18,8 +18,8 @@ public class AgentInterceptorChainInvoker {
         interceptorChain.doBefore(invoker, method, args, context);
     }
 
-    public void doAfter(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public Object doAfter(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
         AgentInterceptorChain interceptorChain = ContextUtils.getFromContext(context, AgentInterceptorChain.class);
-        interceptorChain.doAfter(invoker, method, args, retValue, throwable, context);
+        return interceptorChain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 }

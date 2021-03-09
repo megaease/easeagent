@@ -36,7 +36,7 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         Long beginTime = ContextUtils.getBeginTime(context);
         TraceContext traceContext = Tracing.current().currentTraceContext().get();
@@ -62,7 +62,7 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
 
         // TODO: 2021/3/3 send info
 
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
 }

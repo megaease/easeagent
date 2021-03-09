@@ -19,10 +19,13 @@ package com.megaease.easeagent.zipkin.jdbc;
 
 import brave.Span;
 import brave.propagation.ThreadLocalSpan;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.jdbc.*;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.jdbc.DatabaseInfo;
+import com.megaease.easeagent.core.jdbc.ExecutionInfo;
+import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
+import com.megaease.easeagent.core.jdbc.JdbcUtils;
+import com.megaease.easeagent.core.utils.SQLCompression;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -68,7 +71,7 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         Optional.ofNullable(ThreadLocalSpan.CURRENT_TRACER.remove()).ifPresent(span -> {
             JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
             ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
@@ -79,7 +82,7 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
             }
             span.finish();
         });
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     private String getExceptionMessage(Throwable throwable) {

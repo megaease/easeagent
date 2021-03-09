@@ -28,12 +28,12 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric {
     }
 
     @Override
-    public void after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
         String httpRoute = ServletUtils.getHttpRouteAttribute(httpServletRequest);
         this.collectMetric(httpRoute, httpServletResponse, throwable, context);
-        chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(invoker, method, args, retValue, throwable, context);
     }
 
     public void collectMetric(String key, HttpServletResponse httpServletResponse, Throwable throwable, Map<Object, Object> context) {

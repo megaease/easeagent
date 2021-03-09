@@ -6,7 +6,7 @@ import java.util.Map;
 public class ContextUtils {
     private static final String BEGIN_TIME = ContextUtils.class.getName() + "beginTime";
     private static final String END_TIME = ContextUtils.class.getName() + "endTime";
-    private static final String RET_VALUE = ContextUtils.class.getName() + "retValue";
+//    private static final String RET_VALUE = ContextUtils.class.getName() + "retValue";
 
     private static void setBeginTime(Map<Object, Object> context) {
         context.put(BEGIN_TIME, System.currentTimeMillis());
@@ -28,16 +28,16 @@ public class ContextUtils {
         return getEndTime(context) - getBeginTime(context);
     }
 
-    public static void setRetValue(Map<Object, Object> context, Object value) {
-        if (value == null) {
-            return;
-        }
-        context.put(RET_VALUE, value);
-    }
-
-    public static <T> T getRetValue(Map<Object, Object> context) {
-        return getFromContext(context, RET_VALUE);
-    }
+//    public static void setRetValue(Map<Object, Object> context, Object value) {
+//        if (value == null) {
+//            return;
+//        }
+//        context.put(RET_VALUE, value);
+//    }
+//
+//    public static <T> T getRetValue(Map<Object, Object> context) {
+//        return getFromContext(context, RET_VALUE);
+//    }
 
     public static Map<Object, Object> createContext() {
         HashMap<Object, Object> map = new HashMap<>();
