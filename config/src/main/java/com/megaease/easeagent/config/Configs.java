@@ -1,5 +1,6 @@
 package com.megaease.easeagent.config;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -30,6 +31,11 @@ public class Configs implements Config, ConfigManagerMXBean {
             binds.values().forEach(one -> one.handleChanges(items));
             this.notifier.handleChanges(items);
         }
+    }
+
+    @Override
+    public void updateObservability(String json) throws IOException {
+        this.updateConfigs(ConfigUtils.json2KVMap(json));
     }
 
     @Override

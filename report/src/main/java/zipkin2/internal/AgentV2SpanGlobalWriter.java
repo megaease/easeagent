@@ -32,9 +32,6 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
     public int sizeInBytes(Span value) {
         final MutableInt mutableInt = new MutableInt(0);
         Optional.ofNullable(traceProperties).ifPresent(t -> {
-            if (t.isBraveFormat()) {
-                return;
-            }
             if (TextUtils.hasText(type)) {
                 mutableInt.add(typeFieldName.length() + 1);
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(type));
@@ -56,9 +53,6 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
     @Override
     public void write(Span value, WriteBuffer buffer) {
         Optional.ofNullable(traceProperties).ifPresent(t -> {
-            if (t.isBraveFormat()) {
-                return;
-            }
             if (TextUtils.hasText(type)) {
                 buffer.writeAscii(typeFieldName);
                 buffer.writeUtf8(JsonEscaper.jsonEscape(type));

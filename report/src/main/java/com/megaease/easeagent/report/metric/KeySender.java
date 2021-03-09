@@ -5,14 +5,14 @@ import com.megaease.easeagent.report.metric.log4j.RefreshableAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TypeSender {
-    private final String type;
+public class KeySender {
+    private final String key;
     private final AppenderManager appenderManager;
     private final MetricProps metricProps;
     private Logger logger;
 
-    public TypeSender(String type, AppenderManager appenderManager, MetricProps metricProps) {
-        this.type = type;
+    public KeySender(String key, AppenderManager appenderManager, MetricProps metricProps) {
+        this.key = key;
         this.appenderManager = appenderManager;
         this.metricProps = metricProps;
     }
@@ -31,7 +31,7 @@ public class TypeSender {
 
     private String prepareAppenderAndLogger() {
         RefreshableAppender build = RefreshableAppender.builder()
-                .names(this.type)
+                .names(this.key)
                 .metricProps(this.metricProps)
                 .appenderManager(this.appenderManager)
                 .build();

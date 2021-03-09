@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigFactory;
+import com.megaease.easeagent.config.ConfigManagerMXBean;
 import com.megaease.easeagent.config.Configs;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Default;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -82,11 +84,11 @@ public class Bootstrap {
                         .or(nameStartsWith("junit."))
                         .or(nameStartsWith("com.intellij."))
         ).installOn(inst);
-        registerMBeans(conf,inst);
+        registerMBeans(conf, inst);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
-    static void registerMBeans(Configs conf, Instrumentation inst) throws Exception {
+    static void registerMBeans(ConfigManagerMXBean conf, Instrumentation inst) throws Exception {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
         mbs.registerMBean(conf, mxbeanName);
@@ -168,7 +170,7 @@ public class Bootstrap {
         }
     }
 
-    private static Configs load(String pathname) {
+    private static Configs load(String pathname) throws IOException {
         return Strings.isNullOrEmpty(pathname)
                 ? ConfigFactory.loadFromClasspath(Bootstrap.class.getClassLoader())
                 : ConfigFactory.loadFromFile(new File(pathname));

@@ -2,6 +2,7 @@ package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.config.ChangeItem;
 import com.megaease.easeagent.config.ConfigChangeListener;
+import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;
@@ -41,8 +42,8 @@ public class TraceReport {
                             .build());
         }
 
-        String service = Utils.extractServiceName(configs);
-        String system = Utils.extractSystemName(configs);
+        String service = ConfigUtils.extractServiceName(configs);
+        String system = ConfigUtils.extractSystemName(configs);
 
         // We don't support change service and system name in runtime1
         SDKAsyncReporter reporter = SDKAsyncReporter.

@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MetricReport {
     private final Configs configs;
-    private final ConcurrentHashMap<String, TypeSender> typeLoggers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, KeySender> typeLoggers = new ConcurrentHashMap<>();
     private final AppenderManager appenderManager;
 
     public MetricReport(Configs configs) {
@@ -23,12 +23,12 @@ public class MetricReport {
     }
 
     public void report(MetricItem item) {
-        TypeSender sender = typeLoggers.computeIfAbsent(item.getType(), this::newTypeLogger);
+        KeySender sender = typeLoggers.computeIfAbsent(item.getKey(), this::newKeyLogger);
         sender.send(item.getContent());
     }
 
-    private TypeSender newTypeLogger(String type) {
-        return new TypeSender(type, this.appenderManager, new MetricPropsImpl(configs, type));
+    private KeySender newKeyLogger(String key) {
+        return new KeySender(key, this.appenderManager, Utils.extractMetricProps(configs,key));
     }
 
 

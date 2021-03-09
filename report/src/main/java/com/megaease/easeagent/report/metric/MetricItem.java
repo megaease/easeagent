@@ -1,16 +1,16 @@
 package com.megaease.easeagent.report.metric;
 
 public class MetricItem {
-    private final String type;
+    private final String key;
     private final String content;
 
-    public MetricItem(String type, String content) {
-        this.type = type;
+    public MetricItem(String key, String content) {
+        this.key = key;
         this.content = content;
     }
 
-    public String getType() {
-        return type;
+    public String getKey() {
+        return key;
     }
 
     public String getContent() {
