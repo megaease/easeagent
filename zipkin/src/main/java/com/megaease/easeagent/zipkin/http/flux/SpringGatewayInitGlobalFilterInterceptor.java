@@ -20,6 +20,10 @@ public class SpringGatewayInitGlobalFilterInterceptor implements AgentIntercepto
         this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
     }
 
+    public boolean isLoadAgentFilter() {
+        return loadAgentFilter;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
