@@ -20,6 +20,7 @@ package com.megaease.easeagent.metrics.jdbc.interceptor;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.jdbc.JdbcUtils;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
 
@@ -27,28 +28,28 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-public class JdbcConMetricInterceptor extends AbstractJdbcMetric  implements AgentInterceptor {
+public class JdbcConMetricInterceptor extends AbstractJdbcMetric implements AgentInterceptor {
 
     public JdbcConMetricInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Connection connection = (Connection) retValue;
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        Connection connection = (Connection) methodInfo.getRetValue();
         try {
             String key;
             boolean success = true;
-            if (retValue == null) {
+            if (methodInfo.getRetValue() == null) {
                 key = ERR_CON_METRIC_KEY;
                 success = false;
             } else {
-                key = getMetricKey(connection, throwable);
+                key = getMetricKey(connection, methodInfo.getThrowable());
             }
             this.collectMetric(key, success, context);
         } catch (SQLException ignored) {
         }
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 
     private static String getMetricKey(Connection con, Throwable throwable) throws SQLException {

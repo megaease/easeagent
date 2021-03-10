@@ -7,6 +7,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -49,7 +50,12 @@ public abstract class RestTemplateAdvice implements Transformation {
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
                 Map<Object, Object> context = ContextUtils.createContext();
-                this.agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, context);
+                MethodInfo methodInfo = MethodInfo.builder()
+                        .invoker(invoker)
+                        .method(method)
+                        .args(args)
+                        .build();
+                this.agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, context);
                 return context;
             });
 
@@ -61,7 +67,11 @@ public abstract class RestTemplateAdvice implements Transformation {
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
                   @Advice.Thrown Exception exception) {
-            release.apply(context -> this.agentInterceptorChainInvoker.doAfter(invoker, method, args, null, exception, context));
+            release.apply(context -> {
+                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
+                methodInfo.setThrowable(exception);
+                this.agentInterceptorChainInvoker.doAfter(methodInfo, context);
+            });
         }
     }
 }

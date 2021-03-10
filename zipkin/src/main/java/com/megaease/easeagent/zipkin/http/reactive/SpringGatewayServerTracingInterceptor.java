@@ -1,4 +1,4 @@
-package com.megaease.easeagent.zipkin.http.flux;
+package com.megaease.easeagent.zipkin.http.reactive;
 
 import brave.Span;
 import brave.Tracing;
@@ -10,6 +10,7 @@ import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -30,8 +31,8 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
-        ServerWebExchange exchange = (ServerWebExchange) args[0];
+    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
         Span span = this.httpServerHandler.handleReceive(httpServerRequest);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
@@ -44,13 +45,13 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
         exchange.getAttributes().put(GatewayCons.TRACE_CONTEXT_ATTR, traceContext);
         exchange.getAttributes().put(GatewayCons.CURRENT_TRACE_CONTEXT_ATTR, currentTraceContext);
-        chain.doBefore(invoker, method, args, context);
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, CurrentTraceContext.Scope.class)) {
-            ServerWebExchange exchange = (ServerWebExchange) args[0];
+            ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
             FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
             Span span = ContextUtils.getFromContext(context, Span.class);
             PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
@@ -61,7 +62,7 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
             HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
             this.httpServerHandler.handleSend(response, span);
         }
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 
     static class FluxHttpServerRequest extends HttpServerRequest {

@@ -1,7 +1,9 @@
-package com.megaease.easeagent.zipkin.http.flux;
+package com.megaease.easeagent.zipkin.http.reactive;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.AgentMono;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -23,10 +25,10 @@ public class AgentGlobalFilter implements GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Map<Object, Object> context = ContextUtils.createContext();
-        agentInterceptorChainInvoker.doBefore(this.agentInterceptorChainBuilder, this, "filter", new Object[]{exchange}, context);
-        AgentInterceptorChain agentInterceptorChain = ContextUtils.getFromContext(context, AgentInterceptorChain.class);
+        MethodInfo methodInfo = MethodInfo.builder().invoker(this).method("filter").args(new Object[]{exchange}).build();
+        agentInterceptorChainInvoker.doBefore(this.agentInterceptorChainBuilder, methodInfo, context);
         Mono<Void> mono = chain.filter(exchange);
-        return new AgentMono<>(mono, exchange, agentInterceptorChain, context);
+        return new AgentMono<>(mono, methodInfo, agentInterceptorChainInvoker, context);
     }
 
 }

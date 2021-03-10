@@ -9,9 +9,10 @@ import brave.http.HttpTracing;
 import brave.propagation.CurrentTraceContext;
 import brave.servlet.HttpServletRequestWrapper;
 import brave.servlet.HttpServletResponseWrapper;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.ServletUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,29 +28,29 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
+    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         HttpServerRequest requestWrapper = HttpServletRequestWrapper.create(httpServletRequest);
         Span span = httpServerHandler.handleReceive(requestWrapper);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
         CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
         context.put(Span.class, span);
         context.put(CurrentTraceContext.Scope.class, newScope);
-        chain.doBefore(invoker, method, args, context);
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
-        HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
+        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
         ServletUtils.setHttpRouteAttribute(httpServletRequest);
         Span span = (Span) context.get(Span.class);
         try (CurrentTraceContext.Scope ignored = (CurrentTraceContext.Scope) context.get(CurrentTraceContext.Scope.class)) {
-            HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, throwable);
+            HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, methodInfo.getThrowable());
             span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
             httpServerHandler.handleSend(responseWrapper, span);
         }
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 
 }

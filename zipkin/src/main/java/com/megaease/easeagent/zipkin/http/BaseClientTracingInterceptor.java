@@ -9,6 +9,7 @@ import brave.http.HttpTracing;
 import brave.propagation.CurrentTraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 
 import java.util.Map;
 
@@ -23,26 +24,26 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Req request = getRequest(invoker, args);
+    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        Req request = getRequest(methodInfo.getInvoker(), methodInfo.getArgs());
         HttpClientRequest requestWrapper = this.buildHttpClientRequest(request);
         Span span = clientHandler.handleSend(requestWrapper);
         context.put(Span.class, span);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
         CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
         context.put(CurrentTraceContext.Scope.class, newScope);
-        chain.doBefore(invoker, method, args, context);
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         try (CurrentTraceContext.Scope ignored = (CurrentTraceContext.Scope) context.get(CurrentTraceContext.Scope.class)) {
-            Resp response = this.getResponse(invoker, args, retValue);
+            Resp response = this.getResponse(methodInfo.getInvoker(), methodInfo.getArgs(), methodInfo.getRetValue());
             Span span = (Span) context.get(Span.class);
             HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
             clientHandler.handleReceive(responseWrapper, span);
         }
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 
     public abstract Req getRequest(Object invoker, Object[] args);

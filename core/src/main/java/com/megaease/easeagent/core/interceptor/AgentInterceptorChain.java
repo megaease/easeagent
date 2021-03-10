@@ -4,9 +4,9 @@ import java.util.Map;
 
 public interface AgentInterceptorChain {
 
-    void doBefore(Object invoker, String method, Object[] args, Map<Object, Object> context);
+    void doBefore(MethodInfo methodInfo, Map<Object, Object> context);
 
-    Object doAfter(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context);
+    Object doAfter(MethodInfo methodInfo, Map<Object, Object> context);
 
     interface Builder {
 

@@ -5,6 +5,7 @@ import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import feign.Client;
@@ -51,11 +52,13 @@ public class FeignClientTracingInterceptorTest extends BaseZipkinTest {
         Object[] args = new Object[]{request, options};
         Map<Object, Object> context = ContextUtils.createContext();
         String method = "execute";
-        interceptor.before(client, method, args, context, mock(AgentInterceptorChain.class));
+
+        MethodInfo methodInfo = MethodInfo.builder().invoker(client).method(method).args(args).retValue(response).throwable(null).build();
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
 
         //mock do something
 
-        interceptor.after(request, method, args, response, null, context, mock(AgentInterceptorChain.class));
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.method", "GET");
@@ -93,11 +96,20 @@ public class FeignClientTracingInterceptorTest extends BaseZipkinTest {
         Object[] args = new Object[]{request, options};
         Map<Object, Object> context = ContextUtils.createContext();
         String method = "execute";
-        interceptor.before(client, method, args, context, mock(AgentInterceptorChain.class));
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(client)
+                .method(method)
+                .args(args)
+                .retValue(response)
+                .throwable(null)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
 
         //mock do something
 
-        interceptor.after(request, method, args, response, null, context, mock(AgentInterceptorChain.class));
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.method", "GET");

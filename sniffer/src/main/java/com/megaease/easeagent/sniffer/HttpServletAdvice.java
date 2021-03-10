@@ -7,6 +7,7 @@ import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -44,7 +45,12 @@ public abstract class HttpServletAdvice extends HttpServletService {
         ) {
             return lock.acquire(() -> {
                 Map<Object, Object> map = ContextUtils.createContext();
-                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, map);
+                MethodInfo methodInfo = MethodInfo.builder()
+                        .invoker(invoker)
+                        .method(method)
+                        .args(args)
+                        .build();
+                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, map);
                 return map;
             });
 
@@ -57,9 +63,11 @@ public abstract class HttpServletAdvice extends HttpServletService {
                   @Advice.AllArguments Object[] args,
                   @Advice.Thrown Exception exception
         ) {
-            release.apply(map -> {
-                ContextUtils.setEndTime(map);
-                agentInterceptorChainInvoker.doAfter(invoker, method, args, null, exception, map);
+            release.apply(context -> {
+                ContextUtils.setEndTime(context);
+                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
+                methodInfo.setThrowable(exception);
+                agentInterceptorChainInvoker.doAfter(methodInfo, context);
             });
         }
     }

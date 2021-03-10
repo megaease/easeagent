@@ -5,6 +5,7 @@ import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import org.junit.Assert;
@@ -63,12 +64,21 @@ public class HttpFilterTracingInterceptorTest extends BaseZipkinTest {
         FilterChain filterChain = mock(FilterChain.class);
         Object[] args = new Object[]{httpServletRequest, httpServletResponse, filterChain};
         Map<Object, Object> context = new HashMap<>();
-        httpFilterTracingInterceptor.before(filter, "doFilterInternal", args, context, mock(AgentInterceptorChain.class));
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(filter)
+                .method("doFilterInternal")
+                .args(args)
+                .retValue(null)
+                .throwable(null)
+                .build();
+
+        httpFilterTracingInterceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
 
         // mock do something
         // mock do something end
 
-        httpFilterTracingInterceptor.after(filter, "doFilterInternal", args, null, null, context, mock(AgentInterceptorChain.class));
+        httpFilterTracingInterceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.path", "/path/users/123/info");
@@ -119,13 +129,23 @@ public class HttpFilterTracingInterceptorTest extends BaseZipkinTest {
         FilterChain filterChain = mock(FilterChain.class);
         Object[] args = new Object[]{httpServletRequest, httpServletResponse, filterChain};
         Map<Object, Object> context = new HashMap<>();
-        httpFilterTracingInterceptor.before(filter, "doFilterInternal", args, context, mock(AgentInterceptorChain.class));
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(filter)
+                .method("doFilterInternal")
+                .args(args)
+                .retValue(null)
+                .throwable(null)
+                .build();
+
+        httpFilterTracingInterceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
 
         // mock do something
         // mock do something end
         Exception exception = new Exception("test fail");
-
-        httpFilterTracingInterceptor.after(filter, "doFilterInternal", args, null, exception, context, mock(AgentInterceptorChain.class));
+        methodInfo.setThrowable(exception);
+        
+        httpFilterTracingInterceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.path", "/path/users/123/info");

@@ -17,10 +17,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
-public class FeignClientAdviceTest {
+public class FeignClientAdviceTest extends BaseSnifferTest {
 
     @Test
     public void testInvoke() throws Exception {
@@ -40,15 +40,7 @@ public class FeignClientAdviceTest {
 
         client.execute(request, options);
 
-        verify(chainInvoker, times(1))
-                .doBefore(any(AgentInterceptorChain.Builder.class), any(), any(String.class),
-                        any(Object[].class),
-                        any(Map.class));
-        verify(chainInvoker, times(1))
-                .doAfter(any(), any(String.class),
-                        any(Object[].class),
-                        any(Object.class), any(Exception.class),
-                        any(Map.class));
+        this.verifyInvokeTimes(chainInvoker, 1);
 
     }
 

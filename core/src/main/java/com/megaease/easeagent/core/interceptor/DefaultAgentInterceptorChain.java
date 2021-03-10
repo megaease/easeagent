@@ -15,7 +15,7 @@ public class DefaultAgentInterceptorChain implements AgentInterceptorChain {
     }
 
     @Override
-    public void doBefore(Object invoker, String method, Object[] args, Map<Object, Object> context) {
+    public void doBefore(MethodInfo methodInfo, Map<Object, Object> context) {
         if (pos == this.agentInterceptors.size()) {
             return;
         }
@@ -23,17 +23,17 @@ public class DefaultAgentInterceptorChain implements AgentInterceptorChain {
             context.put(AgentInterceptorChain.class, this);
         }
         AgentInterceptor interceptor = this.agentInterceptors.get(pos++);
-        interceptor.before(invoker, method, args, context, this);
+        interceptor.before(methodInfo, context, this);
     }
 
     @Override
-    public Object doAfter(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public Object doAfter(MethodInfo methodInfo, Map<Object, Object> context) {
         pos--;
         if (pos < 0) {
-            return retValue;
+            return methodInfo.getRetValue();
         }
         AgentInterceptor interceptor = this.agentInterceptors.get(pos);
-        return interceptor.after(invoker, method, args, retValue, throwable, context, this);
+        return interceptor.after(methodInfo, context, this);
     }
 
     public static class Builder implements AgentInterceptorChain.Builder {

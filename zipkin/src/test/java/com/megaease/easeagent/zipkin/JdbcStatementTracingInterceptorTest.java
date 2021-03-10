@@ -26,6 +26,7 @@ import brave.handler.SpanHandler;
 import brave.propagation.StrictCurrentTraceContext;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
@@ -88,8 +89,17 @@ public class JdbcStatementTracingInterceptorTest extends BaseZipkinTest {
         jdbcContextInfo.updateOnCreateStatement(connection, statement, sql);
 
         JdbcStatementTracingInterceptor interceptor = new JdbcStatementTracingInterceptor(SQLCompression.DEFAULT);
-        interceptor.before(statement, "execute", new Object[]{sql}, context, mock(AgentInterceptorChain.class));
-        interceptor.after(statement, "execute", new Object[]{sql}, null, null, context, mock(AgentInterceptorChain.class));
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(statement)
+                .method("execute")
+                .args(new Object[]{sql})
+                .retValue(null)
+                .throwable(null)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
         root.finish();
 
         Map<String, String> expectedMap = new HashMap<>();

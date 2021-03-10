@@ -18,7 +18,7 @@ import java.util.Map;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class SpringGatewayInitGlobalFilterAdviceTest {
+public class SpringGatewayInitGlobalFilterAdviceTest extends BaseSnifferTest {
 
     @SuppressWarnings("unchecked")
     @Test
@@ -34,14 +34,7 @@ public class SpringGatewayInitGlobalFilterAdviceTest {
 
         instance.filteringWebHandler(list);
 
-        verify(chainInvoker, times(1))
-                .doBefore(any(AgentInterceptorChain.Builder.class), any(), any(String.class),
-                        any(Object[].class),
-                        any(Map.class));
-        verify(chainInvoker, times(1))
-                .doAfter(any(), any(String.class),
-                        any(Object[].class),
-                        any(Object.class), any(Exception.class),
-                        any(Map.class));
+         this.verifyInvokeTimes(chainInvoker, 1);
+
     }
 }

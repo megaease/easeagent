@@ -7,6 +7,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -51,7 +52,12 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
                                                        @Advice.AllArguments Object[] args) {
             return lock.acquire(() -> {
                 Map<Object, Object> context = ContextUtils.createContext();
-                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, context);
+                MethodInfo methodInfo = MethodInfo.builder()
+                        .invoker(invoker)
+                        .method(method)
+                        .args(args)
+                        .build();
+                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, context);
                 return context;
             });
         }
@@ -65,7 +71,10 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
                     @Advice.Thrown Throwable throwable) {
             AtomicReference<Object> tmpRet = new AtomicReference<>(retValue);
             release.apply(context -> {
-                Object newRetValue = agentInterceptorChainInvoker.doAfter(invoker, method, args, retValue, throwable, context);
+                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
+                methodInfo.setRetValue(retValue);
+                methodInfo.setThrowable(throwable);
+                Object newRetValue = agentInterceptorChainInvoker.doAfter(methodInfo, context);
                 if (newRetValue != retValue) {
                     tmpRet.set(newRetValue);
                 }

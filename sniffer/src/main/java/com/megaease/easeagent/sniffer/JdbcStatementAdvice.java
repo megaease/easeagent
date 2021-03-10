@@ -24,6 +24,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.core.jdbc.listener.JdbcListenerDispatcher;
 import com.megaease.easeagent.core.utils.ContextUtils;
@@ -158,7 +159,13 @@ public abstract class JdbcStatementAdvice implements Transformation {
                 JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
                 context.put(JdbcContextInfo.class, jdbcContextInfo);
                 this.jdbcListenerDispatcher.dispatchBefore(jdbcContextInfo, invoker, method, objs);
-                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, objs, context);
+
+                MethodInfo methodInfo = MethodInfo.builder()
+                        .invoker(invoker)
+                        .method(method)
+                        .args(objs)
+                        .build();
+                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, context);
                 return context;
             });
         }
@@ -175,7 +182,12 @@ public abstract class JdbcStatementAdvice implements Transformation {
                 Object[] objs = getArgs(args);
                 JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
                 jdbcListenerDispatcher.dispatchAfter(jdbcContextInfo, invoker, method, objs, retValue);
-                agentInterceptorChainInvoker.doAfter(invoker, method, objs, retValue, exception, context);
+
+                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
+                methodInfo.setRetValue(retValue);
+                methodInfo.setThrowable(exception);
+                
+                agentInterceptorChainInvoker.doAfter(methodInfo, context);
             });
 
         }

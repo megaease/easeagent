@@ -5,8 +5,9 @@ import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
@@ -65,10 +66,18 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
         Object[] args = new Object[]{exchange};
         Map<Object, Object> context = ContextUtils.createContext();
 
-        interceptor.before(null, null, args, context, mock(AgentInterceptorChain.class));
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(null)
+                .method("doFilterInternal")
+                .args(args)
+                .retValue(null)
+                .throwable(null)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
         // mock do something
         // mock do something end
-        interceptor.after(null, "doFilterInternal", args, null, null, context, mock(AgentInterceptorChain.class));
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.path", "/anything");
@@ -115,10 +124,18 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
         Object[] args = new Object[]{exchange};
         Map<Object, Object> context = ContextUtils.createContext();
 
-        interceptor.before(null, null, args, context, mock(AgentInterceptorChain.class));
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(null)
+                .method("doFilterInternal")
+                .args(args)
+                .retValue(null)
+                .throwable(null)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
         // mock do something
         // mock do something end
-        interceptor.after(null, "doFilterInternal", args, null, null, context, mock(AgentInterceptorChain.class));
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.path", "/anything");

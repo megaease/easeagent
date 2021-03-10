@@ -23,6 +23,7 @@ import brave.Tracing;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,8 +32,8 @@ import java.util.Map;
 public class HttpServletTracingInterceptor implements AgentInterceptor {
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
+    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         TraceContext.Extractor<HttpServletRequest> extractor = Tracing.current().propagation().extractor((request, key) -> {
             final String header = request.getHeader(key);
             return header != null ? header
@@ -42,13 +43,13 @@ public class HttpServletTracingInterceptor implements AgentInterceptor {
         Tracer.SpanInScope spanInScope = Tracing.currentTracer().withSpanInScope(span);
         context.put(Span.class, span);
         context.put(Tracer.SpanInScope.class, spanInScope);
-        chain.doBefore(invoker, method, args, context);
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
-        HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
+        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
         Span span = (Span) context.get(Span.class);
         span.name("http_recv")
                 .kind(Span.Kind.SERVER)
@@ -63,6 +64,6 @@ public class HttpServletTracingInterceptor implements AgentInterceptor {
                 .tag("has.error", String.valueOf(httpServletResponse.getStatus() >= 400))
                 .tag("remote.address", httpServletRequest.getRemoteAddr())
                 .finish();
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 }

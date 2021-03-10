@@ -12,14 +12,15 @@ public class AgentInterceptorChainInvoker {
         return instance;
     }
 
-    public void doBefore(AgentInterceptorChain.Builder builder, Object invoker, String method, Object[] args, Map<Object, Object> context) {
+    public void doBefore(AgentInterceptorChain.Builder builder, MethodInfo methodInfo, Map<Object, Object> context) {
         AgentInterceptorChain interceptorChain = builder.build();
         context.put(AgentInterceptorChain.class, interceptorChain);
-        interceptorChain.doBefore(invoker, method, args, context);
+        context.put(MethodInfo.class, methodInfo);
+        interceptorChain.doBefore(methodInfo, context);
     }
 
-    public Object doAfter(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context) {
+    public Object doAfter(MethodInfo methodInfo, Map<Object, Object> context) {
         AgentInterceptorChain interceptorChain = ContextUtils.getFromContext(context, AgentInterceptorChain.class);
-        return interceptorChain.doAfter(invoker, method, args, retValue, throwable, context);
+        return interceptorChain.doAfter(methodInfo, context);
     }
 }

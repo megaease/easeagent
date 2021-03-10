@@ -6,9 +6,10 @@ import brave.Tracing;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import com.megaease.easeagent.zipkin.http.flux.GatewayCons;
-import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersInterceptor;
+import com.megaease.easeagent.zipkin.http.reactive.GatewayCons;
+import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
@@ -47,8 +48,20 @@ public class SpringGatewayHttpHeadersInterceptorTest extends BaseZipkinTest {
 
 
         Map<Object, Object> context = ContextUtils.createContext();
-        AgentInterceptorChainInvoker.getInstance().doBefore(builder, null, null, new Object[]{null, exchange}, context);
-        Object ret = AgentInterceptorChainInvoker.getInstance().doAfter(null, null, new Object[]{null, exchange}, httpHeaders, null, context);
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(null)
+                .method(null)
+                .args(new Object[]{null, exchange})
+                .retValue(null)
+                .throwable(null)
+                .build();
+
+        AgentInterceptorChainInvoker.getInstance().doBefore(builder, methodInfo, context);
+
+        methodInfo.setRetValue(httpHeaders);
+
+        Object ret = AgentInterceptorChainInvoker.getInstance().doAfter(methodInfo, context);
         root.finish();
         HttpHeaders retValue = (HttpHeaders) ret;
         Assert.assertNotNull(retValue);

@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.jdbc.ExecutionInfo;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.core.utils.SQLCompression;
@@ -34,6 +35,7 @@ import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.Optional;
@@ -55,22 +57,22 @@ public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implement
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
-        ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
+        ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) methodInfo.getInvoker());
         String sql = executionInfo.getSql();
         String key = this.sqlCompression.compress(sql);
-        this.collectMetric(key, throwable == null, context);
+        this.collectMetric(key, methodInfo.getThrowable() == null, context);
         String value = cache.getIfPresent(key);
         if (value == null) {
             cache.put(key, "");
         }
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 
 
     @Override
-    public void onRemoval(RemovalNotification<String, String> notification) {
+    public void onRemoval(@Nonnull RemovalNotification<String, String> notification) {
         try {
             String key = notification.getKey();
             ImmutableList<String> list = ImmutableList.of(

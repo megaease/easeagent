@@ -3,6 +3,7 @@ package com.megaease.easeagent.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
@@ -57,11 +58,17 @@ public class HttpFilterMetricsInterceptorTest {
         Object[] args = new Object[]{httpServletRequest, httpServletResponse, filterChain};
         Map<Object, Object> context = ContextUtils.createContext();
 
-        interceptor.before(filter, "doFilterInternal", args, context, mock(AgentInterceptorChain.class));
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(filter)
+                .method("doFilterInternal")
+                .args(args)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
         //mock do something
         //mock do something end
         ContextUtils.setEndTime(context);
-        interceptor.after(filter, "doFilterInternal", args, null, null, context, mock(AgentInterceptorChain.class));
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         String key = ServletUtils.getHttpRouteAttribute(httpServletRequest);
         Assert.assertEquals(1L, metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT)).getCount());
@@ -106,11 +113,17 @@ public class HttpFilterMetricsInterceptorTest {
         Object[] args = new Object[]{httpServletRequest, httpServletResponse, filterChain};
         Map<Object, Object> context = ContextUtils.createContext();
 
-        interceptor.before(filter, "doFilterInternal", args, context, mock(AgentInterceptorChain.class));
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(filter)
+                .method("doFilterInternal")
+                .args(args)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
         //mock do something
         //mock do something end
         ContextUtils.setEndTime(context);
-        interceptor.after(filter, "doFilterInternal", args, null, null, context, mock(AgentInterceptorChain.class));
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
         String key = ServletUtils.getHttpRouteAttribute(httpServletRequest);
         Assert.assertEquals(1L, metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT)).getCount());

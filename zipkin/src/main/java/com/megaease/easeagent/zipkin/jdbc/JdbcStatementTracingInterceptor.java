@@ -21,6 +21,7 @@ import brave.Span;
 import brave.propagation.ThreadLocalSpan;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.jdbc.DatabaseInfo;
 import com.megaease.easeagent.core.jdbc.ExecutionInfo;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
@@ -47,11 +48,11 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         Optional.ofNullable(ThreadLocalSpan.CURRENT_TRACER.next()).ifPresent(span -> {
             JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
-            ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
-            span.name(method);
+            ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) methodInfo.getInvoker());
+            span.name(methodInfo.getMethod());
             span.kind(Span.Kind.CLIENT);
             span.tag(SPAN_SQL_QUERY_TAG_NAME, sqlCompression.compress(executionInfo.getSql()));
             span.tag(SPAN_LOCAL_COMPONENT_TAG_NAME, "database");
@@ -67,22 +68,22 @@ public class JdbcStatementTracingInterceptor implements AgentInterceptor {
             }
             span.start();
         });
-        chain.doBefore(invoker, method, args, context);
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         Optional.ofNullable(ThreadLocalSpan.CURRENT_TRACER.remove()).ifPresent(span -> {
             JdbcContextInfo jdbcContextInfo = (JdbcContextInfo) context.get(JdbcContextInfo.class);
-            ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) invoker);
-            if (throwable == null) {
+            ExecutionInfo executionInfo = jdbcContextInfo.getExecutionInfo((Statement) methodInfo.getInvoker());
+            if (methodInfo.getThrowable() == null) {
 //                span.tag(SPAN_ROW_COUNT_TAG_NAME, String.valueOf(executionInfo.getResult()));
             } else {
-                span.tag(SPAN_ERROR_TAG_NAME, getExceptionMessage(throwable));
+                span.tag(SPAN_ERROR_TAG_NAME, getExceptionMessage(methodInfo.getThrowable()));
             }
             span.finish();
         });
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 
     private String getExceptionMessage(Throwable throwable) {

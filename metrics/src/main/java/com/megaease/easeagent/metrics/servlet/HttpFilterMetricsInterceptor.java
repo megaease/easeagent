@@ -6,6 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.MetricSubType;
@@ -17,24 +18,24 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Map;
 
-public class HttpFilterMetricsInterceptor extends AbstractServerMetric  implements AgentInterceptor {
+public class HttpFilterMetricsInterceptor extends AbstractServerMetric implements AgentInterceptor {
 
     public HttpFilterMetricsInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
-        chain.doBefore(invoker, method, args, context);
+    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
-        HttpServletResponse httpServletResponse = (HttpServletResponse) args[1];
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
+        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
         String httpRoute = ServletUtils.getHttpRouteAttribute(httpServletRequest);
-        this.collectMetric(httpRoute, httpServletResponse, throwable, context);
-        return chain.doAfter(invoker, method, args, retValue, throwable, context);
+        this.collectMetric(httpRoute, httpServletResponse, methodInfo.getThrowable(), context);
+        return chain.doAfter(methodInfo, context);
     }
 
     public void collectMetric(String key, HttpServletResponse httpServletResponse, Throwable throwable, Map<Object, Object> context) {

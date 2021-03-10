@@ -19,7 +19,7 @@ import java.util.Map;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class HttpFilterAdviceTest {
+public class HttpFilterAdviceTest extends BaseSnifferTest {
 
     @Test
     public void testInvoke() throws Exception {
@@ -37,15 +37,7 @@ public class HttpFilterAdviceTest {
         FilterChain filterChain = mock(FilterChain.class);
         filter.doFilter(httpServletRequest, httpServletResponse, filterChain);
 
-        verify(chainInvoker, times(1))
-                .doBefore(any(AgentInterceptorChain.Builder.class), any(HttpServlet.class), any(String.class),
-                        any(Object[].class),
-                        any(Map.class));
-        verify(chainInvoker, times(1))
-                .doAfter(any(HttpServlet.class), any(String.class),
-                        any(Object[].class),
-                        any(Object.class), any(Exception.class),
-                        any(Map.class));
+        this.verifyInvokeTimes(chainInvoker, 1);
 
     }
 

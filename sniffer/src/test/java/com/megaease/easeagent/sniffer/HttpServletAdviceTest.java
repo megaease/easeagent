@@ -16,11 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
-public class HttpServletAdviceTest {
+public class HttpServletAdviceTest extends BaseSnifferTest {
 
     @Test
     public void success() throws Exception {
@@ -36,15 +36,8 @@ public class HttpServletAdviceTest {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
         HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
         httpServlet.service(httpServletRequest, httpServletResponse);
-        verify(chainInvoker, times(1))
-                .doBefore(any(AgentInterceptorChain.Builder.class), any(HttpServlet.class), any(String.class),
-                        any(Object[].class),
-                        any(Map.class));
-        verify(chainInvoker, times(1))
-                .doAfter(any(HttpServlet.class), any(String.class),
-                        any(Object[].class),
-                        any(Object.class), any(Exception.class),
-                        any(Map.class));
+
+        this.verifyInvokeTimes(chainInvoker, 1);
 
     }
 

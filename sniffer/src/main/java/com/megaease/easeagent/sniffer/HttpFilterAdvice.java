@@ -7,6 +7,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import net.bytebuddy.asm.Advice;
@@ -63,9 +64,14 @@ public abstract class HttpFilterAdvice implements Transformation {
         ) {
             return lock.acquire(() -> {
                 Map<Object, Object> map = ContextUtils.createContext();
+                MethodInfo methodInfo = MethodInfo.builder()
+                        .invoker(invoker)
+                        .method(method)
+                        .args(args)
+                        .build();
                 HttpServletRequest httpServletRequest = (HttpServletRequest) args[0];
                 ServletUtils.setHttpRouteAttribute(httpServletRequest);
-                agentInterceptorChainInvoker.doBefore(this.builder, invoker, method, args, map);
+                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, map);
                 return map;
             });
 
@@ -78,9 +84,11 @@ public abstract class HttpFilterAdvice implements Transformation {
                   @Advice.AllArguments Object[] args,
                   @Advice.Thrown Exception exception
         ) {
-            release.apply(map -> {
-                ContextUtils.setEndTime(map);
-                agentInterceptorChainInvoker.doAfter(invoker, method, args, null, exception, map);
+            release.apply(context -> {
+                ContextUtils.setEndTime(context);
+                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
+                methodInfo.setThrowable(exception);
+                agentInterceptorChainInvoker.doAfter(methodInfo, context);
             });
         }
     }

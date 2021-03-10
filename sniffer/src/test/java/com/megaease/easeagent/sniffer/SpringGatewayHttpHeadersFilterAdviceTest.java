@@ -15,12 +15,10 @@ import org.springframework.web.server.ServerWebExchange;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class SpringGatewayHttpHeadersFilterAdviceTest {
+public class SpringGatewayHttpHeadersFilterAdviceTest extends BaseSnifferTest {
 
     @SuppressWarnings("unchecked")
     @Test
@@ -42,15 +40,7 @@ public class SpringGatewayHttpHeadersFilterAdviceTest {
         List<HttpHeadersFilter> list = new ArrayList<>();
         HttpHeadersFilter.filterRequest(list, exchange);
 
-        verify(chainInvoker, times(1))
-                .doBefore(any(AgentInterceptorChain.Builder.class), any(), any(String.class),
-                        any(Object[].class),
-                        any(Map.class));
+        this.verifyInvokeTimes(chainInvoker, 1);
 
-        verify(chainInvoker, times(1))
-                .doAfter(any(), any(String.class),
-                        any(Object[].class),
-                        any(), any(Throwable.class),
-                        any(Map.class));
     }
 }

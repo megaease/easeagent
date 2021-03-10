@@ -1,4 +1,4 @@
-package com.megaease.easeagent.zipkin.http.flux;
+package com.megaease.easeagent.zipkin.http.reactive;
 
 public interface GatewayCons {
 

@@ -34,16 +34,18 @@ import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
+import com.megaease.easeagent.metrics.redis.SpringRedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.flux.SpringGatewayHttpHeadersInterceptor;
-import com.megaease.easeagent.zipkin.http.flux.SpringGatewayInitGlobalFilterInterceptor;
-import com.megaease.easeagent.zipkin.http.flux.SpringGatewayServerTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
+import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
+import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
+import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import org.slf4j.LoggerFactory;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -156,6 +158,15 @@ public abstract class Provider {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing))
+                ;
+    }
+
+    @Injection.Bean("agentInterceptorChainBuilder4SpringRedis")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4SpringRedis() {
+        loadTracing();
+        return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new SpringRedisMetricInterceptor(this.metricRegistry))
+                .addInterceptor(new SpringRedisTracingInterceptor())
                 ;
     }
 

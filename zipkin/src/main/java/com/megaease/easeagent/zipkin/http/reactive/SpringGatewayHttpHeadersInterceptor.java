@@ -1,4 +1,4 @@
-package com.megaease.easeagent.zipkin.http.flux;
+package com.megaease.easeagent.zipkin.http.reactive;
 
 import brave.Span;
 import brave.Tracing;
@@ -9,6 +9,7 @@ import brave.http.HttpTracing;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -28,17 +29,17 @@ public class SpringGatewayHttpHeadersInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(Object invoker, String method, Object[] args, Map<Object, Object> context, AgentInterceptorChain chain) {
-        chain.doBefore(invoker, method, args, context);
+    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
-    public Object after(Object invoker, String method, Object[] args, Object retValue, Throwable throwable, Map<Object, Object> context, AgentInterceptorChain chain) {
-        ServerWebExchange exchange = (ServerWebExchange) args[1];
-        HttpHeaders retHttpHeaders = (HttpHeaders) retValue;
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[1];
+        HttpHeaders retHttpHeaders = (HttpHeaders) methodInfo.getRetValue();
         TraceContext traceContext = exchange.getAttribute(GatewayCons.TRACE_CONTEXT_ATTR);
         if (traceContext == null) {
-            return retValue;
+            return methodInfo.getRetValue();
         }
         GatewayClientRequest request = new GatewayClientRequest(exchange);
         Span span = clientHandler.handleSendWithParent(request, traceContext);
@@ -46,8 +47,9 @@ public class SpringGatewayHttpHeadersInterceptor implements AgentInterceptor {
         map.putAll(retHttpHeaders.toSingleValueMap());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAll(map);
+        methodInfo.setRetValue(httpHeaders);
         span.abandon();
-        return chain.doAfter(invoker, method, args, httpHeaders, throwable, context);
+        return chain.doAfter(methodInfo, context);
     }
 
     static class GatewayClientRequest extends HttpClientRequest {

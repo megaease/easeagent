@@ -1,26 +1,8 @@
-/*
- * Copyright (c) 2017, MegaEase
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.megaease.easeagent.metrics.jdbc;
+package com.megaease.easeagent.metrics.redis;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
@@ -29,15 +11,13 @@ import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractJdbcMetric extends AbstractMetric implements AgentInterceptor {
+public class SpringRedisMetricInterceptor extends AbstractMetric implements AgentInterceptor {
 
-    public static final String ERR_CON_METRIC_KEY = "err-con";
-
-    public AbstractJdbcMetric(MetricRegistry metricRegistry) {
+    public SpringRedisMetricInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
@@ -56,9 +36,10 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
                 .gaugeType(MetricSubType.DEFAULT, new HashMap<>())
                 .meterType(MetricSubType.DEFAULT,
                         ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                                .put(MetricField.M1_RATE, MetricValueFetcher.MeteredM1RateIgnoreZero)
+                                .put(MetricField.M1_RATE, MetricValueFetcher.MeteredM1Rate)
                                 .put(MetricField.M5_RATE, MetricValueFetcher.MeteredM5Rate)
                                 .put(MetricField.M15_RATE, MetricValueFetcher.MeteredM15Rate)
+                                .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
                                 .build())
                 .meterType(MetricSubType.ERROR,
                         ImmutableMap.<MetricField, MetricValueFetcher>builder()
@@ -66,11 +47,11 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
                                 .put(MetricField.M5_ERROR_RATE, MetricValueFetcher.MeteredM5Rate)
                                 .put(MetricField.M15_ERROR_RATE, MetricValueFetcher.MeteredM15Rate)
                                 .build())
-                .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                        .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
-                        .build())
                 .counterType(MetricSubType.ERROR, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.EXECUTION_ERROR_COUNT, MetricValueFetcher.CountingCount)
+                        .build())
+                .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                        .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
                         .build())
                 .build();
     }
@@ -80,26 +61,29 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
         chain.doBefore(methodInfo, context);
     }
 
-    protected void collectMetric(String key, boolean success, Map<Object, Object> context) {
-        Timer timer = this.metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT));
-        timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
-        Counter counter = this.metricRegistry.counter(this.metricNameFactory.counterName(key, MetricSubType.DEFAULT));
-        Meter meter = this.metricRegistry.meter(this.metricNameFactory.meterName(key, MetricSubType.DEFAULT));
-        meter.mark();
-        counter.inc();
-        if (!success) {
-            Counter errCounter = this.metricRegistry.counter(this.metricNameFactory.counterName(key, MetricSubType.ERROR));
-            Meter errMeter = this.metricRegistry.meter(this.metricNameFactory.meterName(key, MetricSubType.ERROR));
-            errMeter.mark();
-            errCounter.inc();
+    @Override
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        String key = methodInfo.getInvoker().getClass().getSimpleName() + "." + methodInfo.getMethod();
+        metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT)).update(ContextUtils.getDuration(context), TimeUnit.MILLISECONDS);
+        final Meter defaultMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
+        final Counter defaultCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT));
+        final Meter errorMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.ERROR));
+        final Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR));
+
+        if (methodInfo.getThrowable() != null) {
+            errorMeter.mark();
+            errorCounter.inc();
         }
+        defaultMeter.mark();
+        defaultCounter.inc();
+
         MetricName gaugeName = metricNameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
-        metricRegistry.gauge(gaugeName.name(), () -> () -> LastMinutesCounterGauge.builder()
-                .m1Count((long) meter.getOneMinuteRate() * 60)
-                .m5Count((long) meter.getFiveMinuteRate() * 60 * 5)
-                .m15Count((long) meter.getFifteenMinuteRate() * 60 * 15)
-                .build());
-
+        metricRegistry.gauge(gaugeName.name(), () -> () ->
+                LastMinutesCounterGauge.builder()
+                        .m1Count((long) (defaultMeter.getOneMinuteRate() * 60))
+                        .m5Count((long) (defaultMeter.getFiveMinuteRate() * 60 * 5))
+                        .m15Count((long) (defaultMeter.getFifteenMinuteRate() * 60 * 15))
+                        .build());
+        return chain.doAfter(methodInfo, context);
     }
-
 }
