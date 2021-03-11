@@ -12,4 +12,7 @@ public interface ConfigManagerMXBean {
     Map<String, String> getConfigs();
 
     List<String> availableConfigNames();
+
+    default void healthz() {
+    }
 }

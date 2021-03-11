@@ -17,4 +17,8 @@ public class TextUtils {
         }
         return new String(tmp.toCharArray(), 0, tmp.length() - 1);
     }
+
+    public static boolean hasText(String val) {
+        return val != null && val.trim().length() > 0;
+    }
 }

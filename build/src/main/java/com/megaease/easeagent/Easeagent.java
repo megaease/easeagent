@@ -41,7 +41,8 @@ import com.megaease.easeagent.sniffer.*;
         RestTemplateAdvice.class,
         FeignClientAdvice.class,
         JdbcDataSourceAdvice.class,
-        JdbcStatementAdvice.class
+        JdbcStatementAdvice.class,
+        ServiceNamePropagationAdvice.class
 
 })
 abstract class Easeagent {
