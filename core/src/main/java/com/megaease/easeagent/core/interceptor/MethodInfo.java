@@ -3,6 +3,8 @@ package com.megaease.easeagent.core.interceptor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 @Builder
 public class MethodInfo {
@@ -31,5 +33,7 @@ public class MethodInfo {
      * Throwable is exist if method throws exception. Otherwise it is null.
      */
     private Object retValue;
+
+    private Map<Object,Object> agentFieldMap;
 
 }

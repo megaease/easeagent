@@ -7,8 +7,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -43,7 +42,13 @@ public abstract class SpringRedisAdvice implements Transformation {
     public <T extends Definition> T define(Definition<T> def) {
         Definition.Fork<T> fork = (Definition.Fork<T>) def;
         for (String clsName : clsNames) {
-            fork = fork.type(hasSuperType(named(clsName))).transform(doCommand(any().and(isOverriddenFrom(named(clsName)))));
+            fork = fork.type(hasSuperType(named(clsName)))
+                    .transform(
+                            doCommand(
+                                    any().and(isOverriddenFrom(named(clsName)))
+                                    , AgentFieldAccessor.FIELD_MAP_NAME
+                            )
+                    );
         }
         return fork.end();
 
@@ -60,54 +65,34 @@ public abstract class SpringRedisAdvice implements Transformation {
     }
 
     @AdviceTo(DoCommand.class)
-    abstract Definition.Transformer doCommand(ElementMatcher<? super MethodDescription> matcher);
+    abstract Definition.Transformer doCommand(ElementMatcher<? super MethodDescription> matcher, String fieldName);
 
-    static class DoCommand {
-
-        private final ForwardLock lock;
-        final AgentInterceptorChain.Builder builder;
-        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
+    static class DoCommand extends AbstractAdvice {
 
         @Injection.Autowire
-        DoCommand(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                  @Injection.Qualifier("agentInterceptorChainBuilder4SpringRedis") AgentInterceptorChain.Builder builder) {
-            this.lock = new ForwardLock();
-            this.builder = builder;
-            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
+        DoCommand(@Injection.Qualifier("agentInterceptorChainBuilder4SpringRedis") AgentInterceptorChain.Builder builder,
+                  AgentInterceptorChainInvoker agentInterceptorChainInvoker) {
+            super(builder, agentInterceptorChainInvoker);
         }
 
         @Advice.OnMethodEnter
-        ForwardLock.Release<Map<Object, Object>> enter(
+        public ForwardLock.Release<Map<Object, Object>> enter(
                 @Advice.Origin Object invoker,
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
-            return lock.acquire(() -> {
-                Map<Object, Object> map = ContextUtils.createContext();
-                MethodInfo methodInfo = MethodInfo.builder()
-                        .invoker(invoker)
-                        .method(method)
-                        .args(args)
-                        .build();
-                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, map);
-                return map;
-            });
-
+            return innerEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                  @Advice.Origin Object invoker,
-                  @Advice.Origin("#m") String method,
-                  @Advice.AllArguments Object[] args,
-                  @Advice.Thrown Exception exception
+        public void exit(
+                @Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
+                @Advice.Origin Object invoker,
+                @Advice.Origin("#m") String method,
+                @Advice.AllArguments Object[] args,
+                @Advice.Thrown Exception exception
         ) {
-            release.apply(context -> {
-                ContextUtils.setEndTime(context);
-                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
-                methodInfo.setThrowable(exception);
-                agentInterceptorChainInvoker.doAfter(methodInfo, context);
-            });
+            release.apply(context -> innerExitNoRetValue(release, invoker, method, args, exception));
         }
     }
 }

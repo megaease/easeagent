@@ -26,15 +26,18 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.FluentIterable.from;
+import static net.bytebuddy.matcher.ElementMatchers.any;
 
 public class Classes {
     public static Transforming transform(String... names) {
@@ -117,12 +120,19 @@ public class Classes {
                         @Override
                         public AgentBuilder.Transformer apply(Definition.Transformer input) {
                             register.apply(input.adviceFactoryClassName, loader);
-                            return new AgentBuilder.Transformer.ForAdvice().advice(input.matcher, input.inlineAdviceClassName);
+                            List<AgentBuilder.Transformer> transformers = new ArrayList<>();
+                            transformers.add((builder, typeDescription, classLoader, module) -> {
+                                if (input.fieldName != null) {
+                                    builder = builder.defineField(input.fieldName, input.fieldClass, Opcodes.ACC_PUBLIC);
+                                }
+                                return builder;
+                            });
+                            transformers.add(new AgentBuilder.Transformer.ForAdvice().advice(input.matcher, input.inlineAdviceClassName));
+                            return new CompoundTransformer(transformers);
                         }
                     });
                 }
             }
         }
-
     }
 }

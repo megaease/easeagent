@@ -32,6 +32,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.dynamic.loading.ClassInjector;
+import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
 import org.jolokia.jvmagent.JvmAgent;
@@ -45,9 +46,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -208,42 +207,24 @@ public class Bootstrap {
         private final Register register;
         private final String adviceFactoryClassName;
         private final ForAdvice transformer;
+        private final Definition.Transformer agentTransformer;
 
         ForRegisterAdvice(Register register, Definition.Transformer transformer) {
             this.register = register;
+            this.agentTransformer = transformer;
             this.adviceFactoryClassName = transformer.adviceFactoryClassName;
             this.transformer = new ForAdvice().include(getClass().getClassLoader())
                     .advice(transformer.matcher, transformer.inlineAdviceClassName);
+
         }
 
         @Override
         public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
             register.apply(adviceFactoryClassName, cl);
+            if (this.agentTransformer.fieldName != null) {
+                b = b.defineField(this.agentTransformer.fieldName, this.agentTransformer.fieldClass, Opcodes.ACC_PROTECTED);
+            }
             return transformer.transform(b, td, cl, m);
-        }
-    }
-
-    private static class CompoundTransformer implements AgentBuilder.Transformer {
-
-        private final List<AgentBuilder.Transformer> transformers;
-
-        public CompoundTransformer(List<AgentBuilder.Transformer> transformers) {
-            this.transformers = new ArrayList<>();
-            for (AgentBuilder.Transformer transformer : transformers) {
-                if (transformer instanceof CompoundTransformer) {
-                    this.transformers.addAll(((CompoundTransformer) transformer).transformers);
-                    continue;
-                }
-                this.transformers.add(transformer);
-            }
-        }
-
-        @Override
-        public Builder<?> transform(Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-            for (AgentBuilder.Transformer transformer : this.transformers) {
-                builder = transformer.transform(builder, typeDescription, classLoader, module);
-            }
-            return builder;
         }
     }
 }

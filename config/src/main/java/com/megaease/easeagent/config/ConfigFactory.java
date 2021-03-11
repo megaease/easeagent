@@ -36,7 +36,7 @@ public class ConfigFactory {
             LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
             throw e;
         }
-        validConfigs(configs);
+//        validConfigs(configs);
         return configs;
     }
 

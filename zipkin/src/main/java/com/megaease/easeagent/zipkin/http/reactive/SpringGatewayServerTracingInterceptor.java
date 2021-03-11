@@ -37,12 +37,11 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
         Span span = this.httpServerHandler.handleReceive(httpServerRequest);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
         CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
-        TraceContext traceContext = currentTraceContext.get();
-
-        context.put(CurrentTraceContext.Scope.class, newScope);
         context.put(Span.class, span);
+        context.put(CurrentTraceContext.Scope.class, newScope);
         context.put(FluxHttpServerRequest.class, httpServerRequest);
 
+        TraceContext traceContext = currentTraceContext.get();
         exchange.getAttributes().put(GatewayCons.TRACE_CONTEXT_ATTR, traceContext);
         exchange.getAttributes().put(GatewayCons.CURRENT_TRACE_CONTEXT_ATTR, currentTraceContext);
         chain.doBefore(methodInfo, context);

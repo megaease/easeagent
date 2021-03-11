@@ -24,8 +24,8 @@ public class HttpFilterAdviceTest extends BaseSnifferTest {
     @Test
     public void testInvoke() throws Exception {
         AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(mock(AgentInterceptor.class));
-        Definition.Default def = new GenHttpFilterAdvice().define(Definition.Default.EMPTY);
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
+        Definition.Default def = new GenHttpFilterAdvice().define(Definition.Default.EMPTY);
         String baseName = this.getClass().getName();
         ClassLoader loader = this.getClass().getClassLoader();
         CharacterEncodingFilter filter = (CharacterEncodingFilter) Classes.transform(baseName + "$MyCharacterEncodingFilter")

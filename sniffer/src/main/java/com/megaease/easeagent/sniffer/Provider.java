@@ -170,6 +170,15 @@ public abstract class Provider {
                 ;
     }
 
+    @Injection.Bean("agentInterceptorChainBuilder4LettuceRedisClient")
+    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4LettuceRedisClient() {
+        loadTracing();
+        return new DefaultAgentInterceptorChain.Builder()
+//                .addInterceptor(new SpringRedisMetricInterceptor(this.metricRegistry))
+//                .addInterceptor(new SpringRedisTracingInterceptor())
+                ;
+    }
+
     private SpanHandler spanHandler() {
         return AsyncZipkinSpanHandler.create(new LogSender());
     }

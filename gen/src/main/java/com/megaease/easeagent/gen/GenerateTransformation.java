@@ -63,11 +63,31 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
             final List<? extends VariableElement> parameters = e.getParameters();
             final TypeMirror returnType = e.getReturnType();
 
+//            if (!e.getModifiers().contains(Modifier.ABSTRACT)
+//                    || !utils.isSameType(returnType, Definition.Transformer.class)
+//                    || (parameters.size() != 1 && parameters.size() != 2)
+//                    || isNotMethodElementMatcher(parameters.get(0).asType(), utils))
+//                return super.visitExecutableAsMethod(e, utils);
+
+            if (parameters.size() > 2) {
+                return super.visitExecutableAsMethod(e, utils);
+            }
+
             if (!e.getModifiers().contains(Modifier.ABSTRACT)
                     || !utils.isSameType(returnType, Definition.Transformer.class)
-                    || parameters.size() != 1
-                    || isNotMethodElementMatcher(parameters.get(0).asType(), utils))
+            ) {
                 return super.visitExecutableAsMethod(e, utils);
+            }
+
+            if (parameters.size() == 1 && isNotMethodElementMatcher(parameters.get(0).asType(), utils)) {
+                return super.visitExecutableAsMethod(e, utils);
+            }
+
+            if (parameters.size() == 2 && isNotMethodElementMatcher(parameters.get(0).asType(), utils)
+                    && isNotString(parameters.get(1).asType(), utils)
+            ) {
+                return super.visitExecutableAsMethod(e, utils);
+            }
 
             if (e.getAnnotation(AdviceTo.class) == null)
                 throw new ElementException(e, "should be annotated with " + AdviceTo.class);
@@ -89,7 +109,7 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
             final String inlineAdviceClassName = adviceClassName + "_inline";
             final String adviceFactoryClassName = adviceClassName + "_factory";
 
-            final String format = "return new $T($S, $S, $L)";
+            String format = "return new $T($S, $S, $L)";
             final Object[] args = new Object[]{Definition.Transformer.class, inlineAdviceClassName, adviceFactoryClassName, join(parameters)};
             builder.addMethod(MethodSpec.overriding(e).addStatement(format, args).build());
 
@@ -102,6 +122,11 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
         private boolean isNotMethodElementMatcher(TypeMirror tm, ProcessUtils utils) {
             final WildcardTypeName wtn = WildcardTypeName.supertypeOf(MethodDescription.class);
             return !utils.typeNameOf(tm).equals(ParameterizedTypeName.get(ClassName.get(ElementMatcher.class), wtn));
+        }
+
+        private boolean isNotString(TypeMirror tm, ProcessUtils utils) {
+            final WildcardTypeName wtn = WildcardTypeName.supertypeOf(MethodDescription.class);
+            return !utils.typeNameOf(tm).equals(ParameterizedTypeName.get(ClassName.get(String.class), wtn));
         }
 
         private class GenerateInlineAdviceClass extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
