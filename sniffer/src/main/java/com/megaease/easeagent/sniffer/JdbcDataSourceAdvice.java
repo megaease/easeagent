@@ -24,14 +24,10 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -51,56 +47,29 @@ public abstract class JdbcDataSourceAdvice implements Transformation {
     @AdviceTo(GetConnection.class)
     abstract Definition.Transformer getConnection(ElementMatcher<? super MethodDescription> getConnection);
 
-    static class GetConnection {
-
-        private final ForwardLock lock;
-        private final Logger logger;
-        private final AgentInterceptorChain.Builder builder;
-        private final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
+    static class GetConnection extends AbstractAdvice {
 
         @Injection.Autowire
         GetConnection(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
                       @Injection.Qualifier("agentInterceptorChainBuilder4Con") AgentInterceptorChain.Builder builder) {
-            this.lock = new ForwardLock();
-            logger = LoggerFactory.getLogger(getClass());
-            this.builder = builder;
-            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
+            super(builder, agentInterceptorChainInvoker);
         }
 
         @Advice.OnMethodEnter
         ForwardLock.Release<Map<Object, Object>> enter(@Advice.This DataSource invoker,
                                                        @Advice.Origin("#m") String method,
                                                        @Advice.AllArguments Object[] args) {
-            return lock.acquire(() -> {
-                Map<Object, Object> context = ContextUtils.createContext();
-                MethodInfo methodInfo = MethodInfo.builder()
-                        .invoker(invoker)
-                        .method(method)
-                        .args(args)
-                        .build();
-                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, context);
-                return context;
-            });
+            return this.doEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                  @Advice.This DataSource dataSource,
+                  @Advice.This Object invoker,
+                  @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
                   @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
-                  @Advice.Origin("#m") String method,
                   @Advice.Thrown Exception exception) {
-            release.apply(context -> {
-                try {
-                    ContextUtils.setEndTime(context);
-                    MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
-                    methodInfo.setThrowable(exception);
-                    methodInfo.setRetValue(retValue);
-                    agentInterceptorChainInvoker.doAfter(methodInfo, context);
-                } catch (Exception e) {
-                    logger.error(e.toString());
-                }
-            });
+            this.doExit(release, invoker, method, args, retValue, exception);
         }
     }
 

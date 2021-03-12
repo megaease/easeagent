@@ -46,7 +46,7 @@ public interface Definition<T extends Definition> {
          * field must be Map
          */
         public final String fieldName;
-        public final Class<?> fieldClass = Map.class;
+        public final Class<?> fieldClass = Object.class;
 
         public Transformer(String inlineAdviceClassName, String adviceFactoryClassName, ElementMatcher<? super MethodDescription> matcher) {
             this(inlineAdviceClassName, adviceFactoryClassName, matcher, null);

@@ -5,9 +5,6 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import com.megaease.easeagent.core.utils.AgentFieldAccessor;
-import net.bytebuddy.asm.Advice;
-import net.bytebuddy.implementation.bytecode.assign.Assigner;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,23 +13,18 @@ public class AbstractAdvice {
 
     protected final ForwardLock lock;
     protected final AgentInterceptorChain.Builder builder;
-    protected final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
+    protected final AgentInterceptorChainInvoker chainInvoker;
 
-    public AbstractAdvice(AgentInterceptorChain.Builder builder, AgentInterceptorChainInvoker agentInterceptorChainInvoker) {
+    public AbstractAdvice(AgentInterceptorChain.Builder builder, AgentInterceptorChainInvoker chainInvoker) {
         this.lock = new ForwardLock();
         this.builder = builder;
-        this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
+        this.chainInvoker = chainInvoker;
     }
 
-    @Advice.OnMethodEnter
-    protected ForwardLock.Release<Map<Object, Object>> innerEnter(
-            @Advice.This Object invoker,
-            @Advice.Origin("#m") String method,
-            @Advice.AllArguments Object[] args
-    ) {
+    protected ForwardLock.Release<Map<Object, Object>> doEnter(Object invoker, String method, Object[] args) {
         return lock.acquire(() -> {
             Map<Object, Object> context = ContextUtils.createContext();
-            if (agentInterceptorChainInvoker == null) {
+            if (chainInvoker == null) {
                 return context;
             }
             MethodInfo methodInfo = MethodInfo.builder()
@@ -40,28 +32,26 @@ public class AbstractAdvice {
                     .method(method)
                     .args(args)
                     .build();
-            agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, context);
+            chainInvoker.doBefore(this.builder, methodInfo, context);
             return context;
         });
     }
 
-    protected Object innerExit(
-            @Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-            @Advice.This Object invoker,
-            @Advice.Origin("#m") String method,
-            @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
-            @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
-            @Advice.Thrown Throwable throwable
-    ) {
+    protected Object doExit(ForwardLock.Release<Map<Object, Object>> release, Object invoker, String method, Object[] args, Object retValue, Throwable throwable) {
         AtomicReference<Object> tmpRet = new AtomicReference<>(retValue);
-        if (agentInterceptorChainInvoker == null) {
+        if (chainInvoker == null) {
             return tmpRet.get();
         }
         release.apply(context -> {
-            MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
-            methodInfo.setRetValue(retValue);
-            methodInfo.setThrowable(throwable);
-            Object newRetValue = agentInterceptorChainInvoker.doAfter(methodInfo, context);
+            ContextUtils.setEndTime(context);
+            MethodInfo methodInfo = MethodInfo.builder()
+                    .invoker(invoker)
+                    .method(method)
+                    .args(args)
+                    .retValue(retValue)
+                    .throwable(throwable)
+                    .build();
+            Object newRetValue = chainInvoker.doAfter(this.builder, methodInfo, context);
             if (newRetValue != retValue) {
                 tmpRet.set(newRetValue);
             }
@@ -69,21 +59,30 @@ public class AbstractAdvice {
         return tmpRet.get();
     }
 
-    protected void innerExitNoRetValue(
-            @Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-            @Advice.This Object invoker,
-            @Advice.Origin("#m") String method,
-            @Advice.AllArguments Object[] args,
-            @Advice.Thrown Throwable throwable
-    ) {
+    protected void doExitNoRetValue(ForwardLock.Release<Map<Object, Object>> release, Object invoker, String method, Object[] args, Throwable throwable) {
+        if (chainInvoker == null) {
+            return;
+        }
         release.apply(context -> {
-            MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
-            methodInfo.setThrowable(throwable);
-            if (agentInterceptorChainInvoker == null) {
-                return;
-            }
-            agentInterceptorChainInvoker.doAfter(methodInfo, context);
+            ContextUtils.setEndTime(context);
+            MethodInfo methodInfo = MethodInfo.builder()
+                    .invoker(invoker)
+                    .method(method)
+                    .args(args)
+                    .throwable(throwable)
+                    .build();
+            chainInvoker.doAfter(this.builder, methodInfo, context);
         });
     }
 
+    protected void doConstructorExit(Object invoker, String method, Object[] args, Throwable throwable) {
+        Map<Object, Object> context = ContextUtils.createContext();
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(invoker)
+                .method(method)
+                .args(args)
+                .build();
+        methodInfo.setThrowable(throwable);
+        chainInvoker.doAfter(this.builder, methodInfo, context);
+    }
 }

@@ -20,6 +20,7 @@ package com.megaease.easeagent;
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
+import com.megaease.easeagent.sniffer.lettuce.v5.LettuceInjectAgentFieldAdvice;
 
 @Assembly({
 //        CaptureTrace.class
@@ -42,7 +43,8 @@ import com.megaease.easeagent.sniffer.*;
         FeignClientAdvice.class,
         JdbcDataSourceAdvice.class,
         JdbcStatementAdvice.class,
-        ServiceNamePropagationAdvice.class
+        ServiceNamePropagationAdvice.class,
+        LettuceInjectAgentFieldAdvice.class
 
 })
 abstract class Easeagent {

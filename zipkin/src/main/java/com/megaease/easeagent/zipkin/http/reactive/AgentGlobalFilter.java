@@ -28,7 +28,7 @@ public class AgentGlobalFilter implements GlobalFilter {
         MethodInfo methodInfo = MethodInfo.builder().invoker(this).method("filter").args(new Object[]{exchange}).build();
         agentInterceptorChainInvoker.doBefore(this.agentInterceptorChainBuilder, methodInfo, context);
         Mono<Void> mono = chain.filter(exchange);
-        return new AgentMono<>(mono, methodInfo, agentInterceptorChainInvoker, context);
+        return new AgentMono<>(mono, methodInfo, this.agentInterceptorChainBuilder, agentInterceptorChainInvoker, context);
     }
 
 }

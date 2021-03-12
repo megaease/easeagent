@@ -9,36 +9,49 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
 import io.lettuce.core.RedisClient;
-import io.lettuce.core.api.StatefulRedisConnection;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 public class RedisClientAdviceTest extends BaseSnifferTest {
 
-    @Test
-    public void success() throws Exception {
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(mock(AgentInterceptor.class));
-        AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
+    private static List<Class<?>> classList;
 
-        Definition.Default def = new GenRedisClientAdvice().define(Definition.Default.EMPTY);
-        ClassLoader loader = this.getClass().getClassLoader();
+    AgentInterceptorChain.Builder builder4RedisClientCreate;
+    AgentInterceptorChain.Builder builder4RedisClientConnect;
+    AgentInterceptorChainInvoker chainInvoker;
+    AgentInterceptor interceptor4Create;
+    AgentInterceptor interceptor4Connect;
 
-        RedisClient redisClient = (RedisClient) Classes.transform(this.getClass().getName() + "$MyRedisClient")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4LettuceRedisClient", builder))
-                .load(loader).get(0).newInstance();
+    @Before
+    public void before() {
+        interceptor4Create = mock(AgentInterceptor.class);
+        interceptor4Connect = mock(AgentInterceptor.class);
+        builder4RedisClientCreate = new DefaultAgentInterceptorChain.Builder().addInterceptor(interceptor4Create);
+        builder4RedisClientConnect = new DefaultAgentInterceptorChain.Builder().addInterceptor(interceptor4Connect);
+        chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
 
-        redisClient.connect();
-
-        this.verifyInvokeTimes(chainInvoker, 1);
-    }
-
-    static class MyRedisClient extends RedisClient {
-
-        @Override
-        public StatefulRedisConnection<String, String> connect() {
-            return mock(StatefulRedisConnection.class);
+        if (classList == null) {
+            Definition.Default def = new GenRedisClientAdvice().define(Definition.Default.EMPTY);
+            ClassLoader loader = this.getClass().getClassLoader();
+            classList = Classes.transform("io.lettuce.core.RedisClient")
+                    .with(def, new QualifiedBean("builder4RedisClientCreate", builder4RedisClientCreate),
+                            new QualifiedBean("builder4RedisClientConnect", builder4RedisClientConnect),
+                            new QualifiedBean("", chainInvoker)
+                    )
+                    .load(loader);
         }
     }
+
+    @Test
+    public void createSuccess() throws Exception {
+        RedisClient.create();
+        this.verifyInterceptorTimes(interceptor4Create, 1, false);
+
+    }
+
 }

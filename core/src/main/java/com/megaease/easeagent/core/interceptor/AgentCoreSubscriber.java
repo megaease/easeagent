@@ -11,13 +11,15 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
 
     private final CoreSubscriber<T> actual;
     private final MethodInfo methodInfo;
-    private final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
+    private final AgentInterceptorChain.Builder chainBuilder;
+    private final AgentInterceptorChainInvoker chainInvoker;
     private final Map<Object, Object> context;
 
-    public AgentCoreSubscriber(CoreSubscriber<T> actual, MethodInfo methodInfo, AgentInterceptorChainInvoker agentInterceptorChainInvoker, Map<Object, Object> context) {
+    public AgentCoreSubscriber(CoreSubscriber<T> actual, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context) {
         this.actual = actual;
         this.methodInfo = methodInfo;
-        this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
+        this.chainBuilder = chainBuilder;
+        this.chainInvoker = chainInvoker;
         this.context = context;
     }
 
@@ -41,12 +43,12 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
     public void onError(Throwable t) {
         actual.onError(t);
         methodInfo.setThrowable(t);
-        this.agentInterceptorChainInvoker.doAfter(methodInfo, context);
+        this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context);
     }
 
     @Override
     public void onComplete() {
         actual.onComplete();
-        this.agentInterceptorChainInvoker.doAfter(methodInfo, context);
+        this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context);
     }
 }

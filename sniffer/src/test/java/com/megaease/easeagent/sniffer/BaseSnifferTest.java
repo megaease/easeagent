@@ -1,5 +1,6 @@
 package com.megaease.easeagent.sniffer;
 
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -18,7 +19,18 @@ public class BaseSnifferTest {
                         any(Map.class));
 
         verify(chainInvoker, times(n))
-                .doAfter(any(MethodInfo.class),
+                .doAfter(any(AgentInterceptorChain.Builder.class), any(MethodInfo.class),
                         any(Map.class));
+    }
+
+    protected void verifyInterceptorTimes(AgentInterceptor agentInterceptor, int n, boolean verifyBefore) {
+        if (verifyBefore) {
+            verify(agentInterceptor, times(n))
+                    .before(any(MethodInfo.class), any(Map.class),
+                            any(AgentInterceptorChain.class));
+        }
+        verify(agentInterceptor, times(n))
+                .after(any(MethodInfo.class), any(Map.class),
+                        any(AgentInterceptorChain.class));
     }
 }

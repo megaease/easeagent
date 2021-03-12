@@ -7,15 +7,12 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -25,10 +22,33 @@ public abstract class RedisClientAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("io.lettuce.core.RedisClient")))
+        return def.type(named("io.lettuce.core.RedisClient"))
+                .transform(objConstruct(isConstructor()))
                 .transform(connectSync(nameStartsWith("connect").and(returns(named("io.lettuce.core.api.StatefulRedisConnection")))))
                 .end()
                 ;
+    }
+
+    @AdviceTo(ObjConstruct.class)
+    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher);
+
+    static class ObjConstruct extends AbstractAdvice {
+
+        @Injection.Autowire
+        public ObjConstruct(@Injection.Qualifier("builder4RedisClientCreate") AgentInterceptorChain.Builder builder,
+                            AgentInterceptorChainInvoker agentInterceptorChainInvoker
+        ) {
+            super(builder, agentInterceptorChainInvoker);
+        }
+
+        @Advice.OnMethodExit
+        void exit(
+                @Advice.This Object invoker,
+                @Advice.Origin("#m") String method,
+                @Advice.AllArguments Object[] args
+        ) {
+            this.doConstructorExit(invoker, method, args, null);
+        }
     }
 
     @AdviceTo(ConnectStatefulSync.class)
@@ -36,7 +56,7 @@ public abstract class RedisClientAdvice implements Transformation {
 
     static class ConnectStatefulSync extends AbstractAdvice {
         @Injection.Autowire
-        public ConnectStatefulSync(@Injection.Qualifier("agentInterceptorChainBuilder4LettuceRedisClient") AgentInterceptorChain.Builder builder,
+        public ConnectStatefulSync(@Injection.Qualifier("builder4RedisClientConnect") AgentInterceptorChain.Builder builder,
                                    AgentInterceptorChainInvoker agentInterceptorChainInvoker
         ) {
             super(builder, agentInterceptorChainInvoker);
@@ -48,7 +68,7 @@ public abstract class RedisClientAdvice implements Transformation {
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
-            return this.innerEnter(invoker, method, args);
+            return this.doEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
@@ -59,7 +79,7 @@ public abstract class RedisClientAdvice implements Transformation {
                   @Advice.Return Object retValue,
                   @Advice.Thrown Throwable throwable
         ) {
-            this.innerExit(release, invoker, method, args, retValue, throwable);
+            this.doExit(release, invoker, method, args, retValue, throwable);
         }
     }
 }

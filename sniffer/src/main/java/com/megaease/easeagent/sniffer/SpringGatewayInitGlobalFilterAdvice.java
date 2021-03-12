@@ -7,8 +7,6 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.utils.ContextUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -32,34 +30,20 @@ public abstract class SpringGatewayInitGlobalFilterAdvice implements Transformat
     @AdviceTo(InitBeans.class)
     abstract Definition.Transformer initBeans(ElementMatcher<? super MethodDescription> matcher);
 
-    static class InitBeans {
+    static class InitBeans extends AbstractAdvice {
 
-        final ForwardLock lock;
-        final AgentInterceptorChain.Builder builder;
-        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
         InitBeans(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
                   @Injection.Qualifier("agentInterceptorChainBuilder4Gateway") AgentInterceptorChain.Builder builder) {
-            this.lock = new ForwardLock();
-            this.builder = builder;
-            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
+            super(builder, agentInterceptorChainInvoker);
         }
 
         @Advice.OnMethodEnter
         ForwardLock.Release<Map<Object, Object>> enter(@Advice.This Object invoker,
                                                        @Advice.Origin("#m") String method,
                                                        @Advice.AllArguments Object[] args) {
-            return lock.acquire(() -> {
-                Map<Object, Object> context = ContextUtils.createContext();
-                MethodInfo methodInfo = MethodInfo.builder()
-                        .invoker(invoker)
-                        .method(method)
-                        .args(args)
-                        .build();
-                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, context);
-                return context;
-            });
+            return this.doEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
@@ -67,12 +51,8 @@ public abstract class SpringGatewayInitGlobalFilterAdvice implements Transformat
                   @Advice.This Object invoker,
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
-                  @Advice.Thrown Exception exception) {
-            release.apply(context -> {
-                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
-                methodInfo.setThrowable(exception);
-                agentInterceptorChainInvoker.doAfter(methodInfo, context);
-            });
+                  @Advice.Thrown Throwable throwable) {
+            this.doExitNoRetValue(release, invoker, method, args, throwable);
         }
     }
 }

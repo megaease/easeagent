@@ -5,7 +5,7 @@ import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.utils.AgentFieldAccessor;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
@@ -17,20 +17,19 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Injection.Provider(Provider.class)
-public abstract class RedisConnectionAdvice implements Transformation {
+public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("io.lettuce.core.api.StatefulRedisConnection"))
-                .and(not(isInterface()))
-                .and(not(isAbstract()))
-        )
-//                .type(named("io.lettuce.core.StatefulRedisConnectionImpl")
-//                .or(named("io.lettuce.core.cluster.StatefulRedisClusterPubSubConnectionImpl"))
-//                .or(named("io.lettuce.core.masterslave.StatefulRedisMasterSlaveConnectionImpl"))
-//                .or(named("io.lettuce.core.pubsub.StatefulRedisPubSubConnectionImpl"))
-//        )
-                .transform(objConstruct(none(), AgentFieldAccessor.FIELD_MAP_NAME))
+        return def
+                .type((hasSuperType(named("io.lettuce.core.RedisChannelWriter"))
+                                .or(hasSuperType(named("io.lettuce.core.resource.ClientResources")))
+                                .or(hasSuperType(named("io.lettuce.core.ClientOptions")))
+                                .or(named("io.lettuce.core.ClientOptions"))
+                        )
+                                .and(not(isInterface().or(isAbstract())))
+                )
+                .transform(objConstruct(none(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
                 .end()
                 ;
     }
@@ -51,7 +50,7 @@ public abstract class RedisConnectionAdvice implements Transformation {
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
-            return innerEnter(invoker, method, args);
+            return doEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)

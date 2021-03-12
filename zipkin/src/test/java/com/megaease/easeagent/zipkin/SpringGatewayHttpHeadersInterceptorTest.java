@@ -61,7 +61,7 @@ public class SpringGatewayHttpHeadersInterceptorTest extends BaseZipkinTest {
 
         methodInfo.setRetValue(httpHeaders);
 
-        Object ret = AgentInterceptorChainInvoker.getInstance().doAfter(methodInfo, context);
+        Object ret = AgentInterceptorChainInvoker.getInstance().doAfter(builder, methodInfo, context);
         root.finish();
         HttpHeaders retValue = (HttpHeaders) ret;
         Assert.assertNotNull(retValue);

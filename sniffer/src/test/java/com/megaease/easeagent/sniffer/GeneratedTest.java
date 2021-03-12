@@ -18,8 +18,9 @@
 package com.megaease.easeagent.sniffer;
 
 import com.megaease.easeagent.gen.Assembly;
+import com.megaease.easeagent.sniffer.lettuce.v5.AbstractRedisClientAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.LettuceInjectAgentFieldAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.RedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.RedisConnectionAdvice;
 
 
 @Assembly({
@@ -33,8 +34,10 @@ import com.megaease.easeagent.sniffer.lettuce.v5.RedisConnectionAdvice;
         SpringGatewayHttpHeadersFilterAdvice.class,
         SpringRedisAdvice.class,
         ServiceNamePropagationAdvice.class,
-        RedisConnectionAdvice.class,
-        RedisClientAdvice.class
+        LettuceInjectAgentFieldAdvice.class,
+        RedisClientAdvice.class,
+        AbstractRedisClientAdvice.class,
+
 })
 public interface GeneratedTest {
 }

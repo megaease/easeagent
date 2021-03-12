@@ -36,6 +36,7 @@ import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.redis.SpringRedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
+import com.megaease.easeagent.sniffer.lettuce.v5.RedisClientCreateInterceptor;
 import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
@@ -170,10 +171,20 @@ public abstract class Provider {
                 ;
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4LettuceRedisClient")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4LettuceRedisClient() {
+    @Injection.Bean("builder4RedisClientCreate")
+    public AgentInterceptorChain.Builder builder4RedisClientCreate() {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new RedisClientCreateInterceptor())
+//                .addInterceptor(new SpringRedisMetricInterceptor(this.metricRegistry))
+//                .addInterceptor(new SpringRedisTracingInterceptor())
+                ;
+    }
+    @Injection.Bean("builder4RedisClientConnect")
+    public AgentInterceptorChain.Builder builder4RedisClientConnect() {
+        loadTracing();
+        return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new RedisClientCreateInterceptor())
 //                .addInterceptor(new SpringRedisMetricInterceptor(this.metricRegistry))
 //                .addInterceptor(new SpringRedisTracingInterceptor())
                 ;

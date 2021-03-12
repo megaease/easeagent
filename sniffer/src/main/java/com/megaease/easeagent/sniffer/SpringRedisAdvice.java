@@ -7,7 +7,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.utils.AgentFieldAccessor;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -46,7 +46,7 @@ public abstract class SpringRedisAdvice implements Transformation {
                     .transform(
                             doCommand(
                                     any().and(isOverriddenFrom(named(clsName)))
-                                    , AgentFieldAccessor.FIELD_MAP_NAME
+                                    , AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME
                             )
                     );
         }
@@ -81,7 +81,7 @@ public abstract class SpringRedisAdvice implements Transformation {
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
-            return innerEnter(invoker, method, args);
+            return doEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
@@ -92,7 +92,7 @@ public abstract class SpringRedisAdvice implements Transformation {
                 @Advice.AllArguments Object[] args,
                 @Advice.Thrown Exception exception
         ) {
-            release.apply(context -> innerExitNoRetValue(release, invoker, method, args, exception));
+            doExitNoRetValue(release, invoker, method, args, exception);
         }
     }
 }

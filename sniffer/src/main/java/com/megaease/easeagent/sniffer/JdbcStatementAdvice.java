@@ -133,20 +133,15 @@ public abstract class JdbcStatementAdvice implements Transformation {
         }
     }
 
-    static class Execute {
+    static class Execute extends AbstractAdvice {
 
-        private final ForwardLock lock;
         private final JdbcListenerDispatcher jdbcListenerDispatcher;
-        private final AgentInterceptorChain.Builder builder;
-        final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
 
         @Injection.Autowire
         Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
                 @Injection.Qualifier("agentInterceptorChainBuilder4Stm") AgentInterceptorChain.Builder builder) {
-            this.lock = new ForwardLock();
+            super(builder, agentInterceptorChainInvoker);
             this.jdbcListenerDispatcher = JdbcListenerDispatcher.DEFAULT;
-            this.builder = builder;
-            this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
         }
 
         @Advice.OnMethodEnter
@@ -165,7 +160,7 @@ public abstract class JdbcStatementAdvice implements Transformation {
                         .method(method)
                         .args(objs)
                         .build();
-                agentInterceptorChainInvoker.doBefore(this.builder, methodInfo, context);
+                this.chainInvoker.doBefore(this.builder, methodInfo, context);
                 return context;
             });
         }
@@ -176,18 +171,21 @@ public abstract class JdbcStatementAdvice implements Transformation {
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
                   @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
-                  @Advice.Thrown Exception exception) {
+                  @Advice.Thrown Throwable throwable) {
             release.apply(context -> {
                 ContextUtils.setEndTime(context);
                 Object[] objs = getArgs(args);
                 JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
                 jdbcListenerDispatcher.dispatchAfter(jdbcContextInfo, invoker, method, objs, retValue);
 
-                MethodInfo methodInfo = ContextUtils.getFromContext(context, MethodInfo.class);
-                methodInfo.setRetValue(retValue);
-                methodInfo.setThrowable(exception);
-                
-                agentInterceptorChainInvoker.doAfter(methodInfo, context);
+                MethodInfo methodInfo = MethodInfo.builder()
+                        .invoker(invoker)
+                        .method(method)
+                        .args(args)
+                        .retValue(retValue)
+                        .throwable(throwable)
+                        .build();
+                this.chainInvoker.doAfter(this.builder, methodInfo, context);
             });
 
         }
