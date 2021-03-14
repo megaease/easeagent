@@ -27,7 +27,6 @@ import com.megaease.easeagent.config.ConfigFactory;
 import com.megaease.easeagent.config.ConfigManagerMXBean;
 import com.megaease.easeagent.config.Configs;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.AgentBuilder.Default;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.DynamicType.Builder;
@@ -59,31 +58,27 @@ public class Bootstrap {
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
         final long begin = System.nanoTime();
-
         LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
-
         final Configs conf = load(args);
-
         if (LOGGER.isDebugEnabled()) {
             final String repr = conf.toPrettyDisplay();
             LOGGER.debug("Loaded conf:\n{}", repr);
         }
-
-        define(
-                conf, transformations, scoped(providers, conf),
-                new Default()
-                        .with(LISTENER)
-                        .ignore(any(), protectedLoaders())
-                        .or(isSynthetic())
-                        .or(nameStartsWith("sun.reflect."))
-                        .or(nameStartsWith("net.bytebuddy."))
-                        .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
-                        .or(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
-                        .or(nameStartsWith("org.junit."))
-                        .or(nameStartsWith("junit."))
-                        .or(nameStartsWith("com.intellij."))
-        ).installOn(inst);
         registerMBeans(conf, inst);
+        AgentBuilder builder = new AgentBuilder.Default()
+                .with(LISTENER)
+                .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
+                .ignore(any(), protectedLoaders())
+                .or(isSynthetic())
+                .or(nameStartsWith("sun.reflect."))
+                .or(nameStartsWith("net.bytebuddy."))
+                .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
+                .or(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
+                .or(nameStartsWith("org.junit."))
+                .or(nameStartsWith("junit."))
+                .or(nameStartsWith("com.intellij."));
+        builder = define(conf, transformations, scoped(providers, conf), builder);
+        builder.installOn(inst);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
@@ -189,7 +184,7 @@ public class Bootstrap {
 
         @Override
         public void onIgnored(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded) {
-            LOGGER.debug("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
+//            LOGGER.debug("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
@@ -200,7 +195,7 @@ public class Bootstrap {
 
         @Override
         public void onComplete(String name, ClassLoader ld, JavaModule m, boolean loaded) {
-            LOGGER.debug("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
+//            LOGGER.debug("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
         }
     };
 

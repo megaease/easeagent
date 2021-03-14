@@ -21,6 +21,7 @@ import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
 import com.megaease.easeagent.sniffer.lettuce.v5.LettuceInjectAgentFieldAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.StatefulRedisConnectionAdvice;
 
 @Assembly({
 //        CaptureTrace.class
@@ -44,7 +45,8 @@ import com.megaease.easeagent.sniffer.lettuce.v5.LettuceInjectAgentFieldAdvice;
         JdbcDataSourceAdvice.class,
         JdbcStatementAdvice.class,
         ServiceNamePropagationAdvice.class,
-        LettuceInjectAgentFieldAdvice.class
+        LettuceInjectAgentFieldAdvice.class,
+        StatefulRedisConnectionAdvice.class,
 
 })
 abstract class Easeagent {

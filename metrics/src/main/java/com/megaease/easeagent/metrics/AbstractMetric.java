@@ -1,8 +1,10 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.core.AgentThreadFactory;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractMetric {
@@ -22,7 +24,8 @@ public abstract class AbstractMetric {
         this.enableSchedule = enableSchedule;
         if (this.enableSchedule && this instanceof ScheduleRunner) {
             ScheduleRunner obj = (ScheduleRunner) this;
-            Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(obj::doJob, 5, 10, TimeUnit.SECONDS);
+            ThreadFactory threadFactory = new AgentThreadFactory();
+            Executors.newSingleThreadScheduledExecutor(threadFactory).scheduleWithFixedDelay(obj::doJob, 5, 10, TimeUnit.SECONDS);
         }
     }
 }

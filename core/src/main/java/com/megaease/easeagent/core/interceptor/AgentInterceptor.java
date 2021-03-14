@@ -9,7 +9,9 @@ public interface AgentInterceptor {
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
      * @param chain      The chain can invoke next interceptor
      */
-    void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain);
+    default void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        chain.doBefore(methodInfo, context);
+    }
 
     /**
      * @param methodInfo instrumented method info

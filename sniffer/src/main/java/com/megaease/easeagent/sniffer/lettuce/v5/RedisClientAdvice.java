@@ -24,7 +24,7 @@ public abstract class RedisClientAdvice implements Transformation {
     public <T extends Definition> T define(Definition<T> def) {
         return def.type(named("io.lettuce.core.RedisClient"))
                 .transform(objConstruct(isConstructor()))
-                .transform(connectSync(nameStartsWith("connect").and(returns(named("io.lettuce.core.api.StatefulRedisConnection")))))
+                .transform(connect(nameStartsWith("connect").and(returns(hasSuperType(named("io.lettuce.core.api.StatefulRedisConnection"))))))
                 .end()
                 ;
     }
@@ -47,16 +47,16 @@ public abstract class RedisClientAdvice implements Transformation {
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
-            this.doConstructorExit(invoker, method, args, null);
+            this.doConstructorExit(invoker, method, args);
         }
     }
 
     @AdviceTo(ConnectStatefulSync.class)
-    public abstract Definition.Transformer connectSync(ElementMatcher<? super MethodDescription> matcher);
+    public abstract Definition.Transformer connect(ElementMatcher<? super MethodDescription> matcher);
 
     static class ConnectStatefulSync extends AbstractAdvice {
         @Injection.Autowire
-        public ConnectStatefulSync(@Injection.Qualifier("builder4RedisClientConnect") AgentInterceptorChain.Builder builder,
+        public ConnectStatefulSync(@Injection.Qualifier("builder4RedisClientConnectSync") AgentInterceptorChain.Builder builder,
                                    AgentInterceptorChainInvoker agentInterceptorChainInvoker
         ) {
             super(builder, agentInterceptorChainInvoker);

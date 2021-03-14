@@ -4,7 +4,6 @@ import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
@@ -14,24 +13,23 @@ import net.bytebuddy.matcher.ElementMatcher;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Injection.Provider(Provider.class)
-public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
+public abstract class StatefulRedisConnectionAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type((hasSuperType(named("io.lettuce.core.RedisChannelWriter"))
-                                .or(hasSuperType(named("io.lettuce.core.resource.ClientResources")))
-                                .or(hasSuperType(named("io.lettuce.core.ClientOptions")))
-                                .or(named("io.lettuce.core.ClientOptions"))
-                        ).and(not(isInterface().or(isAbstract())))
+                .type(
+                        (hasSuperType(named("io.lettuce.core.api.StatefulRedisConnection"))
+                        )
+                                .and(not(isInterface().or(isAbstract())))
                 )
-                .transform(objConstruct(none(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
+                .transform(objConstruct(isConstructor()))
                 .end()
                 ;
     }
 
     @AdviceTo(ObjConstruct.class)
-    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher, String fieldName);
+    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher);
 
 
     static class ObjConstruct extends AbstractAdvice {
@@ -46,7 +44,7 @@ public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
-            System.out.println("");
+            System.out.println(invoker + "." + method + " create");
         }
     }
 

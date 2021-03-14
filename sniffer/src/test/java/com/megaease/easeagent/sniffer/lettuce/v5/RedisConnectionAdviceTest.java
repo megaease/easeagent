@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class LettuceInjectAgentFieldAdviceTest {
+public class RedisConnectionAdviceTest {
 
     @Test
     public void success() throws Exception {
@@ -20,10 +20,8 @@ public class LettuceInjectAgentFieldAdviceTest {
                 .with(def)
                 .load(loader);
 
-        {
-            Field field = AgentDynamicFieldAccessor.getDynamicFieldFromClass(classList.get(0));
-            Assert.assertNotNull(field);
-        }
+        Field field = AgentDynamicFieldAccessor.getDynamicFieldFromClass(classList.get(0));
+        Assert.assertNotNull(field);
 
     }
 

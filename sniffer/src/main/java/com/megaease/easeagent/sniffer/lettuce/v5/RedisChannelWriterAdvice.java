@@ -1,5 +1,6 @@
 package com.megaease.easeagent.sniffer.lettuce.v5;
 
+import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
@@ -11,19 +12,18 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
+import java.util.Map;
+
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Injection.Provider(Provider.class)
-public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
+public abstract class RedisChannelWriterAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type((hasSuperType(named("io.lettuce.core.RedisChannelWriter"))
-                                .or(hasSuperType(named("io.lettuce.core.resource.ClientResources")))
-                                .or(hasSuperType(named("io.lettuce.core.ClientOptions")))
-                                .or(named("io.lettuce.core.ClientOptions"))
-                        ).and(not(isInterface().or(isAbstract())))
+                .type(hasSuperType(named("io.lettuce.core.RedisChannelWriter"))
+                        .and(not(isInterface().or(isAbstract())))
                 )
                 .transform(objConstruct(none(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
                 .end()
@@ -46,8 +46,7 @@ public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
-            System.out.println("");
+            
         }
     }
-
 }

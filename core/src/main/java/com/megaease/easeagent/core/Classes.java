@@ -22,14 +22,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
-import net.bytebuddy.implementation.MethodCall;
-import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.SuperMethodCall;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
@@ -41,11 +37,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.FluentIterable.from;
-import static net.bytebuddy.matcher.ElementMatchers.any;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class Classes {
     public static Transforming transform(String... names) {
         return new Transforming(new ByteBuddy(), names);
+    }
+
+    private static ElementMatcher<ClassLoader> protectedLoaders() {
+        return isBootstrapClassLoader().or(is(Bootstrap.class.getClassLoader()));
     }
 
     public static class Transforming {
@@ -53,7 +53,15 @@ public class Classes {
         private final String[] names;
 
         Transforming(ByteBuddy byteBuddy, String[] names) {
-            this.byteBuddy = byteBuddy;
+            this.byteBuddy = byteBuddy
+                    .ignore(isSynthetic())
+                    .ignore(nameStartsWith("sun.reflect."))
+                    .ignore(nameStartsWith("net.bytebuddy."))
+                    .ignore(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
+                    .ignore(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
+                    .ignore(nameStartsWith("junit."))
+                    .ignore(nameStartsWith("com.intellij."))
+            ;
             this.names = names;
         }
 

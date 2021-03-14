@@ -8,7 +8,15 @@ public class AgentFieldAccessor {
 
     private static final Map<String, Field> FIELD_MAP = new ConcurrentHashMap<>();
 
-    public static void setFieldValue(Field field, Object target, Object fieldValue) {
+//    public static void setFieldValue(Object target, Field field, Object fieldValue) {
+//        try {
+//            field.set(target, fieldValue);
+//        } catch (IllegalAccessException ignored) {
+//        }
+//    }
+
+    public static void setFieldValue(Object target, String fieldName, Object fieldValue) {
+        Field field = getFieldFromClass(target.getClass(), fieldName);
         try {
             field.set(target, fieldValue);
         } catch (IllegalAccessException ignored) {
@@ -16,7 +24,8 @@ public class AgentFieldAccessor {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getFieldValue(Field field, Object target) {
+    public static <T> T getFieldValue(Object target, String fieldName) {
+        Field field = getFieldFromClass(target.getClass(), fieldName);
         try {
             return (T) field.get(target);
         } catch (IllegalAccessException ignored) {
@@ -25,14 +34,15 @@ public class AgentFieldAccessor {
     }
 
     public static Field getFieldFromClass(Class<?> clazz, String fieldName) {
-        Field field = FIELD_MAP.get(clazz.getName());
+        String key = clazz.getName() + "." + fieldName;
+        Field field = FIELD_MAP.get(key);
         if (field != null) {
             return field;
         }
         try {
             field = clazz.getField(fieldName);
             field.setAccessible(true);
-            FIELD_MAP.put(clazz.getName(), field);
+            FIELD_MAP.put(key, field);
         } catch (NoSuchFieldException ignored) {
         }
         return field;

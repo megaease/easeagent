@@ -1,47 +1,26 @@
 package com.megaease.easeagent.core.utils;
 
 import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AgentDynamicFieldAccessor {
 
-    public static final String DYNAMIC_FIELD_NAME = "__com_ease_agent_dynamic_$$data_map$$_";
+    private static final String BASE_DYNAMIC_FIELD_NAME = "__com_ease_agent_dynamic_$$$_";
 
-    private static final Map<Object, Object> sharedMap = new ConcurrentHashMap<>();
+    public static final String DYNAMIC_FIELD_NAME = BASE_DYNAMIC_FIELD_NAME + "map";
 
-    public static void initDynamicFieldValue(Object target) {
-        Field field = AgentFieldAccessor.getFieldFromClass(target.getClass(), DYNAMIC_FIELD_NAME);
-        if (field == null) {
-            return;
-        }
-        AgentFieldAccessor.setFieldValue(field, target, sharedMap);
+    public static <T> T getDynamicFieldValue(Object target) {
+        return AgentFieldAccessor.getFieldValue(target, DYNAMIC_FIELD_NAME);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T getDynamicFieldValue(Object target, Object key) {
-        Field field = AgentFieldAccessor.getFieldFromClass(target.getClass(), DYNAMIC_FIELD_NAME);
-        if (field == null) {
-            return null;
-        }
-        Map<Object, Object> map = AgentFieldAccessor.getFieldValue(field, target);
-        if (map == null) {
-            AgentFieldAccessor.setFieldValue(field, target, sharedMap);
-            map = sharedMap;
-        }
-        return (T) map.get(key);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T getSharedValue(Object key) {
-        return (T) sharedMap.get(key);
-    }
-
-    public static void addSharedValue(Object key, Object value) {
-        sharedMap.put(key, value);
+    public static void setDynamicFieldValue(Object target, Object value) {
+        AgentFieldAccessor.setFieldValue(target, DYNAMIC_FIELD_NAME, value);
     }
 
     public static Field getDynamicFieldFromClass(Class<?> clazz) {
         return AgentFieldAccessor.getFieldFromClass(clazz, DYNAMIC_FIELD_NAME);
+    }
+
+    public static String createFieldName(String subFieldName) {
+        return BASE_DYNAMIC_FIELD_NAME + subFieldName;
     }
 }

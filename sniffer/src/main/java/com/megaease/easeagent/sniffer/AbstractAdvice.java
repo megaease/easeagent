@@ -75,14 +75,13 @@ public class AbstractAdvice {
         });
     }
 
-    protected void doConstructorExit(Object invoker, String method, Object[] args, Throwable throwable) {
+    protected void doConstructorExit(Object invoker, String method, Object[] args) {
         Map<Object, Object> context = ContextUtils.createContext();
         MethodInfo methodInfo = MethodInfo.builder()
                 .invoker(invoker)
                 .method(method)
                 .args(args)
                 .build();
-        methodInfo.setThrowable(throwable);
         chainInvoker.doAfter(this.builder, methodInfo, context);
     }
 }

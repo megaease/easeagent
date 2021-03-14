@@ -21,6 +21,7 @@ import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.sniffer.lettuce.v5.AbstractRedisClientAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.LettuceInjectAgentFieldAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.RedisClientAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.StatefulRedisConnectionAdvice;
 
 
 @Assembly({
@@ -37,6 +38,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.RedisClientAdvice;
         LettuceInjectAgentFieldAdvice.class,
         RedisClientAdvice.class,
         AbstractRedisClientAdvice.class,
+        StatefulRedisConnectionAdvice.class,
 
 })
 public interface GeneratedTest {

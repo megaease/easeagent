@@ -71,7 +71,7 @@ public abstract class Provider {
                     .localServiceName(service_name())
                     .traceId128Bit(trace_id_128b())
                     .sampler(CountingSampler.create((float) sample_rate()))
-                    .addSpanHandler(spanHandler())
+//                    .addSpanHandler(spanHandler())
                     .build();
             Tracer tracer = tracing.tracer();
             this.tracing = tracing;
@@ -81,12 +81,12 @@ public abstract class Provider {
 
     @Injection.Bean
     public MetricRegistry metricRegistry() {
-        Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
-                .outputTo(LoggerFactory.getLogger(JVMMemoryMetric.class))
-                .convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .build();
-        reporter.start(10, 30, TimeUnit.SECONDS);
+//        Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
+//                .outputTo(LoggerFactory.getLogger(JVMMemoryMetric.class))
+//                .convertRatesTo(TimeUnit.SECONDS)
+//                .convertDurationsTo(TimeUnit.MILLISECONDS)
+//                .build();
+//        reporter.start(10, 30, TimeUnit.SECONDS);
         return metricRegistry;
     }
 
@@ -176,10 +176,9 @@ public abstract class Provider {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new RedisClientCreateInterceptor())
-//                .addInterceptor(new SpringRedisMetricInterceptor(this.metricRegistry))
-//                .addInterceptor(new SpringRedisTracingInterceptor())
                 ;
     }
+
     @Injection.Bean("builder4RedisClientConnect")
     public AgentInterceptorChain.Builder builder4RedisClientConnect() {
         loadTracing();

@@ -205,7 +205,7 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                         };
                     }
                     return MethodSpec.methodBuilder(name)
-                            .addModifiers(Modifier.STATIC)
+                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
                             .addParameters(utils.asParameterSpecs(parameters))
                             .returns(returnType)

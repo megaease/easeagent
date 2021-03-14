@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent;
+package com.megaease.easeagent;
 
 import com.google.common.collect.Lists;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
@@ -55,8 +55,8 @@ public class Main {
             @Override
             public Void call() throws Exception {
                 loader.loadClass(bootstrap)
-                      .getMethod("premain", String.class, Instrumentation.class)
-                      .invoke(null, args, inst);
+                        .getMethod("premain", String.class, Instrumentation.class)
+                        .invoke(null, args, inst);
                 return null;
             }
         });
@@ -122,7 +122,9 @@ public class Main {
     public static class CompoundableClassLoader extends LaunchedURLClassLoader {
         private final Set<ClassLoader> externals = new CopyOnWriteArraySet<ClassLoader>();
 
-        CompoundableClassLoader(URL[] urls) {super(urls, Main.BOOTSTRAP_CLASS_LOADER);}
+        CompoundableClassLoader(URL[] urls) {
+            super(urls, Main.BOOTSTRAP_CLASS_LOADER);
+        }
 
         public void add(ClassLoader cl) {
             externals.add(cl);
@@ -138,7 +140,8 @@ public class Main {
                         final Class<?> aClass = external.loadClass(name);
                         if (resolve) resolveClass(aClass);
                         return aClass;
-                    } catch (ClassNotFoundException ignore) { }
+                    } catch (ClassNotFoundException ignore) {
+                    }
                 }
 
                 throw e;
