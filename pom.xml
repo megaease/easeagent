@@ -223,6 +223,18 @@
                 <artifactId>okhttp</artifactId>
                 <version>${version.okhttp3}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.retry</groupId>
+                <artifactId>spring-retry</artifactId>
+                <version>1.2.5.RELEASE</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>spring-core</artifactId>
+                        <groupId>org.springframework</groupId>
+                    </exclusion>
+                </exclusions>
+                <optional>true</optional>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

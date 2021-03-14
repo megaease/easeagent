@@ -152,8 +152,9 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
 
     static class FilteringWebHandlerHandle {
         @Advice.OnMethodEnter
-        void enter(@Advice.Argument(value = 0, readOnly = false) org.springframework.web.server.ServerWebExchange exchange) {
+        void enter(@Advice.This Object invoker,@Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] exchanges) {
             try {
+                ServerWebExchange exchange = (ServerWebExchange) exchanges[0];
                 org.springframework.cloud.gateway.route.Route route = exchange.getAttribute("org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRoute");
                 if (route == null) {
                     return;
@@ -169,9 +170,10 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 }
                 ServerHttpRequest newRequest = exchange.getRequest().mutate().header(PROPAGATE_HEAD, host).build();
                 ServerWebExchange newExchange = exchange.mutate().request(newRequest).build();
-                exchange = newExchange;
+                exchanges[0] = newExchange;
             } catch (Exception e) {
                 //ate it
+//                e.printStackTrace();
             }
         }
     }

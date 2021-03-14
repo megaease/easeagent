@@ -32,7 +32,8 @@ import net.bytebuddy.matcher.ElementMatcher;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementKindVisitor6;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.FluentIterable.from;
 
@@ -165,6 +166,49 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
 
                 }
 
+                public Map<VariableElement, String> getReplaceMap(List<? extends VariableElement> parameters) {
+                    Map<VariableElement, String> result = new HashMap<>();
+                    Optional<? extends VariableElement> changeAllArgs = parameters.stream().filter(p -> {
+                        Advice.AllArguments aa = p.getAnnotation(Advice.AllArguments.class);
+                        if (aa == null) {
+                            return false;
+                        }
+                        if (aa.readOnly()) {
+                            return false;
+                        }
+                        return true;
+                    }).findFirst();
+
+
+                    changeAllArgs.ifPresent(p -> {
+                        result.put(p, "allArgsDump");
+                    });
+                    return result;
+                }
+
+                public String buildBeforeExecute(Map<VariableElement, String> replaceMap) {
+                    if (replaceMap.isEmpty()) {
+                        return "";
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    replaceMap.forEach((k, v) -> {
+                        final TypeName tn = TypeName.get(k.asType());
+                        sb.append(String.format("%s %s = %s;\n", tn, v, k.getSimpleName()));
+                    });
+                    return sb.toString();
+                }
+
+                public String buildAfterExecute(Map<VariableElement, String> replaceMap) {
+                    if (replaceMap.isEmpty()) {
+                        return "";
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    replaceMap.forEach((k, v) -> {
+                        sb.append(String.format("\n%s = %s;", k.getSimpleName(), v));
+                    });
+                    return sb.toString();
+                }
+
                 private MethodSpec inlineAdviceMethod(ExecutableElement e, ProcessUtils utils) {
                     final String name = utils.simpleNameOf(e);
                     final TypeName returnType = utils.typeNameOf(e.getReturnType());
@@ -173,10 +217,15 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                     final Object[] args;
                     final List<? extends VariableElement> parameters = e.getParameters();
 
-                    final String join = parameters.isEmpty() ? "null" : join(parameters);
+                    Map<VariableElement, String> replaceMap = getReplaceMap(parameters);
+
+                    final String join = parameters.isEmpty() ? "null" : join(parameters, replaceMap);
+
+                    String beforeExecute = buildBeforeExecute(replaceMap);
+                    String afterExecute = buildAfterExecute(replaceMap);
 
                     if (TypeName.VOID == returnType) {
-                        format = "$T.execute($S, $L)";
+                        format = beforeExecute + "$T.execute($S, $L);" + afterExecute;
                         args = new Object[]{Dispatcher.class, generateClassName + "#advice_" + name, join};
                     } else {
 //                        format = "return ($T) $T.execute($S, $L)";
@@ -191,16 +240,17 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                                 i++;
                             }
                             if (retArg == null) {
-                                format = "return ($T) $T.execute($S, $L)";
+                                format = beforeExecute + "$T result = ($T) $T.execute($S, $L);\n" + afterExecute + "return result";
                             } else {
-                                format = retArg + " = ($T) $T.execute($S, $L);\nreturn " + retArg;
+                                format = beforeExecute + "$T result = ($T) $T.execute($S, $L);\n" + retArg + " = result;\n" + afterExecute + "return " + retArg;
                             }
 
                         } else {
-                            format = "return ($T) $T.execute($S, $L)";
+                            format = beforeExecute + "$T result = ($T) $T.execute($S, $L);\n" + afterExecute + "return result";
                         }
+                        TypeName returnTypeName = returnType.isPrimitive() ? returnType.box() : returnType;
                         args = new Object[]{
-                                returnType.isPrimitive() ? returnType.box() : returnType,
+                                returnTypeName, returnTypeName,
                                 Dispatcher.class, generateClassName + "#advice_" + name, join
                         };
                     }
@@ -308,7 +358,11 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
     }
 
     private static String join(List<? extends VariableElement> parameters) {
-        return from(parameters).transform(TO_STRING).join(JOINER);
+        return join(parameters, Collections.emptyMap());
+    }
+
+    private static String join(List<? extends VariableElement> parameters, Map<VariableElement, String> replaces) {
+        return parameters.stream().map(e -> replaces.getOrDefault(e, e.toString())).collect(Collectors.joining(", "));
     }
 
     private static final Supplier<Class<?>> ADVICE_CLASS = new Supplier<Class<?>>() {
@@ -317,13 +371,4 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
             return Dispatcher.Advice.class;
         }
     };
-
-    private static final Function<VariableElement, String> TO_STRING = new Function<VariableElement, String>() {
-        @Override
-        public String apply(VariableElement input) {
-            return input.toString();
-        }
-    };
-    private static final Joiner JOINER = Joiner.on(", ");
-
 }
