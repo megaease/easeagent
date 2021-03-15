@@ -41,12 +41,9 @@ public interface Definition<T extends Definition> {
         public final String inlineAdviceClassName;
         public final String adviceFactoryClassName;
         public final ElementMatcher<? super MethodDescription> matcher;
-
-        /**
-         * field must be Map
-         */
         public final String fieldName;
         public final Class<?> fieldClass = Object.class;
+        private boolean fieldDefined;
 
         public Transformer(String inlineAdviceClassName, String adviceFactoryClassName, ElementMatcher<? super MethodDescription> matcher) {
             this(inlineAdviceClassName, adviceFactoryClassName, matcher, null);
@@ -57,6 +54,14 @@ public interface Definition<T extends Definition> {
             this.adviceFactoryClassName = adviceFactoryClassName;
             this.matcher = matcher;
             this.fieldName = fieldName;
+        }
+
+        public void setFieldDefined(boolean fieldDefined) {
+            this.fieldDefined = fieldDefined;
+        }
+
+        public boolean isFieldDefined() {
+            return fieldDefined;
         }
     }
 

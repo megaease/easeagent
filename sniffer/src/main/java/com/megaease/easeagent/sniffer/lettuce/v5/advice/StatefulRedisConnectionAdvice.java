@@ -1,9 +1,10 @@
-package com.megaease.easeagent.sniffer.lettuce.v5;
+package com.megaease.easeagent.sniffer.lettuce.v5.advice;
 
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
@@ -18,18 +19,15 @@ public abstract class StatefulRedisConnectionAdvice implements Transformation {
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type(
-                        (hasSuperType(named("io.lettuce.core.api.StatefulRedisConnection"))
-                        )
-                                .and(not(isInterface().or(isAbstract())))
-                )
-                .transform(objConstruct(isConstructor()))
+                .type((hasSuperType(named("io.lettuce.core.api.StatefulRedisConnection")))
+                        .and(not(isInterface().or(isAbstract()))))
+                .transform(objConstruct(none(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
                 .end()
                 ;
     }
 
     @AdviceTo(ObjConstruct.class)
-    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher);
+    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher, String fileName);
 
 
     static class ObjConstruct extends AbstractAdvice {

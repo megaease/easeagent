@@ -21,7 +21,7 @@ import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.sniffer.lettuce.v5.AbstractRedisClientAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.LettuceInjectAgentFieldAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.RedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.StatefulRedisConnectionAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
 
 
 @Assembly({

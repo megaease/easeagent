@@ -31,6 +31,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.dynamic.loading.ClassInjector;
+import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
@@ -217,8 +218,12 @@ public class Bootstrap {
         @Override
         public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
             register.apply(adviceFactoryClassName, cl);
-            if (this.agentTransformer.fieldName != null) {
-                b = b.defineField(this.agentTransformer.fieldName, this.agentTransformer.fieldClass, Opcodes.ACC_PROTECTED);
+            if (!td.isAssignableTo(DynamicFieldAccessor.class)) {
+                if (this.agentTransformer.fieldName != null && !this.agentTransformer.isFieldDefined()) {
+                    b = b.defineField(this.agentTransformer.fieldName, this.agentTransformer.fieldClass, Opcodes.ACC_PROTECTED)
+                            .implement(DynamicFieldAccessor.class).intercept(FieldAccessor.ofField(this.agentTransformer.fieldName));
+                    this.agentTransformer.setFieldDefined(true);
+                }
             }
             return transformer.transform(b, td, cl, m);
         }

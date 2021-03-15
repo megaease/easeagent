@@ -13,7 +13,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Injection.Provider(Provider.class)
+//@Injection.Provider(Provider.class)
 public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
 
     @Override

@@ -26,6 +26,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
@@ -134,8 +135,12 @@ public class Classes {
                             register.apply(input.adviceFactoryClassName, loader);
                             List<AgentBuilder.Transformer> transformers = new ArrayList<>();
                             transformers.add((builder, typeDescription, classLoader, module) -> {
-                                if (input.fieldName != null) {
-                                    builder = builder.defineField(input.fieldName, input.fieldClass, Opcodes.ACC_PUBLIC);
+                                if (!typeDescription.isAssignableTo(DynamicFieldAccessor.class)) {
+                                    if (input.fieldName != null && !input.isFieldDefined()) {
+                                        builder = builder.defineField(input.fieldName, input.fieldClass, Opcodes.ACC_PROTECTED)
+                                                .implement(DynamicFieldAccessor.class).intercept(FieldAccessor.ofField(input.fieldName));
+                                        input.setFieldDefined(true);
+                                    }
                                 }
                                 return builder;
                             });

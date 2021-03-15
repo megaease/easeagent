@@ -40,7 +40,7 @@ public class AgentFieldAccessor {
             return field;
         }
         try {
-            field = clazz.getField(fieldName);
+            field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             FIELD_MAP.put(key, field);
         } catch (NoSuchFieldException ignored) {
