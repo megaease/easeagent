@@ -60,6 +60,7 @@
         <version.okhttp3>4.9.0</version.okhttp3>
         <version.disruptor>3.4.2</version.disruptor>
         <version.spring-boot>2.3.8.RELEASE</version.spring-boot>
+        <version.spring>5.2.12.RELEASE</version.spring>
         <version.spring.cloud>Hoxton.SR10</version.spring.cloud>
         <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
         <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
