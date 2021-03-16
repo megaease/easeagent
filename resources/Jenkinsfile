@@ -22,7 +22,7 @@ pipeline {
         PROJECT_NAME = "${params.PROJECT_NAME}"
         PROJECT_DIR = "${HOME}/backdemo/${PROJECT_NAME}-${BUILD_TIMESTAMP}"
         GIT_SSH_COMMAND = "ssh -i ${HOME}/repository-keys/${PROJECT_NAME}-key.rsa"
-        IMAGE_NAME = "${params.ORGNIZATION}/${IMAGE_NAME}"
+        IMAGE_NAME = "${params.ORGNIZATION}/${IMAGE_NAME}:${IMAGE_TAG}"
         SUDO_CMD = "${params.SUDO == 'true' ? 'sudo' : ' '}"
     }
 
@@ -63,7 +63,7 @@ pipeline {
         stage('镜像构建') {
             steps {
                 script {
-                    sh """${SUDO_CMD} docker build -t ${env.IMAGE_TAG} ${env.PROJECT_DIR} -f ${PROJECT_DIR}/${params.dockerFile} --network host"""
+                    sh """${SUDO_CMD} docker build -t ${env.IMAGE_NAME} ${env.PROJECT_DIR} -f ${PROJECT_DIR}/${params.dockerFile} --network host"""
                 }
             }
             post {
@@ -84,7 +84,7 @@ pipeline {
         stage('镜像发布') {
             steps {
                 script {
-                    sh "cd ${env.PROJECT_DIR}; ${SUDO_CMD} docker push ${env.IMAGE_TAG};"
+                    sh "cd ${env.PROJECT_DIR}; ${SUDO_CMD} docker push ${env.IMAGE_NAME};"
                 }
             }
             post {
@@ -103,12 +103,12 @@ pipeline {
         }
 
     }
-    post {
-        always {
-            script {
-                sh """if [ ! -z "`docker images|grep ${env.IMAGE_TAG}`" ];then docker rmi ${env.IMAGE_TAG}; fi"""
-                sh "if [ -d ${PROJECT_DIR} ];then rm -rf ${PROJECT_DIR}; fi"
-            }
-        }
-    }
+//    post {
+//        always {
+//            script {
+//                sh """if [ ! -z "`docker images|grep ${env.IMAGE_NAME}`" ];then docker rmi ${env.IMAGE_TAG}; fi"""
+//                sh "if [ -d ${PROJECT_DIR} ];then rm -rf ${PROJECT_DIR}; fi"
+//            }
+//        }
+//    }
 }
