@@ -15,9 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public abstract class BaseSpringRedisMetricInterceptor extends AbstractMetric implements AgentInterceptor {
+public class CommonRedisMetricInterceptor extends AbstractMetric implements AgentInterceptor {
 
-    public BaseSpringRedisMetricInterceptor(MetricRegistry metricRegistry) {
+    public CommonRedisMetricInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
@@ -54,11 +54,6 @@ public abstract class BaseSpringRedisMetricInterceptor extends AbstractMetric im
                         .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
                         .build())
                 .build();
-    }
-
-    @Override
-    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        chain.doBefore(methodInfo, context);
     }
 
     @Override

@@ -3,8 +3,6 @@ package com.megaease.easeagent.core.interceptor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Map;
-
 @Data
 @Builder
 public class MethodInfo {
@@ -34,6 +32,8 @@ public class MethodInfo {
      */
     private Object retValue;
 
-    private Map<Object,Object> agentFieldMap;
+    public boolean isSuccess() {
+        return this.throwable == null;
+    }
 
 }

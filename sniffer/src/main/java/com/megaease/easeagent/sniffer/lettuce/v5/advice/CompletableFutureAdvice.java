@@ -1,4 +1,4 @@
-package com.megaease.easeagent.sniffer.lettuce.v5;
+package com.megaease.easeagent.sniffer.lettuce.v5.advice;
 
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
@@ -13,16 +13,13 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-//@Injection.Provider(Provider.class)
-public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
+@Injection.Provider(Provider.class)
+public abstract class CompletableFutureAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type((hasSuperType(named("io.lettuce.core.RedisChannelWriter"))
-                                .or(hasSuperType(named("io.lettuce.core.resource.ClientResources")))
-                                .or(hasSuperType(named("io.lettuce.core.ClientOptions")))
-                                .or(named("io.lettuce.core.ClientOptions"))
+                .type((hasSuperType(named("java.util.concurrent.CompletableFuture"))
                         ).and(not(isInterface().or(isAbstract())))
                 )
                 .transform(objConstruct(none(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
@@ -33,7 +30,6 @@ public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
     @AdviceTo(ObjConstruct.class)
     public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher, String fieldName);
 
-
     static class ObjConstruct extends AbstractAdvice {
 
         ObjConstruct() {
@@ -41,12 +37,8 @@ public abstract class LettuceInjectAgentFieldAdvice implements Transformation {
         }
 
         @Advice.OnMethodExit
-        public void exit(
-                @Advice.This Object invoker,
-                @Advice.Origin("#m") String method,
-                @Advice.AllArguments Object[] args
-        ) {
-            System.out.println("");
+        public void exit() {
+
         }
     }
 

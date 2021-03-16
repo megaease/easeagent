@@ -72,7 +72,7 @@ public class Bootstrap {
                 .or(isSynthetic())
                 .or(nameStartsWith("sun.reflect."))
                 .or(nameStartsWith("net.bytebuddy."))
-                .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
+//                .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
                 .or(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
                 .or(nameStartsWith("org.junit."))
                 .or(nameStartsWith("junit."))
@@ -217,10 +217,9 @@ public class Bootstrap {
         public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
             register.apply(adviceFactoryClassName, cl);
             if (!td.isAssignableTo(DynamicFieldAccessor.class)) {
-                if (this.agentTransformer.fieldName != null && !this.agentTransformer.isFieldDefined()) {
-                    b = b.defineField(this.agentTransformer.fieldName, this.agentTransformer.fieldClass, Opcodes.ACC_PROTECTED)
+                if (this.agentTransformer.fieldName != null) {
+                    b = b.defineField(this.agentTransformer.fieldName, this.agentTransformer.fieldClass, Opcodes.ACC_PRIVATE)
                             .implement(DynamicFieldAccessor.class).intercept(FieldAccessor.ofField(this.agentTransformer.fieldName));
-                    this.agentTransformer.setFieldDefined(true);
                 }
             }
             return transformer.transform(b, td, cl, m);

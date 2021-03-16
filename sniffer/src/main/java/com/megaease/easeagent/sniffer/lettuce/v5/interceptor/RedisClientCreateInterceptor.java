@@ -1,4 +1,4 @@
-package com.megaease.easeagent.sniffer.lettuce.v5;
+package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Place it at last order
  */
-public class RedisClientCreateInterceptor extends BaseAgentInterceptor {
+public class RedisClientCreateInterceptor extends BaseRedisAgentInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {

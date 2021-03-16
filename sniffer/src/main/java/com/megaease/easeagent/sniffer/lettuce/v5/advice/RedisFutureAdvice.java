@@ -12,6 +12,7 @@ import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
@@ -19,20 +20,27 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Injection.Provider(Provider.class)
-public abstract class StatefulRedisConnectionAdvice implements Transformation {
+public abstract class RedisFutureAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type((hasSuperType(named("io.lettuce.core.api.StatefulRedisConnection")).and(not(isInterface().or(isAbstract())))))
+                .type((hasSuperType(named("io.lettuce.core.RedisFuture"))
+                        ).and(not(isInterface().or(isAbstract())))
+                )
                 .transform(objConstruct(none(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
-                .transform(getCommands(named("sync").or(named("async")).or(named("reactive"))))
+                .transform(afterExecute(nameContainsIgnoreCase("apply")
+                        .or(nameContainsIgnoreCase("accept")
+                                .or(nameContainsIgnoreCase("run")))))
                 .end()
                 ;
     }
 
     @AdviceTo(ObjConstruct.class)
-    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher, String fileName);
+    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher, String fieldName);
+
+    @AdviceTo(ObjConstruct.class)
+    public abstract Definition.Transformer afterExecute(ElementMatcher<? super MethodDescription> matcher);
 
 
     static class ObjConstruct extends AbstractAdvice {
@@ -47,24 +55,12 @@ public abstract class StatefulRedisConnectionAdvice implements Transformation {
         }
     }
 
-    @AdviceTo(GetCommands.class)
-    public abstract Definition.Transformer getCommands(ElementMatcher<? super MethodDescription> matcher);
-
-    static class GetCommands extends AbstractAdvice {
+    static class DoCommandWithReturn extends AbstractAdvice {
 
         @Injection.Autowire
-        GetCommands(@Injection.Qualifier("builder4StatefulRedisConnection") AgentInterceptorChain.Builder builder,
-                    AgentInterceptorChainInvoker chainInvoker) {
+        DoCommandWithReturn(@Injection.Qualifier("builder4RedisFuture") AgentInterceptorChain.Builder builder,
+                            AgentInterceptorChainInvoker chainInvoker) {
             super(builder, chainInvoker);
-        }
-
-        @Advice.OnMethodEnter
-        public ForwardLock.Release<Map<Object, Object>> enter(
-                @Advice.This Object invoker,
-                @Advice.Origin("#m") String method,
-                @Advice.AllArguments Object[] args
-        ) {
-            return this.doEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
@@ -72,10 +68,9 @@ public abstract class StatefulRedisConnectionAdvice implements Transformation {
                          @Advice.This Object invoker,
                          @Advice.Origin("#m") String method,
                          @Advice.AllArguments Object[] args,
-                         @Advice.Return Object retValue,
                          @Advice.Thrown Throwable throwable
         ) {
-            this.doExit(release, invoker, method, args, retValue, throwable);
+            this.doExit(release, invoker, method, args, null, throwable);
         }
     }
 

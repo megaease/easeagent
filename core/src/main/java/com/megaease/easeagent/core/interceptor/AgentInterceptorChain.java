@@ -8,6 +8,8 @@ public interface AgentInterceptorChain {
 
     Object doAfter(MethodInfo methodInfo, Map<Object, Object> context);
 
+    void skipBegin();
+
     interface Builder {
 
         Builder addInterceptor(AgentInterceptor agentInterceptor);

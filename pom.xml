@@ -67,6 +67,8 @@
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
         <version.log4j>2.14.0</version.log4j>
         <version.kafka>2.3.1</version.kafka>
+        <version.lettuce>5.3.6.RELEASE</version.lettuce>
+        <version.metrics>4.1.17</version.metrics>
     </properties>
 
     <dependencies>
@@ -223,6 +225,16 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${version.okhttp3}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.lettuce</groupId>
+                <artifactId>lettuce-core</artifactId>
+                <version>${version.lettuce}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${version.metrics}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.retry</groupId>

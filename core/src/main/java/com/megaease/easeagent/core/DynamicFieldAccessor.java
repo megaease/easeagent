@@ -1,9 +1,12 @@
 package com.megaease.easeagent.core;
 
+import com.google.auto.service.AutoService;
+
+@AutoService(AppendBootstrapClassLoaderSearch.class)
 public interface DynamicFieldAccessor {
 
-    void setEase_agent_dynamic_$$$_data(Object data);
+    void setEaseAgent$$DynamicField$$Data(Object data);
 
-    Object getEase_agent_dynamic_$$$_data();
+    Object getEaseAgent$$DynamicField$$Data();
 
 }

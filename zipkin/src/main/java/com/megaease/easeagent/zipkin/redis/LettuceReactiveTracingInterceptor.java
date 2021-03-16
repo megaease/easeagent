@@ -1,15 +1,14 @@
-package com.megaease.easeagent.sniffer.lettuce.v5;
+package com.megaease.easeagent.zipkin.redis;
 
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 
 import java.util.Map;
 
-public class LettuceInjectInterceptor implements AgentInterceptor {
+public class LettuceReactiveTracingInterceptor extends CommonLettuceTracingInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        return chain.doAfter(methodInfo, context);
+        return this.innerAfter(methodInfo, context, chain);
     }
 }

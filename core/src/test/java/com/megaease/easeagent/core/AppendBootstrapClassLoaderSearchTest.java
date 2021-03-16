@@ -32,7 +32,8 @@ public class AppendBootstrapClassLoaderSearchTest {
     public void should_inject_classes() throws Exception {
         final Set<String> strings = Sets.newHashSet(
                 "com.megaease.easeagent.core.Dispatcher",
-                "com.megaease.easeagent.core.Dispatcher$Advice"
+                "com.megaease.easeagent.core.Dispatcher$Advice",
+                "com.megaease.easeagent.core.DynamicFieldAccessor"
         );
         Assert.assertEquals(strings, AppendBootstrapClassLoaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM));
     }

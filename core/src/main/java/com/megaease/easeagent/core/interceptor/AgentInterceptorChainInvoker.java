@@ -18,15 +18,28 @@ public class AgentInterceptorChainInvoker {
     }
 
     public Object doAfter(AgentInterceptorChain.Builder builder, MethodInfo methodInfo, Map<Object, Object> context) {
+        return doAfter(builder, methodInfo, context, false);
+    }
+
+    public Object doAfter(AgentInterceptorChain.Builder builder, MethodInfo methodInfo, Map<Object, Object> context, boolean newInterceptorChain) {
+        if (newInterceptorChain) {
+            context.remove(AgentInterceptorChain.class);
+        }
         AgentInterceptorChain interceptorChain = ContextUtils.getFromContext(context, AgentInterceptorChain.class);
         if (interceptorChain == null) {
             interceptorChain = this.prepare(builder, context);
-            interceptorChain.doBefore(methodInfo, context);
+            if (interceptorChain == null) {
+                return methodInfo.getRetValue();
+            }
+            interceptorChain.skipBegin();
         }
         return interceptorChain.doAfter(methodInfo, context);
     }
 
     private AgentInterceptorChain prepare(AgentInterceptorChain.Builder builder, Map<Object, Object> context) {
+        if (builder == null) {
+            return null;
+        }
         AgentInterceptorChain interceptorChain = builder.build();
         context.put(AgentInterceptorChain.class, interceptorChain);
         return interceptorChain;

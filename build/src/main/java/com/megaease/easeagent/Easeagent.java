@@ -20,8 +20,7 @@ package com.megaease.easeagent;
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
-import com.megaease.easeagent.sniffer.lettuce.v5.LettuceInjectAgentFieldAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
 
 @Assembly({
 //        CaptureTrace.class
@@ -45,8 +44,12 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionA
         JdbcDataSourceAdvice.class,
         JdbcStatementAdvice.class,
         ServiceNamePropagationAdvice.class,
-//        LettuceInjectAgentFieldAdvice.class,
         StatefulRedisConnectionAdvice.class,
+        ConnectionFutureAdvice.class,
+        RedisClientAdvice.class,
+        RedisCommandsAdvice.class,
+        CompletableFutureAdvice.class,
+        
 
 })
 abstract class Easeagent {

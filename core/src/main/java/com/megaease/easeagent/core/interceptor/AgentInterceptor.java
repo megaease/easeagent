@@ -19,6 +19,8 @@ public interface AgentInterceptor {
      * @param chain      The chain can invoke next interceptor
      * @return The return value can change instrumented method result
      */
-    Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain);
+    default Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        return chain.doAfter(methodInfo, context);
+    }
 
 }

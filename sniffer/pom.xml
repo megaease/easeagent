@@ -68,7 +68,6 @@
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
-            <version>5.3.6.RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

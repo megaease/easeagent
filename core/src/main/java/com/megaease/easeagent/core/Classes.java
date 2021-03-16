@@ -136,10 +136,9 @@ public class Classes {
                             List<AgentBuilder.Transformer> transformers = new ArrayList<>();
                             transformers.add((builder, typeDescription, classLoader, module) -> {
                                 if (!typeDescription.isAssignableTo(DynamicFieldAccessor.class)) {
-                                    if (input.fieldName != null && !input.isFieldDefined()) {
-                                        builder = builder.defineField(input.fieldName, input.fieldClass, Opcodes.ACC_PROTECTED)
+                                    if (input.fieldName != null) {
+                                        builder = builder.defineField(input.fieldName, input.fieldClass, Opcodes.ACC_PRIVATE)
                                                 .implement(DynamicFieldAccessor.class).intercept(FieldAccessor.ofField(input.fieldName));
-                                        input.setFieldDefined(true);
                                     }
                                 }
                                 return builder;

@@ -43,7 +43,6 @@ public interface Definition<T extends Definition> {
         public final ElementMatcher<? super MethodDescription> matcher;
         public final String fieldName;
         public final Class<?> fieldClass = Object.class;
-        private boolean fieldDefined;
 
         public Transformer(String inlineAdviceClassName, String adviceFactoryClassName, ElementMatcher<? super MethodDescription> matcher) {
             this(inlineAdviceClassName, adviceFactoryClassName, matcher, null);
@@ -56,13 +55,6 @@ public interface Definition<T extends Definition> {
             this.fieldName = fieldName;
         }
 
-        public void setFieldDefined(boolean fieldDefined) {
-            this.fieldDefined = fieldDefined;
-        }
-
-        public boolean isFieldDefined() {
-            return fieldDefined;
-        }
     }
 
     class Default implements Definition<Default>, Fork<Default> {

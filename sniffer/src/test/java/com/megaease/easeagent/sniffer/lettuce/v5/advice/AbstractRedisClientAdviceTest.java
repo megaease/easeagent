@@ -1,4 +1,4 @@
-package com.megaease.easeagent.sniffer.lettuce.v5;
+package com.megaease.easeagent.sniffer.lettuce.v5.advice;
 
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
 

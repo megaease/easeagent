@@ -19,9 +19,9 @@ public class DefaultAgentInterceptorChain implements AgentInterceptorChain {
         if (pos == this.agentInterceptors.size()) {
             return;
         }
-        if (!context.containsKey(AgentInterceptorChain.class)) {
-            context.put(AgentInterceptorChain.class, this);
-        }
+//        if (!context.containsKey(AgentInterceptorChain.class)) {
+//            context.put(AgentInterceptorChain.class, this);
+//        }
         AgentInterceptor interceptor = this.agentInterceptors.get(pos++);
         interceptor.before(methodInfo, context, this);
     }
@@ -34,6 +34,11 @@ public class DefaultAgentInterceptorChain implements AgentInterceptorChain {
         }
         AgentInterceptor interceptor = this.agentInterceptors.get(pos);
         return interceptor.after(methodInfo, context, this);
+    }
+
+    @Override
+    public void skipBegin() {
+        this.pos = this.agentInterceptors.size();
     }
 
     public static class Builder implements AgentInterceptorChain.Builder {
