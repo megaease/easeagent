@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.config.Configs;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.jolokia.jvmagent.JvmAgent;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,9 @@ public class BootstrapTest {
         String text = UUID.randomUUID().toString();
         source.put("key", text);
         Configs configs = new Configs(source);
-        Bootstrap.registerMBeans(configs, Mockito.mock(Instrumentation.class));
+        final Instrumentation inst = Mockito.mock(Instrumentation.class);
+        Bootstrap.registerMBeans(configs, inst);
+        JvmAgent.premain("", inst);
         String baseUrl = "http://localhost:8778/jolokia/";
         RestTemplate client = new RestTemplate();
 

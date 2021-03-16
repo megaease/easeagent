@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.loadbalancer.*;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerExchangeFilterFunction;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
@@ -92,18 +93,25 @@ public class ServiceNamePropagationAdviceTest {
 
     @Test
     public void test_feignBlockingLoadBalancerClient_execute() throws Exception {
+        String serviceName = "test-hello";
         ClassLoader loader = getClass().getClassLoader();
         Client client = Mockito.mock(Client.class);
         BlockingLoadBalancerClient blockingLoadBalancerClient = Mockito.mock(BlockingLoadBalancerClient.class);
+        final DefaultServiceInstance defaultServiceInstance = new DefaultServiceInstance("test-instance", serviceName, "localhost", 22370, false);
+        Mockito.when(blockingLoadBalancerClient.choose(any())).thenReturn(defaultServiceInstance);
+        Mockito.when(blockingLoadBalancerClient.reconstructURI(any(), any())).thenReturn(URI.create("http://localhost:22370/test"));
         Definition.Default def = new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY);
         FeignBlockingLoadBalancerClient feignBlockingLoadBalancerClient = (FeignBlockingLoadBalancerClient) Classes.transform(ServiceNamePropagationAdvice.FeignBlockingLoadBalancerClient)
                 .with(def)
                 .load(loader).get(0).getConstructor(Client.class, BlockingLoadBalancerClient.class)
                 .newInstance(client, blockingLoadBalancerClient);
-        String serviceName = "test-hello";
-        Request request = Request.create(Request.HttpMethod.GET, "http://" + serviceName + "/test",
-                new HashMap<>(), new byte[0], Charset.defaultCharset(), new RequestTemplate());
-        feignBlockingLoadBalancerClient.execute(request, new Request.Options());
+
+        feignBlockingLoadBalancerClient.execute(Request.create(Request.HttpMethod.GET, "http://" + serviceName + "/test",
+                new HashMap<>(), new byte[0], Charset.defaultCharset(), new RequestTemplate()), new Request.Options());
+        ArgumentCaptor<Request> captor = ArgumentCaptor.forClass(Request.class);
+
+        Mockito.verify(client).execute(captor.capture(), any());
+        Request request = captor.getValue();
         Assert.assertTrue(request.headers().containsKey(ServiceNamePropagationAdvice.PROPAGATE_HEAD));
         Assert.assertEquals(serviceName, request.headers().get(ServiceNamePropagationAdvice.PROPAGATE_HEAD).iterator().next());
     }

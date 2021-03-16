@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
@@ -14,30 +15,42 @@ import static com.megaease.easeagent.config.ValidateUtils.*;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
+    private static final String CONFIG_FILE = "agent.properties";
 
     public static Configs loadFromClasspath(ClassLoader classLoader) {
-        return new Configs(new HashMap<>());
+        try {
+            InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE);
+            if (inputStream != null) {
+                final HashMap<String, String> propsMap = extractPropsMap(inputStream);
+                return new Configs(propsMap);
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Load config file:{} by classloader:{} failure: {}", CONFIG_FILE, classLoader.toString(), e);
+        }
+        return new Configs(Collections.emptyMap());
     }
 
-    public static Configs loadFromFile(File file) throws IOException {
-        Configs configs = null;
+    public static Configs loadFromFile(File file) {
         try {
             try (FileInputStream in = new FileInputStream(file)) {
-                Properties properties = new Properties();
-                properties.load(in);
-                HashMap<String, String> map = new HashMap<>();
-                for (String one : properties.stringPropertyNames()) {
-                    map.put(one, properties.getProperty(one));
-                }
-                configs = new Configs(map);
-
+                HashMap<String, String> map = extractPropsMap(in);
+                return new Configs(map);
             }
         } catch (IOException e) {
             LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
-            throw e;
         }
-//        validConfigs(configs);
-        return configs;
+        return new Configs(Collections.emptyMap());
+
+    }
+
+    private static HashMap<String, String> extractPropsMap(InputStream in) throws IOException {
+        Properties properties = new Properties();
+        properties.load(in);
+        HashMap<String, String> map = new HashMap<>();
+        for (String one : properties.stringPropertyNames()) {
+            map.put(one, properties.getProperty(one));
+        }
+        return map;
     }
 
     private static void validConfigs(Configs configs) {

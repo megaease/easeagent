@@ -5,10 +5,13 @@ import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.TextUtils;
+import feign.Request;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -17,6 +20,7 @@ import org.springframework.web.server.ServerWebExchange;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -81,43 +85,52 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
 
 
     static class FeignLoadBalancerExecute {
+        private final Logger logger = LoggerFactory.getLogger(getClass());
+
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
-        void enter(@Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request, @Advice.Argument(1) Object config) {
+        void enter(@Advice.Origin String method, @Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request, @Advice.Argument(1) Object config) {
             try {
+                logger.debug("enter method [{}]",method);
                 String serviceName = (String) ReflectionTool.invokeMethod(config, "getClientName");
                 Object realRequest = ReflectionTool.invokeMethod(request, "getRequest");
                 Map<String, Collection<String>> headers = (Map<String, Collection<String>>) ReflectionTool.extractField(realRequest, "headers");
                 headers.put(PROPAGATE_HEAD, Collections.singleton(serviceName));
             } catch (Exception e) {
-                //ate it
-//                e.printStackTrace();
+                logger.warn("intercept method [{}] failure", method, e);
             }
         }
     }
 
     static class FeignBlockingLoadBalancerClientExecute {
+        private final Logger logger = LoggerFactory.getLogger(getClass());
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
-        void enter(@Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request) {
+        void enter(@Advice.Origin String method, @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
             try {
-                String url = (String) ReflectionTool.invokeMethod(request, "url");
+                logger.debug("enter method [{}]",method);
+                feign.Request request = (Request) args[0];
+                String url = request.url();
                 String host = URI.create(url).getHost();
                 if (TextUtils.hasText(host)) {
-                    Map<String, Collection<String>> headers = (Map<String, Collection<String>>) ReflectionTool.extractField(request, "headers");
-                    headers.put(PROPAGATE_HEAD, Collections.singleton(host));
+                    final HashMap<String, Collection<String>> newHeaders = new HashMap<>(request.headers());
+                    newHeaders.put(PROPAGATE_HEAD, Collections.singleton(host));
+                    final Request newRequest = Request.create(request.httpMethod(), request.url(), newHeaders, request.body(), request.charset(), request.requestTemplate());
+                    args[0] = newRequest;
                 }
             } catch (Exception e) {
-                //ate it
+                logger.warn("intercept method [{}] failure", method, e);
             }
         }
     }
 
     static class RestTemplateIntercept {
+        private final Logger logger = LoggerFactory.getLogger(getClass());
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
-        void enter(@Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request) {
+        void enter(@Advice.Origin String method,@Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request) {
             try {
+                logger.debug("enter method [{}]",method);
                 URI uri = (URI) ReflectionTool.invokeMethod(request, "getURI");
                 String host = uri.getHost();
                 if (TextUtils.hasText(host)) {
@@ -126,17 +139,18 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                     headers.add(PROPAGATE_HEAD, host);
                 }
             } catch (Exception e) {
-                //ate it
-                e.printStackTrace();
+                logger.warn("intercept method [{}] failure", method, e);
             }
         }
     }
 
     static class WebClientFilter {
+        private final Logger logger = LoggerFactory.getLogger(getClass());
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
-        void enter(@Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request) {
+        void enter(@Advice.Origin String method,@Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request) {
             try {
+                logger.debug("enter method [{}]",method);
                 URI uri = (URI) ReflectionTool.invokeMethod(request, "url");
                 String host = uri.getHost();
                 if (StringUtils.hasText(host)) {
@@ -145,15 +159,17 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                     headers.add(PROPAGATE_HEAD, host);
                 }
             } catch (Exception e) {
-                //ate it
+                logger.warn("intercept method [{}] failure", method, e);
             }
         }
     }
 
     static class FilteringWebHandlerHandle {
+        private final Logger logger = LoggerFactory.getLogger(getClass());
         @Advice.OnMethodEnter
-        void enter(@Advice.This Object invoker,@Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] exchanges) {
+        void enter(@Advice.Origin String method, @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] exchanges) {
             try {
+                logger.debug("enter method [{}]",method);
                 ServerWebExchange exchange = (ServerWebExchange) exchanges[0];
                 org.springframework.cloud.gateway.route.Route route = exchange.getAttribute("org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRoute");
                 if (route == null) {
@@ -172,8 +188,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 ServerWebExchange newExchange = exchange.mutate().request(newRequest).build();
                 exchanges[0] = newExchange;
             } catch (Exception e) {
-                //ate it
-//                e.printStackTrace();
+                logger.warn("intercept method [{}] failure", method, e);
             }
         }
     }

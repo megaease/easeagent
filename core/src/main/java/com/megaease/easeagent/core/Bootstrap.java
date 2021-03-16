@@ -35,7 +35,6 @@ import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
-import org.jolokia.jvmagent.JvmAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +87,6 @@ public class Bootstrap {
         ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
         mbs.registerMBean(conf, mxbeanName);
         LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName.toString());
-        JvmAgent.premain("", inst);
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf) {
