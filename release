@@ -1,12 +1,11 @@
 #! /bin/bash
 # After `mvn clean package -am -pl build`, this script can help you to release `easeagent-dep.jar` to github.
 
-RELEASE_URL="https://api.github.com/repos/megaease/release/releases/7534404"
-UPLOAD_URL="https://uploads.github.com/repos/megaease/release/releases/7534404/assets?name=easeagent.jar"
-TOKEN=`cat ~/.github/pat/megaease`
+RELEASE_URL="https://api.github.com/repos/megaease/easeagent/releases/39859773"
+UPLOAD_URL="https://uploads.github.com/repos/megaease/easeagent/releases/39859773/assets?name=easeagent.jar"
+TOKEN="bca81b5b3d467da250c4db4b048639fe73da7ccc"
 AUTH_HEAD="Authorization: token $TOKEN"
 LIB_PATH="build/target/easeagent-dep.jar"
-
 ASSET_URL=`curl -X GET -H "$AUTH_HEAD" "$RELEASE_URL" | jq --raw-output '.assets[0].url'`
 
 echo "Delete last asset is $ASSET_URL"
@@ -21,4 +20,4 @@ curl -X PATCH -H "$AUTH_HEAD" -H "Content-Type: application/json" -d "{\"body\":
 
 echo "Upload easeagent.jar"
 
-curl -X POST -H "$AUTH_HEAD" -H "Content-Type: application/java-archive" --progress-bar --data-binary @$LIB_PATH "$UPLOAD_URL" > /dev/null
+curl -X POST -H "$AUTH_HEAD" -H "Content-Type: application/java-archive" --progress-bar --data-binary @$LIB_PATH "$UPLOAD_URL"
