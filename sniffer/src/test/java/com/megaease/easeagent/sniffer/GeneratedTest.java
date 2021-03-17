@@ -19,10 +19,7 @@ package com.megaease.easeagent.sniffer;
 
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.sniffer.lettuce.v5.AbstractRedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.ConnectionFutureAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisCommandsAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
 
 
 @Assembly({
@@ -39,8 +36,8 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionA
         RedisClientAdvice.class,
         AbstractRedisClientAdvice.class,
         StatefulRedisConnectionAdvice.class,
-        ConnectionFutureAdvice.class,
-        RedisCommandsAdvice.class,
+        RedisChannelWriterAdvice.class,
+
 
 
 })

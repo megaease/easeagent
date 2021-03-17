@@ -20,27 +20,35 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     private final AgentInterceptorChainInvoker chainInvoker;
     private final Map<Object, Object> context;
     private final boolean newInterceptorChain;
+    private final Object attach;
+    private volatile boolean processed;
 
-    public CompletableFutureWrapper(CompletableFuture<T> source, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context, boolean newInterceptorChain) {
+    public CompletableFutureWrapper(CompletableFuture<T> source, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context, boolean newInterceptorChain, Object attach) {
         this.source = source;
         this.methodInfo = methodInfo;
         this.chainBuilder = chainBuilder;
         this.chainInvoker = chainInvoker;
         this.context = context;
         this.newInterceptorChain = newInterceptorChain;
+        this.attach = attach;
     }
 
     private T processResult(T t) {
-        Object obj = ((DynamicFieldAccessor) this).getEaseAgent$$DynamicField$$Data();
-        return processResult(t, null, obj);
+        return processResult(t, null, this.attach);
     }
 
     private T processResult(T t, Throwable throwable) {
-        Object obj = ((DynamicFieldAccessor) this).getEaseAgent$$DynamicField$$Data();
-        return processResult(t, throwable, obj);
+        return processResult(t, throwable, this.attach);
+    }
+
+    private void processException(Throwable throwable) {
+        processResult(null, throwable, this.attach);
     }
 
     private T processResult(T t, Throwable throwable, Object dynamicFieldValue) {
+        if (this.processed) {
+            return t;
+        }
         if (t instanceof DynamicFieldAccessor) {
             ((DynamicFieldAccessor) t).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
         }
@@ -48,14 +56,8 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
             methodInfo.setThrowable(throwable);
         }
         this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context, newInterceptorChain);
+        this.processed = true;
         return t;
-    }
-
-    private void processException(Throwable throwable) {
-        if (throwable != null) {
-            methodInfo.setThrowable(throwable);
-        }
-        this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context, newInterceptorChain);
     }
 
     @Override
@@ -71,8 +73,13 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        T t = source.get(timeout, unit);
-        return processResult(t);
+        try {
+            T t = source.get(timeout, unit);
+            return this.processResult(t);
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+            this.processException(e);
+            throw e;
+        }
     }
 
     @Override
@@ -284,7 +291,7 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public CompletableFuture<T> whenComplete(BiConsumer<? super T, ? super Throwable> action) {
-        return source.whenComplete(action);
+        return source.whenComplete((t, throwable) -> action.accept(processResult(t, throwable), throwable));
     }
 
     @Override

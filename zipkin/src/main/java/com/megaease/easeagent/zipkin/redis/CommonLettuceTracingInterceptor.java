@@ -3,7 +3,9 @@ package com.megaease.easeagent.zipkin.redis;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
-import com.megaease.easeagent.core.interceptor.*;
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.RedisURI;
@@ -33,21 +35,14 @@ public class CommonLettuceTracingInterceptor implements AgentInterceptor {
         span.kind(Span.Kind.CLIENT);
         span.remoteServiceName("redis");
         span.remoteIpAndPort(redisURI.getHost(), redisURI.getPort());
-        span.tag("redis.method", name);
+        String cmd = ContextUtils.getFromContext(context, "redis.cmd");
+        span.tag("redis.method", cmd);
         context.put(Span.class, span);
         chain.doBefore(methodInfo, context);
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Object retValue = methodInfo.getRetValue();
-        if (retValue instanceof Flux || retValue instanceof Mono || retValue instanceof RedisFuture) {
-            return chain.doAfter(methodInfo, context);
-        }
-        return this.innerAfter(methodInfo, context, chain);
-    }
-
-    protected Object innerAfter(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         try {
             Span span = ContextUtils.getFromContext(context, Span.class);
             if (span == null) {

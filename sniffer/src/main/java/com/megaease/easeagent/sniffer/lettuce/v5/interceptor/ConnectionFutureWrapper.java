@@ -4,7 +4,9 @@ import com.megaease.easeagent.core.DynamicFieldAccessor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 import io.lettuce.core.ConnectionFuture;
+import io.lettuce.core.api.StatefulRedisConnection;
 
 import javax.annotation.Nonnull;
 import java.net.SocketAddress;
@@ -18,48 +20,43 @@ import java.util.function.Function;
 public class ConnectionFutureWrapper<T> implements ConnectionFuture<T> {
 
     private final ConnectionFuture<T> source;
-    private final MethodInfo methodInfo;
-    private final AgentInterceptorChain.Builder chainBuilder;
-    private final AgentInterceptorChainInvoker chainInvoker;
-    private final Map<Object, Object> context;
-    private final boolean newInterceptorChain;
+    private final Object attach;
+    private volatile boolean processed;
 
-    public ConnectionFutureWrapper(ConnectionFuture<T> source, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context, boolean newInterceptorChain) {
+    public ConnectionFutureWrapper(ConnectionFuture<T> source, Object attach) {
         this.source = source;
-        this.methodInfo = methodInfo;
-        this.chainBuilder = chainBuilder;
-        this.chainInvoker = chainInvoker;
-        this.context = context;
-        this.newInterceptorChain = newInterceptorChain;
+        this.attach = attach;
     }
 
     private T processResult(T t) {
-        Object obj = ((DynamicFieldAccessor) this).getEaseAgent$$DynamicField$$Data();
-        return processResult(t, null, obj);
+        return processResult(t, null, this.attach);
     }
 
     private T processResult(T t, Throwable throwable) {
-        Object obj = ((DynamicFieldAccessor) this).getEaseAgent$$DynamicField$$Data();
-        return processResult(t, throwable, obj);
-    }
-
-    private T processResult(T t, Throwable throwable, Object dynamicFieldValue) {
-        if (t instanceof DynamicFieldAccessor) {
-            ((DynamicFieldAccessor) t).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
-        }
-        if (throwable != null) {
-            methodInfo.setThrowable(throwable);
-        }
-        this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context, newInterceptorChain);
-        return t;
+        return processResult(t, throwable, this.attach);
     }
 
     private void processException(Throwable throwable) {
-        if (throwable != null) {
-            methodInfo.setThrowable(throwable);
-        }
-        this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context, newInterceptorChain);
+        processResult(null, throwable, this.attach);
     }
+
+    private T processResult(T t, Throwable throwable, Object dynamicFieldValue) {
+        if (this.processed) {
+            return t;
+        }
+        if (t instanceof DynamicFieldAccessor) {
+            ((DynamicFieldAccessor) t).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
+        }
+        Object channelWriter = AgentFieldAccessor.getFieldValue(t, "channelWriter");
+        if (channelWriter != null) {
+            if (channelWriter instanceof DynamicFieldAccessor) {
+                ((DynamicFieldAccessor) channelWriter).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
+            }
+        }
+        this.processed = true;
+        return t;
+    }
+
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -85,8 +82,13 @@ public class ConnectionFutureWrapper<T> implements ConnectionFuture<T> {
 
     @Override
     public T get(long timeout, @Nonnull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        T t = source.get(timeout, unit);
-        return this.processResult(t);
+        try {
+            T t = source.get(timeout, unit);
+            return this.processResult(t);
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+            this.processException(e);
+            throw e;
+        }
     }
 
     @Override
@@ -96,7 +98,8 @@ public class ConnectionFutureWrapper<T> implements ConnectionFuture<T> {
 
     @Override
     public T join() {
-        return source.join();
+        T t = source.join();
+        return this.processResult(t);
     }
 
     @Override

@@ -45,11 +45,11 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
         JdbcStatementAdvice.class,
         ServiceNamePropagationAdvice.class,
         StatefulRedisConnectionAdvice.class,
-        ConnectionFutureAdvice.class,
+//        ConnectionFutureAdvice.class,
         RedisClientAdvice.class,
-        RedisCommandsAdvice.class,
-        CompletableFutureAdvice.class,
-        
+        RedisChannelWriterAdvice.class,
+//        CompletableFutureAdvice.class,
+
 
 })
 abstract class Easeagent {

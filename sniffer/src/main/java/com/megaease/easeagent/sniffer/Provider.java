@@ -36,8 +36,7 @@ import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
-import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisClientCreateInterceptor;
-import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisDoCommandsInterceptor;
+import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
 import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
@@ -49,7 +48,6 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
-import com.megaease.easeagent.zipkin.redis.LettuceReactiveTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -174,28 +172,11 @@ public abstract class Provider {
                 ;
     }
 
-    @Injection.Bean("builder4RedisClientCreate")
-    public AgentInterceptorChain.Builder builder4RedisClientCreate() {
+    @Injection.Bean("builder4RedisClientConnectAsync")
+    public AgentInterceptorChain.Builder builder4RedisClientConnectAsync() {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisClientCreateInterceptor())
-                ;
-    }
-
-    @Injection.Bean("builder4RedisClientConnectSync")
-    public AgentInterceptorChain.Builder builder4RedisClientConnectSync() {
-        loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new CommonRedisClientConnectInterceptor(null, null))
-                ;
-    }
-
-    @Injection.Bean("builder4RedisClientConnectASync")
-    public AgentInterceptorChain.Builder builder4RedisClientConnectASync() {
-        loadTracing();
-        AgentInterceptorChain.Builder builder4Future = new DefaultAgentInterceptorChain.Builder();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new CommonRedisClientConnectInterceptor(chainInvoker, builder4Future))
+                .addInterceptor(new CommonRedisClientConnectInterceptor())
                 ;
     }
 
@@ -207,13 +188,11 @@ public abstract class Provider {
                 ;
     }
 
-    @Injection.Bean("builder4LettuceDoCommand")
-    public AgentInterceptorChain.Builder builder4LettuceDoCommand() {
+    @Injection.Bean("builder4LettuceDoWrite")
+    public AgentInterceptorChain.Builder builder4LettuceDoWrite() {
         loadTracing();
-        AgentInterceptorChain.Builder reactiveBuilder = new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new LettuceReactiveTracingInterceptor());
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisDoCommandsInterceptor(chainInvoker, reactiveBuilder))
+                .addInterceptor(new RedisChannelWriterInterceptor())
                 .addInterceptor(new CommonLettuceTracingInterceptor())
                 ;
     }

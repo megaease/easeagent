@@ -8,13 +8,6 @@ public class AgentFieldAccessor {
 
     private static final Map<String, Field> FIELD_MAP = new ConcurrentHashMap<>();
 
-//    public static void setFieldValue(Object target, Field field, Object fieldValue) {
-//        try {
-//            field.set(target, fieldValue);
-//        } catch (IllegalAccessException ignored) {
-//        }
-//    }
-
     public static void setFieldValue(Object target, String fieldName, Object fieldValue) {
         Field field = getFieldFromClass(target.getClass(), fieldName);
         try {
@@ -26,6 +19,9 @@ public class AgentFieldAccessor {
     @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, String fieldName) {
         Field field = getFieldFromClass(target.getClass(), fieldName);
+        if (field == null) {
+            return null;
+        }
         try {
             return (T) field.get(target);
         } catch (IllegalAccessException ignored) {
@@ -39,12 +35,24 @@ public class AgentFieldAccessor {
         if (field != null) {
             return field;
         }
-        try {
-            field = clazz.getDeclaredField(fieldName);
-            field.setAccessible(true);
+        field = innerGetFieldFromClass(clazz, fieldName);
+        if (field != null) {
             FIELD_MAP.put(key, field);
-        } catch (NoSuchFieldException ignored) {
         }
         return field;
+    }
+
+    public static Field innerGetFieldFromClass(Class<?> clazz, String fieldName) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field;
+        } catch (NoSuchFieldException ignored) {
+            Class<?> superclass = clazz.getSuperclass();
+            if (superclass.equals(Object.class)) {
+                return null;
+            }
+            return innerGetFieldFromClass(superclass, fieldName);
+        }
     }
 }
