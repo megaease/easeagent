@@ -19,16 +19,16 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Injection.Provider(Provider.class)
-public abstract class RedisClientAdvice implements Transformation {
+public abstract class RedisClusterClientAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("io.lettuce.core.RedisClient"))
-                .or(named("io.lettuce.core.RedisClient"))
+        return def.type(hasSuperType(named("io.lettuce.core.cluster.RedisClusterClient"))
+                .or(named("io.lettuce.core.cluster.RedisClusterClient"))
         )
-                .transform(connectAsync((named("connectStandaloneAsync")
-                                .or(named("connectPubSubAsync"))
-                                .or(named("connectSentinelAsync"))).and(isPrivate())
+                .transform(connectAsync((named("connectClusterAsync")
+                                .or(named("connectClusterPubSubAsync")))
+                                .and(isPrivate())
                         )
                 )
                 .end()

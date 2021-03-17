@@ -1,11 +1,8 @@
 package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.core.DynamicFieldAccessor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -15,21 +12,11 @@ import java.util.function.Function;
 public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     private final CompletableFuture<T> source;
-    private final MethodInfo methodInfo;
-    private final AgentInterceptorChain.Builder chainBuilder;
-    private final AgentInterceptorChainInvoker chainInvoker;
-    private final Map<Object, Object> context;
-    private final boolean newInterceptorChain;
     private final Object attach;
     private volatile boolean processed;
 
-    public CompletableFutureWrapper(CompletableFuture<T> source, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context, boolean newInterceptorChain, Object attach) {
+    public CompletableFutureWrapper(CompletableFuture<T> source, Object attach) {
         this.source = source;
-        this.methodInfo = methodInfo;
-        this.chainBuilder = chainBuilder;
-        this.chainInvoker = chainInvoker;
-        this.context = context;
-        this.newInterceptorChain = newInterceptorChain;
         this.attach = attach;
     }
 
@@ -52,10 +39,12 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
         if (t instanceof DynamicFieldAccessor) {
             ((DynamicFieldAccessor) t).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
         }
-        if (throwable != null) {
-            methodInfo.setThrowable(throwable);
+        Object channelWriter = AgentFieldAccessor.getFieldValue(t, "channelWriter");
+        if (channelWriter != null) {
+            if (channelWriter instanceof DynamicFieldAccessor) {
+                ((DynamicFieldAccessor) channelWriter).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
+            }
         }
-        this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context, newInterceptorChain);
         this.processed = true;
         return t;
     }

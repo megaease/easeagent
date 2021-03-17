@@ -5,9 +5,11 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.cluster.RedisClusterClient;
 
 abstract class BaseRedisAgentInterceptor implements AgentInterceptor {
     private static final String REDIS_URI = "redisURI";
+    private static final String REDIS_URIS = "initialUris";
 
     protected RedisURI getRedisURI(RedisClient redisClient, Object[] args) {
         if (args == null) {
@@ -26,22 +28,14 @@ abstract class BaseRedisAgentInterceptor implements AgentInterceptor {
         return redisURI;
     }
 
-    protected RedisURI getRedisURIFromDynamicField(Object target) {
-        if (target instanceof DynamicFieldAccessor) {
-            return (RedisURI) ((DynamicFieldAccessor) target).getEaseAgent$$DynamicField$$Data();
-        }
-        return null;
+    protected Iterable<RedisURI> getRedisURIs(RedisClusterClient redisClusterClient) {
+        return AgentFieldAccessor.getFieldValue(redisClusterClient, REDIS_URIS);
     }
 
-    protected void setRedisURIToDynamicField(Object target, RedisURI redisURI) {
+    @SuppressWarnings("unchecked")
+    protected <T> T getDataFromDynamicField(Object target) {
         if (target instanceof DynamicFieldAccessor) {
-            ((DynamicFieldAccessor) target).setEaseAgent$$DynamicField$$Data(redisURI);
-        }
-    }
-
-    protected Object getDataFromDynamicField(Object target) {
-        if (target instanceof DynamicFieldAccessor) {
-            return ((DynamicFieldAccessor) target).getEaseAgent$$DynamicField$$Data();
+            return (T) ((DynamicFieldAccessor) target).getEaseAgent$$DynamicField$$Data();
         }
         return null;
     }

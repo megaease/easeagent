@@ -37,6 +37,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
         AbstractRedisClientAdvice.class,
         StatefulRedisConnectionAdvice.class,
         RedisChannelWriterAdvice.class,
+        RedisClusterClientAdvice.class,
 
 
 

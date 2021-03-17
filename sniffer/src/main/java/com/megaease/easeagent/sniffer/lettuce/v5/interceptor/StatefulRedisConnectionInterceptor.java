@@ -1,8 +1,8 @@
 package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
+import com.megaease.easeagent.common.LettuceUtils;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
-import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.reactive.RedisReactiveCommands;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -19,8 +19,10 @@ public class StatefulRedisConnectionInterceptor extends BaseRedisAgentIntercepto
         if (!methodInfo.isSuccess()) {
             return null;
         }
-        RedisURI redisURI = getRedisURIFromDynamicField(methodInfo.getInvoker());
-        setRedisURIToDynamicField(methodInfo.getRetValue(), redisURI);
+        Object data = getDataFromDynamicField(methodInfo.getInvoker());
+        if (LettuceUtils.checkRedisUriInfo(data)) {
+            this.setDataToDynamicField(methodInfo.getRetValue(), data);
+        }
         return chain.doAfter(methodInfo, context);
     }
 }

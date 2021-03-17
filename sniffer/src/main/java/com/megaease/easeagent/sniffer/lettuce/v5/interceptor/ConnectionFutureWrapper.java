@@ -1,16 +1,11 @@
 package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.core.DynamicFieldAccessor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 import io.lettuce.core.ConnectionFuture;
-import io.lettuce.core.api.StatefulRedisConnection;
 
 import javax.annotation.Nonnull;
 import java.net.SocketAddress;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;

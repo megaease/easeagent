@@ -3,14 +3,13 @@ package com.megaease.easeagent.zipkin.redis;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.LettuceUtils;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import io.lettuce.core.RedisFuture;
 import io.lettuce.core.RedisURI;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
@@ -26,16 +25,19 @@ public class CommonLettuceTracingInterceptor implements AgentInterceptor {
             return;
         }
         context.put(CURRENT_SPAN, currentSpan);
-        RedisURI redisURI = ContextUtils.getFromContext(context, RedisURI.class);
-        if (redisURI == null) {
-            return;
+        RedisURI redisURI = null;
+        Object data = ContextUtils.getFromContext(context, ContextCons.CACHE_URI);
+        if (LettuceUtils.checkRedisUriInfo(data)) {
+            redisURI = LettuceUtils.getOneRedisURI(data);
         }
         String name = methodInfo.getInvoker().getClass().getSimpleName() + "." + methodInfo.getMethod();
         Span span = Tracing.currentTracer().nextSpan().name(name).start();
         span.kind(Span.Kind.CLIENT);
         span.remoteServiceName("redis");
-        span.remoteIpAndPort(redisURI.getHost(), redisURI.getPort());
-        String cmd = ContextUtils.getFromContext(context, "redis.cmd");
+        if (redisURI != null) {
+            span.remoteIpAndPort(redisURI.getHost(), redisURI.getPort());
+        }
+        String cmd = ContextUtils.getFromContext(context, ContextCons.CACHE_CMD);
         span.tag("redis.method", cmd);
         context.put(Span.class, span);
         chain.doBefore(methodInfo, context);
