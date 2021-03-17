@@ -1,4 +1,4 @@
-FROM zhaokundev/maven-mysql:ali-mvn3.5.3-jdk8-sql5.7-slim AS builder
+FROM megaease/easeimg-javabuild:latest AS builder
 
 ARG      REPOSITORY1="km-nexus|http://192.168.50.105:18081/nexus/repository/maven-public/|true|true"
 ARG      REPOSITORY2
