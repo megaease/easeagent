@@ -69,6 +69,7 @@
         <version.kafka>2.3.1</version.kafka>
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
         <version.metrics>4.1.17</version.metrics>
+        <version.jedis>3.5.2</version.jedis>
     </properties>
 
     <dependencies>
@@ -247,6 +248,11 @@
                     </exclusion>
                 </exclusions>
                 <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${version.jedis}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

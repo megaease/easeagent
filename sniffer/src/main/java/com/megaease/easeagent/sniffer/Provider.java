@@ -33,6 +33,7 @@ import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
+import com.megaease.easeagent.metrics.redis.CommonRedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
@@ -48,6 +49,7 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
+import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
@@ -176,6 +178,7 @@ public abstract class Provider {
     public AgentInterceptorChain.Builder builder4RedisClientConnectAsync() {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new RedisMetricInterceptor(this.metricRegistry))
                 .addInterceptor(new CommonRedisClientConnectInterceptor())
                 ;
     }
@@ -193,16 +196,17 @@ public abstract class Provider {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new RedisChannelWriterInterceptor())
+                .addInterceptor(new CommonRedisMetricInterceptor(this.metricRegistry))
                 .addInterceptor(new CommonLettuceTracingInterceptor())
                 ;
     }
 
-    @Injection.Bean("builder4RedisFuture")
-    public AgentInterceptorChain.Builder builder4RedisFuture() {
+    @Injection.Bean("builder4Jedis")
+    public AgentInterceptorChain.Builder builder4Jedis() {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
-//                .addInterceptor(new RedisDoCommandsInterceptor(chainInvoker))
-//                .addInterceptor(new LettuceTracingInterceptor())
+                .addInterceptor(new CommonRedisMetricInterceptor(this.metricRegistry))
+                .addInterceptor(new JedisTracingInterceptor())
                 ;
     }
 

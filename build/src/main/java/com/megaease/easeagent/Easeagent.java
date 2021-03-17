@@ -20,6 +20,7 @@ package com.megaease.easeagent;
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
+import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
 
 @Assembly({
@@ -45,10 +46,9 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
         JdbcStatementAdvice.class,
         ServiceNamePropagationAdvice.class,
         StatefulRedisConnectionAdvice.class,
-//        ConnectionFutureAdvice.class,
         RedisClientAdvice.class,
         RedisChannelWriterAdvice.class,
-//        CompletableFutureAdvice.class,
+        JedisAdvice.class,
 
 
 })
