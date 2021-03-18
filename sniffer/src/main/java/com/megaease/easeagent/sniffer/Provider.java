@@ -36,6 +36,8 @@ import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.redis.CommonRedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
+import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
+import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaDoSendInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
@@ -48,6 +50,7 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
+import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
@@ -207,6 +210,16 @@ public abstract class Provider {
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new CommonRedisMetricInterceptor(this.metricRegistry))
                 .addInterceptor(new JedisTracingInterceptor())
+                ;
+    }
+
+    @Injection.Bean("builder4KafkaDoSend")
+    public AgentInterceptorChain.Builder builder4KafkaDoSend() {
+        loadTracing();
+        DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
+        builder.addInterceptor(new KafkaTracingInterceptor());
+        return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new KafkaDoSendInterceptor(builder, chainInvoker))
                 ;
     }
 

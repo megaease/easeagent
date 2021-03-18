@@ -254,6 +254,11 @@
                 <artifactId>jedis</artifactId>
                 <version>${version.jedis}</version>
             </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-kafka-clients</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

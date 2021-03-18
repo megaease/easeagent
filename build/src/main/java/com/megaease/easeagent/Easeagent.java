@@ -21,7 +21,10 @@ import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
 import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
+import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
 
 @Assembly({
 //        CaptureTrace.class
@@ -49,6 +52,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
         RedisClientAdvice.class,
         RedisChannelWriterAdvice.class,
         JedisAdvice.class,
+        KafkaProducerAdvice.class,
 
 
 })
