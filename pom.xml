@@ -66,7 +66,7 @@
         <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
         <version.log4j>2.14.0</version.log4j>
-        <version.kafka>2.3.1</version.kafka>
+        <version.kafka>2.4.1</version.kafka>
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
         <version.metrics>4.1.17</version.metrics>
         <version.jedis>3.5.2</version.jedis>
@@ -257,6 +257,11 @@
             <dependency>
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-instrumentation-kafka-clients</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-messaging</artifactId>
                 <version>${version.brave}</version>
             </dependency>
         </dependencies>
