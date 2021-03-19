@@ -53,6 +53,7 @@ public class TraceReport {
                                 .queuedMaxBytes(traceProperties.getOutput().getQueuedMaxSize()),
                         traceProperties,
                         service, system);
+        reporter.startFlushThread();
         spanRefreshableReporter = new RefreshableReporter<Span>(reporter, traceProperties, outputProperties);
         return spanRefreshableReporter;
     }

@@ -19,11 +19,11 @@ package com.megaease.easeagent.sniffer;
 
 import brave.Tracer;
 import brave.Tracing;
-import brave.handler.SpanHandler;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.common.HostAddress;
-import com.megaease.easeagent.core.Configurable;
+import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.config.ConfigAware;
+import com.megaease.easeagent.config.ConfigConst;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
@@ -36,12 +36,11 @@ import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.redis.CommonRedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaDoSendInterceptor;
+import com.megaease.easeagent.report.AgentReport;
+import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
-import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
@@ -50,16 +49,12 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
-import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
-import java.util.concurrent.TimeUnit;
-
-@Configurable(bind = "sniffer.report")
-public abstract class Provider {
+public abstract class Provider implements AgentReportAware, ConfigAware {
 
     private final MetricRegistry metricRegistry = new MetricRegistry();
 
@@ -70,15 +65,30 @@ public abstract class Provider {
     private Tracer tracer;
 
     private Tracing tracing;
+    private AgentReport agentReport;
+    private Config config;
+
+    @Override
+    public void setConfig(Config config) {
+        this.config = config;
+    }
+
+    @Override
+    public void setAgentReport(AgentReport report) {
+        this.agentReport = report;
+    }
 
     public void loadTracing() {
         if (tracer == null) {
             Tracing tracing = Tracing.newBuilder()
-                    .localServiceName(service_name())
-                    .traceId128Bit(trace_id_128b())
-                    .sampler(CountingSampler.create((float) sample_rate()))
-                    .addSpanHandler(spanHandler())
-                    .build();
+                    .localServiceName(config.getString(ConfigConst.SERVICE_NAME))
+                    .traceId128Bit(false)
+                    .sampler(CountingSampler.create(1))
+                    .addSpanHandler(AsyncZipkinSpanHandler
+                            .newBuilder(span -> agentReport.report(span))
+                            .alwaysReportSpans(true)
+                            .build()
+                    ).build();
             Tracer tracer = tracing.tracer();
             this.tracing = tracing;
             this.tracer = tracer;
@@ -227,100 +237,5 @@ public abstract class Provider {
     @Injection.Bean("commonInterceptorChainBuilder")
     public AgentInterceptorChain.Builder commonInterceptorChainBuilder() {
         return new DefaultAgentInterceptorChain.Builder();
-    }
-
-    private SpanHandler spanHandler() {
-        return AsyncZipkinSpanHandler.create(new LogSender());
-    }
-
-    @Configurable.Item
-    String reporter_name() {
-        return "metrics";
-    }
-
-    @Configurable.Item
-    String rate_unit() {
-        return TimeUnit.SECONDS.toString();
-    }
-
-    @Configurable.Item
-    String duration_unit() {
-        return TimeUnit.MILLISECONDS.toString();
-    }
-
-    @Configurable.Item
-    long period_seconds() {
-        return 30;
-    }
-
-    @Configurable.Item
-    String hostipv4() {
-        return HostAddress.localaddr().getHostAddress();
-    }
-
-    @Configurable.Item
-    abstract String system();
-
-    @Configurable.Item
-    abstract String application();
-
-    @Configurable.Item
-    String service_name() {
-        return system() + "-" + application() + "-" + hostname();
-    }
-
-    @Configurable.Item
-    double sample_rate() {
-        return 1f;
-    }
-
-    @Configurable.Item
-    boolean send_compression() {
-        return false;
-    }
-
-    @Configurable.Item
-    int reporter_queued_max_spans() {
-        return 10000;
-    }
-
-    @Configurable.Item
-    long reporter_message_timeout_seconds() {
-        return 1;
-    }
-
-    @Configurable.Item
-    boolean trace_id_128b() {
-        return false;
-    }
-
-    @Configurable.Item
-    int message_max_bytes() {
-        return 1024 * 1024;
-    }
-
-    @Configurable.Item
-    int connect_timeout() {
-        return 10 * 1000;
-    }
-
-    @Configurable.Item
-    int read_timeout() {
-        return 60 * 1000;
-    }
-
-    @Configurable.Item
-    String user_agent() {
-        return "easeagent/0.1.0";
-    }
-
-    @Configurable.Item
-    String host_ipv4() {
-        return HostAddress.localaddr().getHostAddress();
-    }
-
-    @Configurable.Item
-    String hostname() {
-        return HostAddress.localhost();
     }
 }

@@ -42,18 +42,18 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
             </exclusions>
-            <optional>true</optional>
+<!--            <optional>true</optional>-->
         </dependency>
         <dependency>
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-sender-kafka11</artifactId>
-            <optional>true</optional>
+<!--            <optional>true</optional>-->
         </dependency>
 
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave</artifactId>
-            <optional>true</optional>
+<!--            <optional>true</optional>-->
         </dependency>
     </dependencies>
 </project>

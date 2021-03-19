@@ -62,12 +62,13 @@ public class RefreshableReporter<S> implements Reporter<S> {
                             .encoding(Encoding.JSON)
                             .build());
             asyncReporter.setSender(sender);
-            asyncReporter.setPending(traceProperties.getOutput().getQueuedMaxSpans(), traceProperties.getOutput().getQueuedMaxSize());
-            asyncReporter.setMessageTimeoutNanos(messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS));
-            asyncReporter.startFlushThread(); // start thread
+
         } else {
             asyncReporter.setSender(new SimpleSender());
         }
+        asyncReporter.setPending(traceProperties.getOutput().getQueuedMaxSpans(), traceProperties.getOutput().getQueuedMaxSize());
+        asyncReporter.setMessageTimeoutNanos(messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS));
+        asyncReporter.startFlushThread(); // start thread
     }
 
     protected long messageTimeout(long timeout, TimeUnit unit) {

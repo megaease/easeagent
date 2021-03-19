@@ -18,10 +18,13 @@ public class ConfigUtils {
         return configs.getString(ConfigConst.SYSTEM_NAME);
     }
 
-    public static <R> void bindProp(String name, Configs configs, BiFunction<Configs, String, R> func, Consumer<R> consumer) {
+    public static <R> void bindProp(String name, Configs configs, BiFunction<Configs, String, R> func, Consumer<R> consumer, R def) {
         Runnable process = () -> {
             R result = func.apply(configs, name);
-            consumer.accept(result);
+            result = firstNotNull(result, def);
+            if (result != null) {
+                consumer.accept(result);
+            }
         };
         process.run();
         configs.addChangeListener(list -> {
@@ -30,6 +33,19 @@ public class ConfigUtils {
                 process.run();
             }
         });
+    }
+
+    private static <R> R firstNotNull(R... ars) {
+        for (R one : ars) {
+            if (one != null) {
+                return one;
+            }
+        }
+        return null;
+    }
+
+    public static <R> void bindProp(String name, Configs configs, BiFunction<Configs, String, R> func, Consumer<R> consumer) {
+        bindProp(name, configs, func, consumer, null);
     }
 
     public static Map<String, String> json2KVMap(String json) throws IOException {
@@ -59,6 +75,6 @@ public class ConfigUtils {
     }
 
     private static String join(String prefix, String current) {
-        return prefix==null?current:ConfigConst.join(prefix,current);
+        return prefix == null ? current : ConfigConst.join(prefix, current);
     }
 }

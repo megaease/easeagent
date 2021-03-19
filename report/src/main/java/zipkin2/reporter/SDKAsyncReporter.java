@@ -8,8 +8,8 @@ import zipkin2.Span;
 import zipkin2.codec.BytesEncoder;
 import zipkin2.codec.Encoding;
 import zipkin2.codec.SpanBytesEncoder;
-import zipkin2.internal.JsonCodec;
 import zipkin2.internal.AgentV2SpanWriter;
+import zipkin2.internal.JsonCodec;
 import zipkin2.reporter.kafka11.SDKSender;
 
 import java.io.IOException;
@@ -120,7 +120,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
     @SneakyThrows
     @Override
     public void report(S next) {
-        if (!traceProperties.isEnabled() || !traceProperties.getOutput().isEnabled()) { // 禁止
+        if (!traceProperties.isEnabled()) {
             return;
         }
 
@@ -150,7 +150,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
     @Override
     public final void flush() {
-        if (!traceProperties.isEnabled() || !traceProperties.getOutput().isEnabled()) { // 禁止
+        if (!traceProperties.isEnabled()) {
             return;
         }
 

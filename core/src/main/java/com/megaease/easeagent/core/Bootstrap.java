@@ -22,16 +22,14 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.config.ConfigFactory;
-import com.megaease.easeagent.config.ConfigManagerMXBean;
-import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.*;
+import com.megaease.easeagent.report.AgentReport;
+import com.megaease.easeagent.report.AgentReportAware;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.dynamic.loading.ClassInjector;
-import net.bytebuddy.dynamic.scaffold.InstrumentedType;
 import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -83,7 +81,8 @@ public class Bootstrap {
                 .or(nameStartsWith("org.junit."))
                 .or(nameStartsWith("junit."))
                 .or(nameStartsWith("com.intellij."));
-        builder = define(conf, transformations, scoped(providers, conf), builder);
+        final AgentReport agentReport = AgentReport.create(conf);
+        builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
         builder.installOn(inst);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
@@ -95,7 +94,7 @@ public class Bootstrap {
         LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName.toString());
     }
 
-    private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf) {
+    private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
         return ImmutableMap.copyOf(Maps.transformValues(
                 from(providers).uniqueIndex(new Function<Class<?>, Class<?>>() {
                     @Override
@@ -105,7 +104,7 @@ public class Bootstrap {
                 }), new Function<Class<?>, Iterable<QualifiedBean>>() {
                     @Override
                     public Iterable<QualifiedBean> apply(Class<?> input) {
-                        return beans(conf, input);
+                        return beans(input, conf, agentReport);
                     }
                 }));
     }
@@ -114,8 +113,8 @@ public class Bootstrap {
         return isBootstrapClassLoader().or(is(Bootstrap.class.getClassLoader()));
     }
 
-    private static AgentBuilder define(Configs conf, Iterable<Class<? extends Transformation>> transformations,
-                                       Map<Class<?>, Iterable<QualifiedBean>> scopedBeans, AgentBuilder ab) {
+    private static AgentBuilder define(Iterable<Class<? extends Transformation>> transformations,
+                                       Map<Class<?>, Iterable<QualifiedBean>> scopedBeans, AgentBuilder ab, Configs conf, AgentReport report) {
 
         for (Class<? extends Transformation> tc : transformations) {
             final Injection.Provider ann = tc.getAnnotation(Injection.Provider.class);
@@ -123,7 +122,7 @@ public class Bootstrap {
             final Register register = new Register(beans);
 
             for (Map.Entry<ElementMatcher<? super TypeDescription>, Iterable<Definition.Transformer>> entry :
-                    newInstance(conf, tc).define(Definition.Default.EMPTY).asMap().entrySet()) {
+                    newInstance(tc, conf, report).define(Definition.Default.EMPTY).asMap().entrySet()) {
                 ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register));
             }
 
@@ -142,9 +141,9 @@ public class Bootstrap {
                 }).toList());
     }
 
-    private static Iterable<QualifiedBean> beans(Configs conf, Class<?> provider) {
+    private static Iterable<QualifiedBean> beans(Class<?> provider, Configs conf, AgentReport agentReport) {
         final ImmutableList.Builder<QualifiedBean> builder = ImmutableList.builder();
-        final Object instance = newInstance(conf, provider);
+        final Object instance = newInstance(provider, conf, agentReport);
         for (Method method : provider.getMethods()) {
             final Injection.Bean bean = method.getAnnotation(Injection.Bean.class);
             if (bean == null) continue;
@@ -159,11 +158,18 @@ public class Bootstrap {
         return builder.build();
     }
 
-    private static <T> T newInstance(Configs conf, Class<T> aClass) {
+    private static <T> T newInstance(Class<T> aClass, Configs conf, AgentReport agentReport) {
         final Configurable configurable = aClass.getAnnotation(Configurable.class);
         try {
-            return configurable == null ? aClass.newInstance()
-                    : aClass.getConstructor(Config.class).newInstance(conf.getConfig(configurable.bind()));
+            final T t = configurable == null ? aClass.newInstance()
+                    : aClass.getConstructor(Config.class).newInstance(conf);
+            if (t instanceof ConfigAware) {
+                ((ConfigAware) t).setConfig(conf);
+            }
+            if (t instanceof AgentReportAware) {
+                ((AgentReportAware) t).setAgentReport(agentReport);
+            }
+            return t;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
