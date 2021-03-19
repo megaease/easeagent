@@ -11,7 +11,7 @@ public class ConfigUtilsTest {
     public void test_bindProp() throws Exception {
         Configs configs = new Configs(Collections.singletonMap("hello", "world"));
         String[] rst = new String[]{null};
-        ConfigUtils.bindProp("hello", configs, Configs::getString, v -> rst[0] = v);
+        ConfigUtils.bindProp("hello", configs, Config::getString, v -> rst[0] = v);
         Assert.assertEquals("world", rst[0]);
         configs.updateConfigs(Collections.singletonMap("hello", "test"));
         Assert.assertEquals("test", rst[0]);

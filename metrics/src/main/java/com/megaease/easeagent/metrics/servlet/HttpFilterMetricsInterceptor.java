@@ -4,12 +4,14 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.model.ErrorPercentModelGauge;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +24,12 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric implement
 
     public HttpFilterMetricsInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
+    }
+
+    @Override
+    public Converter newConverter(AdditionalAttributes attributes) {
+        return new ServerConverter("application", "http-request", "url",
+                attributes.getAdditionalAttributes());
     }
 
     @Override

@@ -18,7 +18,7 @@ public class ConfigUtils {
         return configs.getString(ConfigConst.SYSTEM_NAME);
     }
 
-    public static <R> void bindProp(String name, Configs configs, BiFunction<Configs, String, R> func, Consumer<R> consumer, R def) {
+    public static <R> void bindProp(String name, Config configs, BiFunction<Config, String, R> func, Consumer<R> consumer, R def) {
         Runnable process = () -> {
             R result = func.apply(configs, name);
             result = firstNotNull(result, def);
@@ -44,7 +44,7 @@ public class ConfigUtils {
         return null;
     }
 
-    public static <R> void bindProp(String name, Configs configs, BiFunction<Configs, String, R> func, Consumer<R> consumer) {
+    public static <R> void bindProp(String name, Config configs, BiFunction<Config, String, R> func, Consumer<R> consumer) {
         bindProp(name, configs, func, consumer, null);
     }
 

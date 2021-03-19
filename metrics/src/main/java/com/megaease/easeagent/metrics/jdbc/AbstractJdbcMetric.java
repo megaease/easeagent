@@ -27,6 +27,9 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.*;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.KeyType;
+import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 
 import java.time.Duration;
@@ -101,5 +104,9 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
                 .build());
 
     }
-
+    protected class JDBCConverter extends ConverterAdapter {
+        public JDBCConverter(String category, String type, String keyFieldName, Map<String, Object> attributes) {
+            super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
+        }
+    }
 }

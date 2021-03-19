@@ -1,5 +1,6 @@
 package com.megaease.easeagent.report;
 
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 
@@ -22,9 +23,9 @@ public interface OutputProperties {
         private volatile boolean enabled;
 
         public Default(Configs configs) {
-            ConfigUtils.bindProp(OUTPUT_SERVERS, configs, Configs::getString, v -> this.servers = v);
-            ConfigUtils.bindProp(OUTPUT_TIMEOUT, configs, Configs::getString, v -> this.timeout = v);
-            ConfigUtils.bindProp(OUTPUT_ENABLED, configs, Configs::getBoolean, v -> this.enabled = v);
+            ConfigUtils.bindProp(OUTPUT_SERVERS, configs, Config::getString, v -> this.servers = v);
+            ConfigUtils.bindProp(OUTPUT_TIMEOUT, configs, Config::getString, v -> this.timeout = v);
+            ConfigUtils.bindProp(OUTPUT_ENABLED, configs, Config::getBoolean, v -> this.enabled = v);
         }
 
         @Override

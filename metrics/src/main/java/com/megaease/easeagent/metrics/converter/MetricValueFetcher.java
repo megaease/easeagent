@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics;
+package com.megaease.easeagent.metrics.converter;
 
 import com.codahale.metrics.Counting;
 import com.codahale.metrics.Metered;

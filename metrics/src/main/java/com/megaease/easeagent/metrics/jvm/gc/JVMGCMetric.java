@@ -4,9 +4,13 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
+import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.metrics.*;
+import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
@@ -33,6 +37,12 @@ public class JVMGCMetric extends AbstractMetric {
                         .build())
                 .build();
         this.collect();
+    }
+
+    @Override
+    public Converter newConverter(AdditionalAttributes attributes) {
+        //todo
+        throw new UnsupportedOperationException();
     }
 
     public void collect() {

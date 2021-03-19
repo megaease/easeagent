@@ -1,5 +1,6 @@
 package com.megaease.easeagent.report.metric;
 
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 
@@ -22,9 +23,9 @@ public interface MetricProps {
         private volatile String topic;
 
         public Default(Configs configs, String key) {
-            ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_ENABLED), configs, Configs::getBoolean, v -> this.enabled = v);
-            ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_APPEND_TYPE), configs, Configs::getString, v -> this.appendType = v);
-            ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_TOPIC), configs, Configs::getString, v -> this.topic = v);
+            ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_ENABLED), configs, Config::getBoolean, v -> this.enabled = v);
+            ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_APPEND_TYPE), configs, Config::getString, v -> this.appendType = v);
+            ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_TOPIC), configs, Config::getString, v -> this.topic = v);
         }
 
         @Override

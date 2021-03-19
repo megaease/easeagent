@@ -21,6 +21,7 @@ import brave.Tracer;
 import brave.Tracing;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.config.ConfigConst;
@@ -29,6 +30,8 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.SQLCompression;
+import com.megaease.easeagent.metrics.AutoRefreshReporter;
+import com.megaease.easeagent.metrics.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
@@ -38,6 +41,7 @@ import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
+import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
@@ -56,8 +60,6 @@ import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 public abstract class Provider implements AgentReportAware, ConfigAware {
 
-    private final MetricRegistry metricRegistry = new MetricRegistry();
-
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance();
 
     private final SQLCompression sqlCompression = SQLCompression.DEFAULT;
@@ -67,10 +69,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     private Tracing tracing;
     private AgentReport agentReport;
     private Config config;
+    private AdditionalAttributes additionalAttributes;
 
     @Override
     public void setConfig(Config config) {
         this.config = config;
+        this.additionalAttributes = new AdditionalAttributes(config.getString(ConfigConst.SERVICE_NAME));
     }
 
     @Override
@@ -101,25 +105,15 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
         return tracing;
     }
 
-    @Injection.Bean
-    public MetricRegistry metricRegistry() {
-//        Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
-//                .outputTo(LoggerFactory.getLogger(JVMMemoryMetric.class))
-//                .convertRatesTo(TimeUnit.SECONDS)
-//                .convertDurationsTo(TimeUnit.MILLISECONDS)
-//                .build();
-//        reporter.start(10, 30, TimeUnit.SECONDS);
-        return metricRegistry;
-    }
 
     @Injection.Bean
     public JVMMemoryMetric jvmMemoryMetric() {
-        return new JVMMemoryMetric(this.metricRegistry);
+        return new JVMMemoryMetric(new MetricRegistry());
     }
 
     @Injection.Bean
     public JVMGCMetric jvmgcMetric() {
-        return new JVMGCMetric(this.metricRegistry);
+        return new JVMGCMetric(new MetricRegistry());
     }
 
     @Injection.Bean
@@ -129,14 +123,26 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     @Injection.Bean("agentInterceptorChainBuilder4Con")
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Con() {
+        MetricRegistry metricRegistry = new MetricRegistry();
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_JDBC_CONNECTION);
+        final JdbcConMetricInterceptor jdbcConMetricInterceptor = new JdbcConMetricInterceptor(metricRegistry);
+        new AutoRefreshReporter(metricRegistry, collectorConfig,
+                jdbcConMetricInterceptor.newConverter(this.additionalAttributes),
+                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_JDBC_CONNECTION, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new JdbcConMetricInterceptor(metricRegistry));
+                .addInterceptor(jdbcConMetricInterceptor);
     }
 
     @Injection.Bean("agentInterceptorChainBuilder4Stm")
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Stm() {
+        MetricRegistry metricRegistry = new MetricRegistry();
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_JDBC_CONNECTION);
+        final JdbcStatementMetricInterceptor jdbcStatementMetricInterceptor = new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression);
+        new AutoRefreshReporter(metricRegistry, collectorConfig,
+                jdbcStatementMetricInterceptor.newConverter(this.additionalAttributes),
+                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_JDBC_CONNECTION, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression))
+                .addInterceptor(jdbcStatementMetricInterceptor)
                 .addInterceptor(new JdbcStatementTracingInterceptor(sqlCompression))
                 ;
     }
@@ -144,8 +150,14 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("agentInterceptorChainBuilder4Filter")
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Filter() {
         loadTracing();
+        MetricRegistry metricRegistry = new MetricRegistry();
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_REQUEST);
+        final HttpFilterMetricsInterceptor httpFilterMetricsInterceptor = new HttpFilterMetricsInterceptor(metricRegistry);
+        new AutoRefreshReporter(metricRegistry, collectorConfig,
+                httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
+                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_REQUEST, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new HttpFilterMetricsInterceptor(metricRegistry))
+                .addInterceptor(httpFilterMetricsInterceptor)
                 .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
                 .addInterceptor(new HttpFilterLogInterceptor())
                 ;
@@ -188,7 +200,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4SpringRedis() {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisMetricInterceptor(this.metricRegistry))
+                .addInterceptor(new RedisMetricInterceptor(new MetricRegistry()))
                 .addInterceptor(new SpringRedisTracingInterceptor())
                 ;
     }
@@ -197,7 +209,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     public AgentInterceptorChain.Builder builder4RedisClientConnectAsync() {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisMetricInterceptor(this.metricRegistry))
+                .addInterceptor(new RedisMetricInterceptor(new MetricRegistry()))
                 .addInterceptor(new CommonRedisClientConnectInterceptor())
                 ;
     }
@@ -215,7 +227,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new RedisChannelWriterInterceptor())
-                .addInterceptor(new CommonRedisMetricInterceptor(this.metricRegistry))
+                .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
                 .addInterceptor(new CommonLettuceTracingInterceptor())
                 ;
     }
@@ -224,7 +236,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     public AgentInterceptorChain.Builder builder4Jedis() {
         loadTracing();
         return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new CommonRedisMetricInterceptor(this.metricRegistry))
+                .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
                 .addInterceptor(new JedisTracingInterceptor())
                 ;
     }

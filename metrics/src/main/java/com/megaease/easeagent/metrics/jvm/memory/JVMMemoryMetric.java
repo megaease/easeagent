@@ -19,7 +19,9 @@ package com.megaease.easeagent.metrics.jvm.memory;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.metrics.*;
+import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.model.JVMMemoryGaugeMetricModel;
 
 import java.lang.management.ManagementFactory;
@@ -41,6 +43,12 @@ public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
         super(metricRegistry, enableSchedule);
         this.metricNameFactory = MetricNameFactory.createBuilder().gaugeType(MetricSubType.DEFAULT, new HashMap<>())
                 .build();
+    }
+
+    @Override
+    public Converter newConverter(AdditionalAttributes attributes) {
+        //todo
+        throw new UnsupportedOperationException();
     }
 
     @Override

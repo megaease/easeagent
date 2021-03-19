@@ -23,6 +23,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
+import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
@@ -31,6 +32,7 @@ import com.megaease.easeagent.core.jdbc.ExecutionInfo;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,5 +89,11 @@ public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implement
         } catch (Exception e) {
             logger.warn("remove lru cache failed: " + e.getMessage());
         }
+    }
+
+    @Override
+    public Converter newConverter(AdditionalAttributes attributes) {
+        return new JDBCConverter("application", "jdbc-statement",
+                "signature", attributes.getAdditionalAttributes());
     }
 }

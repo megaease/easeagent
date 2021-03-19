@@ -1,5 +1,6 @@
 package com.megaease.easeagent.report.trace;
 
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 
@@ -37,7 +38,7 @@ public interface TraceProps {
         private volatile boolean enabled;
 
         public Default(Configs configs) {
-            ConfigUtils.bindProp(TRACE_ENABLED, configs, Configs::getBoolean, v -> this.enabled = v);
+            ConfigUtils.bindProp(TRACE_ENABLED, configs, Config::getBoolean, v -> this.enabled = v);
             this.output = new KafkaOutputPropsImpl(configs);
         }
 
@@ -62,13 +63,13 @@ public interface TraceProps {
             private volatile int messageTimeout;
 
             public KafkaOutputPropsImpl(Configs configs) {
-                ConfigUtils.bindProp(TRACE_OUTPUT_ENABLED, configs, Configs::getBoolean, v -> this.enabled = v);
-                ConfigUtils.bindProp(TRACE_OUTPUT_TOPIC, configs, Configs::getString, v -> this.topic = v);
-                ConfigUtils.bindProp(TRACE_OUTPUT_MESSAGE_MAX_BYTES, configs, Configs::getInt, v -> this.messageMaxBytes = v);
-                ConfigUtils.bindProp(TRACE_OUTPUT_REPORT_THREAD, configs, Configs::getInt, v -> this.reportThread = v);
-                ConfigUtils.bindProp(TRACE_OUTPUT_QUEUED_MAX_SPANS, configs, Configs::getInt, v -> this.queuedMaxSpans = v);
-                ConfigUtils.bindProp(TRACE_OUTPUT_QUEUED_MAX_SIZE, configs, Configs::getInt, v -> this.queuedMaxSize = v);
-                ConfigUtils.bindProp(TRACE_OUTPUT_MESSAGE_TIMEOUT, configs, Configs::getInt, v -> this.messageTimeout = v);
+                ConfigUtils.bindProp(TRACE_OUTPUT_ENABLED, configs, Config::getBoolean, v -> this.enabled = v);
+                ConfigUtils.bindProp(TRACE_OUTPUT_TOPIC, configs, Config::getString, v -> this.topic = v);
+                ConfigUtils.bindProp(TRACE_OUTPUT_MESSAGE_MAX_BYTES, configs, Config::getInt, v -> this.messageMaxBytes = v);
+                ConfigUtils.bindProp(TRACE_OUTPUT_REPORT_THREAD, configs, Config::getInt, v -> this.reportThread = v);
+                ConfigUtils.bindProp(TRACE_OUTPUT_QUEUED_MAX_SPANS, configs, Config::getInt, v -> this.queuedMaxSpans = v);
+                ConfigUtils.bindProp(TRACE_OUTPUT_QUEUED_MAX_SIZE, configs, Config::getInt, v -> this.queuedMaxSize = v);
+                ConfigUtils.bindProp(TRACE_OUTPUT_MESSAGE_TIMEOUT, configs, Config::getInt, v -> this.messageTimeout = v);
             }
 
             @Override

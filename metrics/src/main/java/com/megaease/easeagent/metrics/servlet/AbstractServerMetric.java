@@ -2,9 +2,16 @@ package com.megaease.easeagent.metrics.servlet;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
-import com.megaease.easeagent.metrics.*;
+import com.megaease.easeagent.metrics.AbstractMetric;
+import com.megaease.easeagent.metrics.MetricField;
+import com.megaease.easeagent.metrics.MetricNameFactory;
+import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.KeyType;
+import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractServerMetric extends AbstractMetric {
 
@@ -46,4 +53,9 @@ public abstract class AbstractServerMetric extends AbstractMetric {
                 .build();
     }
 
+    protected class ServerConverter extends ConverterAdapter {
+        ServerConverter(String category, String type, String keyFieldName, Map<String, Object> attributes) {
+            super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
+        }
+    }
 }
