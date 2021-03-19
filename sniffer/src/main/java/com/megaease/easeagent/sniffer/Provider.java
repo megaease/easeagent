@@ -86,6 +86,12 @@ public abstract class Provider {
     }
 
     @Injection.Bean
+    public Tracing tracing() {
+        loadTracing();
+        return tracing;
+    }
+
+    @Injection.Bean
     public MetricRegistry metricRegistry() {
 //        Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
 //                .outputTo(LoggerFactory.getLogger(JVMMemoryMetric.class))
@@ -215,12 +221,12 @@ public abstract class Provider {
 
     @Injection.Bean("builder4KafkaDoSend")
     public AgentInterceptorChain.Builder builder4KafkaDoSend() {
-        loadTracing();
-        DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
-        builder.addInterceptor(new KafkaTracingInterceptor());
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new KafkaDoSendInterceptor(builder, chainInvoker))
-                ;
+        return new DefaultAgentInterceptorChain.Builder();
+    }
+
+    @Injection.Bean("commonInterceptorChainBuilder")
+    public AgentInterceptorChain.Builder commonInterceptorChainBuilder() {
+        return new DefaultAgentInterceptorChain.Builder();
     }
 
     private SpanHandler spanHandler() {

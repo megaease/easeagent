@@ -1,5 +1,7 @@
 package com.megaease.easeagent.sniffer;
 
+import brave.Tracing;
+import brave.propagation.StrictCurrentTraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
@@ -12,6 +14,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class BaseSnifferTest {
+    StrictCurrentTraceContext currentTraceContext = StrictCurrentTraceContext.create();
+
+    protected Tracing tracing() {
+        Tracing tracing = Tracing.newBuilder()
+                .currentTraceContext(currentTraceContext)
+                .build();
+        tracing.tracer();
+        return tracing;
+    }
 
     protected void verifyInvokeTimes(AgentInterceptorChainInvoker chainInvoker, int n) {
         verify(chainInvoker, times(n))

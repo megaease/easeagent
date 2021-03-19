@@ -107,9 +107,5 @@
             <artifactId>kafka-clients</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>io.zipkin.brave</groupId>
-            <artifactId>brave-instrumentation-kafka-clients</artifactId>
-        </dependency>
     </dependencies>
 </project>

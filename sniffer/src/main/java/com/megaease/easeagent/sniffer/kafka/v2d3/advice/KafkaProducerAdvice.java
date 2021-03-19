@@ -1,5 +1,6 @@
 package com.megaease.easeagent.sniffer.kafka.v2d3.advice;
 
+import brave.Tracing;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
@@ -7,9 +8,12 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
+import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaDoSendInterceptor;
+import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaTracingInterceptor;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
@@ -61,11 +65,15 @@ public abstract class KafkaProducerAdvice implements Transformation {
     public abstract Definition.Transformer doSend(ElementMatcher<? super MethodDescription> matcher);
 
     static class DoSend extends AbstractAdvice {
+
         @Injection.Autowire
-        public DoSend(@Injection.Qualifier("builder4KafkaDoSend") AgentInterceptorChain.Builder builder,
-                      AgentInterceptorChainInvoker agentInterceptorChainInvoker
-        ) {
-            super(builder, agentInterceptorChainInvoker);
+        public DoSend(AgentInterceptorChainInvoker chainInvoker,
+                      @Injection.Qualifier("commonInterceptorChainBuilder") AgentInterceptorChain.Builder builder,
+                      Tracing tracing) {
+            super(builder, chainInvoker);
+            DefaultAgentInterceptorChain.Builder builder4Tracing = new DefaultAgentInterceptorChain.Builder();
+            builder4Tracing.addInterceptor(new KafkaTracingInterceptor(tracing));
+            this.builder.addInterceptor(new KafkaDoSendInterceptor(builder4Tracing, this.chainInvoker));
         }
 
         @Advice.OnMethodEnter

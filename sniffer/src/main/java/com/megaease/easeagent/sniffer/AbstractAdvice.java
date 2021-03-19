@@ -9,16 +9,22 @@ import com.megaease.easeagent.core.utils.ContextUtils;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class AbstractAdvice {
+public abstract class AbstractAdvice {
 
     protected final ForwardLock lock;
-    protected final AgentInterceptorChain.Builder builder;
+    protected AgentInterceptorChain.Builder builder;
     protected final AgentInterceptorChainInvoker chainInvoker;
+    protected boolean needInitChainBuilder = true;
 
     public AbstractAdvice(AgentInterceptorChain.Builder builder, AgentInterceptorChainInvoker chainInvoker) {
         this.lock = new ForwardLock();
         this.builder = builder;
         this.chainInvoker = chainInvoker;
+    }
+
+    public AbstractAdvice withoutInitChainBuilder() {
+        this.needInitChainBuilder = false;
+        return this;
     }
 
     protected ForwardLock.Release<Map<Object, Object>> doEnter(Object invoker, String method, Object[] args) {
