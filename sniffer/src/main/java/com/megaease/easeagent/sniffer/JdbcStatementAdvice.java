@@ -160,7 +160,7 @@ public abstract class JdbcStatementAdvice implements Transformation {
                         .method(method)
                         .args(objs)
                         .build();
-                this.chainInvoker.doBefore(this.builder, methodInfo, context);
+                this.chainInvoker.doBefore(this.chainBuilder, methodInfo, context);
                 return context;
             });
         }
@@ -185,7 +185,7 @@ public abstract class JdbcStatementAdvice implements Transformation {
                         .retValue(retValue)
                         .throwable(throwable)
                         .build();
-                this.chainInvoker.doAfter(this.builder, methodInfo, context);
+                this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context);
             });
 
         }

@@ -21,10 +21,10 @@ public enum MetricSubType {
     DEFAULT("00"),
     ERROR("01"),
     CHANNEL("02"), //for rabbitmq
-    MQ_CONSUMER("03"), //for messaging kafka/rabbitmq consumer
-    MQ_PRODUCER("04"), //for messaging kafka/rabbitmq producer
-    MQ_CONSUMER_ERROR("05"), //for messaging kafka/rabbitmq consumer error
-    MQ_PRODUCER_ERROR("06"), //for messaging kafka/rabbitmq producer error
+    CONSUMER("03"), //for messaging kafka/rabbitmq consumer
+    PRODUCER("04"), //for messaging kafka/rabbitmq producer
+    CONSUMER_ERROR("05"), //for messaging kafka/rabbitmq consumer error
+    PRODUCER_ERROR("06"), //for messaging kafka/rabbitmq producer error
     NONE("99");
 
     private final String code;

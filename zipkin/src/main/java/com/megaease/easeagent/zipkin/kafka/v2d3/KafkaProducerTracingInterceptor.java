@@ -3,6 +3,7 @@ package com.megaease.easeagent.zipkin.kafka.v2d3;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -17,11 +18,11 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Map;
 
-public class KafkaTracingInterceptor implements AgentInterceptor {
+public class KafkaProducerTracingInterceptor implements AgentInterceptor {
 
     private final KafkaTracing kafkaTracing;
 
-    public KafkaTracingInterceptor(Tracing tracing) {
+    public KafkaProducerTracingInterceptor(Tracing tracing) {
         this.kafkaTracing = KafkaTracing.newBuilder(tracing).remoteServiceName("my-broker").build();
     }
 
@@ -41,10 +42,26 @@ public class KafkaTracingInterceptor implements AgentInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        TracingProducer<?, ?> tracingProducer = ContextUtils.getFromContext(context, TracingProducer.class);
-        MultiData<Span, Tracer.SpanInScope> multiData = ContextUtils.getFromContext(context, TracingProducer.class);
-        tracingProducer.afterSend(multiData.data1, multiData.data0, methodInfo.getThrowable());
+        Boolean async = ContextUtils.getFromContext(context, ContextCons.ASYNC_FLAG);
+        if (async != null && async) {
+            return this.processAsync(methodInfo, context, chain);
+        }
+        return this.processSync(methodInfo, context, chain);
+    }
+
+    private Object processSync(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        MultiData<Span, Tracer.SpanInScope> multiData = ContextUtils.getFromContext(context, MultiData.class);
+        if (!methodInfo.isSuccess()) {
+            multiData.data0.error(methodInfo.getThrowable()).finish();
+        }
+        multiData.data1.close();
         return chain.doAfter(methodInfo, context);
     }
 
+    private Object processAsync(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        TracingProducer<?, ?> tracingProducer = ContextUtils.getFromContext(context, TracingProducer.class);
+        MultiData<Span, Tracer.SpanInScope> multiData = ContextUtils.getFromContext(context, MultiData.class);
+        tracingProducer.afterSend(multiData.data1, multiData.data0, methodInfo.getThrowable());
+        return chain.doAfter(methodInfo, context);
+    }
 }

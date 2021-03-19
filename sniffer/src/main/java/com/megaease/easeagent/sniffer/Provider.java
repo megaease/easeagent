@@ -19,12 +19,15 @@ package com.megaease.easeagent.sniffer;
 
 import brave.Tracer;
 import brave.Tracing;
+import brave.handler.SpanHandler;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
+import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.config.ConfigConst;
+import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
@@ -45,6 +48,7 @@ import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
+import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
@@ -57,6 +61,8 @@ import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
+
+import java.util.concurrent.TimeUnit;
 
 public abstract class Provider implements AgentReportAware, ConfigAware {
 

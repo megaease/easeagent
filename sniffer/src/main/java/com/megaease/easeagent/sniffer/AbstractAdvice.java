@@ -11,20 +11,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractAdvice {
 
-    protected final ForwardLock lock;
-    protected AgentInterceptorChain.Builder builder;
-    protected final AgentInterceptorChainInvoker chainInvoker;
-    protected boolean needInitChainBuilder = true;
+    protected final ForwardLock lock = new ForwardLock();
+    protected AgentInterceptorChain.Builder chainBuilder;
+    protected AgentInterceptorChainInvoker chainInvoker;
 
-    public AbstractAdvice(AgentInterceptorChain.Builder builder, AgentInterceptorChainInvoker chainInvoker) {
-        this.lock = new ForwardLock();
-        this.builder = builder;
+    public AbstractAdvice(AgentInterceptorChainInvoker chainInvoker) {
         this.chainInvoker = chainInvoker;
     }
 
-    public AbstractAdvice withoutInitChainBuilder() {
-        this.needInitChainBuilder = false;
-        return this;
+    public AbstractAdvice(AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker) {
+        this.chainBuilder = chainBuilder;
+        this.chainInvoker = chainInvoker;
     }
 
     protected ForwardLock.Release<Map<Object, Object>> doEnter(Object invoker, String method, Object[] args) {
@@ -38,7 +35,7 @@ public abstract class AbstractAdvice {
                     .method(method)
                     .args(args)
                     .build();
-            chainInvoker.doBefore(this.builder, methodInfo, context);
+            chainInvoker.doBefore(this.chainBuilder, methodInfo, context);
             return context;
         });
     }
@@ -57,7 +54,7 @@ public abstract class AbstractAdvice {
                     .retValue(retValue)
                     .throwable(throwable)
                     .build();
-            Object newRetValue = chainInvoker.doAfter(this.builder, methodInfo, context);
+            Object newRetValue = chainInvoker.doAfter(this.chainBuilder, methodInfo, context);
             if (newRetValue != retValue) {
                 tmpRet.set(newRetValue);
             }
@@ -77,7 +74,7 @@ public abstract class AbstractAdvice {
                     .args(args)
                     .throwable(throwable)
                     .build();
-            chainInvoker.doAfter(this.builder, methodInfo, context);
+            chainInvoker.doAfter(this.chainBuilder, methodInfo, context);
         });
     }
 
@@ -88,6 +85,6 @@ public abstract class AbstractAdvice {
                 .method(method)
                 .args(args)
                 .build();
-        chainInvoker.doAfter(this.builder, methodInfo, context);
+        chainInvoker.doAfter(this.chainBuilder, methodInfo, context);
     }
 }

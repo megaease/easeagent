@@ -3,21 +3,19 @@ package com.megaease.easeagent.sniffer.kafka.v2d3.advice;
 import brave.Tracing;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.ForwardLock;
-import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMetric;
-import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
-import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
+import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
+import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
@@ -28,25 +26,22 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Injection.Provider(Provider.class)
-public abstract class KafkaProducerAdvice implements Transformation {
+public abstract class KafkaConsumerAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("org.apache.kafka.clients.producer.KafkaProducer")
-                .or(named("org.apache.kafka.clients.producer.MockProducer")))
-                .or(named("org.apache.kafka.clients.producer.KafkaProducer"))
+        return def.type(hasSuperType(named("org.apache.kafka.clients.consumer.KafkaConsumer")
+                .or(named("org.apache.kafka.clients.consumer.MockConsumer")))
+                .or(named("org.apache.kafka.clients.consumer.KafkaConsumer"))
         )
-                .transform(objConstruct(isConstructor().and(takesArguments(7)), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
-                .transform(doSend((named("doSend")
-                                .and(isPrivate())
-                                .and(takesArguments(2)))
-                                .and(takesArgument(0, named("org.apache.kafka.clients.producer.ProducerRecord")))
-                                .and(takesArgument(1, named("org.apache.kafka.clients.producer.Callback")))
-                                .and(returns(named("java.util.concurrent.Future")))
+                .transform(objConstruct(isConstructor().and(takesArguments(3))
+                                .and(takesArgument(0, named("org.apache.kafka.clients.consumer.ConsumerConfig")))
+                        , AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
+                .transform(doSend((named("poll")
+                                .and(takesArguments(1)))
+                                .and(takesArgument(0, named("java.time.Duration")))
                         )
-
                 )
-
                 .end()
                 ;
     }
@@ -57,10 +52,11 @@ public abstract class KafkaProducerAdvice implements Transformation {
     static class ObjConstruct extends AbstractAdvice {
 
         @Injection.Autowire
-        public ObjConstruct(AgentInterceptorChainInvoker chainInvoker, AgentInterceptorChain.BuilderFactory chainBuilderFactory) {
+        public ObjConstruct(AgentInterceptorChainInvoker chainInvoker,
+                            AgentInterceptorChain.BuilderFactory chainBuilderFactory) {
             super(chainInvoker);
             this.chainBuilder = chainBuilderFactory.create();
-            this.chainBuilder.addInterceptor(new KafkaProducerConstructInterceptor());
+            this.chainBuilder.addInterceptor(new KafkaConsumerConstructInterceptor());
         }
 
         @Advice.OnMethodExit
@@ -71,29 +67,20 @@ public abstract class KafkaProducerAdvice implements Transformation {
         }
     }
 
-    @AdviceTo(DoSend.class)
+    @AdviceTo(DoPoll.class)
     public abstract Definition.Transformer doSend(ElementMatcher<? super MethodDescription> matcher);
 
-    static class DoSend extends AbstractAdvice {
+    static class DoPoll extends AbstractAdvice {
 
         @Injection.Autowire
-        public DoSend(AgentInterceptorChainInvoker chainInvoker, AgentInterceptorChain.BuilderFactory chainBuilderFactory,
+        public DoPoll(AgentInterceptorChainInvoker chainInvoker,
+                      AgentInterceptorChain.BuilderFactory chainBuilderFactory,
                       Tracing tracing, MetricRegistry metricRegistry) {
             super(chainInvoker);
-            this.chainBuilder = chainBuilderFactory.create();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
-
-            KafkaProducerMetricInterceptor metricInterceptor = new KafkaProducerMetricInterceptor(kafkaMetric);
-            KafkaProducerTracingInterceptor tracingInterceptor = new KafkaProducerTracingInterceptor(tracing);
-
-            DefaultAgentInterceptorChain.Builder builder4Async = new DefaultAgentInterceptorChain.Builder();
-            builder4Async.addInterceptor(metricInterceptor)
-                    .addInterceptor(tracingInterceptor);
-
-            this.chainBuilder.addInterceptor(new KafkaProducerDoSendInterceptor(this.chainInvoker, builder4Async))
-                    .addInterceptor(metricInterceptor)
-                    .addInterceptor(tracingInterceptor);
-
+            this.chainBuilder = chainBuilderFactory.create();
+            this.chainBuilder.addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
+                    .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric));
         }
 
         @Advice.OnMethodEnter

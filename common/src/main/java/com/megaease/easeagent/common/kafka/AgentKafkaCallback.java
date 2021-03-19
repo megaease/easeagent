@@ -1,5 +1,6 @@
-package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
+package com.megaease.easeagent.common.kafka;
 
+import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -33,6 +34,7 @@ public class AgentKafkaCallback implements Callback {
 
     @Override
     public void onCompletion(RecordMetadata metadata, Exception exception) {
+        context.put(ContextCons.ASYNC_FLAG, true);
         this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context, newInterceptorChain);
         if (this.source != null) {
             this.source.onCompletion(metadata, exception);

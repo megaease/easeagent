@@ -26,7 +26,7 @@ public class JVMGCMetric extends AbstractMetric {
     private static final String NO_GC = "No GC";
 
     public JVMGCMetric(MetricRegistry metricRegistry) {
-        super(metricRegistry);
+        super(metricRegistry,true);
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .meterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.TIMES, MetricValueFetcher.MeteredCount)

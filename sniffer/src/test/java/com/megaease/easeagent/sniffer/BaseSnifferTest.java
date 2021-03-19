@@ -2,16 +2,15 @@ package com.megaease.easeagent.sniffer;
 
 import brave.Tracing;
 import brave.propagation.StrictCurrentTraceContext;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.interceptor.*;
+import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 public class BaseSnifferTest {
     StrictCurrentTraceContext currentTraceContext = StrictCurrentTraceContext.create();
@@ -43,5 +42,14 @@ public class BaseSnifferTest {
         verify(agentInterceptor, times(n))
                 .after(any(MethodInfo.class), any(Map.class),
                         any(AgentInterceptorChain.class));
+    }
+
+    protected void initBuilderFactory(AgentInterceptorChain.BuilderFactory builderFactory) {
+        when(builderFactory.create()).thenAnswer((Answer<AgentInterceptorChain.Builder>) invocation -> {
+            AgentInterceptorChain.Builder builder = mock(AgentInterceptorChain.Builder.class);
+            when(builder.addInterceptor(any(AgentInterceptor.class))).thenReturn(builder);
+            when(builder.build()).thenReturn(new DefaultAgentInterceptorChain(new ArrayList<>()));
+            return builder;
+        });
     }
 }

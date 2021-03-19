@@ -16,4 +16,10 @@ public interface AgentInterceptorChain {
 
         AgentInterceptorChain build();
     }
+
+    interface BuilderFactory {
+
+        Builder create();
+
+    }
 }

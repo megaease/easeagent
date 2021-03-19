@@ -20,6 +20,7 @@ import brave.propagation.TraceContext.Extractor;
 import brave.propagation.TraceContext.Injector;
 import brave.propagation.TraceContextOrSamplingFlags;
 import brave.sampler.SamplerFunction;
+
 import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerGroupMetadata;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -45,268 +47,304 @@ import org.apache.kafka.common.TopicPartition;
  * Kafka Consumer decorator. Read records headers to create and complete a child of the incoming
  * producers span if possible.
  */
-final class TracingConsumer<K, V> implements Consumer<K, V> {
-  final Consumer<K, V> delegate;
-  final KafkaTracing kafkaTracing;
-  final Tracing tracing;
-  final Extractor<KafkaConsumerRequest> extractor;
-  final SamplerFunction<MessagingRequest> sampler;
-  final Injector<KafkaConsumerRequest> injector;
-  final String remoteServiceName;
-  final boolean singleRootSpanOnReceiveBatch;
-  final TraceContextOrSamplingFlags emptyExtraction;
+public final class TracingConsumer<K, V> implements Consumer<K, V> {
+    final Consumer<K, V> delegate;
+    final KafkaTracing kafkaTracing;
+    final Tracing tracing;
+    final Extractor<KafkaConsumerRequest> extractor;
+    final SamplerFunction<MessagingRequest> sampler;
+    final Injector<KafkaConsumerRequest> injector;
+    final String remoteServiceName;
+    final boolean singleRootSpanOnReceiveBatch;
+    final TraceContextOrSamplingFlags emptyExtraction;
 
-  // replicate org.apache.kafka.clients.consumer.internals.NoOpConsumerRebalanceListener behaviour
-  static final ConsumerRebalanceListener NO_OP_CONSUMER_REBALANCE_LISTENER =
-    new ConsumerRebalanceListener() {
-      @Override public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-      }
+    // replicate org.apache.kafka.clients.consumer.internals.NoOpConsumerRebalanceListener behaviour
+    static final ConsumerRebalanceListener NO_OP_CONSUMER_REBALANCE_LISTENER =
+            new ConsumerRebalanceListener() {
+                @Override
+                public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+                }
 
-      @Override public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-      }
-    };
+                @Override
+                public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+                }
+            };
 
-  TracingConsumer(Consumer<K, V> delegate, KafkaTracing kafkaTracing) {
-    this.delegate = delegate;
-    this.kafkaTracing = kafkaTracing;
-    this.tracing = kafkaTracing.messagingTracing.tracing();
-    this.extractor = kafkaTracing.consumerExtractor;
-    this.sampler = kafkaTracing.consumerSampler;
-    this.injector = kafkaTracing.consumerInjector;
-    this.remoteServiceName = kafkaTracing.remoteServiceName;
-    this.singleRootSpanOnReceiveBatch = kafkaTracing.singleRootSpanOnReceiveBatch;
-    this.emptyExtraction = kafkaTracing.emptyExtraction;
-  }
-
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public ConsumerRecords<K, V> poll(Duration timeout) {
-    return poll(timeout.toMillis());
-  }
-
-  /** This uses a single timestamp for all records polled, to reduce overhead. */
-  // Do not use @Override annotation to avoid compatibility on deprecated methods
-  public ConsumerRecords<K, V> poll(long timeout) {
-    ConsumerRecords<K, V> records = delegate.poll(timeout);
-    if (records.isEmpty() || tracing.isNoop()) return records;
-    long timestamp = 0L;
-    Map<String, Span> consumerSpansForTopic = new LinkedHashMap<>();
-    for (TopicPartition partition : records.partitions()) {
-      String topic = partition.topic();
-      List<ConsumerRecord<K, V>> recordsInPartition = records.records(partition);
-      for (int i = 0, length = recordsInPartition.size(); i < length; i++) {
-        ConsumerRecord<K, V> record = recordsInPartition.get(i);
-        KafkaConsumerRequest request = new KafkaConsumerRequest(record);
-        TraceContextOrSamplingFlags extracted =
-          kafkaTracing.extractAndClearTraceIdHeaders(extractor, request, record.headers());
-
-        // If we extracted neither a trace context, nor request-scoped data (extra),
-        // and sharing trace is enabled make or reuse a span for this topic
-        if (extracted.equals(emptyExtraction) && singleRootSpanOnReceiveBatch) {
-          Span span = consumerSpansForTopic.get(topic);
-          if (span == null) {
-            span = kafkaTracing.nextMessagingSpan(sampler, request, extracted);
-            if (!span.isNoop()) {
-              setConsumerSpan(topic, span);
-              // incur timestamp overhead only once
-              if (timestamp == 0L) {
-                timestamp = tracing.clock(span.context()).currentTimeMicroseconds();
-              }
-              span.start(timestamp);
-            }
-            consumerSpansForTopic.put(topic, span);
-          }
-          injector.inject(span.context(), request);
-        } else { // we extracted request-scoped data, so cannot share a consumer span.
-          Span span = kafkaTracing.nextMessagingSpan(sampler, request, extracted);
-          if (!span.isNoop()) {
-            setConsumerSpan(topic, span);
-            // incur timestamp overhead only once
-            if (timestamp == 0L) {
-              timestamp = tracing.clock(span.context()).currentTimeMicroseconds();
-            }
-            span.start(timestamp).finish(timestamp); // span won't be shared by other records
-          }
-          injector.inject(span.context(), request);
-        }
-      }
+    TracingConsumer(Consumer<K, V> delegate, KafkaTracing kafkaTracing) {
+        this.delegate = delegate;
+        this.kafkaTracing = kafkaTracing;
+        this.tracing = kafkaTracing.messagingTracing.tracing();
+        this.extractor = kafkaTracing.consumerExtractor;
+        this.sampler = kafkaTracing.consumerSampler;
+        this.injector = kafkaTracing.consumerInjector;
+        this.remoteServiceName = kafkaTracing.remoteServiceName;
+        this.singleRootSpanOnReceiveBatch = kafkaTracing.singleRootSpanOnReceiveBatch;
+        this.emptyExtraction = kafkaTracing.emptyExtraction;
     }
-    for (Span span : consumerSpansForTopic.values()) span.finish(timestamp);
-    return records;
-  }
 
-  @Override public Set<TopicPartition> assignment() {
-    return delegate.assignment();
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public ConsumerRecords<K, V> poll(Duration timeout) {
+        return poll(timeout.toMillis());
+    }
 
-  @Override public Set<String> subscription() {
-    return delegate.subscription();
-  }
+    /**
+     * This uses a single timestamp for all records polled, to reduce overhead.
+     */
+    // Do not use @Override annotation to avoid compatibility on deprecated methods
+    public ConsumerRecords<K, V> poll(long timeout) {
+        ConsumerRecords<K, V> records = delegate.poll(timeout);
+        this.afterPoll(records);
+        return records;
+    }
 
-  @Override public void subscribe(Collection<String> topics) {
-    delegate.subscribe(topics);
-  }
+    @SuppressWarnings("unchecked")
+    public void afterPoll(ConsumerRecords<?, ?> _records) {
+        ConsumerRecords<K, V> records = (ConsumerRecords<K, V>) _records;
+        if (records.isEmpty() || tracing.isNoop()) return;
+        long timestamp = 0L;
+        Map<String, Span> consumerSpansForTopic = new LinkedHashMap<>();
+        for (TopicPartition partition : records.partitions()) {
+            String topic = partition.topic();
+            List<ConsumerRecord<K, V>> recordsInPartition = records.records(partition);
+            for (int i = 0, length = recordsInPartition.size(); i < length; i++) {
+                ConsumerRecord<K, V> record = recordsInPartition.get(i);
+                KafkaConsumerRequest request = new KafkaConsumerRequest(record);
+                TraceContextOrSamplingFlags extracted =
+                        kafkaTracing.extractAndClearTraceIdHeaders(extractor, request, record.headers());
 
-  @Override public void subscribe(Collection<String> topics, ConsumerRebalanceListener callback) {
-    delegate.subscribe(topics, callback);
-  }
+                // If we extracted neither a trace context, nor request-scoped data (extra),
+                // and sharing trace is enabled make or reuse a span for this topic
+                if (extracted.equals(emptyExtraction) && singleRootSpanOnReceiveBatch) {
+                    Span span = consumerSpansForTopic.get(topic);
+                    if (span == null) {
+                        span = kafkaTracing.nextMessagingSpan(sampler, request, extracted);
+                        if (!span.isNoop()) {
+                            setConsumerSpan(topic, span);
+                            // incur timestamp overhead only once
+                            if (timestamp == 0L) {
+                                timestamp = tracing.clock(span.context()).currentTimeMicroseconds();
+                            }
+                            span.start(timestamp);
+                        }
+                        consumerSpansForTopic.put(topic, span);
+                    }
+                    injector.inject(span.context(), request);
+                } else { // we extracted request-scoped data, so cannot share a consumer span.
+                    Span span = kafkaTracing.nextMessagingSpan(sampler, request, extracted);
+                    if (!span.isNoop()) {
+                        setConsumerSpan(topic, span);
+                        // incur timestamp overhead only once
+                        if (timestamp == 0L) {
+                            timestamp = tracing.clock(span.context()).currentTimeMicroseconds();
+                        }
+                        span.start(timestamp).finish(timestamp); // span won't be shared by other records
+                    }
+                    injector.inject(span.context(), request);
+                }
+            }
+        }
+        for (Span span : consumerSpansForTopic.values()) span.finish(timestamp);
+    }
 
-  @Override public void assign(Collection<TopicPartition> partitions) {
-    delegate.assign(partitions);
-  }
+    @Override
+    public Set<TopicPartition> assignment() {
+        return delegate.assignment();
+    }
 
-  @Override public void subscribe(Pattern pattern, ConsumerRebalanceListener callback) {
-    delegate.subscribe(pattern, callback);
-  }
+    @Override
+    public Set<String> subscription() {
+        return delegate.subscription();
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 1.0
-  public void subscribe(Pattern pattern) {
-    delegate.subscribe(pattern, NO_OP_CONSUMER_REBALANCE_LISTENER);
-  }
+    @Override
+    public void subscribe(Collection<String> topics) {
+        delegate.subscribe(topics);
+    }
 
-  @Override public void unsubscribe() {
-    delegate.unsubscribe();
-  }
+    @Override
+    public void subscribe(Collection<String> topics, ConsumerRebalanceListener callback) {
+        delegate.subscribe(topics, callback);
+    }
 
-  @Override public void commitSync() {
-    delegate.commitSync();
-  }
+    @Override
+    public void assign(Collection<TopicPartition> partitions) {
+        delegate.assign(partitions);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public void commitSync(Duration timeout) {
-    delegate.commitSync(timeout);
-  }
+    @Override
+    public void subscribe(Pattern pattern, ConsumerRebalanceListener callback) {
+        delegate.subscribe(pattern, callback);
+    }
 
-  @Override public void commitSync(Map<TopicPartition, OffsetAndMetadata> offsets) {
-    delegate.commitSync(offsets);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 1.0
+    public void subscribe(Pattern pattern) {
+        delegate.subscribe(pattern, NO_OP_CONSUMER_REBALANCE_LISTENER);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public void commitSync(Map<TopicPartition, OffsetAndMetadata> offsets, Duration timeout) {
-    delegate.commitSync(offsets, timeout);
-  }
+    @Override
+    public void unsubscribe() {
+        delegate.unsubscribe();
+    }
 
-  @Override public void commitAsync() {
-    delegate.commitAsync();
-  }
+    @Override
+    public void commitSync() {
+        delegate.commitSync();
+    }
 
-  @Override public void commitAsync(OffsetCommitCallback callback) {
-    delegate.commitAsync(callback);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public void commitSync(Duration timeout) {
+        delegate.commitSync(timeout);
+    }
 
-  @Override public void commitAsync(Map<TopicPartition, OffsetAndMetadata> offsets,
-    OffsetCommitCallback callback) {
-    delegate.commitAsync(offsets, callback);
-  }
+    @Override
+    public void commitSync(Map<TopicPartition, OffsetAndMetadata> offsets) {
+        delegate.commitSync(offsets);
+    }
 
-  @Override public void seek(TopicPartition partition, long offset) {
-    delegate.seek(partition, offset);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public void commitSync(Map<TopicPartition, OffsetAndMetadata> offsets, Duration timeout) {
+        delegate.commitSync(offsets, timeout);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public void seek(TopicPartition topicPartition, OffsetAndMetadata offsetAndMetadata) {
-    delegate.seek(topicPartition, offsetAndMetadata);
-  }
+    @Override
+    public void commitAsync() {
+        delegate.commitAsync();
+    }
 
-  @Override public void seekToBeginning(Collection<TopicPartition> partitions) {
-    delegate.seekToBeginning(partitions);
-  }
+    @Override
+    public void commitAsync(OffsetCommitCallback callback) {
+        delegate.commitAsync(callback);
+    }
 
-  @Override public void seekToEnd(Collection<TopicPartition> partitions) {
-    delegate.seekToEnd(partitions);
-  }
+    @Override
+    public void commitAsync(Map<TopicPartition, OffsetAndMetadata> offsets,
+                            OffsetCommitCallback callback) {
+        delegate.commitAsync(offsets, callback);
+    }
 
-  @Override public long position(TopicPartition partition) {
-    return delegate.position(partition);
-  }
+    @Override
+    public void seek(TopicPartition partition, long offset) {
+        delegate.seek(partition, offset);
+    }
 
-  public long position(TopicPartition partition, Duration timeout) {
-    return delegate.position(partition, timeout);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public void seek(TopicPartition topicPartition, OffsetAndMetadata offsetAndMetadata) {
+        delegate.seek(topicPartition, offsetAndMetadata);
+    }
 
-  @Override public OffsetAndMetadata committed(TopicPartition partition) {
-    return delegate.committed(partition);
-  }
+    @Override
+    public void seekToBeginning(Collection<TopicPartition> partitions) {
+        delegate.seekToBeginning(partitions);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public OffsetAndMetadata committed(TopicPartition partition, Duration timeout) {
-    return delegate.committed(partition, timeout);
-  }
+    @Override
+    public void seekToEnd(Collection<TopicPartition> partitions) {
+        delegate.seekToEnd(partitions);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.4
-  public Map<TopicPartition, OffsetAndMetadata> committed(Set<TopicPartition> partitions) {
-    return delegate.committed(partitions);
-  }
+    @Override
+    public long position(TopicPartition partition) {
+        return delegate.position(partition);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.4
-  public Map<TopicPartition, OffsetAndMetadata> committed(
-    Set<TopicPartition> partitions, Duration timeout) {
-    return delegate.committed(partitions, timeout);
-  }
+    public long position(TopicPartition partition, Duration timeout) {
+        return delegate.position(partition, timeout);
+    }
 
-  @Override public Map<MetricName, ? extends Metric> metrics() {
-    return delegate.metrics();
-  }
+    @Override
+    public OffsetAndMetadata committed(TopicPartition partition) {
+        return delegate.committed(partition);
+    }
 
-  @Override public List<PartitionInfo> partitionsFor(String topic) {
-    return delegate.partitionsFor(topic);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public OffsetAndMetadata committed(TopicPartition partition, Duration timeout) {
+        return delegate.committed(partition, timeout);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public List<PartitionInfo> partitionsFor(String topic, Duration timeout) {
-    return delegate.partitionsFor(topic, timeout);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.4
+    public Map<TopicPartition, OffsetAndMetadata> committed(Set<TopicPartition> partitions) {
+        return delegate.committed(partitions);
+    }
 
-  @Override public Map<String, List<PartitionInfo>> listTopics() {
-    return delegate.listTopics();
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.4
+    public Map<TopicPartition, OffsetAndMetadata> committed(
+            Set<TopicPartition> partitions, Duration timeout) {
+        return delegate.committed(partitions, timeout);
+    }
 
-  @Override public Map<String, List<PartitionInfo>> listTopics(Duration timeout) {
-    return delegate.listTopics(timeout);
-  }
+    @Override
+    public Map<MetricName, ? extends Metric> metrics() {
+        return delegate.metrics();
+    }
 
-  @Override public Set<TopicPartition> paused() {
-    return delegate.paused();
-  }
+    @Override
+    public List<PartitionInfo> partitionsFor(String topic) {
+        return delegate.partitionsFor(topic);
+    }
 
-  @Override public void pause(Collection<TopicPartition> partitions) {
-    delegate.pause(partitions);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public List<PartitionInfo> partitionsFor(String topic, Duration timeout) {
+        return delegate.partitionsFor(topic, timeout);
+    }
 
-  @Override public void resume(Collection<TopicPartition> partitions) {
-    delegate.resume(partitions);
-  }
+    @Override
+    public Map<String, List<PartitionInfo>> listTopics() {
+        return delegate.listTopics();
+    }
 
-  @Override public Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes(
-    Map<TopicPartition, Long> timestampsToSearch) {
-    return delegate.offsetsForTimes(timestampsToSearch);
-  }
+    @Override
+    public Map<String, List<PartitionInfo>> listTopics(Duration timeout) {
+        return delegate.listTopics(timeout);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes(
-    Map<TopicPartition, Long> timestampsToSearch, Duration timeout) {
-    return delegate.offsetsForTimes(timestampsToSearch, timeout);
-  }
+    @Override
+    public Set<TopicPartition> paused() {
+        return delegate.paused();
+    }
 
-  @Override
-  public Map<TopicPartition, Long> beginningOffsets(Collection<TopicPartition> partitions) {
-    return delegate.beginningOffsets(partitions);
-  }
+    @Override
+    public void pause(Collection<TopicPartition> partitions) {
+        delegate.pause(partitions);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public Map<TopicPartition, Long> beginningOffsets(Collection<TopicPartition> partitions,
-    Duration timeout) {
-    return delegate.beginningOffsets(partitions, timeout);
-  }
+    @Override
+    public void resume(Collection<TopicPartition> partitions) {
+        delegate.resume(partitions);
+    }
 
-  @Override public Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions) {
-    return delegate.endOffsets(partitions);
-  }
+    @Override
+    public Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes(
+            Map<TopicPartition, Long> timestampsToSearch) {
+        return delegate.offsetsForTimes(timestampsToSearch);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions,
-    Duration timeout) {
-    return delegate.endOffsets(partitions, timeout);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes(
+            Map<TopicPartition, Long> timestampsToSearch, Duration timeout) {
+        return delegate.offsetsForTimes(timestampsToSearch, timeout);
+    }
+
+    @Override
+    public Map<TopicPartition, Long> beginningOffsets(Collection<TopicPartition> partitions) {
+        return delegate.beginningOffsets(partitions);
+    }
+
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public Map<TopicPartition, Long> beginningOffsets(Collection<TopicPartition> partitions,
+                                                      Duration timeout) {
+        return delegate.beginningOffsets(partitions, timeout);
+    }
+
+    @Override
+    public Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions) {
+        return delegate.endOffsets(partitions);
+    }
+
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions,
+                                                Duration timeout) {
+        return delegate.endOffsets(partitions, timeout);
+    }
 
 //  // Do not use @Override annotation to avoid compatibility issue version < 2.5
 //  public ConsumerGroupMetadata groupMetadata() {
@@ -318,26 +356,28 @@ final class TracingConsumer<K, V> implements Consumer<K, V> {
 //    delegate.enforceRebalance();
 //  }
 
-  @Override public void close() {
-    delegate.close();
-  }
+    @Override
+    public void close() {
+        delegate.close();
+    }
 
-  // Do not use @Override annotation to avoid compatibility on deprecated methods
-  public void close(long timeout, TimeUnit unit) {
-    delegate.close(timeout, unit);
-  }
+    // Do not use @Override annotation to avoid compatibility on deprecated methods
+    public void close(long timeout, TimeUnit unit) {
+        delegate.close(timeout, unit);
+    }
 
-  // Do not use @Override annotation to avoid compatibility issue version < 2.0
-  public void close(Duration timeout) {
-    delegate.close(timeout);
-  }
+    // Do not use @Override annotation to avoid compatibility issue version < 2.0
+    public void close(Duration timeout) {
+        delegate.close(timeout);
+    }
 
-  @Override public void wakeup() {
-    delegate.wakeup();
-  }
+    @Override
+    public void wakeup() {
+        delegate.wakeup();
+    }
 
-  void setConsumerSpan(String topic, Span span) {
-    span.name("poll").kind(Span.Kind.CONSUMER).tag(KafkaTags.KAFKA_TOPIC_TAG, topic);
-    if (remoteServiceName != null) span.remoteServiceName(remoteServiceName);
-  }
+    void setConsumerSpan(String topic, Span span) {
+        span.name("poll").kind(Span.Kind.CONSUMER).tag(KafkaTags.KAFKA_TOPIC_TAG, topic);
+        if (remoteServiceName != null) span.remoteServiceName(remoteServiceName);
+    }
 }

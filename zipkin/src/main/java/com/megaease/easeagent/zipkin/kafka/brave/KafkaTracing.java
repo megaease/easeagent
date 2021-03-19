@@ -198,7 +198,7 @@ public final class KafkaTracing {
      * injected onto each message so it becomes the parent when a processor later calls {@link
      * #nextSpan(ConsumerRecord)}.
      */
-    public <K, V> Consumer<K, V> consumer(Consumer<K, V> consumer) {
+    public <K, V> TracingConsumer<K, V> consumer(Consumer<K, V> consumer) {
         if (consumer == null) throw new NullPointerException("consumer == null");
         return new TracingConsumer<K, V>(consumer, this);
     }

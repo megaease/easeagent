@@ -57,4 +57,12 @@ public class DefaultAgentInterceptorChain implements AgentInterceptorChain {
             return new DefaultAgentInterceptorChain(this.list);
         }
     }
+
+    public static class BuilderFactory implements AgentInterceptorChain.BuilderFactory {
+
+        @Override
+        public AgentInterceptorChain.Builder create() {
+            return new DefaultAgentInterceptorChain.Builder();
+        }
+    }
 }

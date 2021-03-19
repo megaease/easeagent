@@ -18,7 +18,7 @@ public abstract class AbstractMetric {
     protected boolean enableSchedule;
 
     public AbstractMetric(MetricRegistry metricRegistry) {
-        this(metricRegistry, true);
+        this(metricRegistry, false);
     }
 
     public AbstractMetric(MetricRegistry metricRegistry, boolean enableSchedule) {
