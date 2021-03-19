@@ -52,7 +52,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionA
         RedisClientAdvice.class,
         RedisChannelWriterAdvice.class,
         JedisAdvice.class,
-        KafkaProducerAdvice.class,
+//        KafkaProducerAdvice.class,
 
 
 })
