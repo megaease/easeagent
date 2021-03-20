@@ -1,11 +1,28 @@
 package com.megaease.easeagent.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
 
 public class ConfigsTest {
+
+    @Test
+    public void test_check_change_count1() throws Exception {
+        final ObjectMapper json = new ObjectMapper();
+        Configs configs = new Configs(Collections.singletonMap("hello", "world"));
+        List<ChangeItem> rst = addListener(configs);
+
+        configs.updateObservability("{}");
+        Assert.assertEquals(0, rst.size());
+
+        configs.updateObservability(json.writeValueAsString(Collections.singletonMap("hello", "world")));
+        Assert.assertEquals(0, rst.size());
+
+        configs.updateObservability(json.writeValueAsString(Collections.singletonMap("hello", "world2")));
+        Assert.assertEquals(1, rst.size());
+    }
 
     @Test
     public void test_check_change_count() throws Exception {

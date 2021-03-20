@@ -1,12 +1,15 @@
 package com.megaease.easeagent.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Configs implements Config, ConfigManagerMXBean {
-
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private volatile Map<String, String> source;
     private final ConcurrentHashMap<String, ConfigDelegate> binds = new ConcurrentHashMap<>();
     private final ConfigNotifier notifier;
@@ -27,6 +30,7 @@ public class Configs implements Config, ConfigManagerMXBean {
             }
         });
         if (!items.isEmpty()) {
+            logger.info("change items: {}", items.toString());
             this.source = dump;
             binds.values().forEach(one -> one.handleChanges(items));
             this.notifier.handleChanges(items);
@@ -35,6 +39,7 @@ public class Configs implements Config, ConfigManagerMXBean {
 
     @Override
     public void updateObservability(String json) throws IOException {
+        logger.info("call updateObservability: {}", json);
         this.updateConfigs(ConfigUtils.json2KVMap(json));
     }
 

@@ -28,4 +28,13 @@ public class ChangeItem {
     public String getNewValue() {
         return newValue;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "fullName='" + fullName + '\'' +
+                ", oldValue='" + oldValue + '\'' +
+                ", newValue='" + newValue + '\'' +
+                '}';
+    }
 }
