@@ -22,6 +22,7 @@ import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -37,7 +38,7 @@ public abstract class KafkaConsumerAdvice implements Transformation {
                 .transform(objConstruct(isConstructor().and(takesArguments(3))
                                 .and(takesArgument(0, named("org.apache.kafka.clients.consumer.ConsumerConfig")))
                         , AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
-                .transform(doSend((named("poll")
+                .transform(doPoll((named("poll")
                                 .and(takesArguments(1)))
                                 .and(takesArgument(0, named("java.time.Duration")))
                         )
@@ -53,10 +54,8 @@ public abstract class KafkaConsumerAdvice implements Transformation {
 
         @Injection.Autowire
         public ObjConstruct(AgentInterceptorChainInvoker chainInvoker,
-                            AgentInterceptorChain.BuilderFactory chainBuilderFactory) {
-            super(chainInvoker);
-            this.chainBuilder = chainBuilderFactory.create();
-            this.chainBuilder.addInterceptor(new KafkaConsumerConstructInterceptor());
+                            @Injection.Qualifier("supplier4KafkaConsumerConstructor") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, chainInvoker, true);
         }
 
         @Advice.OnMethodExit
@@ -68,19 +67,16 @@ public abstract class KafkaConsumerAdvice implements Transformation {
     }
 
     @AdviceTo(DoPoll.class)
-    public abstract Definition.Transformer doSend(ElementMatcher<? super MethodDescription> matcher);
+    public abstract Definition.Transformer doPoll(ElementMatcher<? super MethodDescription> matcher);
 
     static class DoPoll extends AbstractAdvice {
 
         @Injection.Autowire
         public DoPoll(AgentInterceptorChainInvoker chainInvoker,
-                      AgentInterceptorChain.BuilderFactory chainBuilderFactory,
-                      Tracing tracing, MetricRegistry metricRegistry) {
-            super(chainInvoker);
-            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
-            this.chainBuilder = chainBuilderFactory.create();
-            this.chainBuilder.addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
-                    .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric));
+                      @Injection.Qualifier("supplier4KafkaConsumerDoPoll") Supplier<AgentInterceptorChain.Builder> supplier
+        ) {
+            super(supplier, chainInvoker, true);
+
         }
 
         @Advice.OnMethodEnter

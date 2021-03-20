@@ -8,6 +8,7 @@ import com.megaease.easeagent.core.utils.ContextUtils;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public abstract class AbstractAdvice {
 
@@ -21,6 +22,11 @@ public abstract class AbstractAdvice {
 
     public AbstractAdvice(AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker) {
         this.chainBuilder = chainBuilder;
+        this.chainInvoker = chainInvoker;
+    }
+
+    public AbstractAdvice(Supplier<AgentInterceptorChain.Builder> supplier, AgentInterceptorChainInvoker chainInvoker, boolean ignore) {
+        this.chainBuilder = supplier.get();
         this.chainInvoker = chainInvoker;
     }
 

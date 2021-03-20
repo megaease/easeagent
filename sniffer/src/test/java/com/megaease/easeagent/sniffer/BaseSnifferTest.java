@@ -10,7 +10,6 @@ import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 public class BaseSnifferTest {
     StrictCurrentTraceContext currentTraceContext = StrictCurrentTraceContext.create();
@@ -44,7 +43,7 @@ public class BaseSnifferTest {
                         any(AgentInterceptorChain.class));
     }
 
-    protected void initBuilderFactory(AgentInterceptorChain.BuilderFactory builderFactory) {
+    protected void initMock(AgentInterceptorChain.BuilderFactory builderFactory) {
         when(builderFactory.create()).thenAnswer((Answer<AgentInterceptorChain.Builder>) invocation -> {
             AgentInterceptorChain.Builder builder = mock(AgentInterceptorChain.Builder.class);
             when(builder.addInterceptor(any(AgentInterceptor.class))).thenReturn(builder);

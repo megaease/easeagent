@@ -24,6 +24,7 @@ import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.common.HostAddress;
+import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.config.ConfigConst;
@@ -39,12 +40,17 @@ import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
+import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
+import com.megaease.easeagent.metrics.kafka.KafkaMetric;
+import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.CommonRedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
+import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
+import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
@@ -57,12 +63,20 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
+import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
+import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class Provider implements AgentReportAware, ConfigAware {
 
@@ -159,9 +173,9 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
         MetricRegistry metricRegistry = new MetricRegistry();
         MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_REQUEST);
         final HttpFilterMetricsInterceptor httpFilterMetricsInterceptor = new HttpFilterMetricsInterceptor(metricRegistry);
-        new AutoRefreshReporter(metricRegistry, collectorConfig,
-                httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_REQUEST, s))).run();
+//        new AutoRefreshReporter(metricRegistry, collectorConfig,
+//                httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
+//                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_REQUEST, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(httpFilterMetricsInterceptor)
                 .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
@@ -247,13 +261,78 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
                 ;
     }
 
-    @Injection.Bean("builder4KafkaDoSend")
-    public AgentInterceptorChain.Builder builder4KafkaDoSend() {
-        return new DefaultAgentInterceptorChain.Builder();
+//    @Injection.Bean("builder4KafkaDoSend")
+//    public AgentInterceptorChain.Builder builder4KafkaDoSend() {
+//        return new DefaultAgentInterceptorChain.Builder();
+//    }
+
+//    @Injection.Bean
+//    public AgentInterceptorChain.BuilderFactory chainBuilderFactory() {
+//        return new DefaultAgentInterceptorChain.BuilderFactory();
+//    }
+
+    @Injection.Bean("supplier4KafkaProducerDoSend")
+    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerDoSend() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+            MetricRegistry metricRegistry = new MetricRegistry();
+            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
+
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_KAFKA);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    kafkaMetric.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_KAFKA, s))).run();
+
+            KafkaProducerMetricInterceptor metricInterceptor = new KafkaProducerMetricInterceptor(kafkaMetric);
+            KafkaProducerTracingInterceptor tracingInterceptor = new KafkaProducerTracingInterceptor(tracing);
+
+            DefaultAgentInterceptorChain.Builder builder4Async = new DefaultAgentInterceptorChain.Builder();
+            builder4Async.addInterceptor(metricInterceptor)
+                    .addInterceptor(tracingInterceptor);
+
+            chainBuilder.addInterceptor(new KafkaProducerDoSendInterceptor(chainInvoker, builder4Async))
+                    .addInterceptor(metricInterceptor)
+                    .addInterceptor(tracingInterceptor);
+
+            return chainBuilder;
+        };
     }
 
-    @Injection.Bean("commonInterceptorChainBuilder")
-    public AgentInterceptorChain.Builder commonInterceptorChainBuilder() {
-        return new DefaultAgentInterceptorChain.Builder();
+    @Injection.Bean("supplier4KafkaProducerConstructor")
+    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerConstructor() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+            chainBuilder.addInterceptor(new KafkaProducerConstructInterceptor());
+            return chainBuilder;
+        };
     }
+
+    @Injection.Bean("supplier4KafkaConsumerConstructor")
+    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerConstructor() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+            chainBuilder.addInterceptor(new KafkaConsumerConstructInterceptor());
+            return chainBuilder;
+        };
+    }
+
+    @Injection.Bean("supplier4KafkaConsumerDoPoll")
+    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerDoPoll() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+            MetricRegistry metricRegistry = new MetricRegistry();
+            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
+
+//            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_KAFKA);
+//            new AutoRefreshReporter(metricRegistry, collectorConfig,
+//                    kafkaMetric.newConverter(additionalAttributes),
+//                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_KAFKA, s))).run();
+
+            chainBuilder.addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
+                    .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric));
+
+            return chainBuilder;
+        };
+    }
+
 }

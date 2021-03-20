@@ -1,12 +1,9 @@
 package com.megaease.easeagent.sniffer.kafka.v2d3;
 
-import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.*;
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.GenKafkaConsumerAdvice;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -22,6 +19,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.*;
 
@@ -29,11 +27,9 @@ public class KafkaConsumerAdviceTest extends BaseSnifferTest {
 
     static List<Class<?>> classList;
     AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
-    static AgentInterceptorChain.BuilderFactory builderFactory = mock(DefaultAgentInterceptorChain.BuilderFactory.class);
 
     @Before
     public void before() {
-        this.initBuilderFactory(builderFactory);
         if (classList != null) {
             return;
         }
@@ -43,9 +39,8 @@ public class KafkaConsumerAdviceTest extends BaseSnifferTest {
                 this.getClass().getName() + "$MyConsumer"
         )
                 .with(def, new QualifiedBean("", chainInvoker),
-                        new QualifiedBean("", builderFactory),
-                        new QualifiedBean("", this.tracing()),
-                        new QualifiedBean("", new MetricRegistry())
+                        new QualifiedBean("supplier4KafkaConsumerConstructor", (Supplier<AgentInterceptorChain.Builder>) () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor())),
+                        new QualifiedBean("supplier4KafkaConsumerDoPoll", (Supplier<AgentInterceptorChain.Builder>) () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor()))
                 )
                 .load(loader);
     }

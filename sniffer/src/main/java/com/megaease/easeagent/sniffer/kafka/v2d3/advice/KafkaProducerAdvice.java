@@ -1,29 +1,22 @@
 package com.megaease.easeagent.sniffer.kafka.v2d3.advice;
 
-import brave.Tracing;
-import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.ForwardLock;
-import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
-import com.megaease.easeagent.metrics.kafka.KafkaMetric;
-import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
-import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -57,10 +50,9 @@ public abstract class KafkaProducerAdvice implements Transformation {
     static class ObjConstruct extends AbstractAdvice {
 
         @Injection.Autowire
-        public ObjConstruct(AgentInterceptorChainInvoker chainInvoker, AgentInterceptorChain.BuilderFactory chainBuilderFactory) {
-            super(chainInvoker);
-            this.chainBuilder = chainBuilderFactory.create();
-            this.chainBuilder.addInterceptor(new KafkaProducerConstructInterceptor());
+        public ObjConstruct(AgentInterceptorChainInvoker chainInvoker,
+                            @Injection.Qualifier("supplier4KafkaProducerConstructor") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, chainInvoker, true);
         }
 
         @Advice.OnMethodExit
@@ -77,23 +69,9 @@ public abstract class KafkaProducerAdvice implements Transformation {
     static class DoSend extends AbstractAdvice {
 
         @Injection.Autowire
-        public DoSend(AgentInterceptorChainInvoker chainInvoker, AgentInterceptorChain.BuilderFactory chainBuilderFactory,
-                      Tracing tracing, MetricRegistry metricRegistry) {
-            super(chainInvoker);
-            this.chainBuilder = chainBuilderFactory.create();
-            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
-
-            KafkaProducerMetricInterceptor metricInterceptor = new KafkaProducerMetricInterceptor(kafkaMetric);
-            KafkaProducerTracingInterceptor tracingInterceptor = new KafkaProducerTracingInterceptor(tracing);
-
-            DefaultAgentInterceptorChain.Builder builder4Async = new DefaultAgentInterceptorChain.Builder();
-            builder4Async.addInterceptor(metricInterceptor)
-                    .addInterceptor(tracingInterceptor);
-
-            this.chainBuilder.addInterceptor(new KafkaProducerDoSendInterceptor(this.chainInvoker, builder4Async))
-                    .addInterceptor(metricInterceptor)
-                    .addInterceptor(tracingInterceptor);
-
+        public DoSend(AgentInterceptorChainInvoker chainInvoker,
+                      @Injection.Qualifier("supplier4KafkaProducerDoSend") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, chainInvoker, true);
         }
 
         @Advice.OnMethodEnter

@@ -5,8 +5,17 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
-import com.megaease.easeagent.metrics.*;
+import com.megaease.easeagent.common.AdditionalAttributes;
+import com.megaease.easeagent.metrics.AbstractMetric;
+import com.megaease.easeagent.metrics.MetricField;
+import com.megaease.easeagent.metrics.MetricNameFactory;
+import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.KeyType;
+import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class KafkaMetric extends AbstractMetric {
@@ -76,6 +85,12 @@ public class KafkaMetric extends AbstractMetric {
                 .build();
     }
 
+    @Override
+    public Converter newConverter(AdditionalAttributes attributes) {
+        return new KafkaConverter("application", "kafka", "topic",
+                attributes.getAdditionalAttributes());
+    }
+
     public void meter(String topic, MetricSubType... meterTypes) {
         for (MetricSubType meterType : meterTypes) {
             Meter meter = this.metricRegistry.meter(metricNameFactory.meterName(topic, meterType));
@@ -115,5 +130,12 @@ public class KafkaMetric extends AbstractMetric {
         meter(topic, MetricSubType.CONSUMER_ERROR);
         Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
         errorCounter.inc();
+    }
+
+    protected class KafkaConverter extends ConverterAdapter {
+
+        public KafkaConverter(String category, String type, String keyFieldName, Map<String, Object> attributes) {
+            super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
+        }
     }
 }
