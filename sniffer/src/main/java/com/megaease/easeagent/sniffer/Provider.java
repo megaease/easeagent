@@ -169,9 +169,9 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
         MetricRegistry metricRegistry = new MetricRegistry();
         MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_REQUEST);
         final HttpFilterMetricsInterceptor httpFilterMetricsInterceptor = new HttpFilterMetricsInterceptor(metricRegistry);
-//        new AutoRefreshReporter(metricRegistry, collectorConfig,
-//                httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
-//                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_REQUEST, s))).run();
+        new AutoRefreshReporter(metricRegistry, collectorConfig,
+                httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
+                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_REQUEST, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                 .addInterceptor(httpFilterMetricsInterceptor)
