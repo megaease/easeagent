@@ -9,6 +9,7 @@ public interface ConfigConst {
 
     String SERVICE_NAME = "serviceName";
     String SYSTEM_NAME = "systemName";
+    String CANARY_HEADERS = join("canary", "headers");
 
     String OUTPUT = "outputServer";
 

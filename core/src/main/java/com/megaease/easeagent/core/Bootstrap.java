@@ -71,9 +71,14 @@ public class Bootstrap {
         registerMBeans(conf, inst);
         AgentBuilder builder = new AgentBuilder.Default()
                 .with(LISTENER)
+//                .with(new AgentBuilder.Listener.Filtering(
+//                        new StringMatcher("java.lang.Thread", StringMatcher.Mode.EQUALS_FULLY),
+//                        AgentBuilder.Listener.StreamWriting.toSystemOut()))
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
-                .ignore(any(), protectedLoaders())
-                .or(isSynthetic())
+//                .ignore(any(), protectedLoaders()) // we need to redefine java.lang and java.util
+                .ignore(isSynthetic())
                 .or(nameStartsWith("sun.reflect."))
                 .or(nameStartsWith("net.bytebuddy."))
 //                .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))

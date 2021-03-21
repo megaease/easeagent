@@ -43,10 +43,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
         JedisAdvice.class,
         KafkaProducerAdvice.class,
         KafkaConsumerAdvice.class,
-
-
-
-
+        CrossThreadPropagationAdvice.class,
 })
 public interface GeneratedTest {
 }

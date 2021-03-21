@@ -19,16 +19,13 @@ package com.megaease.easeagent.sniffer;
 
 import brave.Tracer;
 import brave.Tracing;
-import brave.handler.SpanHandler;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
-import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.config.ConfigConst;
-import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
@@ -54,7 +51,8 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstr
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
-import com.megaease.easeagent.zipkin.LogSender;
+import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
+import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
@@ -70,12 +68,6 @@ import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class Provider implements AgentReportAware, ConfigAware {
@@ -125,6 +117,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
         return tracing;
     }
 
+    @Injection.Bean
+    public CrossThreadPropagationConfig crossThreadPropagationConfig() {
+        return new CrossThreadPropagationConfig(this.config);
+    }
 
     @Injection.Bean
     public JVMMemoryMetric jvmMemoryMetric() {
@@ -177,6 +173,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 //                httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
 //                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_REQUEST, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                 .addInterceptor(httpFilterMetricsInterceptor)
                 .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
                 .addInterceptor(new HttpFilterLogInterceptor())

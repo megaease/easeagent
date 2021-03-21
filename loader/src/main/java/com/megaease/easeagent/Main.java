@@ -123,7 +123,8 @@ public class Main {
         private final Set<ClassLoader> externals = new CopyOnWriteArraySet<ClassLoader>();
 
         CompoundableClassLoader(URL[] urls) {
-            super(urls, Main.BOOTSTRAP_CLASS_LOADER);
+            super(urls, ClassLoader.getSystemClassLoader());
+//            super(urls, Main.BOOTSTRAP_CLASS_LOADER);
         }
 
         public void add(ClassLoader cl) {

@@ -1,10 +1,12 @@
 package com.megaease.easeagent.sniffer;
 
+import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.TextUtils;
+import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import feign.Request;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -86,6 +88,12 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
 
     static class FeignLoadBalancerExecute {
         private final Logger logger = LoggerFactory.getLogger(getClass());
+        private final CrossThreadPropagationConfig config;
+
+        @Injection.Autowire
+        public FeignLoadBalancerExecute(CrossThreadPropagationConfig config) {
+            this.config = config;
+        }
 
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
@@ -96,6 +104,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 Object realRequest = ReflectionTool.invokeMethod(request, "getRequest");
                 Map<String, Collection<String>> headers = (Map<String, Collection<String>>) ReflectionTool.extractField(realRequest, "headers");
                 headers.put(PROPAGATE_HEAD, Collections.singleton(serviceName));
+                ThreadLocalCurrentContext.DEFAULT.fill((k, v) -> headers.put(k, Collections.singleton(v)), this.config.getCanaryHeaders());
             } catch (Exception e) {
                 logger.warn("intercept method [{}] failure", method, e);
             }
@@ -104,6 +113,12 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
 
     static class FeignBlockingLoadBalancerClientExecute {
         private final Logger logger = LoggerFactory.getLogger(getClass());
+        private final CrossThreadPropagationConfig config;
+
+        @Injection.Autowire
+        public FeignBlockingLoadBalancerClientExecute(CrossThreadPropagationConfig config) {
+            this.config = config;
+        }
 
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
@@ -116,6 +131,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 if (TextUtils.hasText(host)) {
                     final HashMap<String, Collection<String>> newHeaders = new HashMap<>(request.headers());
                     newHeaders.put(PROPAGATE_HEAD, Collections.singleton(host));
+                    ThreadLocalCurrentContext.DEFAULT.fill((k, v) -> newHeaders.put(k, Collections.singleton(v)), this.config.getCanaryHeaders());
                     final Request newRequest = Request.create(request.httpMethod(), request.url(), newHeaders, request.body(), request.charset(), request.requestTemplate());
                     args[0] = newRequest;
                 }
@@ -127,6 +143,12 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
 
     static class RestTemplateIntercept {
         private final Logger logger = LoggerFactory.getLogger(getClass());
+        private final CrossThreadPropagationConfig config;
+
+        @Injection.Autowire
+        public RestTemplateIntercept(CrossThreadPropagationConfig config) {
+            this.config = config;
+        }
 
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
@@ -139,6 +161,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                     Object fakeHeaders = ReflectionTool.invokeMethod(request, "getHeaders");//org.springframework.http.HttpHeaders
                     MultiValueMap<String, String> headers = (MultiValueMap<String, String>) ReflectionTool.extractField(fakeHeaders, "headers");
                     headers.add(PROPAGATE_HEAD, host);
+                    ThreadLocalCurrentContext.DEFAULT.fill(headers::add, this.config.getCanaryHeaders());
                 }
             } catch (Exception e) {
                 logger.warn("intercept method [{}] failure", method, e);
@@ -148,6 +171,12 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
 
     static class WebClientFilter {
         private final Logger logger = LoggerFactory.getLogger(getClass());
+        private final CrossThreadPropagationConfig config;
+
+        @Injection.Autowire
+        public WebClientFilter(CrossThreadPropagationConfig config) {
+            this.config = config;
+        }
 
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
@@ -160,6 +189,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                     Object fakeHeaders = ReflectionTool.invokeMethod(request, "headers");//org.springframework.http.HttpHeaders
                     MultiValueMap<String, String> headers = (MultiValueMap<String, String>) ReflectionTool.extractField(fakeHeaders, "headers");
                     headers.add(PROPAGATE_HEAD, host);
+                    ThreadLocalCurrentContext.DEFAULT.fill(headers::add, this.config.getCanaryHeaders());
                 }
             } catch (Exception e) {
                 logger.warn("intercept method [{}] failure", method, e);

@@ -177,6 +177,8 @@
                     </descriptors>
                     <archive>
                         <manifestEntries>
+                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
                             <Premain-Class>com.megaease.easeagent.Main</Premain-Class>
                             <Bootstrap-Class>com.megaease.easeagent.StartBootstrap</Bootstrap-Class>
                             <Logging-Property>log4j.configurationFile</Logging-Property>

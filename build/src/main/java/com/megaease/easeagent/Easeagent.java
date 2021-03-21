@@ -55,8 +55,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionA
         JedisAdvice.class,
         KafkaProducerAdvice.class,
         KafkaConsumerAdvice.class,
-        
-
+        CrossThreadPropagationAdvice.class,
 })
 abstract class Easeagent {
     // This static code is to keep the links of the dependencies for shade plugin, not for real runtime.

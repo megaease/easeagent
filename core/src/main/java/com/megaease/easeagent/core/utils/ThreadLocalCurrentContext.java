@@ -1,12 +1,16 @@
-package com.megaease.easeagent.common;
+package com.megaease.easeagent.core.utils;
+
+import com.google.auto.service.AutoService;
+import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 
+@AutoService(AppendBootstrapClassLoaderSearch.class)
 public class ThreadLocalCurrentContext {
     public static final ThreadLocalCurrentContext DEFAULT = new ThreadLocalCurrentContext(new ThreadLocal<>());
     final ThreadLocal<Context> local;
@@ -35,17 +39,13 @@ public class ThreadLocalCurrentContext {
         return newScope(context);
     }
 
-    public <C> Callable<C> wrap(Callable<C> task) {
-        final Context invocationContext = get();
-        class CurrentTraceContextCallable implements Callable<C> {
-            @Override
-            public C call() throws Exception {
-                try (Scope scope = maybeScope(invocationContext)) {
-                    return task.call();
-                }
+    public void fill(BiConsumer<String, String> consumer, String[] names) {
+        final Context ctx = get();
+        if (ctx != null) {
+            for (String one : names) {
+                consumer.accept(one, ctx.get(one));
             }
         }
-        return new CurrentTraceContextCallable();
     }
 
     /**
@@ -53,15 +53,7 @@ public class ThreadLocalCurrentContext {
      */
     public Runnable wrap(Runnable task) {
         final Context invocationContext = get();
-        class CurrentTraceContextRunnable implements Runnable {
-            @Override
-            public void run() {
-                try (Scope scope = maybeScope(invocationContext)) {
-                    task.run();
-                }
-            }
-        }
-        return new CurrentTraceContextRunnable();
+        return new CurrentTraceContextRunnable(this, invocationContext, task);
     }
 
     public static Context createContext(String... kvs) {
@@ -75,22 +67,47 @@ public class ThreadLocalCurrentContext {
         return ctx;
     }
 
-    public interface Scope extends Closeable {
-        Scope NOOP = new Scope() {
-            @Override
-            public void close() {
-            }
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
+    public static class CurrentTraceContextRunnable implements Runnable {
+        private final ThreadLocalCurrentContext threadLocalCurrentContext;
+        private final Context ctx;
+        private final Runnable original;
 
-            @Override
-            public String toString() {
-                return "NoopScope";
+        public CurrentTraceContextRunnable(ThreadLocalCurrentContext threadLocalCurrentContext, Context ctx, Runnable original) {
+            this.threadLocalCurrentContext = threadLocalCurrentContext;
+            this.ctx = ctx;
+            this.original = original;
+        }
+
+        @Override
+        public void run() {
+            try (Scope scope = this.threadLocalCurrentContext.maybeScope(ctx)) {
+                original.run();
             }
-        };
+        }
+    }
+
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
+    public interface Scope extends Closeable {
+        Scope NOOP = new NOOPScope();
 
         @Override
         void close();
     }
 
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
+    public static class NOOPScope implements Scope {
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public String toString() {
+            return "NoopScope";
+        }
+    }
+
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
     public static class Context {
         private final Map<String, String> data = new HashMap<>();
 
@@ -105,8 +122,14 @@ public class ThreadLocalCurrentContext {
         public boolean containsKey(String key) {
             return data.containsKey(key);
         }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
     }
 
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
     static final class RevertToNullScope implements Scope {
         final ThreadLocal<Context> local;
 
@@ -120,6 +143,7 @@ public class ThreadLocalCurrentContext {
         }
     }
 
+    @AutoService(AppendBootstrapClassLoaderSearch.class)
     static final class RevertToPreviousScope implements Scope {
         final ThreadLocal<Context> local;
         final Context previous;
