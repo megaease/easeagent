@@ -21,4 +21,5 @@ RUN apk --no-cache add curl wget
 RUN wget -O jolokia.jar  https://search.maven.org/remotecontent\?filepath\=org/jolokia/jolokia-jvm/1.6.2/jolokia-jvm-1.6.2-agent.jar
 
 COPY --from=builder /easeagent/build/target/easeagent-dep.jar   /easeagent-volume/easeagent.jar
+RUN cd  /easeagent-volume/ && jar xf easeagent.jar application.conf log4j2.xml
 RUN cp /jolokia.jar  /easeagent-volume/jolokia.jar
