@@ -1,7 +1,11 @@
 package com.megaease.easeagent.sniffer;
 
+import com.megaease.easeagent.config.ConfigConst;
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
+import com.megaease.easeagent.core.QualifiedBean;
+import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.netflix.client.config.CommonClientConfigKey;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
@@ -84,11 +88,18 @@ public class ServiceNamePropagationAdviceTest {
         ServerIntrospector introspector = Mockito.mock(ServerIntrospector.class);
         Definition.Default def = new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY);
         FeignLoadBalancer balancer = (FeignLoadBalancer) Classes.transform(ServiceNamePropagationAdvice.FeignLoadBalancer)
-                .with(def)
+                .with(def, new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(loader).get(0).getConstructor(ILoadBalancer.class, IClientConfig.class, ServerIntrospector.class)
                 .newInstance(loadBalancer, config, introspector);
 
         new Adaptor().doWork(balancer, config);
+    }
+
+    private CrossThreadPropagationConfig getCrossThreadPropagationConfig() {
+        final HashMap<String, String> source = new HashMap<>();
+        source.put(ConfigConst.CANARY_HEADERS, "x-canary-labels");
+        final CrossThreadPropagationConfig bean = new CrossThreadPropagationConfig(new Configs(source));
+        return bean;
     }
 
     @Test
@@ -102,7 +113,7 @@ public class ServiceNamePropagationAdviceTest {
         Mockito.when(blockingLoadBalancerClient.reconstructURI(any(), any())).thenReturn(URI.create("http://localhost:22370/test"));
         Definition.Default def = new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY);
         FeignBlockingLoadBalancerClient feignBlockingLoadBalancerClient = (FeignBlockingLoadBalancerClient) Classes.transform(ServiceNamePropagationAdvice.FeignBlockingLoadBalancerClient)
-                .with(def)
+                .with(def, new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(loader).get(0).getConstructor(Client.class, BlockingLoadBalancerClient.class)
                 .newInstance(client, blockingLoadBalancerClient);
 
@@ -129,7 +140,7 @@ public class ServiceNamePropagationAdviceTest {
         LoadBalancedRetryFactory lbRetryFactory = Mockito.mock(LoadBalancedRetryFactory.class);
         RetryLoadBalancerInterceptor retryLoadBalancerInterceptor = (RetryLoadBalancerInterceptor) Classes.
                 transform(ServiceNamePropagationAdvice.RetryLoadBalancerInterceptor)
-                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY))
+                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY), new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(getClass().getClassLoader()).get(0)
                 .getConstructor(LoadBalancerClient.class, LoadBalancerRetryProperties.class, LoadBalancerRequestFactory.class, LoadBalancedRetryFactory.class)
                 .newInstance(loadBalancer, lbProperties, requestFactory, lbRetryFactory);
@@ -153,7 +164,7 @@ public class ServiceNamePropagationAdviceTest {
         LoadBalancerRequestFactory requestFactory = Mockito.mock(LoadBalancerRequestFactory.class);
         LoadBalancerInterceptor interceptor = (LoadBalancerInterceptor) Classes.
                 transform(ServiceNamePropagationAdvice.LoadBalancerInterceptor)
-                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY))
+                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY), new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(getClass().getClassLoader()).get(0)
                 .getConstructor(LoadBalancerClient.class, LoadBalancerRequestFactory.class)
                 .newInstance(loadBalancer, requestFactory);
@@ -175,7 +186,7 @@ public class ServiceNamePropagationAdviceTest {
 
         AsyncLoadBalancerInterceptor interceptor = (AsyncLoadBalancerInterceptor) Classes.
                 transform(ServiceNamePropagationAdvice.AsyncLoadBalancerInterceptor)
-                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY))
+                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY), new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(getClass().getClassLoader()).get(0)
                 .getConstructor(LoadBalancerClient.class)
                 .newInstance(loadBalancer);
@@ -197,7 +208,7 @@ public class ServiceNamePropagationAdviceTest {
 
         LoadBalancerExchangeFilterFunction function = (LoadBalancerExchangeFilterFunction) Classes.
                 transform(ServiceNamePropagationAdvice.LoadBalancerExchangeFilterFunction)
-                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY))
+                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY), new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(getClass().getClassLoader()).get(0)
                 .getConstructor(LoadBalancerClient.class)
                 .newInstance(loadBalancer);
@@ -216,7 +227,7 @@ public class ServiceNamePropagationAdviceTest {
 
         ReactorLoadBalancerExchangeFilterFunction function = (ReactorLoadBalancerExchangeFilterFunction) Classes.
                 transform(ServiceNamePropagationAdvice.ReactorLoadBalancerExchangeFilterFunction)
-                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY))
+                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY), new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(getClass().getClassLoader()).get(0)
                 .getConstructor(ReactiveLoadBalancer.Factory.class)
                 .newInstance(loadBalancerClientFactory);
@@ -236,7 +247,7 @@ public class ServiceNamePropagationAdviceTest {
 
         FilteringWebHandler handler = (FilteringWebHandler) Classes.
                 transform(ServiceNamePropagationAdvice.FilteringWebHandler)
-                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY))
+                .with(new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY), new QualifiedBean("", getCrossThreadPropagationConfig()))
                 .load(getClass().getClassLoader()).get(0)
                 .getConstructor(List.class)
                 .newInstance(Collections.singletonList(filter));

@@ -33,7 +33,15 @@ public class AppendBootstrapClassLoaderSearchTest {
         final Set<String> strings = Sets.newHashSet(
                 "com.megaease.easeagent.core.Dispatcher",
                 "com.megaease.easeagent.core.Dispatcher$Advice",
-                "com.megaease.easeagent.core.DynamicFieldAccessor"
+                "com.megaease.easeagent.core.DynamicFieldAccessor",
+                "com.megaease.easeagent.core.utils.ThreadContextBind",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$Context",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$CurrentTraceContextRunnable",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$NOOPScope",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$RevertToNullScope",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$RevertToPreviousScope",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$Scope"
         );
         Assert.assertEquals(strings, AppendBootstrapClassLoaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM));
     }
