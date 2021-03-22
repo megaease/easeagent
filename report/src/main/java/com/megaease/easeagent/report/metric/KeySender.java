@@ -1,9 +1,9 @@
 package com.megaease.easeagent.report.metric;
 
 import com.megaease.easeagent.report.metric.log4j.AppenderManager;
+import com.megaease.easeagent.report.metric.log4j.LoggerFactory;
 import com.megaease.easeagent.report.metric.log4j.RefreshableAppender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.core.Logger;
 
 public class KeySender {
     private final String key;
@@ -25,7 +25,7 @@ public class KeySender {
     private void lazyInitLogger() {
         if (logger == null) {
             String loggerName = prepareAppenderAndLogger();
-            logger = LoggerFactory.getLogger(loggerName);
+            logger = LoggerFactory.getLoggerContext().getLogger(loggerName);
         }
     }
 

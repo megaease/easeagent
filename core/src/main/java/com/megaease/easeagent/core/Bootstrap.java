@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.*;
+import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -91,7 +92,8 @@ public class Bootstrap {
     static void registerMBeans(ConfigManagerMXBean conf, Instrumentation inst) throws Exception {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
-        mbs.registerMBean(conf, mxbeanName);
+        ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
+        mbs.registerMBean(new WrappedConfigManager(customClassLoader, conf), mxbeanName);
         LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName.toString());
     }
 
