@@ -5,7 +5,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
-import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.metrics.AbstractMetric;
 import com.megaease.easeagent.metrics.MetricField;
 import com.megaease.easeagent.metrics.MetricNameFactory;
@@ -17,6 +16,7 @@ import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class KafkaMetric extends AbstractMetric {
 
@@ -86,9 +86,9 @@ public class KafkaMetric extends AbstractMetric {
     }
 
     @Override
-    public Converter newConverter(AdditionalAttributes attributes) {
+    public Converter newConverter(Supplier<Map<String, Object>> attributes) {
         return new KafkaConverter("application", "kafka", "topic",
-                attributes.getAdditionalAttributes());
+                attributes);
     }
 
     public void meter(String topic, MetricSubType... meterTypes) {
@@ -134,7 +134,7 @@ public class KafkaMetric extends AbstractMetric {
 
     protected class KafkaConverter extends ConverterAdapter {
 
-        public KafkaConverter(String category, String type, String keyFieldName, Map<String, Object> attributes) {
+        public KafkaConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
             super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
         }
     }

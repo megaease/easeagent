@@ -21,7 +21,6 @@ import brave.Tracer;
 import brave.Tracing;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
@@ -33,6 +32,7 @@ import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
 import com.megaease.easeagent.metrics.MetricsCollectorConfig;
+import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
@@ -67,6 +67,7 @@ import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract class Provider implements AgentReportAware, ConfigAware {
@@ -80,12 +81,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     private Tracing tracing;
     private AgentReport agentReport;
     private Config config;
-    private AdditionalAttributes additionalAttributes;
+    private Supplier<Map<String, Object>> additionalAttributes;
 
     @Override
     public void setConfig(Config config) {
         this.config = config;
-        this.additionalAttributes = new AdditionalAttributes(config.getString(ConfigConst.SERVICE_NAME));
+        this.additionalAttributes = new MetricsAdditionalAttributes(config);
     }
 
     @Override

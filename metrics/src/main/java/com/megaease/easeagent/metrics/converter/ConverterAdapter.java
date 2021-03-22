@@ -10,6 +10,7 @@ import com.megaease.easeagent.metrics.model.GaugeMetricModel;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class ConverterAdapter extends AbstractConverter {
 
@@ -18,14 +19,14 @@ public class ConverterAdapter extends AbstractConverter {
     private final MetricNameFactory metricNameFactory;
 
     public ConverterAdapter(String category, String type, MetricNameFactory metricNameFactory, KeyType keyType,
-                            Map<String, Object> attributes, String keyFieldName) {
+                            Supplier<Map<String, Object>> attributes, String keyFieldName) {
         super(category, type, keyFieldName, attributes);
         this.keyType = keyType;
         this.metricNameFactory = metricNameFactory;
     }
 
     public ConverterAdapter(String category, String type, MetricNameFactory metricNameFactory, KeyType keyType,
-                            Map<String, Object> attributes) {
+                            Supplier<Map<String, Object>> attributes) {
         this(category, type, metricNameFactory, keyType, attributes, "resource");
     }
 

@@ -41,6 +41,7 @@ import javax.annotation.Nonnull;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implements RemovalListener<String, String>, AgentInterceptor {
 
@@ -92,8 +93,8 @@ public class JdbcStatementMetricInterceptor extends AbstractJdbcMetric implement
     }
 
     @Override
-    public Converter newConverter(AdditionalAttributes attributes) {
+    public Converter newConverter(Supplier<Map<String, Object>> attributes) {
         return new JDBCConverter("application", "jdbc-statement",
-                "signature", attributes.getAdditionalAttributes());
+                "signature", attributes);
     }
 }

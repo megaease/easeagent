@@ -18,7 +18,6 @@
 package com.megaease.easeagent.metrics.jdbc.interceptor;
 
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -29,6 +28,7 @@ import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class JdbcConMetricInterceptor extends AbstractJdbcMetric implements AgentInterceptor {
 
@@ -37,8 +37,8 @@ public class JdbcConMetricInterceptor extends AbstractJdbcMetric implements Agen
     }
 
     @Override
-    public Converter newConverter(AdditionalAttributes attributes) {
-        return new JDBCConverter("application", "jdbc-connection", "url", attributes.getAdditionalAttributes());
+    public Converter newConverter(Supplier<Map<String, Object>> attributes) {
+        return new JDBCConverter("application", "jdbc-connection", "url", attributes);
     }
 
     @Override

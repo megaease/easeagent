@@ -12,6 +12,7 @@ import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public abstract class AbstractServerMetric extends AbstractMetric {
 
@@ -54,7 +55,7 @@ public abstract class AbstractServerMetric extends AbstractMetric {
     }
 
     protected class ServerConverter extends ConverterAdapter {
-        ServerConverter(String category, String type, String keyFieldName, Map<String, Object> attributes) {
+        ServerConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
             super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
         }
     }

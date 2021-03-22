@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public abstract class AbstractConverter implements Converter {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConverter.class);
@@ -21,9 +22,9 @@ public abstract class AbstractConverter implements Converter {
     final Long durationFactor;
     final Long rateFactor;
     private final String keyFieldName;
-    private final Map<String, Object> additionalAttributes;
+    private final Supplier<Map<String, Object>> additionalAttributes;
 
-    AbstractConverter(String category, String type, String keyFieldName, Map<String, Object> additionalAttributes) {
+    AbstractConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> additionalAttributes) {
         this.category = category;
         this.type = type;
         this.rateFactor = TimeUnit.SECONDS.toSeconds(1);
@@ -71,7 +72,7 @@ public abstract class AbstractConverter implements Converter {
     private Map<String, Object> buildMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("timestamp", System.currentTimeMillis());
-        map.putAll(additionalAttributes);
+        map.putAll(additionalAttributes.get());
         return map;
     }
 

@@ -4,13 +4,11 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
-import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
@@ -18,6 +16,7 @@ import javax.management.openmbean.CompositeData;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION;
 
@@ -40,7 +39,7 @@ public class JVMGCMetric extends AbstractMetric {
     }
 
     @Override
-    public Converter newConverter(AdditionalAttributes attributes) {
+    public Converter newConverter(Supplier<Map<String, Object>> attributes) {
         //todo
         throw new UnsupportedOperationException();
     }

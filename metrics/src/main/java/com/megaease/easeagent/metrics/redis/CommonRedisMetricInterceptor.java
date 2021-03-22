@@ -4,7 +4,6 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
-import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -17,6 +16,7 @@ import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class CommonRedisMetricInterceptor extends AbstractMetric implements AgentInterceptor {
 
@@ -60,7 +60,7 @@ public class CommonRedisMetricInterceptor extends AbstractMetric implements Agen
     }
 
     @Override
-    public Converter newConverter(AdditionalAttributes attributes) {
+    public Converter newConverter(Supplier<Map<String, Object>> attributes) {
         //todo
         throw new UnsupportedOperationException();
     }

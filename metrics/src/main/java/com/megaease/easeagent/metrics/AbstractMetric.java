@@ -1,13 +1,14 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.core.AgentThreadFactory;
 import com.megaease.easeagent.metrics.converter.Converter;
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public abstract class AbstractMetric {
 
@@ -30,5 +31,5 @@ public abstract class AbstractMetric {
             Executors.newSingleThreadScheduledExecutor(threadFactory).scheduleWithFixedDelay(obj::doJob, 5, 10, TimeUnit.SECONDS);
         }
     }
-    public abstract Converter newConverter(AdditionalAttributes attributes);
+    public abstract Converter newConverter(Supplier<Map<String, Object>> attributes);
 }

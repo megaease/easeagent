@@ -4,7 +4,6 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -19,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class HttpFilterMetricsInterceptor extends AbstractServerMetric implements AgentInterceptor {
 
@@ -27,9 +27,9 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric implement
     }
 
     @Override
-    public Converter newConverter(AdditionalAttributes attributes) {
+    public Converter newConverter(Supplier<Map<String, Object>> attributes) {
         return new ServerConverter("application", "http-request", "url",
-                attributes.getAdditionalAttributes());
+                attributes);
     }
 
     @Override

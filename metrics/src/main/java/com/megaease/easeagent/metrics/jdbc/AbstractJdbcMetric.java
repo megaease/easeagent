@@ -35,6 +35,7 @@ import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public abstract class AbstractJdbcMetric extends AbstractMetric implements AgentInterceptor {
 
@@ -105,7 +106,7 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
 
     }
     protected class JDBCConverter extends ConverterAdapter {
-        public JDBCConverter(String category, String type, String keyFieldName, Map<String, Object> attributes) {
+        public JDBCConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
             super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
         }
     }
