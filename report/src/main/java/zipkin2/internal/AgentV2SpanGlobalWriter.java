@@ -14,17 +14,14 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
     final String type;
     final String service;//= ApplicationUtils.getBean(Environment.class).getProperty(MetricNameBuilder
     // .SPRING_APPLICATION_NAME, "");
-    final String system;// = ApplicationUtils.getBean(Environment.class).getProperty(MetricNameBuilder.SYSTEM_NAME, "");
     final TraceProps traceProperties;//= ApplicationUtils.getBean(TraceProperties.class);
 
     final String typeFieldName = ",\"type\":\"";
     final String serviceFieldName = ",\"service\":\"";
-    final String systemFieldName = ",\"system\":\"";
 
-    public AgentV2SpanGlobalWriter(String type, String service, String system, TraceProps tp) {
+    public AgentV2SpanGlobalWriter(String type, String service, TraceProps tp) {
         this.type = type;
         this.service = service;
-        this.system = system;
         this.traceProperties = tp;
     }
 
@@ -42,10 +39,6 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(service));
             }
 
-            if (TextUtils.hasText(system)) {
-                mutableInt.add(systemFieldName.length() + 1);
-                mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(system));
-            }
         });
         return mutableInt.intValue();
     }
@@ -65,11 +58,6 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 buffer.writeByte(34);
             }
 
-            if (TextUtils.hasText(system)) {
-                buffer.writeAscii(systemFieldName);
-                buffer.writeUtf8(JsonEscaper.jsonEscape(system));
-                buffer.writeByte(34);
-            }
         });
     }
 }

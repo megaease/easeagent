@@ -64,10 +64,10 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
     public static SDKAsyncReporter<Span> builderSDKAsyncReporter(AsyncReporter.Builder builder,
                                                                  TraceProps traceProperties,
-                                                                 String service, String system) {
+                                                                 String service) {
         final SDKAsyncReporter<Span> reporter = new Builder(builder
                 .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes()))  //设置队列的最大count和最大的size
-                .build(traceProperties, service, system);
+                .build(traceProperties, service);
         reporter.setTraceProperties(traceProperties);
         return reporter;
     }
@@ -360,11 +360,11 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         /**
          * Builds an async reporter that encodes zipkin spans as they are reported.
          */
-        public SDKAsyncReporter<Span> build(TraceProps traceProperties, String service, String system) {
+        public SDKAsyncReporter<Span> build(TraceProps traceProperties, String service) {
             this.traceProperties = traceProperties;
             switch (builder.sender.encoding()) {
                 case JSON:
-                    return build(getAgentEncoder(traceProperties, service, system));
+                    return build(getAgentEncoder(traceProperties, service));
                 case PROTO3:
                     return build(SpanBytesEncoder.PROTO3);
                 case THRIFT:
@@ -374,8 +374,8 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
             }
         }
 
-        private BytesEncoder<Span> getAgentEncoder(TraceProps tp, String service, String system) {
-            return new AgentJSONByteEncoder(service, system, tp);
+        private BytesEncoder<Span> getAgentEncoder(TraceProps tp, String service) {
+            return new AgentJSONByteEncoder(service, tp);
         }
 
         /**
@@ -426,8 +426,8 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
             final AgentV2SpanWriter writer;
 
-            AgentJSONByteEncoder(String service, String system, TraceProps traceProperties) {
-                writer = new AgentV2SpanWriter(service, system, traceProperties);
+            AgentJSONByteEncoder(String service, TraceProps traceProperties) {
+                writer = new AgentV2SpanWriter(service, traceProperties);
             }
 
             @Override

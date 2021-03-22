@@ -139,11 +139,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("agentInterceptorChainBuilder4Con")
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Con() {
         MetricRegistry metricRegistry = new MetricRegistry();
-        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_JDBC_CONNECTION);
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
         final JdbcConMetricInterceptor jdbcConMetricInterceptor = new JdbcConMetricInterceptor(metricRegistry);
         new AutoRefreshReporter(metricRegistry, collectorConfig,
                 jdbcConMetricInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_JDBC_CONNECTION, s))).run();
+                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(jdbcConMetricInterceptor);
     }
@@ -151,11 +151,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("agentInterceptorChainBuilder4Stm")
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Stm() {
         MetricRegistry metricRegistry = new MetricRegistry();
-        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_JDBC_CONNECTION);
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
         final JdbcStatementMetricInterceptor jdbcStatementMetricInterceptor = new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression);
         new AutoRefreshReporter(metricRegistry, collectorConfig,
                 jdbcStatementMetricInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_JDBC_CONNECTION, s))).run();
+                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(jdbcStatementMetricInterceptor)
                 .addInterceptor(new JdbcStatementTracingInterceptor(sqlCompression))
@@ -166,11 +166,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Filter() {
         loadTracing();
         MetricRegistry metricRegistry = new MetricRegistry();
-        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.KEY_METRICS_REQUEST);
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
         final HttpFilterMetricsInterceptor httpFilterMetricsInterceptor = new HttpFilterMetricsInterceptor(metricRegistry);
         new AutoRefreshReporter(metricRegistry, collectorConfig,
                 httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_REQUEST, s))).run();
+                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
         return new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                 .addInterceptor(httpFilterMetricsInterceptor)
@@ -264,10 +264,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
             MetricRegistry metricRegistry = new MetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
 
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_KAFKA);
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_KAFKA);
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     kafkaMetric.newConverter(additionalAttributes),
-                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_KAFKA, s))).run();
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
 
             KafkaProducerMetricInterceptor metricInterceptor = new KafkaProducerMetricInterceptor(kafkaMetric);
             KafkaProducerTracingInterceptor tracingInterceptor = new KafkaProducerTracingInterceptor(tracing);

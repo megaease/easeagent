@@ -1,6 +1,7 @@
 package com.megaease.easeagent.config;
 
 import java.util.List;
+import java.util.Set;
 
 public interface Config {
 
@@ -19,4 +20,6 @@ public interface Config {
     public List<String> getStringList(String name);
 
     public Runnable addChangeListener(ConfigChangeListener listener);
+
+    Set<String> keySet();
 }

@@ -5,14 +5,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Configs implements Config, ConfigManagerMXBean {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private volatile Map<String, String> source;
-    private final ConcurrentHashMap<String, ConfigDelegate> binds = new ConcurrentHashMap<>();
     private final ConfigNotifier notifier;
+    private volatile String latestVersion;
 
     public Configs(Map<String, String> source) {
         this.source = new HashMap<>(source);
@@ -32,15 +31,25 @@ public class Configs implements Config, ConfigManagerMXBean {
         if (!items.isEmpty()) {
             logger.info("change items: {}", items.toString());
             this.source = dump;
-            binds.values().forEach(one -> one.handleChanges(items));
             this.notifier.handleChanges(items);
         }
     }
 
     @Override
-    public void updateObservability(String json) throws IOException {
-        logger.info("call updateObservability: {}", json);
+    public void updateService(String json, String version) throws IOException {
+        logger.info("call updateService. version: {}, json: {}", version, json);
+        if (hasText(latestVersion) && Objects.equals(latestVersion, version)) {
+            logger.info("new version: {} is same with the old version: {}", version, latestVersion);
+            return;
+        } else if (hasText(version)) {
+            logger.info("update the latest version to {}", version);
+            this.latestVersion = version;
+        }
         this.updateConfigs(ConfigUtils.json2KVMap(json));
+    }
+
+    private boolean hasText(String text) {
+        return text != null && text.trim().length() > 0;
     }
 
     @Override
@@ -51,11 +60,6 @@ public class Configs implements Config, ConfigManagerMXBean {
     @Override
     public List<String> availableConfigNames() {
         throw new UnsupportedOperationException();
-    }
-
-    public Config getConfig(String bind) {
-        String prefix = Common.fixPrefix(bind);
-        return binds.computeIfAbsent(prefix, k -> new ConfigDelegate(this, k));
     }
 
     public String toPrettyDisplay() {
@@ -134,5 +138,10 @@ public class Configs implements Config, ConfigManagerMXBean {
     @Override
     public Runnable addChangeListener(ConfigChangeListener listener) {
         return notifier.addChangeListener(listener);
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return this.source.keySet();
     }
 }

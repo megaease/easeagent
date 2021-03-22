@@ -4,7 +4,7 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 
-import static com.megaease.easeagent.config.ConfigConst.*;
+import static com.megaease.easeagent.config.ConfigConst.Observability.*;
 
 public interface OutputProperties {
     String getServers();

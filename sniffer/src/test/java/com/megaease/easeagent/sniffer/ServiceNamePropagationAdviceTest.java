@@ -97,7 +97,7 @@ public class ServiceNamePropagationAdviceTest {
 
     private CrossThreadPropagationConfig getCrossThreadPropagationConfig() {
         final HashMap<String, String> source = new HashMap<>();
-        source.put(ConfigConst.CANARY_HEADERS, "x-canary-labels");
+        source.put(ConfigConst.Canary.FILTER_HEADERS + ".x-canary-labels.hello", "test");
         final CrossThreadPropagationConfig bean = new CrossThreadPropagationConfig(new Configs(source));
         return bean;
     }

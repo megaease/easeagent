@@ -12,7 +12,8 @@ import java.util.List;
 
 public class Utils {
     public static boolean isOutputPropertiesChange(List<ChangeItem> list) {
-        List<String> relatedNames = Arrays.asList(ConfigConst.OUTPUT_ENABLED, ConfigConst.OUTPUT_SERVERS, ConfigConst.OUTPUT_TIMEOUT);
+        List<String> relatedNames = Arrays.asList(ConfigConst.Observability.OUTPUT_ENABLED,
+                ConfigConst.Observability.OUTPUT_SERVERS, ConfigConst.Observability.OUTPUT_TIMEOUT);
         boolean hasChange = list.stream().map(ChangeItem::getFullName)
                 .anyMatch(relatedNames::contains);
         return hasChange;
@@ -20,7 +21,7 @@ public class Utils {
 
     public static boolean isTraceOutputPropertiesChange(List<ChangeItem> list) {
         boolean hasChange = list.stream().map(ChangeItem::getFullName)
-                .anyMatch(name -> name.startsWith(ConfigConst.TRACE_OUTPUT + ConfigConst.DELIMITER));
+                .anyMatch(name -> name.startsWith(ConfigConst.Observability.TRACE_OUTPUT + ConfigConst.DELIMITER));
         return hasChange;
     }
 

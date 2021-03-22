@@ -7,7 +7,7 @@ import java.util.Map;
 public interface ConfigManagerMXBean {
     void updateConfigs(Map<String, String> configs);
 
-    void updateObservability(String json) throws IOException;
+    void updateService(String json, String version) throws IOException;
 
     Map<String, String> getConfigs();
 

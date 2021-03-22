@@ -14,10 +14,6 @@ public class ConfigUtils {
         return configs.getString(ConfigConst.SERVICE_NAME);
     }
 
-    public static String extractSystemName(Configs configs) {
-        return configs.getString(ConfigConst.SYSTEM_NAME);
-    }
-
     public static <R> void bindProp(String name, Config configs, BiFunction<Config, String, R> func, Consumer<R> consumer, R def) {
         Runnable process = () -> {
             R result = func.apply(configs, name);

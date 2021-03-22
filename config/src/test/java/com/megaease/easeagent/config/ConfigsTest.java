@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ConfigsTest {
 
@@ -14,13 +16,13 @@ public class ConfigsTest {
         Configs configs = new Configs(Collections.singletonMap("hello", "world"));
         List<ChangeItem> rst = addListener(configs);
 
-        configs.updateObservability("{}");
+        configs.updateService("{}",null);
         Assert.assertEquals(0, rst.size());
 
-        configs.updateObservability(json.writeValueAsString(Collections.singletonMap("hello", "world")));
+        configs.updateService(json.writeValueAsString(Collections.singletonMap("hello", "world")),null);
         Assert.assertEquals(0, rst.size());
 
-        configs.updateObservability(json.writeValueAsString(Collections.singletonMap("hello", "world2")));
+        configs.updateService(json.writeValueAsString(Collections.singletonMap("hello", "world2")),null);
         Assert.assertEquals(1, rst.size());
     }
 
@@ -62,30 +64,6 @@ public class ConfigsTest {
         Assert.assertEquals(first.getName(), "name");
         Assert.assertEquals(first.getOldValue(), null);
         Assert.assertEquals(first.getNewValue(), "666");
-    }
-
-    @Test
-    public void test_check_config() throws Exception {
-        Configs configs = new Configs(Collections.singletonMap("hello.one", "world"));
-        Config hello = configs.getConfig("hello");
-        List<ChangeItem> rst = addListener(hello);
-        Map<String, String> newValues = new HashMap<>();
-        newValues.put("hello.two", "666");
-        newValues.put("hello.one", "test");
-        configs.updateConfigs(newValues);
-        Assert.assertEquals(2, rst.size());
-
-        ChangeItem one = rst.stream().filter(e -> e.getFullName().equals("hello.one")).findFirst().orElse(null);
-        Assert.assertEquals(one.getFullName(), "hello.one");
-        Assert.assertEquals(one.getName(), "one");
-        Assert.assertEquals(one.getOldValue(), "world");
-        Assert.assertEquals(one.getNewValue(), "test");
-
-        ChangeItem two = rst.stream().filter(e -> e.getFullName().equals("hello.two")).findFirst().orElse(null);
-        Assert.assertEquals(two.getFullName(), "hello.two");
-        Assert.assertEquals(two.getName(), "two");
-        Assert.assertEquals(two.getOldValue(), null);
-        Assert.assertEquals(two.getNewValue(), "666");
     }
 
 

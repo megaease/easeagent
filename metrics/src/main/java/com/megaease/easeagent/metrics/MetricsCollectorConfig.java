@@ -13,9 +13,9 @@ public class MetricsCollectorConfig {
     private Runnable callback;
 
     public MetricsCollectorConfig(Config config, String type) {
-        ConfigUtils.bindProp(ConfigConst.METRICS_ENABLED, config, Config::getBoolean, v -> this.globalEnabled = v);
-        ConfigUtils.bindProp(join(METRICS, type, KEY_COMM_ENABLED), config, Config::getBoolean, v -> this.enabled = v);
-        ConfigUtils.bindProp(join(METRICS, type, KEY_COMM_INTERVAL), config, Config::getInt, v -> {
+        ConfigUtils.bindProp(ConfigConst.Observability.METRICS_ENABLED, config, Config::getBoolean, v -> this.globalEnabled = v);
+        ConfigUtils.bindProp(join(Observability.METRICS, type, Observability.KEY_COMM_ENABLED), config, Config::getBoolean, v -> this.enabled = v);
+        ConfigUtils.bindProp(join(Observability.METRICS, type, Observability.KEY_COMM_INTERVAL), config, Config::getInt, v -> {
             this.interval = v;
             if (callback != null) {
                 callback.run();

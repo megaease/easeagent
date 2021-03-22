@@ -13,17 +13,17 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
 
     @Deprecated
     public AgentV2SpanWriter() {
-        this("", "", null);
+        this("",  null);
     }
 
-    public AgentV2SpanWriter(String service, String system, TraceProps properties) {
+    public AgentV2SpanWriter(String service, TraceProps properties) {
         writerList = ImmutableList.<WriteBuffer.Writer<Span>>builder()
                 .add(new AgentV2SpanBaseWriter())
                 .add(new AgentV2SpanLocalEndpointWriter())
                 .add(new AgentV2SpanRemoteEndpointWriter())
                 .add(new AgentV2SpanAnnotationsWriter())
                 .add(new AgentV2SpanTagsWriter())
-                .add(new AgentV2SpanGlobalWriter("log-tracing", service, system, properties))
+                .add(new AgentV2SpanGlobalWriter("log-tracing", service, properties))
                 .build();
     }
 

@@ -57,20 +57,20 @@ public class ConfigFactory {
         //validate serviceName
         ValidateUtils.validate(configs, ConfigConst.SERVICE_NAME, HasText);
         //validate output
-        ValidateUtils.validate(configs, ConfigConst.OUTPUT_ENABLED, HasText, Bool);
-        ValidateUtils.validate(configs, ConfigConst.OUTPUT_SERVERS, HasText);
-        ValidateUtils.validate(configs, ConfigConst.OUTPUT_TIMEOUT, HasText, NumberInt);
+        ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_ENABLED, HasText, Bool);
+        ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_SERVERS, HasText);
+        ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_TIMEOUT, HasText, NumberInt);
         //validate metrics
-        ValidateUtils.validate(configs, ConfigConst.METRICS_ENABLED, HasText, Bool);
+        ValidateUtils.validate(configs, ConfigConst.Observability.METRICS_ENABLED, HasText, Bool);
         //validate trace
-        ValidateUtils.validate(configs, ConfigConst.TRACE_ENABLED, HasText, Bool);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_ENABLED, HasText, Bool);
         //validate trace output
-        ValidateUtils.validate(configs, ConfigConst.TRACE_OUTPUT_ENABLED, HasText, Bool);
-        ValidateUtils.validate(configs, ConfigConst.TRACE_OUTPUT_MESSAGE_MAX_BYTES, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.TRACE_OUTPUT_MESSAGE_TIMEOUT, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.TRACE_OUTPUT_QUEUED_MAX_SIZE, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.TRACE_OUTPUT_QUEUED_MAX_SPANS, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.TRACE_OUTPUT_REPORT_THREAD, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.TRACE_OUTPUT_TOPIC, HasText);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_ENABLED, HasText, Bool);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_MESSAGE_MAX_BYTES, HasText, NumberInt);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_MESSAGE_TIMEOUT, HasText, NumberInt);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SIZE, HasText, NumberInt);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SPANS, HasText, NumberInt);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_REPORT_THREAD, HasText, NumberInt);
+        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_TOPIC, HasText);
     }
 }

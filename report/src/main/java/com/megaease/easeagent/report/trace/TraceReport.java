@@ -43,7 +43,6 @@ public class TraceReport {
         }
 
         String service = ConfigUtils.extractServiceName(configs);
-        String system = ConfigUtils.extractSystemName(configs);
 
         // We don't support change service and system name in runtime1
         SDKAsyncReporter reporter = SDKAsyncReporter.
@@ -52,7 +51,7 @@ public class TraceReport {
                                 .messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS)
                                 .queuedMaxBytes(traceProperties.getOutput().getQueuedMaxSize()),
                         traceProperties,
-                        service, system);
+                        service);
         reporter.startFlushThread();
         spanRefreshableReporter = new RefreshableReporter<Span>(reporter, traceProperties, outputProperties);
         return spanRefreshableReporter;
