@@ -1,9 +1,6 @@
 package com.megaease.easeagent.report.trace;
 
-import com.megaease.easeagent.config.ChangeItem;
-import com.megaease.easeagent.config.ConfigChangeListener;
-import com.megaease.easeagent.config.ConfigUtils;
-import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;
 import zipkin2.Span;
@@ -42,16 +39,14 @@ public class TraceReport {
                             .build());
         }
 
-        String service = ConfigUtils.extractServiceName(configs);
-
-        // We don't support change service and system name in runtime1
+        AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(configs, ConfigConst.SERVICE_NAME, Config::getString);
         SDKAsyncReporter reporter = SDKAsyncReporter.
                 builderSDKAsyncReporter(AsyncReporter.builder(sender)
                                 .queuedMaxSpans(traceProperties.getOutput().getQueuedMaxSpans())
                                 .messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS)
                                 .queuedMaxBytes(traceProperties.getOutput().getQueuedMaxSize()),
                         traceProperties,
-                        service);
+                        serviceName::getValue);
         reporter.startFlushThread();
         spanRefreshableReporter = new RefreshableReporter<Span>(reporter, traceProperties, outputProperties);
         return spanRefreshableReporter;

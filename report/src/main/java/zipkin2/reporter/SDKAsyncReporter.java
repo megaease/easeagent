@@ -20,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,7 +65,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
     public static SDKAsyncReporter<Span> builderSDKAsyncReporter(AsyncReporter.Builder builder,
                                                                  TraceProps traceProperties,
-                                                                 String service) {
+                                                                 Supplier<String> service) {
         final SDKAsyncReporter<Span> reporter = new Builder(builder
                 .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes()))  //设置队列的最大count和最大的size
                 .build(traceProperties, service);
@@ -360,7 +361,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         /**
          * Builds an async reporter that encodes zipkin spans as they are reported.
          */
-        public SDKAsyncReporter<Span> build(TraceProps traceProperties, String service) {
+        public SDKAsyncReporter<Span> build(TraceProps traceProperties, Supplier<String> service) {
             this.traceProperties = traceProperties;
             switch (builder.sender.encoding()) {
                 case JSON:
@@ -374,7 +375,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
             }
         }
 
-        private BytesEncoder<Span> getAgentEncoder(TraceProps tp, String service) {
+        private BytesEncoder<Span> getAgentEncoder(TraceProps tp, Supplier<String> service) {
             return new AgentJSONByteEncoder(service, tp);
         }
 
@@ -426,7 +427,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
             final AgentV2SpanWriter writer;
 
-            AgentJSONByteEncoder(String service, TraceProps traceProperties) {
+            AgentJSONByteEncoder(Supplier<String> service, TraceProps traceProperties) {
                 writer = new AgentV2SpanWriter(service, traceProperties);
             }
 

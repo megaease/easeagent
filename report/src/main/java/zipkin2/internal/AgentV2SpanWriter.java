@@ -6,6 +6,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import zipkin2.Span;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
 
@@ -13,10 +14,10 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
 
     @Deprecated
     public AgentV2SpanWriter() {
-        this("",  null);
+        this(()->"",  null);
     }
 
-    public AgentV2SpanWriter(String service, TraceProps properties) {
+    public AgentV2SpanWriter(Supplier<String> service, TraceProps properties) {
         writerList = ImmutableList.<WriteBuffer.Writer<Span>>builder()
                 .add(new AgentV2SpanBaseWriter())
                 .add(new AgentV2SpanLocalEndpointWriter())

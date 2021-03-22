@@ -4,22 +4,21 @@ import com.megaease.easeagent.report.trace.TraceProps;
 import com.megaease.easeagent.report.util.TextUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import zipkin2.Span;
-import zipkin2.internal.JsonEscaper;
-import zipkin2.internal.WriteBuffer;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
 
     final String type;
-    final String service;//= ApplicationUtils.getBean(Environment.class).getProperty(MetricNameBuilder
+    final Supplier<String> service;//= ApplicationUtils.getBean(Environment.class).getProperty(MetricNameBuilder
     // .SPRING_APPLICATION_NAME, "");
     final TraceProps traceProperties;//= ApplicationUtils.getBean(TraceProperties.class);
 
     final String typeFieldName = ",\"type\":\"";
     final String serviceFieldName = ",\"service\":\"";
 
-    public AgentV2SpanGlobalWriter(String type, String service, TraceProps tp) {
+    public AgentV2SpanGlobalWriter(String type, Supplier<String> service, TraceProps tp) {
         this.type = type;
         this.service = service;
         this.traceProperties = tp;
@@ -34,9 +33,10 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(type));
             }
 
-            if (TextUtils.hasText(service)) {
+            String tmpService = this.service.get();
+            if (TextUtils.hasText(tmpService)) {
                 mutableInt.add(serviceFieldName.length() + 1);
-                mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(service));
+                mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpService));
             }
 
         });
@@ -51,10 +51,10 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 buffer.writeUtf8(JsonEscaper.jsonEscape(type));
                 buffer.writeByte(34);
             }
-
-            if (TextUtils.hasText(service)) {
+            String tmpService = this.service.get();
+            if (TextUtils.hasText(tmpService)) {
                 buffer.writeAscii(serviceFieldName);
-                buffer.writeUtf8(JsonEscaper.jsonEscape(service));
+                buffer.writeUtf8(JsonEscaper.jsonEscape(tmpService));
                 buffer.writeByte(34);
             }
 

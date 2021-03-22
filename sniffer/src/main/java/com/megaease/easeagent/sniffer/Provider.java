@@ -19,9 +19,13 @@ package com.megaease.easeagent.sniffer;
 
 import brave.Tracer;
 import brave.Tracing;
+import brave.handler.MutableSpan;
+import brave.handler.SpanHandler;
+import brave.propagation.TraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
+import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.config.ConfigConst;
@@ -96,10 +100,18 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     public void loadTracing() {
         if (tracer == null) {
+            AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
             Tracing tracing = Tracing.newBuilder()
                     .localServiceName(config.getString(ConfigConst.SERVICE_NAME))
                     .traceId128Bit(false)
                     .sampler(CountingSampler.create(1))
+                    .addSpanHandler(new SpanHandler() {
+                        @Override
+                        public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                            span.localServiceName(serviceName.getValue());
+                            return true;
+                        }
+                    })
                     .addSpanHandler(AsyncZipkinSpanHandler
                             .newBuilder(span -> agentReport.report(span))
                             .alwaysReportSpans(true)
