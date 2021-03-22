@@ -45,17 +45,13 @@ import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.FluentIterable.from;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class Bootstrap {
-
-    Set<TypeDescription> set = new HashSet<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 

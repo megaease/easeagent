@@ -14,7 +14,7 @@ public class JedisTracingInterceptor extends CommonRedisTracingInterceptor {
         Jedis invoker = (Jedis) methodInfo.getInvoker();
         String name = invoker.getClass().getSimpleName() + "." + methodInfo.getMethod();
         String cmd = methodInfo.getMethod();
-        this.startTracing(name, null, 0, cmd, context);
+        this.startTracing(name, null, cmd, context);
         chain.doBefore(methodInfo, context);
     }
 }

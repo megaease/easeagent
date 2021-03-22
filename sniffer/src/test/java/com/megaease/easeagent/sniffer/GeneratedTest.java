@@ -21,8 +21,10 @@ import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.AbstractRedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClusterClientAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
 
 
 @Assembly({
@@ -36,7 +38,6 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.*;
         SpringGatewayHttpHeadersFilterAdvice.class,
         ServiceNamePropagationAdvice.class,
         RedisClientAdvice.class,
-        AbstractRedisClientAdvice.class,
         StatefulRedisConnectionAdvice.class,
         RedisChannelWriterAdvice.class,
         RedisClusterClientAdvice.class,

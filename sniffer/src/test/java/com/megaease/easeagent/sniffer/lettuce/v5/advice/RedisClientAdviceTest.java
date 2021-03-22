@@ -4,22 +4,16 @@ import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
-import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
 import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.StatefulRedisConnectionImpl;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.RedisCodec;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -30,20 +24,18 @@ public class RedisClientAdviceTest extends BaseSnifferTest {
     static List<Class<?>> classList;
 
     static AgentInterceptorChainInvoker chainInvoker;
-    static AgentInterceptorChain.Builder builder4RedisClientConnectAsync;
     static AgentInterceptor interceptor4ConnectASync;
 
     @Before
     public void before() {
         if (classList == null) {
             interceptor4ConnectASync = mock(AgentInterceptor.class);
-            builder4RedisClientConnectAsync = new DefaultAgentInterceptorChain.Builder().addInterceptor(interceptor4ConnectASync);
             chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
             Definition.Default def = new GenRedisClientAdvice().define(Definition.Default.EMPTY);
             ClassLoader loader = this.getClass().getClassLoader();
             classList = Classes.transform(this.getClass().getName() + "$MyRedisClient")
                     .with(def,
-                            new QualifiedBean("builder4RedisClientConnectAsync", builder4RedisClientConnectAsync),
+                            new QualifiedBean("supplier4RedisClientConnectAsync", mockSupplier()),
                             new QualifiedBean("", chainInvoker)
                     )
                     .load(loader);
@@ -54,14 +46,7 @@ public class RedisClientAdviceTest extends BaseSnifferTest {
     public void connect() throws Exception {
         MyRedisClient myRedisClient = (MyRedisClient) classList.get(0).newInstance();
         myRedisClient.connectStandaloneAsync();
-        this.verifyInterceptorTimes(interceptor4ConnectASync, 1, false);
-
-    }
-
-    @Test
-    public void field() {
-        Field field = AgentFieldAccessor.getFieldFromClass(StatefulRedisConnectionImpl.class, "channelWriter");
-        Assert.assertNotNull(field);
+        this.verifyInvokeTimes(chainInvoker, 1);
     }
 
     static class MyRedisClient extends RedisClient {

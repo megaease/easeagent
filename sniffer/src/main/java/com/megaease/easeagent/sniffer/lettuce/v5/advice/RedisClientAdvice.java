@@ -15,6 +15,7 @@ import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -40,10 +41,10 @@ public abstract class RedisClientAdvice implements Transformation {
 
     static class ConnectStatefulASync extends AbstractAdvice {
         @Injection.Autowire
-        public ConnectStatefulASync(@Injection.Qualifier("builder4RedisClientConnectAsync") AgentInterceptorChain.Builder builder,
+        public ConnectStatefulASync(@Injection.Qualifier("supplier4RedisClientConnectAsync") Supplier<AgentInterceptorChain.Builder> supplier,
                                     AgentInterceptorChainInvoker agentInterceptorChainInvoker
         ) {
-            super(builder, agentInterceptorChainInvoker);
+            super(supplier, agentInterceptorChainInvoker, true);
         }
 
         @Advice.OnMethodEnter

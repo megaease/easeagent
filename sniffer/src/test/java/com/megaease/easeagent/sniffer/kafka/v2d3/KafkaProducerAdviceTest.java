@@ -3,7 +3,7 @@ package com.megaease.easeagent.sniffer.kafka.v2d3;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
-import com.megaease.easeagent.core.interceptor.*;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.GenKafkaProducerAdvice;
 import org.apache.kafka.clients.producer.Callback;
@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 import static org.mockito.Mockito.*;
 
@@ -33,8 +32,8 @@ public class KafkaProducerAdviceTest extends BaseSnifferTest {
                 this.getClass().getName() + "$MyKafkaProducer"
         )
                 .with(def, new QualifiedBean("", chainInvoker),
-                        new QualifiedBean("supplier4KafkaProducerConstructor", (Supplier<AgentInterceptorChain.Builder>) () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor())),
-                        new QualifiedBean("supplier4KafkaProducerDoSend", (Supplier<AgentInterceptorChain.Builder>) () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor()))
+                        new QualifiedBean("supplier4KafkaProducerConstructor", mockSupplier()),
+                        new QualifiedBean("supplier4KafkaProducerDoSend", mockSupplier())
                 )
                 .load(loader);
     }

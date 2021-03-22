@@ -30,9 +30,7 @@ public class RedisChannelWriterInterceptor extends BaseRedisAgentInterceptor {
             cmd = "[" + Joiner.on(",").join(redisCommands.stream().map(input -> input.getType().name()).collect(Collectors.toList())) + "]";
         }
         context.put(ContextCons.CACHE_CMD, cmd);
-        if (LettuceUtils.checkRedisUriInfo(data)) {
-            context.put(ContextCons.CACHE_URI, data);
-        }
+        context.put(ContextCons.CACHE_URI, data);
         super.before(methodInfo, context, chain);
     }
 }

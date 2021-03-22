@@ -18,23 +18,22 @@ public class CommonRedisTracingInterceptor implements AgentInterceptor {
         return chain.doAfter(methodInfo, context);
     }
 
-    protected Span startTracing(String name, String host, int port, String cmd, Map<Object, Object> context) {
+    protected void startTracing(String name, String uri, String cmd, Map<Object, Object> context) {
         Tracer tracer = Tracing.currentTracer();
         Span currentSpan = tracer.currentSpan();
         if (currentSpan == null) {
-            return null;
+            return;
         }
         Span span = Tracing.currentTracer().nextSpan().name(name).start();
         span.kind(Span.Kind.CLIENT);
         span.remoteServiceName("redis");
-        if (host != null) {
-            span.remoteIpAndPort(host, port);
+        if (uri != null) {
+
         }
         context.put(Span.class, span);
         if (cmd != null) {
             span.tag("redis.method", cmd);
         }
-        return span;
     }
 
     protected void finishTracing(Map<Object, Object> context) {

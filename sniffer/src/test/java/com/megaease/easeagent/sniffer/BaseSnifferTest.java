@@ -7,6 +7,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -50,5 +51,9 @@ public class BaseSnifferTest {
             when(builder.build()).thenReturn(new DefaultAgentInterceptorChain(new ArrayList<>()));
             return builder;
         });
+    }
+
+    protected Supplier<AgentInterceptorChain.Builder> mockSupplier() {
+        return (Supplier<AgentInterceptorChain.Builder>) () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor());
     }
 }

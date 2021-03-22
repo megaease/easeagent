@@ -50,7 +50,6 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstr
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
-import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.StatefulRedisConnectionInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
@@ -222,21 +221,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
                 ;
     }
 
-    @Injection.Bean("builder4RedisClientConnectAsync")
-    public AgentInterceptorChain.Builder builder4RedisClientConnectAsync() {
+    @Injection.Bean("supplier4RedisClientConnectAsync")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConnectAsync() {
         loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisMetricInterceptor(new MetricRegistry()))
-                .addInterceptor(new CommonRedisClientConnectInterceptor())
-                ;
-    }
-
-    @Injection.Bean("builder4StatefulRedisConnection")
-    public AgentInterceptorChain.Builder builder4StatefulRedisConnection() {
-        loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new StatefulRedisConnectionInterceptor())
-                ;
+        return () -> new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new CommonRedisClientConnectInterceptor());
     }
 
     @Injection.Bean("builder4LettuceDoWrite")
