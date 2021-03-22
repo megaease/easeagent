@@ -32,7 +32,7 @@ public interface ConfigConst {
         String OUTPUT_ENABLED = join(OUTPUT, "enabled");
 
         String METRICS = join(OBSERVABILITY, "metrics");
-        String TRACE = join("tracings");
+        String TRACE = join(OBSERVABILITY, "tracings");
 
         String METRICS_ENABLED = join(METRICS, "enabled");
 
