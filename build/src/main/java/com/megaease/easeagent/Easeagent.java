@@ -26,6 +26,8 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 
 @Assembly({
 //        CaptureTrace.class
@@ -56,7 +58,8 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionA
         KafkaProducerAdvice.class,
         KafkaConsumerAdvice.class,
         CrossThreadPropagationAdvice.class,
-//        ThreadAdvice.class,
+        RabbitMqChannelAdvice.class,
+        RabbitMqConsumerAdvice.class,
 })
 abstract class Easeagent {
     // This static code is to keep the links of the dependencies for shade plugin, not for real runtime.

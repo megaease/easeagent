@@ -25,6 +25,8 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClusterClientAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 
 
 @Assembly({
@@ -45,6 +47,10 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionA
         KafkaProducerAdvice.class,
         KafkaConsumerAdvice.class,
         CrossThreadPropagationAdvice.class,
+        RabbitMqChannelAdvice.class,
+        RabbitMqConsumerAdvice.class,
+
+
 })
 public interface GeneratedTest {
 }

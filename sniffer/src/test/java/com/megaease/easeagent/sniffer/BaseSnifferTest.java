@@ -3,16 +3,16 @@ package com.megaease.easeagent.sniffer;
 import brave.Tracing;
 import brave.propagation.StrictCurrentTraceContext;
 import com.megaease.easeagent.core.interceptor.*;
-import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class BaseSnifferTest {
+
     StrictCurrentTraceContext currentTraceContext = StrictCurrentTraceContext.create();
 
     protected Tracing tracing() {
@@ -44,16 +44,16 @@ public class BaseSnifferTest {
                         any(AgentInterceptorChain.class));
     }
 
-    protected void initMock(AgentInterceptorChain.BuilderFactory builderFactory) {
-        when(builderFactory.create()).thenAnswer((Answer<AgentInterceptorChain.Builder>) invocation -> {
-            AgentInterceptorChain.Builder builder = mock(AgentInterceptorChain.Builder.class);
-            when(builder.addInterceptor(any(AgentInterceptor.class))).thenReturn(builder);
-            when(builder.build()).thenReturn(new DefaultAgentInterceptorChain(new ArrayList<>()));
-            return builder;
-        });
-    }
+//    protected void initMock(AgentInterceptorChain.BuilderFactory builderFactory) {
+//        when(builderFactory.create()).thenAnswer((Answer<AgentInterceptorChain.Builder>) invocation -> {
+//            AgentInterceptorChain.Builder builder = mock(AgentInterceptorChain.Builder.class);
+//            when(builder.addInterceptor(any(AgentInterceptor.class))).thenReturn(builder);
+//            when(builder.build()).thenReturn(new DefaultAgentInterceptorChain(new ArrayList<>()));
+//            return builder;
+//        });
+//    }
 
     protected Supplier<AgentInterceptorChain.Builder> mockSupplier() {
-        return (Supplier<AgentInterceptorChain.Builder>) () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor());
+        return () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor());
     }
 }

@@ -56,6 +56,11 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>gen</artifactId>
             <version>${project.version}</version>

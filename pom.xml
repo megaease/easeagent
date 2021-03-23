@@ -70,6 +70,7 @@
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
         <version.metrics>4.1.17</version.metrics>
         <version.jedis>3.5.2</version.jedis>
+        <version.amqp-client>5.11.0</version.amqp-client>
     </properties>
 
     <dependencies>
@@ -263,6 +264,11 @@
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-instrumentation-messaging</artifactId>
                 <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rabbitmq</groupId>
+                <artifactId>amqp-client</artifactId>
+                <version>${version.amqp-client}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

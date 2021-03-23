@@ -44,6 +44,10 @@ import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
+import com.megaease.easeagent.metrics.rabbitmq.RabbitMqConsumerMetric;
+import com.megaease.easeagent.metrics.rabbitmq.RabbitMqConsumerMetricInterceptor;
+import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetric;
+import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.CommonRedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
@@ -54,6 +58,8 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstr
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
@@ -66,6 +72,8 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInt
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
+import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
+import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
@@ -225,14 +233,14 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
                 ;
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4SpringRedis")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4SpringRedis() {
-        loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisMetricInterceptor(new MetricRegistry()))
-                .addInterceptor(new SpringRedisTracingInterceptor())
-                ;
-    }
+//    @Injection.Bean("agentInterceptorChainBuilder4SpringRedis")
+//    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4SpringRedis() {
+//        loadTracing();
+//        return new DefaultAgentInterceptorChain.Builder()
+//                .addInterceptor(new RedisMetricInterceptor(new MetricRegistry()))
+//                .addInterceptor(new SpringRedisTracingInterceptor())
+//                ;
+//    }
 
     @Injection.Bean("supplier4RedisClientConnectAsync")
     public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConnectAsync() {
@@ -273,6 +281,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("supplier4KafkaProducerDoSend")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerDoSend() {
         return () -> {
+            loadTracing();
             AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = new MetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
@@ -318,18 +327,74 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("supplier4KafkaConsumerDoPoll")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerDoPoll() {
         return () -> {
+            loadTracing();
             AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = new MetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
 
-//            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_KAFKA);
-//            new AutoRefreshReporter(metricRegistry, collectorConfig,
-//                    kafkaMetric.newConverter(additionalAttributes),
-//                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_KAFKA, s))).run();
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_KAFKA);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    kafkaMetric.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_KAFKA, s))).run();
 
             chainBuilder.addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
                     .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric));
 
+            return chainBuilder;
+        };
+    }
+
+    @Injection.Bean("supplier4RabbitMqBasicPublish")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicPublish() {
+        return () -> {
+            loadTracing();
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+            MetricRegistry metricRegistry = new MetricRegistry();
+            RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
+            RabbitMqProducerMetricInterceptor metricInterceptor = new RabbitMqProducerMetricInterceptor(metric);
+
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_RABBIT);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    metric.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_RABBIT, s))).run();
+
+            chainBuilder.addInterceptor(new RabbitMqChannelPublishInterceptor())
+                    .addInterceptor(metricInterceptor)
+                    .addInterceptor(new RabbitMqProducerTracingInterceptor(tracing))
+            ;
+
+            return chainBuilder;
+        };
+    }
+
+    @Injection.Bean("supplier4RabbitMqBasicConsume")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicConsume() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+            chainBuilder.addInterceptor(new RabbitMqChannelConsumeInterceptor());
+            return chainBuilder;
+        };
+    }
+
+    @Injection.Bean("supplier4RabbitMqHandleDelivery")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqHandleDelivery() {
+        return () -> {
+            loadTracing();
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+
+            MetricRegistry metricRegistry = new MetricRegistry();
+            RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
+            RabbitMqConsumerMetricInterceptor metricInterceptor = new RabbitMqConsumerMetricInterceptor(metric);
+
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_RABBIT);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    metric.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_RABBIT, s))).run();
+
+            chainBuilder
+                    .addInterceptor(metricInterceptor)
+                    .addInterceptor(new RabbitMqConsumerTracingInterceptor(tracing))
+            ;
             return chainBuilder;
         };
     }

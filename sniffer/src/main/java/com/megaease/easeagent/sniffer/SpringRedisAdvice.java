@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Injection.Provider(Provider.class)
+//@Injection.Provider(Provider.class)
 public abstract class SpringRedisAdvice implements Transformation {
     private static final String RedisStringCommands = "org.springframework.data.redis.connection.RedisStringCommands";
     private static final String RedisHashCommands = "org.springframework.data.redis.connection.RedisHashCommands";
