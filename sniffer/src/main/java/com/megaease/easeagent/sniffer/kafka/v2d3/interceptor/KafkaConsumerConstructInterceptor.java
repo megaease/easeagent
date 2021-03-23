@@ -16,10 +16,10 @@ public class KafkaConsumerConstructInterceptor implements AgentInterceptor {
         Object invoker = methodInfo.getInvoker();
         ConsumerConfig config = (ConsumerConfig) methodInfo.getArgs()[0];
         List<String> list = config.getList(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
-        String serverUrls = String.join(",", list);
+        String uri = String.join(",", list);
         if (invoker instanceof DynamicFieldAccessor) {
             DynamicFieldAccessor fieldAccessor = (DynamicFieldAccessor) invoker;
-            fieldAccessor.setEaseAgent$$DynamicField$$Data(serverUrls);
+            fieldAccessor.setEaseAgent$$DynamicField$$Data(uri);
         }
         return chain.doAfter(methodInfo, context);
     }
