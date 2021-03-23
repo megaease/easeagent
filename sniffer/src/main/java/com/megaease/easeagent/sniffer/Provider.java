@@ -332,10 +332,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
             MetricRegistry metricRegistry = new MetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
 
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_KAFKA);
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_KAFKA);
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     kafkaMetric.newConverter(additionalAttributes),
-                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_KAFKA, s))).run();
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
 
             chainBuilder.addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
                     .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric));
@@ -353,10 +353,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
             RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
             RabbitMqProducerMetricInterceptor metricInterceptor = new RabbitMqProducerMetricInterceptor(metric);
 
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_RABBIT);
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_RABBIT);
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     metric.newConverter(additionalAttributes),
-                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_RABBIT, s))).run();
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
 
             chainBuilder.addInterceptor(new RabbitMqChannelPublishInterceptor())
                     .addInterceptor(metricInterceptor)
@@ -386,10 +386,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
             RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
             RabbitMqConsumerMetricInterceptor metricInterceptor = new RabbitMqConsumerMetricInterceptor(metric);
 
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.KEY_METRICS_RABBIT);
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_RABBIT);
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     metric.newConverter(additionalAttributes),
-                    s -> agentReport.report(new MetricItem(ConfigConst.KEY_METRICS_RABBIT, s))).run();
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
 
             chainBuilder
                     .addInterceptor(metricInterceptor)

@@ -13,6 +13,7 @@ import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class RabbitMqConsumerMetric extends AbstractMetric {
 
@@ -46,14 +47,14 @@ public class RabbitMqConsumerMetric extends AbstractMetric {
     }
 
     @Override
-    public Converter newConverter(AdditionalAttributes attributes) {
+    public Converter newConverter(Supplier<Map<String, Object>> attributes) {
         return new RabbitMqConverter("application", "rabbit", "queue",
-                attributes.getAdditionalAttributes());
+                attributes);
     }
 
     protected class RabbitMqConverter extends ConverterAdapter {
 
-        public RabbitMqConverter(String category, String type, String keyFieldName, Map<String, Object> attributes) {
+        public RabbitMqConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
             super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
         }
     }
