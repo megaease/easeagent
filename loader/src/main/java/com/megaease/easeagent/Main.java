@@ -31,6 +31,7 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -128,7 +129,9 @@ public class Main {
         }
 
         public void add(ClassLoader cl) {
-            externals.add(cl);
+            if (cl != null && !Objects.equals(cl, this)) {
+                externals.add(cl);
+            }
         }
 
         @Override

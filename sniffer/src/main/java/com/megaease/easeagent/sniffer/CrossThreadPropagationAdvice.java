@@ -53,7 +53,7 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
         void enter(@Advice.Origin String method,
                    @Advice.This Thread own,
                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
-            logger.info("enter method [{}]", method);
+            logger.debug("enter method [{}]", method);
             Runnable task = (Runnable) args[1];
             if (task == null) {
                 final ThreadLocalCurrentContext.Context ctx = ThreadLocalCurrentContext.DEFAULT.get();
@@ -73,7 +73,7 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
         @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
         ThreadLocalCurrentContext.Scope enter(@Advice.Origin String method, @Advice.This Thread own) {
-            logger.info("enter method [{}]", method);
+            logger.debug("enter method [{}]", method);
             ThreadLocalCurrentContext.Context ctx = ThreadContextBind.get(own);
             if (ctx == null) {
                 return null;
@@ -99,7 +99,7 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method,
                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
-            logger.info("enter method [{}]", method);
+            logger.debug("enter method [{}]", method);
             Runnable task = (Runnable) args[0];
             final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
             args[0] = wrap;

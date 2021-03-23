@@ -28,7 +28,7 @@ public class HTTPHeaderExtractInterceptor implements AgentInterceptor {
             final String value = request.getHeader(header);
             ctx.put(header, value == null ? "" : value);
         }
-        logger.info("extract ctx:{} from http request with headers:{}", ctx.toString(), Arrays.toString(canaryHeaders));
+        logger.debug("extract ctx:{} from http request with headers:{}", ctx.toString(), Arrays.toString(canaryHeaders));
         final ThreadLocalCurrentContext.Scope scope = ThreadLocalCurrentContext.DEFAULT.newScope(ctx);
         context.put(ThreadLocalCurrentContext.Scope.class, scope);
         chain.doBefore(methodInfo, context);

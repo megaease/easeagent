@@ -71,8 +71,8 @@ public class Bootstrap {
 //                .with(new AgentBuilder.Listener.Filtering(
 //                        new StringMatcher("java.lang.Thread", StringMatcher.Mode.EQUALS_FULLY),
 //                        AgentBuilder.Listener.StreamWriting.toSystemOut()))
-//                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-//                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
 //                .ignore(any(), protectedLoaders()) // we need to redefine java.lang and java.util
                 .ignore(isSynthetic())
