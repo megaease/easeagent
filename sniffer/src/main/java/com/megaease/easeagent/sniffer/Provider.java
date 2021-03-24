@@ -48,7 +48,8 @@ import com.megaease.easeagent.metrics.rabbitmq.RabbitMqConsumerMetric;
 import com.megaease.easeagent.metrics.rabbitmq.RabbitMqConsumerMetricInterceptor;
 import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetric;
 import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetricInterceptor;
-import com.megaease.easeagent.metrics.redis.CommonRedisMetricInterceptor;
+import com.megaease.easeagent.metrics.redis.JedisMetricInterceptor;
+import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
@@ -273,23 +274,17 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Injection.Bean("supplier4LettuceDoWrite")
     public Supplier<AgentInterceptorChain.Builder> supplier4LettuceDoWrite() {
-        return () -> {
-            return new DefaultAgentInterceptorChain.Builder()
-                    .addInterceptor(new RedisChannelWriterInterceptor())
-                    .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
-                    .addInterceptor(new CommonLettuceTracingInterceptor())
-                    ;
-        };
+        return () -> new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new RedisChannelWriterInterceptor())
+                .addInterceptor(new LettuceMetricInterceptor(new MetricRegistry()))
+                .addInterceptor(new CommonLettuceTracingInterceptor());
     }
 
     @Injection.Bean("supplier4Jedis")
     public Supplier<AgentInterceptorChain.Builder> supplier4Jedis() {
-        return () -> {
-            return new DefaultAgentInterceptorChain.Builder()
-                    .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
-                    .addInterceptor(new JedisTracingInterceptor())
-                    ;
-        };
+        return () -> new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new JedisMetricInterceptor(new MetricRegistry()))
+                .addInterceptor(new JedisTracingInterceptor());
     }
 
     @Injection.Bean("supplier4KafkaProducerDoSend")

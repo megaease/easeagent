@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class CommonRedisMetricInterceptor extends AbstractMetric implements AgentInterceptor {
+public abstract class AbstractRedisMetricInterceptor extends AbstractMetric implements AgentInterceptor {
 
-    public CommonRedisMetricInterceptor(MetricRegistry metricRegistry) {
+    public AbstractRedisMetricInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
@@ -72,16 +72,23 @@ public class CommonRedisMetricInterceptor extends AbstractMetric implements Agen
         }
     }
 
+    public abstract String getKey(MethodInfo methodInfo, Map<Object, Object> context);
+
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        String key = methodInfo.getInvoker().getClass().getSimpleName() + "." + methodInfo.getMethod();
-        metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT)).update(ContextUtils.getDuration(context), TimeUnit.MILLISECONDS);
+        String key = this.getKey(methodInfo, context);
+        this.collect(key, ContextUtils.getDuration(context), methodInfo.isSuccess());
+        return chain.doAfter(methodInfo, context);
+    }
+
+    public void collect(String key, long duration, boolean success) {
+        metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
         final Meter defaultMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
         final Counter defaultCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT));
         final Meter errorMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.ERROR));
         final Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR));
 
-        if (methodInfo.getThrowable() != null) {
+        if (!success) {
             errorMeter.mark();
             errorCounter.inc();
         }
@@ -95,6 +102,5 @@ public class CommonRedisMetricInterceptor extends AbstractMetric implements Agen
                         .m5Count((long) (defaultMeter.getFiveMinuteRate() * 60 * 5))
                         .m15Count((long) (defaultMeter.getFifteenMinuteRate() * 60 * 15))
                         .build());
-        return chain.doAfter(methodInfo, context);
     }
 }
