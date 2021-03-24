@@ -83,7 +83,7 @@ public interface AppenderManager {
                 appender.start();
                 return appender;
             } catch (Exception e) {
-                LOGGER.warn("can't not create topic :" + topic + " kafka appender , error :", e.getMessage());
+                LOGGER.warn("can't not create topic :" + topic + " kafka appender , error :", e.getMessage(), e);
             }
             return null;
         }
