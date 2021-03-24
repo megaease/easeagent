@@ -45,7 +45,7 @@ public abstract class RedisChannelWriterAdvice implements Transformation {
     static class ObjConstruct extends AbstractAdvice {
 
         ObjConstruct() {
-            super(null, null, true);
+            super(null, null);
         }
 
         @Advice.OnMethodExit
@@ -59,7 +59,7 @@ public abstract class RedisChannelWriterAdvice implements Transformation {
         @Injection.Autowire
         DoWrite(@Injection.Qualifier("supplier4LettuceDoWrite") Supplier<AgentInterceptorChain.Builder> supplier,
                 AgentInterceptorChainInvoker chainInvoker) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter

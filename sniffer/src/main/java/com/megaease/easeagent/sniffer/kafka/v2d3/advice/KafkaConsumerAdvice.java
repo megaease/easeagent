@@ -54,7 +54,7 @@ public abstract class KafkaConsumerAdvice implements Transformation {
         @Injection.Autowire
         public ObjConstruct(AgentInterceptorChainInvoker chainInvoker,
                             @Injection.Qualifier("supplier4KafkaConsumerConstructor") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodExit
@@ -74,7 +74,7 @@ public abstract class KafkaConsumerAdvice implements Transformation {
         public DoPoll(AgentInterceptorChainInvoker chainInvoker,
                       @Injection.Qualifier("supplier4KafkaConsumerDoPoll") Supplier<AgentInterceptorChain.Builder> supplier
         ) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
 
         }
 

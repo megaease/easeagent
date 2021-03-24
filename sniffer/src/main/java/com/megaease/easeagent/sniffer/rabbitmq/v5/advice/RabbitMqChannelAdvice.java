@@ -45,7 +45,7 @@ public abstract class RabbitMqChannelAdvice implements Transformation {
     static class ObjConstruct extends AbstractAdvice {
 
         public ObjConstruct() {
-            super(null, null, true);
+            super(null, null);
         }
 
         @Advice.OnMethodExit
@@ -61,7 +61,7 @@ public abstract class RabbitMqChannelAdvice implements Transformation {
         @Injection.Autowire
         public DoBasicPublish(@Injection.Qualifier("supplier4RabbitMqBasicPublish") Supplier<AgentInterceptorChain.Builder> supplier,
                               AgentInterceptorChainInvoker chainInvoker) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter
@@ -92,7 +92,7 @@ public abstract class RabbitMqChannelAdvice implements Transformation {
         @Injection.Autowire
         public DoBasicConsume(@Injection.Qualifier("supplier4RabbitMqBasicConsume") Supplier<AgentInterceptorChain.Builder> supplier,
                               AgentInterceptorChainInvoker chainInvoker) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter

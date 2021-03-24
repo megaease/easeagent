@@ -44,7 +44,7 @@ public abstract class RedisClientAdvice implements Transformation {
         public ConnectStatefulASync(@Injection.Qualifier("supplier4RedisClientConnectAsync") Supplier<AgentInterceptorChain.Builder> supplier,
                                     AgentInterceptorChainInvoker agentInterceptorChainInvoker
         ) {
-            super(supplier, agentInterceptorChainInvoker, true);
+            super(supplier, agentInterceptorChainInvoker);
         }
 
         @Advice.OnMethodEnter

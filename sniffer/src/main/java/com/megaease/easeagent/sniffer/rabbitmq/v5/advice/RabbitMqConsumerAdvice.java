@@ -38,7 +38,7 @@ public abstract class RabbitMqConsumerAdvice implements Transformation {
     static class ObjConstruct extends AbstractAdvice {
 
         public ObjConstruct() {
-            super(null, null, true);
+            super(null, null);
         }
 
         @Advice.OnMethodExit
@@ -55,7 +55,7 @@ public abstract class RabbitMqConsumerAdvice implements Transformation {
         @Injection.Autowire
         public DoHandleDelivery(@Injection.Qualifier("supplier4RabbitMqHandleDelivery") Supplier<AgentInterceptorChain.Builder> supplier,
                                 AgentInterceptorChainInvoker chainInvoker) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter

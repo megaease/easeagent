@@ -36,7 +36,7 @@ public abstract class SpringGatewayInitGlobalFilterAdvice implements Transformat
         @Injection.Autowire
         InitBeans(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
                   @Injection.Qualifier("supplier4Gateway") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, agentInterceptorChainInvoker, true);
+            super(supplier, agentInterceptorChainInvoker);
         }
 
         @Advice.OnMethodEnter

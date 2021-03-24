@@ -52,7 +52,7 @@ public abstract class KafkaProducerAdvice implements Transformation {
         @Injection.Autowire
         public ObjConstruct(AgentInterceptorChainInvoker chainInvoker,
                             @Injection.Qualifier("supplier4KafkaProducerConstructor") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodExit
@@ -71,7 +71,7 @@ public abstract class KafkaProducerAdvice implements Transformation {
         @Injection.Autowire
         public DoSend(AgentInterceptorChainInvoker chainInvoker,
                       @Injection.Qualifier("supplier4KafkaProducerDoSend") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter

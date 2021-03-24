@@ -34,7 +34,7 @@ public abstract class RestTemplateAdvice implements Transformation {
         @Injection.Autowire
         Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
                 @Injection.Qualifier("supplier4RestTemplate") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, agentInterceptorChainInvoker, true);
+            super(supplier, agentInterceptorChainInvoker);
         }
 
         @Advice.OnMethodEnter

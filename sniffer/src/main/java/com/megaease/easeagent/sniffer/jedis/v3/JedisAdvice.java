@@ -50,7 +50,7 @@ public abstract class JedisAdvice implements Transformation {
         @Injection.Autowire
         public DoCommand(@Injection.Qualifier("supplier4Jedis") Supplier<AgentInterceptorChain.Builder> supplier,
                          AgentInterceptorChainInvoker chainInvoker) {
-            super(supplier, chainInvoker, true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter

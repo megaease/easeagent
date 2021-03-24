@@ -36,7 +36,7 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
         @Injection.Autowire
         FilterRequest(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
                       @Injection.Qualifier("supplier4GatewayHeaders") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, agentInterceptorChainInvoker, true);
+            super(supplier, agentInterceptorChainInvoker);
         }
 
         @Advice.OnMethodEnter

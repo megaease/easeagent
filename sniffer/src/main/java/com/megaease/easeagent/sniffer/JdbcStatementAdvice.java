@@ -141,7 +141,7 @@ public abstract class JdbcStatementAdvice implements Transformation {
         @Injection.Autowire
         Execute(AgentInterceptorChainInvoker chainInvoker,
                 @Injection.Qualifier("supplier4Stm") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, chainInvoker,true);
+            super(supplier, chainInvoker);
             this.jdbcListenerDispatcher = JdbcListenerDispatcher.DEFAULT;
         }
 

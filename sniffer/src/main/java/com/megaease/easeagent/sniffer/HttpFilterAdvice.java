@@ -45,7 +45,7 @@ public abstract class HttpFilterAdvice implements Transformation {
         @Injection.Autowire
         DoFilterInternal(AgentInterceptorChainInvoker chainInvoker,
                          @Injection.Qualifier("supplier4Filter") Supplier<AgentInterceptorChain.Builder> supplier) {
-            super(supplier, chainInvoker,true);
+            super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter
