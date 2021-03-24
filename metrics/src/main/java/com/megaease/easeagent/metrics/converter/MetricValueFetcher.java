@@ -37,12 +37,7 @@ public enum MetricValueFetcher {
     Snapshot99PercentileValue(Snapshot::get99thPercentile, Snapshot.class),
     Snapshot999PercentileValue(Snapshot::get999thPercentile, Snapshot.class),
     MeteredM1Rate(Metered::getOneMinuteRate, Metered.class),
-    MeteredM1RateIgnoreZero(Metered::getOneMinuteRate, Metered.class, aDouble -> {
-        if (aDouble.compareTo(0.00001) < 0) {
-            throw new IllegalArgumentException("current value is too small: " + aDouble);
-        }
-        return aDouble;
-    }),
+    MeteredM1RateIgnoreZero(Metered::getOneMinuteRate, Metered.class, aDouble -> aDouble),
     MeteredM5Rate(Metered::getFiveMinuteRate, Metered.class),
     MeteredM15Rate(Metered::getFifteenMinuteRate, Metered.class),
     MeteredMeanRate(Metered::getMeanRate, Metered.class),
