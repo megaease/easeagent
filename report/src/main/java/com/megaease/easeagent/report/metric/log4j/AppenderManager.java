@@ -47,7 +47,17 @@ public interface AppenderManager {
 
         private DefaultKafkaAppenderManager(OutputProperties outputProperties) {
             this.outputProperties = outputProperties;
-            this.provider = (topic) -> this.newAppender(this.outputProperties, topic);
+            ClassLoader initClassLoader = Thread.currentThread().getContextClassLoader();
+            LOGGER.info("bind classloader:{} to AppenderManager", initClassLoader);
+            this.provider = (topic) -> {
+                ClassLoader old = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(initClassLoader);
+                try {
+                    return this.newAppender(this.outputProperties, topic);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(old);
+                }
+            };
         }
 
         private DefaultKafkaAppenderManager(OutputProperties outputProperties, Function<String, Appender> provider) {
