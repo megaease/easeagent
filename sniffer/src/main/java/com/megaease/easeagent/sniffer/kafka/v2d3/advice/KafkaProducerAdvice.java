@@ -25,9 +25,9 @@ public abstract class KafkaProducerAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("org.apache.kafka.clients.producer.KafkaProducer")
-                .or(named("org.apache.kafka.clients.producer.MockProducer")))
-                .or(named("org.apache.kafka.clients.producer.KafkaProducer"))
+        return def.type(
+                named("org.apache.kafka.clients.producer.KafkaProducer")
+                .or(hasSuperType(named("org.apache.kafka.clients.producer.MockProducer")))
         )
                 .transform(objConstruct(isConstructor().and(takesArguments(7)), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
                 .transform(doSend((named("doSend")

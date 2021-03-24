@@ -28,6 +28,7 @@ import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.dynamic.loading.ClassInjector;
@@ -74,6 +75,7 @@ public class Bootstrap {
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
+                .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG.withFallbackTo(ClassFileLocator.ForClassLoader.ofBootLoader()))
 //                .ignore(any(), protectedLoaders()) // we need to redefine java.lang and java.util
                 .ignore(isSynthetic())
                 .or(nameStartsWith("sun.reflect."))
@@ -203,8 +205,8 @@ public class Bootstrap {
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-            LOGGER.error("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
-            error.printStackTrace();
+            LOGGER.warn("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
+//            error.printStackTrace();
         }
 
         @Override

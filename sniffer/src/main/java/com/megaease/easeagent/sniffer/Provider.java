@@ -62,6 +62,7 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelCon
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
+import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
@@ -77,14 +78,19 @@ import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingIntercep
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 public abstract class Provider implements AgentReportAware, ConfigAware {
 
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance();
+
+    private static final Logger logger= LoggerFactory.getLogger(Provider.class);
 
     private final SQLCompression sqlCompression = SQLCompression.DEFAULT;
 
@@ -117,6 +123,13 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
                         @Override
                         public boolean end(TraceContext context, MutableSpan span, Cause cause) {
                             span.localServiceName(serviceName.getValue());
+                            return true;
+                        }
+                    })
+                    .addSpanHandler(new SpanHandler() {
+                        @Override
+                        public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                            logger.info(span.toString());
                             return true;
                         }
                     })

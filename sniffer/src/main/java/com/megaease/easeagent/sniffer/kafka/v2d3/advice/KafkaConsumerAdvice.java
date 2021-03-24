@@ -31,9 +31,8 @@ public abstract class KafkaConsumerAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("org.apache.kafka.clients.consumer.KafkaConsumer")
-                .or(named("org.apache.kafka.clients.consumer.MockConsumer")))
-                .or(named("org.apache.kafka.clients.consumer.KafkaConsumer"))
+        return def.type(named("org.apache.kafka.clients.consumer.KafkaConsumer")
+                .or(hasSuperType(named("org.apache.kafka.clients.consumer.MockConsumer")))
         )
                 .transform(objConstruct(isConstructor().and(takesArguments(3))
                                 .and(takesArgument(0, named("org.apache.kafka.clients.consumer.ConsumerConfig")))
