@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.sniffer;
 
-import brave.Tracer;
 import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;

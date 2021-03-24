@@ -82,7 +82,7 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
             String value = mapper.writeValueAsString(requestInfo);
             reportConsumer.accept(value);
         } catch (JsonProcessingException e) {
-            logger.error("conert to json error. " + e.getMessage());
+            logger.error("convert to json error. " + e.getMessage());
         }
         return chain.doAfter(methodInfo, context);
     }
