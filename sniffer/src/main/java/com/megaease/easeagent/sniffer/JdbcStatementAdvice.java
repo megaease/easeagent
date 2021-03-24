@@ -38,6 +38,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -138,9 +139,9 @@ public abstract class JdbcStatementAdvice implements Transformation {
         private final JdbcListenerDispatcher jdbcListenerDispatcher;
 
         @Injection.Autowire
-        Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                @Injection.Qualifier("agentInterceptorChainBuilder4Stm") AgentInterceptorChain.Builder builder) {
-            super(builder, agentInterceptorChainInvoker);
+        Execute(AgentInterceptorChainInvoker chainInvoker,
+                @Injection.Qualifier("supplier4Stm") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, chainInvoker,true);
             this.jdbcListenerDispatcher = JdbcListenerDispatcher.DEFAULT;
         }
 

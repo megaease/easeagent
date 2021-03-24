@@ -13,6 +13,7 @@ import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
@@ -34,8 +35,8 @@ public abstract class SpringGatewayHttpHeadersFilterAdvice implements Transforma
 
         @Injection.Autowire
         FilterRequest(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                      @Injection.Qualifier("agentInterceptorChainBuilder4GatewayHeaders") AgentInterceptorChain.Builder builder) {
-            super(builder, agentInterceptorChainInvoker);
+                      @Injection.Qualifier("supplier4GatewayHeaders") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, agentInterceptorChainInvoker, true);
         }
 
         @Advice.OnMethodEnter

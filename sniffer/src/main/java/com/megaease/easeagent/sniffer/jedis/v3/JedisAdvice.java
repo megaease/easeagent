@@ -14,6 +14,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -47,9 +48,9 @@ public abstract class JedisAdvice implements Transformation {
     static class DoCommand extends AbstractAdvice {
 
         @Injection.Autowire
-        public DoCommand(@Injection.Qualifier("builder4Jedis") AgentInterceptorChain.Builder builder,
+        public DoCommand(@Injection.Qualifier("supplier4Jedis") Supplier<AgentInterceptorChain.Builder> supplier,
                          AgentInterceptorChainInvoker chainInvoker) {
-            super(builder, chainInvoker);
+            super(supplier, chainInvoker, true);
         }
 
         @Advice.OnMethodEnter

@@ -12,6 +12,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -32,8 +33,8 @@ public abstract class RestTemplateAdvice implements Transformation {
 
         @Injection.Autowire
         Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                @Injection.Qualifier("agentInterceptorChainBuilder4RestTemplate") AgentInterceptorChain.Builder builder) {
-            super(builder, agentInterceptorChainInvoker);
+                @Injection.Qualifier("supplier4RestTemplate") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, agentInterceptorChainInvoker, true);
         }
 
         @Advice.OnMethodEnter

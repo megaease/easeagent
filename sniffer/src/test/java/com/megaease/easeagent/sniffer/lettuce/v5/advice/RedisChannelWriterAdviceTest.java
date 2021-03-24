@@ -18,6 +18,7 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.*;
 
@@ -25,6 +26,7 @@ public class RedisChannelWriterAdviceTest extends BaseSnifferTest {
     static List<Class<?>> classList;
     AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(mock(AgentInterceptor.class));
     AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
+    Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
 
     @Before
     public void before() throws Exception {
@@ -37,7 +39,7 @@ public class RedisChannelWriterAdviceTest extends BaseSnifferTest {
                 this.getClass().getName() + "$MyRedisChannelWriter"
         )
                 .with(def,
-                        new QualifiedBean("builder4LettuceDoWrite", builder),
+                        new QualifiedBean("supplier4LettuceDoWrite", supplier),
                         new QualifiedBean("", chainInvoker))
                 .load(loader);
 

@@ -12,6 +12,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -35,8 +36,8 @@ public abstract class FeignClientAdvice implements Transformation {
 
         @Injection.Autowire
         Execute(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                @Injection.Qualifier("agentInterceptorChainBuilder4FeignClient") AgentInterceptorChain.Builder builder) {
-            super(builder, agentInterceptorChainInvoker);
+                @Injection.Qualifier("supplier4FeignClient") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, agentInterceptorChainInvoker, true);
         }
 
         @Advice.OnMethodEnter

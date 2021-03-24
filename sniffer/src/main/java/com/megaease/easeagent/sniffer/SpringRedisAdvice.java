@@ -64,35 +64,35 @@ public abstract class SpringRedisAdvice implements Transformation {
 //                .end();
     }
 
-    @AdviceTo(DoCommand.class)
+//    @AdviceTo(DoCommand.class)
     abstract Definition.Transformer doCommand(ElementMatcher<? super MethodDescription> matcher, String fieldName);
 
-    static class DoCommand extends AbstractAdvice {
-
-        @Injection.Autowire
-        DoCommand(@Injection.Qualifier("agentInterceptorChainBuilder4SpringRedis") AgentInterceptorChain.Builder builder,
-                  AgentInterceptorChainInvoker agentInterceptorChainInvoker) {
-            super(builder, agentInterceptorChainInvoker);
-        }
-
-        @Advice.OnMethodEnter
-        public ForwardLock.Release<Map<Object, Object>> enter(
-                @Advice.Origin Object invoker,
-                @Advice.Origin("#m") String method,
-                @Advice.AllArguments Object[] args
-        ) {
-            return doEnter(invoker, method, args);
-        }
-
-        @Advice.OnMethodExit(onThrowable = Throwable.class)
-        public void exit(
-                @Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                @Advice.Origin Object invoker,
-                @Advice.Origin("#m") String method,
-                @Advice.AllArguments Object[] args,
-                @Advice.Thrown Exception exception
-        ) {
-            doExitNoRetValue(release, invoker, method, args, exception);
-        }
-    }
+//    static class DoCommand extends AbstractAdvice {
+//
+//        @Injection.Autowire
+//        DoCommand(@Injection.Qualifier("agentInterceptorChainBuilder4SpringRedis") AgentInterceptorChain.Builder builder,
+//                  AgentInterceptorChainInvoker agentInterceptorChainInvoker) {
+//            super(builder, agentInterceptorChainInvoker);
+//        }
+//
+//        @Advice.OnMethodEnter
+//        public ForwardLock.Release<Map<Object, Object>> enter(
+//                @Advice.Origin Object invoker,
+//                @Advice.Origin("#m") String method,
+//                @Advice.AllArguments Object[] args
+//        ) {
+//            return doEnter(invoker, method, args);
+//        }
+//
+//        @Advice.OnMethodExit(onThrowable = Throwable.class)
+//        public void exit(
+//                @Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
+//                @Advice.Origin Object invoker,
+//                @Advice.Origin("#m") String method,
+//                @Advice.AllArguments Object[] args,
+//                @Advice.Thrown Exception exception
+//        ) {
+//            doExitNoRetValue(release, invoker, method, args, exception);
+//        }
+//    }
 }

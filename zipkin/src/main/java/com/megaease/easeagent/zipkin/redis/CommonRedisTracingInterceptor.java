@@ -14,6 +14,10 @@ public class CommonRedisTracingInterceptor implements AgentInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!methodInfo.isSuccess()) {
+            Span span = ContextUtils.getFromContext(context, Span.class);
+            span.error(methodInfo.getThrowable());
+        }
         this.finishTracing(context);
         return chain.doAfter(methodInfo, context);
     }
@@ -28,7 +32,7 @@ public class CommonRedisTracingInterceptor implements AgentInterceptor {
         span.kind(Span.Kind.CLIENT);
         span.remoteServiceName("redis");
         if (uri != null) {
-
+            // TODO: 2021/3/24 add remote host
         }
         context.put(Span.class, span);
         if (cmd != null) {

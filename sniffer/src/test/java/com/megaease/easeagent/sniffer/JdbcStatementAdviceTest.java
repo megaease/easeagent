@@ -45,10 +45,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+@SuppressWarnings("all")
 public class JdbcStatementAdviceTest {
     private static List<Class<?>> classList;
     private static MetricRegistry registry;
@@ -58,6 +60,7 @@ public class JdbcStatementAdviceTest {
         if (classList == null) {
             registry = new MetricRegistry();
             AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcStatementMetricInterceptor(registry, SQLCompression.DEFAULT));
+            Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
             String baeName = JdbcStatementAdviceTest.class.getName();
             ClassLoader loader = getClass().getClassLoader();
             String conName = baeName + "$MyConnection";
@@ -65,7 +68,7 @@ public class JdbcStatementAdviceTest {
             AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
             Definition.Default def = new GenJdbcStatementAdvice().define(Definition.Default.EMPTY);
             classList = Classes.transform(conName, stmName)
-                    .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4Stm", builder))
+                    .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4Stm", supplier))
                     .load(loader);
         }
     }

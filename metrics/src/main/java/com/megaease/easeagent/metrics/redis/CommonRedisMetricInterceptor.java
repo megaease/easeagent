@@ -10,6 +10,8 @@ import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 
@@ -61,8 +63,13 @@ public class CommonRedisMetricInterceptor extends AbstractMetric implements Agen
 
     @Override
     public Converter newConverter(Supplier<Map<String, Object>> attributes) {
-        //todo
-        throw new UnsupportedOperationException();
+        return new RedisConverter(attributes);
+    }
+
+    protected class RedisConverter extends ConverterAdapter {
+        public RedisConverter(Supplier<Map<String, Object>> attributes) {
+            super("application", "cache-redis", metricNameFactory, KeyType.Timer, attributes, "signature");
+        }
     }
 
     @Override

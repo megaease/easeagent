@@ -49,7 +49,6 @@ import com.megaease.easeagent.metrics.rabbitmq.RabbitMqConsumerMetricInterceptor
 import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetric;
 import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.CommonRedisMetricInterceptor;
-import com.megaease.easeagent.metrics.redis.RedisMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
@@ -62,7 +61,6 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelCon
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
-import com.megaease.easeagent.zipkin.LogSender;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
@@ -77,20 +75,19 @@ import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingIntercep
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
-import com.megaease.easeagent.zipkin.redis.SpringRedisTracingInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 
 public abstract class Provider implements AgentReportAware, ConfigAware {
 
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance();
 
-    private static final Logger logger= LoggerFactory.getLogger(Provider.class);
+    private static final Logger logger = LoggerFactory.getLogger(Provider.class);
 
     private final SQLCompression sqlCompression = SQLCompression.DEFAULT;
 
@@ -170,80 +167,95 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
         return chainInvoker;
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4Con")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Con() {
-        MetricRegistry metricRegistry = new MetricRegistry();
-        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
-        final JdbcConMetricInterceptor jdbcConMetricInterceptor = new JdbcConMetricInterceptor(metricRegistry);
-        new AutoRefreshReporter(metricRegistry, collectorConfig,
-                jdbcConMetricInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(jdbcConMetricInterceptor);
+    @Injection.Bean("supplier4Con")
+    public Supplier<AgentInterceptorChain.Builder> supplier4Con() {
+        return () -> {
+            MetricRegistry metricRegistry = new MetricRegistry();
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
+            final JdbcConMetricInterceptor interceptor = new JdbcConMetricInterceptor(metricRegistry);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    interceptor.newConverter(this.additionalAttributes),
+                    s -> Provider.this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(interceptor);
+        };
+
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4Stm")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Stm() {
-        MetricRegistry metricRegistry = new MetricRegistry();
-        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
-        final JdbcStatementMetricInterceptor jdbcStatementMetricInterceptor = new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression);
-        new AutoRefreshReporter(metricRegistry, collectorConfig,
-                jdbcStatementMetricInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(jdbcStatementMetricInterceptor)
-                .addInterceptor(new JdbcStatementTracingInterceptor(sqlCompression))
-                ;
+    @Injection.Bean("supplier4Stm")
+    public Supplier<AgentInterceptorChain.Builder> supplier4Stm() {
+        return () -> {
+            MetricRegistry metricRegistry = new MetricRegistry();
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
+            final JdbcStatementMetricInterceptor jdbcStatementMetricInterceptor = new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    jdbcStatementMetricInterceptor.newConverter(this.additionalAttributes),
+                    s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(jdbcStatementMetricInterceptor)
+                    .addInterceptor(new JdbcStatementTracingInterceptor(sqlCompression))
+                    ;
+        };
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4Filter")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Filter() {
+    @Injection.Bean("supplier4Filter")
+    public Supplier<AgentInterceptorChain.Builder> supplier4Filter() {
         loadTracing();
-        MetricRegistry metricRegistry = new MetricRegistry();
-        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
-        final HttpFilterMetricsInterceptor httpFilterMetricsInterceptor = new HttpFilterMetricsInterceptor(metricRegistry);
-        new AutoRefreshReporter(metricRegistry, collectorConfig,
-                httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
-                .addInterceptor(httpFilterMetricsInterceptor)
-                .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
-                .addInterceptor(new HttpFilterLogInterceptor())
-                ;
+        return () -> {
+            MetricRegistry metricRegistry = new MetricRegistry();
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
+            final HttpFilterMetricsInterceptor httpFilterMetricsInterceptor = new HttpFilterMetricsInterceptor(metricRegistry);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
+                    s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
+                    .addInterceptor(httpFilterMetricsInterceptor)
+                    .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
+                    .addInterceptor(new HttpFilterLogInterceptor(s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
+                    ;
+        };
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4RestTemplate")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4RestTemplate() {
+    @Injection.Bean("supplier4RestTemplate")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RestTemplate() {
         loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RestTemplateTracingInterceptor(tracing))
-                ;
+        return () -> {
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new RestTemplateTracingInterceptor(tracing))
+                    ;
+        };
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4FeignClient")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4FeignClient() {
+    @Injection.Bean("supplier4FeignClient")
+    public Supplier<AgentInterceptorChain.Builder> supplier4FeignClient() {
         loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new FeignClientTracingInterceptor(tracing))
-                ;
+        return () -> {
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new FeignClientTracingInterceptor(tracing))
+                    ;
+        };
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4Gateway")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4Gateway() {
-        AgentInterceptorChain.Builder headersFilterChainBuilder = new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing));
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
-        builder.addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
-        return builder;
+    @Injection.Bean("supplier4Gateway")
+    public Supplier<AgentInterceptorChain.Builder> supplier4Gateway() {
+        return () -> {
+            AgentInterceptorChain.Builder headersFilterChainBuilder = new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing));
+            AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
+            builder.addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
+            return builder;
+        };
     }
 
-    @Injection.Bean("agentInterceptorChainBuilder4GatewayHeaders")
-    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4GatewayHeaders() {
+    @Injection.Bean("supplier4GatewayHeaders")
+    public Supplier<AgentInterceptorChain.Builder> supplier4GatewayHeaders() {
         loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing))
-                ;
+        return () -> {
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing))
+                    ;
+        };
     }
 
 //    @Injection.Bean("agentInterceptorChainBuilder4SpringRedis")
@@ -262,34 +274,28 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
                 .addInterceptor(new CommonRedisClientConnectInterceptor());
     }
 
-    @Injection.Bean("builder4LettuceDoWrite")
-    public AgentInterceptorChain.Builder builder4LettuceDoWrite() {
+    @Injection.Bean("supplier4LettuceDoWrite")
+    public Supplier<AgentInterceptorChain.Builder> supplier4LettuceDoWrite() {
         loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisChannelWriterInterceptor())
-                .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
-                .addInterceptor(new CommonLettuceTracingInterceptor())
-                ;
+        return () -> {
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new RedisChannelWriterInterceptor())
+                    .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
+                    .addInterceptor(new CommonLettuceTracingInterceptor())
+                    ;
+        };
     }
 
-    @Injection.Bean("builder4Jedis")
-    public AgentInterceptorChain.Builder builder4Jedis() {
+    @Injection.Bean("supplier4Jedis")
+    public Supplier<AgentInterceptorChain.Builder> supplier4Jedis() {
         loadTracing();
-        return new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
-                .addInterceptor(new JedisTracingInterceptor())
-                ;
+        return () -> {
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
+                    .addInterceptor(new JedisTracingInterceptor())
+                    ;
+        };
     }
-
-//    @Injection.Bean("builder4KafkaDoSend")
-//    public AgentInterceptorChain.Builder builder4KafkaDoSend() {
-//        return new DefaultAgentInterceptorChain.Builder();
-//    }
-
-//    @Injection.Bean
-//    public AgentInterceptorChain.BuilderFactory chainBuilderFactory() {
-//        return new DefaultAgentInterceptorChain.BuilderFactory();
-//    }
 
     @Injection.Bean("supplier4KafkaProducerDoSend")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerDoSend() {

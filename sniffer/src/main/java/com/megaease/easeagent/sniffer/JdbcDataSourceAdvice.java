@@ -32,6 +32,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -50,9 +51,9 @@ public abstract class JdbcDataSourceAdvice implements Transformation {
     static class GetConnection extends AbstractAdvice {
 
         @Injection.Autowire
-        GetConnection(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                      @Injection.Qualifier("agentInterceptorChainBuilder4Con") AgentInterceptorChain.Builder builder) {
-            super(builder, agentInterceptorChainInvoker);
+        GetConnection(AgentInterceptorChainInvoker chainInvoker,
+                      @Injection.Qualifier("supplier4Con")Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, chainInvoker,true);
         }
 
         @Advice.OnMethodEnter

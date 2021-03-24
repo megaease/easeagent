@@ -12,6 +12,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
@@ -32,11 +33,10 @@ public abstract class SpringGatewayInitGlobalFilterAdvice implements Transformat
 
     static class InitBeans extends AbstractAdvice {
 
-
         @Injection.Autowire
         InitBeans(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                  @Injection.Qualifier("agentInterceptorChainBuilder4Gateway") AgentInterceptorChain.Builder builder) {
-            super(builder, agentInterceptorChainInvoker);
+                  @Injection.Qualifier("supplier4Gateway") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, agentInterceptorChainInvoker, true);
         }
 
         @Advice.OnMethodEnter

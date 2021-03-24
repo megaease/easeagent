@@ -15,6 +15,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -25,11 +26,12 @@ public class RestTemplateAdviceTest extends BaseSnifferTest {
     public void testInvoke() throws Exception {
         AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(mock(AgentInterceptor.class));
         Definition.Default def = new GenRestTemplateAdvice().define(Definition.Default.EMPTY);
+        Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
         String baseName = this.getClass().getName();
         ClassLoader loader = this.getClass().getClassLoader();
         MyRequest request = (MyRequest) Classes.transform(baseName + "$MyRequest")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4RestTemplate", builder))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4RestTemplate", supplier))
                 .load(loader).get(0).newInstance();
 
         HttpHeaders headers = new HttpHeaders();

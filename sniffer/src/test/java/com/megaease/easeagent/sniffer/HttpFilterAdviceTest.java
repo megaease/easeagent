@@ -11,14 +11,14 @@ import org.junit.Test;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+import java.util.function.Supplier;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
+@SuppressWarnings("all")
 public class HttpFilterAdviceTest extends BaseSnifferTest {
 
     @Test
@@ -27,9 +27,10 @@ public class HttpFilterAdviceTest extends BaseSnifferTest {
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
         Definition.Default def = new GenHttpFilterAdvice().define(Definition.Default.EMPTY);
         String baseName = this.getClass().getName();
+        Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         ClassLoader loader = this.getClass().getClassLoader();
         CharacterEncodingFilter filter = (CharacterEncodingFilter) Classes.transform(baseName + "$MyCharacterEncodingFilter")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4Filter", builder))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4Filter", supplier))
                 .load(loader).get(0).newInstance();
 
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);

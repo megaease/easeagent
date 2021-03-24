@@ -23,7 +23,6 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClusterClientAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
@@ -32,7 +31,6 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 @Assembly({
         JdbcDataSourceAdvice.class,
         JdbcStatementAdvice.class,
-        HttpServletAdvice.class,
         HttpFilterAdvice.class,
         RestTemplateAdvice.class,
         FeignClientAdvice.class,
@@ -42,7 +40,7 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
         RedisClientAdvice.class,
         StatefulRedisConnectionAdvice.class,
         RedisChannelWriterAdvice.class,
-        RedisClusterClientAdvice.class,
+//        RedisClusterClientAdvice.class,
         JedisAdvice.class,
         KafkaProducerAdvice.class,
         KafkaConsumerAdvice.class,

@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -28,11 +29,12 @@ public class FeignClientAdviceTest extends BaseSnifferTest {
         String url = "http://google.com";
         AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(mock(AgentInterceptor.class));
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
+        Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         Definition.Default def = new GenFeignClientAdvice().define(Definition.Default.EMPTY);
         String baseName = this.getClass().getName();
         ClassLoader loader = this.getClass().getClassLoader();
         MyClient client = (MyClient) Classes.transform(baseName + "$MyClient")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4FeignClient", builder))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4FeignClient", supplier))
                 .load(loader).get(0).newInstance();
 
         Request request = Request.create(Request.HttpMethod.GET, url, headers, "ok".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8, null);

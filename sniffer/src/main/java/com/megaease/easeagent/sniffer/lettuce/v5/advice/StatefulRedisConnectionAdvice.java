@@ -34,7 +34,7 @@ public abstract class StatefulRedisConnectionAdvice implements Transformation {
     static class ObjConstruct extends AbstractAdvice {
 
         ObjConstruct() {
-            super(null, null);
+            super(null, null, true);
         }
 
         @Advice.OnMethodExit

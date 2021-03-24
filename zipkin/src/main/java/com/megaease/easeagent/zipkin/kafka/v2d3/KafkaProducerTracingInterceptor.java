@@ -23,7 +23,7 @@ public class KafkaProducerTracingInterceptor implements AgentInterceptor {
     private final KafkaTracing kafkaTracing;
 
     public KafkaProducerTracingInterceptor(Tracing tracing) {
-        this.kafkaTracing = KafkaTracing.newBuilder(tracing).remoteServiceName("my-broker").build();
+        this.kafkaTracing = KafkaTracing.newBuilder(tracing).remoteServiceName("kafka").build();
     }
 
     @Override

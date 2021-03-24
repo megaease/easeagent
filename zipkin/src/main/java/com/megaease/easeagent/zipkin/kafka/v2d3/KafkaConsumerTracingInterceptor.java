@@ -16,11 +16,14 @@ public class KafkaConsumerTracingInterceptor implements AgentInterceptor {
     private final KafkaTracing kafkaTracing;
 
     public KafkaConsumerTracingInterceptor(Tracing tracing) {
-        this.kafkaTracing = KafkaTracing.newBuilder(tracing).remoteServiceName("my-broker").build();
+        this.kafkaTracing = KafkaTracing.newBuilder(tracing).remoteServiceName("kafka").build();
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!methodInfo.isSuccess()) {
+            return chain.doAfter(methodInfo, context);
+        }
         Consumer<?, ?> consumer = (Consumer<?, ?>) methodInfo.getInvoker();
         ConsumerRecords<?, ?> consumerRecords = (ConsumerRecords<?, ?>) methodInfo.getRetValue();
         TracingConsumer<?, ?> tracingConsumer = kafkaTracing.consumer(consumer);

@@ -28,8 +28,16 @@ import com.megaease.easeagent.core.utils.ServletUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class HttpFilterLogInterceptor implements AgentInterceptor {
+
+
+    private final Consumer<String> reportConsumer;
+
+    public HttpFilterLogInterceptor(Consumer<String> reportConsumer) {
+        this.reportConsumer = reportConsumer;
+    }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {

@@ -22,7 +22,9 @@ import com.google.common.collect.Maps;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
-import com.megaease.easeagent.core.interceptor.*;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
@@ -34,22 +36,23 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import static org.mockito.Mockito.*;
 
-public class JdbcDataSourceAdviceTest {
+@SuppressWarnings("all")
+public class JdbcDataSourceAdviceTest extends BaseSnifferTest {
 
     @Test
-    @SuppressWarnings("unchecked")
     public void should_work() throws Exception {
-        final MetricRegistry registry = new MetricRegistry();
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
-        final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
+        MetricRegistry registry = new MetricRegistry();
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
-        final DataSource ds = (DataSource) Classes.transform("com.megaease.easeagent.sniffer.JdbcDataSourceAdviceTest$MyDataSource")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4Con", builder))
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
+        Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
+        final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
+        final DataSource ds = (DataSource) Classes.transform(this.getClass().getName() + "$MyDataSource")
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4Con", supplier))
                 .load(getClass().getClassLoader()).get(0).newInstance();
         Connection connection = ds.getConnection();
         System.out.println(connection);
@@ -67,11 +70,12 @@ public class JdbcDataSourceAdviceTest {
     @Test
     public void should_throw_exception() throws Exception {
         final MetricRegistry registry = new MetricRegistry();
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
+        Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
-        final DataSource ds = (DataSource) Classes.transform("com.megaease.easeagent.sniffer.JdbcDataSourceAdviceTest$ErrDataSource")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("agentInterceptorChainBuilder4Con", builder))
+        final DataSource ds = (DataSource) Classes.transform(this.getClass().getName() + "$ErrDataSource")
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4Con", supplier))
                 .load(getClass().getClassLoader()).get(0).newInstance();
         try {
             ds.getConnection();
@@ -100,42 +104,42 @@ public class JdbcDataSourceAdviceTest {
         }
 
         @Override
-        public Connection getConnection(String username, String password) throws SQLException {
+        public Connection getConnection(String username, String password) {
             return mock(Connection.class);
         }
 
         @Override
-        public <T> T unwrap(Class<T> iface) throws SQLException {
+        public <T> T unwrap(Class<T> iface) {
             return null;
         }
 
         @Override
-        public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        public boolean isWrapperFor(Class<?> iface) {
             return false;
         }
 
         @Override
-        public PrintWriter getLogWriter() throws SQLException {
+        public PrintWriter getLogWriter() {
             return null;
         }
 
         @Override
-        public void setLogWriter(PrintWriter out) throws SQLException {
+        public void setLogWriter(PrintWriter out) {
 
         }
 
         @Override
-        public void setLoginTimeout(int seconds) throws SQLException {
+        public void setLoginTimeout(int seconds) {
 
         }
 
         @Override
-        public int getLoginTimeout() throws SQLException {
+        public int getLoginTimeout() {
             return 0;
         }
 
         @Override
-        public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        public Logger getParentLogger() {
             return null;
         }
     }

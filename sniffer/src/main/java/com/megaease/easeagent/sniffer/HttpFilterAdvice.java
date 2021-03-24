@@ -7,13 +7,12 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.utils.ServletUtils;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -44,9 +43,9 @@ public abstract class HttpFilterAdvice implements Transformation {
 
 
         @Injection.Autowire
-        DoFilterInternal(AgentInterceptorChainInvoker agentInterceptorChainInvoker,
-                         @Injection.Qualifier("agentInterceptorChainBuilder4Filter") AgentInterceptorChain.Builder builder) {
-            super(builder, agentInterceptorChainInvoker);
+        DoFilterInternal(AgentInterceptorChainInvoker chainInvoker,
+                         @Injection.Qualifier("supplier4Filter") Supplier<AgentInterceptorChain.Builder> supplier) {
+            super(supplier, chainInvoker,true);
         }
 
         @Advice.OnMethodEnter

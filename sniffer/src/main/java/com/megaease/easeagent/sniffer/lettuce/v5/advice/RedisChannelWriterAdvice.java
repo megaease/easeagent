@@ -17,6 +17,7 @@ import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -44,7 +45,7 @@ public abstract class RedisChannelWriterAdvice implements Transformation {
     static class ObjConstruct extends AbstractAdvice {
 
         ObjConstruct() {
-            super(null, null);
+            super(null, null, true);
         }
 
         @Advice.OnMethodExit
@@ -56,9 +57,9 @@ public abstract class RedisChannelWriterAdvice implements Transformation {
     static class DoWrite extends AbstractAdvice {
 
         @Injection.Autowire
-        DoWrite(@Injection.Qualifier("builder4LettuceDoWrite") AgentInterceptorChain.Builder builder,
+        DoWrite(@Injection.Qualifier("supplier4LettuceDoWrite") Supplier<AgentInterceptorChain.Builder> supplier,
                 AgentInterceptorChainInvoker chainInvoker) {
-            super(builder, chainInvoker);
+            super(supplier, chainInvoker, true);
         }
 
         @Advice.OnMethodEnter

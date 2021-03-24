@@ -13,6 +13,7 @@ import org.junit.Test;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.*;
 
@@ -28,11 +29,12 @@ public class JedisAdviceTest extends BaseSnifferTest {
         if (classList == null) {
             builder4Jedis = new DefaultAgentInterceptorChain.Builder().addInterceptor(mock(AgentInterceptor.class));
             chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
+            Supplier<AgentInterceptorChain.Builder> supplier = () -> builder4Jedis;
             Definition.Default def = new GenJedisAdvice().define(Definition.Default.EMPTY);
             ClassLoader loader = this.getClass().getClassLoader();
             classList = Classes.transform(this.getClass().getName() + "$MyJedis")
                     .with(def,
-                            new QualifiedBean("builder4Jedis", builder4Jedis),
+                            new QualifiedBean("supplier4Jedis", supplier),
                             new QualifiedBean("", chainInvoker)
                     )
                     .load(loader);
