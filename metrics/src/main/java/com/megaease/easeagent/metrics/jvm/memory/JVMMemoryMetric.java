@@ -21,6 +21,8 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.model.JVMMemoryGaugeMetricModel;
 
 import java.lang.management.ManagementFactory;
@@ -47,8 +49,7 @@ public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
 
     @Override
     public Converter newConverter(Supplier<Map<String, Object>> attributes) {
-        //todo
-        throw new UnsupportedOperationException();
+        return new JVMMemoryMetricConverter(attributes);
     }
 
     @Override
@@ -67,6 +68,12 @@ public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
                         memoryPoolMXBean.getUsage().getMax());
                 this.metricRegistry.gauge(metricName.name(), () -> gauge);
             }
+        }
+    }
+
+    class JVMMemoryMetricConverter extends ConverterAdapter {
+        JVMMemoryMetricConverter(Supplier<Map<String, Object>> attributes) {
+            super("application", "jvm-memory", metricNameFactory, KeyType.Gauge, attributes, "resource");
         }
     }
 }

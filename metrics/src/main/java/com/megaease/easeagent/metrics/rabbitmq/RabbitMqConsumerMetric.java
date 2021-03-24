@@ -48,14 +48,13 @@ public class RabbitMqConsumerMetric extends AbstractMetric {
 
     @Override
     public Converter newConverter(Supplier<Map<String, Object>> attributes) {
-        return new RabbitMqConverter("application", "rabbit", "queue",
-                attributes);
+        return new RabbitMqConverter(attributes);
     }
 
     protected class RabbitMqConverter extends ConverterAdapter {
 
-        public RabbitMqConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
-            super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
+        public RabbitMqConverter(Supplier<Map<String, Object>> attributes) {
+            super("application", "rabbitmq-queue", metricNameFactory, KeyType.Timer, attributes, "resource");
         }
     }
 

@@ -6,6 +6,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
@@ -25,7 +27,7 @@ public class JVMGCMetric extends AbstractMetric {
     private static final String NO_GC = "No GC";
 
     public JVMGCMetric(MetricRegistry metricRegistry) {
-        super(metricRegistry,true);
+        super(metricRegistry, true);
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .meterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.TIMES, MetricValueFetcher.MeteredCount)
@@ -40,8 +42,7 @@ public class JVMGCMetric extends AbstractMetric {
 
     @Override
     public Converter newConverter(Supplier<Map<String, Object>> attributes) {
-        //todo
-        throw new UnsupportedOperationException();
+        return new JVMGCMetricConverter(attributes);
     }
 
     public void collect() {
@@ -87,4 +88,9 @@ public class JVMGCMetric extends AbstractMetric {
         };
     }
 
+    class JVMGCMetricConverter extends ConverterAdapter {
+        JVMGCMetricConverter(Supplier<Map<String, Object>> attributes) {
+            super("application", "jvm-gc", metricNameFactory, KeyType.Meter, attributes, "resource");
+        }
+    }
 }

@@ -29,6 +29,7 @@ import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.config.ConfigConst;
+import com.megaease.easeagent.core.IProvider;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
@@ -80,23 +81,18 @@ import org.slf4j.LoggerFactory;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public abstract class Provider implements AgentReportAware, ConfigAware {
+public abstract class Provider implements AgentReportAware, ConfigAware, IProvider {
 
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance();
-
     private static final Logger logger = LoggerFactory.getLogger(Provider.class);
-
     private final SQLCompression sqlCompression = SQLCompression.DEFAULT;
-
-    private Tracer tracer;
-
     private Tracing tracing;
     private AgentReport agentReport;
     private Config config;
     private Supplier<Map<String, Object>> additionalAttributes;
+    private AutoRefreshConfigItem<String> serviceName;
 
     @Override
     public void setConfig(Config config) {
@@ -109,41 +105,36 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
         this.agentReport = report;
     }
 
-    public void loadTracing() {
-        if (tracer == null) {
-            AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
-            Tracing tracing = Tracing.newBuilder()
-                    .localServiceName(config.getString(ConfigConst.SERVICE_NAME))
-                    .traceId128Bit(false)
-                    .sampler(CountingSampler.create(1))
-                    .addSpanHandler(new SpanHandler() {
-                        @Override
-                        public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-                            span.localServiceName(serviceName.getValue());
-                            return true;
-                        }
-                    })
-                    .addSpanHandler(new SpanHandler() {
-                        @Override
-                        public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-                            logger.info(span.toString());
-                            return true;
-                        }
-                    })
-                    .addSpanHandler(AsyncZipkinSpanHandler
-                            .newBuilder(span -> agentReport.report(span))
-                            .alwaysReportSpans(true)
-                            .build()
-                    ).build();
-            Tracer tracer = tracing.tracer();
-            this.tracing = tracing;
-            this.tracer = tracer;
-        }
+    @Override
+    public void afterPropertiesSet() {
+        serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
+        this.tracing = Tracing.newBuilder()
+                .localServiceName(config.getString(ConfigConst.SERVICE_NAME))
+                .traceId128Bit(false)
+                .sampler(CountingSampler.create(1))
+                .addSpanHandler(new SpanHandler() {
+                    @Override
+                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                        span.localServiceName(serviceName.getValue());
+                        return true;
+                    }
+                })
+                .addSpanHandler(new SpanHandler() {
+                    @Override
+                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                        logger.info(span.toString());
+                        return true;
+                    }
+                })
+                .addSpanHandler(AsyncZipkinSpanHandler
+                        .newBuilder(span -> agentReport.report(span))
+                        .alwaysReportSpans(true)
+                        .build()
+                ).build();
     }
 
     @Injection.Bean
     public Tracing tracing() {
-        loadTracing();
         return tracing;
     }
 
@@ -154,12 +145,24 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     @Injection.Bean
     public JVMMemoryMetric jvmMemoryMetric() {
-        return new JVMMemoryMetric(new MetricRegistry());
+        MetricRegistry metricRegistry = new MetricRegistry();
+        JVMMemoryMetric jvmMemoryMetric = new JVMMemoryMetric(metricRegistry);
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JVM_MEMORY);
+        new AutoRefreshReporter(metricRegistry, collectorConfig,
+                jvmMemoryMetric.newConverter(this.additionalAttributes),
+                s -> Provider.this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JVM_MEMORY, s))).run();
+        return jvmMemoryMetric;
     }
 
     @Injection.Bean
     public JVMGCMetric jvmgcMetric() {
-        return new JVMGCMetric(new MetricRegistry());
+        MetricRegistry metricRegistry = new MetricRegistry();
+        JVMGCMetric jvmgcMetric = new JVMGCMetric(metricRegistry);
+        MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JVM_GC);
+        new AutoRefreshReporter(metricRegistry, collectorConfig,
+                jvmgcMetric.newConverter(this.additionalAttributes),
+                s -> Provider.this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JVM_GC, s))).run();
+        return jvmgcMetric;
     }
 
     @Injection.Bean
@@ -200,7 +203,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     @Injection.Bean("supplier4Filter")
     public Supplier<AgentInterceptorChain.Builder> supplier4Filter() {
-        loadTracing();
         return () -> {
             MetricRegistry metricRegistry = new MetricRegistry();
             MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
@@ -212,14 +214,13 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
                     .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                     .addInterceptor(httpFilterMetricsInterceptor)
                     .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
-                    .addInterceptor(new HttpFilterLogInterceptor(s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
+                    .addInterceptor(new HttpFilterLogInterceptor(serviceName, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
                     ;
         };
     }
 
     @Injection.Bean("supplier4RestTemplate")
     public Supplier<AgentInterceptorChain.Builder> supplier4RestTemplate() {
-        loadTracing();
         return () -> {
             return new DefaultAgentInterceptorChain.Builder()
                     .addInterceptor(new RestTemplateTracingInterceptor(tracing))
@@ -229,7 +230,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     @Injection.Bean("supplier4FeignClient")
     public Supplier<AgentInterceptorChain.Builder> supplier4FeignClient() {
-        loadTracing();
         return () -> {
             return new DefaultAgentInterceptorChain.Builder()
                     .addInterceptor(new FeignClientTracingInterceptor(tracing))
@@ -250,7 +250,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     @Injection.Bean("supplier4GatewayHeaders")
     public Supplier<AgentInterceptorChain.Builder> supplier4GatewayHeaders() {
-        loadTracing();
         return () -> {
             return new DefaultAgentInterceptorChain.Builder()
                     .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing))
@@ -269,14 +268,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     @Injection.Bean("supplier4RedisClientConnectAsync")
     public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConnectAsync() {
-        loadTracing();
         return () -> new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new CommonRedisClientConnectInterceptor());
     }
 
     @Injection.Bean("supplier4LettuceDoWrite")
     public Supplier<AgentInterceptorChain.Builder> supplier4LettuceDoWrite() {
-        loadTracing();
         return () -> {
             return new DefaultAgentInterceptorChain.Builder()
                     .addInterceptor(new RedisChannelWriterInterceptor())
@@ -288,7 +285,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
 
     @Injection.Bean("supplier4Jedis")
     public Supplier<AgentInterceptorChain.Builder> supplier4Jedis() {
-        loadTracing();
         return () -> {
             return new DefaultAgentInterceptorChain.Builder()
                     .addInterceptor(new CommonRedisMetricInterceptor(new MetricRegistry()))
@@ -300,7 +296,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("supplier4KafkaProducerDoSend")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerDoSend() {
         return () -> {
-            loadTracing();
             AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = new MetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
@@ -346,7 +341,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("supplier4KafkaConsumerDoPoll")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerDoPoll() {
         return () -> {
-            loadTracing();
             AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = new MetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
@@ -366,7 +360,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("supplier4RabbitMqBasicPublish")
     public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicPublish() {
         return () -> {
-            loadTracing();
             AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = new MetricRegistry();
             RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
@@ -398,7 +391,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware {
     @Injection.Bean("supplier4RabbitMqHandleDelivery")
     public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqHandleDelivery() {
         return () -> {
-            loadTracing();
             AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
 
             MetricRegistry metricRegistry = new MetricRegistry();

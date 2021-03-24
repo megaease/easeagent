@@ -19,12 +19,17 @@ package com.megaease.easeagent.zipkin.http;
 
 import brave.Tracing;
 import brave.propagation.TraceContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.common.HostAddress;
+import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -32,10 +37,16 @@ import java.util.function.Consumer;
 
 public class HttpFilterLogInterceptor implements AgentInterceptor {
 
+    static final ObjectMapper mapper = new ObjectMapper();
 
     private final Consumer<String> reportConsumer;
 
-    public HttpFilterLogInterceptor(Consumer<String> reportConsumer) {
+    private final AutoRefreshConfigItem<String> serviceName;
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpFilterLogInterceptor.class);
+
+    public HttpFilterLogInterceptor(AutoRefreshConfigItem<String> serviceName, Consumer<String> reportConsumer) {
+        this.serviceName = serviceName;
         this.reportConsumer = reportConsumer;
     }
 
@@ -49,10 +60,8 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         Long beginTime = ContextUtils.getBeginTime(context);
         TraceContext traceContext = Tracing.current().currentTraceContext().get();
-
         RequestInfo requestInfo = RequestInfo.builder()
-                .service("")
-                .system("")
+                .service(this.serviceName.getValue())
                 .hostName(HostAddress.localhost())
                 .hostIpv4(HostAddress.localaddr().getHostAddress())
                 .category("application")
@@ -69,8 +78,12 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
                 .parentSpanId(traceContext.parentIdString())
                 .build();
 
-        // TODO: 2021/3/3 send info
-
+        try {
+            String value = mapper.writeValueAsString(requestInfo);
+            reportConsumer.accept(value);
+        } catch (JsonProcessingException e) {
+            logger.error("conert to json error. " + e.getMessage());
+        }
         return chain.doAfter(methodInfo, context);
     }
 

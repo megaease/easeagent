@@ -160,6 +160,9 @@ public class Bootstrap {
                 throw new IllegalStateException(e);
             }
         }
+        if (instance instanceof IProvider) {
+            ((IProvider) instance).afterPropertiesSet();
+        }
         return builder.build();
     }
 

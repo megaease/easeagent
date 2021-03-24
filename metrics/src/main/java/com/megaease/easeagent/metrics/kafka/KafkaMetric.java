@@ -87,8 +87,7 @@ public class KafkaMetric extends AbstractMetric {
 
     @Override
     public Converter newConverter(Supplier<Map<String, Object>> attributes) {
-        return new KafkaConverter("application", "kafka", "topic",
-                attributes);
+        return new KafkaConverter(attributes);
     }
 
     public void meter(String topic, MetricSubType... meterTypes) {
@@ -134,8 +133,8 @@ public class KafkaMetric extends AbstractMetric {
 
     protected class KafkaConverter extends ConverterAdapter {
 
-        public KafkaConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
-            super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
+        public KafkaConverter(Supplier<Map<String, Object>> attributes) {
+            super("application", "kafka", metricNameFactory, KeyType.Timer, attributes, "resource");
         }
     }
 }

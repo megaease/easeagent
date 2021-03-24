@@ -22,8 +22,6 @@ public class RequestInfo {
 
     private String type = "access-log";
 
-    private String system;
-
     private String service;
 
     @JsonProperty("client_ip")
