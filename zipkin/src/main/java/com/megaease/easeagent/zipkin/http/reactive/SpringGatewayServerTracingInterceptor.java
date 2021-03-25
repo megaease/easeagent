@@ -13,6 +13,7 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.HandlerMapping;
@@ -123,7 +124,8 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
         @Override
         public int statusCode() {
-            Integer rawStatusCode = this.response.getRawStatusCode();
+            HttpStatus statusCode = this.response.getStatusCode();
+            Integer rawStatusCode = statusCode != null ? statusCode.value() : null;
             return rawStatusCode == null ? 0 : rawStatusCode;
         }
 
