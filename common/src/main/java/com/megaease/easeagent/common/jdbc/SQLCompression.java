@@ -1,4 +1,4 @@
-package com.megaease.easeagent.core.utils;
+package com.megaease.easeagent.common.jdbc;
 
 public interface SQLCompression {
 

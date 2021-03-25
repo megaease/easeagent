@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -120,6 +121,7 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
         when(request.getMethodValue()).thenReturn(HttpMethod.GET.name());
 
         when(response.getRawStatusCode()).thenReturn(400);
+        when(response.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
 
         Object[] args = new Object[]{exchange};
         Map<Object, Object> context = ContextUtils.createContext();

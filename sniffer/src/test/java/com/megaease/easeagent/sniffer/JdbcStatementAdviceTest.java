@@ -19,6 +19,7 @@ package com.megaease.easeagent.sniffer;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
+import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
@@ -27,7 +28,6 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
 import com.megaease.easeagent.core.jdbc.listener.JdbcListener;
-import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;

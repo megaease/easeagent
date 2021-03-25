@@ -23,6 +23,11 @@ import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.HostAddress;
+import com.megaease.easeagent.common.JsonUtil;
+import com.megaease.easeagent.common.jdbc.MD5DictionaryItem;
+import com.megaease.easeagent.common.jdbc.MD5SQLCompression;
+import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
@@ -33,7 +38,6 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
-import com.megaease.easeagent.core.utils.SQLCompression;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
 import com.megaease.easeagent.metrics.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
@@ -81,13 +85,15 @@ import org.slf4j.LoggerFactory;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY;
 
 public abstract class Provider implements AgentReportAware, ConfigAware, IProvider {
 
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance();
     private static final Logger logger = LoggerFactory.getLogger(Provider.class);
-    private final SQLCompression sqlCompression = SQLCompression.DEFAULT;
     private Tracing tracing;
     private AgentReport agentReport;
     private Config config;
@@ -189,6 +195,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4Stm() {
         return () -> {
             MetricRegistry metricRegistry = new MetricRegistry();
+            SQLCompression sqlCompression = new MD5SQLCompression(new Md5ReportConsumer());
             MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
             final JdbcStatementMetricInterceptor jdbcStatementMetricInterceptor = new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression);
             new AutoRefreshReporter(metricRegistry, collectorConfig,
@@ -404,4 +411,27 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         };
     }
 
+    class Md5ReportConsumer implements Consumer<Map<String, String>> {
+
+        @Override
+        public void accept(Map<String, String> map) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                MD5DictionaryItem item = MD5DictionaryItem.builder()
+                        .timestamp(System.currentTimeMillis())
+                        .category("application")
+                        .hostName(HostAddress.localhost())
+                        .hostIpv4(HostAddress.localaddr().getHostAddress())
+                        .gid("")
+                        .service(serviceName.getValue())
+                        .tags("")
+                        .type(KEY_METRICS_MD5_DICTIONARY)
+                        .id("")
+                        .md5(entry.getKey())
+                        .sql(entry.getValue())
+                        .build();
+                String json = JsonUtil.toJson(item);
+                agentReport.report(new MetricItem(KEY_METRICS_MD5_DICTIONARY, json));
+            }
+        }
+    }
 }
