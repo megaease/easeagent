@@ -56,6 +56,10 @@ public class ThreadLocalCurrentContext {
         return new CurrentTraceContextRunnable(this, invocationContext, task);
     }
 
+    public static boolean isWrapped(Runnable task) {
+        return task instanceof CurrentTraceContextRunnable;
+    }
+
     public static Context createContext(String... kvs) {
         if (kvs.length % 2 != 0) {
             throw new IllegalArgumentException("size of kvs should be even number");

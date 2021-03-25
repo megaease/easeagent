@@ -19,6 +19,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class CrossThreadPropagationAdvice implements Transformation {
     public static final String CLASS_THREAD = "java.lang.Thread";
     public static final String CLASS_THREAD_POOL_EXECUTOR = "java.util.concurrent.ThreadPoolExecutor";
+    public static final String CLASS_REACTOR_SCHEDULERS = "reactor.core.scheduler.Schedulers";
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
@@ -29,6 +30,11 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
                         .and(takesArguments(0))))
                 .type(named(CLASS_THREAD_POOL_EXECUTOR))
                 .transform(threadPoolExecutorExecute(named("execute")
+                        .and(takesArguments(1))
+                        .and(takesArgument(0, named("java.lang.Runnable")))
+                ))
+                .type(named(CLASS_REACTOR_SCHEDULERS))
+                .transform(reactorSchedulersOnSchedule(named("onSchedule")
                         .and(takesArguments(1))
                         .and(takesArgument(0, named("java.lang.Runnable")))
                 ))
@@ -44,6 +50,8 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
     @AdviceTo(ThreadPoolExecutorExecute.class)
     abstract Definition.Transformer threadPoolExecutorExecute(ElementMatcher<? super MethodDescription> matcher);
 
+    @AdviceTo(ReactorSchedulersOnSchedule.class)
+    abstract Definition.Transformer reactorSchedulersOnSchedule(ElementMatcher<? super MethodDescription> matcher);
 
     static class ThreadInit {
         private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -61,8 +69,10 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
                     ThreadContextBind.bind(own, ctx);
                 }
             } else {
-                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
-                args[1] = wrap;
+                if (!ThreadLocalCurrentContext.isWrapped(task)) {
+                    final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
+                    args[1] = wrap;
+                }
             }
         }
     }
@@ -101,8 +111,26 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
             logger.debug("enter method [{}]", method);
             Runnable task = (Runnable) args[0];
-            final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
-            args[0] = wrap;
+            if (!ThreadLocalCurrentContext.isWrapped(task)) {
+                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
+                args[0] = wrap;
+            }
+        }
+    }
+
+    static class ReactorSchedulersOnSchedule {
+        private final Logger logger = LoggerFactory.getLogger(getClass());
+
+        @SuppressWarnings("unchecked")
+        @Advice.OnMethodEnter
+        void enter(@Advice.Origin String method,
+                   @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
+            logger.debug("enter method [{}]", method);
+            Runnable task = (Runnable) args[0];
+            if (!ThreadLocalCurrentContext.isWrapped(task)) {
+                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
+                args[0] = wrap;
+            }
         }
     }
 
