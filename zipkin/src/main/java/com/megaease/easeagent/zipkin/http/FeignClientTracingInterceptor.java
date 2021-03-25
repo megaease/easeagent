@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<Request, Response> {
@@ -39,25 +41,22 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
         return new FeignClientResponseWrapper(response);
     }
 
-    @SuppressWarnings("unchecked")
-    static Map<String, Collection<String>> headers(Request request) {
-        Field headersField = HeadersFieldFinder.getHeadersField();
-        if (headersField == null) {
-            return null;
-        }
-        try {
-            return (Map<String, Collection<String>>) headersField.get(request);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     static class FeignClientRequestWrapper extends HttpClientRequest {
 
         private final Request request;
 
+        private final Map<String, Collection<String>> headers = new HashMap<>();
+
         public FeignClientRequestWrapper(Request request) {
             this.request = request;
+            Field headersField = HeadersFieldFinder.getHeadersField();
+            if (headersField != null) {
+                Map<String, Collection<String>> originHeaders = HeadersFieldFinder.getHeadersFieldValue(headersField, request);
+                if (originHeaders != null) {
+                    headers.putAll(originHeaders);
+                }
+                HeadersFieldFinder.setHeadersFieldValue(headersField, request, headers);
+            }
         }
 
         @Override
@@ -67,15 +66,8 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
 
         @Override
         public void header(String name, String value) {
-            Map<String, Collection<String>> headers = headers(request);
-            if (headers == null) {
-                return;
-            }
-            Collection<String> strings = headers.get(name);
-            if (strings == null) {
-                return;
-            }
-            strings.add(value);
+            Collection<String> values = headers.computeIfAbsent(name, k -> new ArrayList<>());
+            values.add(value);
         }
 
         @Override
@@ -95,17 +87,12 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
 
         @Override
         public String header(String name) {
-            Map<String, Collection<String>> headers = headers(request);
-            if (headers == null) {
+            Collection<String> values = headers.get(name);
+            if (values == null || values.isEmpty()) {
                 return null;
             }
-            Collection<String> strings = headers.get(name);
-            if (strings == null || strings.isEmpty()) {
-                return null;
-            }
-            return strings.iterator().next();
+            return values.iterator().next();
         }
-
     }
 
     static class FeignClientResponseWrapper extends HttpClientResponse {
@@ -145,6 +132,24 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
             } catch (Exception e) {
                 logger.warn(e.getMessage());
                 return null;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        static Map<String, Collection<String>> getHeadersFieldValue(Field headersField, Object target) {
+            try {
+                return (Map<String, Collection<String>>) headersField.get(target);
+            } catch (IllegalAccessException e) {
+                logger.error("can not get header in FeignClient. {}", e.getMessage());
+            }
+            return null;
+        }
+
+        static void setHeadersFieldValue(Field headersField, Object target, Object fieldValue) {
+            try {
+                headersField.set(target, fieldValue);
+            } catch (IllegalAccessException e) {
+                logger.error("can not set header in FeignClient. {}", e.getMessage());
             }
         }
     }
