@@ -23,6 +23,9 @@ public class KafkaConsumerMetricInterceptor implements AgentInterceptor {
             return chain.doAfter(methodInfo, context);
         }
         ConsumerRecords<?, ?> consumerRecords = (ConsumerRecords<?, ?>) methodInfo.getRetValue();
+        if (consumerRecords == null) {
+            return chain.doAfter(methodInfo, context);
+        }
         for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
             Timer.Context ctx = this.kafkaMetric.consumeStart(consumerRecord.topic());
             this.kafkaMetric.consumeStop(ctx, consumerRecord.topic());
