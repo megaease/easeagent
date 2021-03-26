@@ -43,6 +43,7 @@ import com.megaease.easeagent.metrics.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
+import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStmMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
@@ -58,6 +59,8 @@ import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
+import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
+import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
@@ -74,6 +77,7 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
+import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
@@ -189,6 +193,41 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .addInterceptor(interceptor);
         };
 
+    }
+
+    @Injection.Bean("supplier4JdbcCon")
+    public Supplier<AgentInterceptorChain.Builder> supplier4JdbcCon() {
+        return () -> new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new JdbConPrepareOrCreateStmInterceptor());
+
+    }
+
+    @Injection.Bean("supplier4JdbcStmPrepareSql")
+    public Supplier<AgentInterceptorChain.Builder> supplier4JdbcStmPrepareSql() {
+        return () -> {
+            DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
+            builder.addInterceptor(new JdbcStmPrepareSqlInterceptor());
+            return builder;
+        };
+    }
+
+    @Injection.Bean("supplier4JdbcStmExecute")
+    public Supplier<AgentInterceptorChain.Builder> supplier4JdbcStmExecute() {
+        return () -> {
+            MetricRegistry metricRegistry = new MetricRegistry();
+            SQLCompression sqlCompression = new MD5SQLCompression(new Md5ReportConsumer());
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
+            JdbcStmMetricInterceptor metricInterceptor = new JdbcStmMetricInterceptor(metricRegistry, sqlCompression);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    metricInterceptor.newConverter(this.additionalAttributes),
+                    s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
+
+            DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
+            builder.addInterceptor(new JdbcStmPrepareSqlInterceptor());
+            builder.addInterceptor(metricInterceptor);
+            builder.addInterceptor(new JdbcStmTracingInterceptor(sqlCompression));
+            return builder;
+        };
     }
 
     @Injection.Bean("supplier4Stm")

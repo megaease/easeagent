@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer;
+package com.megaease.easeagent.sniffer.jdbc.advice;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
@@ -28,6 +28,7 @@ import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
+import com.megaease.easeagent.sniffer.BaseSnifferTest;
 import org.junit.Assert;
 import org.junit.Test;
 

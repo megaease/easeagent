@@ -15,23 +15,14 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer;
+package com.megaease.easeagent.sniffer.jdbc.advice;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.Maps;
-import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
-import com.megaease.easeagent.core.jdbc.JdbcContextInfo;
-import com.megaease.easeagent.core.jdbc.listener.JdbcListener;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
-import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
-import org.junit.Assert;
+import com.megaease.easeagent.sniffer.BaseSnifferTest;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,415 +33,51 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("all")
-public class JdbcStatementAdviceTest {
+public class JdbcStatementAdviceTest extends BaseSnifferTest {
     private static List<Class<?>> classList;
-    private static MetricRegistry registry;
+    static AgentInterceptorChainInvoker chainInvoker;
 
     @Before
     public void before() {
         if (classList == null) {
-            registry = new MetricRegistry();
-            AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcStatementMetricInterceptor(registry, SQLCompression.DEFAULT));
-            Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
             String baeName = JdbcStatementAdviceTest.class.getName();
             ClassLoader loader = getClass().getClassLoader();
-            String conName = baeName + "$MyConnection";
             String stmName = baeName + "$MyStatement";
-            AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
+            chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
             Definition.Default def = new GenJdbcStatementAdvice().define(Definition.Default.EMPTY);
-            classList = Classes.transform(conName, stmName)
-                    .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4Stm", supplier))
+            classList = Classes.transform(stmName)
+                    .with(def,
+                            new QualifiedBean("", chainInvoker)
+                            , new QualifiedBean("supplier4JdbcStmPrepareSql", this.mockSupplier())
+                            , new QualifiedBean("supplier4JdbcStmExecute", this.mockSupplier())
+                    )
                     .load(loader);
         }
     }
 
+    @After
+    public void after() {
+        reset(chainInvoker);
+    }
+
     @Test
-    public void should_work() throws Exception {
-        JdbcListener jdbcListener = JdbcListener.DEFAULT;
+    public void invokeExecute() throws Exception {
         Connection connection = mock(Connection.class);
-        final Statement stat = (Statement) classList.get(1).newInstance();
-
-        jdbcListener.onConnectionCreateStatement(JdbcContextInfo.getCurrent(), connection, stat);
-
-        String sql = "sql";
-        stat.execute(sql);
-
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
-                .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
-                .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
-                .build();
-        Assert.assertEquals(1L, registry.timer(metricNameFactory.timerName(sql, MetricSubType.DEFAULT)).getCount());
-        Assert.assertEquals(1L, registry.counter(metricNameFactory.counterName(sql, MetricSubType.DEFAULT)).getCount());
-        Assert.assertEquals(1L, registry.meter(metricNameFactory.meterName(sql, MetricSubType.DEFAULT)).getCount());
-        Assert.assertNotNull(JdbcContextInfo.getCurrent().getExecutionInfo(stat));
-
-        registry.remove(metricNameFactory.timerName(sql, MetricSubType.DEFAULT));
-        registry.remove(metricNameFactory.counterName(sql, MetricSubType.DEFAULT));
-        registry.remove(metricNameFactory.meterName(sql, MetricSubType.DEFAULT));
-
-        stat.close();
-        Assert.assertNull(JdbcContextInfo.getCurrent().getExecutionInfo(stat));
-        Assert.assertTrue(JdbcContextInfo.getCurrent().getInfoMap().isEmpty());
+        final Statement stm = (Statement) classList.get(0).newInstance();
+        stm.execute("sql");
+        this.verifyInvokeTimes(chainInvoker, 1);
     }
 
     @Test
-    public void addBatch() throws Exception {
-        JdbcListener jdbcListener = JdbcListener.DEFAULT;
+    public void invokeAddBatch() throws Exception {
         Connection connection = mock(Connection.class);
-        final Statement stat = (Statement) classList.get(1).newInstance();
-
-        JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
-        jdbcListener.onConnectionCreateStatement(jdbcContextInfo, connection, stat);
-
-        String key = "sql1\nsql2";
-
-        // addBatch
-        stat.addBatch("sql1");
-        stat.addBatch("sql2");
-        Assert.assertEquals(2, jdbcContextInfo.getExecutionInfo(stat).getSqlList().size());
-
-        stat.executeBatch();
-
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
-                .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
-                .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
-                .build();
-
-        Assert.assertEquals(1L, registry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT)).getCount());
-        Assert.assertEquals(1L, registry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT)).getCount());
-        Assert.assertEquals(1L, registry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT)).getCount());
-        Assert.assertNotNull(jdbcContextInfo.getExecutionInfo(stat));
-
-        // clearBatch
-        stat.clearBatch();
-        Assert.assertTrue(jdbcContextInfo.getExecutionInfo(stat).getSqlList().isEmpty());
-
-        // close statement
-        stat.close();
-
-        Assert.assertNull(jdbcContextInfo.getExecutionInfo(stat));
-
-        registry.remove(metricNameFactory.timerName(key, MetricSubType.DEFAULT));
-        registry.remove(metricNameFactory.counterName(key, MetricSubType.DEFAULT));
-        registry.remove(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
-    }
-
-    @Test
-    public void createStatement() throws Exception {
-        JdbcContextInfo jdbcContextInfo = JdbcContextInfo.getCurrent();
-        final Connection con = (Connection) classList.get(0).newInstance();
-        Statement statement = con.createStatement();
-        Assert.assertNotNull(jdbcContextInfo.getExecutionInfo(statement));
-        Assert.assertEquals(1, jdbcContextInfo.getInfoMap().size());
-        String sql1 = "sql1";
-        PreparedStatement ps = con.prepareStatement(sql1);
-        Assert.assertEquals(2, jdbcContextInfo.getInfoMap().size());
-
-        ps.executeQuery();
-        Assert.assertEquals(sql1, jdbcContextInfo.getExecutionInfo(ps).getSql());
-
-        // do nothing
-        ps.addBatch();
-
-        String sql2 = "sql2";
-        ps.addBatch(sql2);
-        Assert.assertEquals(sql1 + "\n" + sql2, jdbcContextInfo.getExecutionInfo(ps).getSql());
-
-        String sql3 = "sql3";
-        ps.executeUpdate(sql3);
-        Assert.assertEquals(sql3, jdbcContextInfo.getExecutionInfo(ps).getSql());
-
-        Assert.assertEquals(2, jdbcContextInfo.getInfoMap().size());
-        //close statement
-        ps.close();
-        Assert.assertNull(jdbcContextInfo.getExecutionInfo(ps));
-        Assert.assertEquals(1, jdbcContextInfo.getInfoMap().size());
-
-        statement.close();
-        Assert.assertNull(jdbcContextInfo.getExecutionInfo(statement));
-        Assert.assertTrue(jdbcContextInfo.getInfoMap().isEmpty());
-    }
-
-    static class MyConnection implements Connection {
-
-        @Override
-        public Statement createStatement() throws SQLException {
-            return new MyStatement();
-        }
-
-        @Override
-        public PreparedStatement prepareStatement(String sql) throws SQLException {
-            return new MyStatement();
-        }
-
-        @Override
-        public CallableStatement prepareCall(String sql) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public String nativeSQL(String sql) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void setAutoCommit(boolean autoCommit) throws SQLException {
-
-        }
-
-        @Override
-        public boolean getAutoCommit() throws SQLException {
-            return false;
-        }
-
-        @Override
-        public void commit() throws SQLException {
-
-        }
-
-        @Override
-        public void rollback() throws SQLException {
-
-        }
-
-        @Override
-        public void close() throws SQLException {
-
-        }
-
-        @Override
-        public boolean isClosed() throws SQLException {
-            return false;
-        }
-
-        @Override
-        public DatabaseMetaData getMetaData() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void setReadOnly(boolean readOnly) throws SQLException {
-
-        }
-
-        @Override
-        public boolean isReadOnly() throws SQLException {
-            return false;
-        }
-
-        @Override
-        public void setCatalog(String catalog) throws SQLException {
-
-        }
-
-        @Override
-        public String getCatalog() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void setTransactionIsolation(int level) throws SQLException {
-
-        }
-
-        @Override
-        public int getTransactionIsolation() throws SQLException {
-            return 0;
-        }
-
-        @Override
-        public SQLWarning getWarnings() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void clearWarnings() throws SQLException {
-
-        }
-
-        @Override
-        public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public Map<String, Class<?>> getTypeMap() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-
-        }
-
-        @Override
-        public void setHoldability(int holdability) throws SQLException {
-
-        }
-
-        @Override
-        public int getHoldability() throws SQLException {
-            return 0;
-        }
-
-        @Override
-        public Savepoint setSavepoint() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public Savepoint setSavepoint(String name) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void rollback(Savepoint savepoint) throws SQLException {
-
-        }
-
-        @Override
-        public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-
-        }
-
-        @Override
-        public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public Clob createClob() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public Blob createBlob() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public NClob createNClob() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public SQLXML createSQLXML() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public boolean isValid(int timeout) throws SQLException {
-            return false;
-        }
-
-        @Override
-        public void setClientInfo(String name, String value) throws SQLClientInfoException {
-
-        }
-
-        @Override
-        public void setClientInfo(Properties properties) throws SQLClientInfoException {
-
-        }
-
-        @Override
-        public String getClientInfo(String name) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public Properties getClientInfo() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void setSchema(String schema) throws SQLException {
-
-        }
-
-        @Override
-        public String getSchema() throws SQLException {
-            return null;
-        }
-
-        @Override
-        public void abort(Executor executor) throws SQLException {
-
-        }
-
-        @Override
-        public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-
-        }
-
-        @Override
-        public int getNetworkTimeout() throws SQLException {
-            return 0;
-        }
-
-        @Override
-        public <T> T unwrap(Class<T> iface) throws SQLException {
-            return null;
-        }
-
-        @Override
-        public boolean isWrapperFor(Class<?> iface) throws SQLException {
-            return false;
-        }
+        final Statement stm = (Statement) classList.get(0).newInstance();
+        stm.addBatch("sql");
+        this.verifyInvokeTimes(chainInvoker, 1);
     }
 
     static class MyStatement implements PreparedStatement {

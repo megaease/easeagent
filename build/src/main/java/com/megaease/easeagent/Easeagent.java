@@ -20,6 +20,9 @@ package com.megaease.easeagent;
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
+import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
+import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
+import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
@@ -49,6 +52,7 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
         RestTemplateAdvice.class,
         FeignClientAdvice.class,
         JdbcDataSourceAdvice.class,
+        JdbcConAdvice.class,
         JdbcStatementAdvice.class,
         ServiceNamePropagationAdvice.class,
         StatefulRedisConnectionAdvice.class,

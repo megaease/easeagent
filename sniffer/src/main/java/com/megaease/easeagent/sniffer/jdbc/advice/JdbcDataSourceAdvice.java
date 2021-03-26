@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer;
+package com.megaease.easeagent.sniffer.jdbc.advice;
 
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
@@ -24,6 +24,8 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.sniffer.AbstractAdvice;
+import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
