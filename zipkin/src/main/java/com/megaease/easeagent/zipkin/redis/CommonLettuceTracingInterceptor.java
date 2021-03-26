@@ -12,9 +12,9 @@ public class CommonLettuceTracingInterceptor extends CommonRedisTracingIntercept
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         String uri = ContextUtils.getFromContext(context, ContextCons.CACHE_URI);
-        String name = methodInfo.getInvoker().getClass().getSimpleName() + "." + methodInfo.getMethod();
         String cmd = ContextUtils.getFromContext(context, ContextCons.CACHE_CMD);
-        this.startTracing(name, uri, cmd, context);
+//        String name = methodInfo.getInvoker().getClass().getSimpleName() + "." + methodInfo.getMethod();
+        this.startTracing(cmd, uri, cmd, context);
         chain.doBefore(methodInfo, context);
     }
 
