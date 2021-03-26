@@ -23,24 +23,17 @@ public class ThreadLocalCurrentContextTest {
 
     @Test
     public void should_work_multiple() throws Exception {
-        final int size = 2;
+        final int size = 1;
         CountDownLatch countDownLatch = new CountDownLatch(size);
         final ThreadLocalCurrentContext currentContext = ThreadLocalCurrentContext.DEFAULT;
         try (final ThreadLocalCurrentContext.Scope scope1 = currentContext.newScope(ThreadLocalCurrentContext.createContext("hello", "world"))) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    assertNull(currentContext.get());
-                    countDownLatch.countDown();
-                }
-            }).start();
-            new Thread(currentContext.wrap(new Runnable() {
-                @Override
-                public void run() {
                     assertEquals("world", currentContext.get().get("hello"));
                     countDownLatch.countDown();
                 }
-            })).start();
+            }).start();
             assertEquals("world", currentContext.get().get("hello"));
         }
         countDownLatch.await();

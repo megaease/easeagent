@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public class ThreadLocalCurrentContext {
-    public static final ThreadLocalCurrentContext DEFAULT = new ThreadLocalCurrentContext(new ThreadLocal<>());
+    public static final ThreadLocalCurrentContext DEFAULT = new ThreadLocalCurrentContext(new InheritableThreadLocal<>());
     final ThreadLocal<Context> local;
     final RevertToNullScope revertToNull;
 

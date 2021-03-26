@@ -127,13 +127,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                         return true;
                     }
                 })
-                .addSpanHandler(new SpanHandler() {
-                    @Override
-                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-                        logger.info(span.toString());
-                        return true;
-                    }
-                })
                 .addSpanHandler(AsyncZipkinSpanHandler
                         .newBuilder(span -> agentReport.report(span))
                         .alwaysReportSpans(true)

@@ -1,5 +1,6 @@
 package com.megaease.easeagent.sniffer;
 
+import brave.Tracing;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
@@ -25,7 +26,6 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
     public <T extends Definition> T define(Definition<T> def) {
         return def
                 .type(hasSuperType(named(CLASS_THREAD)).or(named(CLASS_THREAD)))
-                .transform(threadInit(named("init").and(takesArguments(6))))
                 .transform(threadRun(named("run")
                         .and(takesArguments(0))))
                 .type(named(CLASS_THREAD_POOL_EXECUTOR))
@@ -41,9 +41,6 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
                 .end();
     }
 
-    @AdviceTo(ThreadInit.class)
-    abstract Definition.Transformer threadInit(ElementMatcher<? super MethodDescription> matcher);
-
     @AdviceTo(ThreadRun.class)
     abstract Definition.Transformer threadRun(ElementMatcher<? super MethodDescription> matcher);
 
@@ -53,29 +50,6 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
     @AdviceTo(ReactorSchedulersOnSchedule.class)
     abstract Definition.Transformer reactorSchedulersOnSchedule(ElementMatcher<? super MethodDescription> matcher);
 
-    static class ThreadInit {
-        private final Logger logger = LoggerFactory.getLogger(getClass());
-
-        @SuppressWarnings("unchecked")
-        @Advice.OnMethodEnter
-        void enter(@Advice.Origin String method,
-                   @Advice.This Thread own,
-                   @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
-            logger.debug("enter method [{}]", method);
-            Runnable task = (Runnable) args[1];
-            if (task == null) {
-                final ThreadLocalCurrentContext.Context ctx = ThreadLocalCurrentContext.DEFAULT.get();
-                if (ctx != null) {
-                    ThreadContextBind.bind(own, ctx);
-                }
-            } else {
-                if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                    final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
-                    args[1] = wrap;
-                }
-            }
-        }
-    }
 
     static class ThreadRun {
         private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -112,7 +86,8 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
             logger.debug("enter method [{}]", method);
             Runnable task = (Runnable) args[0];
             if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
+                Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);
+                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(firstWrap);
                 args[0] = wrap;
             }
         }
@@ -128,7 +103,8 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
             logger.debug("enter method [{}]", method);
             Runnable task = (Runnable) args[0];
             if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(task);
+                Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);
+                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(firstWrap);
                 args[0] = wrap;
             }
         }
