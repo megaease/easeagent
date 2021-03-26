@@ -4,23 +4,27 @@ public interface ConfigConst {
     String DELIMITER = ".";
     String SERVICE_NAME = "name";
     String OBSERVABILITY = "observability";
-    String CANARY = "canary";
+    String GLOBAL_CANARY_LABELS = "globalCanaryHeaders";
 
     static String join(String... texts) {
         return String.join(DELIMITER, texts);
     }
 
-    interface Canary {
-        String FILTER_HEADERS = join(CANARY, "filter", "headers");
+    interface GlobalCanaryLabels {
+        String SERVICE_HEADERS = join(GLOBAL_CANARY_LABELS, "serviceHeaders");
 
         static String extractHeaderName(String full) {
-            String prefix = FILTER_HEADERS + DELIMITER;
+            String prefix = SERVICE_HEADERS + DELIMITER;
             int idx = full.indexOf(prefix);
             if (idx < 0) {
                 return null;
             }
             String remain = full.substring(idx + prefix.length());
-            return remain.split("\\" + DELIMITER)[0];
+            String[] arr = remain.split("\\" + DELIMITER);
+            if (arr.length < 2) {
+                return null;
+            }
+            return arr[1];
         }
     }
 

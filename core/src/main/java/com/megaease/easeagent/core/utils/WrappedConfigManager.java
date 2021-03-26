@@ -43,6 +43,25 @@ public class WrappedConfigManager implements ConfigManagerMXBean {
     }
 
     @Override
+    public void updateCanary(String json, String version) throws IOException {
+        try {
+            ThreadUtils.callWithClassLoader(customClassLoader, () -> {
+                try {
+                    conf.updateCanary(json, version);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+    }
+
+    @Override
     public Map<String, String> getConfigs() {
         return ThreadUtils.callWithClassLoader(customClassLoader, conf::getConfigs);
     }

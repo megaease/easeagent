@@ -11,7 +11,8 @@ public class Configs implements Config, ConfigManagerMXBean {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private volatile Map<String, String> source;
     private final ConfigNotifier notifier;
-    private volatile String latestVersion;
+    private volatile String mainLatestVersion;
+    private volatile String canaryLatestVersion;
 
     public Configs(Map<String, String> source) {
         this.source = new HashMap<>(source);
@@ -38,14 +39,32 @@ public class Configs implements Config, ConfigManagerMXBean {
     @Override
     public void updateService(String json, String version) throws IOException {
         logger.info("call updateService. version: {}, json: {}", version, json);
-        if (hasText(latestVersion) && Objects.equals(latestVersion, version)) {
-            logger.info("new version: {} is same with the old version: {}", version, latestVersion);
+        if (hasText(mainLatestVersion) && Objects.equals(mainLatestVersion, version)) {
+            logger.info("new main version: {} is same with the old version: {}", version, mainLatestVersion);
             return;
         } else if (hasText(version)) {
-            logger.info("update the latest version to {}", version);
-            this.latestVersion = version;
+            logger.info("update the main latest version to {}", version);
+            this.mainLatestVersion = version;
         }
         this.updateConfigs(ConfigUtils.json2KVMap(json));
+    }
+
+    @Override
+    public void updateCanary(String json, String version) throws IOException {
+        logger.info("call updateCanary. version: {}, json: {}", version, json);
+        if (hasText(canaryLatestVersion) && Objects.equals(canaryLatestVersion, version)) {
+            logger.info("new canary version: {} is same with the old version: {}", version, canaryLatestVersion);
+            return;
+        } else if (hasText(version)) {
+            logger.info("update the canary latest version to {}", version);
+            this.canaryLatestVersion = version;
+        }
+        Map<String, String> originals = ConfigUtils.json2KVMap(json);
+        HashMap<String, String> rst = new HashMap<>();
+        originals.forEach((k, v) -> {
+            rst.put(ConfigConst.join(ConfigConst.GLOBAL_CANARY_LABELS, k), v);
+        });
+        this.updateConfigs(rst);
     }
 
     private boolean hasText(String text) {

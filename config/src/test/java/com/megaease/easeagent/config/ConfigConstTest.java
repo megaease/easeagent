@@ -8,10 +8,11 @@ import static org.junit.Assert.assertNull;
 public class ConfigConstTest {
     @Test
     public void testExtractHeaderName() {
-        String prefix = "canary.filter.headers";
-        assertEquals(prefix, ConfigConst.Canary.FILTER_HEADERS);
-        assertEquals("test-aaa", ConfigConst.Canary.extractHeaderName(prefix + ".test-aaa.hello"));
-        assertEquals("test-bbb", ConfigConst.Canary.extractHeaderName(prefix + ".test-bbb"));
-        assertNull(ConfigConst.Canary.extractHeaderName(prefix + "test-bbb"));
+        String prefix = "globalCanaryHeaders.serviceHeaders";
+        assertEquals(prefix, ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS);
+        assertEquals("hello", ConfigConst.GlobalCanaryLabels.extractHeaderName(prefix + ".test-aaa.hello"));
+        assertEquals("world", ConfigConst.GlobalCanaryLabels.extractHeaderName(prefix + ".test-aaa.world"));
+        assertNull(ConfigConst.GlobalCanaryLabels.extractHeaderName(prefix + ".test-bbb"));
+        assertNull(ConfigConst.GlobalCanaryLabels.extractHeaderName(prefix + "test-bbb"));
     }
 }

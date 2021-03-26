@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 
 public class CrossThreadPropagationConfig {
     private volatile String[] canaryHeaders = new String[0];
-    private final Predicate<String> prefixPredicate = e -> e.startsWith(ConfigConst.Canary.FILTER_HEADERS + ConfigConst.DELIMITER);
+    private final Predicate<String> prefixPredicate = e -> e.startsWith(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ConfigConst.DELIMITER);
 
     public CrossThreadPropagationConfig(Config config) {
         this.resetData(config);
@@ -31,7 +31,7 @@ public class CrossThreadPropagationConfig {
     private void resetData(Config config) {
         this.canaryHeaders = config.keySet().stream()
                 .filter(prefixPredicate)
-                .map(ConfigConst.Canary::extractHeaderName)
+                .map(ConfigConst.GlobalCanaryLabels::extractHeaderName)
                 .filter(Objects::nonNull).distinct().toArray(String[]::new);
     }
 

@@ -9,6 +9,8 @@ public interface ConfigManagerMXBean {
 
     void updateService(String json, String version) throws IOException;
 
+    void updateCanary(String json, String version) throws IOException;
+
     Map<String, String> getConfigs();
 
     List<String> availableConfigNames();
