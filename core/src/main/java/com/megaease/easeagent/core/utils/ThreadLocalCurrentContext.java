@@ -53,11 +53,11 @@ public class ThreadLocalCurrentContext {
      */
     public Runnable wrap(Runnable task) {
         final Context invocationContext = get();
-        return new CurrentTraceContextRunnable(this, invocationContext, task);
+        return new CurrentContextRunnable(this, invocationContext, task);
     }
 
     public static boolean isWrapped(Runnable task) {
-        return task instanceof CurrentTraceContextRunnable;
+        return task instanceof CurrentContextRunnable;
     }
 
     public static Context createContext(String... kvs) {
@@ -72,12 +72,12 @@ public class ThreadLocalCurrentContext {
     }
 
     @AutoService(AppendBootstrapClassLoaderSearch.class)
-    public static class CurrentTraceContextRunnable implements Runnable {
+    public static class CurrentContextRunnable implements Runnable {
         private final ThreadLocalCurrentContext threadLocalCurrentContext;
         private final Context ctx;
         private final Runnable original;
 
-        public CurrentTraceContextRunnable(ThreadLocalCurrentContext threadLocalCurrentContext, Context ctx, Runnable original) {
+        public CurrentContextRunnable(ThreadLocalCurrentContext threadLocalCurrentContext, Context ctx, Runnable original) {
             this.threadLocalCurrentContext = threadLocalCurrentContext;
             this.ctx = ctx;
             this.original = original;
