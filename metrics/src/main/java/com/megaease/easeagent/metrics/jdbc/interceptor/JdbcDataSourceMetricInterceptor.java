@@ -30,9 +30,9 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class JdbcConMetricInterceptor extends AbstractJdbcMetric implements AgentInterceptor {
+public class JdbcDataSourceMetricInterceptor extends AbstractJdbcMetric implements AgentInterceptor {
 
-    public JdbcConMetricInterceptor(MetricRegistry metricRegistry) {
+    public JdbcDataSourceMetricInterceptor(MetricRegistry metricRegistry) {
         super(metricRegistry);
     }
 

@@ -27,7 +27,7 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
-import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
+import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcDataSourceMetricInterceptor;
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,11 +49,11 @@ public class JdbcDataSourceAdviceTest extends BaseSnifferTest {
     public void should_work() throws Exception {
         MetricRegistry registry = new MetricRegistry();
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcDataSourceMetricInterceptor(registry));
         Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
         final DataSource ds = (DataSource) Classes.transform(this.getClass().getName() + "$MyDataSource")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4Con", supplier))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4DataSourceGetCon", supplier))
                 .load(getClass().getClassLoader()).get(0).newInstance();
         Connection connection = ds.getConnection();
         System.out.println(connection);
@@ -72,18 +72,18 @@ public class JdbcDataSourceAdviceTest extends BaseSnifferTest {
     public void should_throw_exception() throws Exception {
         final MetricRegistry registry = new MetricRegistry();
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcConMetricInterceptor(registry));
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcDataSourceMetricInterceptor(registry));
         Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
         final DataSource ds = (DataSource) Classes.transform(this.getClass().getName() + "$ErrDataSource")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4Con", supplier))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4DataSourceGetCon", supplier))
                 .load(getClass().getClassLoader()).get(0).newInstance();
         try {
             ds.getConnection();
             Assert.fail("must throw exception");
         } catch (SQLException ignored) {
         }
-        String key = JdbcConMetricInterceptor.ERR_CON_METRIC_KEY;
+        String key = JdbcDataSourceMetricInterceptor.ERR_CON_METRIC_KEY;
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
                 .meterType(MetricSubType.ERROR, Maps.newHashMap())
                 .counterType(MetricSubType.ERROR, Maps.newHashMap())

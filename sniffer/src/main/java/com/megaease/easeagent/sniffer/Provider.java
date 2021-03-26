@@ -41,8 +41,7 @@ import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
 import com.megaease.easeagent.metrics.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
-import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcConMetricInterceptor;
-import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStatementMetricInterceptor;
+import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcDataSourceMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStmMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
@@ -76,7 +75,6 @@ import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
-import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
@@ -180,12 +178,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         return chainInvoker;
     }
 
-    @Injection.Bean("supplier4Con")
-    public Supplier<AgentInterceptorChain.Builder> supplier4Con() {
+    @Injection.Bean("supplier4DataSourceGetCon")
+    public Supplier<AgentInterceptorChain.Builder> supplier4DataSourceGetCon() {
         return () -> {
             MetricRegistry metricRegistry = new MetricRegistry();
             MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
-            final JdbcConMetricInterceptor interceptor = new JdbcConMetricInterceptor(metricRegistry);
+            final JdbcDataSourceMetricInterceptor interceptor = new JdbcDataSourceMetricInterceptor(metricRegistry);
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     interceptor.newConverter(this.additionalAttributes),
                     s -> Provider.this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
@@ -216,11 +214,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         return () -> {
             MetricRegistry metricRegistry = new MetricRegistry();
             SQLCompression sqlCompression = new MD5SQLCompression(new Md5ReportConsumer());
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_STATEMENT);
             JdbcStmMetricInterceptor metricInterceptor = new JdbcStmMetricInterceptor(metricRegistry, sqlCompression);
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     metricInterceptor.newConverter(this.additionalAttributes),
-                    s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
+                    s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_STATEMENT, s))).run();
 
             DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
             builder.addInterceptor(new JdbcStmPrepareSqlInterceptor());
@@ -230,22 +228,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         };
     }
 
-    @Injection.Bean("supplier4Stm")
-    public Supplier<AgentInterceptorChain.Builder> supplier4Stm() {
-        return () -> {
-            MetricRegistry metricRegistry = new MetricRegistry();
-            SQLCompression sqlCompression = new MD5SQLCompression(new Md5ReportConsumer());
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION);
-            final JdbcStatementMetricInterceptor jdbcStatementMetricInterceptor = new JdbcStatementMetricInterceptor(metricRegistry, sqlCompression);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                    jdbcStatementMetricInterceptor.newConverter(this.additionalAttributes),
-                    s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
-            return new DefaultAgentInterceptorChain.Builder()
-                    .addInterceptor(jdbcStatementMetricInterceptor)
-                    .addInterceptor(new JdbcStatementTracingInterceptor(sqlCompression))
-                    ;
-        };
-    }
 
     @Injection.Bean("supplier4Filter")
     public Supplier<AgentInterceptorChain.Builder> supplier4Filter() {

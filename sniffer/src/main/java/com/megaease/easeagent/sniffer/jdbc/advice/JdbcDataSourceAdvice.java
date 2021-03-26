@@ -54,7 +54,7 @@ public abstract class JdbcDataSourceAdvice implements Transformation {
 
         @Injection.Autowire
         GetConnection(AgentInterceptorChainInvoker chainInvoker,
-                      @Injection.Qualifier("supplier4Con")Supplier<AgentInterceptorChain.Builder> supplier) {
+                      @Injection.Qualifier("supplier4DataSourceGetCon")Supplier<AgentInterceptorChain.Builder> supplier) {
             super(supplier, chainInvoker);
         }
 
