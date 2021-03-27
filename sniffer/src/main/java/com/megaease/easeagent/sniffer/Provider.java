@@ -66,8 +66,10 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollIn
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
@@ -81,6 +83,7 @@ import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
+import com.megaease.easeagent.zipkin.rabbitmq.spring.RabbitMqMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
@@ -449,8 +452,30 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
 
             chainBuilder
+                    .addInterceptor(new RabbitMqConsumerHandleDeliveryInterceptor())
                     .addInterceptor(metricInterceptor)
                     .addInterceptor(new RabbitMqConsumerTracingInterceptor(tracing))
+            ;
+            return chainBuilder;
+        };
+    }
+
+    @Injection.Bean("supplier4SpringRabbitMqMessageListenerOnMessage")
+    public Supplier<AgentInterceptorChain.Builder> supplier4SpringRabbitMqMessageListenerOnMessage() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+
+            MetricRegistry metricRegistry = new MetricRegistry();
+            RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
+
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_RABBIT);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    metric.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
+
+            chainBuilder
+                    .addInterceptor(new RabbitMqMessageListenerOnMessageInterceptor())
+                    .addInterceptor(new RabbitMqMessageListenerTracingInterceptor(tracing))
             ;
             return chainBuilder;
         };

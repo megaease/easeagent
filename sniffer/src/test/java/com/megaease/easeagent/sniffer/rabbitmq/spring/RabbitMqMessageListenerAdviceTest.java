@@ -27,13 +27,13 @@ public class RabbitMqMessageListenerAdviceTest extends BaseSnifferTest {
         if (classList != null) {
             return;
         }
-        Definition.Default def = new GenRabbitmqListenerAdvice().define(Definition.Default.EMPTY);
+        Definition.Default def = new GenRabbitMqMessageListenerAdvice().define(Definition.Default.EMPTY);
         ClassLoader loader = this.getClass().getClassLoader();
         classList = Classes.transform(
                 this.getClass().getName() + "$MyListener"
         )
                 .with(def, new QualifiedBean("", chainInvoker),
-                        new QualifiedBean("supplier4SpringRabbitMqOnMessage", this.mockSupplier())
+                        new QualifiedBean("supplier4SpringRabbitMqMessageListenerOnMessage", this.mockSupplier())
                 )
                 .load(loader);
     }

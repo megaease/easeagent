@@ -21,7 +21,7 @@ import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 @Injection.Provider(Provider.class)
-public abstract class RabbitmqListenerAdvice implements Transformation {
+public abstract class RabbitMqMessageListenerAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
@@ -39,7 +39,7 @@ public abstract class RabbitmqListenerAdvice implements Transformation {
 
         @Injection.Autowire
         public OnMessage(AgentInterceptorChainInvoker chainInvoker,
-                         @Injection.Qualifier("supplier4SpringRabbitMqOnMessage") Supplier<AgentInterceptorChain.Builder> supplier
+                         @Injection.Qualifier("supplier4SpringRabbitMqMessageListenerOnMessage") Supplier<AgentInterceptorChain.Builder> supplier
         ) {
             super(supplier, chainInvoker);
         }

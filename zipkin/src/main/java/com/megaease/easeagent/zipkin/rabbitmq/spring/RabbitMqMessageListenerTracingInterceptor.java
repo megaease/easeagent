@@ -5,8 +5,10 @@ import brave.Tracer;
 import brave.Tracing;
 import brave.messaging.ConsumerRequest;
 import brave.messaging.MessagingTracing;
+import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
+import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -75,28 +77,35 @@ public class RabbitMqMessageListenerTracingInterceptor implements AgentIntercept
     }
 
     private void processMessageBefore(Message message, Map<Object, Object> context, int index) {
+        String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
         MessageProperties messageProperties = message.getMessageProperties();
         RabbitConsumerRequest request = new RabbitConsumerRequest(message);
         TraceContextOrSamplingFlags samplingFlags = this.extractor.extract(request);
         Span span = Tracing.currentTracer().nextSpan(samplingFlags);
+        span.kind(Span.Kind.CLIENT);
         span.name("on-message");
         span.tag("rabbit.exchange", messageProperties.getReceivedExchange());
         span.tag("rabbit.routing_key", messageProperties.getReceivedRoutingKey());
         span.tag("rabbit.queue", messageProperties.getConsumerQueue());
+        if (uri != null) {
+            span.tag("rabbit.broker", uri);
+        }
         span.remoteServiceName("rabbitmq");
         span.start();
-        Tracer.SpanInScope spanInScope = Tracing.currentTracer().withSpanInScope(span);
+
+        CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
+        CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
+        context.put(SCOPE_CONTEXT_KEY + index, newScope);
         context.put(SPAN_CONTEXT_KEY + index, span);
-        context.put(SCOPE_CONTEXT_KEY + index, spanInScope);
     }
 
     private void processMessageAfter(MethodInfo methodInfo, Map<Object, Object> context, int index) {
-        Tracer.SpanInScope spanInScope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY + index);
+        CurrentTraceContext.Scope newScope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY + index);
         Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY + index);
         if (!methodInfo.isSuccess()) {
             span.error(methodInfo.getThrowable());
         }
-        spanInScope.close();
+        newScope.close();
         span.finish();
     }
 

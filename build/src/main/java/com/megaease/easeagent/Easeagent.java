@@ -31,6 +31,7 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerAdvice;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 
@@ -61,13 +62,14 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
         RedisClientAdvice.class,
         RedisChannelWriterAdvice.class,
         JedisAdvice.class,
-        KafkaProducerAdvice.class,
-        KafkaConsumerAdvice.class,
         CrossThreadPropagationAdvice.class,
         RabbitMqChannelAdvice.class,
         RabbitMqConsumerAdvice.class,
+        RabbitMqMessageListenerAdvice.class,
         KafkaMessageListenerAdvice.class,
         KafkaConsumerRecordAdvice.class,
+        KafkaProducerAdvice.class,
+        KafkaConsumerAdvice.class,
 
 })
 abstract class Easeagent {

@@ -50,6 +50,7 @@ public class RabbitMqProducerTracingInterceptor implements AgentInterceptor {
         } else {
             span = Tracing.currentTracer().newChild(traceContext);
         }
+        span.kind(Span.Kind.PRODUCER);
         span.name("publish");
         if (exchange != null) {
             span.tag("rabbit.exchange", exchange);

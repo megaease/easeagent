@@ -17,8 +17,10 @@ public class KafkaConsumerPollInterceptor implements AgentInterceptor {
         Consumer<?, ?> consumer = (Consumer<?, ?>) methodInfo.getInvoker();
         String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(consumer);
         ConsumerRecords<?, ?> consumerRecords = (ConsumerRecords<?, ?>) methodInfo.getRetValue();
-        for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
-            AgentDynamicFieldAccessor.setDynamicFieldValue(consumerRecord, uri);
+        if (consumerRecords != null) {
+            for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+                AgentDynamicFieldAccessor.setDynamicFieldValue(consumerRecord, uri);
+            }
         }
         return chain.doAfter(methodInfo, context);
     }
