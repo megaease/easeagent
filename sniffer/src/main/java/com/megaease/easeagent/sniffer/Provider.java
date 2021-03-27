@@ -46,12 +46,10 @@ import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStmMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
+import com.megaease.easeagent.metrics.kafka.KafkaMessageListenerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
-import com.megaease.easeagent.metrics.rabbitmq.RabbitMqConsumerMetric;
-import com.megaease.easeagent.metrics.rabbitmq.RabbitMqConsumerMetricInterceptor;
-import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetric;
-import com.megaease.easeagent.metrics.rabbitmq.RabbitMqProducerMetricInterceptor;
+import com.megaease.easeagent.metrics.rabbitmq.*;
 import com.megaease.easeagent.metrics.redis.JedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
@@ -401,6 +399,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
 
             chainBuilder.addInterceptor(new KafkaMessageListenerInterceptor())
+                    .addInterceptor(new KafkaMessageListenerMetricInterceptor(kafkaMetric))
                     .addInterceptor(new KafkaMessageListenerTracingInterceptor(tracing));
             return chainBuilder;
         };
@@ -475,6 +474,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
             chainBuilder
                     .addInterceptor(new RabbitMqMessageListenerOnMessageInterceptor())
+                    .addInterceptor(new RabbitMqMessageListenerMetricInterceptor(metric))
                     .addInterceptor(new RabbitMqMessageListenerTracingInterceptor(tracing))
             ;
             return chainBuilder;

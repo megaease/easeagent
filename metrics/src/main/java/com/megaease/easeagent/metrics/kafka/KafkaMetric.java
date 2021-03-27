@@ -131,6 +131,18 @@ public class KafkaMetric extends AbstractMetric {
         errorCounter.inc();
     }
 
+    public void consume(String topic, long beginTime, boolean success) {
+        meter(topic, MetricSubType.CONSUMER);
+        this.metricRegistry.timer(metricNameFactory.timerName(topic, MetricSubType.CONSUMER)).update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
+        Counter counter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER));
+        counter.inc();
+        if (!success) {
+            meter(topic, MetricSubType.CONSUMER_ERROR);
+            Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
+            errorCounter.inc();
+        }
+    }
+
     protected class KafkaConverter extends ConverterAdapter {
 
         public KafkaConverter(Supplier<Map<String, Object>> attributes) {
