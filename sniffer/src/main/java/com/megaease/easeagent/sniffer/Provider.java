@@ -60,7 +60,9 @@ import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
+import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
+import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
@@ -373,8 +375,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     kafkaMetric.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
 
-            chainBuilder.addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
-                    .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric));
+            chainBuilder
+                    .addInterceptor(new KafkaConsumerPollInterceptor())
+                    .addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
+                    .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric))
+            ;
 
             return chainBuilder;
         };
@@ -392,8 +397,8 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     kafkaMetric.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
 
-            chainBuilder.addInterceptor(new KafkaMessageListenerTracingInterceptor(tracing));
-
+            chainBuilder.addInterceptor(new KafkaMessageListenerInterceptor())
+                    .addInterceptor(new KafkaMessageListenerTracingInterceptor(tracing));
             return chainBuilder;
         };
     }

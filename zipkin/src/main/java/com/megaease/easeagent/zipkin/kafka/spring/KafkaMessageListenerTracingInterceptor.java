@@ -1,8 +1,9 @@
 package com.megaease.easeagent.zipkin.kafka.spring;
 
 import brave.Span;
-import brave.Tracer;
 import brave.Tracing;
+import brave.propagation.CurrentTraceContext;
+import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -16,7 +17,7 @@ public class KafkaMessageListenerTracingInterceptor implements AgentInterceptor 
 
     private final KafkaTracing kafkaTracing;
 
-    private final String SCOPE_CONTEXT_KEY = KafkaMessageListenerTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
+    private final String SCOPE_CONTEXT_KEY = KafkaMessageListenerTracingInterceptor.class.getName() + "-CurrentTraceContext.Scope";
     private final String SPAN_CONTEXT_KEY = KafkaMessageListenerTracingInterceptor.class.getName() + "-Span";
 
     public KafkaMessageListenerTracingInterceptor(Tracing tracing) {
@@ -26,20 +27,28 @@ public class KafkaMessageListenerTracingInterceptor implements AgentInterceptor 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         ConsumerRecord<?, ?> consumerRecord = (ConsumerRecord<?, ?>) methodInfo.getArgs()[0];
-        Span span = this.kafkaTracing.nextSpan(consumerRecord).name("on-message").start();
-        Tracer.SpanInScope spanInScope = Tracing.currentTracer().withSpanInScope(span);
-        context.put(SCOPE_CONTEXT_KEY, spanInScope);
+        String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
+        Span span = this.kafkaTracing.nextSpan(consumerRecord).name("on-message")
+                .kind(Span.Kind.CLIENT)
+                .remoteServiceName("kafka")
+                .tag("kafka.broker", uri)
+                .start();
+
+        CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
+        CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
+        context.put(SCOPE_CONTEXT_KEY, newScope);
         context.put(SPAN_CONTEXT_KEY, span);
+        chain.doBefore(methodInfo, context);
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Tracer.SpanInScope spanInScope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY);
+        CurrentTraceContext.Scope newScope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY);
         Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
         if (!methodInfo.isSuccess()) {
             span.error(methodInfo.getThrowable());
         }
-        spanInScope.close();
+        newScope.close();
         span.finish();
         return chain.doAfter(methodInfo, context);
     }

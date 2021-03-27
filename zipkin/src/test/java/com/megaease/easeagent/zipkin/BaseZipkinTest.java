@@ -3,9 +3,13 @@ package com.megaease.easeagent.zipkin;
 import brave.Tracer;
 import brave.Tracing;
 import brave.propagation.StrictCurrentTraceContext;
+import com.megaease.easeagent.core.interceptor.AgentInterceptor;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import org.junit.After;
 import zipkin2.Span;
 import zipkin2.reporter.Reporter;
+
+import static org.mockito.Mockito.mock;
 
 public class BaseZipkinTest {
     StrictCurrentTraceContext currentTraceContext = StrictCurrentTraceContext.create();
@@ -21,5 +25,9 @@ public class BaseZipkinTest {
         return Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
                 .spanReporter(reporter).build().tracer();
+    }
+
+    protected AgentInterceptorChain mockChain() {
+        return mock(AgentInterceptorChain.class);
     }
 }

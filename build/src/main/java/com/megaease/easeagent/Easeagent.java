@@ -26,6 +26,7 @@ import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
+import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerRecordAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
@@ -66,6 +67,7 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
         RabbitMqChannelAdvice.class,
         RabbitMqConsumerAdvice.class,
         KafkaMessageListenerAdvice.class,
+        KafkaConsumerRecordAdvice.class,
 
 })
 abstract class Easeagent {
