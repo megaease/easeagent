@@ -7,6 +7,7 @@ import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.kafka.brave.KafkaTracing;
 import com.megaease.easeagent.zipkin.kafka.brave.MultiData;
@@ -29,9 +30,10 @@ public class KafkaProducerTracingInterceptor implements AgentInterceptor {
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         KafkaProducer<?, ?> producer = (KafkaProducer<?, ?>) methodInfo.getInvoker();
+        String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(producer);
         TracingProducer<?, ?> tracingProducer = kafkaTracing.producer(producer);
         ProducerRecord<?, ?> record = (ProducerRecord<?, ?>) methodInfo.getArgs()[0];
-        MultiData<Span, Tracer.SpanInScope> multiData = tracingProducer.beforeSend(record);
+        MultiData<Span, Tracer.SpanInScope> multiData = tracingProducer.beforeSend(record, span -> span.tag("kafka.broker", uri));
         Callback callback = (Callback) methodInfo.getArgs()[1];
         Callback tracingCallback = TracingCallback.create(callback, multiData.data0, tracingProducer.currentTraceContext);
         methodInfo.getArgs()[1] = tracingCallback;

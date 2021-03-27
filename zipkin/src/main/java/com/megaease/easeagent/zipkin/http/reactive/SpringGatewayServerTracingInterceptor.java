@@ -25,6 +25,8 @@ import java.util.Map;
 public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
     private final HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler;
+    private static final String SCOPE_CONTEXT_KEY = SpringGatewayServerTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
+    private static final String SPAN_CONTEXT_KEY = SpringGatewayServerTracingInterceptor.class.getName() + "-Span";
 
     public SpringGatewayServerTracingInterceptor(Tracing tracing) {
         HttpTracing httpTracing = HttpTracing.create(tracing);
@@ -38,8 +40,8 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
         Span span = this.httpServerHandler.handleReceive(httpServerRequest);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
         CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
-        context.put(Span.class, span);
-        context.put(CurrentTraceContext.Scope.class, newScope);
+        context.put(SPAN_CONTEXT_KEY, span);
+        context.put(SCOPE_CONTEXT_KEY, newScope);
         context.put(FluxHttpServerRequest.class, httpServerRequest);
 
         TraceContext traceContext = currentTraceContext.get();
@@ -50,10 +52,10 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, CurrentTraceContext.Scope.class)) {
+        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY)) {
             ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
             FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
-            Span span = ContextUtils.getFromContext(context, Span.class);
+            Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
             PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
             String route = null;
             if (bestPattern != null) {

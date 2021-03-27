@@ -13,7 +13,6 @@ import com.megaease.easeagent.common.jdbc.SqlInfo;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import com.megaease.easeagent.zipkin.jdbc.JdbcStatementTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -88,9 +87,9 @@ public class JdbcStmTracingInterceptorTest extends BaseZipkinTest{
         root.finish();
 
         Map<String, String> expectedMap = new HashMap<>();
-        expectedMap.put(JdbcStatementTracingInterceptor.SPAN_SQL_QUERY_TAG_NAME, sql);
-        expectedMap.put(JdbcStatementTracingInterceptor.SPAN_URL, "jdbc:mysql://127.0.0.1:3306/demo");
-        expectedMap.put(JdbcStatementTracingInterceptor.SPAN_LOCAL_COMPONENT_TAG_NAME, "database");
+        expectedMap.put(JdbcStmTracingInterceptor.SPAN_SQL_QUERY_TAG_NAME, sql);
+        expectedMap.put(JdbcStmTracingInterceptor.SPAN_URL, "jdbc:mysql://127.0.0.1:3306/demo");
+        expectedMap.put(JdbcStmTracingInterceptor.SPAN_LOCAL_COMPONENT_TAG_NAME, "database");
         expectedMap.put("name", "execute");
         expectedMap.put("remoteServiceName", "demo");
         expectedMap.put("remotePort", "3306");

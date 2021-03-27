@@ -76,6 +76,7 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
+import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
@@ -120,6 +121,13 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 .localServiceName(config.getString(ConfigConst.SERVICE_NAME))
                 .traceId128Bit(false)
                 .sampler(CountingSampler.create(1))
+//                .addSpanHandler(new SpanHandler() {
+//                    @Override
+//                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+//                        logger.info(span.toString());
+//                        return true;
+//                    }
+//                })
                 .addSpanHandler(new SpanHandler() {
                     @Override
                     public boolean end(TraceContext context, MutableSpan span, Cause cause) {
@@ -367,6 +375,24 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
             chainBuilder.addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
                     .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric));
+
+            return chainBuilder;
+        };
+    }
+
+    @Injection.Bean("supplier4SpringKafkaMessageListenerOnMessage")
+    public Supplier<AgentInterceptorChain.Builder> supplier4SpringKafkaMessageListenerOnMessage() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
+            MetricRegistry metricRegistry = new MetricRegistry();
+            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
+
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_KAFKA);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    kafkaMetric.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
+
+            chainBuilder.addInterceptor(new KafkaMessageListenerTracingInterceptor(tracing));
 
             return chainBuilder;
         };

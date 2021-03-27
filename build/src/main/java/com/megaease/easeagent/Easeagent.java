@@ -24,6 +24,7 @@ import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
+import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
@@ -64,6 +65,8 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
         CrossThreadPropagationAdvice.class,
         RabbitMqChannelAdvice.class,
         RabbitMqConsumerAdvice.class,
+        KafkaMessageListenerAdvice.class,
+
 })
 abstract class Easeagent {
     // This static code is to keep the links of the dependencies for shade plugin, not for real runtime.

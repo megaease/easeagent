@@ -19,6 +19,9 @@ import java.util.Map;
 
 public class RabbitMqConsumerTracingInterceptor implements AgentInterceptor {
 
+    private static final String SCOPE_CONTEXT_KEY = RabbitMqConsumerTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
+    private static final String SPAN_CONTEXT_KEY = RabbitMqConsumerTracingInterceptor.class.getName() + "-Span";
+
     private final TraceContext.Extractor<RabbitConsumerRequest> extractor;
 
     public RabbitMqConsumerTracingInterceptor(Tracing tracing) {
@@ -53,16 +56,19 @@ public class RabbitMqConsumerTracingInterceptor implements AgentInterceptor {
         span.remoteServiceName("rabbitmq");
         span.start();
         Tracer.SpanInScope spanInScope = Tracing.currentTracer().withSpanInScope(span);
-        context.put(Span.class, span);
-        context.put(Tracer.SpanInScope.class, spanInScope);
+        context.put(SPAN_CONTEXT_KEY, span);
+        context.put(SCOPE_CONTEXT_KEY, spanInScope);
         chain.doBefore(methodInfo, context);
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Tracer.SpanInScope spanInScope = ContextUtils.getFromContext(context, Tracer.SpanInScope.class);
+        Tracer.SpanInScope spanInScope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY);
+        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+        if (!methodInfo.isSuccess()) {
+            span.error(methodInfo.getThrowable());
+        }
         spanInScope.close();
-        Span span = ContextUtils.getFromContext(context, Span.class);
         span.finish();
         return chain.doAfter(methodInfo, context);
     }

@@ -4,9 +4,11 @@ import brave.Tracing;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.zipkin.kafka.brave.KafkaTracing;
 import com.megaease.easeagent.zipkin.kafka.brave.TracingConsumer;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 import java.util.Map;
@@ -25,9 +27,13 @@ public class KafkaConsumerTracingInterceptor implements AgentInterceptor {
             return chain.doAfter(methodInfo, context);
         }
         Consumer<?, ?> consumer = (Consumer<?, ?>) methodInfo.getInvoker();
+        String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(consumer);
         ConsumerRecords<?, ?> consumerRecords = (ConsumerRecords<?, ?>) methodInfo.getRetValue();
+        for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+            AgentDynamicFieldAccessor.setDynamicFieldValue(consumerRecord, uri);
+        }
         TracingConsumer<?, ?> tracingConsumer = kafkaTracing.consumer(consumer);
-        tracingConsumer.afterPoll(consumerRecords);
+        tracingConsumer.afterPoll(consumerRecords, span -> span.tag("kafka.broker", uri));
         return chain.doAfter(methodInfo, context);
     }
 }

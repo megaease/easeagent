@@ -1,9 +1,9 @@
 package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
 
-import com.megaease.easeagent.core.DynamicFieldAccessor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.List;
@@ -18,10 +18,7 @@ public class KafkaProducerConstructInterceptor implements AgentInterceptor {
         Map<String, Object> configs = (Map<String, Object>) methodInfo.getArgs()[0];
         List<String> serverConfig = (List<String>) configs.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
         String uri = String.join(",", serverConfig);
-        if (invoker instanceof DynamicFieldAccessor) {
-            DynamicFieldAccessor fieldAccessor = (DynamicFieldAccessor) invoker;
-            fieldAccessor.setEaseAgent$$DynamicField$$Data(uri);
-        }
+        AgentDynamicFieldAccessor.setDynamicFieldValue(invoker, uri);
         return chain.doAfter(methodInfo, context);
     }
 }

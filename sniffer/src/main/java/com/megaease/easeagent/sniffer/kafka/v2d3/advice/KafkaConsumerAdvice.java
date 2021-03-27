@@ -1,7 +1,5 @@
 package com.megaease.easeagent.sniffer.kafka.v2d3.advice;
 
-import brave.Tracing;
-import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
@@ -10,12 +8,8 @@ import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
-import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
-import com.megaease.easeagent.metrics.kafka.KafkaMetric;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
-import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;

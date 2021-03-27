@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public final class TracingProducer<K, V> implements Producer<K, V> {
     final Producer<K, V> delegate;
@@ -142,7 +143,7 @@ public final class TracingProducer<K, V> implements Producer<K, V> {
         }
     }
 
-    public MultiData<Span, Tracer.SpanInScope> beforeSend(ProducerRecord<?, ?> record) {
+    public MultiData<Span, Tracer.SpanInScope> beforeSend(ProducerRecord<?, ?> record, Consumer<Span> spanConsumer) {
         KafkaProducerRequest request = new KafkaProducerRequest(record);
         TraceContext maybeParent = currentTraceContext.get();
         Span span;
@@ -153,7 +154,9 @@ public final class TracingProducer<K, V> implements Producer<K, V> {
         } else { // If we have a span in scope assume headers were cleared before
             span = tracer.newChild(maybeParent);
         }
-
+        if (spanConsumer != null) {
+            spanConsumer.accept(span);
+        }
         if (!span.isNoop()) {
             span.kind(Span.Kind.PRODUCER).name("send");
             if (remoteServiceName != null) span.remoteServiceName(remoteServiceName);
@@ -163,7 +166,6 @@ public final class TracingProducer<K, V> implements Producer<K, V> {
             span.tag(KafkaTags.KAFKA_TOPIC_TAG, record.topic());
             span.start();
         }
-
         injector.inject(span.context(), request);
         Tracer.SpanInScope spanInScope = tracer.withSpanInScope(span);
         return new MultiData<>(span, spanInScope);

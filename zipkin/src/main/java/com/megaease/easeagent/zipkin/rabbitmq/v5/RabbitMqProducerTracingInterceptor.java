@@ -21,6 +21,7 @@ import java.util.Map;
 public class RabbitMqProducerTracingInterceptor implements AgentInterceptor {
 
     private final TraceContext.Injector<RabbitProducerRequest> injector;
+    private static final String SPAN_CONTEXT_KEY = RabbitMqProducerTracingInterceptor.class.getName() + "-Span";
 
     public RabbitMqProducerTracingInterceptor(Tracing tracing) {
         MessagingTracing messagingTracing = MessagingTracing.newBuilder(tracing).build();
@@ -61,14 +62,14 @@ public class RabbitMqProducerTracingInterceptor implements AgentInterceptor {
             span.remoteServiceName("rabbitmq");
             span.start();
         }
-        context.put(Span.class, span);
+        context.put(SPAN_CONTEXT_KEY, span);
         injector.inject(span.context(), producerRequest);
         chain.doBefore(methodInfo, context);
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Span span = ContextUtils.getFromContext(context, Span.class);
+        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
         span.finish();
         return chain.doAfter(methodInfo, context);
     }

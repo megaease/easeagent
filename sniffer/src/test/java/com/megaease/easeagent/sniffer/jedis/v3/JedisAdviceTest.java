@@ -15,7 +15,8 @@ import redis.clients.jedis.Jedis;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 public class JedisAdviceTest extends BaseSnifferTest {
 

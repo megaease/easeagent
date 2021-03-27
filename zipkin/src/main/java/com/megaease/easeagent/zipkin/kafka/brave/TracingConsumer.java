@@ -93,12 +93,12 @@ public final class TracingConsumer<K, V> implements Consumer<K, V> {
     // Do not use @Override annotation to avoid compatibility on deprecated methods
     public ConsumerRecords<K, V> poll(long timeout) {
         ConsumerRecords<K, V> records = delegate.poll(timeout);
-        this.afterPoll(records);
+        this.afterPoll(records, null);
         return records;
     }
 
     @SuppressWarnings("unchecked")
-    public void afterPoll(ConsumerRecords<?, ?> _records) {
+    public void afterPoll(ConsumerRecords<?, ?> _records, java.util.function.Consumer<Span> spanConsumer) {
         ConsumerRecords<K, V> records = (ConsumerRecords<K, V>) _records;
         if (records.isEmpty() || tracing.isNoop()) return;
         long timestamp = 0L;
@@ -127,6 +127,9 @@ public final class TracingConsumer<K, V> implements Consumer<K, V> {
                             span.start(timestamp);
                         }
                         consumerSpansForTopic.put(topic, span);
+                    }
+                    if (spanConsumer != null) {
+                        spanConsumer.accept(span);
                     }
                     injector.inject(span.context(), request);
                 } else { // we extracted request-scoped data, so cannot share a consumer span.

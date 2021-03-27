@@ -11,6 +11,7 @@ import com.megaease.easeagent.core.utils.ContextUtils;
 import java.util.Map;
 
 public class CommonRedisTracingInterceptor implements AgentInterceptor {
+    private static final String SPAN_CONTEXT_KEY = CommonRedisTracingInterceptor.class.getName() + "-Span";
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
@@ -34,7 +35,7 @@ public class CommonRedisTracingInterceptor implements AgentInterceptor {
         if (uri != null) {
             // TODO: 2021/3/24 add remote host
         }
-        context.put(Span.class, span);
+        context.put(SPAN_CONTEXT_KEY, span);
         if (cmd != null) {
             span.tag("redis.method", cmd);
         }
@@ -42,7 +43,7 @@ public class CommonRedisTracingInterceptor implements AgentInterceptor {
 
     protected void finishTracing(Map<Object, Object> context) {
         try {
-            Span span = ContextUtils.getFromContext(context, Span.class);
+            Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
             if (span == null) {
                 return;
             }

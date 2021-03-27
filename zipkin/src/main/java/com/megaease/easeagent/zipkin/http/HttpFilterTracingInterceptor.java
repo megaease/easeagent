@@ -22,6 +22,8 @@ import java.util.Map;
 public class HttpFilterTracingInterceptor implements AgentInterceptor {
 
     private final HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler;
+    private static final String SCOPE_CONTEXT_KEY = HttpFilterTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
+    private static final String SPAN_CONTEXT_KEY = HttpFilterTracingInterceptor.class.getName() + "-Span";
 
     public HttpFilterTracingInterceptor(Tracing tracing) {
         HttpTracing httpTracing = HttpTracing.create(tracing);
@@ -35,18 +37,18 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
         Span span = httpServerHandler.handleReceive(requestWrapper);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
         CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
-        context.put(Span.class, span);
-        context.put(CurrentTraceContext.Scope.class, newScope);
+        context.put(SPAN_CONTEXT_KEY, span);
+        context.put(SCOPE_CONTEXT_KEY, newScope);
         chain.doBefore(methodInfo, context);
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        try (CurrentTraceContext.Scope ignored = (CurrentTraceContext.Scope) context.get(CurrentTraceContext.Scope.class)) {
+        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY)) {
             HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
             HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
             ServletUtils.setHttpRouteAttribute(httpServletRequest);
-            Span span = ContextUtils.getFromContext(context, Span.class);
+            Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
             HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, methodInfo.getThrowable());
             span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
             httpServerHandler.handleSend(responseWrapper, span);

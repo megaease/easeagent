@@ -61,6 +61,7 @@
         <version.disruptor>3.4.2</version.disruptor>
         <version.spring-boot>2.3.8.RELEASE</version.spring-boot>
         <version.spring>5.2.12.RELEASE</version.spring>
+        <version.spring-kafka>2.3.13.RELEASE</version.spring-kafka>
         <version.spring.cloud>Hoxton.SR10</version.spring.cloud>
         <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
         <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
@@ -269,6 +270,16 @@
                 <groupId>com.rabbitmq</groupId>
                 <artifactId>amqp-client</artifactId>
                 <version>${version.amqp-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>${version.spring-kafka}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-amqp</artifactId>
+                <version>${version.spring-boot}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
