@@ -51,16 +51,12 @@ public class HttpFilterLogInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        chain.doBefore(methodInfo, context);
-    }
-
-    @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         Long beginTime = ContextUtils.getBeginTime(context);
         TraceContext traceContext = Tracing.current().currentTraceContext().get();
         RequestInfo requestInfo = RequestInfo.builder()
+                .type("access-log")
                 .service(this.serviceName.getValue())
                 .hostName(HostAddress.localhost())
                 .hostIpv4(HostAddress.localaddr().getHostAddress())
