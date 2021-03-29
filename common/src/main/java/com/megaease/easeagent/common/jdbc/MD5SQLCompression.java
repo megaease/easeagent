@@ -4,6 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.megaease.easeagent.common.concurrent.ScheduleHelper;
 import com.megaease.easeagent.core.utils.DataSize;
 import com.megaease.easeagent.core.utils.TextUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 public class MD5SQLCompression implements SQLCompression, RemovalListener<String, String> {
@@ -20,15 +22,16 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
 
     private static final Logger logger = LoggerFactory.getLogger(MD5SQLCompression.class);
 
-    private Cache<String, String> dictionary = CacheBuilder.newBuilder().maximumSize(1000)
+    private final Cache<String, String> dictionary = CacheBuilder.newBuilder().maximumSize(1000)
             .removalListener(this).build();
 
-    private Cache<String, String> md5Cache = CacheBuilder.newBuilder().maximumSize(1000).build();
+    private final Cache<String, String> md5Cache = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     private final Consumer<Map<String, String>> reportConsumer;
 
     public MD5SQLCompression(Consumer<Map<String, String>> reportConsumer) {
         this.reportConsumer = reportConsumer;
+        ScheduleHelper.DEFAULT.execute(10, 5, this::pushItems);
     }
 
     @Override
@@ -45,6 +48,14 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
             logger.error("compress content[{}] failure", origin, e);
             return origin;
         }
+    }
+
+    private void pushItems() {
+        ConcurrentMap<String, String> map = this.dictionary.asMap();
+        if (map.isEmpty()) {
+            return;
+        }
+        this.reportConsumer.accept(map);
     }
 
     @Override
