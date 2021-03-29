@@ -51,8 +51,8 @@ public class RedisClientAdviceTest extends BaseSnifferTest {
 
     static class MyRedisClient extends RedisClient {
 
-        private ConnectionFuture<StatefulRedisConnection> connectStandaloneAsync() throws ExecutionException, InterruptedException {
-            ConnectionFuture<StatefulRedisConnection> connectionFuture = mock(ConnectionFuture.class);
+        private <K, V> ConnectionFuture<StatefulRedisConnection<K, V>> connectStandaloneAsync() throws ExecutionException, InterruptedException {
+            ConnectionFuture<StatefulRedisConnection<K, V>> connectionFuture = mock(ConnectionFuture.class);
             when(connectionFuture.get()).thenReturn(mock(StatefulRedisConnection.class));
             return connectionFuture;
         }

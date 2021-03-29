@@ -1,6 +1,6 @@
 package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
-import com.megaease.easeagent.core.DynamicFieldAccessor;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 
 import java.util.concurrent.*;
@@ -36,14 +36,10 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
         if (this.processed) {
             return t;
         }
-        if (t instanceof DynamicFieldAccessor) {
-            ((DynamicFieldAccessor) t).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
-        }
+        AgentDynamicFieldAccessor.setDynamicFieldValue(t, dynamicFieldValue);
         Object channelWriter = AgentFieldAccessor.getFieldValue(t, "channelWriter");
         if (channelWriter != null) {
-            if (channelWriter instanceof DynamicFieldAccessor) {
-                ((DynamicFieldAccessor) channelWriter).setEaseAgent$$DynamicField$$Data(dynamicFieldValue);
-            }
+            AgentDynamicFieldAccessor.setDynamicFieldValue(channelWriter, dynamicFieldValue);
         }
         this.processed = true;
         return t;

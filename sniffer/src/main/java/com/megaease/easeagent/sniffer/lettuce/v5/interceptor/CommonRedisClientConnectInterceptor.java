@@ -2,6 +2,7 @@ package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
 import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -24,7 +25,7 @@ public class CommonRedisClientConnectInterceptor extends BaseRedisAgentIntercept
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         if (!methodInfo.isSuccess()) {
-            return null;
+            return chain.doAfter(methodInfo, context);
         }
         Object invoker = methodInfo.getInvoker();
         if (invoker instanceof RedisClusterClient) {
@@ -36,7 +37,7 @@ public class CommonRedisClientConnectInterceptor extends BaseRedisAgentIntercept
     public Object processRedisClient(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         RedisURI redisURI = this.getRedisURI((RedisClient) methodInfo.getInvoker(), methodInfo.getArgs());
         if (redisURI != null) {
-            this.setDataToDynamicField(methodInfo.getRetValue(), toURI(redisURI));
+            AgentDynamicFieldAccessor.setDynamicFieldValue(methodInfo.getRetValue(), toURI(redisURI));
         }
         Object ret = chain.doAfter(methodInfo, context);
         if (ret instanceof ConnectionFuture) {
@@ -47,9 +48,6 @@ public class CommonRedisClientConnectInterceptor extends BaseRedisAgentIntercept
     }
 
     public Object processRedisClusterClient(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        if (!methodInfo.isSuccess()) {
-            return null;
-        }
         Iterable<RedisURI> redisURIs = this.getRedisURIs((RedisClusterClient) methodInfo.getInvoker());
         Object ret = chain.doAfter(methodInfo, context);
         if (redisURIs == null) {
@@ -58,7 +56,7 @@ public class CommonRedisClientConnectInterceptor extends BaseRedisAgentIntercept
         List<String> uriList = new ArrayList<>();
         redisURIs.forEach(redisURI -> uriList.add(toURI(redisURI)));
         String uriStr = String.join(",", uriList);
-        this.setDataToDynamicField(methodInfo.getRetValue(), uriStr);
+        AgentDynamicFieldAccessor.setDynamicFieldValue(methodInfo.getRetValue(), uriStr);
         if (ret instanceof CompletableFuture) {
             CompletableFuture<?> future = (CompletableFuture<?>) ret;
             return new CompletableFutureWrapper<>(future, uriStr);

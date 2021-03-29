@@ -290,6 +290,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 .addInterceptor(new CommonRedisClientConnectInterceptor());
     }
 
+    @Injection.Bean("supplier4RedisClusterConnectAsync")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RedisClusterConnectAsync() {
+        return () -> new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new CommonRedisClientConnectInterceptor());
+    }
+
     @Injection.Bean("supplier4LettuceDoWrite")
     public Supplier<AgentInterceptorChain.Builder> supplier4LettuceDoWrite() {
         return () -> new DefaultAgentInterceptorChain.Builder()
