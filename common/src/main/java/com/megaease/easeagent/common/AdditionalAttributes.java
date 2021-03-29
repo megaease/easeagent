@@ -13,7 +13,7 @@ import java.util.Map;
 
 
 /**
- * SpdbcccAdditionalAttributes hold the global attributes field values which are
+ * AdditionalAttributes hold the global attributes field values which are
  * always same in an instance, such as</p>
  * <b>host_ipv4</b>: a ip address to identical instance address
  * <b>hostname</b>: a name to identical instance name
