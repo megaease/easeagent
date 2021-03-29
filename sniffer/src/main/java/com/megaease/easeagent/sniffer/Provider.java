@@ -18,11 +18,9 @@
 package com.megaease.easeagent.sniffer;
 
 import brave.Tracing;
-import brave.handler.MutableSpan;
-import brave.handler.SpanHandler;
-import brave.propagation.TraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.common.JsonUtil;
 import com.megaease.easeagent.common.jdbc.MD5DictionaryItem;
@@ -70,6 +68,7 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPub
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
+import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
@@ -121,23 +120,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public void afterPropertiesSet() {
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
         this.tracing = Tracing.newBuilder()
-                .localServiceName(config.getString(ConfigConst.SERVICE_NAME))
+                .localServiceName(serviceName.getValue())
                 .traceId128Bit(false)
                 .sampler(CountingSampler.create(1))
-//                .addSpanHandler(new SpanHandler() {
-//                    @Override
-//                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-//                        logger.info(span.toString());
-//                        return true;
-//                    }
-//                })
-                .addSpanHandler(new SpanHandler() {
-                    @Override
-                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-                        span.localServiceName(serviceName.getValue());
-                        return true;
-                    }
-                })
+                .addSpanHandler(new CustomTagsSpanHandler(serviceName::getValue, AdditionalAttributes.getHostName()))
                 .addSpanHandler(AsyncZipkinSpanHandler
                         .newBuilder(span -> agentReport.report(span))
                         .alwaysReportSpans(true)
