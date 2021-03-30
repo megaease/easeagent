@@ -61,7 +61,7 @@ public class AgentInterceptorChainInvoker {
         Long elapsed4Before = ContextUtils.getFromContext(context, BEFORE_ELAPSED_TIME_KEY);
         long elapsed4After = System.currentTimeMillis() - beginTime;
         if (logElapsedTime) {
-            log.info("===== elapsedTime advice:{}  method-before:{}ms, method-after:{}ms ======", sb.toString(), elapsed4Before, elapsed4After);
+            log.info("===== elapsedTime advice:{} before invoke:{}ms, after invoke:{}ms ======", sb.toString(), elapsed4Before, elapsed4After);
         }
         return result;
     }
