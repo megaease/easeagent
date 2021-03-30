@@ -3,6 +3,7 @@ package com.megaease.easeagent.config;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -52,5 +53,11 @@ public class ConfigUtilsTest {
         Assert.assertEquals("false", map.get("metrics.obj.c"));
         Assert.assertEquals("hello", map.get("metrics.request.topic"));
         Assert.assertEquals("false", map.get("metrics.request.enabled"));
+    }
+
+    @Test
+    public void test_json2KVMap_2() throws IOException {
+        Map<String, String> map = ConfigUtils.json2KVMap("{\"serviceHeaders\":{\"mesh-app-backend\":[\"X-canary\"]}}");
+        Assert.assertEquals("X-canary", map.get("serviceHeaders.mesh-app-backend.0"));
     }
 }

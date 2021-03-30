@@ -31,7 +31,7 @@ public class CrossThreadPropagationConfig {
     private void resetData(Config config) {
         this.canaryHeaders = config.keySet().stream()
                 .filter(prefixPredicate)
-                .map(ConfigConst.GlobalCanaryLabels::extractHeaderName)
+                .map(config::getString)
                 .filter(Objects::nonNull).distinct().toArray(String[]::new);
     }
 
