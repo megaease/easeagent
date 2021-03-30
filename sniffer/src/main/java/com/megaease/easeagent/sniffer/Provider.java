@@ -485,7 +485,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                         .gid("")
                         .service(serviceName.getValue())
                         .tags("")
-                        .type(KEY_METRICS_MD5_DICTIONARY)
+                        .type("md5-dictionary")
                         .id("")
                         .md5(entry.getKey())
                         .sql(entry.getValue())
