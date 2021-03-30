@@ -19,13 +19,13 @@ package com.megaease.easeagent.zipkin.jdbc;
 
 import brave.Span;
 import brave.propagation.ThreadLocalSpan;
+import com.megaease.easeagent.common.jdbc.DatabaseInfo;
+import com.megaease.easeagent.common.jdbc.JdbcUtils;
 import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.common.jdbc.SqlInfo;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.jdbc.DatabaseInfo;
-import com.megaease.easeagent.core.jdbc.JdbcUtils;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

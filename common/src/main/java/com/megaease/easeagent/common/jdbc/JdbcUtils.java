@@ -1,4 +1,4 @@
-package com.megaease.easeagent.core.jdbc;
+package com.megaease.easeagent.common.jdbc;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

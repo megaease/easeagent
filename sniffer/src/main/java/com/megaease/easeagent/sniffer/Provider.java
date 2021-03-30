@@ -97,8 +97,7 @@ import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRIC
 
 public abstract class Provider implements AgentReportAware, ConfigAware, IProvider {
 
-    private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance();
-    private static final Logger logger = LoggerFactory.getLogger(Provider.class);
+    private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(true);
     private Tracing tracing;
     private AgentReport agentReport;
     private Config config;

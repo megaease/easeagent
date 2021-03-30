@@ -18,10 +18,10 @@
 package com.megaease.easeagent.metrics.jdbc.interceptor;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.jdbc.JdbcUtils;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.jdbc.JdbcUtils;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
 
