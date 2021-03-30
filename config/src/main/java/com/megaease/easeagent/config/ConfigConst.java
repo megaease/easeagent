@@ -21,10 +21,10 @@ public interface ConfigConst {
             }
             String remain = full.substring(idx + prefix.length());
             String[] arr = remain.split("\\" + DELIMITER);
-            if (arr.length < 2) {
+            if (arr.length < 3) {
                 return null;
             }
-            return arr[1];
+            return arr[2];
         }
     }
 
