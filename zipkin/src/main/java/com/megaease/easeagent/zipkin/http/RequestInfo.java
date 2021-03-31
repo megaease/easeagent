@@ -61,4 +61,6 @@ public class RequestInfo {
     private Map<String, String> headers;
 
     private Map<String, String> queries;
+
+    private long timestamp;
 }

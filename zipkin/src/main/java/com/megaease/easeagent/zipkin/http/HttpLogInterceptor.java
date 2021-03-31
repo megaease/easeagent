@@ -84,6 +84,7 @@ public abstract class HttpLogInterceptor implements AgentInterceptor {
         requestInfo.setCpuElapsedTime(System.nanoTime() - requestInfo.getBeginCpuTime());
         requestInfo.setResponseSize(serverInfo.getResponseBufferSize());
         requestInfo.setMatchUrl(serverInfo.getMatchURL());
+        requestInfo.setTimestamp(System.currentTimeMillis());
         List<RequestInfo> list = new ArrayList<>(1);
         list.add(requestInfo);
         String value = JsonUtil.toJson(list);

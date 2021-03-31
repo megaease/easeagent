@@ -32,9 +32,9 @@ public class CommonRedisTracingInterceptor implements AgentInterceptor {
         Span span = Tracing.currentTracer().nextSpan().name(name).start();
         span.kind(Span.Kind.CLIENT);
         span.remoteServiceName("redis");
-        if (uri != null) {
-            // TODO: 2021/3/24 add remote host
-        }
+//        if (uri != null) {
+//            // TODO: 2021/3/24 add remote host
+//        }
         context.put(SPAN_CONTEXT_KEY, span);
         if (cmd != null) {
             span.tag("redis.method", cmd);
@@ -48,7 +48,7 @@ public class CommonRedisTracingInterceptor implements AgentInterceptor {
                 return;
             }
             span.finish();
-            context.remove(Span.class);
+            context.remove(SPAN_CONTEXT_KEY);
         } catch (Exception ignored) {
         }
     }
