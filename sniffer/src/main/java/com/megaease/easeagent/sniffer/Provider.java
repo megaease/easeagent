@@ -294,17 +294,37 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Injection.Bean("supplier4LettuceDoWrite")
     public Supplier<AgentInterceptorChain.Builder> supplier4LettuceDoWrite() {
-        return () -> new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new RedisChannelWriterInterceptor())
-                .addInterceptor(new LettuceMetricInterceptor(new MetricRegistry()))
-                .addInterceptor(new CommonLettuceTracingInterceptor());
+        return () -> {
+            MetricRegistry metricRegistry = new MetricRegistry();
+            LettuceMetricInterceptor metricInterceptor = new LettuceMetricInterceptor(metricRegistry);
+
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_CACHE);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    metricInterceptor.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
+
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(new RedisChannelWriterInterceptor())
+                    .addInterceptor(metricInterceptor)
+                    .addInterceptor(new CommonLettuceTracingInterceptor());
+        };
     }
 
     @Injection.Bean("supplier4Jedis")
     public Supplier<AgentInterceptorChain.Builder> supplier4Jedis() {
-        return () -> new DefaultAgentInterceptorChain.Builder()
-                .addInterceptor(new JedisMetricInterceptor(new MetricRegistry()))
-                .addInterceptor(new JedisTracingInterceptor());
+        return () -> {
+            MetricRegistry metricRegistry = new MetricRegistry();
+            JedisMetricInterceptor metricInterceptor = new JedisMetricInterceptor(metricRegistry);
+
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_CACHE);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    metricInterceptor.newConverter(additionalAttributes),
+                    s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
+
+            return new DefaultAgentInterceptorChain.Builder()
+                    .addInterceptor(metricInterceptor)
+                    .addInterceptor(new JedisTracingInterceptor());
+        };
     }
 
     @Injection.Bean("supplier4KafkaProducerDoSend")
