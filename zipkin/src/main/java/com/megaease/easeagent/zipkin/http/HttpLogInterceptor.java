@@ -28,6 +28,8 @@ import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -82,7 +84,9 @@ public abstract class HttpLogInterceptor implements AgentInterceptor {
         requestInfo.setCpuElapsedTime(System.nanoTime() - requestInfo.getBeginCpuTime());
         requestInfo.setResponseSize(serverInfo.getResponseBufferSize());
         requestInfo.setMatchUrl(serverInfo.getMatchURL());
-        String value = JsonUtil.toJson(requestInfo);
+        List<RequestInfo> list = new ArrayList<>(1);
+        list.add(requestInfo);
+        String value = JsonUtil.toJson(list);
 //        log.info("access-log: {}", value);
         reportConsumer.accept(value);
         return chain.doAfter(methodInfo, context);
