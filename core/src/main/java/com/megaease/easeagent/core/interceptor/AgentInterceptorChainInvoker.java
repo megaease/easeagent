@@ -36,7 +36,7 @@ public class AgentInterceptorChainInvoker {
     }
 
     public Object doAfter(AgentInterceptorChain.Builder builder, MethodInfo methodInfo, Map<Object, Object> context, boolean newInterceptorChain) {
-        long beginTime = System.currentTimeMillis();
+        long beginTime4After = System.currentTimeMillis();
         if (newInterceptorChain) {
             context.remove(AgentInterceptorChain.class);
         }
@@ -49,21 +49,32 @@ public class AgentInterceptorChainInvoker {
             interceptorChain.skipBegin();
         }
         Object result = interceptorChain.doAfter(methodInfo, context);
+        this.logTime(methodInfo, context, beginTime4After);
+        return result;
+    }
+
+    private void logTime(MethodInfo methodInfo, Map<Object, Object> context, long beginTime4After) {
+        if (!logElapsedTime) {
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         if (methodInfo != null) {
             if (methodInfo.getInvoker() != null) {
-                sb.append(methodInfo.getInvoker().getClass().getName());
+                sb.append(methodInfo.getInvoker().getClass().getSimpleName());
             }
             if (methodInfo.getMethod() != null) {
                 sb.append("#").append(methodInfo.getMethod());
             }
         }
         Long elapsed4Before = ContextUtils.getFromContext(context, BEFORE_ELAPSED_TIME_KEY);
-        long elapsed4After = System.currentTimeMillis() - beginTime;
-        if (logElapsedTime) {
-            log.info("===== elapsedTime advice:{} before invoke:{}ms, after invoke:{}ms ======", sb.toString(), elapsed4Before, elapsed4After);
+        long endTime = System.currentTimeMillis();
+        long elapsed4After = endTime - beginTime4After;
+        Long beginTime = ContextUtils.getBeginTime(context);
+        long elapsedAll = -1;
+        if (beginTime != null) {
+            elapsedAll = endTime - beginTime;
         }
-        return result;
+        log.info("=== elapsedTime advice:{} before invoke:{}ms, after invoke:{}ms, all time:{}ms ===", sb.toString(), elapsed4Before, elapsed4After, elapsedAll);
     }
 
     private AgentInterceptorChain prepare(AgentInterceptorChain.Builder builder, Map<Object, Object> context) {
