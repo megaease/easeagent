@@ -69,12 +69,10 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHa
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
-import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.HttpFilterLogInterceptor;
-import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.*;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
+import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
@@ -85,8 +83,6 @@ import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingIntercep
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
 import java.util.Map;
@@ -231,7 +227,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                     .addInterceptor(httpFilterMetricsInterceptor)
                     .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
-                    .addInterceptor(new HttpFilterLogInterceptor(serviceName, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
+                    .addInterceptor(new ServletHttpLogInterceptor(serviceName, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
                     ;
         };
     }
@@ -258,7 +254,8 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4Gateway() {
         return () -> {
             AgentInterceptorChain.Builder headersFilterChainBuilder = new DefaultAgentInterceptorChain.Builder()
-                    .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing));
+                    .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing))
+                    .addInterceptor(new SpringGatewayLogInterceptor(this.serviceName, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))));
             AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
             builder.addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
             return builder;

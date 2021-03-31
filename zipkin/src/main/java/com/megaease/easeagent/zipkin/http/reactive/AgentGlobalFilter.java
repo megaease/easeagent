@@ -15,20 +15,20 @@ import java.util.Map;
 public class AgentGlobalFilter implements GlobalFilter {
 
     private final AgentInterceptorChain.Builder agentInterceptorChainBuilder;
-    private final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
+    private final AgentInterceptorChainInvoker chainInvoker;
 
-    public AgentGlobalFilter(AgentInterceptorChain.Builder agentInterceptorChainBuilder, AgentInterceptorChainInvoker agentInterceptorChainInvoker) {
+    public AgentGlobalFilter(AgentInterceptorChain.Builder agentInterceptorChainBuilder, AgentInterceptorChainInvoker chainInvoker) {
         this.agentInterceptorChainBuilder = agentInterceptorChainBuilder;
-        this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
+        this.chainInvoker = chainInvoker;
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Map<Object, Object> context = ContextUtils.createContext();
         MethodInfo methodInfo = MethodInfo.builder().invoker(this).method("filter").args(new Object[]{exchange}).build();
-        agentInterceptorChainInvoker.doBefore(this.agentInterceptorChainBuilder, methodInfo, context);
+        chainInvoker.doBefore(this.agentInterceptorChainBuilder, methodInfo, context);
         Mono<Void> mono = chain.filter(exchange);
-        return new AgentMono<>(mono, methodInfo, this.agentInterceptorChainBuilder, agentInterceptorChainInvoker, context);
+        return new AgentMono<>(mono, methodInfo, this.agentInterceptorChainBuilder, chainInvoker, context);
     }
 
 }

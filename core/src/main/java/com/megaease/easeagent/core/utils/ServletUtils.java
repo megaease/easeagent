@@ -87,4 +87,15 @@ public class ServletUtils {
         }
         return map;
     }
+
+    public static Map<String, String> getQueries4SingleValue(HttpServletRequest httpServletRequest) {
+        Map<String, List<String>> map = getQueries(httpServletRequest);
+        Map<String, String> singleValueMap = new HashMap<>();
+        map.forEach((key, values) -> {
+            if (values != null && values.size() > 0) {
+                singleValueMap.put(key, values.get(0));
+            }
+        });
+        return singleValueMap;
+    }
 }

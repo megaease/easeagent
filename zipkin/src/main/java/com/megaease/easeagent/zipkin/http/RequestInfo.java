@@ -1,14 +1,13 @@
 package com.megaease.easeagent.zipkin.http;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Map;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class RequestInfo {
 
     @JsonProperty("span_id")
@@ -54,12 +53,12 @@ public class RequestInfo {
     @JsonProperty("host_ipv4")
     private String hostIpv4;
 
-    private String category;
+    private String category = "application";
 
     @JsonProperty("match_url")
     private String matchUrl;
 
     private Map<String, String> headers;
 
-    private Map<String, List<String>> queries;
+    private Map<String, String> queries;
 }

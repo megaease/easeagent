@@ -14,11 +14,11 @@ public class SpringGatewayInitGlobalFilterInterceptor implements AgentIntercepto
     private boolean loadAgentFilter;
 
     private final AgentInterceptorChain.Builder headersFilterChainBuilder;
-    private final AgentInterceptorChainInvoker agentInterceptorChainInvoker;
+    private final AgentInterceptorChainInvoker chainInvoker;
 
-    public SpringGatewayInitGlobalFilterInterceptor(AgentInterceptorChain.Builder headersFilterChainBuilder, AgentInterceptorChainInvoker agentInterceptorChainInvoker) {
+    public SpringGatewayInitGlobalFilterInterceptor(AgentInterceptorChain.Builder headersFilterChainBuilder, AgentInterceptorChainInvoker chainInvoker) {
         this.headersFilterChainBuilder = headersFilterChainBuilder;
-        this.agentInterceptorChainInvoker = agentInterceptorChainInvoker;
+        this.chainInvoker = chainInvoker;
     }
 
     public boolean isLoadAgentFilter() {
@@ -44,7 +44,7 @@ public class SpringGatewayInitGlobalFilterInterceptor implements AgentIntercepto
         if (this.loadAgentFilter) {
             return;
         }
-        list.add(0, new AgentGlobalFilter(headersFilterChainBuilder, agentInterceptorChainInvoker));
+        list.add(0, new AgentGlobalFilter(headersFilterChainBuilder, chainInvoker));
         this.loadAgentFilter = true;
         chain.doBefore(methodInfo, context);
     }
