@@ -2,6 +2,7 @@ package com.megaease.easeagent.core.interceptor;
 
 import com.megaease.easeagent.core.utils.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.Date;
 import java.util.Map;
@@ -11,6 +12,7 @@ public class AgentInterceptorChainInvoker {
 
     private static final String BEFORE_ELAPSED_TIME_KEY = AgentInterceptorChainInvoker.class.getName() + "-BEFORE_ELAPSED_TIME_KEY";
     private static final String BEFORE_BEGIN_TIME_KEY = AgentInterceptorChainInvoker.class.getName() + "-BEFORE_BEGIN_TIME_KEY";
+    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     public static final AgentInterceptorChainInvoker instance = new AgentInterceptorChainInvoker();
 
@@ -71,10 +73,13 @@ public class AgentInterceptorChainInvoker {
         }
         Long elapsed4Before = ContextUtils.getFromContext(context, BEFORE_ELAPSED_TIME_KEY);
         Long beginTime4Before = ContextUtils.getFromContext(context, BEFORE_BEGIN_TIME_KEY);
-        Date beginDate4Before = null;
+        String beginTime4BeforeStr;
         if (beginTime4Before != null) {
-            beginDate4Before = new Date(beginTime4Before);
+            beginTime4BeforeStr = DateFormatUtils.format(beginTime4Before, DATE_PATTERN);
+        } else {
+            beginTime4BeforeStr = "";
         }
+        String beginTime4AfterStr = DateFormatUtils.format(new Date(beginTime4After), DATE_PATTERN);
         long endTime = System.currentTimeMillis();
         long elapsed4After = endTime - beginTime4After;
         Long beginTime = ContextUtils.getBeginTime(context);
@@ -82,9 +87,8 @@ public class AgentInterceptorChainInvoker {
         if (beginTime != null) {
             elapsedAll = endTime - beginTime;
         }
-//        log.info("=== elapsedTime advice:{} before invoke:{}ms, after invoke:{}ms, all time:{}ms ===", sb.toString(), elapsed4Before, elapsed4After, elapsedAll);
-        log.info("== agent advice:{} before beginTime:{} elapsed:{}ms, after beginTime:{} elapsed:{}ms, all time:{}ms ==",
-                sb.toString(), beginDate4Before, elapsed4Before, new Date(beginTime4After), elapsed4After, elapsedAll);
+        log.info("== agent-method:{} before-beginTime:{} elapsed:{}ms, after-beginTime:{} elapsed:{}ms, all-time:{}ms ==",
+                sb.toString(), beginTime4BeforeStr, elapsed4Before, beginTime4AfterStr, elapsed4After, elapsedAll);
     }
 
     private AgentInterceptorChain prepare(AgentInterceptorChain.Builder builder, Map<Object, Object> context) {
