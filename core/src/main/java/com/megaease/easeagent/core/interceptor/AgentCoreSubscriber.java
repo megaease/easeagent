@@ -5,6 +5,8 @@ import reactor.core.CoreSubscriber;
 import reactor.util.context.Context;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
@@ -15,6 +17,7 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
     private final AgentInterceptorChainInvoker chainInvoker;
     private final Map<Object, Object> context;
     private final boolean newInterceptorChain;
+    private final List<T> results = new ArrayList<>();
 
     public AgentCoreSubscriber(CoreSubscriber<T> actual, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context) {
         this(actual, methodInfo, chainBuilder, chainInvoker, context, false);
@@ -43,6 +46,7 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
     @Override
     public void onNext(T t) {
         actual.onNext(t);
+        results.add(t);
     }
 
     @Override
@@ -55,6 +59,7 @@ public class AgentCoreSubscriber<T> implements CoreSubscriber<T> {
     @Override
     public void onComplete() {
         actual.onComplete();
+        methodInfo.setRetValue(results);
         this.chainInvoker.doAfter(this.chainBuilder, methodInfo, context, newInterceptorChain);
     }
 }

@@ -52,8 +52,8 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
             HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, methodInfo.getThrowable());
             span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
             httpServerHandler.handleSend(responseWrapper, span);
+            return chain.doAfter(methodInfo, context);
         }
-        return chain.doAfter(methodInfo, context);
     }
 
 }

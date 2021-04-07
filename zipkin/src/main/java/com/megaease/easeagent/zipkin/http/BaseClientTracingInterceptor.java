@@ -44,8 +44,8 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
             Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
             HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
             clientHandler.handleReceive(responseWrapper, span);
+            return chain.doAfter(methodInfo, context);
         }
-        return chain.doAfter(methodInfo, context);
     }
 
     public abstract Req getRequest(Object invoker, Object[] args);

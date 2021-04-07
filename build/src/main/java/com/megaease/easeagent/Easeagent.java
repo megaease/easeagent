@@ -35,6 +35,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionA
 import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerAdvice;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
+import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
 
 @Assembly({
 //        CaptureTrace.class
@@ -72,6 +73,7 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
         KafkaConsumerRecordAdvice.class,
         KafkaProducerAdvice.class,
         KafkaConsumerAdvice.class,
+        WebClientBuilderAdvice.class,
 
 })
 abstract class Easeagent {

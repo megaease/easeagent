@@ -15,10 +15,6 @@ public class AgentMono<T> extends Mono<T> {
     private final Map<Object, Object> context;
     private final boolean newInterceptorChain;
 
-    public AgentMono(Mono<T> source, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context) {
-        this(source, methodInfo, chainBuilder, chainInvoker, context, false);
-    }
-
     public AgentMono(Mono<T> source, MethodInfo methodInfo, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, Map<Object, Object> context, boolean newInterceptorChain) {
         this.source = source;
         this.methodInfo = methodInfo;

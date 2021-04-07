@@ -18,6 +18,9 @@
 package com.megaease.easeagent.sniffer;
 
 import brave.Tracing;
+import brave.handler.MutableSpan;
+import brave.handler.SpanHandler;
+import brave.propagation.TraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
@@ -35,6 +38,7 @@ import com.megaease.easeagent.core.IProvider;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.ChainBuilderFactory;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
 import com.megaease.easeagent.metrics.MetricsCollectorConfig;
@@ -68,12 +72,14 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPub
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
+import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
 import com.megaease.easeagent.zipkin.http.*;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.webclient.WebClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
@@ -486,6 +492,17 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .addInterceptor(new RabbitMqMessageListenerTracingInterceptor(tracing))
             ;
             return chainBuilder;
+        };
+    }
+
+    @Injection.Bean("supplier4WebClientBuild")
+    public Supplier<AgentInterceptorChain.Builder> supplier4WebClientBuild() {
+        return () -> {
+            AgentInterceptorChain.Builder chainBuilder = ChainBuilderFactory.DEFAULT.createBuilder();
+            chainBuilder.addInterceptor(new WebClientTracingInterceptor(tracing));
+            return ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new WebClientBuildInterceptor(chainBuilder, chainInvoker))
+                    ;
         };
     }
 

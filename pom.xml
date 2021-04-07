@@ -281,6 +281,11 @@
                 <artifactId>spring-boot-starter-amqp</artifactId>
                 <version>${version.spring-boot}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webflux</artifactId>
+                <version>${version.spring}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

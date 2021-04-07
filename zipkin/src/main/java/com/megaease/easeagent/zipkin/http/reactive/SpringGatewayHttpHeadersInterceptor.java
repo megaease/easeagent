@@ -29,11 +29,6 @@ public class SpringGatewayHttpHeadersInterceptor implements AgentInterceptor {
     }
 
     @Override
-    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        chain.doBefore(methodInfo, context);
-    }
-
-    @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[1];
         HttpHeaders retHttpHeaders = (HttpHeaders) methodInfo.getRetValue();

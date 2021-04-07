@@ -48,9 +48,4 @@ public class SpringGatewayInitGlobalFilterInterceptor implements AgentIntercepto
         this.loadAgentFilter = true;
         chain.doBefore(methodInfo, context);
     }
-
-    @Override
-    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        return chain.doAfter(methodInfo, context);
-    }
 }

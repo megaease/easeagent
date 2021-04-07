@@ -63,8 +63,8 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
             }
             HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
             this.httpServerHandler.handleSend(response, span);
+            return chain.doAfter(methodInfo, context);
         }
-        return chain.doAfter(methodInfo, context);
     }
 
     static class FluxHttpServerRequest extends HttpServerRequest {
