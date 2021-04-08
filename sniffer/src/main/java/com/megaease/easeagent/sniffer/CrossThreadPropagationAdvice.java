@@ -10,8 +10,6 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -44,13 +42,12 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
 
 
     static class ThreadPoolExecutorExecute {
-        private final Logger logger = LoggerFactory.getLogger(getClass());
+//        private final Logger logger = LoggerFactory.getLogger(getClass());
 
-        @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method,
                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
-            logger.debug("enter method [{}]", method);
+//            logger.debug("enter method [{}]", method);
             Runnable task = (Runnable) args[0];
             if (!ThreadLocalCurrentContext.isWrapped(task)) {
                 Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);
@@ -61,13 +58,12 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
     }
 
     static class ReactorSchedulersOnSchedule {
-        private final Logger logger = LoggerFactory.getLogger(getClass());
+//        private final Logger logger = LoggerFactory.getLogger(getClass());
 
-        @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method,
                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
-            logger.debug("enter method [{}]", method);
+//            logger.debug("enter method [{}]", method);
             Runnable task = (Runnable) args[0];
             if (!ThreadLocalCurrentContext.isWrapped(task)) {
                 Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);

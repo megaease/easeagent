@@ -18,9 +18,7 @@
 package com.megaease.easeagent.sniffer;
 
 import brave.Tracing;
-import brave.handler.MutableSpan;
-import brave.handler.SpanHandler;
-import brave.propagation.TraceContext;
+import brave.propagation.ThreadLocalCurrentTraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
@@ -74,7 +72,10 @@ import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
-import com.megaease.easeagent.zipkin.http.*;
+import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
+import com.megaease.easeagent.zipkin.http.ServletHttpLogInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
@@ -84,6 +85,7 @@ import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
+import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
 import com.megaease.easeagent.zipkin.rabbitmq.spring.RabbitMqMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
@@ -99,7 +101,7 @@ import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRIC
 
 public abstract class Provider implements AgentReportAware, ConfigAware, IProvider {
 
-    private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(true);
+    private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(false);
     private Tracing tracing;
     private AgentReport agentReport;
     private Config config;
@@ -119,6 +121,9 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Override
     public void afterPropertiesSet() {
+        ThreadLocalCurrentTraceContext traceContext = ThreadLocalCurrentTraceContext.newBuilder()
+                .addScopeDecorator(AgentMDCScopeDecorator.get())
+                .build();
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
         this.tracing = Tracing.newBuilder()
                 .localServiceName(serviceName.getValue())
@@ -129,7 +134,9 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                         .newBuilder(span -> agentReport.report(span))
                         .alwaysReportSpans(true)
                         .build()
-                ).build();
+                )
+                .currentTraceContext(traceContext)
+                .build();
     }
 
     @Injection.Bean

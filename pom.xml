@@ -169,6 +169,16 @@
                 <version>${version.brave}</version>
             </dependency>
             <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-context-log4j2</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-context-slf4j</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.zipkin.reporter2</groupId>
                 <artifactId>zipkin-sender-kafka11</artifactId>
                 <version>${version.zipkin-sender-kafka11}</version>

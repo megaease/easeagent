@@ -13,7 +13,7 @@
             <TimeBasedTriggeringPolicy />
         </RollingFile>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d [%10.10t] %5p %10.10c{1} - %msg%n"/>
+            <PatternLayout pattern="%d [%10.10t] %5p %10.10c{1} - [%X{traceId}/%X{spanId}] %msg%n"/>
         </Console>
         <EaseHttp name="post-requests" uri="${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
         <EaseHttp name="post-metrics" uri="${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>

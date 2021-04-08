@@ -208,8 +208,7 @@ public class Bootstrap {
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-            LOGGER.warn("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
-//            error.printStackTrace();
+//            LOGGER.warn("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
         }
 
         @Override

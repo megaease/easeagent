@@ -2,7 +2,6 @@ package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.google.common.base.Joiner;
 import com.megaease.easeagent.common.ContextCons;
-import com.megaease.easeagent.common.LettuceUtils;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import io.lettuce.core.protocol.RedisCommand;
