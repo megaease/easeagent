@@ -37,6 +37,7 @@
         <module>sniffer</module>
         <module>config</module>
         <module>report</module>
+        <module>httpserver</module>
     </modules>
 
     <properties>
@@ -48,7 +49,7 @@
         <version.slf4j>1.7.21</version.slf4j>
         <version.byte-buddy>1.10.19</version.byte-buddy>
         <version.auto-service>1.0-rc2</version.auto-service>
-        <version.lombok>1.18.4</version.lombok>
+        <version.lombok>1.18.20</version.lombok>
         <version.config>1.2.1</version.config>
         <version.logback>1.1.11</version.logback>
         <version.fastjson>1.2.31</version.fastjson>
@@ -72,6 +73,7 @@
         <version.metrics>4.1.17</version.metrics>
         <version.jedis>3.5.2</version.jedis>
         <version.amqp-client>5.11.0</version.amqp-client>
+        <version.prometheus>0.10.0</version.prometheus>
     </properties>
 
     <dependencies>
@@ -296,6 +298,21 @@
                 <artifactId>spring-webflux</artifactId>
                 <version>${version.spring}</version>
             </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_dropwizard</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_httpserver</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_servlet</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -325,7 +342,7 @@
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.16.12.0</version>
+                <version>1.18.20.0</version>
                 <configuration>
                     <encoding>${encoding.file}</encoding>
                 </configuration>

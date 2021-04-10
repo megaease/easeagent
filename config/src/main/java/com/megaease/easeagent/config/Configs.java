@@ -19,6 +19,10 @@ public class Configs implements Config, ConfigManagerMXBean {
         notifier = new ConfigNotifier("");
     }
 
+    public void updateConfigsNotNotify(Map<String, String> changes) {
+        this.source.putAll(changes);
+    }
+
     public void updateConfigs(Map<String, String> changes) {
         Map<String, String> dump = new HashMap<>(this.source);
         List<ChangeItem> items = new LinkedList<>();
@@ -109,17 +113,12 @@ public class Configs implements Config, ConfigManagerMXBean {
     public Boolean getBoolean(String name) {
         String value = this.source.get(name);
         if (value == null) {
-            return null;
+            return false;
         }
         if (value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true")) {
             return true;
         }
-        if (value.equalsIgnoreCase("no") || value.equalsIgnoreCase("false")) {
-            return false;
-        }
-
-        return null;
-
+        return false;
     }
 
     public Double getDouble(String name) {

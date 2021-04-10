@@ -20,12 +20,12 @@ package com.megaease.easeagent.zipkin.http;
 import brave.Tracing;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.common.HostAddress;
-import com.megaease.easeagent.common.JsonUtil;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.core.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;

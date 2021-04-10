@@ -23,7 +23,6 @@ import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.common.HostAddress;
-import com.megaease.easeagent.common.JsonUtil;
 import com.megaease.easeagent.common.jdbc.MD5DictionaryItem;
 import com.megaease.easeagent.common.jdbc.MD5SQLCompression;
 import com.megaease.easeagent.common.jdbc.SQLCompression;
@@ -38,6 +37,9 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.ChainBuilderFactory;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
+import com.megaease.easeagent.core.utils.JsonUtil;
+import com.megaease.easeagent.httpserver.AgentHttpHandler;
+import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
 import com.megaease.easeagent.metrics.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
@@ -56,6 +58,8 @@ import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
+import com.megaease.easeagent.sniffer.healthy.AgentHealth;
+import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
@@ -93,13 +97,15 @@ import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY;
 
-public abstract class Provider implements AgentReportAware, ConfigAware, IProvider {
+public abstract class Provider implements AgentReportAware, ConfigAware, IProvider, AgentHttpHandlerProvider {
 
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(false);
     private Tracing tracing;
@@ -107,6 +113,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     private Config config;
     private Supplier<Map<String, Object>> additionalAttributes;
     private AutoRefreshConfigItem<String> serviceName;
+    private final AgentHealth agentHealth = new AgentHealth();
 
     @Override
     public void setConfig(Config config) {
@@ -120,7 +127,17 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     }
 
     @Override
+    public List<AgentHttpHandler> getAgentHttpHandlers() {
+        List<AgentHttpHandler> list = new ArrayList<>();
+        list.add(new AgentHealth.HealthAgentHttpHandler(this.agentHealth));
+        list.add(new AgentHealth.LivenessAgentHttpHandler(this.agentHealth));
+        list.add(new AgentHealth.ReadinessAgentHttpHandler(this.agentHealth));
+        return list;
+    }
+
+    @Override
     public void afterPropertiesSet() {
+        this.agentHealth.setReadinessEnabled(this.config.getBoolean("agent.health.readiness.enabled"));
         ThreadLocalCurrentTraceContext traceContext = ThreadLocalCurrentTraceContext.newBuilder()
                 .addScopeDecorator(AgentMDCScopeDecorator.get())
                 .build();
@@ -137,6 +154,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 )
                 .currentTraceContext(traceContext)
                 .build();
+    }
+
+    @Injection.Bean
+    public AgentHealth agentHealth() {
+        return this.agentHealth;
     }
 
     @Injection.Bean
@@ -512,6 +534,18 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     ;
         };
     }
+
+    @Injection.Bean("supplier4OnApplicationEvent")
+    public Supplier<AgentInterceptorChain.Builder> supplier4OnApplicationEvent() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new OnApplicationEventInterceptor(this.agentHealth));
+    }
+
+//    @Injection.Bean("supplier4CreateRegistrar")
+//    public Supplier<AgentInterceptorChain.Builder> supplier4CreateRegistrar() {
+//        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+//                .addInterceptor(new RegistrarConstructInterceptor(this.agentHealth));
+//    }
 
     class Md5ReportConsumer implements Consumer<Map<String, String>> {
 

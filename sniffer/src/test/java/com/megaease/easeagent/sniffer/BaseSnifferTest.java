@@ -11,6 +11,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@SuppressWarnings("unchecked")
 public class BaseSnifferTest {
 
     StrictCurrentTraceContext currentTraceContext = StrictCurrentTraceContext.create();
@@ -28,6 +29,12 @@ public class BaseSnifferTest {
                 .doBefore(any(AgentInterceptorChain.Builder.class), any(MethodInfo.class),
                         any(Map.class));
 
+        verify(chainInvoker, times(n))
+                .doAfter(any(AgentInterceptorChain.Builder.class), any(MethodInfo.class),
+                        any(Map.class));
+    }
+
+    protected void verifyAfterInvokeTimes(AgentInterceptorChainInvoker chainInvoker, int n) {
         verify(chainInvoker, times(n))
                 .doAfter(any(AgentInterceptorChain.Builder.class), any(MethodInfo.class),
                         any(Map.class));

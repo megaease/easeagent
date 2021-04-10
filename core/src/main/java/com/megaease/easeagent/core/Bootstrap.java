@@ -18,14 +18,19 @@
 package com.megaease.easeagent.core;
 
 import com.google.common.base.Function;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.*;
+import com.megaease.easeagent.core.utils.JsonUtil;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
+import com.megaease.easeagent.httpserver.AgentHttpHandler;
+import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
+import com.megaease.easeagent.httpserver.AgentHttpServer;
+import com.megaease.easeagent.httpserver.HttpResponse;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
+import com.sun.net.httpserver.HttpExchange;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -36,6 +41,7 @@ import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +52,9 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -56,6 +64,12 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public class Bootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
+
+    private static final List<AgentHttpHandler> AGENT_HTTP_HANDLER_LIST = new ArrayList<>();
+
+    private static final String HTTP_SERVER_PORT = "http.server.port";
+
+    private static WrappedConfigManager wrappedConfigManager;
 
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
@@ -88,6 +102,11 @@ public class Bootstrap {
         final AgentReport agentReport = AgentReport.create(conf);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
         builder.installOn(inst);
+        Integer port = conf.getInt(HTTP_SERVER_PORT);
+        AgentHttpServer agentHttpServer = new AgentHttpServer(port);
+        agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST);
+        agentHttpServer.start();
+        LOGGER.info("start agent http server on port:{}", port);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
@@ -95,8 +114,9 @@ public class Bootstrap {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
         ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
-        mbs.registerMBean(new WrappedConfigManager(customClassLoader, conf), mxbeanName);
-        LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName.toString());
+        wrappedConfigManager = new WrappedConfigManager(customClassLoader, conf);
+        mbs.registerMBean(wrappedConfigManager, mxbeanName);
+        LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName);
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
@@ -130,8 +150,9 @@ public class Bootstrap {
                     newInstance(tc, conf, report).define(Definition.Default.EMPTY).asMap().entrySet()) {
                 ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register));
             }
-
-            LOGGER.debug("Defined {}", tc);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Defined {}", tc);
+            }
         }
         return ab;
     }
@@ -177,16 +198,61 @@ public class Bootstrap {
             if (t instanceof AgentReportAware) {
                 ((AgentReportAware) t).setAgentReport(agentReport);
             }
+            if (t instanceof AgentHttpHandlerProvider) {
+                AGENT_HTTP_HANDLER_LIST.addAll(((AgentHttpHandlerProvider) t).getAgentHttpHandlers());
+            }
             return t;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private static Configs load(String pathname) throws IOException {
-        return Strings.isNullOrEmpty(pathname)
-                ? ConfigFactory.loadFromClasspath(Bootstrap.class.getClassLoader())
-                : ConfigFactory.loadFromFile(new File(pathname));
+    private static Configs load(String pathname) {
+        Configs configs = ConfigFactory.loadFromClasspath(Bootstrap.class.getClassLoader());
+        if (StringUtils.isNotEmpty(pathname)) {
+            Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
+            configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
+        }
+        AGENT_HTTP_HANDLER_LIST.add(new AgentHttpHandler() {
+            @Override
+            public String getPath() {
+                return "/config-service";
+            }
+
+            @Override
+            public HttpResponse process(HttpExchange exchange) throws IOException {
+                String str = this.getRequestBodyString(exchange);
+                Map<String, Object> map = JsonUtil.toMap(str);
+                String version = (String) map.get("version");
+                HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
+                if (version == null) {
+                    return builder.statusCode(400).build();
+                }
+                wrappedConfigManager.updateService(str, version);
+                return builder.statusCode(200).build();
+            }
+        });
+        AGENT_HTTP_HANDLER_LIST.add(new AgentHttpHandler() {
+            @Override
+            public String getPath() {
+                return "/config-canary";
+            }
+
+            @Override
+            public HttpResponse process(HttpExchange exchange) throws IOException {
+                String str = this.getRequestBodyString(exchange);
+                Map<String, Object> map = JsonUtil.toMap(str);
+                String version = (String) map.get("version");
+                HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
+                if (version == null) {
+                    return builder.statusCode(400).build();
+                }
+                wrappedConfigManager.updateCanary(str, version);
+                return builder.statusCode(200).build();
+            }
+        });
+
+        return configs;
     }
 
     private static final AgentBuilder.Listener LISTENER = new AgentBuilder.Listener() {

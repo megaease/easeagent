@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
+            <artifactId>httpserver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>metrics</artifactId>
             <version>${project.version}</version>
         </dependency>
