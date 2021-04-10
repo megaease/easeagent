@@ -313,6 +313,11 @@
                 <artifactId>simpleclient_servlet</artifactId>
                 <version>${version.prometheus}</version>
             </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_common</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

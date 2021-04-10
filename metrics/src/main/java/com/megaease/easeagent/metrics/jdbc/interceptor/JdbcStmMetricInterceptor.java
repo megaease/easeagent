@@ -44,7 +44,6 @@ public class JdbcStmMetricInterceptor extends AbstractJdbcMetric implements Remo
 
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
-    // TODO: 2021/2/26 maxCacheSize should use configuration for JMX
     private static final int maxCacheSize = 1000;
 
     private final SQLCompression sqlCompression;
