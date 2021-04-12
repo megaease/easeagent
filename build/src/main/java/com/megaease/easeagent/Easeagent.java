@@ -39,19 +39,6 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
 
 @Assembly({
-//        CaptureTrace.class
-//        , CaptureExecuteSql.class
-//        , CaptureHttpRequest.class
-//        , TraceHttpServlet.class
-//        , TraceHttpClient.class
-//        , TraceRestTemplate.class
-//        , TraceJedis.class
-//        , TraceJdbcStatement.class
-//        , MeasureJdbcStatement.class
-//        , MeasureJdbcGetConnection.class
-//        , MeasureHttpRequest.class
-//        , CaptureCaller.class
-//        , HttpServletAdvice.class
         HttpFilterAdvice.class,
         SpringGatewayHttpHeadersFilterAdvice.class,
         SpringGatewayInitGlobalFilterAdvice.class,

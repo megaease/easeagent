@@ -48,13 +48,13 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
         return new FeignClientResponseWrapper(response);
     }
 
-//    @Override
-//    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-//        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
-//        Response response = (Response) methodInfo.getRetValue();
-//        this.addMeshHeaders(response, span);
-//        return super.after(methodInfo, context, chain);
-//    }
+    @Override
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+        Response response = (Response) methodInfo.getRetValue();
+        this.addMeshHeaders(response, span);
+        return super.after(methodInfo, context, chain);
+    }
 
     /**
      * support ease mesh

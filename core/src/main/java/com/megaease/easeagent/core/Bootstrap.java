@@ -75,7 +75,7 @@ public class Bootstrap {
 
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
-        final long begin = System.nanoTime();
+        long begin = System.nanoTime();
         LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
         final Configs conf = load(args);
         if (LOGGER.isDebugEnabled()) {
@@ -83,8 +83,10 @@ public class Bootstrap {
             LOGGER.debug("Loaded conf:\n{}", repr);
         }
         registerMBeans(conf, inst);
+
+        long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
-                .with(LISTENER)
+//                .with(LISTENER)
 //                .with(new AgentBuilder.Listener.Filtering(
 //                        new StringMatcher("java.lang.Thread", StringMatcher.Mode.EQUALS_FULLY),
 //                        AgentBuilder.Listener.StreamWriting.toSystemOut()))
@@ -94,16 +96,29 @@ public class Bootstrap {
                 .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG.withFallbackTo(ClassFileLocator.ForClassLoader.ofBootLoader()))
 //                .ignore(any(), protectedLoaders()) // we need to redefine java.lang and java.util
                 .ignore(isSynthetic())
-                .or(nameStartsWith("sun.reflect."))
+                .or(nameStartsWith("sun."))
+                .or(nameStartsWith("com.sun."))
+                .or(nameStartsWith("brave."))
+                .or(nameStartsWith("zipkin2."))
+                .or(nameStartsWith("com.fasterxml"))
+                .or(nameStartsWith("org.apache.logging"))
+                .or(nameStartsWith("kotlin."))
+                .or(nameStartsWith("javax."))
                 .or(nameStartsWith("net.bytebuddy."))
-//                .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
+                .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
                 .or(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
                 .or(nameStartsWith("org.junit."))
                 .or(nameStartsWith("junit."))
                 .or(nameStartsWith("com.intellij."));
+        LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
+
         final AgentReport agentReport = AgentReport.create(conf);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
+        long installBegin = System.currentTimeMillis();
         builder.installOn(inst);
+        LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
+
+        long serverBegin = System.currentTimeMillis();
         Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
@@ -113,17 +128,19 @@ public class Bootstrap {
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
         agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST);
         agentHttpServer.start();
-        LOGGER.info("start agent http server on port:{}", port);
+        LOGGER.info("start agent http server on port:{} use time: {}", port, (System.currentTimeMillis() - serverBegin));
+
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
     static void registerMBeans(ConfigManagerMXBean conf, Instrumentation inst) throws Exception {
+        long begin = System.currentTimeMillis();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
         ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
         wrappedConfigManager = new WrappedConfigManager(customClassLoader, conf);
         mbs.registerMBean(wrappedConfigManager, mxbeanName);
-        LOGGER.debug("Register {} as MBean {}", conf.getClass().getName(), mxbeanName);
+        LOGGER.debug("Register {} as MBean {}, use time: {}", conf.getClass().getName(), mxbeanName, (System.currentTimeMillis() - begin));
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
@@ -147,7 +164,7 @@ public class Bootstrap {
 
     private static AgentBuilder define(Iterable<Class<? extends Transformation>> transformations,
                                        Map<Class<?>, Iterable<QualifiedBean>> scopedBeans, AgentBuilder ab, Configs conf, AgentReport report) {
-
+        long begin = System.currentTimeMillis();
         for (Class<? extends Transformation> tc : transformations) {
             final Injection.Provider ann = tc.getAnnotation(Injection.Provider.class);
             final Iterable<QualifiedBean> beans = ann == null ? Collections.<QualifiedBean>emptySet() : scopedBeans.get(ann.value());
@@ -161,6 +178,7 @@ public class Bootstrap {
                 LOGGER.debug("Defined {}", tc);
             }
         }
+        LOGGER.info("define use time: {}", (System.currentTimeMillis() - begin));
         return ab;
     }
 
@@ -266,17 +284,17 @@ public class Bootstrap {
 
         @Override
         public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-//            LOGGER.debug("onDiscovery {} from classLoader {}", typeName, classLoader);
+            LOGGER.info("onDiscovery {} from classLoader {}", typeName, classLoader);
         }
 
         @Override
         public void onTransformation(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded, DynamicType dt) {
-            LOGGER.info("onTransformation: {} loaded: {} from classLoader {}", td, loaded, ld);
+//            LOGGER.info("onTransformation: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
         public void onIgnored(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded) {
-//            LOGGER.debug("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
+//            LOGGER.info("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
@@ -286,7 +304,7 @@ public class Bootstrap {
 
         @Override
         public void onComplete(String name, ClassLoader ld, JavaModule m, boolean loaded) {
-//            LOGGER.debug("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
+//            LOGGER.info("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
         }
     };
 
