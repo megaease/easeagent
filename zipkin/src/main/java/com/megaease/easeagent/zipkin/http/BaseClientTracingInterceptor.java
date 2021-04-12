@@ -18,7 +18,7 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
 
     protected final HttpClientHandler<HttpClientRequest, HttpClientResponse> clientHandler;
     private static final String SCOPE_CONTEXT_KEY = BaseClientTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
-    private static final String SPAN_CONTEXT_KEY = BaseClientTracingInterceptor.class.getName() + "-Span";
+    protected static final String SPAN_CONTEXT_KEY = BaseClientTracingInterceptor.class.getName() + "-Span";
 
     public BaseClientTracingInterceptor(Tracing tracing) {
         HttpTracing httpTracing = HttpTracing.create(tracing);

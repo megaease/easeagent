@@ -60,10 +60,10 @@
         <version.moco>1.1.0</version.moco>
         <version.okhttp3>4.9.0</version.okhttp3>
         <version.disruptor>3.4.2</version.disruptor>
-        <version.spring-boot>2.3.8.RELEASE</version.spring-boot>
-        <version.spring>5.2.12.RELEASE</version.spring>
+        <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
+        <version.spring>5.2.6.RELEASE</version.spring>
         <version.spring-kafka>2.3.13.RELEASE</version.spring-kafka>
-        <version.spring.cloud>Hoxton.SR10</version.spring.cloud>
+        <version.spring.cloud>Hoxton.SR5</version.spring.cloud>
         <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
         <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
@@ -287,6 +287,12 @@
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
                 <version>${version.spring-kafka}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>

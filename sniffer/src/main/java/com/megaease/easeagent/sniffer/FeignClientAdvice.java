@@ -9,6 +9,7 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
@@ -52,8 +53,9 @@ public abstract class FeignClientAdvice implements Transformation {
                   @Advice.This Object invoker,
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
+                  @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
                   @Advice.Thrown Throwable throwable) {
-            this.doExitNoRetValue(release, invoker, method, args, throwable);
+            this.doExit(release, invoker, method, args, retValue, throwable);
         }
     }
 }

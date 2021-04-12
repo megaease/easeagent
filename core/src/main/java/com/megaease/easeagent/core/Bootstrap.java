@@ -67,7 +67,9 @@ public class Bootstrap {
 
     private static final List<AgentHttpHandler> AGENT_HTTP_HANDLER_LIST = new ArrayList<>();
 
-    private static final String HTTP_SERVER_PORT = "http.server.port";
+    private static final String AGENT_SERVER_PORT_KEY = "agent.server.port";
+
+    private static final int DEF_AGENT_SERVER_PORT = 9900;
 
     private static WrappedConfigManager wrappedConfigManager;
 
@@ -102,7 +104,12 @@ public class Bootstrap {
         final AgentReport agentReport = AgentReport.create(conf);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
         builder.installOn(inst);
-        Integer port = conf.getInt(HTTP_SERVER_PORT);
+        Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
+        if (port == null) {
+            port = DEF_AGENT_SERVER_PORT;
+        }
+        String portStr = System.getProperty(AGENT_SERVER_PORT_KEY, String.valueOf(port));
+        port = Integer.parseInt(portStr);
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
         agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST);
         agentHttpServer.start();
