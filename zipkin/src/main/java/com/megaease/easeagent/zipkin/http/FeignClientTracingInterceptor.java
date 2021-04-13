@@ -70,6 +70,9 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
     private static final String X_EG_TIME_LIMITER_KEY = "X-EG-Time-Limiter";
 
     private void addMeshHeaders(Response response, Span span) {
+        if (response == null) {
+            return;
+        }
         Map<String, Collection<String>> headers = response.headers();
         log.info("feign client response headers: {}", headers);
         String header4Breaker = getFirstHeaderValue(headers, X_EG_CIRCUIT_BREAKER_KEY);
