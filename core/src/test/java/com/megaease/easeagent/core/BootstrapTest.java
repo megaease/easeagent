@@ -26,7 +26,7 @@ public class BootstrapTest {
         source.put("key", text);
         Configs configs = new Configs(source);
         final Instrumentation inst = Mockito.mock(Instrumentation.class);
-        Bootstrap.registerMBeans(configs, inst);
+        Bootstrap.registerMBeans(configs);
         JvmAgent.premain("", inst);
         String baseUrl = "http://localhost:8778/jolokia/";
         RestTemplate client = new RestTemplate();

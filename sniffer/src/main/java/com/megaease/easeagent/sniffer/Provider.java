@@ -109,6 +109,7 @@ import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRIC
 
 public abstract class Provider implements AgentReportAware, ConfigAware, IProvider, AgentHttpHandlerProvider {
 
+    private static final String EASEAGENT_HEALTH_READINESS_ENABLED = "easeagent.health.readiness.enabled";
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(false);
     private Tracing tracing;
     private AgentReport agentReport;
@@ -141,7 +142,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Override
     public void afterPropertiesSet() {
-        this.agentHealth.setReadinessEnabled(this.config.getBoolean("agent.health.readiness.enabled"));
+        this.agentHealth.setReadinessEnabled(this.config.getBoolean(EASEAGENT_HEALTH_READINESS_ENABLED));
         ThreadLocalCurrentTraceContext traceContext = ThreadLocalCurrentTraceContext.newBuilder()
                 .addScopeDecorator(AgentMDCScopeDecorator.get())
                 .build();

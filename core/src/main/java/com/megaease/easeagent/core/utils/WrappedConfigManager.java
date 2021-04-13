@@ -62,6 +62,22 @@ public class WrappedConfigManager implements ConfigManagerMXBean {
     }
 
     @Override
+    public void updateService(Map<String, String> configs, String version) {
+        ThreadUtils.callWithClassLoader(customClassLoader, () -> {
+            conf.updateService(configs, version);
+            return null;
+        });
+    }
+
+    @Override
+    public void updateCanary(Map<String, String> configs, String version) {
+        ThreadUtils.callWithClassLoader(customClassLoader, () -> {
+            conf.updateCanary(configs, version);
+            return null;
+        });
+    }
+
+    @Override
     public Map<String, String> getConfigs() {
         return ThreadUtils.callWithClassLoader(customClassLoader, conf::getConfigs);
     }

@@ -34,7 +34,7 @@ public class Configs implements Config, ConfigManagerMXBean {
             }
         });
         if (!items.isEmpty()) {
-            logger.info("change items: {}", items.toString());
+            logger.info("change items: {}", items);
             this.source = dump;
             this.notifier.handleChanges(items);
         }
@@ -65,9 +65,35 @@ public class Configs implements Config, ConfigManagerMXBean {
         }
         Map<String, String> originals = ConfigUtils.json2KVMap(json);
         HashMap<String, String> rst = new HashMap<>();
-        originals.forEach((k, v) -> {
-            rst.put(ConfigConst.join(ConfigConst.GLOBAL_CANARY_LABELS, k), v);
-        });
+        originals.forEach((k, v) -> rst.put(ConfigConst.join(ConfigConst.GLOBAL_CANARY_LABELS, k), v));
+        this.updateConfigs(rst);
+    }
+
+    @Override
+    public void updateService(Map<String, String> configs, String version) {
+        logger.info("call updateService. version: {}, configs: {}", version, configs);
+        if (hasText(mainLatestVersion) && Objects.equals(mainLatestVersion, version)) {
+            logger.info("new main version: {} is same with the old version: {}", version, mainLatestVersion);
+        }
+        if (hasText(version)) {
+            logger.info("update the main latest version to {}", version);
+            this.mainLatestVersion = version;
+        }
+        this.updateConfigs(configs);
+    }
+
+    @Override
+    public void updateCanary(Map<String, String> configs, String version) {
+        logger.info("call updateCanary. version: {}, configs: {}", version, configs);
+        if (hasText(canaryLatestVersion) && Objects.equals(canaryLatestVersion, version)) {
+            logger.info("new canary version: {} is same with the old version: {}", version, canaryLatestVersion);
+            return;
+        } else if (hasText(version)) {
+            logger.info("update the canary latest version to {}", version);
+            this.canaryLatestVersion = version;
+        }
+        HashMap<String, String> rst = new HashMap<>();
+        configs.forEach((k, v) -> rst.put(ConfigConst.join(ConfigConst.GLOBAL_CANARY_LABELS, k), v));
         this.updateConfigs(rst);
     }
 
@@ -115,10 +141,7 @@ public class Configs implements Config, ConfigManagerMXBean {
         if (value == null) {
             return false;
         }
-        if (value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true")) {
-            return true;
-        }
-        return false;
+        return value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
     }
 
     public Double getDouble(String name) {

@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
-    <Properties>
-        <Property name="address">${env:GATEWAY_ADDR:-https://gateway.easeapm.com:10443}</Property>
-        <Property name="version">${env:GATEWAY_VER:-v1}</Property>
-    </Properties>
     <Appenders>
         <RollingFile name="RollingFile" fileName="logs/easeagent.log" filePattern="logs/easeagent-%d{MM-dd-yyyy}.log"
                      ignoreExceptions="false">
@@ -15,29 +11,11 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d [%10.10t] %5p %10.10c{1} - [%X{traceId}/%X{spanId}] %msg%n"/>
         </Console>
-        <EaseHttp name="post-requests" uri="${address}/${version}/app_requests" contentType="application/json" userAgent="easeagent/0.1.0"/>
-        <EaseHttp name="post-metrics" uri="${address}/${version}/app_metrics" contentType="application/json" userAgent="easeagent/0.1.0"/>
-        <Failover name="failover-requests" primary="post-requests" retryIntervalSeconds="1">
-            <Failovers>
-                <AppenderRef ref="RollingFile"/>
-            </Failovers>
-        </Failover>
-        <Failover name="failover-metrics" primary="post-metrics" retryIntervalSeconds="1">
-            <Failovers>
-                <AppenderRef ref="RollingFile"/>
-            </Failovers>
-        </Failover>
     </Appenders>
     <Loggers>
         <Root level="debug">
 <!--            <AppenderRef ref="RollingFile"/>-->
             <AppenderRef ref="Console"/>
         </Root>
-<!--        <Logger name="metrics" level="info" additivity="false">-->
-<!--            <AppenderRef ref="failover-metrics"/>-->
-<!--        </Logger>-->
-<!--        <Logger name="requests" level="info" additivity="false">-->
-<!--            <AppenderRef ref="failover-requests"/>-->
-<!--        </Logger>-->
     </Loggers>
 </Configuration>

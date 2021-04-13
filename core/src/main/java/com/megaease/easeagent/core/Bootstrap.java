@@ -48,14 +48,10 @@ import org.slf4j.LoggerFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.io.File;
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.FluentIterable.from;
@@ -67,7 +63,7 @@ public class Bootstrap {
 
     private static final List<AgentHttpHandler> AGENT_HTTP_HANDLER_LIST = new ArrayList<>();
 
-    private static final String AGENT_SERVER_PORT_KEY = "agent.server.port";
+    private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
 
     private static final int DEF_AGENT_SERVER_PORT = 9900;
 
@@ -82,7 +78,7 @@ public class Bootstrap {
             final String repr = conf.toPrettyDisplay();
             LOGGER.debug("Loaded conf:\n{}", repr);
         }
-        registerMBeans(conf, inst);
+        registerMBeans(conf);
 
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
@@ -133,7 +129,7 @@ public class Bootstrap {
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
-    static void registerMBeans(ConfigManagerMXBean conf, Instrumentation inst) throws Exception {
+    static void registerMBeans(ConfigManagerMXBean conf) throws Exception {
         long begin = System.currentTimeMillis();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
@@ -238,46 +234,66 @@ public class Bootstrap {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
             configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
-        AGENT_HTTP_HANDLER_LIST.add(new AgentHttpHandler() {
+        AGENT_HTTP_HANDLER_LIST.add(new ConfigsUpdateAgentHttpHandler() {
             @Override
             public String getPath() {
                 return "/config-service";
             }
 
             @Override
-            public HttpResponse process(HttpExchange exchange) throws IOException {
-                String str = this.getRequestBodyString(exchange);
-                Map<String, Object> map = JsonUtil.toMap(str);
-                String version = (String) map.get("version");
-                HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
-                if (version == null) {
-                    return builder.statusCode(400).build();
-                }
-                wrappedConfigManager.updateService(str, version);
-                return builder.statusCode(200).build();
+            public void processConfig(Map<String, String> config, String version) {
+                wrappedConfigManager.updateService(config, version);
             }
+
         });
-        AGENT_HTTP_HANDLER_LIST.add(new AgentHttpHandler() {
+        AGENT_HTTP_HANDLER_LIST.add(new ConfigsUpdateAgentHttpHandler() {
             @Override
             public String getPath() {
                 return "/config-canary";
             }
 
             @Override
-            public HttpResponse process(HttpExchange exchange) throws IOException {
-                String str = this.getRequestBodyString(exchange);
-                Map<String, Object> map = JsonUtil.toMap(str);
-                String version = (String) map.get("version");
-                HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
-                if (version == null) {
-                    return builder.statusCode(400).build();
-                }
-                wrappedConfigManager.updateCanary(str, version);
-                return builder.statusCode(200).build();
+            public void processConfig(Map<String, String> config, String version) {
+                wrappedConfigManager.updateCanary(config, version);
             }
         });
-
         return configs;
+    }
+
+    static Map<String, String> toConfigMap(Map<String, Object> map) {
+        Map<String, String> config = new HashMap<>();
+        map.forEach((s, o) -> config.put(s, o.toString()));
+        return config;
+    }
+
+    static abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
+
+        @Override
+        public String getPath() {
+            return null;
+        }
+
+        public abstract void processConfig(Map<String, String> config, String version);
+
+        @Override
+        public HttpResponse process(HttpExchange exchange) {
+            HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
+            String str = this.getRequestBodyString(exchange);
+            if (StringUtils.isEmpty(str)) {
+                return builder.statusCode(400).build();
+            }
+            Map<String, Object> map = JsonUtil.toMap(str);
+            if (map == null) {
+                return builder.statusCode(400).build();
+            }
+            String version = (String) map.remove("version");
+            if (version == null) {
+                return builder.statusCode(400).build();
+            }
+            Map<String, String> config = toConfigMap(map);
+            processConfig(config, version);
+            return builder.statusCode(200).build();
+        }
     }
 
     private static final AgentBuilder.Listener LISTENER = new AgentBuilder.Listener() {

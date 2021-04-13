@@ -11,6 +11,10 @@ public interface ConfigManagerMXBean {
 
     void updateCanary(String json, String version) throws IOException;
 
+    void updateService(Map<String, String> configs, String version);
+
+    void updateCanary(Map<String, String> configs, String version);
+
     Map<String, String> getConfigs();
 
     List<String> availableConfigNames();

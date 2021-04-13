@@ -16,18 +16,18 @@ public class ConfigsTest {
         Configs configs = new Configs(Collections.singletonMap("hello", "world"));
         List<ChangeItem> rst = addListener(configs);
 
-        configs.updateService("{}",null);
+        configs.updateService("{}", null);
         Assert.assertEquals(0, rst.size());
 
-        configs.updateService(json.writeValueAsString(Collections.singletonMap("hello", "world")),null);
+        configs.updateService(json.writeValueAsString(Collections.singletonMap("hello", "world")), null);
         Assert.assertEquals(0, rst.size());
 
-        configs.updateService(json.writeValueAsString(Collections.singletonMap("hello", "world2")),null);
+        configs.updateService(json.writeValueAsString(Collections.singletonMap("hello", "world2")), null);
         Assert.assertEquals(1, rst.size());
     }
 
     @Test
-    public void test_check_change_count() throws Exception {
+    public void test_check_change_count() {
         Configs configs = new Configs(Collections.singletonMap("hello", "world"));
         List<ChangeItem> rst = addListener(configs);
 
@@ -42,7 +42,7 @@ public class ConfigsTest {
     }
 
     @Test
-    public void test_check_old() throws Exception {
+    public void test_check_old() {
         Configs configs = new Configs(Collections.singletonMap("hello", "world"));
         List<ChangeItem> rst = addListener(configs);
         configs.updateConfigs(Collections.singletonMap("hello", "test"));
@@ -55,26 +55,21 @@ public class ConfigsTest {
 
 
     @Test
-    public void test_check_new() throws Exception {
+    public void test_check_new() {
         Configs configs = new Configs(Collections.singletonMap("hello", "world"));
         List<ChangeItem> rst = addListener(configs);
         configs.updateConfigs(Collections.singletonMap("name", "666"));
         ChangeItem first = rst.get(0);
         Assert.assertEquals(first.getFullName(), "name");
         Assert.assertEquals(first.getName(), "name");
-        Assert.assertEquals(first.getOldValue(), null);
+        Assert.assertNull(first.getOldValue());
         Assert.assertEquals(first.getNewValue(), "666");
     }
 
 
     private List<ChangeItem> addListener(Config config) {
         List<ChangeItem> rst = new LinkedList<>();
-        config.addChangeListener(new ConfigChangeListener() {
-            @Override
-            public void onChange(List<ChangeItem> list) {
-                rst.addAll(list);
-            }
-        });
+        config.addChangeListener(rst::addAll);
         return rst;
     }
 }
