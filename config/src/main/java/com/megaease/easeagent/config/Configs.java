@@ -70,7 +70,7 @@ public class Configs implements Config, ConfigManagerMXBean {
     }
 
     @Override
-    public void updateService(Map<String, String> configs, String version) {
+    public void updateService2(Map<String, String> configs, String version) {
         logger.info("call updateService. version: {}, configs: {}", version, configs);
         if (hasText(mainLatestVersion) && Objects.equals(mainLatestVersion, version)) {
             logger.info("new main version: {} is same with the old version: {}", version, mainLatestVersion);
@@ -83,7 +83,7 @@ public class Configs implements Config, ConfigManagerMXBean {
     }
 
     @Override
-    public void updateCanary(Map<String, String> configs, String version) {
+    public void updateCanary2(Map<String, String> configs, String version) {
         logger.info("call updateCanary. version: {}, configs: {}", version, configs);
         if (hasText(canaryLatestVersion) && Objects.equals(canaryLatestVersion, version)) {
             logger.info("new canary version: {} is same with the old version: {}", version, canaryLatestVersion);

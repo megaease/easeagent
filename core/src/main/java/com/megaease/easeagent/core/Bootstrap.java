@@ -242,7 +242,7 @@ public class Bootstrap {
 
             @Override
             public void processConfig(Map<String, String> config, String version) {
-                wrappedConfigManager.updateService(config, version);
+                wrappedConfigManager.updateService2(config, version);
             }
 
         });
@@ -254,7 +254,7 @@ public class Bootstrap {
 
             @Override
             public void processConfig(Map<String, String> config, String version) {
-                wrappedConfigManager.updateCanary(config, version);
+                wrappedConfigManager.updateCanary2(config, version);
             }
         });
         return configs;
