@@ -17,11 +17,9 @@
 
 package com.megaease.easeagent.httpserver;
 
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import lombok.SneakyThrows;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -32,10 +30,6 @@ public class AgentHttpServer {
     @SneakyThrows
     public AgentHttpServer(int port) {
         this.httpServer = HttpServer.create(new InetSocketAddress(port), 0);
-    }
-
-    public void addHttpHandler(AgentHttpHandler agentHttpHandler) {
-        this.httpServer.createContext(agentHttpHandler.getPath(), agentHttpHandler);
     }
 
     public void addHttpHandlers(List<AgentHttpHandler> agentHttpHandlers) {
@@ -51,27 +45,5 @@ public class AgentHttpServer {
     public void stop() {
         System.out.println("begin stop http server");
         this.httpServer.start();
-    }
-
-    @SneakyThrows
-    public static void main(String[] args) {
-        AgentHttpServer agentHttpServer = new AgentHttpServer(9900);
-        agentHttpServer.addHttpHandler(new AgentHttpHandler() {
-            @Override
-            public String getPath() {
-                return "/test";
-            }
-
-            @Override
-            public HttpResponse process(HttpExchange exchange) throws IOException {
-                String string = this.getRequestBodyString(exchange);
-                System.out.println(string);
-                return HttpResponse.builder().statusCode(200).data("ok-ok").build();
-            }
-        });
-        agentHttpServer.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(agentHttpServer::stop));
-        System.out.println("local http server started");
-//        TimeUnit.HOURS.sleep(1);
     }
 }

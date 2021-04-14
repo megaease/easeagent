@@ -1,11 +1,11 @@
 package com.megaease.easeagent.sniffer;
 
-import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.TextUtils;
+import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import feign.Request;
 import net.bytebuddy.asm.Advice;
@@ -99,7 +99,9 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method, @Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request, @Advice.Argument(1) Object config) {
             try {
-                logger.debug("enter method [{}]", method);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("enter method [{}]", method);
+                }
                 String serviceName = (String) ReflectionTool.invokeMethod(config, "getClientName");
                 Object realRequest = ReflectionTool.invokeMethod(request, "getRequest");
                 Map<String, Collection<String>> headers = (Map<String, Collection<String>>) ReflectionTool.extractField(realRequest, "headers");
@@ -120,11 +122,12 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
             this.config = config;
         }
 
-        @SuppressWarnings("unchecked")
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method, @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
             try {
-                logger.debug("enter method [{}]", method);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("enter method [{}]", method);
+                }
                 feign.Request request = (Request) args[0];
                 String url = request.url();
                 String host = URI.create(url).getHost();
@@ -154,7 +157,9 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method, @Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request) {
             try {
-                logger.debug("enter method [{}]", method);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("enter method [{}]", method);
+                }
                 URI uri = (URI) ReflectionTool.invokeMethod(request, "getURI");
                 String host = uri.getHost();
                 if (TextUtils.hasText(host)) {
@@ -182,7 +187,9 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method, @Advice.Argument(value = 0, readOnly = false, typing = Assigner.Typing.DYNAMIC) Object request) {
             try {
-                logger.debug("enter method [{}]", method);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("enter method [{}]", method);
+                }
                 URI uri = (URI) ReflectionTool.invokeMethod(request, "url");
                 String host = uri.getHost();
                 if (StringUtils.hasText(host)) {
@@ -203,7 +210,9 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
         @Advice.OnMethodEnter
         void enter(@Advice.Origin String method, @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] exchanges) {
             try {
-                logger.debug("enter method [{}]", method);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("enter method [{}]", method);
+                }
                 ServerWebExchange exchange = (ServerWebExchange) exchanges[0];
                 org.springframework.cloud.gateway.route.Route route = exchange.getAttribute("org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRoute");
                 if (route == null) {

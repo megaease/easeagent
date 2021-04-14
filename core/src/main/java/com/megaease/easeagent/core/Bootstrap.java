@@ -61,7 +61,9 @@ public class Bootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 
-    private static final List<AgentHttpHandler> AGENT_HTTP_HANDLER_LIST = new ArrayList<>();
+    private static final List<AgentHttpHandler> AGENT_HTTP_HANDLER_LIST_ON_INIT = new ArrayList<>();
+
+    private static final List<AgentHttpHandler> AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER = new ArrayList<>();
 
     private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
 
@@ -72,13 +74,27 @@ public class Bootstrap {
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
         long begin = System.nanoTime();
-        LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
+        }
         final Configs conf = load(args);
         if (LOGGER.isDebugEnabled()) {
-            final String repr = conf.toPrettyDisplay();
-            LOGGER.debug("Loaded conf:\n{}", repr);
+            final String display = conf.toPrettyDisplay();
+            LOGGER.info("Loaded conf:\n{}", display);
         }
         registerMBeans(conf);
+
+        long serverBegin = System.currentTimeMillis();
+        Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
+        if (port == null) {
+            port = DEF_AGENT_SERVER_PORT;
+        }
+        String portStr = System.getProperty(AGENT_SERVER_PORT_KEY, String.valueOf(port));
+        port = Integer.parseInt(portStr);
+        AgentHttpServer agentHttpServer = new AgentHttpServer(port);
+        agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST_ON_INIT);
+        agentHttpServer.start();
+        LOGGER.info("start agent http server on port:{} use time: {}", port, (System.currentTimeMillis() - serverBegin));
 
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
@@ -113,19 +129,7 @@ public class Bootstrap {
         long installBegin = System.currentTimeMillis();
         builder.installOn(inst);
         LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
-
-        long serverBegin = System.currentTimeMillis();
-        Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
-        if (port == null) {
-            port = DEF_AGENT_SERVER_PORT;
-        }
-        String portStr = System.getProperty(AGENT_SERVER_PORT_KEY, String.valueOf(port));
-        port = Integer.parseInt(portStr);
-        AgentHttpServer agentHttpServer = new AgentHttpServer(port);
-        agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST);
-        agentHttpServer.start();
-        LOGGER.info("start agent http server on port:{} use time: {}", port, (System.currentTimeMillis() - serverBegin));
-
+        agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
@@ -136,7 +140,7 @@ public class Bootstrap {
         ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
         wrappedConfigManager = new WrappedConfigManager(customClassLoader, conf);
         mbs.registerMBean(wrappedConfigManager, mxbeanName);
-        LOGGER.debug("Register {} as MBean {}, use time: {}", conf.getClass().getName(), mxbeanName, (System.currentTimeMillis() - begin));
+        LOGGER.info("Register {} as MBean {}, use time: {}", conf.getClass().getName(), mxbeanName, (System.currentTimeMillis() - begin));
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
@@ -197,7 +201,9 @@ public class Bootstrap {
             try {
                 final QualifiedBean qb = new QualifiedBean(bean.value(), method.invoke(instance));
                 builder.add(qb);
-                LOGGER.debug("Provided {} ", qb);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Provided {} ", qb);
+                }
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -220,7 +226,7 @@ public class Bootstrap {
                 ((AgentReportAware) t).setAgentReport(agentReport);
             }
             if (t instanceof AgentHttpHandlerProvider) {
-                AGENT_HTTP_HANDLER_LIST.addAll(((AgentHttpHandlerProvider) t).getAgentHttpHandlers());
+                AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER.addAll(((AgentHttpHandlerProvider) t).getAgentHttpHandlers());
             }
             return t;
         } catch (Exception e) {
@@ -234,7 +240,7 @@ public class Bootstrap {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
             configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
-        AGENT_HTTP_HANDLER_LIST.add(new ConfigsUpdateAgentHttpHandler() {
+        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new ConfigsUpdateAgentHttpHandler() {
             @Override
             public String getPath() {
                 return "/config-service";
@@ -246,7 +252,7 @@ public class Bootstrap {
             }
 
         });
-        AGENT_HTTP_HANDLER_LIST.add(new ConfigsUpdateAgentHttpHandler() {
+        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new ConfigsUpdateAgentHttpHandler() {
             @Override
             public String getPath() {
                 return "/config-canary";

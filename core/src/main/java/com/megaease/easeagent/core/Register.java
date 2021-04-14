@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.core;
+package com.megaease.easeagent.core;
 
 import com.google.common.base.*;
 import com.google.common.collect.FluentIterable;
@@ -71,8 +71,8 @@ class Register {
 
     private Object newInstanceOf(Class<?> aClass) {
         return from(aClass.getConstructors()).firstMatch(Injection.Autowire.AUTOWIRED_CONS)
-                                             .transform(new ConstructorNew())
-                                             .or(new DefaultConstructorNew(aClass));
+                .transform(new ConstructorNew())
+                .or(new DefaultConstructorNew(aClass));
     }
 
     private FluentIterable<Method> adviceFactoryMethods(Class<?> aClass) {
@@ -84,11 +84,13 @@ class Register {
         });
     }
 
-    private class DefaultConstructorNew implements Supplier<Object> {
+    private static class DefaultConstructorNew implements Supplier<Object> {
 
         private final Class<?> aClass;
 
-        DefaultConstructorNew(Class<?> aClass) {this.aClass = aClass;}
+        DefaultConstructorNew(Class<?> aClass) {
+            this.aClass = aClass;
+        }
 
         @Override
         public Object get() {
@@ -142,7 +144,7 @@ class Register {
                     public QualifiedBean get() {
                         final String append = Strings.isNullOrEmpty(qualifier) ? "" : "[" + qualifier + "]";
                         final String msg = String.format("Miss bean %s%s for %s",
-                                                         aClass.getCanonicalName(), append, cons.getDeclaringClass());
+                                aClass.getCanonicalName(), append, cons.getDeclaringClass());
                         throw new IllegalStateException(msg);
                     }
                 });

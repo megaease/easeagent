@@ -1,9 +1,9 @@
 package com.megaease.easeagent.sniffer.thread;
 
-import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,9 @@ public class HTTPHeaderExtractInterceptor implements AgentInterceptor {
             final String value = request.getHeader(header);
             ctx.put(header, value == null ? "" : value);
         }
-        logger.debug("extract ctx:{} from http request with headers:{}", ctx.toString(), Arrays.toString(canaryHeaders));
+        if (logger.isDebugEnabled()) {
+            logger.debug("extract ctx:{} from http request with headers:{}", ctx, Arrays.toString(canaryHeaders));
+        }
         final ThreadLocalCurrentContext.Scope scope = ThreadLocalCurrentContext.DEFAULT.newScope(ctx);
         context.put(ThreadLocalCurrentContext.Scope.class, scope);
         chain.doBefore(methodInfo, context);
