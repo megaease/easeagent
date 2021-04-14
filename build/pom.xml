@@ -73,11 +73,6 @@
         </dependency>
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
-            <artifactId>requests</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.megaease.easeagent</groupId>
             <artifactId>metrics</artifactId>
             <version>${project.version}</version>
         </dependency>
