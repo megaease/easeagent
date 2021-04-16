@@ -1,9 +1,10 @@
 #! /bin/bash
 # After `mvn clean package -am -pl build`, this script can help you to release `easeagent-dep.jar` to github.
 
-RELEASE_URL="https://api.github.com/repos/megaease/easeagent/releases/39859773"
-UPLOAD_URL="https://uploads.github.com/repos/megaease/easeagent/releases/39859773/assets?name=easeagent.jar"
-TOKEN="bca81b5b3d467da250c4db4b048639fe73da7ccc"
+RELEASE_ID=41522274
+RELEASE_URL="https://api.github.com/repos/megaease/easeagent/releases/${RELEASE_ID}"
+UPLOAD_URL="https://uploads.github.com/repos/megaease/easeagent/releases/${RELEASE_ID}/assets?name=easeagent.jar"
+TOKEN=""
 AUTH_HEAD="Authorization: token $TOKEN"
 LIB_PATH="build/target/easeagent-dep.jar"
 ASSET_URL=`curl -X GET -H "$AUTH_HEAD" "$RELEASE_URL" | jq --raw-output '.assets[0].url'`
