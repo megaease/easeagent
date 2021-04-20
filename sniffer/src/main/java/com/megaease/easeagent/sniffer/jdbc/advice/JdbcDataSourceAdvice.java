@@ -31,8 +31,6 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -42,8 +40,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class JdbcDataSourceAdvice implements Transformation {
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(isSubTypeOf(DataSource.class))
-                .transform(getConnection(named("getConnection").and(returns(isSubTypeOf(Connection.class)))))
+        return def.type(hasSuperType(named("javax.sql.DataSource")))
+                .transform(getConnection(named("getConnection").and(returns(named("java.sql.Connection")))))
                 .end();
     }
 
@@ -54,12 +52,12 @@ public abstract class JdbcDataSourceAdvice implements Transformation {
 
         @Injection.Autowire
         GetConnection(AgentInterceptorChainInvoker chainInvoker,
-                      @Injection.Qualifier("supplier4DataSourceGetCon")Supplier<AgentInterceptorChain.Builder> supplier) {
+                      @Injection.Qualifier("supplier4DataSourceGetCon") Supplier<AgentInterceptorChain.Builder> supplier) {
             super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter
-        ForwardLock.Release<Map<Object, Object>> enter(@Advice.This DataSource invoker,
+        ForwardLock.Release<Map<Object, Object>> enter(@Advice.This Object invoker,
                                                        @Advice.Origin("#m") String method,
                                                        @Advice.AllArguments Object[] args) {
             return this.doEnter(invoker, method, args);

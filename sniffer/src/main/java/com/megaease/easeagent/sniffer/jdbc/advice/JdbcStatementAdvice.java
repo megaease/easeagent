@@ -32,7 +32,6 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
-import java.sql.Statement;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -42,7 +41,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class JdbcStatementAdvice implements Transformation {
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(isSubTypeOf(Statement.class).and(not(isInterface().or(isAbstract()))))
+        return def.type(hasSuperType(named("java.sql.Statement")).and(not(isInterface().or(isAbstract()))))
                 .transform(objConstruct(isConstructor(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
                 .transform(execute(nameStartsWith("execute")
                         .and(not(returns(TypeDescription.VOID)))
