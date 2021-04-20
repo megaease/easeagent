@@ -60,7 +60,8 @@ public class AgentHttpServer extends RouterNanoHTTPD {
 //
 //        @Override
 //        public Response process(UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
-//            return NanoHTTPD.newFixedLengthResponse("hi");
+//            String requestBody = this.buildRequestBody(session);
+//            return NanoHTTPD.newFixedLengthResponse(requestBody);
 //        }
 //    }
 }

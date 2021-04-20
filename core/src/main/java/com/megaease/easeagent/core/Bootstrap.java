@@ -282,13 +282,11 @@ public class Bootstrap {
         @SneakyThrows
         @Override
         public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-            HashMap<String, String> dataMap = new HashMap<>();
-            session.parseBody(dataMap);
-            String str = dataMap.get("postData");
-            if (StringUtils.isEmpty(str)) {
+            String body = this.buildRequestBody(session);
+            if (StringUtils.isEmpty(body)) {
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
             }
-            Map<String, Object> map = JsonUtil.toMap(str);
+            Map<String, Object> map = JsonUtil.toMap(body);
             if (map == null) {
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
             }

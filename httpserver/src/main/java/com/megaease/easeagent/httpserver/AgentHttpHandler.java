@@ -19,7 +19,13 @@ package com.megaease.easeagent.httpserver;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
+import lombok.SneakyThrows;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
@@ -31,6 +37,20 @@ public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
     @Override
     public String getText() {
         return this.text;
+    }
+
+    @SneakyThrows
+    protected String buildRequestBody(NanoHTTPD.IHTTPSession session) {
+        Map<String, String> files = new HashMap<>();
+        NanoHTTPD.Method method = session.getMethod();
+        if (!NanoHTTPD.Method.PUT.equals(method) && !NanoHTTPD.Method.POST.equals(method)) {
+            return null;
+        }
+        session.parseBody(files);
+        String content = files.get("content");
+        Path path = Paths.get(content);
+        byte[] bytes = Files.readAllBytes(path);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     @Override
