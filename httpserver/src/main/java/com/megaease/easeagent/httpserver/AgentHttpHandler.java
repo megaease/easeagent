@@ -48,9 +48,12 @@ public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
         }
         session.parseBody(files);
         String content = files.get("content");
-        Path path = Paths.get(content);
-        byte[] bytes = Files.readAllBytes(path);
-        return new String(bytes, StandardCharsets.UTF_8);
+        if (content != null) {
+            Path path = Paths.get(content);
+            byte[] bytes = Files.readAllBytes(path);
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
+        return files.get("postData");
     }
 
     @Override
