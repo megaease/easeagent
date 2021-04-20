@@ -18,9 +18,12 @@
 package com.megaease.easeagent.sniffer.healthy;
 
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
-import com.megaease.easeagent.httpserver.HttpResponse;
-import com.sun.net.httpserver.HttpExchange;
+import com.megaease.easeagent.httpserver.AgentHttpServer;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.router.RouterNanoHTTPD;
 import lombok.Data;
+
+import java.util.Map;
 
 @Data
 public class AgentHealth {
@@ -28,13 +31,9 @@ public class AgentHealth {
     private boolean alive = true;
     private boolean ready;
 
+    public static final AgentHealth instance = new AgentHealth();
+
     public static class HealthAgentHttpHandler extends AgentHttpHandler {
-
-        protected final AgentHealth agentHealth;
-
-        public HealthAgentHttpHandler(AgentHealth agentHealth) {
-            this.agentHealth = agentHealth;
-        }
 
         @Override
         public String getPath() {
@@ -42,16 +41,12 @@ public class AgentHealth {
         }
 
         @Override
-        public HttpResponse process(HttpExchange exchange) {
-            return HttpResponse.builder().statusCode(200).build();
+        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
         }
     }
 
     public static class LivenessAgentHttpHandler extends HealthAgentHttpHandler {
-
-        public LivenessAgentHttpHandler(AgentHealth agentHealth) {
-            super(agentHealth);
-        }
 
         @Override
         public String getPath() {
@@ -62,25 +57,44 @@ public class AgentHealth {
 
     public static class ReadinessAgentHttpHandler extends HealthAgentHttpHandler {
 
-        public ReadinessAgentHttpHandler(AgentHealth agentHealth) {
-            super(agentHealth);
-        }
-
         @Override
         public String getPath() {
             return "/health/readiness";
         }
 
         @Override
-        public HttpResponse process(HttpExchange exchange) {
-            if (this.agentHealth.isReadinessEnabled()) {
-                if (this.agentHealth.isReady()) {
-                    return HttpResponse.builder().statusCode(200).build();
+        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            if (instance.isReadinessEnabled()) {
+                if (instance.isReady()) {
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
                 }
-                return HttpResponse.builder().statusCode(500).build();
+                return NanoHTTPD.newFixedLengthResponse(Status.SERVICE_UNAVAILABLE, AgentHttpServer.JSON_TYPE, null);
             }
-            return super.process(exchange);
+            return super.process(uriResource, urlParams, session);
         }
     }
 
+    enum Status implements NanoHTTPD.Response.IStatus {
+
+        SERVICE_UNAVAILABLE(503, "Service Unavailable"),
+        ;
+        private final int requestStatus;
+
+        private final String description;
+
+        Status(int requestStatus, String description) {
+            this.requestStatus = requestStatus;
+            this.description = description;
+        }
+
+        @Override
+        public String getDescription() {
+            return description;
+        }
+
+        @Override
+        public int getRequestStatus() {
+            return requestStatus;
+        }
+    }
 }

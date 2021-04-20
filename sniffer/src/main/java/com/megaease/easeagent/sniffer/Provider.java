@@ -116,8 +116,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     private Config config;
     private Supplier<Map<String, Object>> additionalAttributes;
     private AutoRefreshConfigItem<String> serviceName;
-    private final AgentHealth agentHealth = new AgentHealth();
-
 
     @Override
     public void setConfig(Config config) {
@@ -133,16 +131,16 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Override
     public List<AgentHttpHandler> getAgentHttpHandlers() {
         List<AgentHttpHandler> list = new ArrayList<>();
-        list.add(new AgentHealth.HealthAgentHttpHandler(this.agentHealth));
-        list.add(new AgentHealth.LivenessAgentHttpHandler(this.agentHealth));
-        list.add(new AgentHealth.ReadinessAgentHttpHandler(this.agentHealth));
+        list.add(new AgentHealth.HealthAgentHttpHandler());
+        list.add(new AgentHealth.LivenessAgentHttpHandler());
+        list.add(new AgentHealth.ReadinessAgentHttpHandler());
         list.add(new PrometheusAgentHttpHandler());
         return list;
     }
 
     @Override
     public void afterPropertiesSet() {
-        this.agentHealth.setReadinessEnabled(this.config.getBoolean(EASEAGENT_HEALTH_READINESS_ENABLED));
+        AgentHealth.instance.setReadinessEnabled(this.config.getBoolean(EASEAGENT_HEALTH_READINESS_ENABLED));
         ThreadLocalCurrentTraceContext traceContext = ThreadLocalCurrentTraceContext.newBuilder()
                 .addScopeDecorator(AgentMDCScopeDecorator.get())
                 .build();
@@ -159,11 +157,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 )
                 .currentTraceContext(traceContext)
                 .build();
-    }
-
-    @Injection.Bean
-    public AgentHealth agentHealth() {
-        return this.agentHealth;
     }
 
     @Injection.Bean
@@ -543,7 +536,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Injection.Bean("supplier4OnApplicationEvent")
     public Supplier<AgentInterceptorChain.Builder> supplier4OnApplicationEvent() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new OnApplicationEventInterceptor(this.agentHealth));
+                .addInterceptor(new OnApplicationEventInterceptor());
     }
 
 //    @Injection.Bean("supplier4CreateRegistrar")

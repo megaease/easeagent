@@ -36,25 +36,23 @@ public class OnApplicationEventInterceptorTest {
 
     @Test
     public void invokeSuccess() {
-        AgentHealth agentHealth = new AgentHealth();
-        OnApplicationEventInterceptor interceptor = new OnApplicationEventInterceptor(agentHealth);
+        OnApplicationEventInterceptor interceptor = new OnApplicationEventInterceptor();
         ApplicationEvent event = mock(ApplicationReadyEvent.class);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{event}).build();
         Map<Object, Object> context = ContextUtils.createContext();
         interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
-        Assert.assertTrue(agentHealth.isAlive());
-        Assert.assertTrue(agentHealth.isReady());
+        Assert.assertTrue(AgentHealth.instance.isAlive());
+        Assert.assertTrue(AgentHealth.instance.isReady());
     }
 
     @Test
     public void invokeFail() {
-        AgentHealth agentHealth = new AgentHealth();
-        OnApplicationEventInterceptor interceptor = new OnApplicationEventInterceptor(agentHealth);
+        OnApplicationEventInterceptor interceptor = new OnApplicationEventInterceptor();
         ApplicationEvent event = mock(ApplicationFailedEvent.class);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{event}).build();
         Map<Object, Object> context = ContextUtils.createContext();
         interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
-        Assert.assertTrue(agentHealth.isAlive());
-        Assert.assertFalse(agentHealth.isReady());
+        Assert.assertTrue(AgentHealth.instance.isAlive());
+        Assert.assertFalse(AgentHealth.instance.isReady());
     }
 }

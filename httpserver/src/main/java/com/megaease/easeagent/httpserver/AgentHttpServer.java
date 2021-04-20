@@ -17,33 +17,50 @@
 
 package com.megaease.easeagent.httpserver;
 
-import com.sun.net.httpserver.HttpServer;
+import fi.iki.elonen.router.RouterNanoHTTPD;
 import lombok.SneakyThrows;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 
-public class AgentHttpServer {
+public class AgentHttpServer extends RouterNanoHTTPD {
 
-    HttpServer httpServer;
+    public static String JSON_TYPE = "application/json";
 
-    @SneakyThrows
     public AgentHttpServer(int port) {
-        this.httpServer = HttpServer.create(new InetSocketAddress(port), 0);
+        super(port);
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
-    public void addHttpHandlers(List<AgentHttpHandler> agentHttpHandlers) {
+    public void addHttpRoutes(List<AgentHttpHandler> agentHttpHandlers) {
         for (AgentHttpHandler agentHttpHandler : agentHttpHandlers) {
-            this.httpServer.createContext(agentHttpHandler.getPath(), agentHttpHandler);
+            this.addRoute(agentHttpHandler.getPath(), agentHttpHandler.getClass());
         }
     }
 
-    public void start() {
-        this.httpServer.start();
+    @SneakyThrows
+    public void startServer() {
+        this.start(5000, true);
     }
 
-    public void stop() {
-        System.out.println("begin stop http server");
-        this.httpServer.start();
-    }
+//    public static void main(String[] args) {
+//        AgentHttpServer agentHttpServer = new AgentHttpServer(9900);
+//        agentHttpServer.startServer();
+//        System.out.println("after start");
+//        List<AgentHttpHandler> list = new ArrayList<>();
+//        list.add(new TestHandler());
+//        agentHttpServer.addHttpRoutes(list);
+//    }
+//
+//    public static class TestHandler extends AgentHttpHandler {
+//
+//        @Override
+//        public String getPath() {
+//            return "/hello";
+//        }
+//
+//        @Override
+//        public Response process(UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
+//            return NanoHTTPD.newFixedLengthResponse("hi");
+//        }
+//    }
 }

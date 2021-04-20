@@ -17,46 +17,36 @@
 
 package com.megaease.easeagent.httpserver;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import lombok.SneakyThrows;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-public abstract class AgentHttpHandler implements HttpHandler {
+public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
 
     public abstract String getPath();
 
-    public abstract HttpResponse process(HttpExchange exchange) throws IOException;
+    protected String text;
 
-    protected String getRequestBodyString(HttpExchange exchange) {
-        InputStream inputStream = exchange.getRequestBody();
-        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-                .lines().collect(Collectors.joining("\n"));
+    @Override
+    public String getText() {
+        return this.text;
     }
 
-    @SneakyThrows
     @Override
-    public void handle(HttpExchange exchange) {
-        try {
-            HttpResponse httpResponse = this.process(exchange);
-            int len = 0;
-            byte[] bytes = null;
-            if (httpResponse.getData() != null) {
-                bytes = httpResponse.getData().getBytes(StandardCharsets.UTF_8);
-                len = bytes.length;
-            }
-            exchange.sendResponseHeaders(httpResponse.getStatusCode(), len);
-            if (bytes != null) {
-                exchange.getResponseBody().write(bytes);
-            }
-        } finally {
-            exchange.close();
-        }
+    public NanoHTTPD.Response.IStatus getStatus() {
+        return NanoHTTPD.Response.Status.OK;
+    }
+
+    @Override
+    public String getMimeType() {
+        return null;
+    }
+
+    public abstract NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session);
+
+    @Override
+    public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+        return this.process(uriResource, urlParams, session);
     }
 }

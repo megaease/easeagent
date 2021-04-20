@@ -18,12 +18,13 @@
 package com.megaease.easeagent.metrics;
 
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
-import com.megaease.easeagent.httpserver.HttpResponse;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
+import com.megaease.easeagent.httpserver.AgentHttpServer;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.router.RouterNanoHTTPD;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -31,7 +32,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Map;
 
+@Slf4j
 public class PrometheusAgentHttpHandler extends AgentHttpHandler {
 
     @Override
@@ -40,17 +43,18 @@ public class PrometheusAgentHttpHandler extends AgentHttpHandler {
     }
 
     @Override
-    public HttpResponse process(HttpExchange exchange) throws IOException {
-        Headers headers = exchange.getRequestHeaders();
-        String contentType = TextFormat.chooseContentType(headers.getFirst("Accept"));
+    public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+        Map<String, String> headers = session.getHeaders();
+        String contentType = TextFormat.chooseContentType(headers.get("Accept"));
         Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
         StringWriter stringWriter = new StringWriter();
         try (Writer writer = new BufferedWriter(stringWriter)) {
             TextFormat.writeFormat(contentType, writer, samples);
             writer.flush();
+        } catch (IOException e) {
+            log.error("write data error. {}", e.getMessage());
         }
         String data = stringWriter.toString();
-        return HttpResponse.builder().statusCode(200).data(data).build();
+        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, data);
     }
-
 }

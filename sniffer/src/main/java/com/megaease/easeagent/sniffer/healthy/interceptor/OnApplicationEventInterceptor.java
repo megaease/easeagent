@@ -29,19 +29,13 @@ import java.util.Map;
 
 public class OnApplicationEventInterceptor implements AgentInterceptor {
 
-    private final AgentHealth agentHealth;
-
-    public OnApplicationEventInterceptor(AgentHealth agentHealth) {
-        this.agentHealth = agentHealth;
-    }
-
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         ApplicationEvent applicationEvent = (ApplicationEvent) methodInfo.getArgs()[0];
         if (applicationEvent instanceof ApplicationReadyEvent) {
-            this.agentHealth.setReady(true);
+            AgentHealth.instance.setReady(true);
         } else if (applicationEvent instanceof ApplicationFailedEvent) {
-            this.agentHealth.setReady(false);
+            AgentHealth.instance.setReady(false);
         }
         return AgentInterceptor.super.after(methodInfo, context, chain);
     }

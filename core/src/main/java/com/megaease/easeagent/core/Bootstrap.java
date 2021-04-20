@@ -27,10 +27,11 @@ import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
-import com.megaease.easeagent.httpserver.HttpResponse;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
-import com.sun.net.httpserver.HttpExchange;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.router.RouterNanoHTTPD;
+import lombok.SneakyThrows;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -84,7 +85,6 @@ public class Bootstrap {
         }
         registerMBeans(conf);
 
-        long serverBegin = System.currentTimeMillis();
         Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
@@ -92,9 +92,9 @@ public class Bootstrap {
         String portStr = System.getProperty(AGENT_SERVER_PORT_KEY, String.valueOf(port));
         port = Integer.parseInt(portStr);
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
-        agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST_ON_INIT);
-        agentHttpServer.start();
-        LOGGER.info("start agent http server on port:{} use time: {}", port, (System.currentTimeMillis() - serverBegin));
+        agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_ON_INIT);
+        agentHttpServer.startServer();
+        LOGGER.info("start agent http server on port:{}", port);
 
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
@@ -129,7 +129,7 @@ public class Bootstrap {
         long installBegin = System.currentTimeMillis();
         builder.installOn(inst);
         LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
-        agentHttpServer.addHttpHandlers(AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER);
+        agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
@@ -240,29 +240,8 @@ public class Bootstrap {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
             configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
-        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new ConfigsUpdateAgentHttpHandler() {
-            @Override
-            public String getPath() {
-                return "/config-service";
-            }
-
-            @Override
-            public void processConfig(Map<String, String> config, String version) {
-                wrappedConfigManager.updateService2(config, version);
-            }
-
-        });
-        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new ConfigsUpdateAgentHttpHandler() {
-            @Override
-            public String getPath() {
-                return "/config-canary";
-            }
-
-            @Override
-            public void processConfig(Map<String, String> config, String version) {
-                wrappedConfigManager.updateCanary2(config, version);
-            }
-        });
+        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new ServiceUpdateAgentHttpHandler());
+        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new CanaryUpdateAgentHttpHandler());
         return configs;
     }
 
@@ -272,33 +251,54 @@ public class Bootstrap {
         return config;
     }
 
-    static abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
-
+    public static class CanaryUpdateAgentHttpHandler extends ConfigsUpdateAgentHttpHandler {
         @Override
         public String getPath() {
-            return null;
+            return "/config-canary";
         }
+
+        @Override
+        public void processConfig(Map<String, String> config, String version) {
+            wrappedConfigManager.updateCanary2(config, version);
+        }
+    }
+
+    public static class ServiceUpdateAgentHttpHandler extends ConfigsUpdateAgentHttpHandler {
+        @Override
+        public String getPath() {
+            return "/config-service";
+        }
+
+        @Override
+        public void processConfig(Map<String, String> config, String version) {
+            wrappedConfigManager.updateService2(config, version);
+        }
+    }
+
+    public static abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
 
         public abstract void processConfig(Map<String, String> config, String version);
 
+        @SneakyThrows
         @Override
-        public HttpResponse process(HttpExchange exchange) {
-            HttpResponse.HttpResponseBuilder builder = HttpResponse.builder();
-            String str = this.getRequestBodyString(exchange);
+        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            HashMap<String, String> dataMap = new HashMap<>();
+            session.parseBody(dataMap);
+            String str = dataMap.get("postData");
             if (StringUtils.isEmpty(str)) {
-                return builder.statusCode(400).build();
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
             }
             Map<String, Object> map = JsonUtil.toMap(str);
             if (map == null) {
-                return builder.statusCode(400).build();
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
             }
             String version = (String) map.remove("version");
             if (version == null) {
-                return builder.statusCode(400).build();
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
             }
             Map<String, String> config = toConfigMap(map);
             processConfig(config, version);
-            return builder.statusCode(200).build();
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
         }
     }
 
