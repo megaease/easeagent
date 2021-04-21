@@ -9,6 +9,7 @@ import brave.http.HttpTracing;
 import brave.propagation.CurrentTraceContext;
 import brave.servlet.HttpServletRequestWrapper;
 import brave.servlet.HttpServletResponseWrapper;
+import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -39,6 +40,7 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
         CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
         context.put(SPAN_CONTEXT_KEY, span);
         context.put(SCOPE_CONTEXT_KEY, newScope);
+        context.put(ContextCons.SPAN, span);
         chain.doBefore(methodInfo, context);
     }
 

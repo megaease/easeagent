@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.zipkin.http;
 
-import brave.Tracing;
-import brave.propagation.TraceContext;
+import brave.Span;
+import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
@@ -49,7 +49,7 @@ public abstract class HttpLogInterceptor implements AgentInterceptor {
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         AccessLogServerInfo serverInfo = this.serverInfo(methodInfo, context);
         Long beginTime = ContextUtils.getBeginTime(context);
-        TraceContext traceContext = Tracing.current().currentTraceContext().get();
+        Span span = (Span) context.get(ContextCons.SPAN);
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setService(this.serviceName.getValue());
         requestInfo.setHostName(HostAddress.localhost());
@@ -61,9 +61,9 @@ public abstract class HttpLogInterceptor implements AgentInterceptor {
         requestInfo.setQueries(serverInfo.findQueries());
         requestInfo.setClientIP(serverInfo.getClientIP());
         requestInfo.setBeginCpuTime(System.nanoTime());
-        requestInfo.setTraceId(traceContext.traceIdString());
-        requestInfo.setSpanId(traceContext.spanIdString());
-        requestInfo.setParentSpanId(traceContext.parentIdString());
+        requestInfo.setTraceId(span.context().traceIdString());
+        requestInfo.setSpanId(span.context().spanIdString());
+        requestInfo.setParentSpanId(span.context().parentIdString());
         context.put(RequestInfo.class, requestInfo);
         context.put(ServletAccessLogServerInfo.class, serverInfo);
         chain.doBefore(methodInfo, context);

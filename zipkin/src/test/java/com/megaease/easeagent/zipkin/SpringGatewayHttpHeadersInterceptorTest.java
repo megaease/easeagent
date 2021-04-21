@@ -1,6 +1,6 @@
 package com.megaease.easeagent.zipkin;
 
-import brave.ScopedSpan;
+import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
@@ -31,10 +31,10 @@ public class SpringGatewayHttpHeadersInterceptorTest extends BaseZipkinTest {
                 .build().tracer();
         AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder()
                 .addInterceptor(new SpringGatewayHttpHeadersInterceptor(Tracing.current()));
-        ScopedSpan root = tracer.startScopedSpan("root");
+        Span span = tracer.newTrace();
 
         Map<String, Object> attrMap = new HashMap<>();
-        attrMap.put(GatewayCons.TRACE_CONTEXT_ATTR, currentTraceContext.get());
+        attrMap.put(GatewayCons.SPAN_KEY, span);
 
         ServerWebExchange exchange = mock(ServerWebExchange.class);
         ServerHttpRequest request = mock(ServerHttpRequest.class);
@@ -62,7 +62,7 @@ public class SpringGatewayHttpHeadersInterceptorTest extends BaseZipkinTest {
         methodInfo.setRetValue(httpHeaders);
 
         Object ret = AgentInterceptorChainInvoker.getInstance().doAfter(builder, methodInfo, context);
-        root.finish();
+        span.finish();
         HttpHeaders retValue = (HttpHeaders) ret;
         Assert.assertNotNull(retValue);
     }

@@ -6,8 +6,7 @@ import brave.http.HttpServerHandler;
 import brave.http.HttpServerRequest;
 import brave.http.HttpServerResponse;
 import brave.http.HttpTracing;
-import brave.propagation.CurrentTraceContext;
-import brave.propagation.TraceContext;
+import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -38,33 +37,27 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
         Span span = this.httpServerHandler.handleReceive(httpServerRequest);
-        CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
-        CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
         context.put(SPAN_CONTEXT_KEY, span);
-        context.put(SCOPE_CONTEXT_KEY, newScope);
+        context.put(ContextCons.SPAN, span);
+        exchange.getAttributes().put(GatewayCons.SPAN_KEY, span);
         context.put(FluxHttpServerRequest.class, httpServerRequest);
-
-        TraceContext traceContext = currentTraceContext.get();
-        exchange.getAttributes().put(GatewayCons.TRACE_CONTEXT_ATTR, traceContext);
-        exchange.getAttributes().put(GatewayCons.CURRENT_TRACE_CONTEXT_ATTR, currentTraceContext);
         chain.doBefore(methodInfo, context);
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY)) {
-            ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-            FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
-            Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
-            PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-            String route = null;
-            if (bestPattern != null) {
-                route = bestPattern.getPatternString();
-            }
-            HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
-            this.httpServerHandler.handleSend(response, span);
-            return chain.doAfter(methodInfo, context);
+        ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
+        FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
+        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+        PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        String route = null;
+        if (bestPattern != null) {
+            route = bestPattern.getPatternString();
         }
+        HttpServerResponse response = new FluxHttpServerResponse(httpServerRequest, exchange.getResponse(), route);
+        this.httpServerHandler.handleSend(response, span);
+        exchange.getAttributes().remove(GatewayCons.SPAN_KEY);
+        return chain.doAfter(methodInfo, context);
     }
 
     static class FluxHttpServerRequest extends HttpServerRequest {
