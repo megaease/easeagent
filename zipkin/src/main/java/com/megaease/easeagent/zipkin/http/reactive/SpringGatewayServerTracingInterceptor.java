@@ -20,11 +20,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
     private final HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler;
-    private static final String SCOPE_CONTEXT_KEY = SpringGatewayServerTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
     private static final String SPAN_CONTEXT_KEY = SpringGatewayServerTracingInterceptor.class.getName() + "-Span";
 
     public SpringGatewayServerTracingInterceptor(Tracing tracing) {
@@ -47,6 +47,12 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
+
+        Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
+        if (consumer != null) {
+            consumer.accept(exchange);
+        }
+
         FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
         Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
         PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);

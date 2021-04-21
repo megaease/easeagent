@@ -10,11 +10,14 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class SpringGatewayHttpHeadersInterceptor implements AgentInterceptor {
 
@@ -36,13 +39,46 @@ public class SpringGatewayHttpHeadersInterceptor implements AgentInterceptor {
             return chain.doAfter(methodInfo, context);
         }
         GatewayClientRequest request = new GatewayClientRequest(exchange);
-        clientHandler.handleSend(request, span);
+
+        Span childSpan = clientHandler.handleSendWithParent(request, span.context());
+        exchange.getAttributes().put(GatewayCons.CHILD_SPAN_KEY, childSpan);
         Map<String, String> map = request.getHeadersFromExchange();
         map.putAll(retHttpHeaders.toSingleValueMap());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setAll(map);
         methodInfo.setRetValue(httpHeaders);
+
+        Consumer<ServerWebExchange> consumer = serverWebExchange -> {
+            Span childSpan1 = serverWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
+            GatewayClientResponse response = new GatewayClientResponse(serverWebExchange);
+            clientHandler.handleReceive(response, childSpan1);
+        };
+        exchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, consumer);
         return chain.doAfter(methodInfo, context);
+    }
+
+    static class GatewayClientResponse extends HttpClientResponse {
+
+        private final ServerWebExchange exchange;
+
+        public GatewayClientResponse(ServerWebExchange exchange) {
+            this.exchange = exchange;
+        }
+
+        @Override
+        public int statusCode() {
+            ServerHttpResponse response = exchange.getResponse();
+            HttpStatus statusCode = response.getStatusCode();
+            if (statusCode == null) {
+                return 0;
+            }
+            return statusCode.value();
+        }
+
+        @Override
+        public Object unwrap() {
+            return exchange.getResponse();
+        }
     }
 
     static class GatewayClientRequest extends HttpClientRequest {
