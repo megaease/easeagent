@@ -6,7 +6,6 @@ import brave.http.HttpClientHandler;
 import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
 import brave.http.HttpTracing;
-import brave.propagation.CurrentTraceContext;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -21,13 +20,10 @@ import java.util.Map;
 public class WebClientTracingInterceptor implements AgentInterceptor {
 
     private static final String SPAN_KEY = WebClientTracingInterceptor.class.getName() + "-SPAN";
-    private static final String SPAN_SCOPE_KEY = WebClientTracingInterceptor.class.getName() + "-SPAN-SCOPE";
 
     private final HttpClientHandler<HttpClientRequest, HttpClientResponse> clientHandler;
-    private final Tracing tracing;
 
     public WebClientTracingInterceptor(Tracing tracing) {
-        this.tracing = tracing;
         HttpTracing httpTracing = HttpTracing.create(tracing);
         this.clientHandler = HttpClientHandler.create(httpTracing);
     }
@@ -38,10 +34,7 @@ public class WebClientTracingInterceptor implements AgentInterceptor {
         ClientRequest.Builder builder = ClientRequest.from(clientRequest);
         WebClientRequest request = new WebClientRequest(clientRequest, builder);
         Span span = this.clientHandler.handleSend(request);
-        CurrentTraceContext currentTraceContext = tracing.currentTraceContext();
-        CurrentTraceContext.Scope newScope = currentTraceContext.newScope(span.context());
         context.put(SPAN_KEY, span);
-        context.put(SPAN_SCOPE_KEY, newScope);
         methodInfo.getArgs()[0] = builder.build();
         chain.doBefore(methodInfo, context);
     }
@@ -49,18 +42,16 @@ public class WebClientTracingInterceptor implements AgentInterceptor {
     @SuppressWarnings("unchecked")
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, SPAN_SCOPE_KEY)) {
-            if (methodInfo.isSuccess()) {
-                List<ClientResponse> list = (List<ClientResponse>) methodInfo.getRetValue();
-                WebClientResponse webClientResponse = null;
-                if (list.size() > 0) {
-                    webClientResponse = new WebClientResponse(list.get(0));
-                }
-                Span span = ContextUtils.getFromContext(context, SPAN_KEY);
-                clientHandler.handleReceive(webClientResponse, span);
+        if (methodInfo.isSuccess()) {
+            List<ClientResponse> list = (List<ClientResponse>) methodInfo.getRetValue();
+            WebClientResponse webClientResponse = null;
+            if (list.size() > 0) {
+                webClientResponse = new WebClientResponse(list.get(0));
             }
-            return chain.doAfter(methodInfo, context);
+            Span span = ContextUtils.getFromContext(context, SPAN_KEY);
+            clientHandler.handleReceive(webClientResponse, span);
         }
+        return chain.doAfter(methodInfo, context);
     }
 
     static class WebClientRequest extends HttpClientRequest {
