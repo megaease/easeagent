@@ -18,7 +18,10 @@
 package com.megaease.easeagent.sniffer;
 
 import brave.Tracing;
+import brave.handler.MutableSpan;
+import brave.handler.SpanHandler;
 import brave.propagation.ThreadLocalCurrentTraceContext;
+import brave.propagation.TraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
@@ -56,6 +59,7 @@ import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
 import com.megaease.easeagent.metrics.rabbitmq.*;
 import com.megaease.easeagent.metrics.redis.JedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
+import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
@@ -214,7 +218,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     interceptor.newConverter(this.additionalAttributes),
                     s -> Provider.this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
-            return new DefaultAgentInterceptorChain.Builder()
+            return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(interceptor);
         };
 
@@ -222,18 +226,15 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Injection.Bean("supplier4JdbcCon")
     public Supplier<AgentInterceptorChain.Builder> supplier4JdbcCon() {
-        return () -> new DefaultAgentInterceptorChain.Builder()
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new JdbConPrepareOrCreateStmInterceptor());
 
     }
 
     @Injection.Bean("supplier4JdbcStmPrepareSql")
     public Supplier<AgentInterceptorChain.Builder> supplier4JdbcStmPrepareSql() {
-        return () -> {
-            DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
-            builder.addInterceptor(new JdbcStmPrepareSqlInterceptor());
-            return builder;
-        };
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new JdbcStmPrepareSqlInterceptor());
     }
 
     @Injection.Bean("supplier4JdbcStmExecute")
@@ -247,11 +248,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     metricInterceptor.newConverter(this.additionalAttributes),
                     s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_STATEMENT, s))).run();
 
-            DefaultAgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
-            builder.addInterceptor(new JdbcStmPrepareSqlInterceptor());
-            builder.addInterceptor(metricInterceptor);
-            builder.addInterceptor(new JdbcStmTracingInterceptor(sqlCompression));
-            return builder;
+            return ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new JdbcStmPrepareSqlInterceptor())
+                    .addInterceptor(metricInterceptor)
+                    .addInterceptor(new JdbcStmTracingInterceptor(sqlCompression));
         };
     }
 
@@ -265,7 +265,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                     httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
                     s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
-            return new DefaultAgentInterceptorChain.Builder()
+            return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                     .addInterceptor(httpFilterMetricsInterceptor)
                     .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
@@ -276,61 +276,49 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Injection.Bean("supplier4RestTemplate")
     public Supplier<AgentInterceptorChain.Builder> supplier4RestTemplate() {
-        return () -> {
-            return new DefaultAgentInterceptorChain.Builder()
-                    .addInterceptor(new RestTemplateTracingInterceptor(tracing))
-                    ;
-        };
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new RestTemplateTracingInterceptor(tracing));
     }
 
     @Injection.Bean("supplier4FeignClient")
     public Supplier<AgentInterceptorChain.Builder> supplier4FeignClient() {
-        return () -> {
-            return new DefaultAgentInterceptorChain.Builder()
-                    .addInterceptor(new FeignClientTracingInterceptor(tracing))
-                    ;
-        };
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new FeignClientTracingInterceptor(tracing));
     }
 
     @Injection.Bean("supplier4Gateway")
     public Supplier<AgentInterceptorChain.Builder> supplier4Gateway() {
         return () -> {
-            AgentInterceptorChain.Builder headersFilterChainBuilder = new DefaultAgentInterceptorChain.Builder()
+            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
+            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
+            GatewayMetricsInterceptor gatewayMetricsInterceptor = new GatewayMetricsInterceptor(metricRegistry);
+            new AutoRefreshReporter(metricRegistry, collectorConfig,
+                    gatewayMetricsInterceptor.newConverter(this.additionalAttributes),
+                    s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
+            AgentInterceptorChain.Builder headersFilterChainBuilder = ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(gatewayMetricsInterceptor)
                     .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing))
                     .addInterceptor(new SpringGatewayLogInterceptor(this.serviceName, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))));
-            AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder();
-            builder.addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
-            return builder;
+            return ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
         };
     }
 
     @Injection.Bean("supplier4GatewayHeaders")
     public Supplier<AgentInterceptorChain.Builder> supplier4GatewayHeaders() {
-        return () -> {
-            return new DefaultAgentInterceptorChain.Builder()
-                    .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing))
-                    ;
-        };
+        return () -> new DefaultAgentInterceptorChain.Builder()
+                .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing));
     }
-
-//    @Injection.Bean("agentInterceptorChainBuilder4SpringRedis")
-//    public AgentInterceptorChain.Builder agentInterceptorChainBuilder4SpringRedis() {
-//        loadTracing();
-//        return new DefaultAgentInterceptorChain.Builder()
-//                .addInterceptor(new RedisMetricInterceptor(new MetricRegistry()))
-//                .addInterceptor(new SpringRedisTracingInterceptor())
-//                ;
-//    }
 
     @Injection.Bean("supplier4RedisClientConnectAsync")
     public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConnectAsync() {
-        return () -> new DefaultAgentInterceptorChain.Builder()
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new CommonRedisClientConnectInterceptor());
     }
 
     @Injection.Bean("supplier4RedisClusterConnectAsync")
     public Supplier<AgentInterceptorChain.Builder> supplier4RedisClusterConnectAsync() {
-        return () -> new DefaultAgentInterceptorChain.Builder()
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new CommonRedisClientConnectInterceptor());
     }
 
@@ -345,7 +333,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     metricInterceptor.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
 
-            return new DefaultAgentInterceptorChain.Builder()
+            return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new RedisChannelWriterInterceptor())
                     .addInterceptor(metricInterceptor)
                     .addInterceptor(new CommonLettuceTracingInterceptor());
@@ -363,7 +351,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     metricInterceptor.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
 
-            return new DefaultAgentInterceptorChain.Builder()
+            return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(metricInterceptor)
                     .addInterceptor(new JedisTracingInterceptor());
         };
@@ -372,7 +360,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Injection.Bean("supplier4KafkaProducerDoSend")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerDoSend() {
         return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
 
@@ -384,40 +371,32 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             KafkaProducerMetricInterceptor metricInterceptor = new KafkaProducerMetricInterceptor(kafkaMetric);
             KafkaProducerTracingInterceptor tracingInterceptor = new KafkaProducerTracingInterceptor(tracing);
 
-            DefaultAgentInterceptorChain.Builder builder4Async = new DefaultAgentInterceptorChain.Builder();
-            builder4Async.addInterceptor(metricInterceptor)
-                    .addInterceptor(tracingInterceptor);
-
-            chainBuilder.addInterceptor(new KafkaProducerDoSendInterceptor(chainInvoker, builder4Async))
+            AgentInterceptorChain.Builder builder4Async = ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(metricInterceptor)
                     .addInterceptor(tracingInterceptor);
 
-            return chainBuilder;
+            return ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new KafkaProducerDoSendInterceptor(chainInvoker, builder4Async))
+                    .addInterceptor(metricInterceptor)
+                    .addInterceptor(tracingInterceptor);
         };
     }
 
     @Injection.Bean("supplier4KafkaProducerConstructor")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerConstructor() {
-        return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
-            chainBuilder.addInterceptor(new KafkaProducerConstructInterceptor());
-            return chainBuilder;
-        };
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new KafkaProducerConstructInterceptor());
     }
 
     @Injection.Bean("supplier4KafkaConsumerConstructor")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerConstructor() {
-        return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
-            chainBuilder.addInterceptor(new KafkaConsumerConstructInterceptor());
-            return chainBuilder;
-        };
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new KafkaConsumerConstructInterceptor());
     }
 
     @Injection.Bean("supplier4KafkaConsumerDoPoll")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerDoPoll() {
         return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
 
@@ -426,20 +405,17 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     kafkaMetric.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
 
-            chainBuilder
+            return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new KafkaConsumerPollInterceptor())
                     .addInterceptor(new KafkaConsumerTracingInterceptor(tracing))
                     .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric))
-            ;
-
-            return chainBuilder;
+                    ;
         };
     }
 
     @Injection.Bean("supplier4SpringKafkaMessageListenerOnMessage")
     public Supplier<AgentInterceptorChain.Builder> supplier4SpringKafkaMessageListenerOnMessage() {
         return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
 
@@ -448,17 +424,16 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     kafkaMetric.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
 
-            chainBuilder.addInterceptor(new KafkaMessageListenerInterceptor())
+            return ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new KafkaMessageListenerInterceptor())
                     .addInterceptor(new KafkaMessageListenerMetricInterceptor(kafkaMetric))
                     .addInterceptor(new KafkaMessageListenerTracingInterceptor(tracing));
-            return chainBuilder;
         };
     }
 
     @Injection.Bean("supplier4RabbitMqBasicPublish")
     public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicPublish() {
         return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
             RabbitMqProducerMetricInterceptor metricInterceptor = new RabbitMqProducerMetricInterceptor(metric);
@@ -468,28 +443,23 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     metric.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
 
-            chainBuilder.addInterceptor(new RabbitMqChannelPublishInterceptor())
+            return ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new RabbitMqChannelPublishInterceptor())
                     .addInterceptor(metricInterceptor)
                     .addInterceptor(new RabbitMqProducerTracingInterceptor(tracing))
-            ;
-
-            return chainBuilder;
+                    ;
         };
     }
 
     @Injection.Bean("supplier4RabbitMqBasicConsume")
     public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicConsume() {
-        return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
-            chainBuilder.addInterceptor(new RabbitMqChannelConsumeInterceptor());
-            return chainBuilder;
-        };
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new RabbitMqChannelConsumeInterceptor());
     }
 
     @Injection.Bean("supplier4RabbitMqHandleDelivery")
     public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqHandleDelivery() {
         return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
 
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
@@ -500,19 +470,17 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     metric.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
 
-            chainBuilder
+            return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new RabbitMqConsumerHandleDeliveryInterceptor())
                     .addInterceptor(metricInterceptor)
                     .addInterceptor(new RabbitMqConsumerTracingInterceptor(tracing))
-            ;
-            return chainBuilder;
+                    ;
         };
     }
 
     @Injection.Bean("supplier4SpringRabbitMqMessageListenerOnMessage")
     public Supplier<AgentInterceptorChain.Builder> supplier4SpringRabbitMqMessageListenerOnMessage() {
         return () -> {
-            AgentInterceptorChain.Builder chainBuilder = new DefaultAgentInterceptorChain.Builder();
 
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
@@ -522,20 +490,19 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     metric.newConverter(additionalAttributes),
                     s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
 
-            chainBuilder
+            return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new RabbitMqMessageListenerOnMessageInterceptor())
                     .addInterceptor(new RabbitMqMessageListenerMetricInterceptor(metric))
                     .addInterceptor(new RabbitMqMessageListenerTracingInterceptor(tracing))
-            ;
-            return chainBuilder;
+                    ;
         };
     }
 
     @Injection.Bean("supplier4WebClientBuild")
     public Supplier<AgentInterceptorChain.Builder> supplier4WebClientBuild() {
         return () -> {
-            AgentInterceptorChain.Builder chainBuilder = ChainBuilderFactory.DEFAULT.createBuilder();
-            chainBuilder.addInterceptor(new WebClientTracingInterceptor(tracing));
+            AgentInterceptorChain.Builder chainBuilder = ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new WebClientTracingInterceptor(tracing));
             return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new WebClientBuildInterceptor(chainBuilder, chainInvoker))
                     ;
@@ -547,12 +514,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new OnApplicationEventInterceptor());
     }
-
-//    @Injection.Bean("supplier4CreateRegistrar")
-//    public Supplier<AgentInterceptorChain.Builder> supplier4CreateRegistrar() {
-//        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-//                .addInterceptor(new RegistrarConstructInterceptor(this.agentHealth));
-//    }
 
     class Md5ReportConsumer implements Consumer<Map<String, String>> {
 

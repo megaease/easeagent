@@ -49,10 +49,9 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
         try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY)) {
             HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
             HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-            ServletUtils.setHttpRouteAttribute(httpServletRequest);
             Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
             HttpServerResponse responseWrapper = HttpServletResponseWrapper.create(httpServletRequest, httpServletResponse, methodInfo.getThrowable());
-            span.tag("http.route", ServletUtils.getHttpRouteAttribute(httpServletRequest));
+            span.tag("http.route", ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest));
             httpServerHandler.handleSend(responseWrapper, span);
             return chain.doAfter(methodInfo, context);
         }
