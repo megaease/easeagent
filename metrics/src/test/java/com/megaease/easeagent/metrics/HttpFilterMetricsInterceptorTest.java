@@ -70,7 +70,7 @@ public class HttpFilterMetricsInterceptorTest {
         ContextUtils.setEndTime(context);
         interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
-        String key = ServletUtils.getHttpRouteAttribute(httpServletRequest);
+        String key = httpServletRequest.getMethod() + " " + ServletUtils.getHttpRouteAttribute(httpServletRequest);
         Assert.assertEquals(1L, metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT)).getCount());
         Assert.assertEquals(1L, metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT)).getCount());
         Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT)).getCount());
@@ -125,7 +125,7 @@ public class HttpFilterMetricsInterceptorTest {
         ContextUtils.setEndTime(context);
         interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
 
-        String key = ServletUtils.getHttpRouteAttribute(httpServletRequest);
+        String key = httpServletRequest.getMethod() + " " + ServletUtils.getHttpRouteAttribute(httpServletRequest);
         Assert.assertEquals(1L, metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT)).getCount());
         Assert.assertEquals(1L, metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR)).getCount());
         Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.ERROR)).getCount());
