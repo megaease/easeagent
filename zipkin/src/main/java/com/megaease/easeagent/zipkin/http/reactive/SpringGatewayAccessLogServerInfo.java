@@ -3,6 +3,7 @@ package com.megaease.easeagent.zipkin.http.reactive;
 import com.megaease.easeagent.zipkin.http.AccessLogServerInfo;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -46,11 +47,15 @@ public class SpringGatewayAccessLogServerInfo implements AccessLogServerInfo {
 
     @Override
     public String getMatchURL() {
+        HttpMethod httpMethod = exchange.getRequest().getMethod();
+        if (httpMethod == null) {
+            return "";
+        }
         Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
         if (route != null && route.getUri() != null) {
-            return route.getUri().toString();
+            return httpMethod.name() + " " + route.getUri().toString();
         }
-        return getRequestURI();
+        return httpMethod.name() + " " + getRequestURI();
     }
 
     @Override

@@ -42,7 +42,8 @@ public class HttpFilterMetricsInterceptor extends AbstractServerMetric implement
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
         String httpRoute = ServletUtils.getHttpRouteAttribute(httpServletRequest);
-        this.collectMetric(httpRoute, httpServletResponse, methodInfo.getThrowable(), context);
+        String key = httpServletRequest.getMethod() + " " + httpRoute;
+        this.collectMetric(key, httpServletResponse, methodInfo.getThrowable(), context);
         return chain.doAfter(methodInfo, context);
     }
 
