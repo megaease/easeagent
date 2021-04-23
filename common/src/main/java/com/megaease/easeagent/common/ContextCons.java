@@ -7,4 +7,6 @@ public interface ContextCons {
     String MQ_URI = ContextCons.class.getName() + ".mq_uri";
     String ASYNC_FLAG = ContextCons.class.getName() + ".async";
     String SPAN = ContextCons.class.getName() + ".Span";
+    String PROCESSED_BEFORE = ContextCons.class.getName() + ".Processed-Before";
+    String PROCESSED_AFTER = ContextCons.class.getName() + ".Processed-After";
 }

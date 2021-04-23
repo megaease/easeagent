@@ -159,15 +159,15 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                         .alwaysReportSpans(true)
                         .build()
                 )
-//                .addSpanHandler(new SpanHandler() {
-//                    @Override
-//                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-//                        System.out.println("\n\n=========== console tracing =================\n\n"
-//                                + span.toString()
-//                                + "\n\n============================\n\n");
-//                        return super.end(context, span, cause);
-//                    }
-//                })
+                .addSpanHandler(new SpanHandler() {
+                    @Override
+                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                        System.out.println("\n\n=========== console tracing =================\n\n"
+                                + span.toString()
+                                + "\n\n============================\n\n");
+                        return super.end(context, span, cause);
+                    }
+                })
                 .currentTraceContext(traceContext)
                 .build();
     }

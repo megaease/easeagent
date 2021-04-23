@@ -18,40 +18,19 @@
 package com.megaease.easeagent.zipkin.http;
 
 import brave.Span;
-import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.common.HostAddress;
-import com.megaease.easeagent.config.AutoRefreshConfigItem;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
 @Slf4j
-public abstract class HttpLogInterceptor implements AgentInterceptor {
+public class HttpLog {
 
-    private final Consumer<String> reportConsumer;
-
-    private final AutoRefreshConfigItem<String> serviceName;
-
-    public HttpLogInterceptor(AutoRefreshConfigItem<String> serviceName, Consumer<String> reportConsumer) {
-        this.serviceName = serviceName;
-        this.reportConsumer = reportConsumer;
-    }
-
-    @Override
-    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        AccessLogServerInfo serverInfo = this.serverInfo(methodInfo, context);
-        Long beginTime = ContextUtils.getBeginTime(context);
-        Span span = (Span) context.get(ContextCons.SPAN);
+    public RequestInfo prepare(String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
         RequestInfo requestInfo = new RequestInfo();
-        requestInfo.setService(this.serviceName.getValue());
+        requestInfo.setService(serviceName);
         requestInfo.setHostName(HostAddress.localhost());
         requestInfo.setHostIpv4(HostAddress.localaddr().getHostAddress());
         requestInfo.setUrl(serverInfo.getMethod() + " " + serverInfo.getRequestURI());
@@ -64,20 +43,12 @@ public abstract class HttpLogInterceptor implements AgentInterceptor {
         requestInfo.setTraceId(span.context().traceIdString());
         requestInfo.setSpanId(span.context().spanIdString());
         requestInfo.setParentSpanId(span.context().parentIdString());
-        context.put(RequestInfo.class, requestInfo);
-        context.put(ServletAccessLogServerInfo.class, serverInfo);
-        chain.doBefore(methodInfo, context);
+        return requestInfo;
     }
 
-    public abstract AccessLogServerInfo serverInfo(MethodInfo methodInfo, Map<Object, Object> context);
-
-    @Override
-    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Long beginTime = ContextUtils.getBeginTime(context);
-        AccessLogServerInfo serverInfo = this.serverInfo(methodInfo, context);
-        RequestInfo requestInfo = ContextUtils.getFromContext(context, RequestInfo.class);
+    public String getLogString(RequestInfo requestInfo, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
         requestInfo.setStatusCode(serverInfo.getStatusCode());
-        if (!methodInfo.isSuccess()) {
+        if (!success) {
             requestInfo.setStatusCode("500");
         }
         requestInfo.setRequestTime(System.currentTimeMillis() - beginTime);
@@ -87,10 +58,8 @@ public abstract class HttpLogInterceptor implements AgentInterceptor {
         requestInfo.setTimestamp(System.currentTimeMillis());
         List<RequestInfo> list = new ArrayList<>(1);
         list.add(requestInfo);
-        String value = JsonUtil.toJson(list);
-//        log.info("access-log: {}", value);
-        reportConsumer.accept(value);
-        return chain.doAfter(methodInfo, context);
+        String logString = JsonUtil.toJson(list);
+        log.info("access-log: {}", logString);
+        return logString;
     }
-
 }
