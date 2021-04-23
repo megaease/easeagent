@@ -18,33 +18,31 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Injection.Provider(Provider.class)
 public abstract class HttpFilterAdvice implements Transformation {
-    private static final String FILTER_NAME = "org.springframework.web.filter.CharacterEncodingFilter";
-    static final String SERVLET_REQUEST = "javax.servlet.http.HttpServletRequest";
-    static final String SERVLET_RESPONSE = "javax.servlet.http.HttpServletResponse";
-    static final String FILTER_CHAIN = "javax.servlet.FilterChain";
+    private static final String FILTER_NAME = "javax.servlet.Filter";
+    private static final String HTTP_SERVLET_NAME = "javax.servlet.http.HttpServlet";
+    static final String SERVLET_REQUEST = "javax.servlet.ServletRequest";
+    static final String SERVLET_RESPONSE = "javax.servlet.ServletResponse";
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def.type(
-                hasSuperType(named(FILTER_NAME)))
-                .transform(doFilterInternal(
-                        named("doFilterInternal").and(takesArguments(3))
+                hasSuperType(namedOneOf(FILTER_NAME, HTTP_SERVLET_NAME)))
+                .transform(doFilterOrService(
+                        namedOneOf("doFilter", "service")
                                 .and(takesArgument(0, named(SERVLET_REQUEST)))
                                 .and(takesArgument(1, named(SERVLET_RESPONSE)))
-                                .and(takesArgument(2, named(FILTER_CHAIN)))
                         )
                 ).end();
     }
 
-    @AdviceTo(DoFilterInternal.class)
-    protected abstract Definition.Transformer doFilterInternal(ElementMatcher<? super MethodDescription> matcher);
+    @AdviceTo(DoFilterOrService.class)
+    protected abstract Definition.Transformer doFilterOrService(ElementMatcher<? super MethodDescription> matcher);
 
-    static class DoFilterInternal extends AbstractAdvice {
-
+    static class DoFilterOrService extends AbstractAdvice {
 
         @Injection.Autowire
-        DoFilterInternal(AgentInterceptorChainInvoker chainInvoker,
-                         @Injection.Qualifier("supplier4Filter") Supplier<AgentInterceptorChain.Builder> supplier) {
+        DoFilterOrService(AgentInterceptorChainInvoker chainInvoker,
+                          @Injection.Qualifier("supplier4Filter") Supplier<AgentInterceptorChain.Builder> supplier) {
             super(supplier, chainInvoker);
         }
 
