@@ -1,8 +1,6 @@
 package com.megaease.easeagent.metrics.servlet;
 
-import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.common.http.HttpServletInterceptor;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ServletUtils;
 
@@ -10,19 +8,38 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
-public class HttpFilterMetricsInterceptor extends AbstractServerMetric implements AgentInterceptor {
+public class HttpFilterMetricsInterceptor extends HttpServletInterceptor {
 
-    public HttpFilterMetricsInterceptor(MetricRegistry metricRegistry) {
-        super(metricRegistry);
+    private final static String PROCESSED_BEFORE_KEY = HttpFilterMetricsInterceptor.class.getName() + ".processedBefore";
+
+    private final static String PROCESSED_AFTER_KEY = HttpFilterMetricsInterceptor.class.getName() + ".processedAfter";
+
+    private final ServletMetric servletMetric;
+
+    public HttpFilterMetricsInterceptor(ServletMetric servletMetric) {
+        this.servletMetric = servletMetric;
     }
 
     @Override
-    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
-        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
+    public void internalBefore(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+
+    }
+
+    @Override
+    public void internalAfter(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         String httpRoute = ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest);
         String key = httpServletRequest.getMethod() + " " + httpRoute;
-        this.collectMetric(key, httpServletResponse.getStatus(), methodInfo.getThrowable(), context);
-        return chain.doAfter(methodInfo, context);
+        this.servletMetric.collectMetric(key, httpServletResponse.getStatus(), methodInfo.getThrowable(), context);
     }
+
+    @Override
+    public String processedBeforeKey() {
+        return PROCESSED_BEFORE_KEY;
+    }
+
+    @Override
+    public String processedAfterKey() {
+        return PROCESSED_AFTER_KEY;
+    }
+
 }

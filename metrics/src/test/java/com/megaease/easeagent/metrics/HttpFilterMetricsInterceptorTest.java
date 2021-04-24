@@ -7,6 +7,7 @@ import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
+import com.megaease.easeagent.metrics.servlet.ServletMetric;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,8 +26,8 @@ public class HttpFilterMetricsInterceptorTest {
     @Test
     public void success() {
         MetricRegistry metricRegistry = new MetricRegistry();
-
-        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(metricRegistry);
+        ServletMetric servletMetric = new ServletMetric(metricRegistry);
+        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric);
 
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
@@ -80,8 +81,8 @@ public class HttpFilterMetricsInterceptorTest {
     @Test
     public void fail() {
         MetricRegistry metricRegistry = new MetricRegistry();
-
-        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(metricRegistry);
+        ServletMetric servletMetric = new ServletMetric(metricRegistry);
+        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric);
 
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())

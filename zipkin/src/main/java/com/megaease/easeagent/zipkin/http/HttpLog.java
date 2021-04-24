@@ -59,7 +59,7 @@ public class HttpLog {
         List<RequestInfo> list = new ArrayList<>(1);
         list.add(requestInfo);
         String logString = JsonUtil.toJson(list);
-        log.info("access-log: {}", logString);
+//        log.info("access-log: {}", logString);
         return logString;
     }
 }

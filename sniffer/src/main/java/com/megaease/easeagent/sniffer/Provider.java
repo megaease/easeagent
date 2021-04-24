@@ -61,6 +61,7 @@ import com.megaease.easeagent.metrics.redis.JedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
+import com.megaease.easeagent.metrics.servlet.ServletMetric;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
@@ -159,15 +160,15 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                         .alwaysReportSpans(true)
                         .build()
                 )
-                .addSpanHandler(new SpanHandler() {
-                    @Override
-                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
-                        System.out.println("\n\n=========== console tracing =================\n\n"
-                                + span.toString()
-                                + "\n\n============================\n\n");
-                        return super.end(context, span, cause);
-                    }
-                })
+//                .addSpanHandler(new SpanHandler() {
+//                    @Override
+//                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+//                        System.out.println("\n\n=========== console tracing =================\n\n"
+//                                + span.toString()
+//                                + "\n\n============================\n\n");
+//                        return super.end(context, span, cause);
+//                    }
+//                })
                 .currentTraceContext(traceContext)
                 .build();
     }
@@ -261,13 +262,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         return () -> {
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
-            final HttpFilterMetricsInterceptor httpFilterMetricsInterceptor = new HttpFilterMetricsInterceptor(metricRegistry);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                    httpFilterMetricsInterceptor.newConverter(this.additionalAttributes),
+            ServletMetric servletMetric = new ServletMetric(metricRegistry);
+            new AutoRefreshReporter(metricRegistry, collectorConfig, servletMetric.newConverter(this.additionalAttributes),
                     s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
             return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
-                    .addInterceptor(httpFilterMetricsInterceptor)
+                    .addInterceptor(new HttpFilterMetricsInterceptor(servletMetric))
                     .addInterceptor(new HttpFilterTracingInterceptor(this.tracing))
                     .addInterceptor(new ServletHttpLogInterceptor(serviceName, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
                     ;

@@ -2,32 +2,29 @@ package com.megaease.easeagent.zipkin.http;
 
 import brave.Span;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.http.HttpServletInterceptor;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 @Slf4j
-public class ServletHttpLogInterceptor implements AgentInterceptor {
-
-    private final static String ERROR_KEY = ServletHttpLogInterceptor.class.getName() + ".Error";
+public class ServletHttpLogInterceptor extends HttpServletInterceptor {
 
     private final HttpLog httpLog = new HttpLog();
 
     private final Consumer<String> reportConsumer;
 
     private final AutoRefreshConfigItem<String> serviceName;
+
+    private final static String PROCESSED_BEFORE_KEY = ServletHttpLogInterceptor.class.getName() + ".processedBefore";
+
+    private final static String PROCESSED_AFTER_KEY = ServletHttpLogInterceptor.class.getName() + ".processedAfter";
 
     public ServletHttpLogInterceptor(AutoRefreshConfigItem<String> serviceName, Consumer<String> reportConsumer) {
         this.serviceName = serviceName;
@@ -44,105 +41,32 @@ public class ServletHttpLogInterceptor implements AgentInterceptor {
         return serverInfo;
     }
 
-    public boolean markProcessedBefore(HttpServletRequest request) {
-        Object attribute = request.getAttribute(ContextCons.PROCESSED_BEFORE);
-        if (attribute != null) {
-            return true;
-        }
-        request.setAttribute(ContextCons.PROCESSED_BEFORE, true);
-        return false;
-    }
-
-    public boolean markProcessedAfter(HttpServletRequest request) {
-        Object attribute = request.getAttribute(ContextCons.PROCESSED_AFTER);
-        if (attribute != null) {
-            return true;
-        }
-        request.setAttribute(ContextCons.PROCESSED_AFTER, true);
-        return false;
-    }
-
     @Override
-    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest request = (HttpServletRequest) methodInfo.getArgs()[0];
-        HttpServletResponse response = (HttpServletResponse) methodInfo.getArgs()[1];
-        boolean markProcessedBefore = this.markProcessedBefore(request);
-        if (markProcessedBefore) {
-            chain.doBefore(methodInfo, context);
-            return;
-        }
+    public void internalBefore(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         Long beginTime = ContextUtils.getBeginTime(context);
         Span span = (Span) context.get(ContextCons.SPAN);
-        AccessLogServerInfo serverInfo = this.serverInfo(request, response);
+        AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
         RequestInfo requestInfo = this.httpLog.prepare(this.serviceName.getValue(), beginTime, span, serverInfo);
-        request.setAttribute(RequestInfo.class.getName(), requestInfo);
-        chain.doBefore(methodInfo, context);
+        httpServletRequest.setAttribute(RequestInfo.class.getName(), requestInfo);
     }
 
     @Override
-    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        HttpServletRequest request = (HttpServletRequest) methodInfo.getArgs()[0];
-        HttpServletResponse response = (HttpServletResponse) methodInfo.getArgs()[1];
-        boolean markProcessedAfter = this.markProcessedAfter(request);
-        if (markProcessedAfter) {
-            return chain.doAfter(methodInfo, context);
-        }
+    public void internalAfter(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         Long beginTime = ContextUtils.getBeginTime(context);
-        RequestInfo requestInfo = (RequestInfo) request.getAttribute(RequestInfo.class.getName());
-        if (request.isAsyncStarted()) {
-            request.getAsyncContext().addListener(new LogAsyncListener(asyncEvent -> {
-                HttpServletRequest suppliedRequest = (HttpServletRequest) asyncEvent.getSuppliedRequest();
-                HttpServletResponse suppliedResponse = (HttpServletResponse) asyncEvent.getSuppliedResponse();
-                AccessLogServerInfo serverInfo = this.serverInfo(suppliedRequest, suppliedResponse);
-                String logString = this.httpLog.getLogString(requestInfo, methodInfo.isSuccess(), beginTime, serverInfo);
-                reportConsumer.accept(logString);
-            }));
-        } else {
-            AccessLogServerInfo serverInfo = this.serverInfo(request, response);
-            String logString = this.httpLog.getLogString(requestInfo, methodInfo.isSuccess(), beginTime, serverInfo);
-            reportConsumer.accept(logString);
-        }
-        return chain.doAfter(methodInfo, context);
+        RequestInfo requestInfo = (RequestInfo) httpServletRequest.getAttribute(RequestInfo.class.getName());
+        AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
+        String logString = this.httpLog.getLogString(requestInfo, methodInfo.isSuccess(), beginTime, serverInfo);
+        reportConsumer.accept(logString);
     }
 
-    static class LogAsyncListener implements AsyncListener {
-
-        private final Consumer<AsyncEvent> consumer;
-
-        public LogAsyncListener(Consumer<AsyncEvent> consumer) {
-            this.consumer = consumer;
-        }
-
-        @Override
-        public void onComplete(AsyncEvent event) {
-            this.consumer.accept(event);
-        }
-
-        @Override
-        public void onTimeout(AsyncEvent event) {
-        }
-
-        @Override
-        public void onError(AsyncEvent event) {
-        }
-
-        @Override
-        public void onStartAsync(AsyncEvent event) {
-            AsyncContext eventAsyncContext = event.getAsyncContext();
-            if (eventAsyncContext != null) {
-                eventAsyncContext.addListener(this, event.getSuppliedRequest(), event.getSuppliedResponse());
-            }
-        }
+    @Override
+    public String processedBeforeKey() {
+        return PROCESSED_BEFORE_KEY;
     }
 
-    static final class AsyncTimeoutException extends TimeoutException {
-        AsyncTimeoutException(AsyncEvent e) {
-            super("Timed out after " + e.getAsyncContext().getTimeout() + "ms");
-        }
-
-        @Override
-        public Throwable fillInStackTrace() {
-            return this; // stack trace doesn't add value as this is used in a callback
-        }
+    @Override
+    public String processedAfterKey() {
+        return PROCESSED_AFTER_KEY;
     }
+
 }
