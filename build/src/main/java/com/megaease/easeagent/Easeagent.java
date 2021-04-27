@@ -15,32 +15,55 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent;
+package com.megaease.easeagent;
 
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
-import com.megaease.easeagent.metrics.CaptureCaller;
-import com.megaease.easeagent.metrics.MeasureHttpRequest;
-import com.megaease.easeagent.metrics.MeasureJdbcGetConnection;
-import com.megaease.easeagent.metrics.MeasureJdbcStatement;
-import com.megaease.easeagent.requests.CaptureExecuteSql;
-import com.megaease.easeagent.requests.CaptureHttpRequest;
-import com.megaease.easeagent.requests.CaptureTrace;
-import com.megaease.easeagent.zipkin.*;
+import com.megaease.easeagent.sniffer.*;
+import com.megaease.easeagent.sniffer.healthy.advice.SpringApplicationAdminMXBeanRegistrarAdvice;
+import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
+import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
+import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
+import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
+import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerAdvice;
+import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
+import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerRecordAdvice;
+import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClusterClientAdvice;
+import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
+import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
 
 @Assembly({
-        CaptureTrace.class
-        , CaptureExecuteSql.class
-        , CaptureHttpRequest.class
-        , TraceHttpServlet.class
-        , TraceHttpClient.class
-        , TraceRestTemplate.class
-        , TraceJedis.class
-        , TraceJdbcStatement.class
-        , MeasureJdbcStatement.class
-        , MeasureJdbcGetConnection.class
-        , MeasureHttpRequest.class
-        , CaptureCaller.class
+        HttpFilterAdvice.class,
+        SpringGatewayHttpHeadersFilterAdvice.class,
+        SpringGatewayInitGlobalFilterAdvice.class,
+        RestTemplateAdvice.class,
+        FeignClientAdvice.class,
+        JdbcDataSourceAdvice.class,
+        JdbcConAdvice.class,
+        JdbcStatementAdvice.class,
+        ServiceNamePropagationAdvice.class,
+        StatefulRedisConnectionAdvice.class,
+        RedisClientAdvice.class,
+        RedisClusterClientAdvice.class,
+        RedisChannelWriterAdvice.class,
+        JedisAdvice.class,
+        CrossThreadPropagationAdvice.class,
+        RabbitMqChannelAdvice.class,
+        RabbitMqConsumerAdvice.class,
+        RabbitMqMessageListenerAdvice.class,
+        KafkaMessageListenerAdvice.class,
+        KafkaConsumerRecordAdvice.class,
+        KafkaProducerAdvice.class,
+        KafkaConsumerAdvice.class,
+        WebClientBuilderAdvice.class,
+        SpringApplicationAdminMXBeanRegistrarAdvice.class,
+
 
 })
 abstract class Easeagent {

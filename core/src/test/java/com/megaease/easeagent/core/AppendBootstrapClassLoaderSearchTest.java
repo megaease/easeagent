@@ -19,22 +19,29 @@ package com.megaease.easeagent.core;
 
 import com.google.common.collect.Sets;
 import net.bytebuddy.dynamic.loading.ClassInjector;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.instrument.Instrumentation;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class AppendBootstrapClassLoaderSearchTest {
     @Test
     public void should_inject_classes() throws Exception {
-        // old version already load class in system classloader
-        // use 1.10.19，we should load from system classloader in test，because mock Instrumentation can not run
-
-        final Set<String> strings = Sets.newHashSet("com.megaease.easeagent.core.Dispatcher", "com.megaease.easeagent.core.Dispatcher$Advice");
-        assertThat(AppendBootstrapClassLoaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM), is(strings));
+        final Set<String> strings = Sets.newHashSet(
+                "com.megaease.easeagent.core.Dispatcher",
+                "com.megaease.easeagent.core.Dispatcher$Advice",
+                "com.megaease.easeagent.core.DynamicFieldAccessor",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$Context",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$CurrentContextRunnable",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$NOOPScope",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$RevertToNullScope",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$RevertToPreviousScope",
+                "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$Scope"
+        );
+        Assert.assertEquals(strings, AppendBootstrapClassLoaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM));
     }
 }

@@ -30,7 +30,7 @@ public class DefaultTest {
     @Test
     public void should_work() throws Exception {
         final Map<?, ?> map = Default.EMPTY.type(named("t"))
-                                           .transform(new Definition.Transformer("inline", "factory", named("m")))
+                                           .transform(new Definition.Transformer("inline", "factory", named("m"),null))
                                            .end().asMap();
         assertThat(map.size(), is(1));
     }

@@ -33,7 +33,7 @@ public class GenerateSpecTestBase {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    GenerateSpecTestBase(When when, String generated) {
+    public GenerateSpecTestBase(When when, String generated) {
         this.when = when;
         this.generated = generated;
     }

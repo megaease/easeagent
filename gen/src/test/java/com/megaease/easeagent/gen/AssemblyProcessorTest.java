@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
+import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Dispatcher;
 import com.megaease.easeagent.core.Injection;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -34,6 +34,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -49,7 +50,7 @@ public class AssemblyProcessorTest {
         final Class<Bar> genBar = (Class<Bar>) Class.forName(packageName + ".GenBar");
         assertNotNull(genBar.getAnnotation(Configurable.class));
 
-        final Bar bar = genBar.getConstructor(Config.class).newInstance(ConfigFactory.parseString("bool = yes"));
+        final Bar bar = genBar.getConstructor(Config.class).newInstance(new Configs(Collections.singletonMap("bool", "yes")));
         assertTrue(bar.bool());
         assertThat(bar.i(), is(10));
 

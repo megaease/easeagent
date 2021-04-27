@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.core;
+package com.megaease.easeagent.core;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -41,12 +41,20 @@ public interface Definition<T extends Definition> {
         public final String inlineAdviceClassName;
         public final String adviceFactoryClassName;
         public final ElementMatcher<? super MethodDescription> matcher;
+        public final String fieldName;
+        public final Class<?> fieldClass = Object.class;
 
         public Transformer(String inlineAdviceClassName, String adviceFactoryClassName, ElementMatcher<? super MethodDescription> matcher) {
+            this(inlineAdviceClassName, adviceFactoryClassName, matcher, null);
+        }
+
+        public Transformer(String inlineAdviceClassName, String adviceFactoryClassName, ElementMatcher<? super MethodDescription> matcher, String fieldName) {
             this.inlineAdviceClassName = inlineAdviceClassName;
             this.adviceFactoryClassName = adviceFactoryClassName;
             this.matcher = matcher;
+            this.fieldName = fieldName;
         }
+
     }
 
     class Default implements Definition<Default>, Fork<Default> {

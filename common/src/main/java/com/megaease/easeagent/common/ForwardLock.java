@@ -15,36 +15,26 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.common;
+package com.megaease.easeagent.common;
 
 import com.google.auto.service.AutoService;
-import com.google.common.collect.Sets;
 import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class ForwardLock {
-    private static final ThreadLocal<Set<ForwardLock>> MARK = new ThreadLocal<Set<ForwardLock>>(){
-        @Override
-        protected Set<ForwardLock> initialValue() {
-            return Sets.newHashSet();
-        }
-    };
+    private static final ThreadLocal<Set<ForwardLock>> MARK = ThreadLocal.withInitial(HashSet::new);
 
     public <T> Release<T> acquire(Supplier<T> supplier) {
-        if (!MARK.get().add(this)) return new Release<T>() {
-            @Override
-            public void apply(Consumer<T> c) { }
-        };
-
+        if (!MARK.get().add(this)) {
+            return c -> {
+            };
+        }
         final T value = supplier.get();
-
-        return new Release<T>() {
-            @Override
-            public void apply(Consumer<T> c) {
-                MARK.get().remove(ForwardLock.this);
-                c.accept(value);
-            }
+        return c -> {
+            c.accept(value);
+            MARK.get().remove(ForwardLock.this);
         };
     }
 

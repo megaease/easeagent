@@ -15,18 +15,24 @@ curl -Lk https://github.com/megaease/release/releases/download/easeagent/easeage
 ## Extract default configuration files
 
 ```
-jar xf easeagent.jar application.conf log4j2.xml
+jar xf easeagent.jar agent.properties log4j2.xml
 ```
 
-## Setup JAVA_OPTS, then run your java program with `$JAVA_OPTS`
+## Simple Use
 
 ```
-export JAVA_OPTS="${JAVA_OPTS} -javaagent:/path/to/easeagent.jar=/path/to/application.conf -Deaseagent.log.conf=/path/to/log4j2.xml"
+java -jar -javaagent:/{path}/easeagent.jar your-springboot-app.jar
 ```
 
-> Use `CATALINA_OPTS` instead when tomcat was used.
+## Custom Configuration
 
-# Build from source
+```
+java -jar -javaagent:/{path}/easeagent.jar=/{path}/agent.properties" -Deaseagent.log.conf=/{path}/log4j2.xml -Deaseagent.server.port=9901 your-springboot-app.jar
+```
+## Other Configuration Detail
+Detailed configuration information is in build/src/main/resources/agent.properties
+
+# Build From Source
 
 ```
 mvn clean package -am -pl build
@@ -36,31 +42,17 @@ A generated `./build/target/easeagent-dep.jar` is the java agent jar with all th
 
 
 # Configuration
+Agent.properties contains all configurations
 
-configurations can be configured by environment, examples:
-[Service name as application of easeagent](https://github.com/megaease/spring-petclinic-microservices/blob/master/entrypoint/application.conf#L3)
+# Supported Modules
+* JDK 8
+* JDBC4, Modules implements JDBC Interface
+* Spring Boot 2.2.x
+* Spring WebClient, Spring RestTemplate, Spring FeignClient
+* RabbitMQ Client 5.x, Kafka Client 2.4.x
+* Jedis 3.5.x, Lettuce 5.3.x
+* Log4j, Log4j2, Logback
 
-Examples:
-[spring petclinic microservices demo](https://github.com/megaease/spring-petclinic-microservices/blob/master/entrypoint/application.conf)
-
-Some options:
-## Enable callstack
-```
-requests {
-  report = ${host.info} {
-    callstack = true
-  }
-  ...
-}
-```
-## Enable zipkin
-configure service_name and send_endpoint
-```
-zipkin.tracer = ${host.info} {
-  service_name = ${SERVICE_NAME}
-  send_endpoint = "https://gateway.easeapm.com:10443/v1/zipkin_spans"
-}
-```
 # Licensing
 
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.

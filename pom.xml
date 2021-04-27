@@ -21,19 +21,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.megaease.easeagent</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>easeagent</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <modules>
         <module>core</module>
         <module>gen</module>
         <module>build</module>
-        <module>requests</module>
         <module>common</module>
         <module>metrics</module>
         <module>zipkin</module>
         <module>log4j2</module>
         <module>loader</module>
+        <module>sniffer</module>
+        <module>config</module>
+        <module>report</module>
+        <module>httpserver</module>
     </modules>
 
     <properties>
@@ -45,15 +48,31 @@
         <version.slf4j>1.7.21</version.slf4j>
         <version.byte-buddy>1.10.19</version.byte-buddy>
         <version.auto-service>1.0-rc2</version.auto-service>
-        <version.lombok>1.18.4</version.lombok>
+        <version.lombok>1.18.20</version.lombok>
         <version.config>1.2.1</version.config>
         <version.logback>1.1.11</version.logback>
-        <version.fastjson>1.2.31</version.fastjson>
+        <version.jackson>2.12.1</version.jackson>
         <version.servlet>3.1.0</version.servlet>
         <version.brave>5.13.3</version.brave>
+        <version.zipkin-sender-kafka11>2.8.0</version.zipkin-sender-kafka11>
         <version.moco>1.1.0</version.moco>
+        <version.okhttp3>4.9.0</version.okhttp3>
         <version.disruptor>3.4.2</version.disruptor>
+        <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
+        <version.spring>5.2.6.RELEASE</version.spring>
+        <version.spring-kafka>2.3.13.RELEASE</version.spring-kafka>
+        <version.spring.cloud>Hoxton.SR5</version.spring.cloud>
+        <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
+        <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
+        <version.log4j>2.14.0</version.log4j>
+        <version.kafka>2.4.1</version.kafka>
+        <version.lettuce>5.3.6.RELEASE</version.lettuce>
+        <version.metrics>4.1.17</version.metrics>
+        <version.jedis>3.5.2</version.jedis>
+        <version.amqp-client>5.11.0</version.amqp-client>
+        <version.prometheus>0.10.0</version.prometheus>
+        <version.sparkjava>2.9.2</version.sparkjava>
     </properties>
 
     <dependencies>
@@ -92,6 +111,20 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-bom</artifactId>
+                <version>2020.0.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${version.spring.cloud}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
                 <version>${version.byte-buddy}</version>
@@ -101,20 +134,15 @@
                 <artifactId>guava</artifactId>
                 <version>${version.guava}</version>
             </dependency>
-            <dependency>
-                <groupId>com.typesafe</groupId>
-                <artifactId>config</artifactId>
-                <version>${version.config}</version>
-            </dependency>
+            <!--            <dependency>-->
+            <!--                <groupId>com.typesafe</groupId>-->
+            <!--                <artifactId>config</artifactId>-->
+            <!--                <version>${version.config}</version>-->
+            <!--            </dependency>-->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${version.slf4j}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${version.fastjson}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -127,9 +155,178 @@
                 <version>${version.brave}</version>
             </dependency>
             <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-http</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-servlet</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-context-log4j2</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-context-slf4j</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-sender-kafka11</artifactId>
+                <version>${version.zipkin-sender-kafka11}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>*</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>com.github.dreamhead</groupId>
                 <artifactId>moco-core</artifactId>
                 <version>${version.moco}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${version.log4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${version.log4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>${version.disruptor}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.11</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${version.kafka}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-log4j-appender</artifactId>
+                <version>${version.kafka}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${version.okhttp3}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.lettuce</groupId>
+                <artifactId>lettuce-core</artifactId>
+                <version>${version.lettuce}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${version.metrics}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.retry</groupId>
+                <artifactId>spring-retry</artifactId>
+                <version>1.2.5.RELEASE</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>spring-core</artifactId>
+                        <groupId>org.springframework</groupId>
+                    </exclusion>
+                </exclusions>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${version.jedis}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-kafka-clients</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-messaging</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rabbitmq</groupId>
+                <artifactId>amqp-client</artifactId>
+                <version>${version.amqp-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>${version.spring-kafka}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-amqp</artifactId>
+                <version>${version.spring-boot}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webflux</artifactId>
+                <version>${version.spring}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_dropwizard</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_httpserver</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_servlet</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_common</artifactId>
+                <version>${version.prometheus}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.nanohttpd</groupId>
+                <artifactId>nanohttpd</artifactId>
+                <version>2.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.nanohttpd</groupId>
+                <artifactId>nanohttpd-nanolets</artifactId>
+                <version>2.2.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -160,7 +357,7 @@
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.16.12.0</version>
+                <version>1.18.20.0</version>
                 <configuration>
                     <encoding>${encoding.file}</encoding>
                 </configuration>

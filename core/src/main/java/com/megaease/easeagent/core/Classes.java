@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.core;
+package com.megaease.easeagent.core;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -26,17 +26,27 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.FieldAccessor;
+import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.FluentIterable.from;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class Classes {
     public static Transforming transform(String... names) {
         return new Transforming(new ByteBuddy(), names);
+    }
+
+    private static ElementMatcher<ClassLoader> protectedLoaders() {
+        return isBootstrapClassLoader().or(is(Bootstrap.class.getClassLoader()));
     }
 
     public static class Transforming {
@@ -44,7 +54,15 @@ public class Classes {
         private final String[] names;
 
         Transforming(ByteBuddy byteBuddy, String[] names) {
-            this.byteBuddy = byteBuddy;
+            this.byteBuddy = byteBuddy
+                    .ignore(isSynthetic())
+                    .ignore(nameStartsWith("sun.reflect."))
+                    .ignore(nameStartsWith("net.bytebuddy."))
+                    .ignore(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
+                    .ignore(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
+                    .ignore(nameStartsWith("junit."))
+                    .ignore(nameStartsWith("com.intellij."))
+            ;
             this.names = names;
         }
 
@@ -55,6 +73,11 @@ public class Classes {
                     return new QualifiedBean("", input);
                 }
             }));
+            return new Loaded(register, def.asMap());
+        }
+
+        public Loaded with(Definition.Default def, final QualifiedBean... beans) {
+            final Register register = new Register(Stream.of(beans).collect(Collectors.toList()));
             return new Loaded(register, def.asMap());
         }
 
@@ -100,7 +123,9 @@ public class Classes {
             private class Mapping implements Function<Iterable<Definition.Transformer>, Iterable<AgentBuilder.Transformer>> {
                 private final ClassLoader loader;
 
-                Mapping(ClassLoader loader) {this.loader = loader;}
+                Mapping(ClassLoader loader) {
+                    this.loader = loader;
+                }
 
                 @Override
                 public Iterable<AgentBuilder.Transformer> apply(Iterable<Definition.Transformer> input) {
@@ -108,12 +133,22 @@ public class Classes {
                         @Override
                         public AgentBuilder.Transformer apply(Definition.Transformer input) {
                             register.apply(input.adviceFactoryClassName, loader);
-                            return new AgentBuilder.Transformer.ForAdvice().advice(input.matcher, input.inlineAdviceClassName);
+                            List<AgentBuilder.Transformer> transformers = new ArrayList<>();
+                            transformers.add((builder, typeDescription, classLoader, module) -> {
+                                if (!typeDescription.isAssignableTo(DynamicFieldAccessor.class)) {
+                                    if (input.fieldName != null) {
+                                        builder = builder.defineField(input.fieldName, input.fieldClass, Opcodes.ACC_PRIVATE)
+                                                .implement(DynamicFieldAccessor.class).intercept(FieldAccessor.ofField(input.fieldName));
+                                    }
+                                }
+                                return builder;
+                            });
+                            transformers.add(new AgentBuilder.Transformer.ForAdvice().advice(input.matcher, input.inlineAdviceClassName));
+                            return new CompoundTransformer(transformers);
                         }
                     });
                 }
             }
         }
-
     }
 }
