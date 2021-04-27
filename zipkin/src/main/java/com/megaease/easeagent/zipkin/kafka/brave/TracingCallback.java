@@ -23,6 +23,8 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 /**
  * Decorates, then finishes a producer span. Allows tracing to record the duration between batching
  * for send and actual send.
+ *
+ * copy from zipkin.kafka.brave
  */
 public final class TracingCallback {
     public static Callback create(@Nullable Callback delegate, Span span, CurrentTraceContext current) {

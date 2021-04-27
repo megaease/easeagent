@@ -40,6 +40,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+/**
+ * copy from zipkin.kafka.brave
+ */
 public final class TracingProducer<K, V> implements Producer<K, V> {
     final Producer<K, V> delegate;
     final KafkaTracing kafkaTracing;

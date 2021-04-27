@@ -46,6 +46,8 @@ import org.apache.kafka.common.TopicPartition;
 /**
  * Kafka Consumer decorator. Read records headers to create and complete a child of the incoming
  * producers span if possible.
+ *
+ * copy from zipkin.kafka.brave
  */
 public final class TracingConsumer<K, V> implements Consumer<K, V> {
     final Consumer<K, V> delegate;

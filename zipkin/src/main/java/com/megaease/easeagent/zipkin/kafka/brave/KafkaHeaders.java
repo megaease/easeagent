@@ -20,6 +20,9 @@ import org.apache.kafka.common.header.Headers;
 import static com.megaease.easeagent.zipkin.kafka.brave.KafkaTracing.log;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * copy from zipkin.kafka.brave
+ */
 final class KafkaHeaders {
   static void replaceHeader(Headers headers, String key, String value) {
     try {

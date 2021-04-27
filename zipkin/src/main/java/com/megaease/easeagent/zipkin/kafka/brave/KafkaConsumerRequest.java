@@ -22,7 +22,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import static com.megaease.easeagent.zipkin.kafka.brave.KafkaHeaders.lastStringHeader;
 
-
+/**
+ * copy from zipkin.kafka.brave
+ */
 // intentionally not yet public until we add tag parsing functionality
 final class KafkaConsumerRequest extends ConsumerRequest {
     static final RemoteGetter<KafkaConsumerRequest> GETTER =

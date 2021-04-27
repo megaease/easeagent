@@ -22,7 +22,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import static com.megaease.easeagent.zipkin.kafka.brave.KafkaHeaders.lastStringHeader;
 
-
+/**
+ * copy from zipkin.kafka.brave
+ */
 // intentionally not yet public until we add tag parsing functionality
 final class KafkaProducerRequest extends ProducerRequest {
     static final RemoteGetter<KafkaProducerRequest> GETTER =

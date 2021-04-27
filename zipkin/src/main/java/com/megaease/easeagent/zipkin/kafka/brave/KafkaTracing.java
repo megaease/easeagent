@@ -46,6 +46,8 @@ import static com.megaease.easeagent.zipkin.kafka.brave.KafkaHeaders.lastStringH
 
 /**
  * Use this class to decorate your Kafka consumer / producer and enable Tracing.
+ *
+ * copy from zipkin.kafka.brave
  */
 public final class KafkaTracing {
     /**

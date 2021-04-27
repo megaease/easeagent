@@ -19,6 +19,8 @@ import org.apache.kafka.clients.producer.Producer;
 
 /**
  * Tagging policy is not yet dynamic. The descriptions below reflect static policy.
+ *
+ * copy from zipkin.kafka.brave
  */
 final class KafkaTags {
   /**
