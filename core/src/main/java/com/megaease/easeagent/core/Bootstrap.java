@@ -93,9 +93,10 @@ public class Bootstrap {
         port = Integer.parseInt(portStr);
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
         agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_ON_INIT);
-        agentHttpServer.startServer();
-        LOGGER.info("start agent http server on port:{}", port);
-
+        if (port > 0) {
+            agentHttpServer.startServer();
+            LOGGER.info("start agent http server on port:{}", port);
+        }
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
 //                .with(LISTENER)
