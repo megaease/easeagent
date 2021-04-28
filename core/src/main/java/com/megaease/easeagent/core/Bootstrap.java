@@ -68,6 +68,8 @@ public class Bootstrap {
 
     private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
 
+    private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
+
     private static final int DEF_AGENT_SERVER_PORT = 9900;
 
     private static WrappedConfigManager wrappedConfigManager;
@@ -93,7 +95,10 @@ public class Bootstrap {
         port = Integer.parseInt(portStr);
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
         agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_ON_INIT);
-        if (port > 0) {
+        Boolean httpServerEnabled = conf.getBoolean(AGENT_SERVER_ENABLED_KEY);
+        String httpServerEnabledInProp = System.getProperty(AGENT_SERVER_ENABLED_KEY, String.valueOf(httpServerEnabled));
+        httpServerEnabled = Boolean.parseBoolean(httpServerEnabledInProp);
+        if (httpServerEnabled) {
             agentHttpServer.startServer();
             LOGGER.info("start agent http server on port:{}", port);
         }
