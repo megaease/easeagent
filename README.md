@@ -103,17 +103,51 @@ java -jar spring-petclinic-config-server/target/spring-petclinic-config-server-2
 
 java -jar spring-petclinic-discovery-server/target/spring-petclinic-discovery-server-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.enabled=false -jar spring-petclinic-vets-service/target/spring-petclinic-vets-service-2.4.2.jar
+java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9900 -jar spring-petclinic-vets-service/target/spring-petclinic-vets-service-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.enabled=false -jar spring-petclinic-visits-service/target/spring-petclinic-visits-service-2.4.2.jar
+java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9901 -jar spring-petclinic-visits-service/target/spring-petclinic-visits-service-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.enabled=false -jar spring-petclinic-customers-service/target/spring-petclinic-customers-service-2.4.2.jar
+java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9902 -jar spring-petclinic-customers-service/target/spring-petclinic-customers-service-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.enabled=false -jar spring-petclinic-api-gateway/target/spring-petclinic-api-gateway-2.4.2.jar
+java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9903 -jar spring-petclinic-api-gateway/target/spring-petclinic-api-gateway-2.4.2.jar
 ```
 
 ### Step 5
-Tracing and Metric information can be shown in console  
+add config in `prometheus.yml` 
+```
+  - job_name: 'petclinic-vets-service'
+    static_configs:
+    - targets: ['localhost:9900']
+    metrics_path: "/prometheus/metrics"
+
+  - job_name: 'petclinic-visits-service'
+    static_configs:
+    - targets: ['localhost:9901']
+    metrics_path: "/prometheus/metrics"
+
+  - job_name: 'petclinic-customers-service'
+    static_configs:
+    - targets: ['localhost:9902']
+    metrics_path: "/prometheus/metrics"
+
+  - job_name: 'petclinic-api-gateway'
+    static_configs:
+    - targets: ['localhost:9903']
+    metrics_path: "/prometheus/metrics"
+
+```
+start Prometheus
+```
+./prometheus --config.file=prometheus.yml
+```
+
+### Step 6
+Open Browser to visit [http://localhost:8080](http://localhost:8080)
+
+After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search `_00GET__owners`.You will see as following
+
+![image](./doc/images/prometheus-demo-1.png)
+
 
 ## Documentation
 
