@@ -77,9 +77,7 @@ public class Bootstrap {
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
         long begin = System.nanoTime();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
-        }
+        LOGGER.info("Injected class: {}", AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP));
         final Configs conf = load(args);
         if (LOGGER.isDebugEnabled()) {
             final String display = conf.toPrettyDisplay();
