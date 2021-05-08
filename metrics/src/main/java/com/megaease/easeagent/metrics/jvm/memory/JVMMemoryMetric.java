@@ -19,6 +19,8 @@ package com.megaease.easeagent.metrics.jvm.memory;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
@@ -34,15 +36,18 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
+    public static final String ENABLE_KEY = "observability.metrics.jvmMemory.enabled";
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
     private static final String POOLS = "pools";
+    private final Config config;
 
-    public JVMMemoryMetric(MetricRegistry metricRegistry) {
-        this(metricRegistry, true);
+    public JVMMemoryMetric(MetricRegistry metricRegistry, Config config) {
+        this(metricRegistry, config, true);
     }
 
-    public JVMMemoryMetric(MetricRegistry metricRegistry, boolean enableSchedule) {
+    public JVMMemoryMetric(MetricRegistry metricRegistry, Config config, boolean enableSchedule) {
         super(metricRegistry, enableSchedule);
+        this.config = config;
         this.metricNameFactory = MetricNameFactory.createBuilder().gaugeType(MetricSubType.DEFAULT, new HashMap<>())
                 .build();
     }
@@ -54,6 +59,9 @@ public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
 
     @Override
     public void doJob() {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return;
+        }
         List<MemoryPoolMXBean> memoryPoolMXBeans = ManagementFactory.getMemoryPoolMXBeans();
         for (MemoryPoolMXBean memoryPoolMXBean : memoryPoolMXBeans) {
             String memoryPoolMXBeanName = memoryPoolMXBean.getName();

@@ -19,9 +19,11 @@ package com.megaease.easeagent.metrics.rabbitmq;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.metrics.BaseMetricsTest;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import org.junit.Assert;
@@ -31,17 +33,18 @@ import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 
-public class RabbitMqProducerInterceptorTest {
+public class RabbitMqProducerInterceptorTest extends BaseMetricsTest {
 
     @Test
     public void invokeSuccess() {
+        Config config = this.createConfig(RabbitMqProducerMetricInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.PRODUCER, Maps.newHashMap())
                 .build();
-        RabbitMqProducerMetricInterceptor interceptor = new RabbitMqProducerMetricInterceptor(metric);
+        RabbitMqProducerMetricInterceptor interceptor = new RabbitMqProducerMetricInterceptor(metric, config);
         Map<Object, Object> context = ContextUtils.createContext();
         ContextUtils.setEndTime(context);
         MethodInfo methodInfo = MethodInfo.builder().invoker(this).method("publish").args(new Object[]{"exchange", "routingKey"}).build();
@@ -53,6 +56,7 @@ public class RabbitMqProducerInterceptorTest {
 
     @Test
     public void invokeErr() {
+        Config config = this.createConfig(RabbitMqProducerMetricInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
@@ -60,7 +64,7 @@ public class RabbitMqProducerInterceptorTest {
                 .meterType(MetricSubType.PRODUCER, Maps.newHashMap())
                 .meterType(MetricSubType.PRODUCER_ERROR, Maps.newHashMap())
                 .build();
-        RabbitMqProducerMetricInterceptor interceptor = new RabbitMqProducerMetricInterceptor(metric);
+        RabbitMqProducerMetricInterceptor interceptor = new RabbitMqProducerMetricInterceptor(metric, config);
         Map<Object, Object> context = ContextUtils.createContext();
         ContextUtils.setEndTime(context);
         MethodInfo methodInfo = MethodInfo.builder().invoker(this).method("publish").args(new Object[]{"exchange", "routingKey"}).throwable(new Exception()).build();
@@ -69,5 +73,19 @@ public class RabbitMqProducerInterceptorTest {
         Assert.assertEquals(1L, metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT)).getCount());
         Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.PRODUCER)).getCount());
         Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.PRODUCER_ERROR)).getCount());
+    }
+
+    @Test
+    public void disableCollect() {
+        Config config = this.createConfig(RabbitMqProducerMetricInterceptor.ENABLE_KEY, "false");
+        MetricRegistry metricRegistry = new MetricRegistry();
+        RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
+        RabbitMqProducerMetricInterceptor interceptor = new RabbitMqProducerMetricInterceptor(metric, config);
+        Map<Object, Object> context = ContextUtils.createContext();
+        ContextUtils.setEndTime(context);
+        MethodInfo methodInfo = MethodInfo.builder().invoker(this).method("publish").args(new Object[]{"exchange", "routingKey"}).build();
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+
+        Assert.assertTrue(metricRegistry.getMetrics().isEmpty());
     }
 }

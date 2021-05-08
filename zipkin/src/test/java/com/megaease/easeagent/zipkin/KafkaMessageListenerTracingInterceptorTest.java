@@ -24,6 +24,7 @@ import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
@@ -42,6 +43,7 @@ public class KafkaMessageListenerTracingInterceptorTest extends BaseZipkinTest {
 
     @Test
     public void invokeSuccess() {
+        Config config = this.createConfig(KafkaMessageListenerTracingInterceptor.ENABLE_KEY, "true");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracer tracer = Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -56,7 +58,7 @@ public class KafkaMessageListenerTracingInterceptorTest extends BaseZipkinTest {
                 .build().tracer();
 
         ScopedSpan root = tracer.startScopedSpan("root");
-        KafkaMessageListenerTracingInterceptor interceptor = new KafkaMessageListenerTracingInterceptor(Tracing.current());
+        KafkaMessageListenerTracingInterceptor interceptor = new KafkaMessageListenerTracingInterceptor(Tracing.current(), config);
 
         Headers headers = new RecordHeaders();
         ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>("topic", 1, 1, System.currentTimeMillis(), TimestampType.CREATE_TIME, 11L, "key".getBytes(StandardCharsets.UTF_8).length, "value".getBytes(StandardCharsets.UTF_8).length, "key", "value", headers);
@@ -71,12 +73,49 @@ public class KafkaMessageListenerTracingInterceptorTest extends BaseZipkinTest {
         interceptor.before(methodInfo, context, this.mockChain());
 
         interceptor.after(methodInfo, context, this.mockChain());
+        root.finish();
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("kafka.topic", "topic");
         expectedMap.put("kafka.key", "key");
         expectedMap.put("kafka.broker", "localhost:9092");
         Assert.assertEquals(expectedMap, spanInfoMap);
+    }
+
+    @Test
+    public void disableTracing() {
+        Config config = this.createConfig(KafkaMessageListenerTracingInterceptor.ENABLE_KEY, "false");
+        Map<String, String> spanInfoMap = new HashMap<>();
+        Tracer tracer = Tracing.newBuilder()
+                .currentTraceContext(currentTraceContext)
+                .addSpanHandler(new SpanHandler() {
+                    @Override
+                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                        Map<String, String> tmpMap = new HashMap<>(span.tags());
+                        spanInfoMap.putAll(tmpMap);
+                        return super.end(context, span, cause);
+                    }
+                })
+                .build().tracer();
+
+        ScopedSpan root = tracer.startScopedSpan("root");
+        KafkaMessageListenerTracingInterceptor interceptor = new KafkaMessageListenerTracingInterceptor(Tracing.current(), config);
+
+        Headers headers = new RecordHeaders();
+        ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>("topic", 1, 1, System.currentTimeMillis(), TimestampType.CREATE_TIME, 11L, "key".getBytes(StandardCharsets.UTF_8).length, "value".getBytes(StandardCharsets.UTF_8).length, "key", "value", headers);
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .method("onMessage")
+                .args(new Object[]{consumerRecord})
+                .build();
+
+        Map<Object, Object> context = ContextUtils.createContext();
+        context.put(ContextCons.MQ_URI, "localhost:9092");
+        interceptor.before(methodInfo, context, this.mockChain());
+
+        interceptor.after(methodInfo, context, this.mockChain());
         root.finish();
+
+        Assert.assertTrue(spanInfoMap.isEmpty());
     }
 }

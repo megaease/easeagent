@@ -18,7 +18,6 @@
 package com.megaease.easeagent.zipkin.rabbitmq.spring;
 
 import brave.Span;
-import brave.Tracer;
 import brave.Tracing;
 import brave.messaging.ConsumerRequest;
 import brave.messaging.MessagingTracing;
@@ -26,6 +25,8 @@ import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -37,18 +38,26 @@ import java.util.List;
 import java.util.Map;
 
 public class RabbitMqMessageListenerTracingInterceptor implements AgentInterceptor {
-
+    public static final String ENABLE_KEY = "observability.tracings.rabbit.enabled";
     private final TraceContext.Extractor<RabbitConsumerRequest> extractor;
+    private final Config config;
     private static final String SCOPE_CONTEXT_KEY = RabbitMqMessageListenerTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
     private static final String SPAN_CONTEXT_KEY = RabbitMqMessageListenerTracingInterceptor.class.getName() + "-Span";
+    private static final String TRACING_DISABLE = RabbitMqMessageListenerTracingInterceptor.class.getName() + "-Tracing.disable";
 
-    public RabbitMqMessageListenerTracingInterceptor(Tracing tracing) {
+    public RabbitMqMessageListenerTracingInterceptor(Tracing tracing, Config config) {
         MessagingTracing messagingTracing = MessagingTracing.newBuilder(tracing).build();
         this.extractor = messagingTracing.propagation().extractor(RabbitConsumerRequest::header);
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            context.put(TRACING_DISABLE, true);
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         if (methodInfo.getArgs()[0] instanceof List) {
             this.before4List(methodInfo, context);
         } else {
@@ -73,6 +82,9 @@ public class RabbitMqMessageListenerTracingInterceptor implements AgentIntercept
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (ContextUtils.getFromContext(context, TRACING_DISABLE) != null) {
+            return chain.doAfter(methodInfo, context);
+        }
         if (methodInfo.getArgs()[0] instanceof List) {
             this.after4List(methodInfo, context);
         } else {

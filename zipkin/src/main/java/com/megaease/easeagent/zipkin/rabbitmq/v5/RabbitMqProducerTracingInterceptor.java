@@ -24,6 +24,8 @@ import brave.messaging.ProducerRequest;
 import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -36,17 +38,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RabbitMqProducerTracingInterceptor implements AgentInterceptor {
-
+    public static final String ENABLE_KEY = "observability.tracings.rabbit.enabled";
     private final TraceContext.Injector<RabbitProducerRequest> injector;
     private static final String SPAN_CONTEXT_KEY = RabbitMqProducerTracingInterceptor.class.getName() + "-Span";
+    private final Config config;
 
-    public RabbitMqProducerTracingInterceptor(Tracing tracing) {
+    public RabbitMqProducerTracingInterceptor(Tracing tracing, Config config) {
         MessagingTracing messagingTracing = MessagingTracing.newBuilder(tracing).build();
         this.injector = messagingTracing.propagation().injector(RabbitProducerRequest::addHeader);
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
         String exchange = null;
         if (methodInfo.getArgs()[0] != null) {
@@ -88,6 +96,9 @@ public class RabbitMqProducerTracingInterceptor implements AgentInterceptor {
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+        if (span == null) {
+            return chain.doAfter(methodInfo, context);
+        }
         span.finish();
         return chain.doAfter(methodInfo, context);
     }

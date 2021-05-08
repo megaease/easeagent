@@ -24,6 +24,8 @@ import brave.http.HttpServerRequest;
 import brave.http.HttpServerResponse;
 import brave.http.HttpTracing;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -43,14 +45,21 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
     private final HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler;
     private static final String SPAN_CONTEXT_KEY = SpringGatewayServerTracingInterceptor.class.getName() + "-Span";
+    public static final String ENABLE_KEY = "observability.tracings.request.enabled";
+    private final Config config;
 
-    public SpringGatewayServerTracingInterceptor(Tracing tracing) {
+    public SpringGatewayServerTracingInterceptor(Tracing tracing, Config config) {
         HttpTracing httpTracing = HttpTracing.create(tracing);
         this.httpServerHandler = HttpServerHandler.create(httpTracing);
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
         Span span = this.httpServerHandler.handleReceive(httpServerRequest);
@@ -63,15 +72,18 @@ public class SpringGatewayServerTracingInterceptor implements AgentInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
+        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+        if (span == null) {
+            return chain.doAfter(methodInfo, context);
+        }
 
+        ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
         if (consumer != null) {
             consumer.accept(exchange);
         }
 
         FluxHttpServerRequest httpServerRequest = ContextUtils.getFromContext(context, HttpServerRequest.class);
-        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
         PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String route = null;
         if (bestPattern != null) {

@@ -21,9 +21,11 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import feign.Client;
 import feign.Request;
@@ -42,7 +44,8 @@ public class FeignClientTracingInterceptorTest extends BaseZipkinTest {
 
     @Test
     public void success() {
-        String url = "http://google.com";
+        Config config = this.createConfig(BaseClientTracingInterceptor.ENABLE_KEY, "true");
+        String url = "https://google.com";
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -56,7 +59,7 @@ public class FeignClientTracingInterceptorTest extends BaseZipkinTest {
                 })
                 .build().tracer();
 
-        FeignClientTracingInterceptor interceptor = new FeignClientTracingInterceptor(Tracing.current());
+        FeignClientTracingInterceptor interceptor = new FeignClientTracingInterceptor(Tracing.current(), config);
 
         Map<String, Collection<String>> headers = new HashMap<>();
         Request request = Request.create(Request.HttpMethod.GET, url, headers, "ok".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8, null);
@@ -79,14 +82,15 @@ public class FeignClientTracingInterceptorTest extends BaseZipkinTest {
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.method", "GET");
-        expectedMap.put("http.path", "http://google.com");
+        expectedMap.put("http.path", "https://google.com");
 
         Assert.assertEquals(expectedMap, spanInfoMap);
     }
 
     @Test
     public void fail() {
-        String url = "http://google.com";
+        Config config = this.createConfig(BaseClientTracingInterceptor.ENABLE_KEY, "true");
+        String url = "https://google.com";
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -100,7 +104,7 @@ public class FeignClientTracingInterceptorTest extends BaseZipkinTest {
                 })
                 .build().tracer();
 
-        FeignClientTracingInterceptor interceptor = new FeignClientTracingInterceptor(Tracing.current());
+        FeignClientTracingInterceptor interceptor = new FeignClientTracingInterceptor(Tracing.current(), config);
 
         Map<String, Collection<String>> headers = new HashMap<>();
         Request request = Request.create(Request.HttpMethod.GET, url, headers, "ok".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8, null);
@@ -130,10 +134,50 @@ public class FeignClientTracingInterceptorTest extends BaseZipkinTest {
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("http.method", "GET");
-        expectedMap.put("http.path", "http://google.com");
+        expectedMap.put("http.path", "https://google.com");
         expectedMap.put("http.status_code", "400");
         expectedMap.put("error", "400");
 
         Assert.assertEquals(expectedMap, spanInfoMap);
     }
+
+    @Test
+    public void disableTracing() {
+        Config config = this.createConfig(BaseClientTracingInterceptor.ENABLE_KEY, "false");
+        String url = "https://google.com";
+        Map<String, String> spanInfoMap = new HashMap<>();
+        Tracing.newBuilder()
+                .currentTraceContext(currentTraceContext)
+                .addSpanHandler(new SpanHandler() {
+                    @Override
+                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                        Map<String, String> tmpMap = new HashMap<>(span.tags());
+                        spanInfoMap.putAll(tmpMap);
+                        return super.end(context, span, cause);
+                    }
+                })
+                .build().tracer();
+
+        FeignClientTracingInterceptor interceptor = new FeignClientTracingInterceptor(Tracing.current(), config);
+
+        Map<String, Collection<String>> headers = new HashMap<>();
+        Request request = Request.create(Request.HttpMethod.GET, url, headers, "ok".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8, null);
+        Request.Options options = new Request.Options();
+        Response response = Response.builder()
+                .status(200)
+                .request(request)
+                .build();
+        Client client = mock(Client.class);
+        Object[] args = new Object[]{request, options};
+        Map<Object, Object> context = ContextUtils.createContext();
+        String method = "execute";
+
+        MethodInfo methodInfo = MethodInfo.builder().invoker(client).method(method).args(args).retValue(response).throwable(null).build();
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
+        //mock do something
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+
+        Assert.assertTrue(spanInfoMap.isEmpty());
+    }
+
 }

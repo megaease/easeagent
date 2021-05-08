@@ -21,6 +21,8 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
@@ -40,11 +42,13 @@ import java.util.function.Supplier;
 import static com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION;
 
 public class JVMGCMetric extends AbstractMetric {
-
+    public static final String ENABLE_KEY = "observability.metrics.jvmGc.enabled";
     private static final String NO_GC = "No GC";
+    private final Config config;
 
-    public JVMGCMetric(MetricRegistry metricRegistry) {
+    public JVMGCMetric(MetricRegistry metricRegistry, Config config) {
         super(metricRegistry, true);
+        this.config = config;
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .meterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.TIMES, MetricValueFetcher.MeteredCount)
@@ -76,6 +80,9 @@ public class JVMGCMetric extends AbstractMetric {
     private NotificationListener getListener() {
         return (notification, ref) -> {
             if (!notification.getType().equals(GARBAGE_COLLECTION_NOTIFICATION)) {
+                return;
+            }
+            if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
                 return;
             }
 

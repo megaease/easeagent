@@ -19,6 +19,7 @@ package com.megaease.easeagent.sniffer.jdbc.advice;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.QualifiedBean;
@@ -47,9 +48,10 @@ public class JdbcDataSourceAdviceTest extends BaseSnifferTest {
 
     @Test
     public void should_work() throws Exception {
+        Config config = this.createConfig(JdbcDataSourceMetricInterceptor.ENABLE_KEY, "true");
         MetricRegistry registry = new MetricRegistry();
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcDataSourceMetricInterceptor(registry));
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcDataSourceMetricInterceptor(registry, config));
         Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
         final DataSource ds = (DataSource) Classes.transform(this.getClass().getName() + "$MyDataSource")
@@ -70,9 +72,10 @@ public class JdbcDataSourceAdviceTest extends BaseSnifferTest {
 
     @Test
     public void should_throw_exception() throws Exception {
+        Config config = this.createConfig(JdbcDataSourceMetricInterceptor.ENABLE_KEY, "true");
         final MetricRegistry registry = new MetricRegistry();
         AgentInterceptorChainInvoker chainInvoker = spy(AgentInterceptorChainInvoker.getInstance());
-        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcDataSourceMetricInterceptor(registry));
+        AgentInterceptorChain.Builder builder = new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcDataSourceMetricInterceptor(registry, config));
         Supplier<AgentInterceptorChain.Builder> supplier = () -> builder;
         final Definition.Default def = new GenJdbcDataSourceAdvice().define(Definition.Default.EMPTY);
         final DataSource ds = (DataSource) Classes.transform(this.getClass().getName() + "$ErrDataSource")

@@ -17,7 +17,9 @@
 
 package com.megaease.easeagent.metrics.servlet;
 
+import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.http.HttpServletInterceptor;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ServletUtils;
 
@@ -33,8 +35,13 @@ public class HttpFilterMetricsInterceptor extends HttpServletInterceptor {
 
     private final ServletMetric servletMetric;
 
-    public HttpFilterMetricsInterceptor(ServletMetric servletMetric) {
+    public static final String ENABLE_KEY = "observability.metrics.request.enabled";
+
+    private final Config config;
+
+    public HttpFilterMetricsInterceptor(ServletMetric servletMetric, Config config) {
         this.servletMetric = servletMetric;
+        this.config = config;
     }
 
     @Override
@@ -44,6 +51,9 @@ public class HttpFilterMetricsInterceptor extends HttpServletInterceptor {
 
     @Override
     public void internalAfter(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return;
+        }
         String httpRoute = ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest);
         String key = httpServletRequest.getMethod() + " " + httpRoute;
         this.servletMetric.collectMetric(key, httpServletResponse.getStatus(), methodInfo.getThrowable(), context);

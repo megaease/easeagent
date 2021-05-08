@@ -18,6 +18,8 @@
 package com.megaease.easeagent.metrics.kafka;
 
 import com.codahale.metrics.Timer;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -28,14 +30,22 @@ import java.util.Map;
 
 public class KafkaConsumerMetricInterceptor implements AgentInterceptor {
 
+    public static final String ENABLE_KEY = "observability.metrics.kafka.enabled";
+
+    private final Config config;
+
     private final KafkaMetric kafkaMetric;
 
-    public KafkaConsumerMetricInterceptor(KafkaMetric kafkaMetric) {
+    public KafkaConsumerMetricInterceptor(KafkaMetric kafkaMetric, Config config) {
         this.kafkaMetric = kafkaMetric;
+        this.config = config;
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return chain.doAfter(methodInfo, context);
+        }
         if (!methodInfo.isSuccess()) {
             return chain.doAfter(methodInfo, context);
         }

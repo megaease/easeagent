@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.metrics.rabbitmq;
 
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -26,15 +28,20 @@ import com.rabbitmq.client.Envelope;
 import java.util.Map;
 
 public class RabbitMqConsumerMetricInterceptor implements AgentInterceptor {
-
+    public static final String ENABLE_KEY = "observability.metrics.rabbit.enabled";
     private final RabbitMqConsumerMetric rabbitMqConsumerMetric;
+    private final Config config;
 
-    public RabbitMqConsumerMetricInterceptor(RabbitMqConsumerMetric rabbitMqConsumerMetric) {
+    public RabbitMqConsumerMetricInterceptor(RabbitMqConsumerMetric rabbitMqConsumerMetric, Config config) {
         this.rabbitMqConsumerMetric = rabbitMqConsumerMetric;
+        this.config = config;
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return chain.doAfter(methodInfo, context);
+        }
         Envelope envelope = (Envelope) methodInfo.getArgs()[1];
         this.rabbitMqConsumerMetric.after(envelope.getRoutingKey(), ContextUtils.getBeginTime(context), methodInfo.isSuccess());
         return chain.doAfter(methodInfo, context);

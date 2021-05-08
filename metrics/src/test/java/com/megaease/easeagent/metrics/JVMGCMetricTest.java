@@ -22,6 +22,7 @@ import com.github.dreamhead.moco.HttpServer;
 import com.github.dreamhead.moco.MocoConfig;
 import com.github.dreamhead.moco.ResponseHandler;
 import com.github.dreamhead.moco.internal.SessionContext;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
@@ -39,12 +40,13 @@ import java.util.concurrent.TimeUnit;
 import static com.github.dreamhead.moco.Moco.httpServer;
 import static com.github.dreamhead.moco.Runner.running;
 
-public class JVMGCMetricTest {
+public class JVMGCMetricTest extends BaseMetricsTest {
 
     @Test
     public void success() throws Exception {
+        Config config = this.createConfig(JVMGCMetric.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
-        JVMGCMetric jvmgcMetric = new JVMGCMetric(metricRegistry);
+        JVMGCMetric jvmgcMetric = new JVMGCMetric(metricRegistry, config);
         jvmgcMetric.collect();
         int serverPort = 12999;
         HttpServer httpServer = httpServer(serverPort);
@@ -52,9 +54,6 @@ public class JVMGCMetricTest {
             @SneakyThrows
             @Override
             public void writeToResponse(SessionContext context) {
-//                Runtime runtime = Runtime.getRuntime();
-//                System.out.println("total memory: " + runtime.totalMemory() / (1024 * 1024));
-//                System.out.println("begin response freeMemory:" + runtime.freeMemory() / (1024 * 1024));
                 List<byte[]> list = new ArrayList<>();
                 for (int i = 0; i < 40; i++) {
                     list.add(new byte[10 * 1024 * 1024]);
@@ -62,7 +61,6 @@ public class JVMGCMetricTest {
                 Assert.assertNotNull(list);
                 System.gc();
                 TimeUnit.SECONDS.sleep(1);
-//                System.out.println("end response freeMemory:" + runtime.freeMemory() / (1024 * 1024));
             }
 
             @Override
@@ -97,6 +95,50 @@ public class JVMGCMetricTest {
                     Assert.assertTrue(counter.getCount() > 1);
                 }
             }
+        });
+    }
+
+    @Test
+    public void disableCollect() throws Exception {
+        Config config = this.createConfig(JVMGCMetric.ENABLE_KEY, "false");
+        MetricRegistry metricRegistry = new MetricRegistry();
+        JVMGCMetric jvmgcMetric = new JVMGCMetric(metricRegistry, config);
+        jvmgcMetric.collect();
+        int serverPort = 12999;
+        HttpServer httpServer = httpServer(serverPort);
+        httpServer.response(new ResponseHandler() {
+            @SneakyThrows
+            @Override
+            public void writeToResponse(SessionContext context) {
+                List<byte[]> list = new ArrayList<>();
+                for (int i = 0; i < 40; i++) {
+                    list.add(new byte[10 * 1024 * 1024]);
+                }
+                Assert.assertNotNull(list);
+                System.gc();
+                TimeUnit.SECONDS.sleep(1);
+            }
+
+            @Override
+            public ResponseHandler apply(MocoConfig config) {
+                return this;
+            }
+        });
+
+        running(httpServer, () -> {
+            OkHttpClient client = new OkHttpClient.Builder().readTimeout(100, TimeUnit.SECONDS).build();
+            for (int i = 0; i < 1; i++) {
+                Request request = new Request.Builder()
+                        .url("http://localhost:" + serverPort)
+                        .build();
+                try (Response response = client.newCall(request).execute()) {
+                    Objects.requireNonNull(response.body()).string();
+                }
+                TimeUnit.SECONDS.sleep(1);
+            }
+            TimeUnit.SECONDS.sleep(5);
+            Map<String, Metric> metrics = metricRegistry.getMetrics();
+            Assert.assertTrue(metrics.isEmpty());
         });
     }
 }

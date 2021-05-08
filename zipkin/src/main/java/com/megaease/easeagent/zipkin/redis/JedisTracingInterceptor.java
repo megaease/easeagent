@@ -18,6 +18,9 @@
 package com.megaease.easeagent.zipkin.redis;
 
 
+import brave.Tracer;
+import brave.Tracing;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import redis.clients.jedis.Jedis;
@@ -25,6 +28,10 @@ import redis.clients.jedis.Jedis;
 import java.util.Map;
 
 public class JedisTracingInterceptor extends CommonRedisTracingInterceptor {
+
+    public JedisTracingInterceptor(Tracing tracing, Config config) {
+        super(tracing, config);
+    }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {

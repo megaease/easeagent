@@ -27,40 +27,32 @@ import com.megaease.easeagent.metrics.BaseMetricsTest;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.common.TopicPartition;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 
-public class KafkaConsumerMetricInterceptorTest extends BaseMetricsTest {
+public class KafkaMessageListenerMetricInterceptorTest extends BaseMetricsTest {
     MetricRegistry metricRegistry;
     KafkaMetric kafkaMetric;
-    KafkaConsumerMetricInterceptor interceptor;
+    KafkaMessageListenerMetricInterceptor interceptor;
     String topic = "topic";
     MethodInfo methodInfo;
 
     @Before
     public void before() {
-        Config config = this.createConfig(KafkaConsumerMetricInterceptor.ENABLE_KEY, "true");
+        Config config = this.createConfig(KafkaMessageListenerMetricInterceptor.ENABLE_KEY, "true");
         metricRegistry = new MetricRegistry();
         kafkaMetric = new KafkaMetric(metricRegistry);
-        interceptor = new KafkaConsumerMetricInterceptor(kafkaMetric, config);
-        Map<TopicPartition, List<ConsumerRecord<String, String>>> recordsMap = new HashMap<>();
-        List<ConsumerRecord<String, String>> consumerRecordList = new ArrayList<>();
-        consumerRecordList.add(new ConsumerRecord<>(topic, 1, 0, "key", "value"));
-        recordsMap.put(new TopicPartition(topic, 1), consumerRecordList);
-        ConsumerRecords<String, String> consumerRecords = new ConsumerRecords<>(recordsMap);
+        interceptor = new KafkaMessageListenerMetricInterceptor(kafkaMetric, config);
+
+        ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>(topic, 1, 0, "key", "value");
+
         methodInfo = MethodInfo.builder()
-                .invoker(this)
-                .retValue(consumerRecords)
+                .args(new Object[]{consumerRecord})
                 .build();
     }
 
@@ -72,7 +64,11 @@ public class KafkaConsumerMetricInterceptorTest extends BaseMetricsTest {
                 .counterType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .build();
         Map<Object, Object> context = ContextUtils.createContext();
-        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+
+        AgentInterceptorChain chain = mock(AgentInterceptorChain.class);
+
+        interceptor.before(methodInfo, context, chain);
+        interceptor.after(methodInfo, context, chain);
 
         Assert.assertEquals(1L, metricRegistry.timer(metricNameFactory.timerName(topic, MetricSubType.CONSUMER)).getCount());
         Assert.assertEquals(1L, metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER)).getCount());
@@ -83,20 +79,39 @@ public class KafkaConsumerMetricInterceptorTest extends BaseMetricsTest {
     public void invokeFail() {
         Map<Object, Object> context = ContextUtils.createContext();
         methodInfo.setThrowable(new Exception());
-        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+        AgentInterceptorChain chain = mock(AgentInterceptorChain.class);
 
-        Assert.assertTrue(metricRegistry.getMetrics().isEmpty());
+        interceptor.before(methodInfo, context, chain);
+        interceptor.after(methodInfo, context, chain);
+
+        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+                .timerType(MetricSubType.CONSUMER, Maps.newHashMap())
+                .meterType(MetricSubType.CONSUMER, Maps.newHashMap())
+                .meterType(MetricSubType.CONSUMER_ERROR, Maps.newHashMap())
+                .counterType(MetricSubType.CONSUMER, Maps.newHashMap())
+                .counterType(MetricSubType.CONSUMER_ERROR, Maps.newHashMap())
+                .build();
+
+        Assert.assertEquals(1L, metricRegistry.timer(metricNameFactory.timerName(topic, MetricSubType.CONSUMER)).getCount());
+        Assert.assertEquals(1L, metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER)).getCount());
+        Assert.assertEquals(1L, metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR)).getCount());
+        Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(topic, MetricSubType.CONSUMER)).getCount());
+        Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(topic, MetricSubType.CONSUMER_ERROR)).getCount());
+
     }
 
     @Test
     public void disableCollect() {
-        Config config = this.createConfig(KafkaConsumerMetricInterceptor.ENABLE_KEY, "false");
-        interceptor = new KafkaConsumerMetricInterceptor(kafkaMetric, config);
+        Config config = this.createConfig(KafkaMessageListenerMetricInterceptor.ENABLE_KEY, "false");
+        metricRegistry = new MetricRegistry();
+        kafkaMetric = new KafkaMetric(metricRegistry);
+        interceptor = new KafkaMessageListenerMetricInterceptor(kafkaMetric, config);
         Map<Object, Object> context = ContextUtils.createContext();
-        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+        AgentInterceptorChain chain = mock(AgentInterceptorChain.class);
+
+        interceptor.before(methodInfo, context, chain);
+        interceptor.after(methodInfo, context, chain);
 
         Assert.assertTrue(metricRegistry.getMetrics().isEmpty());
     }
-
-
 }

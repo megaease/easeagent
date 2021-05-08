@@ -21,9 +21,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.common.jdbc.SqlInfo;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.metrics.BaseMetricsTest;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStmMetricInterceptor;
@@ -36,7 +38,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 
-public class JdbcStmMetricInterceptorTest {
+public class JdbcStmMetricInterceptorTest extends BaseMetricsTest {
     MetricRegistry registry;
     SqlInfo sqlInfo;
     String sql = "sql";
@@ -45,10 +47,11 @@ public class JdbcStmMetricInterceptorTest {
 
     @Before
     public void before() {
+        Config config = this.createConfig(JdbcStmMetricInterceptor.ENABLE_KEY, "true");
         registry = new MetricRegistry();
         sqlInfo = new SqlInfo(mock(Connection.class));
         sqlInfo.addSql(sql, false);
-        interceptor = new JdbcStmMetricInterceptor(registry, SQLCompression.DEFAULT);
+        interceptor = new JdbcStmMetricInterceptor(registry, SQLCompression.DEFAULT, config);
         methodInfo = MethodInfo.builder()
                 .build();
     }
@@ -88,5 +91,18 @@ public class JdbcStmMetricInterceptorTest {
         Assert.assertEquals(1L, registry.meter(metricNameFactory.meterName(sql, MetricSubType.DEFAULT)).getCount());
         Assert.assertEquals(1L, registry.counter(metricNameFactory.counterName(sql, MetricSubType.ERROR)).getCount());
         Assert.assertEquals(1L, registry.meter(metricNameFactory.meterName(sql, MetricSubType.ERROR)).getCount());
+    }
+
+    @Test
+    public void disableCollect() {
+        Config config = this.createConfig(JdbcStmMetricInterceptor.ENABLE_KEY, "false");
+        interceptor = new JdbcStmMetricInterceptor(registry, SQLCompression.DEFAULT, config);
+        Map<Object, Object> context = ContextUtils.createContext();
+        context.put(SqlInfo.class, sqlInfo);
+        methodInfo.setThrowable(new Exception());
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
+        ContextUtils.setEndTime(context);
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+        Assert.assertTrue(registry.getMetrics().isEmpty());
     }
 }

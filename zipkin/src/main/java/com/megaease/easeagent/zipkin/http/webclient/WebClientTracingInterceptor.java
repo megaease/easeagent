@@ -23,6 +23,8 @@ import brave.http.HttpClientHandler;
 import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
 import brave.http.HttpTracing;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -37,16 +39,22 @@ import java.util.Map;
 public class WebClientTracingInterceptor implements AgentInterceptor {
 
     private static final String SPAN_KEY = WebClientTracingInterceptor.class.getName() + "-SPAN";
-
+    public static final String ENABLE_KEY = "observability.tracings.remoteInvoke.enabled";
     private final HttpClientHandler<HttpClientRequest, HttpClientResponse> clientHandler;
+    private final Config config;
 
-    public WebClientTracingInterceptor(Tracing tracing) {
+    public WebClientTracingInterceptor(Tracing tracing, Config config) {
         HttpTracing httpTracing = HttpTracing.create(tracing);
         this.clientHandler = HttpClientHandler.create(httpTracing);
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         ClientRequest clientRequest = (ClientRequest) methodInfo.getArgs()[0];
         ClientRequest.Builder builder = ClientRequest.from(clientRequest);
         WebClientRequest request = new WebClientRequest(clientRequest, builder);
@@ -59,13 +67,16 @@ public class WebClientTracingInterceptor implements AgentInterceptor {
     @SuppressWarnings("unchecked")
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        Span span = ContextUtils.getFromContext(context, SPAN_KEY);
+        if (span == null) {
+            return chain.doAfter(methodInfo, context);
+        }
         if (methodInfo.isSuccess()) {
             List<ClientResponse> list = (List<ClientResponse>) methodInfo.getRetValue();
             WebClientResponse webClientResponse = null;
             if (list.size() > 0) {
                 webClientResponse = new WebClientResponse(list.get(0));
             }
-            Span span = ContextUtils.getFromContext(context, SPAN_KEY);
             clientHandler.handleReceive(webClientResponse, span);
         }
         return chain.doAfter(methodInfo, context);

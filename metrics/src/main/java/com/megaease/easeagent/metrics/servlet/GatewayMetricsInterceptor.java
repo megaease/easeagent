@@ -18,6 +18,8 @@
 package com.megaease.easeagent.metrics.servlet;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -31,12 +33,20 @@ import java.util.Map;
 
 public class GatewayMetricsInterceptor extends AbstractServerMetric implements AgentInterceptor {
 
-    public GatewayMetricsInterceptor(MetricRegistry metricRegistry) {
+    public static final String ENABLE_KEY = "observability.metrics.request.enabled";
+
+    private final Config config;
+
+    public GatewayMetricsInterceptor(MetricRegistry metricRegistry, Config config) {
         super(metricRegistry);
+        this.config = config;
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return chain.doAfter(methodInfo, context);
+        }
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         String key = getKey(exchange);
         HttpStatus statusCode = exchange.getResponse().getStatusCode();

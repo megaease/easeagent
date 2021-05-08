@@ -20,9 +20,11 @@ package com.megaease.easeagent.metrics.kafka;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.metrics.BaseMetricsTest;
 import com.megaease.easeagent.metrics.MetricNameFactory;
 import com.megaease.easeagent.metrics.MetricSubType;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -34,7 +36,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 
-public class KafkaProducerMetricInterceptorTest {
+public class KafkaProducerMetricInterceptorTest extends BaseMetricsTest {
 
     MetricRegistry metricRegistry;
     KafkaMetric kafkaMetric;
@@ -45,9 +47,10 @@ public class KafkaProducerMetricInterceptorTest {
 
     @Before
     public void before() {
+        Config config = this.createConfig(KafkaProducerMetricInterceptor.ENABLE_KEY, "true");
         metricRegistry = new MetricRegistry();
         kafkaMetric = new KafkaMetric(metricRegistry);
-        interceptor = new KafkaProducerMetricInterceptor(kafkaMetric);
+        interceptor = new KafkaProducerMetricInterceptor(kafkaMetric, config);
         producerRecord = new ProducerRecord<>(topic, 1, System.currentTimeMillis(), "key", "value");
         methodInfo = MethodInfo.builder()
                 .invoker(this)
@@ -107,5 +110,17 @@ public class KafkaProducerMetricInterceptorTest {
         Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(topic, MetricSubType.PRODUCER)).getCount());
         Assert.assertEquals(1L, metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.PRODUCER_ERROR)).getCount());
         Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(topic, MetricSubType.PRODUCER_ERROR)).getCount());
+    }
+
+    @Test
+    public void disableCollect() {
+        Config config = this.createConfig(KafkaProducerMetricInterceptor.ENABLE_KEY, "false");
+        interceptor = new KafkaProducerMetricInterceptor(kafkaMetric, config);
+        Map<Object, Object> context = ContextUtils.createContext();
+        context.put(ContextCons.ASYNC_FLAG, true);
+
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+
+        Assert.assertTrue(metricRegistry.getMetrics().isEmpty());
     }
 }

@@ -24,6 +24,8 @@ import brave.messaging.MessagingTracing;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -36,20 +38,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RabbitMqConsumerTracingInterceptor implements AgentInterceptor {
-
+    public static final String ENABLE_KEY = "observability.tracings.rabbit.enabled";
     private static final String SPAN_CONTEXT_KEY = RabbitMqConsumerTracingInterceptor.class.getName() + "-Span";
-
+    private final Config config;
     private final TraceContext.Extractor<RabbitConsumerRequest> extractor;
     private final TraceContext.Injector<RabbitConsumerRequest> injector;
 
-    public RabbitMqConsumerTracingInterceptor(Tracing tracing) {
+    public RabbitMqConsumerTracingInterceptor(Tracing tracing, Config config) {
         MessagingTracing messagingTracing = MessagingTracing.newBuilder(tracing).build();
         this.extractor = messagingTracing.propagation().extractor(RabbitConsumerRequest::header);
         this.injector = messagingTracing.propagation().injector(RabbitConsumerRequest::addHeader);
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
         Envelope envelope = (Envelope) methodInfo.getArgs()[1];
         AMQP.BasicProperties basicProperties = (AMQP.BasicProperties) methodInfo.getArgs()[2];
@@ -74,6 +81,9 @@ public class RabbitMqConsumerTracingInterceptor implements AgentInterceptor {
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+        if (span == null) {
+            return chain.doAfter(methodInfo, context);
+        }
         if (!methodInfo.isSuccess()) {
             span.error(methodInfo.getThrowable());
         }

@@ -18,19 +18,33 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
+import org.junit.Assert;
 import org.junit.Test;
 
-public class JVMMemoryMetricTest {
+public class JVMMemoryMetricTest extends BaseMetricsTest {
 
     @Test
     public void success() {
+        Config config = this.createConfig(JVMMemoryMetric.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
-        JVMMemoryMetric jvmMemoryMetric = new JVMMemoryMetric(metricRegistry, false);
+        JVMMemoryMetric jvmMemoryMetric = new JVMMemoryMetric(metricRegistry, config, false);
 
         jvmMemoryMetric.doJob();
 
-        // no exception is success
+        Assert.assertFalse(metricRegistry.getMetrics().isEmpty());
+    }
+
+    @Test
+    public void disableCollect() {
+        Config config = this.createConfig(JVMMemoryMetric.ENABLE_KEY, "false");
+        MetricRegistry metricRegistry = new MetricRegistry();
+        JVMMemoryMetric jvmMemoryMetric = new JVMMemoryMetric(metricRegistry, config, false);
+
+        jvmMemoryMetric.doJob();
+
+        Assert.assertTrue(metricRegistry.getMetrics().isEmpty());
     }
 
 }

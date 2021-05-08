@@ -17,7 +17,10 @@
 
 package com.megaease.easeagent.zipkin.redis;
 
+import brave.Tracer;
+import brave.Tracing;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
@@ -25,6 +28,10 @@ import com.megaease.easeagent.core.utils.ContextUtils;
 import java.util.Map;
 
 public class CommonLettuceTracingInterceptor extends CommonRedisTracingInterceptor {
+
+    public CommonLettuceTracingInterceptor(Tracing tracing, Config config) {
+        super(tracing, config);
+    }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {

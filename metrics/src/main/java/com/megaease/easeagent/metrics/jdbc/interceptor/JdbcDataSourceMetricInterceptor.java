@@ -18,7 +18,9 @@
 package com.megaease.easeagent.metrics.jdbc.interceptor;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.jdbc.JdbcUtils;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -32,8 +34,13 @@ import java.util.function.Supplier;
 
 public class JdbcDataSourceMetricInterceptor extends AbstractJdbcMetric implements AgentInterceptor {
 
-    public JdbcDataSourceMetricInterceptor(MetricRegistry metricRegistry) {
+    public static final String ENABLE_KEY = "observability.metrics.jdbcConnection.enabled";
+
+    private final Config config;
+
+    public JdbcDataSourceMetricInterceptor(MetricRegistry metricRegistry, Config config) {
         super(metricRegistry);
+        this.config = config;
     }
 
     @Override
@@ -43,6 +50,9 @@ public class JdbcDataSourceMetricInterceptor extends AbstractJdbcMetric implemen
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return chain.doAfter(methodInfo, context);
+        }
         Connection connection = (Connection) methodInfo.getRetValue();
         try {
             String key;

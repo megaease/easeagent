@@ -20,14 +20,15 @@ package com.megaease.easeagent.zipkin.http;
 import brave.Tracing;
 import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
+import com.megaease.easeagent.config.Config;
 import lombok.SneakyThrows;
 import org.springframework.http.client.AbstractClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
 public class RestTemplateTracingInterceptor extends BaseClientTracingInterceptor<AbstractClientHttpRequest, ClientHttpResponse> {
 
-    public RestTemplateTracingInterceptor(Tracing tracing) {
-        super(tracing);
+    public RestTemplateTracingInterceptor(Tracing tracing, Config config) {
+        super(tracing, config);
     }
 
     @Override

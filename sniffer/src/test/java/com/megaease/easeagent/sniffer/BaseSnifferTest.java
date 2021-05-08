@@ -19,8 +19,12 @@ package com.megaease.easeagent.sniffer;
 
 import brave.Tracing;
 import brave.propagation.StrictCurrentTraceContext;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.interceptor.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -79,5 +83,13 @@ public class BaseSnifferTest {
 
     protected Supplier<AgentInterceptorChain.Builder> mockSupplier() {
         return () -> new DefaultAgentInterceptorChain.Builder().addInterceptor(new MockAgentInterceptor());
+    }
+
+    protected Config createConfig(String key, String value) {
+        Map<String, String> map = new HashMap<>();
+        map.put(key, value);
+        map.put(SwitchUtil.GLOBAL_METRICS_ENABLE_KEY, "true");
+        map.put(SwitchUtil.GLOBAL_TRACING_ENABLE_KEY, "true");
+        return new Configs(map);
     }
 }

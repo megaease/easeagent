@@ -21,6 +21,8 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -38,9 +40,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public abstract class AbstractRedisMetricInterceptor extends AbstractMetric implements AgentInterceptor {
+    public static final String ENABLE_KEY = "observability.metrics.redis.enabled";
+    private final Config config;
 
-    public AbstractRedisMetricInterceptor(MetricRegistry metricRegistry) {
+    public AbstractRedisMetricInterceptor(MetricRegistry metricRegistry, Config config) {
         super(metricRegistry);
+        this.config = config;
         this.metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
                         ImmutableMap.<MetricField, MetricValueFetcher>builder()
@@ -99,6 +104,9 @@ public abstract class AbstractRedisMetricInterceptor extends AbstractMetric impl
     }
 
     public void collect(String key, long duration, boolean success) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return;
+        }
         metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
         final Meter defaultMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
         final Counter defaultCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT));
