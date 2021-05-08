@@ -23,8 +23,10 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
+import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.common.jdbc.SqlInfo;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
@@ -42,6 +44,8 @@ import java.util.function.Supplier;
 
 public class JdbcStmMetricInterceptor extends AbstractJdbcMetric implements RemovalListener<String, String>, AgentInterceptor {
 
+    public static final String ENABLE_KEY = "observability.metrics.jdbcStatement.enabled";
+
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     private static final int maxCacheSize = 1000;
@@ -50,13 +54,19 @@ public class JdbcStmMetricInterceptor extends AbstractJdbcMetric implements Remo
 
     private final Cache<String, String> cache = CacheBuilder.newBuilder().maximumSize(maxCacheSize).removalListener(this).build();
 
-    public JdbcStmMetricInterceptor(MetricRegistry metricRegistry, SQLCompression sqlCompression) {
+    private final Config config;
+
+    public JdbcStmMetricInterceptor(MetricRegistry metricRegistry, SQLCompression sqlCompression, Config config) {
         super(metricRegistry);
         this.sqlCompression = sqlCompression;
+        this.config = config;
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return chain.doAfter(methodInfo, context);
+        }
         SqlInfo sqlInfo = (SqlInfo) context.get(SqlInfo.class);
         String sql = sqlInfo.getSql();
         String key = this.sqlCompression.compress(sql);

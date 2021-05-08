@@ -28,6 +28,8 @@ import brave.servlet.HttpServletRequestWrapper;
 import brave.servlet.HttpServletResponseWrapper;
 import brave.servlet.internal.ServletRuntime;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -44,16 +46,22 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
     private final HttpServerHandler<HttpServerRequest, HttpServerResponse> httpServerHandler;
     private static final String SCOPE_CONTEXT_KEY = HttpFilterTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
     private static final String SEND_HANDLED_KEY = "brave.servlet.TracingFilter$SendHandled";
-
+    public static final String ENABLE_KEY = "observability.tracings.request.enabled";
     private final ServletRuntime servletRuntime = ServletRuntime.get();
+    private final Config config;
 
-    public HttpFilterTracingInterceptor(Tracing tracing) {
+    public HttpFilterTracingInterceptor(Tracing tracing, Config config) {
         HttpTracing httpTracing = HttpTracing.create(tracing);
         this.httpServerHandler = HttpServerHandler.create(httpTracing);
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         Span span = (Span) httpServletRequest.getAttribute(ContextCons.SPAN);
         CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
@@ -81,7 +89,11 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY)) {
+        CurrentTraceContext.Scope scope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY);
+        if (scope == null) {
+            return chain.doAfter(methodInfo, context);
+        }
+        try {
             HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
             HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
             Span span = (Span) httpServletRequest.getAttribute(ContextCons.SPAN);
@@ -94,6 +106,8 @@ public class HttpFilterTracingInterceptor implements AgentInterceptor {
                 httpServerHandler.handleSend(responseWrapper, span);
             }
             return chain.doAfter(methodInfo, context);
+        } finally {
+            scope.close();
         }
     }
 

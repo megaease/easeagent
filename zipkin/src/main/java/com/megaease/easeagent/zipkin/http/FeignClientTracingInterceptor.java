@@ -21,6 +21,7 @@ import brave.Span;
 import brave.Tracing;
 import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
@@ -41,8 +42,8 @@ import java.util.Map;
 @Slf4j
 public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<Request, Response> {
 
-    public FeignClientTracingInterceptor(Tracing tracing) {
-        super(tracing);
+    public FeignClientTracingInterceptor(Tracing tracing, Config config) {
+        super(tracing, config);
     }
 
     @Override

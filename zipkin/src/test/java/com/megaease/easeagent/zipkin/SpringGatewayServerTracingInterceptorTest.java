@@ -21,6 +21,7 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
@@ -47,6 +48,7 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
 
     @Test
     public void success() {
+        Config config = this.createConfig(SpringGatewayServerTracingInterceptor.ENABLE_KEY, "true");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -60,7 +62,7 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
                 })
                 .build().tracer();
 
-        SpringGatewayServerTracingInterceptor interceptor = new SpringGatewayServerTracingInterceptor(Tracing.current());
+        SpringGatewayServerTracingInterceptor interceptor = new SpringGatewayServerTracingInterceptor(Tracing.current(), config);
 
         Map<String, Object> attrMap = new HashMap<>();
         ServerWebExchange exchange = mock(ServerWebExchange.class);
@@ -74,8 +76,8 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         when(request.getHeaders()).thenReturn(httpHeaders);
-        when(request.getPath()).thenReturn(RequestPath.parse(URI.create("http://httpbin.org/anything"), ""));
-        when(request.getURI()).thenReturn(URI.create("http://httpbin.org/anything"));
+        when(request.getPath()).thenReturn(RequestPath.parse(URI.create("https://httpbin.org/anything"), ""));
+        when(request.getURI()).thenReturn(URI.create("https://httpbin.org/anything"));
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getMethodValue()).thenReturn(HttpMethod.GET.name());
 
@@ -105,6 +107,7 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
 
     @Test
     public void fail() {
+        Config config = this.createConfig(SpringGatewayServerTracingInterceptor.ENABLE_KEY, "true");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -118,7 +121,7 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
                 })
                 .build().tracer();
 
-        SpringGatewayServerTracingInterceptor interceptor = new SpringGatewayServerTracingInterceptor(Tracing.current());
+        SpringGatewayServerTracingInterceptor interceptor = new SpringGatewayServerTracingInterceptor(Tracing.current(), config);
 
         Map<String, Object> attrMap = new HashMap<>();
         ServerWebExchange exchange = mock(ServerWebExchange.class);
@@ -132,8 +135,8 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         when(request.getHeaders()).thenReturn(httpHeaders);
-        when(request.getPath()).thenReturn(RequestPath.parse(URI.create("http://httpbin.org/anything"), ""));
-        when(request.getURI()).thenReturn(URI.create("http://httpbin.org/anything"));
+        when(request.getPath()).thenReturn(RequestPath.parse(URI.create("https://httpbin.org/anything"), ""));
+        when(request.getURI()).thenReturn(URI.create("https://httpbin.org/anything"));
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getMethodValue()).thenReturn(HttpMethod.GET.name());
 
@@ -162,5 +165,61 @@ public class SpringGatewayServerTracingInterceptorTest extends BaseZipkinTest {
         expectedMap.put("error", "400");
         expectedMap.put("http.status_code", "400");
         Assert.assertEquals(expectedMap, spanInfoMap);
+    }
+
+    @Test
+    public void disableTracing() {
+        Config config = this.createConfig(SpringGatewayServerTracingInterceptor.ENABLE_KEY, "false");
+        Map<String, String> spanInfoMap = new HashMap<>();
+        Tracing.newBuilder()
+                .currentTraceContext(currentTraceContext)
+                .addSpanHandler(new SpanHandler() {
+                    @Override
+                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                        Map<String, String> tmpMap = new HashMap<>(span.tags());
+                        spanInfoMap.putAll(tmpMap);
+                        return super.end(context, span, cause);
+                    }
+                })
+                .build().tracer();
+
+        SpringGatewayServerTracingInterceptor interceptor = new SpringGatewayServerTracingInterceptor(Tracing.current(), config);
+
+        Map<String, Object> attrMap = new HashMap<>();
+        ServerWebExchange exchange = mock(ServerWebExchange.class);
+        ServerHttpRequest request = mock(ServerHttpRequest.class);
+        ServerHttpResponse response = mock(ServerHttpResponse.class);
+
+        when(exchange.getRequest()).thenReturn(request);
+        when(exchange.getResponse()).thenReturn(response);
+        when(exchange.getAttributes()).thenReturn(attrMap);
+        when(exchange.getAttribute(any(String.class))).thenAnswer(invocation -> attrMap.get(invocation.getArgumentAt(0, String.class)));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        when(request.getHeaders()).thenReturn(httpHeaders);
+        when(request.getPath()).thenReturn(RequestPath.parse(URI.create("https://httpbin.org/anything"), ""));
+        when(request.getURI()).thenReturn(URI.create("https://httpbin.org/anything"));
+        when(request.getMethod()).thenReturn(HttpMethod.GET);
+        when(request.getMethodValue()).thenReturn(HttpMethod.GET.name());
+
+        when(response.getRawStatusCode()).thenReturn(200);
+
+        Object[] args = new Object[]{exchange};
+        Map<Object, Object> context = ContextUtils.createContext();
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(null)
+                .method("doFilterInternal")
+                .args(args)
+                .retValue(null)
+                .throwable(null)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
+        // mock do something
+        // mock do something end
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+
+        Assert.assertTrue(spanInfoMap.isEmpty());
     }
 }

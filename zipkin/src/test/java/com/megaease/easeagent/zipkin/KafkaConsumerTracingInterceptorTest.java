@@ -21,30 +21,32 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
-import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.DynamicFieldAccessor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
-import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
-public class KafkaProducerTracingInterceptorTest extends BaseZipkinTest {
+public class KafkaConsumerTracingInterceptorTest extends BaseZipkinTest {
 
     @Test
     public void success() {
-        Config config = this.createConfig(KafkaProducerTracingInterceptor.ENABLE_KEY, "true");
+        Config config = this.createConfig(KafkaConsumerTracingInterceptor.ENABLE_KEY, "true");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing tracing = Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -55,41 +57,42 @@ public class KafkaProducerTracingInterceptorTest extends BaseZipkinTest {
                         spanInfoMap.putAll(tmpMap);
                         return super.end(context, span, cause);
                     }
-                }).build();
+                })
+                .build();
 
-
-        Map<Object, Object> context = ContextUtils.createContext();
-        context.put(ContextCons.ASYNC_FLAG, true);
-
-        KafkaProducer<String, String> kafkaProducer = mock(KafkaProducer.class, withSettings().extraInterfaces(DynamicFieldAccessor.class));
-        DynamicFieldAccessor accessor = (DynamicFieldAccessor) kafkaProducer;
+        Consumer<String, String> consumer = mock(Consumer.class, withSettings().extraInterfaces(DynamicFieldAccessor.class));
+        DynamicFieldAccessor accessor = (DynamicFieldAccessor) consumer;
         when(accessor.getEaseAgent$$DynamicField$$Data()).thenReturn("mock-uri");
         String topic = "mock-topic";
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, "mock-key", "mock-value");
+        TopicPartition topicPartition = new TopicPartition(topic, 1);
+        List<ConsumerRecord<String, String>> list = new ArrayList<>();
+        ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>(topic, 1, 0, "mock-key", "mock-value");
+        list.add(consumerRecord);
+        Map<TopicPartition, List<ConsumerRecord<String, String>>> recordMap = new HashMap<>();
+        recordMap.put(topicPartition, list);
+        ConsumerRecords<String, String> consumerRecords = new ConsumerRecords<>(recordMap);
         MethodInfo methodInfo = MethodInfo.builder()
-                .invoker(kafkaProducer)
-                .method("doSend")
-                .args(new Object[]{producerRecord, null})
+                .invoker(consumer)
+                .method("poll")
+                .args(new Object[]{})
+                .retValue(consumerRecords)
                 .build();
+        Map<Object, Object> context = ContextUtils.createContext();
         AgentInterceptorChain chain = mock(AgentInterceptorChain.class);
 
-        KafkaProducerTracingInterceptor interceptor = new KafkaProducerTracingInterceptor(tracing, config);
+        KafkaConsumerTracingInterceptor interceptor = new KafkaConsumerTracingInterceptor(tracing, config);
         interceptor.before(methodInfo, context, chain);
         interceptor.after(methodInfo, context, chain);
-        Callback callback = (Callback) methodInfo.getArgs()[1];
-        callback.onCompletion(null, null);
 
         Map<String, String> expectedMap = new HashMap<>();
-        expectedMap.put("kafka.topic", "mock-topic");
-        expectedMap.put("kafka.key", "mock-key");
+        expectedMap.put("kafka.topic", topic);
         expectedMap.put("kafka.broker", "mock-uri");
-
         Assert.assertEquals(expectedMap, spanInfoMap);
     }
 
     @Test
     public void disableTracing() {
-        Config config = this.createConfig(KafkaProducerTracingInterceptor.ENABLE_KEY, "false");
+        Config config = this.createConfig(KafkaConsumerTracingInterceptor.ENABLE_KEY, "false");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing tracing = Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -100,29 +103,33 @@ public class KafkaProducerTracingInterceptorTest extends BaseZipkinTest {
                         spanInfoMap.putAll(tmpMap);
                         return super.end(context, span, cause);
                     }
-                }).build();
+                })
+                .build();
 
-
-        Map<Object, Object> context = ContextUtils.createContext();
-        context.put(ContextCons.ASYNC_FLAG, true);
-
-        KafkaProducer<String, String> kafkaProducer = mock(KafkaProducer.class, withSettings().extraInterfaces(DynamicFieldAccessor.class));
-        DynamicFieldAccessor accessor = (DynamicFieldAccessor) kafkaProducer;
+        Consumer<String, String> consumer = mock(Consumer.class, withSettings().extraInterfaces(DynamicFieldAccessor.class));
+        DynamicFieldAccessor accessor = (DynamicFieldAccessor) consumer;
         when(accessor.getEaseAgent$$DynamicField$$Data()).thenReturn("mock-uri");
         String topic = "mock-topic";
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, "mock-key", "mock-value");
+        TopicPartition topicPartition = new TopicPartition(topic, 1);
+        List<ConsumerRecord<String, String>> list = new ArrayList<>();
+        ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>(topic, 1, 0, "mock-key", "mock-value");
+        list.add(consumerRecord);
+        Map<TopicPartition, List<ConsumerRecord<String, String>>> recordMap = new HashMap<>();
+        recordMap.put(topicPartition, list);
+        ConsumerRecords<String, String> consumerRecords = new ConsumerRecords<>(recordMap);
         MethodInfo methodInfo = MethodInfo.builder()
-                .invoker(kafkaProducer)
-                .method("doSend")
-                .args(new Object[]{producerRecord, null})
+                .invoker(consumer)
+                .method("poll")
+                .args(new Object[]{})
+                .retValue(consumerRecords)
                 .build();
+        Map<Object, Object> context = ContextUtils.createContext();
         AgentInterceptorChain chain = mock(AgentInterceptorChain.class);
 
-        KafkaProducerTracingInterceptor interceptor = new KafkaProducerTracingInterceptor(tracing, config);
+        KafkaConsumerTracingInterceptor interceptor = new KafkaConsumerTracingInterceptor(tracing, config);
         interceptor.before(methodInfo, context, chain);
         interceptor.after(methodInfo, context, chain);
-        Callback callback = (Callback) methodInfo.getArgs()[1];
-        Assert.assertNull(callback);
+
         Assert.assertTrue(spanInfoMap.isEmpty());
     }
 }

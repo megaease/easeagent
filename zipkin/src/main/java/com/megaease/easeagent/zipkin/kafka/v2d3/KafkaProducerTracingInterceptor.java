@@ -21,6 +21,8 @@ import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -38,14 +40,21 @@ import java.util.Map;
 
 public class KafkaProducerTracingInterceptor implements AgentInterceptor {
 
+    public static final String ENABLE_KEY = "observability.tracings.kafka.enabled";
     private final KafkaTracing kafkaTracing;
+    private final Config config;
 
-    public KafkaProducerTracingInterceptor(Tracing tracing) {
+    public KafkaProducerTracingInterceptor(Tracing tracing, Config config) {
         this.kafkaTracing = KafkaTracing.newBuilder(tracing).remoteServiceName("kafka").build();
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         KafkaProducer<?, ?> producer = (KafkaProducer<?, ?>) methodInfo.getInvoker();
         String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(producer);
         TracingProducer<?, ?> tracingProducer = kafkaTracing.producer(producer);
@@ -61,6 +70,10 @@ public class KafkaProducerTracingInterceptor implements AgentInterceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        MultiData<Span, Tracer.SpanInScope> multiData = ContextUtils.getFromContext(context, MultiData.class);
+        if (multiData == null) {
+            return chain.doAfter(methodInfo, context);
+        }
         Boolean async = ContextUtils.getFromContext(context, ContextCons.ASYNC_FLAG);
         if (async != null && async) {
             return this.processAsync(methodInfo, context, chain);

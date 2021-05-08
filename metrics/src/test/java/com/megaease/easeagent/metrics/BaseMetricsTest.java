@@ -15,23 +15,22 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics.redis;
+package com.megaease.easeagent.metrics;
 
-import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.config.Configs;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class JedisMetricInterceptor extends AbstractRedisMetricInterceptor {
+public class BaseMetricsTest {
 
-    public JedisMetricInterceptor(MetricRegistry metricRegistry, Config config) {
-        super(metricRegistry, config);
+    public Config createConfig(String key, String value) {
+        Map<String, String> map = new HashMap<>();
+        map.put(key, value);
+        map.put(SwitchUtil.GLOBAL_METRICS_ENABLE_KEY, "true");
+        map.put(SwitchUtil.GLOBAL_TRACING_ENABLE_KEY, "true");
+        return new Configs(map);
     }
-
-    @Override
-    public String getKey(MethodInfo methodInfo, Map<Object, Object> context) {
-        return methodInfo.getMethod();
-    }
-
 }

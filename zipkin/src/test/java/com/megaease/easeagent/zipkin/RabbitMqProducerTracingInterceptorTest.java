@@ -26,22 +26,23 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import com.megaease.easeagent.zipkin.rabbitmq.spring.RabbitMqMessageListenerTracingInterceptor;
+import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 
-public class RabbitMqMessageListenerTracingInterceptorTest extends BaseZipkinTest {
+public class RabbitMqProducerTracingInterceptorTest extends BaseZipkinTest {
 
     @Test
     public void success() {
-        Config config = this.createConfig(RabbitMqMessageListenerTracingInterceptor.ENABLE_KEY, "true");
+        Config config = this.createConfig(RabbitMqProducerTracingInterceptor.ENABLE_KEY, "true");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing tracing = Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -54,39 +55,35 @@ public class RabbitMqMessageListenerTracingInterceptorTest extends BaseZipkinTes
                     }
                 }).build();
 
-
         Map<Object, Object> context = ContextUtils.createContext();
         context.put(ContextCons.MQ_URI, "mock-uri");
+        Map<String, Object> headers = new HashMap<>();
+        AMQP.BasicProperties basicProperties = new AMQP.BasicProperties(null, null, headers, 0, 0, null, null, null, null, new Date(), null, null, null, null);
 
-        MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setConsumerQueue("mock-queue");
-        messageProperties.setReceivedExchange("mock-exchange");
-        messageProperties.setReceivedRoutingKey("mock-routingKey");
-
-        Message message = new Message(new byte[0], messageProperties);
+        Channel channel = mock(Channel.class);
         MethodInfo methodInfo = MethodInfo.builder()
-                .method("onMessage")
-                .args(new Object[]{message})
+                .invoker(channel)
+                .method("basicPublish")
+                .args(new Object[]{"mock-exchange", "mock-queue", true, true, basicProperties, new byte[0]})
                 .build();
-
-        RabbitMqMessageListenerTracingInterceptor interceptor = new RabbitMqMessageListenerTracingInterceptor(tracing, config);
-
         AgentInterceptorChain chain = mock(AgentInterceptorChain.class);
+
+        RabbitMqProducerTracingInterceptor interceptor = new RabbitMqProducerTracingInterceptor(tracing, config);
         interceptor.before(methodInfo, context, chain);
         interceptor.after(methodInfo, context, chain);
 
         Map<String, String> expectedMap = new HashMap<>();
         expectedMap.put("rabbit.exchange", "mock-exchange");
-        expectedMap.put("rabbit.routing_key", "mock-routingKey");
+        expectedMap.put("rabbit.routing_key", "mock-queue");
         expectedMap.put("rabbit.broker", "mock-uri");
-        expectedMap.put("rabbit.queue", "mock-queue");
 
         Assert.assertEquals(expectedMap, spanInfoMap);
+
     }
 
     @Test
     public void disableTracing() {
-        Config config = this.createConfig(RabbitMqMessageListenerTracingInterceptor.ENABLE_KEY, "false");
+        Config config = this.createConfig(RabbitMqProducerTracingInterceptor.ENABLE_KEY, "false");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing tracing = Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -99,27 +96,24 @@ public class RabbitMqMessageListenerTracingInterceptorTest extends BaseZipkinTes
                     }
                 }).build();
 
-
         Map<Object, Object> context = ContextUtils.createContext();
         context.put(ContextCons.MQ_URI, "mock-uri");
+        Map<String, Object> headers = new HashMap<>();
+        AMQP.BasicProperties basicProperties = new AMQP.BasicProperties(null, null, headers, 0, 0, null, null, null, null, new Date(), null, null, null, null);
 
-        MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setConsumerQueue("mock-queue");
-        messageProperties.setReceivedExchange("mock-exchange");
-        messageProperties.setReceivedRoutingKey("mock-routingKey");
-
-        Message message = new Message(new byte[0], messageProperties);
+        Channel channel = mock(Channel.class);
         MethodInfo methodInfo = MethodInfo.builder()
-                .method("onMessage")
-                .args(new Object[]{message})
+                .invoker(channel)
+                .method("basicPublish")
+                .args(new Object[]{"mock-exchange", "mock-queue", true, true, basicProperties, new byte[0]})
                 .build();
-
-        RabbitMqMessageListenerTracingInterceptor interceptor = new RabbitMqMessageListenerTracingInterceptor(tracing, config);
-
         AgentInterceptorChain chain = mock(AgentInterceptorChain.class);
+
+        RabbitMqProducerTracingInterceptor interceptor = new RabbitMqProducerTracingInterceptor(tracing, config);
         interceptor.before(methodInfo, context, chain);
         interceptor.after(methodInfo, context, chain);
 
         Assert.assertTrue(spanInfoMap.isEmpty());
+
     }
 }

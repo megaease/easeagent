@@ -19,6 +19,7 @@ package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
@@ -38,13 +39,14 @@ import java.util.Map;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-public class HttpFilterMetricsInterceptorTest {
+public class HttpFilterMetricsInterceptorTest extends BaseMetricsTest {
 
     @Test
     public void success() {
+        Config config = this.createConfig(HttpFilterMetricsInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         ServletMetric servletMetric = new ServletMetric(metricRegistry);
-        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric);
+        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric, config);
 
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
@@ -97,9 +99,10 @@ public class HttpFilterMetricsInterceptorTest {
 
     @Test
     public void fail() {
+        Config config = this.createConfig(HttpFilterMetricsInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         ServletMetric servletMetric = new ServletMetric(metricRegistry);
-        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric);
+        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric, config);
 
         MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
@@ -148,6 +151,50 @@ public class HttpFilterMetricsInterceptorTest {
         Assert.assertEquals(1L, metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR)).getCount());
         Assert.assertEquals(1L, metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.ERROR)).getCount());
 
+    }
+
+    @Test
+    public void disableCollect() {
+        Config config = this.createConfig(HttpFilterMetricsInterceptor.ENABLE_KEY, "false");
+        MetricRegistry metricRegistry = new MetricRegistry();
+        ServletMetric servletMetric = new ServletMetric(metricRegistry);
+        HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric, config);
+
+        Filter filter = mock(Filter.class);
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+
+        when(httpServletRequest.getMethod()).thenReturn("GET");
+        when(httpServletRequest.getRequestURI()).thenReturn("/path/users/123/info");
+        when(httpServletRequest.getRequestURL()).thenReturn(new StringBuffer("/path/users/123/info?page=200"));
+        when(httpServletResponse.getStatus()).thenReturn(200);
+
+        Map<String, Object> attrMap = new HashMap<>();
+        doAnswer(invocation -> {
+            String key = invocation.getArgumentAt(0, String.class);
+            Object value = invocation.getArgumentAt(1, Object.class);
+            attrMap.put(key, value);
+            return null;
+        }).when(httpServletRequest).setAttribute(any(String.class), any());
+        when(httpServletRequest.getAttribute(any(String.class))).thenAnswer(invocation -> attrMap.get(invocation.getArgumentAt(0, String.class)));
+
+        httpServletRequest.setAttribute(ServletUtils.BEST_MATCHING_PATTERN_ATTRIBUTE, "/path/users/{userId}/info");
+
+        Object[] args = new Object[]{httpServletRequest, httpServletResponse, filterChain};
+        Map<Object, Object> context = ContextUtils.createContext();
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(filter)
+                .method("doFilterInternal")
+                .args(args)
+                .build();
+
+        interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
+        ContextUtils.setEndTime(context);
+        interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
+
+        Assert.assertTrue(metricRegistry.getMetrics().isEmpty());
 
     }
 }

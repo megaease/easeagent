@@ -19,10 +19,12 @@ package com.megaease.easeagent.zipkin.jdbc;
 
 import brave.Span;
 import brave.propagation.ThreadLocalSpan;
+import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.jdbc.DatabaseInfo;
 import com.megaease.easeagent.common.jdbc.JdbcUtils;
 import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.common.jdbc.SqlInfo;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -37,6 +39,7 @@ import java.util.Optional;
 
 public class JdbcStmTracingInterceptor implements AgentInterceptor {
 
+    public static final String ENABLE_KEY = "observability.tracings.jdbc.enabled";
     public static final String SPAN_SQL_QUERY_TAG_NAME = "sql";
     public static final String SPAN_ERROR_TAG_NAME = "error";
     public static final String SPAN_LOCAL_COMPONENT_TAG_NAME = "local-component";
@@ -45,13 +48,19 @@ public class JdbcStmTracingInterceptor implements AgentInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(JdbcStmTracingInterceptor.class);
 
     private final SQLCompression sqlCompression;
+    private final Config config;
 
-    public JdbcStmTracingInterceptor(SQLCompression sqlCompression) {
+    public JdbcStmTracingInterceptor(SQLCompression sqlCompression, Config config) {
         this.sqlCompression = sqlCompression;
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         SqlInfo sqlInfo = ContextUtils.getFromContext(context, SqlInfo.class);
         if (sqlInfo == null) {
             logger.error("must get sqlInfo from context");

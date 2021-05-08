@@ -21,6 +21,7 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.ChainBuilderFactory;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -46,6 +47,7 @@ public class WebClientTracingInterceptorTest extends BaseZipkinTest {
     @SneakyThrows
     @Test
     public void success() {
+        Config config = this.createConfig(WebClientTracingInterceptor.ENABLE_KEY, "true");
         Map<String, String> spanInfoMap = new HashMap<>();
         Tracing.newBuilder()
                 .currentTraceContext(currentTraceContext)
@@ -59,7 +61,7 @@ public class WebClientTracingInterceptorTest extends BaseZipkinTest {
                 })
                 .build().tracer();
 
-        ClientRequest clientRequest = ClientRequest.create(HttpMethod.GET, new URI("http://www.xxx.com/users/1")).build();
+        ClientRequest clientRequest = ClientRequest.create(HttpMethod.GET, new URI("https://www.xxx.com/users/1")).build();
         ClientResponse clientResponse = ClientResponse.create(HttpStatus.OK).build();
 
         ArrayList<ClientResponse> results = new ArrayList<>();
@@ -70,7 +72,7 @@ public class WebClientTracingInterceptorTest extends BaseZipkinTest {
                 .retValue(results)
                 .build();
         Map<Object, Object> context = ContextUtils.createContext();
-        WebClientTracingInterceptor interceptor = new WebClientTracingInterceptor(Tracing.current());
+        WebClientTracingInterceptor interceptor = new WebClientTracingInterceptor(Tracing.current(), config);
         AgentInterceptorChain interceptorChain = mock(AgentInterceptorChain.class);
         interceptor.before(methodInfo, context, interceptorChain);
 
@@ -83,5 +85,45 @@ public class WebClientTracingInterceptorTest extends BaseZipkinTest {
         expectedMap.put("http.method", "GET");
         expectedMap.put("http.path", "/users/1");
         Assert.assertEquals(expectedMap, spanInfoMap);
+    }
+
+    @SneakyThrows
+    @Test
+    public void disableTracing() {
+        Config config = this.createConfig(WebClientTracingInterceptor.ENABLE_KEY, "false");
+        Map<String, String> spanInfoMap = new HashMap<>();
+        Tracing.newBuilder()
+                .currentTraceContext(currentTraceContext)
+                .addSpanHandler(new SpanHandler() {
+                    @Override
+                    public boolean end(TraceContext context, MutableSpan span, Cause cause) {
+                        Map<String, String> tmpMap = new HashMap<>(span.tags());
+                        spanInfoMap.putAll(tmpMap);
+                        return super.end(context, span, cause);
+                    }
+                })
+                .build().tracer();
+
+        ClientRequest clientRequest = ClientRequest.create(HttpMethod.GET, new URI("https://www.xxx.com/users/1")).build();
+        ClientResponse clientResponse = ClientResponse.create(HttpStatus.OK).build();
+
+        ArrayList<ClientResponse> results = new ArrayList<>();
+        results.add(clientResponse);
+        MethodInfo methodInfo = MethodInfo.builder()
+                .method("filter")
+                .args(new Object[]{clientRequest})
+                .retValue(results)
+                .build();
+        Map<Object, Object> context = ContextUtils.createContext();
+        WebClientTracingInterceptor interceptor = new WebClientTracingInterceptor(Tracing.current(), config);
+        AgentInterceptorChain interceptorChain = mock(AgentInterceptorChain.class);
+        interceptor.before(methodInfo, context, interceptorChain);
+
+        AgentInterceptorChain.Builder builder = ChainBuilderFactory.DEFAULT.createBuilder();
+        builder.addInterceptor(interceptor);
+
+        interceptor.after(methodInfo, context, interceptorChain);
+
+        Assert.assertTrue(spanInfoMap.isEmpty());
     }
 }

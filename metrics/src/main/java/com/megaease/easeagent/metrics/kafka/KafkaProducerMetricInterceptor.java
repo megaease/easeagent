@@ -18,6 +18,8 @@
 package com.megaease.easeagent.metrics.kafka;
 
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -28,14 +30,22 @@ import java.util.Map;
 
 public class KafkaProducerMetricInterceptor implements AgentInterceptor {
 
+    public static final String ENABLE_KEY = "observability.metrics.kafka.enabled";
+
+    private final Config config;
+
     private final KafkaMetric kafkaMetric;
 
-    public KafkaProducerMetricInterceptor(KafkaMetric kafkaMetric) {
+    public KafkaProducerMetricInterceptor(KafkaMetric kafkaMetric, Config config) {
         this.kafkaMetric = kafkaMetric;
+        this.config = config;
     }
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            return chain.doAfter(methodInfo, context);
+        }
         Boolean async = ContextUtils.getFromContext(context, ContextCons.ASYNC_FLAG);
         if (async != null && async) {
             return this.processAsync(methodInfo, context, chain);

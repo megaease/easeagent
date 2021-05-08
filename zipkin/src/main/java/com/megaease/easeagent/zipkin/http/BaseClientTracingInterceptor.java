@@ -24,6 +24,8 @@ import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
 import brave.http.HttpTracing;
 import brave.propagation.CurrentTraceContext;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -36,14 +38,21 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
     protected final HttpClientHandler<HttpClientRequest, HttpClientResponse> clientHandler;
     private static final String SCOPE_CONTEXT_KEY = BaseClientTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
     protected static final String SPAN_CONTEXT_KEY = BaseClientTracingInterceptor.class.getName() + "-Span";
+    public static final String ENABLE_KEY = "observability.tracings.remoteInvoke.enabled";
+    private final Config config;
 
-    public BaseClientTracingInterceptor(Tracing tracing) {
+    public BaseClientTracingInterceptor(Tracing tracing, Config config) {
         HttpTracing httpTracing = HttpTracing.create(tracing);
         this.clientHandler = HttpClientHandler.create(httpTracing);
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         Req request = getRequest(methodInfo.getInvoker(), methodInfo.getArgs());
         HttpClientRequest requestWrapper = this.buildHttpClientRequest(request);
         Span span = clientHandler.handleSend(requestWrapper);
@@ -56,12 +65,18 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        try (CurrentTraceContext.Scope ignored = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY)) {
+        CurrentTraceContext.Scope scope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY);
+        if (scope == null) {
+            return chain.doAfter(methodInfo, context);
+        }
+        try {
             Resp response = this.getResponse(methodInfo.getInvoker(), methodInfo.getArgs(), methodInfo.getRetValue());
             Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
             HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
             clientHandler.handleReceive(responseWrapper, span);
             return chain.doAfter(methodInfo, context);
+        } finally {
+            scope.close();
         }
     }
 

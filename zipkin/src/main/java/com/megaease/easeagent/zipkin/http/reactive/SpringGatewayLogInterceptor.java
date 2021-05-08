@@ -19,7 +19,9 @@ package com.megaease.easeagent.zipkin.http.reactive;
 
 import brave.Span;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -33,16 +35,19 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class SpringGatewayLogInterceptor implements AgentInterceptor {
-
+    public static final String ENABLE_KEY = "observability.metrics.access.enabled";
     private final Consumer<String> reportConsumer;
 
     protected final AutoRefreshConfigItem<String> serviceName;
 
     private final HttpLog httpLog = new HttpLog();
 
-    public SpringGatewayLogInterceptor(AutoRefreshConfigItem<String> serviceName, Consumer<String> reportConsumer) {
+    private final Config config;
+
+    public SpringGatewayLogInterceptor(AutoRefreshConfigItem<String> serviceName, Config config, Consumer<String> reportConsumer) {
         this.serviceName = serviceName;
         this.reportConsumer = reportConsumer;
+        this.config = config;
     }
 
     public AccessLogServerInfo serverInfo(ServerWebExchange exchange) {
@@ -52,6 +57,10 @@ public class SpringGatewayLogInterceptor implements AgentInterceptor {
     }
 
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         Long beginTime = ContextUtils.getBeginTime(context);
@@ -64,12 +73,12 @@ public class SpringGatewayLogInterceptor implements AgentInterceptor {
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-        Long beginTime = ContextUtils.getBeginTime(context);
-        AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         RequestInfo requestInfo = exchange.getAttribute(RequestInfo.class.getName());
         if (requestInfo == null) {
             return chain.doAfter(methodInfo, context);
         }
+        Long beginTime = ContextUtils.getBeginTime(context);
+        AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         String logString = this.httpLog.getLogString(requestInfo, methodInfo.isSuccess(), beginTime, serverInfo);
         reportConsumer.accept(logString);
         return chain.doAfter(methodInfo, context);

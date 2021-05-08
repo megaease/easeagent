@@ -21,6 +21,8 @@ import brave.Span;
 import brave.Tracing;
 import brave.propagation.CurrentTraceContext;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -33,16 +35,22 @@ import java.util.Map;
 public class KafkaMessageListenerTracingInterceptor implements AgentInterceptor {
 
     private final KafkaTracing kafkaTracing;
-
+    public static final String ENABLE_KEY = "observability.tracings.kafka.enabled";
     private final String SCOPE_CONTEXT_KEY = KafkaMessageListenerTracingInterceptor.class.getName() + "-CurrentTraceContext.Scope";
     private final String SPAN_CONTEXT_KEY = KafkaMessageListenerTracingInterceptor.class.getName() + "-Span";
+    private final Config config;
 
-    public KafkaMessageListenerTracingInterceptor(Tracing tracing) {
+    public KafkaMessageListenerTracingInterceptor(Tracing tracing, Config config) {
         this.kafkaTracing = KafkaTracing.newBuilder(tracing).remoteServiceName("kafka").build();
+        this.config = config;
     }
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         ConsumerRecord<?, ?> consumerRecord = (ConsumerRecord<?, ?>) methodInfo.getArgs()[0];
         String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
         Span span = this.kafkaTracing.nextSpan(consumerRecord).name("on-message")
@@ -61,12 +69,18 @@ public class KafkaMessageListenerTracingInterceptor implements AgentInterceptor 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         CurrentTraceContext.Scope newScope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY);
-        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
-        if (!methodInfo.isSuccess()) {
-            span.error(methodInfo.getThrowable());
+        if (newScope == null) {
+            return chain.doAfter(methodInfo, context);
         }
-        newScope.close();
-        span.finish();
+        try {
+            Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+            if (!methodInfo.isSuccess()) {
+                span.error(methodInfo.getThrowable());
+            }
+            span.finish();
+        } finally {
+            newScope.close();
+        }
         return chain.doAfter(methodInfo, context);
     }
 }

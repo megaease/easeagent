@@ -19,8 +19,10 @@ package com.megaease.easeagent.zipkin.http;
 
 import brave.Span;
 import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.http.HttpServletInterceptor;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
+import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,10 @@ import java.util.function.Consumer;
 @Slf4j
 public class ServletHttpLogInterceptor extends HttpServletInterceptor {
 
+    public static final String ENABLE_KEY = "observability.metrics.access.enabled";
+
+    private final Config config;
+
     private final HttpLog httpLog = new HttpLog();
 
     private final Consumer<String> reportConsumer;
@@ -43,9 +49,10 @@ public class ServletHttpLogInterceptor extends HttpServletInterceptor {
 
     private final static String PROCESSED_AFTER_KEY = ServletHttpLogInterceptor.class.getName() + ".processedAfter";
 
-    public ServletHttpLogInterceptor(AutoRefreshConfigItem<String> serviceName, Consumer<String> reportConsumer) {
+    public ServletHttpLogInterceptor(AutoRefreshConfigItem<String> serviceName, Config config, Consumer<String> reportConsumer) {
         this.serviceName = serviceName;
         this.reportConsumer = reportConsumer;
+        this.config = config;
     }
 
     public AccessLogServerInfo serverInfo(HttpServletRequest request, HttpServletResponse response) {
@@ -60,6 +67,9 @@ public class ServletHttpLogInterceptor extends HttpServletInterceptor {
 
     @Override
     public void internalBefore(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            return;
+        }
         Long beginTime = ContextUtils.getBeginTime(context);
         Span span = (Span) context.get(ContextCons.SPAN);
         AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
@@ -69,6 +79,9 @@ public class ServletHttpLogInterceptor extends HttpServletInterceptor {
 
     @Override
     public void internalAfter(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+            return;
+        }
         Long beginTime = ContextUtils.getBeginTime(context);
         RequestInfo requestInfo = (RequestInfo) httpServletRequest.getAttribute(RequestInfo.class.getName());
         AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
