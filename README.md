@@ -1,3 +1,6 @@
+# EaseAgent
+An agent component for Java system.
+
 - [Overview](#Overview)
   - [Purpose](#Purpose)
   - [Principles](#Principles)
@@ -9,9 +12,6 @@
 - [User Manual](#User-Manual)
 - [Development Guide](#Development-Guide)  
 - [Licenses](#Licenses)
-
-# EaseAgent
-An agent component for Java system.
 
 ## Overview
 
