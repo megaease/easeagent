@@ -1,85 +1,95 @@
 - [Overview](#Overview)
-  - [Purpose & Principles](#Purpose-&-Principles)
+  - [Purpose](#Purpose)
+  - [Principles](#Principles)
   - [Architecture Diagram](#Architecture-Diagram)
 - [Features](#Features)
 - [QuickStart](#QuickStart)
   - [Download](#Download)
   - [Build From Source](#Build-From-Source)
-- [Documentation](#Documentation)
-  - [Agent Configuration](#Agent-Configuration)
-  - [Health Check Endpoint](#Health-Check-Endpoint)
-  - [Readiness Check Endpoint](#Readiness-Check-Endpoint)
-  - [Tracing](#Tracing)
-  - [Metrics](#Metrics)
-    - [Prometheus Metrics Support](#Prometheus-Metrics-Support)
+- [User Manual](#User-Manual)
 - [Development Guide](#Development-Guide)  
 - [Licenses](#Licenses)
 
+# EaseAgent
+An agent component for Java system.
 
 ## Overview
 
 ### Purpose
-EaseAgent is an APM tool under the Java system, used in a distributed system developed by Java.
-It provides cross-service call chain tracking and performance information collection for distributed systems, helps users analyze the overall structure of the distributed system and the call relationships between services and components, thereby improving the efficiency of troubleshooting.
+- EasegAgnet is a Java agent for APM(Application Performance Management) system.
+- EaseAgent majorly  focuses on the Spring Boot development environments.
+- EaseAgent is compatible with mainstream monitoring ecosystems, such as Kafka, ElasticSearch, Prometheus, Zipkin, etc.
+- EaseAgent collects the basic metrics and the service tracking logs, which is very helpful for performance analysis and troubleshooting.
 
 ### Principles
-- No invasion
-- Service based view
-- High performance
+- Design for Micro-Service architecture, collecting the data from a service perspective.
+- Instrumenting a Java application in a non-intrusive way.
+- Lightweight and very low CPU, memory, and I/O resource usage.
+- Safe to Java application/service.
 
 ### Architecture Diagram
 ![image](./doc/images/EaseAgent-Architecture.jpg)
 
-## Features
+#### Description
+Instrumenting the method base on [Byte buddy](https://github.com/raphw/byte-buddy) technology.
+```
+net.bytebuddy.asm.Advice.OnMethodEnter, net.bytebuddy.asm.Advice.OnMethodExit
+```
+1. When the program invokes the enhanced method of class, the method which has the annotation (`OnMethodEnter`)  will be invoked at first.
+2. `Method Advice` will invoke `Metric Interceptor` and `Tracing Interceptor` to processing.
+3. `Metric` and `Tracing` information will be stored in `MetricRegistry` and `Tracing`.
+4. The `Reporter` module will get information from `MetricRegistry` and `Tracing` and send it to `Kafka`. 
+5. The method  which has the annotation (`OnMethodExit`) will be invoked at last.
 
-* Collect Metric and Tracing information
-    * `JDBC`4.0 SQL
-    * `Http Servlet`、`Http Filter`
-    * Spring Boot 2.2.x: `WebClient` 、 `RestTemplate`、`FeignClient` 
-    * `RabbitMQ Client` 5.x、 `Kafka Client` 2.4.x
-    * `Jedis` 3.5.x、 `Lettuce` 5.3.x
-* Collect Access Log
-    * `Http Servlet`、`Http Filter`
+## Features
+* Collecting Metric & Tracing Logs.
+    * `JDBC 4.0`
+    * `HTTP Servlet`、`HTTP Filter`
+    * `Spring Boot 2.2.x`: `WebClient` 、 `RestTemplate`、`FeignClient` 
+    * `RabbitMQ Client 5.x`、 `Kafka Client 2.4.x`
+    * `Jedis 3.5.x`、 `Lettuce 5.3.x` 
+* Collecting Access Logs.
+    * `HTTP Servlet`、`HTTP Filter`
     * `Spring Cloud Gateway`
-* Support `traceId` and `spanId` inject into user application
-* Support `health check` endpoint
-* Support `readiness check` endpoint for `SpringBoot2.2.x`
+* Instrumenting the `traceId` and `spanId` automatically
+* Supplying the `health check` endpoint
+* Supplying the `readiness check` endpoint for `SpringBoot2.2.x`
 
 ## QuickStart
 
 ### Download
-Download `easeagent.jar` from releases [releases](https://github.com/megaease/easeagent/releases)
+Download `easeagent.jar` from releases [releases](https://github.com/megaease/easeagent/releases).
 
 or
 
 ```
-curl -Lk https://github.com/megaease/easeagent/releases/download/{tag}/easeagent.jar -O
+$ curl -Lk https://github.com/megaease/easeagent/releases/download/{tag}/easeagent.jar -O
 ```
 
 ### Build From Source
-Download EaseAgent with `git clone https://github.com/megaease/easeagent.git`
+Download EaseAgent with `git clone https://github.com/megaease/easeagent.git`.
 ```
-cd easeagent
-mvn clean package -am -pl build
+$ cd easeagent
+$ mvn clean package -am -pl build
 ```
-A generated `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
+The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
 
 ### Step 1
-Extract default configuration files
+Extracting the default configuration file.
 ```
-jar xf easeagent.jar agent.properties log4j2.xml
+$ jar xf easeagent.jar agent.properties log4j2.xml
 ```
 
 ### Step 2
-* Modify service name, default configuration is unknown-service
+* Modify service name, default configuration is unknown-service.
 ```
 name=[app-name]
 ```
-* Modify kafka server config, default configuration is `127.0.0.1:9092`
+* Modify kafka server config, default configuration is `127.0.0.1:9092`.
 ```
 observability.outputServer.bootstrapServer = [ip:port]
 ```
-* Modify output configuration, if you want to see log information in console
+* Modify output configuration, if you want to see log information in console.
 ```
 # metric output
 observability.metrics.[xxxx].appendType=console
@@ -89,31 +99,42 @@ observability.tracings.output.enabled=false
 ```
 
 ### Step 3
-Clone demo source code and build
+Building the demo application.
 ```
-git clone https://github.com/akwei/spring-petclinic-microservices.git
-cd spring-petclinic-microservices
-mvn -DskipTests=true package
+$ git clone https://github.com/akwei/spring-petclinic-microservices.git
+$ cd spring-petclinic-microservices
+$ mvn -DskipTests=true package
 ```
 
 ### Step 4
-Run java application with agent in console
+Run the demo application with EaseAgent.
 ```
-java -jar spring-petclinic-config-server/target/spring-petclinic-config-server-2.4.2.jar
+# Open another console
+$ java -jar spring-petclinic-config-server/target/spring-petclinic-config-server-2.4.2.jar
 
-java -jar spring-petclinic-discovery-server/target/spring-petclinic-discovery-server-2.4.2.jar
+# Open another console
+$ java -jar spring-petclinic-discovery-server/target/spring-petclinic-discovery-server-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9900 -jar spring-petclinic-vets-service/target/spring-petclinic-vets-service-2.4.2.jar
+# Open another console
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar spring-petclinic-vets-service/target/spring-petclinic-vets-service-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9901 -jar spring-petclinic-visits-service/target/spring-petclinic-visits-service-2.4.2.jar
+# Open another console
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9901 -jar spring-petclinic-visits-service/target/spring-petclinic-visits-service-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9902 -jar spring-petclinic-customers-service/target/spring-petclinic-customers-service-2.4.2.jar
+# Open another console
+$ export EASE_AGENT_PATH=/[Replace with agent path]
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9902 -jar spring-petclinic-customers-service/target/spring-petclinic-customers-service-2.4.2.jar
 
-java -javaagent:/[user path]/easeagent.jar=/{path}/agent.properties -Deaseagent.server.port=9903 -jar spring-petclinic-api-gateway/target/spring-petclinic-api-gateway-2.4.2.jar
+# Open another console
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9903 -jar spring-petclinic-api-gateway/target/spring-petclinic-api-gateway-2.4.2.jar
+
 ```
 
 ### Step 5
-add config in `prometheus.yml` 
+Adding the following configuration in `prometheus.yml` 
 ```
   - job_name: 'petclinic-vets-service'
     static_configs:
@@ -136,45 +157,23 @@ add config in `prometheus.yml`
     metrics_path: "/prometheus/metrics"
 
 ```
-start Prometheus
+Start Prometheus
 ```
-./prometheus --config.file=prometheus.yml
+$ ./prometheus --config.file=prometheus.yml
 ```
 
 ### Step 6
-Open Browser to visit [http://localhost:8080](http://localhost:8080)
+Open Browser to visit [http://localhost:8080](http://localhost:8080).
 
-After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search `_00GET__owners`.You will see as following
+After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search `_00GET__owners`. You will see as following.
 
 ![image](./doc/images/prometheus-demo-1.png)
 
+## User Manual
+For more information, please refer to the [User Manual](./doc/user-manual.md).
 
-## Documentation
-
-### Agent Configuration
-
-### Health Check Endpoint
-User can use the following URL to support health check and liveness check
-```
-http://[ip]:[easeagent.server.port]/health
-```
-
-### Readiness Check Endpoint
-User can use the following URL to support health check in SpringBoot 2.2.x
-```
-http://[ip]:[easeagent.server.port]/health/readiness
-```
-
-### Tracing
-EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing information.The data format stored in `Kafka`  is [Zipkin Data Model](https://zipkin.io/pages/data_model.html). User can send tracing information to [Zipkin server](https://zipkin.io/pages/quickstart.html).
-
-### Metrics
-EaseAgent use [io.dropwizard.metrics](https://github.com/dropwizard/metrics) to collect metric information.
-
-For more metric information, please refer to the [User Manual](./doc/user-manual.md)
-
-## Development-Guide
-Refer to [Development-Guide](./doc/development-guide.md)
+## Development Guide
+Refer to [Development-Guide](./doc/development-guide.md).
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
