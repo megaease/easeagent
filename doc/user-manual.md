@@ -35,14 +35,20 @@
       - [JVM Memory](#jvm-memory)
       - [JVM GC](#jvm-gc)
       - [Kafka Client](#kafka-client)
-      - [RabbitMq Producer](#rabbitmq-producer)
-      - [RabbitMq Consumer](#rabbitmq-consumer)
+      - [RabbitMQ Producer](#rabbitmq-producer)
+      - [RabbitMQ Consumer](#rabbitmq-consumer)
   
 ## Agent.properties
-`EaseAgent` uses the `report` module to control the tracing and metric collection behavior of each component. `agent.properties` is configured with various parameters of `report`. Changing these parameters can change the collection behavior. These parameters include: collection frequency, target queue, switch and other settings. Users can customize parameter.
+EaseAgent provides dedicated parameters for controlling metrics and tracing collection behavior via agent.properties. These parameters include:
+* Data reporting frequency
+* Data reporting output type
+* Kafka topic of data reporting
+* Data collecting and reporting switch
+* Queue depth in process for high throughput
+
 
 ### Getting the configuration file
-Extracting the default configuration file
+You may extract default configuration from the JAR file or create new properties from a blank file.
 ```
 $ jar xf easeagent.jar agent.properties log4j2.xml
 ```
@@ -287,11 +293,19 @@ For Example: EaseAgent collect metric of HTTP Request. The collected metric data
 }
 ```
 
-For different components, the fields contained in JSON are as follows:
+For different kind of metrics, we have different schemas:
 
 #### HTTP Request
+HTTP Request schema describes key metrics of service APIs, which include:
+* Total execution count (cnt)
+* Throughput (m1, m5, m15)
+* Error throughput (m1err, m5err, m15err)
+* Error throughput percentage (m1errpct, m5errpct, m15errpct)
+* Latency (p25, p50, p75, p95, p98, p99)
+* Execution duration (min, mean, max)
+
 | Field | Type | Description | 
-| ----- | ---- | ----------- | 
+| :------------------ | :-----: | :----- | 
 | url                   |string|the URL of the request|
 | cnt       |integer| The total count of the request executed |
 | m1               |double| The HTTP request executions per second (exponentially-weighted moving average) in last 1 minute |
@@ -315,16 +329,20 @@ For different components, the fields contained in JSON are as follows:
 |p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
 
 #### JDBC Statement
+JDBC Statement schema describes key metrics of JDBC SQL Statement, which include:
+* Execution count (cnt)
+* Throughput (m1, m5, m15)
+* Error throughput (m1err, m5err, m15err)
+* Latency (p25, p50, p75, p95, p98, p99, p999)
+* Execution duration (min, mean, max)
+
 | Field | Type | Description |
-| ----- | ---- | ----------- |
+| :------------------ | :-----: | :----- |
 |signature|string|Executed JDBC method signature.|
 | cnt | integer |  The total count of JDBC method executed |
 | m1 | double| The JDBC method executions per second (exponentially-weighted moving average) in last 1 minute. |
 | m5 | double|  The JDBC method executions per second (exponentially-weighted moving average) in last 5 minutes. |
 | m15 | double |  The JDBC method executions per second (exponentially-weighted moving average) in last 15 minutes. |
-| m1cnt | integer |  The JDBC method execution count in last 1 minute. |
-| m5cnt | integer |  The JDBC method execution count in last 5 minutes. |
-| m15cnt | integer |  The JDBC method execution count in last 15 minutes. |
 | m1err         |double| The JDBC method error executions per second (exponentially-weighted moving average) in last 1 minute |
 | m5err         |double| The JDBC method error executions per second (exponentially-weighted moving average) in last 5 minute. |
 | m15err        |double| The JDBC method error executions per second (exponentially-weighted moving average) in last 15 minute |
@@ -340,16 +358,20 @@ For different components, the fields contained in JSON are as follows:
 | p999 | double |  TP99.9: The JDBC method execution duration in milliseconds for 99.9% user. |
 
 #### JDBC Connection
-| Field               |  Type   | Description                                                  |
-| ------------------- |  ------- | ----------------------------------------------------------- |
+JDBC Connection schema describes key metrics of Getting Connection, which include:
+* Execution count (cnt)
+* Throughput (m1, m5, m15)
+* Error throughput (m1err, m5err, m15err)
+* Latency (p25, p50, p75, p95, p98, p99, p999)
+* Execution duration (min, mean, max)
+
+| Field | Type | Description |
+| :------------------ | :-----: | :----- |
 | url                 | string  | The total number of database connections                     |
-| cnt     | integer |  The total number of database connections                     |
+| cnt     | integer |  The total number of database connections|
 | m1             | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 1 minute. |
 | m5             | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 5 minutes. |
 | m15            | double  |  The JDBC connection establishment per second (exponentially-weighted moving average) in last 15 minutes. |
-| m1cnt            | integer |  The JDBC connection establishment count in last 1 minute.    |
-| m5cnt            | integer |The JDBC connection establishment count in last 5 minutes.   | 
-| m15cnt           | integer |  The JDBC connection establishment count in last 15 minutes.  |
 | m1err         |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 1 minute |
 | m5err         |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 5 minute. |
 | m15err        |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 15 minute |
@@ -365,23 +387,47 @@ For different components, the fields contained in JSON are as follows:
 | p999 | double  | TP99.9: The JDBC connection establishment duration in milliseconds for 99.9% user. |
 
 #### JVM Memory
-| Field           |  Type   | Description                                                  |
-| :-------------- | :-----: | :----------------------------------------------------------- |
-| bytes-init      | integer | The value represents the initial amount of memory in bytes unit that the JVM requests from the operating system for memory management during startup. The JVM may request additional memory from the operating system and may also release memory to the system over time. The value of init may be undefined (value -1). |
-| bytes-used      | integer | The value represents the amount of memory currently used in bytes unit. |
+JVM Memory schema describes key metrics of Java memory usage, which include:
+* bytes-init
+* bytes-used 
+* bytes-committed 
+* bytes-max
+
+
+| Field | Type | Description |
+| :------------------ | :-----: | :----- |
+| bytes-init | integer | The value represents the initial amount of memory in bytes unit that the JVM requests from the operating system for memory management during startup. The JVM may request additional memory from the operating system and may also release memory to the system over time. The value of init may be undefined (value -1). |
+| bytes-used | integer | The value represents the amount of memory currently used in bytes unit. |
 | bytes-committed | integer | The value represents the amount of memory in bytes unit that is guaranteed to be available for use by the JVM. The amount of committed memory may change over time (increase or decrease). The JVM may release memory to the system and committed could be less than init. Value committed will always be greater than or equal to used. |
-| bytes-max       | integer | The value represents the maximum amount of memory in bytes unit that can be used for memory management. Its value may be undefined (value -1). The maximum amount of memory may change over time if defined. The amount of used and committed memory will always be less than or equal to max if max is defined. A memory allocation may fail if it attempts to increase the used memory such that used > committed even if used <= max would still be true (for example, when the system is low on virtual memory). |
+| bytes-max | integer | The value represents the maximum amount of memory in bytes unit that can be used for memory management. Its value may be undefined (value -1). The maximum amount of memory may change over time if defined. The amount of used and committed memory will always be less than or equal to max if max is defined. A memory allocation may fail if it attempts to increase the used memory such that used > committed even if used <= max would still be true (for example, when the system is low on virtual memory). |
 
 #### JVM GC
-| Field                 |  Type   | Description                                                  |
-| :-------------------- | :-----: | :----------------------------------------------------------- |
+JVM GC schema describes key metrics of JVM garbage collection, which include:
+* total_collection_time
+* times
+* times_rate
+
+| Field | Type | Description |
+| :------------------ | :-----: | :----- |
 | total_collection_time | integer |The value represents the total time for garbage collection operation in millisecond unit. |
-| times                 | integer |  The value represents the total garbage collection times.     |
+| times                 | integer |  The value represents the total garbage collection times. |
 | times_rate            | integer |  The number of gc times per second.                           |
 
 #### Kafka Client
-| Field               |  Type   |  Description                                                  |
-| :------------------ | :-----: | :----------------------------------------------------------- |
+Kafka Client schema describes key metrics of Kafka client invoking, which include:
+* Producer
+  * Throughput (prodrm1, prodrm5, prodrm15)
+  * Error throughput (prodrm1err, prodrm5err, prodrm15err)
+  * Execution duration (prodrmin, prodrmean, prodrmax)
+  * Latency (prodrp25, prodrp50, prodrp75, prodrp95, prodrp98, prodrp99, prodrp999)
+* Consumer
+  * Throughput (consrm1, consrm5, consrm15)
+  * Error throughput (consrm1err, consrm5err, consrm15err)
+  * Execution duration (consrmin, consrmean, consrmax)
+  * Latency (consrp25, consrp50, consrp75, consrp95, consrp98, consrp99, consrp999)
+
+| Field               |  Type   |  Description |
+| :------------------ | :-----: | :----- |
 |resource|string|topic name|
 |prodrm1|double|The executions per second (exponentially-weighted moving average) in last 1 minute (producer)|
 |prodrm5|double|The executions per second (exponentially-weighted moving average) in last 5 minute (producer)|
@@ -416,9 +462,15 @@ For different components, the fields contained in JSON are as follows:
 |consrp99|double|TP99: The execution duration in milliseconds for 99% user.|
 |consrp999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
 
-#### RabbitMq Producer
-| Field               |  Type   | Description                                                  |
-| :------------------ | :-----: | :----------------------------------------------------------- |
+#### RabbitMQ Producer
+RabbitMQ Producer schema describes key metrics of RabbitMQ client publishing message, which include:
+* Throughput (prodrm1, prodrm5, prodrm15)
+* Error throughput (prodrm1err, prodrm5err, prodrm15err)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99)
+
+| Field               |  Type   | Description |
+| :------------------ | :-----: | :---- |
 |resource|string|rabbitmq exchange or routingkey|
 |prodrm1|double|The executions of producer per second (exponentially-weighted moving average) in last 1 minute |
 |prodrm5|double|The executions of producer per second (exponentially-weighted moving average) in last 5 minute |
@@ -435,17 +487,24 @@ For different components, the fields contained in JSON are as follows:
 |p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
 |p98|double|TP98: The http-request execution duration in milliseconds for 98% user.| 
 |p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
+|p999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
 
-#### RabbitMq Consumer
-| Field               |  Type   | Description                                                  |
-| :------------------ | :-----: | :----------------------------------------------------------- |
+#### RabbitMQ Consumer
+RabbitMQ Consumer schema describes key metrics of RabbitMQ client consuming message, which include:
+* Throughput (queue_m1_rate, queue_m5_rate, queue_m15_rate)
+* Error throughput (queue_m1_error_rate, queue_m5_error_rate, queue_m15_error_rate)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99)
+
+| Field               |  Type   | Description |
+| :------------------ | :-----: | :---------- |
 |resource|string|rabbitmq queue| rabbit queue |
-|querym1|double|The executions of queue per second (exponentially-weighted moving average) in last 1 minute |
-|querym5|double|The executions of queue per second (exponentially-weighted moving average) in last 5 minute |
-|querym5|double|The executionsof queue per second (exponentially-weighted moving average) in last 15 minute |
-|querym1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (queue)|
-|querym5err|double|The error executions per second (exponentially-weighted moving average) in last 5 minute (queue)|
-|querym5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (queue)|
+|queue_m1_rate|double|The executions of queue per second (exponentially-weighted moving average) in last 1 minute |
+|queue_m5_rate|double|The executions of queue per second (exponentially-weighted moving average) in last 5 minute |
+|queue_m15_rate|double|The executionsof queue per second (exponentially-weighted moving average) in last 15 minute |
+|queue_m1_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (queue)|
+|queue_m5_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 5 minute (queue)|
+|queue_m15_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (queue)|
 |min|double|The http-request minimal execution duration in milliseconds.|
 |max|double|The http-request maximal execution duration in milliseconds.|
 |mean|double|The http-request mean execution duration in milliseconds.|
@@ -455,3 +514,4 @@ For different components, the fields contained in JSON are as follows:
 |p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
 |p98|double|TP98: The http-request execution duration in milliseconds for 98% user.|
 |p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
+|p999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
