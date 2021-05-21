@@ -160,12 +160,12 @@ Key| Default Value | Description |
 `observability.tracings.output.queuedMaxSpans` | 1000 | The maximum number of spans to be processed in the queue. |
 `observability.tracings.output.queuedMaxSize` | 1000000 | The maximum bytes of spans to be processed in the queue. |
 `observability.tracings.output.messageTimeout` | 1000 |  |
-`observability.tracings.request.enabled` | true | Enable collection of tracing logs(`Servlet`、 `Filter`).|
-`observability.tracings.remoteInvoke.enabled` | true | Enable collection of tracing logs(`RestTemplate`、 `FeignClient`、`WebClient`). |
-`observability.tracings.kafka.enabled`| true | Enable collection of `kafka` tracing logs. |
-`observability.tracings.jdbc.enabled` | true | Enable collection of `JDBC` tracing logs. |
-`observability.tracings.redis.enabled` | true | Enable collection of tracing logs(`Jedis`、`Lettuce`). |
-`observability.tracings.rabbit.enabled` | true | Enable collection of `RabbitMQ` tracing logs. |
+`observability.tracings.request.enabled` | true | Enable collection of tracing logs(`Servlet`、 `Filter`). `false`: Disable collecting. |
+`observability.tracings.remoteInvoke.enabled` | true | Enable collection of tracing logs(`RestTemplate`、 `FeignClient`、`WebClient`). `false`: Disable collecting. |
+`observability.tracings.kafka.enabled`| true | Enable collection of `kafka` tracing logs. `false`: Disable collecting. |
+`observability.tracings.jdbc.enabled` | true | Enable collection of `JDBC` tracing logs. `false`: Disable collecting. |
+`observability.tracings.redis.enabled` | true | Enable collection of tracing logs(`Jedis`、`Lettuce`). `false`: Disable collecting. |
+`observability.tracings.rabbit.enabled` | true | Enable collection of `RabbitMQ` tracing logs. `false`: Disable collecting. |
 
 ### Logging
 EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `log4j2.xml` file.
