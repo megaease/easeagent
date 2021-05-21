@@ -279,7 +279,7 @@ For Example: EaseAgent collect metric of HTTP Request. The collected metric data
 }
 ```
 
-For different components, the fields contained in json are as follows:
+For different components, the fields contained in JSON are as follows:
 
 #### HTTP Request
 | Field | Type | Description | 
