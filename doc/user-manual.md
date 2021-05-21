@@ -3,6 +3,7 @@
 
 - [User Manual](#user-manual)
   - [Agent.properties](#agentproperties)
+    - [Getting the configuration file](#getting-the-configuration-file)
     - [Internal HTTP Server](#internal-http-server)
     - [Metric](#metric)
     - [Kafka](#kafka)
@@ -38,6 +39,9 @@
       - [RabbitMq Consumer](#rabbitmq-consumer)
   
 ## Agent.properties
+`EaseAgent` uses the `report` module to control the tracing and metric collection behavior of each component. `agent.properties` is configured with various parameters of `report`. Changing these parameters can change the collection behavior. These parameters include: collection frequency, target queue, switch and other settings. Users can customize parameter.
+
+### Getting the configuration file
 Extracting the default configuration file
 ```
 $ jar xf easeagent.jar agent.properties log4j2.xml
@@ -48,20 +52,23 @@ $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar=${EASE_AGENT_PATH}/agent.properties" -jar user-app.jar
 ```
 
+Users can customize the following parameters
+
 ### Internal HTTP Server
 EaseAgent opens port `9900` by default to receive configuration change notifications and Prometheus requests.
 
 Key| Default Value | Description |
 ---| ---| ---|
-`easeagent.server.enabled` | true | Enable Internal HTTP Server. `False` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override.|
+`easeagent.server.enabled` | true | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override.|
 `easeagent.server.port` | 9900 | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override. |
 
 ### Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.enabled` | true | Enable all metrics collection. `False`: Disable all metrics collection |
+`observability.metrics.enabled` | true | Enable all metrics collection. `false`: Disable all metrics collection |
 
 ### Kafka
+Tracing and metric data will be output to kafka server.
 Key| Default Value | Description |
 ---| ---| ---|
 `observability.outputServer.bootstrapServer`| 127.0.0.1:9092 |Kafka server host and port. Tracing and metric data will be output to kafka. |
@@ -70,7 +77,7 @@ Key| Default Value | Description |
 ### HTTP Reqeust Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.request.enabled` | true | Enable collecting `Servlet` or `Filter` metric data |
+`observability.metrics.request.enabled` | true | Enable collecting `Servlet` or `Filter` metric data. `false`: Disable collecting. |
 `observability.metrics.request.interval`| 30 | Time interval between two outputs. Time Unit: second. | 
 `observability.metrics.request.topic` | application-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.request.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -78,7 +85,7 @@ Key| Default Value | Description |
 ### JDBC SQL Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.jdbcStatement.enabled` | true | Enable collecting metric data of `JDBC SQL`. |
+`observability.metrics.jdbcStatement.enabled` | true | Enable collecting metric data of `JDBC SQL`. `false`: Disable collecting. |
 `observability.metrics.jdbcStatement.interval` | 30 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.jdbcStatement.topic` | application-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.jdbcStatement.appendType` | kafka  | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -86,7 +93,7 @@ Key| Default Value | Description |
 ### JDBC Connection Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.jdbcConnection.enabled` | true | Enable collecting metric data of `JDBC Connection`. |
+`observability.metrics.jdbcConnection.enabled` | true | Enable collecting metric data of `JDBC Connection`. `false`: Disable collecting. |
 `observability.metrics.jdbcConnection.interval` | 30 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.jdbcConnection.topic` | application-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.jdbcConnection.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -94,7 +101,7 @@ Key| Default Value | Description |
 ### RabbitMQ Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.rabbit.enabled` | true |  Enable collecting metric data of `RabbitMQ producer and consumer`. | Send metric data to the specified kafka topic. |
+`observability.metrics.rabbit.enabled` | true |  Enable collecting metric data of `RabbitMQ producer and consumer`. `false`: Disable collecting. |
 `observability.metrics.rabbit.interval` | 30 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.rabbit.topic` | platform-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.rabbit.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -102,7 +109,7 @@ Key| Default Value | Description |
 ### Kafka Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.kafka.enabled` | true | Enable collection metric data of `Kafka producer and consumer`. |
+`observability.metrics.kafka.enabled` | true | Enable collection metric data of `Kafka producer and consumer`. `false`: Disable collecting. |
 `observability.metrics.kafka.interval` | 30 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.kafka.topic` | platform-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.kafka.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -110,7 +117,7 @@ Key| Default Value | Description |
 ### Redis Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.redis.enabled` | true | Enable collection metric data of `Redis`. |
+`observability.metrics.redis.enabled` | true | Enable collection metric data of `Redis`.  `false`: Disable collecting. |
 `observability.metrics.redis.interval` | 30 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.redis.topic` | application-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.redis.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -118,7 +125,7 @@ Key| Default Value | Description |
 ### JVM GC Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.jvmGc.enabled` | true | Enable collection metric data of `JVM GC`. |
+`observability.metrics.jvmGc.enabled` | true | Enable collection metric data of `JVM GC`.  `false`: Disable collecting. |
 `observability.metrics.jvmGc.interval` | 30 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.jvmGc.topic` | application-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.jvmGc.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -126,7 +133,7 @@ Key| Default Value | Description |
 ### JVM Memory Metric
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.jvmMemory.enabled` | true | Enable collection metric data of `JVM GC`. |
+`observability.metrics.jvmMemory.enabled` | true | Enable collection metric data of `JVM GC`.  `false`: Disable collecting. |
 `observability.metrics.jvmMemory.interval` | 30 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.jvmMemory.topic` | application-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.jvmMemory.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -134,9 +141,10 @@ Key| Default Value | Description |
 ### SQL MD5Dictionary 
 When EaseAgent is used with EaseMesh, tracing and metric data will be stored in Elasticsearch. In order to reduce the space occupied by SQL in Elasticsearch, EaseAgent uses md5 to reduce the length of SQL, and then periodically stores it in Kafka, and finally stores it in Elasticsearch. Only one copy of sql will be stored in Elasticsearch.
 
+
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.md5Dictionary.enabled` | true | Enable collection of `JVM GC` metric data. |
+`observability.metrics.md5Dictionary.enabled` | true | Enable collection of `JVM GC` metric data.  `false`: Disable collecting.|
 `observability.metrics.md5Dictionary.interval` | 300 | Time interval between two outputs. Time Unit: second. |
 `observability.metrics.md5Dictionary.topic` | application-meter | Send metric data to the specified kafka topic. |
 `observability.metrics.md5Dictionary.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
@@ -144,7 +152,7 @@ Key| Default Value | Description |
 ### Tracing
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.tracings.enabled` | true | Enable all collection of tracing logs. `False`: Disable all collection of tracing logs. |
+`observability.tracings.enabled` | true | Enable all collection of tracing logs. `false`: Disable all collection of tracing logs. |
 `observability.tracings.output.enabled` | true | Enable output tracing logs to Kafka. |
 `observability.tracings.output.topic` | log-tracing | Send tracing logs to the specified kafka topic. |
 `observability.tracings.output.messageMaxBytes` | 999900 | Maximum size of a message. |
