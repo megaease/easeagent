@@ -3,7 +3,6 @@
 
 - [User Manual](#user-manual)
   - [Agent.properties](#agentproperties)
-    - [Getting the configuration file](#getting-the-configuration-file)
     - [Internal HTTP Server](#internal-http-server)
     - [Metric](#metric)
     - [Kafka](#kafka)
@@ -28,8 +27,6 @@
       - [RabbitMQ Producer And Consumer](#rabbitmq-producer-and-consumer)
       - [Kafka Producer And Consumer](#kafka-producer-and-consumer)
   - [Metric](#metric-1)
-    - [Metric Key](#metric-key)
-      - [Type And SubType Detail](#type-and-subtype-detail)
     - [Metric Field](#metric-field)
       - [HTTP Request](#http-request)
       - [JDBC Statement](#jdbc-statement)
@@ -41,9 +38,6 @@
       - [RabbitMq Consumer](#rabbitmq-consumer)
   
 ## Agent.properties
-`EaseAgent` uses the `report` module to control the tracing and metric collection behavior of each component. `agent.properties` is configured with various parameters of `report`. Changing these parameters can change the collection behavior . These parameters include: collection frequency, target queue, switch and other settings. Users can customize parameter values.
-
-### Getting the configuration file
 Extracting the default configuration file
 ```
 $ jar xf easeagent.jar agent.properties log4j2.xml
@@ -68,7 +62,6 @@ Key| Default Value | Description |
 `observability.metrics.enabled` | true | Enable all metrics collection. `False`: Disable all metrics collection |
 
 ### Kafka
-Tracing and metric data will output to kafka server.
 Key| Default Value | Description |
 ---| ---| ---|
 `observability.outputServer.bootstrapServer`| 127.0.0.1:9092 |Kafka server host and port. Tracing and metric data will be output to kafka. |
@@ -242,3 +235,215 @@ Tag | Description |
 kafka.key | Kafka consumer record Key |
 kafka.topic | Kafka topic |
 kafka.broker | Kafka url |
+
+## Metric
+EaseAgent use [io.dropwizard.metrics](https://github.com/dropwizard/metrics) to collect metric information.
+
+
+### Metric Field
+EaseAgent output metric data to kafka. The data stored in kafka is in JSON format.
+
+For Example: EaseAgent collect metric of HTTP Request. The collected metric data are as follows:
+```json
+{
+  "m15err" : 0,
+  "m5err" : 0,
+  "cnt" : 1,
+  "url" : "GET \/",
+  "m5" : 0.050990000000000001,
+  "max" : 823,
+  "mean" : 823,
+  "p98" : 823,
+  "errcnt" : 0,
+  "host_name" : "akwei",
+  "min" : 823,
+  "category" : "application",
+  "system" : "none",
+  "type" : "http-request",
+  "mean_rate" : 0,
+  "p99" : 823,
+  "p95" : 823,
+  "m15" : 0.12681999999999999,
+  "timestamp" : 1621567320892,
+  "service" : "unknown-service",
+  "m1" : 0.00022000000000000001,
+  "m5errpct" : 0,
+  "p25" : 823,
+  "p75" : 823,
+  "p50" : 823,
+  "host_ipv4" : "192.168.2.5",
+  "m1errpct" : 0,
+  "m15errpct" : 0,
+  "m1err" : 0,
+  "p999" : 823
+}
+```
+
+For different components, the fields contained in json are as follows:
+
+#### HTTP Request
+| Field | Type | Description | 
+| ----- | ---- | ----------- | 
+| url                   |string|the URL of the request|
+| cnt       |integer| The total count of the request executed |
+| m1               |double| The HTTP request executions per second (exponentially-weighted moving average) in last 1 minute |
+| m5               |double| The HTTP request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15              |double| The HTTP request executions per second (exponentially-weighted moving average) in last 15 minute. |
+| errcnt |integer| The total error count of the request executed | Topn HTTP request total error count |
+| m1err         |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 1 minute |
+| m5err         |integer|| The HTTP error request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15err        |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 15 minute |
+| m1errpct      |double| error percentage in last 1 minute |
+| m5errpct      |double| error percentage in last 5 minute |
+| m15errpct     |double| error percentage in last 15 minute |
+|min|double|The http-request minimal execution duration in milliseconds.|
+|max|double|The http-request maximal execution duration in milliseconds.|
+|mean|double|The http-request mean execution duration in milliseconds.|
+|p25|double|TP25: The http-request execution duration in milliseconds for 25% user.|
+|p50|double|TP50: The http-request execution duration in milliseconds for 50% user.|
+|p75|double|TP75: The http-request execution duration in milliseconds for 75% user.|
+|p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
+|p98|double|TP98: The http-request execution duration in milliseconds for 98% user.|
+|p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
+
+#### JDBC Statement
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+|signature|string|Executed JDBC method signature.|
+| cnt | integer |  The total count of JDBC method executed |
+| m1 | double| The JDBC method executions per second (exponentially-weighted moving average) in last 1 minute. |
+| m5 | double|  The JDBC method executions per second (exponentially-weighted moving average) in last 5 minutes. |
+| m15 | double |  The JDBC method executions per second (exponentially-weighted moving average) in last 15 minutes. |
+| m1cnt | integer |  The JDBC method execution count in last 1 minute. |
+| m5cnt | integer |  The JDBC method execution count in last 5 minutes. |
+| m15cnt | integer |  The JDBC method execution count in last 15 minutes. |
+| m1err         |double| The JDBC method error executions per second (exponentially-weighted moving average) in last 1 minute |
+| m5err         |double| The JDBC method error executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15err        |double| The JDBC method error executions per second (exponentially-weighted moving average) in last 15 minute |
+| min | double | The JDBC method minimal execution duration in milliseconds. |
+| max | double |  The JDBC method maximal execution duration in milliseconds. |
+| mean | double |  The JDBC method mean execution duration in milliseconds. |
+| p25 | double |  TP25: The JDBC method execution duration in milliseconds for 25% user. |
+| p50 | double |  TP50: The JDBC method execution duration in milliseconds for 50% user. |
+| p75 | double |  TP75: The JDBC method execution duration in milliseconds for 75% user. | 
+| p95 | double |  TP95: The JDBC method execution duration in milliseconds for 95% user. | 
+| p98 | double |  TP98: The JDBC method execution duration in milliseconds for 98% user. |
+| p99 | double |  TP99: The JDBC method execution duration in milliseconds for 99% user. |
+| p999 | double |  TP99.9: The JDBC method execution duration in milliseconds for 99.9% user. |
+
+#### JDBC Connection
+| Field               |  Type   | Description                                                  |
+| ------------------- |  ------- | ----------------------------------------------------------- |
+| url                 | string  | The total number of database connections                     |
+| cnt     | integer |  The total number of database connections                     |
+| m1             | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 1 minute. |
+| m5             | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 5 minutes. |
+| m15            | double  |  The JDBC connection establishment per second (exponentially-weighted moving average) in last 15 minutes. |
+| m1cnt            | integer |  The JDBC connection establishment count in last 1 minute.    |
+| m5cnt            | integer |The JDBC connection establishment count in last 5 minutes.   | 
+| m15cnt           | integer |  The JDBC connection establishment count in last 15 minutes.  |
+| m1err         |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 1 minute |
+| m5err         |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15err        |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 15 minute |
+| min  | double  |The JDBC connection minimal establishment duration in milliseconds. | 
+| max  | double  | The JDBC connection maximal establishment duration in milliseconds. |
+| mean | double  | The JDBC connection mean establishment duration in milliseconds. |
+| p25  | double  | TP25: The JDBC connection establishment duration in milliseconds for 25% user. |
+| p50  | double  | TP50: The JDBC connection establishment duration in milliseconds for 50% user. |
+| p75  | double  | TP75: The JDBC connection establishment duration in milliseconds for 75% user. |
+| p95  | double  | TP95: The JDBC connection establishment duration in milliseconds for 95% user. |
+| p98  | double  | TP98: The JDBC connection establishment duration in milliseconds for 98% user. |
+| p99  | double  | TP99: The JDBC connection establishment duration in milliseconds for 99% user. |
+| p999 | double  | TP99.9: The JDBC connection establishment duration in milliseconds for 99.9% user. |
+
+#### JVM Memory
+| Field           |  Type   | Description                                                  |
+| :-------------- | :-----: | :----------------------------------------------------------- |
+| bytes-init      | integer | The value represents the initial amount of memory in bytes unit that the JVM requests from the operating system for memory management during startup. The JVM may request additional memory from the operating system and may also release memory to the system over time. The value of init may be undefined (value -1). |
+| bytes-used      | integer | The value represents the amount of memory currently used in bytes unit. |
+| bytes-committed | integer | The value represents the amount of memory in bytes unit that is guaranteed to be available for use by the JVM. The amount of committed memory may change over time (increase or decrease). The JVM may release memory to the system and committed could be less than init. Value committed will always be greater than or equal to used. |
+| bytes-max       | integer | The value represents the maximum amount of memory in bytes unit that can be used for memory management. Its value may be undefined (value -1). The maximum amount of memory may change over time if defined. The amount of used and committed memory will always be less than or equal to max if max is defined. A memory allocation may fail if it attempts to increase the used memory such that used > committed even if used <= max would still be true (for example, when the system is low on virtual memory). |
+
+#### JVM GC
+| Field                 |  Type   | Description                                                  |
+| :-------------------- | :-----: | :----------------------------------------------------------- |
+| total_collection_time | integer |The value represents the total time for garbage collection operation in millisecond unit. |
+| times                 | integer |  The value represents the total garbage collection times.     |
+| times_rate            | integer |  The number of gc times per second.                           |
+
+#### Kafka Client
+| Field               |  Type   |  Description                                                  |
+| :------------------ | :-----: | :----------------------------------------------------------- |
+|resource|string|topic name| 主题 |
+|prodrm1|double|The executions per second (exponentially-weighted moving average) in last 1 minute (producer)|
+|prodrm5|double|The executions per second (exponentially-weighted moving average) in last 5 minute (producer)|
+|prodrm15|double|The executions per second (exponentially-weighted moving average) in last 15 minute (producer)|
+|consrm1|double|The executions per second (exponentially-weighted moving average) in last 1 minute (consumer)|
+|consrm5|double|The executions per second (exponentially-weighted moving average) in last 5 minute (consumer)|
+|consrm15|double|The executions per second (exponentially-weighted moving average) in last 15 minute (consumer)|
+|prodrm1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (producer)|
+|prodrm5err|double|The executions per second (exponentially-weighted moving average) in last 5 minute (producer)|
+|prodrm5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (producer)|
+|consrm1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (consumer)| 
+|consrm5err|double|The error executions per second (exponentially-weighted moving average) in last 5 minute (consumer)|
+|consrm5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (consumer)|
+|prodrmin|double|The minimal execution duration in milliseconds.|
+|prodrmax|double|The maximal execution duration in milliseconds.|
+|prodrmean|double|The mean execution duration in milliseconds.|
+|prodrp25|double|TP25: The execution duration in milliseconds for 25% user.|
+|prodrp50|double|TP50: The execution duration in milliseconds for 50% user.|
+|prodrp75|double|TP75: The execution duration in milliseconds for 75% user.|
+|prodrp95|double|TP95: The execution duration in milliseconds for 95% user.|
+|prodrp98|double|TP98: The execution duration in milliseconds for 98% user.|
+|prodrp99|double|TP99: The execution duration in milliseconds for 99% user.|
+|prodrp999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
+|consrmin|double|The minimal execution duration in milliseconds.|
+|consrmax|double|The maximal execution duration in milliseconds.|
+|consrmean|double|The mean execution duration in milliseconds.| 
+|consrp25|double|TP25: The execution duration in milliseconds for 25% user.|
+|consrp50|double|TP50: The execution duration in milliseconds for 50% user.|
+|consrp75|double|TP75: The execution duration in milliseconds for 75% user.|
+|consrp95|double|TP95: The execution duration in milliseconds for 95% user.|
+|consrp98|double|TP98: The execution duration in milliseconds for 98% user.|
+|consrp99|double|TP99: The execution duration in milliseconds for 99% user.|
+|consrp999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
+
+#### RabbitMq Producer
+| Field               |  Type   | Description                                                  |
+| :------------------ | :-----: | :----------------------------------------------------------- |
+|resource|string|rabbitmq exchange or routingkey|
+|prodrm1|double|The executions of producer per second (exponentially-weighted moving average) in last 1 minute |
+|prodrm5|double|The executions of producer per second (exponentially-weighted moving average) in last 5 minute |
+|prodrm15|double|The executionsof producer per second (exponentially-weighted moving average) in last 15 minute |
+|prodrm1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (producer)|
+|prodrm5err|double|The executions per second (exponentially-weighted moving average) in last 5 minute (producer)|
+|prodrm5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (producer)|
+|min|double|The http-request minimal execution duration in milliseconds.|
+|max|double|The http-request maximal execution duration in milliseconds.|
+|mean|double|The http-request mean execution duration in milliseconds.| 
+|p25|double|TP25: The http-request execution duration in milliseconds for 25% user.|
+|p50|double|TP50: The http-request execution duration in milliseconds for 50% user.|
+|p75|double|TP75: The http-request execution duration in milliseconds for 75% user.|
+|p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
+|p98|double|TP98: The http-request execution duration in milliseconds for 98% user.| 
+|p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
+
+#### RabbitMq Consumer
+| Field               |  Type   | Description                                                  |
+| :------------------ | :-----: | :----------------------------------------------------------- |
+|resource|string|rabbitmq queue| rabbit queue |
+|querym1|double|The executions of queue per second (exponentially-weighted moving average) in last 1 minute |
+|querym5|double|The executions of queue per second (exponentially-weighted moving average) in last 5 minute |
+|querym5|double|The executionsof queue per second (exponentially-weighted moving average) in last 15 minute |
+|querym1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (queue)|
+|querym5err|double|The error executions per second (exponentially-weighted moving average) in last 5 minute (queue)|
+|querym5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (queue)|
+|min|double|The http-request minimal execution duration in milliseconds.|
+|max|double|The http-request maximal execution duration in milliseconds.|
+|mean|double|The http-request mean execution duration in milliseconds.|
+|p25|double|TP25: The http-request execution duration in milliseconds for 25% user.|
+|p50|double|TP50: The http-request execution duration in milliseconds for 50% user.|
+|p75|double|TP75: The http-request execution duration in milliseconds for 75% user.|
+|p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
+|p98|double|TP98: The http-request execution duration in milliseconds for 98% user.|
+|p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
