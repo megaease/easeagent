@@ -374,7 +374,7 @@ For different components, the fields contained in JSON are as follows:
 #### Kafka Client
 | Field               |  Type   |  Description                                                  |
 | :------------------ | :-----: | :----------------------------------------------------------- |
-|resource|string|topic name| 主题 |
+|resource|string|topic name|
 |prodrm1|double|The executions per second (exponentially-weighted moving average) in last 1 minute (producer)|
 |prodrm5|double|The executions per second (exponentially-weighted moving average) in last 5 minute (producer)|
 |prodrm15|double|The executions per second (exponentially-weighted moving average) in last 15 minute (producer)|
