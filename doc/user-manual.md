@@ -289,9 +289,9 @@ For different components, the fields contained in JSON are as follows:
 | m1               |double| The HTTP request executions per second (exponentially-weighted moving average) in last 1 minute |
 | m5               |double| The HTTP request executions per second (exponentially-weighted moving average) in last 5 minute. |
 | m15              |double| The HTTP request executions per second (exponentially-weighted moving average) in last 15 minute. |
-| errcnt |integer| The total error count of the request executed | Topn HTTP request total error count |
+| errcnt |integer| The total error count of the request executed |
 | m1err         |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 1 minute |
-| m5err         |integer|| The HTTP error request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m5err         |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 5 minute. |
 | m15err        |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 15 minute |
 | m1errpct      |double| error percentage in last 1 minute |
 | m5errpct      |double| error percentage in last 5 minute |
