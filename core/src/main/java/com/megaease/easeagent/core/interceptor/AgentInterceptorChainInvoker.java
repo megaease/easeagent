@@ -45,12 +45,16 @@ public class AgentInterceptorChainInvoker {
     }
 
     public void doBefore(AgentInterceptorChain.Builder builder, MethodInfo methodInfo, Map<Object, Object> context) {
-        long beginTime = System.currentTimeMillis();
-        AgentInterceptorChain interceptorChain = this.prepare(builder, context);
-        interceptorChain.doBefore(methodInfo, context);
-        long elapsed = System.currentTimeMillis() - beginTime;
-        context.put(BEFORE_ELAPSED_TIME_KEY, elapsed);
-        context.put(BEFORE_BEGIN_TIME_KEY, beginTime);
+        try {
+            long beginTime = System.currentTimeMillis();
+            AgentInterceptorChain interceptorChain = this.prepare(builder, context);
+            interceptorChain.doBefore(methodInfo, context);
+            long elapsed = System.currentTimeMillis() - beginTime;
+            context.put(BEFORE_ELAPSED_TIME_KEY, elapsed);
+            context.put(BEFORE_BEGIN_TIME_KEY, beginTime);
+        } catch (Throwable e) {
+            log.error("interceptorChain doBefore error.", e);
+        }
     }
 
     public Object doAfter(AgentInterceptorChain.Builder builder, MethodInfo methodInfo, Map<Object, Object> context) {
@@ -58,21 +62,26 @@ public class AgentInterceptorChainInvoker {
     }
 
     public Object doAfter(AgentInterceptorChain.Builder builder, MethodInfo methodInfo, Map<Object, Object> context, boolean newInterceptorChain) {
-        long beginTime4After = System.currentTimeMillis();
-        if (newInterceptorChain) {
-            context.remove(AgentInterceptorChain.class);
-        }
-        AgentInterceptorChain interceptorChain = ContextUtils.getFromContext(context, AgentInterceptorChain.class);
-        if (interceptorChain == null) {
-            interceptorChain = this.prepare(builder, context);
-            if (interceptorChain == null) {
-                return methodInfo.getRetValue();
+        try {
+            long beginTime4After = System.currentTimeMillis();
+            if (newInterceptorChain) {
+                context.remove(AgentInterceptorChain.class);
             }
-            interceptorChain.skipBegin();
+            AgentInterceptorChain interceptorChain = ContextUtils.getFromContext(context, AgentInterceptorChain.class);
+            if (interceptorChain == null) {
+                interceptorChain = this.prepare(builder, context);
+                if (interceptorChain == null) {
+                    return methodInfo.getRetValue();
+                }
+                interceptorChain.skipBegin();
+            }
+            Object result = interceptorChain.doAfter(methodInfo, context);
+            this.logTime(methodInfo, context, beginTime4After);
+            return result;
+        } catch (Throwable e) {
+            log.error("interceptorChain doAfter error.", e);
+            return methodInfo.getRetValue();
         }
-        Object result = interceptorChain.doAfter(methodInfo, context);
-        this.logTime(methodInfo, context, beginTime4After);
-        return result;
     }
 
     private void logTime(MethodInfo methodInfo, Map<Object, Object> context, long beginTime4After) {
@@ -105,7 +114,7 @@ public class AgentInterceptorChainInvoker {
             elapsedAll = endTime - beginTime;
         }
         log.info("== agent-method:{} before-beginTime:{} elapsed:{}ms, after-beginTime:{} elapsed:{}ms, all-time:{}ms ==",
-                sb.toString(), beginTime4BeforeStr, elapsed4Before, beginTime4AfterStr, elapsed4After, elapsedAll);
+                sb, beginTime4BeforeStr, elapsed4Before, beginTime4AfterStr, elapsed4After, elapsedAll);
     }
 
     private AgentInterceptorChain prepare(AgentInterceptorChain.Builder builder, Map<Object, Object> context) {
