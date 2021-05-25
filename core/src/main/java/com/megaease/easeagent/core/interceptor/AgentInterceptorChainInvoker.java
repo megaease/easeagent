@@ -53,7 +53,7 @@ public class AgentInterceptorChainInvoker {
             context.put(BEFORE_ELAPSED_TIME_KEY, elapsed);
             context.put(BEFORE_BEGIN_TIME_KEY, beginTime);
         } catch (Throwable e) {
-            log.error("interceptorChain doBefore error.", e);
+            log.warn("interceptorChain doBefore error.", e);
         }
     }
 
@@ -79,7 +79,7 @@ public class AgentInterceptorChainInvoker {
             this.logTime(methodInfo, context, beginTime4After);
             return result;
         } catch (Throwable e) {
-            log.error("interceptorChain doAfter error.", e);
+            log.warn("interceptorChain doAfter error.", e);
             return methodInfo.getRetValue();
         }
     }
