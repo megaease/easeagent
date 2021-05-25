@@ -38,9 +38,10 @@ public class JdbConPrepareOrCreateStmInterceptor implements AgentInterceptor {
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         Statement stm = (Statement) methodInfo.getRetValue();
         SqlInfo sqlInfo = new SqlInfo((Connection) methodInfo.getInvoker());
-        if (methodInfo.getMethod().startsWith("prepare")) {
-            if (methodInfo.getArgs() != null && methodInfo.getArgs().length > 0) {
-                String sql = (String) methodInfo.getArgs()[0];
+        if (methodInfo.getMethod().startsWith("prepare")
+                && methodInfo.getArgs() != null && methodInfo.getArgs().length > 0) {
+            String sql = (String) methodInfo.getArgs()[0];
+            if (sql != null) {
                 sqlInfo.addSql(sql, false);
             }
         }
