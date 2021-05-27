@@ -32,7 +32,7 @@ public class HttpLog {
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setService(serviceName);
         requestInfo.setHostName(HostAddress.localhost());
-        requestInfo.setHostIpv4(HostAddress.localaddr().getHostAddress());
+        requestInfo.setHostIpv4(HostAddress.getHostIpv4());
         requestInfo.setUrl(serverInfo.getMethod() + " " + serverInfo.getRequestURI());
         requestInfo.setMethod(serverInfo.getMethod());
         requestInfo.setHeaders(serverInfo.findHeaders());
