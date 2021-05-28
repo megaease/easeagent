@@ -520,7 +520,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                         .timestamp(System.currentTimeMillis())
                         .category("application")
                         .hostName(HostAddress.localhost())
-                        .hostIpv4(HostAddress.localaddr().getHostAddress())
+                        .hostIpv4(HostAddress.getHostIpv4())
                         .gid("")
                         .service(serviceName.getValue())
                         .tags("")
