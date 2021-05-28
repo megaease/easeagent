@@ -28,8 +28,9 @@ import java.util.List;
 @Slf4j
 public class HttpLog {
 
-    public RequestInfo prepare(String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
+    public RequestInfo prepare(String system, String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
         RequestInfo requestInfo = new RequestInfo();
+        requestInfo.setSystem(system);
         requestInfo.setService(serviceName);
         requestInfo.setHostName(HostAddress.localhost());
         requestInfo.setHostIpv4(HostAddress.localaddr().getHostAddress());
@@ -59,7 +60,6 @@ public class HttpLog {
         List<RequestInfo> list = new ArrayList<>(1);
         list.add(requestInfo);
         String logString = JsonUtil.toJson(list);
-//        log.info("access-log: {}", logString);
         return logString;
     }
 }

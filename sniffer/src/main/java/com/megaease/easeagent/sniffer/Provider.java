@@ -258,7 +258,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                     .addInterceptor(new HttpFilterMetricsInterceptor(servletMetric, config))
                     .addInterceptor(new HttpFilterTracingInterceptor(this.tracing, config))
-                    .addInterceptor(new ServletHttpLogInterceptor(serviceName, config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
+                    .addInterceptor(new ServletHttpLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
                     ;
         };
     }
@@ -287,7 +287,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             AgentInterceptorChain.Builder headersFilterChainBuilder = ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(gatewayMetricsInterceptor)
                     .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing, config))
-                    .addInterceptor(new SpringGatewayLogInterceptor(this.serviceName, config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))));
+                    .addInterceptor(new SpringGatewayLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))));
             return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
         };
@@ -522,6 +522,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                         .hostName(HostAddress.localhost())
                         .hostIpv4(HostAddress.localaddr().getHostAddress())
                         .gid("")
+                        .system(config.getString("system"))
                         .service(serviceName.getValue())
                         .tags("")
                         .type("md5-dictionary")

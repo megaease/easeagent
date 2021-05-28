@@ -21,7 +21,6 @@ import brave.Span;
 import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.http.HttpServletInterceptor;
-import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
@@ -43,14 +42,11 @@ public class ServletHttpLogInterceptor extends HttpServletInterceptor {
 
     private final Consumer<String> reportConsumer;
 
-    private final AutoRefreshConfigItem<String> serviceName;
-
     private final static String PROCESSED_BEFORE_KEY = ServletHttpLogInterceptor.class.getName() + ".processedBefore";
 
     private final static String PROCESSED_AFTER_KEY = ServletHttpLogInterceptor.class.getName() + ".processedAfter";
 
-    public ServletHttpLogInterceptor(AutoRefreshConfigItem<String> serviceName, Config config, Consumer<String> reportConsumer) {
-        this.serviceName = serviceName;
+    public ServletHttpLogInterceptor(Config config, Consumer<String> reportConsumer) {
         this.reportConsumer = reportConsumer;
         this.config = config;
     }
@@ -73,7 +69,7 @@ public class ServletHttpLogInterceptor extends HttpServletInterceptor {
         Long beginTime = ContextUtils.getBeginTime(context);
         Span span = (Span) context.get(ContextCons.SPAN);
         AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
-        RequestInfo requestInfo = this.httpLog.prepare(this.serviceName.getValue(), beginTime, span, serverInfo);
+        RequestInfo requestInfo = this.httpLog.prepare(config.getString("system"), config.getString("name"), beginTime, span, serverInfo);
         httpServletRequest.setAttribute(RequestInfo.class.getName(), requestInfo);
     }
 
