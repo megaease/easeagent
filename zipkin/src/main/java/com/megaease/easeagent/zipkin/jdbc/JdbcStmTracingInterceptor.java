@@ -63,7 +63,7 @@ public class JdbcStmTracingInterceptor implements AgentInterceptor {
         }
         SqlInfo sqlInfo = ContextUtils.getFromContext(context, SqlInfo.class);
         if (sqlInfo == null) {
-            logger.error("must get sqlInfo from context");
+            logger.warn("must get sqlInfo from context");
             chain.doBefore(methodInfo, context);
             return;
         }

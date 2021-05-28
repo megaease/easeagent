@@ -218,7 +218,7 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
             try {
                 return (Map<String, Collection<String>>) headersField.get(target);
             } catch (IllegalAccessException e) {
-                logger.error("can not get header in FeignClient. {}", e.getMessage());
+                logger.warn("can not get header in FeignClient. {}", e.getMessage());
             }
             return null;
         }
@@ -227,7 +227,7 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
             try {
                 headersField.set(target, fieldValue);
             } catch (IllegalAccessException e) {
-                logger.error("can not set header in FeignClient. {}", e.getMessage());
+                logger.warn("can not set header in FeignClient. {}", e.getMessage());
             }
         }
     }
