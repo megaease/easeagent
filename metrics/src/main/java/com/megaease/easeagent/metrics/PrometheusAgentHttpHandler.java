@@ -52,7 +52,7 @@ public class PrometheusAgentHttpHandler extends AgentHttpHandler {
             TextFormat.writeFormat(contentType, writer, samples);
             writer.flush();
         } catch (IOException e) {
-            log.error("write data error. {}", e.getMessage());
+            log.warn("write data error. {}", e.getMessage());
         }
         String data = stringWriter.toString();
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, data);

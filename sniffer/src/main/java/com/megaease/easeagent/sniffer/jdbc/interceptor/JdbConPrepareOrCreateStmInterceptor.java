@@ -47,7 +47,7 @@ public class JdbConPrepareOrCreateStmInterceptor implements AgentInterceptor {
         if (stm instanceof DynamicFieldAccessor) {
             ((DynamicFieldAccessor) stm).setEaseAgent$$DynamicField$$Data(sqlInfo);
         } else {
-            logger.error("statement must implements " + DynamicFieldAccessor.class.getName());
+            logger.warn("statement must implements " + DynamicFieldAccessor.class.getName());
         }
         return chain.doAfter(methodInfo, context);
     }

@@ -62,7 +62,7 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
             }
             return md5;
         } catch (Exception e) {
-            logger.error("compress content[{}] failure", origin, e);
+            logger.warn("compress content[{}] failure", origin, e);
             return origin;
         }
     }

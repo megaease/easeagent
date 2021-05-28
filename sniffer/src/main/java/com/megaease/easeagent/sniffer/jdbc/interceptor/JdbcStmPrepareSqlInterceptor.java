@@ -36,7 +36,7 @@ public class JdbcStmPrepareSqlInterceptor implements AgentInterceptor {
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         Statement stm = (Statement) methodInfo.getInvoker();
         if (!(stm instanceof DynamicFieldAccessor)) {
-            logger.error("statement must implements " + DynamicFieldAccessor.class.getName());
+            logger.warn("statement must implements " + DynamicFieldAccessor.class.getName());
             chain.doBefore(methodInfo, context);
             return;
         }

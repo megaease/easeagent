@@ -41,7 +41,7 @@ public class JsonUtil {
         try {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            logger.error("data to json error: {}", e.getMessage());
+            logger.warn("data to json error: {}", e.getMessage());
             return null;
         }
     }

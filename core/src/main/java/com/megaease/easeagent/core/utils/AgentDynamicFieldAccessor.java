@@ -33,7 +33,7 @@ public class AgentDynamicFieldAccessor {
     public static <T> T getDynamicFieldValue(Object target) {
         if (!(target instanceof DynamicFieldAccessor)) {
 //            throw new IllegalArgumentException(target.getClass().getName() + " must implements DynamicFieldAccessor");
-            logger.error(target.getClass().getName() + " must implements DynamicFieldAccessor");
+            logger.warn(target.getClass().getName() + " must implements DynamicFieldAccessor");
             return null;
         }
         return (T) ((DynamicFieldAccessor) target).getEaseAgent$$DynamicField$$Data();
@@ -42,7 +42,7 @@ public class AgentDynamicFieldAccessor {
     public static void setDynamicFieldValue(Object target, Object value) {
         if (!(target instanceof DynamicFieldAccessor)) {
 //            throw new IllegalArgumentException(target.getClass().getName() + " must implements DynamicFieldAccessor");
-            logger.error(target.getClass().getName() + " must implements DynamicFieldAccessor");
+            logger.warn(target.getClass().getName() + " must implements DynamicFieldAccessor");
             return;
         }
         ((DynamicFieldAccessor) target).setEaseAgent$$DynamicField$$Data(value);
