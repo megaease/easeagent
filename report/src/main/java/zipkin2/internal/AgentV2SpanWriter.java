@@ -23,7 +23,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import zipkin2.Span;
 
 import java.util.Collection;
-import java.util.function.Supplier;
 
 public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
 
@@ -31,17 +30,27 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
 
     @Deprecated
     public AgentV2SpanWriter() {
-        this(()->"",  null);
+        this(new GlobalExtrasSupplier() {
+            @Override
+            public String service() {
+                return "";
+            }
+
+            @Override
+            public String system() {
+                return "";
+            }
+        }, null);
     }
 
-    public AgentV2SpanWriter(Supplier<String> service, TraceProps properties) {
+    public AgentV2SpanWriter(GlobalExtrasSupplier extrasSupplier, TraceProps properties) {
         writerList = ImmutableList.<WriteBuffer.Writer<Span>>builder()
                 .add(new AgentV2SpanBaseWriter())
                 .add(new AgentV2SpanLocalEndpointWriter())
                 .add(new AgentV2SpanRemoteEndpointWriter())
                 .add(new AgentV2SpanAnnotationsWriter())
                 .add(new AgentV2SpanTagsWriter())
-                .add(new AgentV2SpanGlobalWriter("log-tracing", service, properties))
+                .add(new AgentV2SpanGlobalWriter("log-tracing", extrasSupplier, properties))
                 .build();
     }
 

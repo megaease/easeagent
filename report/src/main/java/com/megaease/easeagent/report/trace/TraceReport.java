@@ -22,6 +22,7 @@ import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;
 import zipkin2.Span;
 import zipkin2.codec.Encoding;
+import zipkin2.internal.GlobalExtrasSupplier;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.SDKAsyncReporter;
 import zipkin2.reporter.Sender;
@@ -56,14 +57,27 @@ public class TraceReport {
                             .build());
         }
 
-        AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(configs, ConfigConst.SERVICE_NAME, Config::getString);
+        GlobalExtrasSupplier extrasSupplier = new GlobalExtrasSupplier() {
+            final AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(configs, ConfigConst.SERVICE_NAME, Config::getString);
+            final AutoRefreshConfigItem<String> systemName = new AutoRefreshConfigItem<>(configs, ConfigConst.SYSTEM_NAME, Config::getString);
+
+            @Override
+            public String service() {
+                return serviceName.getValue();
+            }
+
+            @Override
+            public String system() {
+                return systemName.getValue();
+            }
+        };
         SDKAsyncReporter reporter = SDKAsyncReporter.
                 builderSDKAsyncReporter(AsyncReporter.builder(sender)
                                 .queuedMaxSpans(traceProperties.getOutput().getQueuedMaxSpans())
                                 .messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS)
                                 .queuedMaxBytes(traceProperties.getOutput().getQueuedMaxSize()),
                         traceProperties,
-                        serviceName::getValue);
+                        extrasSupplier);
         reporter.startFlushThread();
         spanRefreshableReporter = new RefreshableReporter<Span>(reporter, traceProperties, outputProperties);
         return spanRefreshableReporter;

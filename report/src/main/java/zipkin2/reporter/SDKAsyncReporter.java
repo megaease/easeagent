@@ -26,6 +26,7 @@ import zipkin2.codec.BytesEncoder;
 import zipkin2.codec.Encoding;
 import zipkin2.codec.SpanBytesEncoder;
 import zipkin2.internal.AgentV2SpanWriter;
+import zipkin2.internal.GlobalExtrasSupplier;
 import zipkin2.internal.JsonCodec;
 import zipkin2.reporter.kafka11.SDKSender;
 
@@ -37,7 +38,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,10 +82,10 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
     public static SDKAsyncReporter<Span> builderSDKAsyncReporter(AsyncReporter.Builder builder,
                                                                  TraceProps traceProperties,
-                                                                 Supplier<String> service) {
+                                                                 GlobalExtrasSupplier extrasSupplier) {
         final SDKAsyncReporter<Span> reporter = new Builder(builder
                 .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes()))  //设置队列的最大count和最大的size
-                .build(traceProperties, service);
+                .build(traceProperties, extrasSupplier);
         reporter.setTraceProperties(traceProperties);
         return reporter;
     }
@@ -378,11 +378,11 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         /**
          * Builds an async reporter that encodes zipkin spans as they are reported.
          */
-        public SDKAsyncReporter<Span> build(TraceProps traceProperties, Supplier<String> service) {
+        public SDKAsyncReporter<Span> build(TraceProps traceProperties, GlobalExtrasSupplier extrasSupplier) {
             this.traceProperties = traceProperties;
             switch (builder.sender.encoding()) {
                 case JSON:
-                    return build(getAgentEncoder(traceProperties, service));
+                    return build(getAgentEncoder(traceProperties,  extrasSupplier));
                 case PROTO3:
                     return build(SpanBytesEncoder.PROTO3);
                 case THRIFT:
@@ -392,8 +392,8 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
             }
         }
 
-        private BytesEncoder<Span> getAgentEncoder(TraceProps tp, Supplier<String> service) {
-            return new AgentJSONByteEncoder(service, tp);
+        private BytesEncoder<Span> getAgentEncoder(TraceProps tp, GlobalExtrasSupplier extrasSupplier) {
+            return new AgentJSONByteEncoder( extrasSupplier, tp);
         }
 
         /**
@@ -444,8 +444,8 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
             final AgentV2SpanWriter writer;
 
-            AgentJSONByteEncoder(Supplier<String> service, TraceProps traceProperties) {
-                writer = new AgentV2SpanWriter(service, traceProperties);
+            AgentJSONByteEncoder(GlobalExtrasSupplier extrasSupplier, TraceProps traceProperties) {
+                writer = new AgentV2SpanWriter( extrasSupplier, traceProperties);
             }
 
             @Override
