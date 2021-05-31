@@ -47,7 +47,14 @@ public class JdbcStmPrepareSqlInterceptor implements AgentInterceptor {
         }
         String method = methodInfo.getMethod();
         if (method.equals("addBatch")) {
-            sqlInfo.addSql(sql, true);
+            /*
+             * user creates PreparedStatement with con.preparedStatement(sql).
+             * User can invokes PreparedStatement.addBatch() multi times.
+             * In this scenario, sqlInfo should has only one sql.
+             */
+            if (sql != null) {
+                sqlInfo.addSql(sql, true);
+            }
         } else if (method.equals("clearBatch")) {
             sqlInfo.clearSql();
         } else if (method.startsWith("execute") && sql != null) {

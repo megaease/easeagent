@@ -17,12 +17,18 @@
 
 package com.megaease.easeagent.sniffer.jdbc.advice;
 
+import com.megaease.easeagent.common.jdbc.SqlInfo;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
+import com.megaease.easeagent.core.DynamicFieldAccessor;
 import com.megaease.easeagent.core.QualifiedBean;
+import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
+import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,6 +39,7 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.*;
 
@@ -52,7 +59,12 @@ public class JdbcStatementAdviceTest extends BaseSnifferTest {
             classList = Classes.transform(stmName)
                     .with(def,
                             new QualifiedBean("", chainInvoker)
-                            , new QualifiedBean("supplier4JdbcStmPrepareSql", this.mockSupplier())
+                            , new QualifiedBean("supplier4JdbcStmPrepareSql", new Supplier<AgentInterceptorChain.Builder>() {
+                                @Override
+                                public AgentInterceptorChain.Builder get() {
+                                    return new DefaultAgentInterceptorChain.Builder().addInterceptor(new JdbcStmPrepareSqlInterceptor());
+                                }
+                            })
                             , new QualifiedBean("supplier4JdbcStmExecute", this.mockSupplier())
                     )
                     .load(loader);
@@ -73,11 +85,42 @@ public class JdbcStatementAdviceTest extends BaseSnifferTest {
     }
 
     @Test
-    public void invokeAddBatch() throws Exception {
+    public void invokeAddBatch1() throws Exception {
         Connection connection = mock(Connection.class);
         final Statement stm = (Statement) classList.get(0).newInstance();
         stm.addBatch("sql");
         this.verifyInvokeTimes(chainInvoker, 1);
+    }
+
+
+    @Test
+    public void invokeAddBatch2() throws Exception {
+        Connection connection = mock(Connection.class);
+        PreparedStatement pstm = (PreparedStatement) classList.get(0).newInstance();
+        SqlInfo sqlInfo = new SqlInfo(connection);
+        sqlInfo.addSql("sql", false);
+        ((DynamicFieldAccessor) pstm).setEaseAgent$$DynamicField$$Data(sqlInfo);
+        pstm.addBatch();
+        pstm.addBatch();
+        this.verifyInvokeTimes(chainInvoker, 2);
+        sqlInfo = (SqlInfo) ((DynamicFieldAccessor) pstm).getEaseAgent$$DynamicField$$Data();
+        Assert.assertEquals(1, sqlInfo.getSqlList().size());
+        Assert.assertEquals("sql", sqlInfo.getSql());
+    }
+
+    @Test
+    public void invokeAddBatch3() throws Exception {
+        Connection connection = mock(Connection.class);
+        PreparedStatement pstm = (PreparedStatement) classList.get(0).newInstance();
+        SqlInfo sqlInfo = new SqlInfo(connection);
+        sqlInfo.addSql("sql1", false);
+        ((DynamicFieldAccessor) pstm).setEaseAgent$$DynamicField$$Data(sqlInfo);
+        pstm.addBatch("sql2");
+        pstm.addBatch("sql3");
+        this.verifyInvokeTimes(chainInvoker, 2);
+        sqlInfo = (SqlInfo) ((DynamicFieldAccessor) pstm).getEaseAgent$$DynamicField$$Data();
+        Assert.assertEquals(3, sqlInfo.getSqlList().size());
+        Assert.assertEquals("sql1\nsql2\nsql3", sqlInfo.getSql());
     }
 
     static class MyStatement implements PreparedStatement {

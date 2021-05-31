@@ -42,7 +42,9 @@ public abstract class JdbcConAdvice implements Transformation {
     public <T extends Definition> T define(Definition<T> def) {
         return def
                 .type(hasSuperType(named("java.sql.Connection")))
-                .transform(createOrPrepareStatement(named("createStatement").or(nameStartsWith("prepare"))))
+                .transform(createOrPrepareStatement(
+                        (named("createStatement").or(named("prepareCall")).or(named("prepareStatement")))
+                                .and(isOverriddenFrom(named("java.sql.Connection")))))
                 .end();
     }
 
