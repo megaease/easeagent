@@ -124,7 +124,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 Map<String, Collection<String>> headers = (Map<String, Collection<String>>) ReflectionTool.extractField(realRequest, "headers");
                 headers.put(PROPAGATE_HEAD, Collections.singleton(serviceName));
                 ThreadLocalCurrentContext.DEFAULT.fill((k, v) -> headers.put(k, Collections.singleton(v)), this.config.getCanaryHeaders());
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.warn("intercept method [{}] failure", method, e);
             }
         }
@@ -155,7 +155,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                     final Request newRequest = Request.create(request.httpMethod(), request.url(), newHeaders, request.body(), request.charset(), request.requestTemplate());
                     args[0] = newRequest;
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.warn("intercept method [{}] failure", method, e);
             }
         }
@@ -185,7 +185,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                     headers.add(PROPAGATE_HEAD, host);
                     ThreadLocalCurrentContext.DEFAULT.fill(headers::add, this.config.getCanaryHeaders());
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.warn("intercept method [{}] failure", method, e);
             }
         }
@@ -215,7 +215,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                     headers.add(PROPAGATE_HEAD, host);
                     ThreadLocalCurrentContext.DEFAULT.fill(headers::add, this.config.getCanaryHeaders());
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.warn("intercept method [{}] failure", method, e);
             }
         }
@@ -247,7 +247,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 ServerHttpRequest newRequest = exchange.getRequest().mutate().header(PROPAGATE_HEAD, host).build();
                 ServerWebExchange newExchange = exchange.mutate().request(newRequest).build();
                 exchanges[0] = newExchange;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logger.warn("intercept method [{}] failure", method, e);
             }
         }
