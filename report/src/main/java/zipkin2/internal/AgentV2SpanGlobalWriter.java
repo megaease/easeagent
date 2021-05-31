@@ -23,21 +23,21 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import zipkin2.Span;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
 
     final String type;
-    final Supplier<String> service;//= ApplicationUtils.getBean(Environment.class).getProperty(MetricNameBuilder
+    final GlobalExtrasSupplier extras;//= ApplicationUtils.getBean(Environment.class).getProperty(MetricNameBuilder
     // .SPRING_APPLICATION_NAME, "");
     final TraceProps traceProperties;//= ApplicationUtils.getBean(TraceProperties.class);
 
     final String typeFieldName = ",\"type\":\"";
     final String serviceFieldName = ",\"service\":\"";
+    final String systemFieldName = ",\"system\":\"";
 
-    public AgentV2SpanGlobalWriter(String type, Supplier<String> service, TraceProps tp) {
+    public AgentV2SpanGlobalWriter(String type, GlobalExtrasSupplier extras, TraceProps tp) {
         this.type = type;
-        this.service = service;
+        this.extras = extras;
         this.traceProperties = tp;
     }
 
@@ -50,12 +50,17 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(type));
             }
 
-            String tmpService = this.service.get();
+            String tmpService = this.extras.system();
             if (TextUtils.hasText(tmpService)) {
                 mutableInt.add(serviceFieldName.length() + 1);
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpService));
             }
 
+            String tmpSystem = this.extras.system();
+            if (TextUtils.hasText(tmpSystem)) {
+                mutableInt.add(systemFieldName.length() + 1);
+                mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpSystem));
+            }
         });
         return mutableInt.intValue();
     }
@@ -68,13 +73,18 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 buffer.writeUtf8(JsonEscaper.jsonEscape(type));
                 buffer.writeByte(34);
             }
-            String tmpService = this.service.get();
+            String tmpService = this.extras.system();
             if (TextUtils.hasText(tmpService)) {
                 buffer.writeAscii(serviceFieldName);
                 buffer.writeUtf8(JsonEscaper.jsonEscape(tmpService));
                 buffer.writeByte(34);
             }
-
+            String tmpSystem = this.extras.system();
+            if (TextUtils.hasText(tmpSystem)) {
+                buffer.writeAscii(systemFieldName);
+                buffer.writeUtf8(JsonEscaper.jsonEscape(tmpSystem));
+                buffer.writeByte(34);
+            }
         });
     }
 }

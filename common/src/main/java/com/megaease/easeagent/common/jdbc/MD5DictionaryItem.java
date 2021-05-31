@@ -40,6 +40,8 @@ public class MD5DictionaryItem {
 
     private String service;
 
+    private String system;
+
     private String type;
 
     private String tags;

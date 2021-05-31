@@ -71,8 +71,9 @@ public class ConfigFactory {
     }
 
     private static void validConfigs(Configs configs) {
-        //validate serviceName
+        //validate serviceName and systemName
         ValidateUtils.validate(configs, ConfigConst.SERVICE_NAME, HasText);
+        ValidateUtils.validate(configs, ConfigConst.SYSTEM_NAME, HasText);
         //validate output
         ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_ENABLED, HasText, Bool);
         ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_SERVERS, HasText);

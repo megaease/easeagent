@@ -20,6 +20,7 @@ package com.megaease.easeagent.config;
 public interface ConfigConst {
     String DELIMITER = ".";
     String SERVICE_NAME = "name";
+    String SYSTEM_NAME = "system";
     String OBSERVABILITY = "observability";
     String GLOBAL_CANARY_LABELS = "globalCanaryHeaders";
 

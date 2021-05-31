@@ -37,7 +37,12 @@ public class ContextUtils {
     }
 
     public static Long getEndTime(Map<Object, Object> context) {
-        return (Long) context.get(END_TIME);
+        Long endTime = (Long) context.get(END_TIME);
+        if (endTime == null) {
+            setEndTime(context);
+            endTime = (Long) context.get(END_TIME);
+        }
+        return endTime;
     }
 
     public static long getDuration(Map<Object, Object> context) {

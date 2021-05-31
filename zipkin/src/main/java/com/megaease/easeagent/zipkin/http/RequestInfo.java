@@ -40,6 +40,8 @@ public class RequestInfo {
 
     private String service;
 
+    private String system;
+
     @JsonProperty("client_ip")
     private String clientIP = "-";
 

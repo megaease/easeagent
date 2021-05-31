@@ -20,7 +20,6 @@ package com.megaease.easeagent.zipkin.http.reactive;
 import brave.Span;
 import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.common.config.SwitchUtil;
-import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
@@ -38,14 +37,11 @@ public class SpringGatewayLogInterceptor implements AgentInterceptor {
     public static final String ENABLE_KEY = "observability.metrics.access.enabled";
     private final Consumer<String> reportConsumer;
 
-    protected final AutoRefreshConfigItem<String> serviceName;
-
     private final HttpLog httpLog = new HttpLog();
 
     private final Config config;
 
-    public SpringGatewayLogInterceptor(AutoRefreshConfigItem<String> serviceName, Config config, Consumer<String> reportConsumer) {
-        this.serviceName = serviceName;
+    public SpringGatewayLogInterceptor(Config config, Consumer<String> reportConsumer) {
         this.reportConsumer = reportConsumer;
         this.config = config;
     }
@@ -65,7 +61,7 @@ public class SpringGatewayLogInterceptor implements AgentInterceptor {
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         Long beginTime = ContextUtils.getBeginTime(context);
         Span span = (Span) context.get(ContextCons.SPAN);
-        RequestInfo requestInfo = this.httpLog.prepare(this.serviceName.getValue(), beginTime, span, serverInfo);
+        RequestInfo requestInfo = this.httpLog.prepare(config.getString("system"), config.getString("name"), beginTime, span, serverInfo);
         exchange.getAttributes().put(RequestInfo.class.getName(), requestInfo);
         chain.doBefore(methodInfo, context);
     }

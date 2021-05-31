@@ -28,10 +28,17 @@ import java.util.function.Supplier;
 public class MetricsAdditionalAttributes implements Supplier<Map<String, Object>> {
 
     private volatile Map<String, Object> additionalAttributes;
+    private volatile String serviceName = "";
+    private volatile String systemName = "";
 
     public MetricsAdditionalAttributes(Config config) {
         ConfigUtils.bindProp(ConfigConst.SERVICE_NAME, config, Config::getString, v -> {
-            this.additionalAttributes = new AdditionalAttributes(v).getAdditionalAttributes();
+            this.serviceName = v;
+            this.additionalAttributes = new AdditionalAttributes(this.serviceName, this.systemName).getAdditionalAttributes();
+        });
+        ConfigUtils.bindProp(ConfigConst.SYSTEM_NAME, config, Config::getString, v -> {
+            this.systemName = v;
+            this.additionalAttributes = new AdditionalAttributes(this.serviceName, this.systemName).getAdditionalAttributes();
         });
     }
 
