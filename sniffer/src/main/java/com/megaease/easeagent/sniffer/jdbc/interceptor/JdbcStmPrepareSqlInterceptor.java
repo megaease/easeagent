@@ -41,6 +41,17 @@ public class JdbcStmPrepareSqlInterceptor implements AgentInterceptor {
             return;
         }
         SqlInfo sqlInfo = (SqlInfo) ((DynamicFieldAccessor) stm).getEaseAgent$$DynamicField$$Data();
+        if (sqlInfo == null) {
+            /*
+             * This happens:
+             * 1. StatementA contains StatementB.
+             * 2. Intercept: statementA = con.preparedStatement.
+             * 3. Not intercept: statementB = new StatementB(). StatementB can not be set dynamicField value.
+             * 4. StatementB invoke other method, like: clearBatch, so interceptor will find dynamicField value is null.
+             */
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         String sql = null;
         if (methodInfo.getArgs() != null && methodInfo.getArgs().length > 0) {
             sql = (String) methodInfo.getArgs()[0];
