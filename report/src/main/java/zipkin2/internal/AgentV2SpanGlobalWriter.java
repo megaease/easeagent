@@ -50,7 +50,7 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(type));
             }
 
-            String tmpService = this.extras.system();
+            String tmpService = this.extras.service();
             if (TextUtils.hasText(tmpService)) {
                 mutableInt.add(serviceFieldName.length() + 1);
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpService));
