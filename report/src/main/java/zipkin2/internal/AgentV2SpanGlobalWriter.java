@@ -73,7 +73,7 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 buffer.writeUtf8(JsonEscaper.jsonEscape(type));
                 buffer.writeByte(34);
             }
-            String tmpService = this.extras.system();
+            String tmpService = this.extras.service();
             if (TextUtils.hasText(tmpService)) {
                 buffer.writeAscii(serviceFieldName);
                 buffer.writeUtf8(JsonEscaper.jsonEscape(tmpService));
