@@ -16,7 +16,7 @@ An agent component for Java system.
 ## Overview
 
 ### Purpose
-- EasegAgent is a Java agent for APM(Application Performance Management) system.
+- EaseAgent is a Java agent for APM(Application Performance Management) system.
 - EaseAgent majorly  focuses on the Spring Boot development environments.
 - EaseAgent is compatible with mainstream monitoring ecosystems, such as Kafka, ElasticSearch, Prometheus, Zipkin, etc.
 - EaseAgent collects the basic metrics and the service tracking logs, which is very helpful for performance analysis and troubleshooting.
