@@ -50,7 +50,7 @@
         <version.auto-service>1.0-rc2</version.auto-service>
         <version.lombok>1.18.20</version.lombok>
         <version.config>1.2.1</version.config>
-        <version.logback>1.1.11</version.logback>
+        <version.logback>1.2.0</version.logback>
         <version.jackson>2.12.1</version.jackson>
         <version.servlet>3.1.0</version.servlet>
         <version.brave>5.13.3</version.brave>
