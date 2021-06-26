@@ -36,15 +36,14 @@ class Register {
     private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
     private final Iterable<QualifiedBean> beans;
-    private final Set<Integer> applied;
+    private final Set<String> applied = new HashSet<>();
 
     Register(Iterable<QualifiedBean> beans) {
         this.beans = beans;
-        applied = new HashSet<Integer>();
     }
 
     void apply(String adviceClassName, ClassLoader external) {
-        if (!applied.add(Objects.hashCode(external, adviceClassName))) return;
+        if (!applied.add(adviceClassName + external.getClass().getName())) return;
 
         try {
             final Class<?> aClass = compound(getClass().getClassLoader(), external).loadClass(adviceClassName);
