@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +44,7 @@ class Register {
     }
 
     void apply(String adviceClassName, ClassLoader external) {
-        if (!applied.add(adviceClassName + external.getClass().getName())) return;
+        if (!applied.add(adviceClassName + "-" + System.identityHashCode(external))) return;
 
         try {
             final Class<?> aClass = compound(getClass().getClassLoader(), external).loadClass(adviceClassName);
