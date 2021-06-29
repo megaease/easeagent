@@ -30,6 +30,7 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import static com.google.common.collect.FluentIterable.from;
 
@@ -37,14 +38,22 @@ class Register {
     private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
     private final Iterable<QualifiedBean> beans;
-    private final Set<String> applied = new HashSet<>();
+    private final WeakHashMap<ClassLoader, Set<String>> applied = new WeakHashMap<>();
 
     Register(Iterable<QualifiedBean> beans) {
         this.beans = beans;
     }
 
-    void apply(String adviceClassName, ClassLoader external) {
-        if (!applied.add(adviceClassName + "-" + System.identityHashCode(external))) return;
+    synchronized void apply(String adviceClassName, ClassLoader external) {
+        Set<String> classNames = applied.get(external);
+        if (classNames == null) {
+            classNames = new HashSet<>();
+            applied.put(external, classNames);
+        }
+
+        if (!classNames.add(adviceClassName)) {
+            return;
+        }
 
         try {
             final Class<?> aClass = compound(getClass().getClassLoader(), external).loadClass(adviceClassName);
