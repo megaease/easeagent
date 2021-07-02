@@ -17,7 +17,10 @@
 
 package com.megaease.easeagent.core;
 
-import com.google.common.base.*;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -36,15 +39,15 @@ class Register {
     private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
     private final Iterable<QualifiedBean> beans;
-    private final Set<Integer> applied;
+    private final Set<String> applied;
 
     Register(Iterable<QualifiedBean> beans) {
         this.beans = beans;
-        applied = new HashSet<Integer>();
+        applied = new HashSet<>();
     }
 
     void apply(String adviceClassName, ClassLoader external) {
-        if (!applied.add(Objects.hashCode(external, adviceClassName))) return;
+        if (!applied.add(adviceClassName)) return;
 
         try {
             final Class<?> aClass = compound(getClass().getClassLoader(), external).loadClass(adviceClassName);
@@ -60,7 +63,7 @@ class Register {
         }
     }
 
-    private ClassLoader compound(ClassLoader parent, ClassLoader external) throws Exception {
+    private ClassLoader compound(ClassLoader parent, ClassLoader external) {
         try {
             parent.getClass().getDeclaredMethod("add", ClassLoader.class).invoke(parent, external);
         } catch (Exception e) {
