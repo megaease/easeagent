@@ -1,8 +1,8 @@
 # EaseAgent Roadmap
 
 ## Features
-* Collecting the distributed trace data and metric data from a service perspective.
-* Support various third-party critical components in microservices.
+* Focus on observability for Java ecosystem with a service perspective.
+* Support mainstream middlewares, libraries, and components in Java-based microservices.
   
 ## Trace and Metric
 EaseAgent uses open source components to implement data collection:
