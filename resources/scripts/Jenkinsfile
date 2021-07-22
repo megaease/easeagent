@@ -1,0 +1,5 @@
+package resources.scripts
+
+@Library(value='JenkinsHelper', changelog=false) _
+
+updateJavaBuild()
