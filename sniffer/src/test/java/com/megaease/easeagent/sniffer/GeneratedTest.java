@@ -19,6 +19,7 @@ package com.megaease.easeagent.sniffer;
 
 import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.sniffer.healthy.advice.SpringApplicationAdminMXBeanRegistrarAdvice;
+import com.megaease.easeagent.sniffer.httpclient.advice.HttpClientAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
@@ -60,6 +61,8 @@ import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
         RabbitMqMessageListenerAdvice.class,
         WebClientBuilderAdvice.class,
         SpringApplicationAdminMXBeanRegistrarAdvice.class,
+        HttpClientAdvice.class,
+
 
 
 })

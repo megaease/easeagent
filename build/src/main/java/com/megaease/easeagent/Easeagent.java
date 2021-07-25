@@ -21,6 +21,7 @@ import com.megaease.easeagent.gen.Assembly;
 import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
 import com.megaease.easeagent.sniffer.healthy.advice.SpringApplicationAdminMXBeanRegistrarAdvice;
+import com.megaease.easeagent.sniffer.httpclient.advice.HttpClientAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
@@ -63,6 +64,7 @@ import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
         KafkaConsumerAdvice.class,
         WebClientBuilderAdvice.class,
         SpringApplicationAdminMXBeanRegistrarAdvice.class,
+        HttpClientAdvice.class,
 
 
 })
