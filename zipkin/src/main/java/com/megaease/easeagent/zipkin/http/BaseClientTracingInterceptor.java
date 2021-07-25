@@ -54,6 +54,10 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
             return;
         }
         Req request = getRequest(methodInfo.getInvoker(), methodInfo.getArgs());
+        if (request == null) {
+            chain.doBefore(methodInfo, context);
+            return;
+        }
         HttpClientRequest requestWrapper = this.buildHttpClientRequest(request);
         Span span = clientHandler.handleSend(requestWrapper);
         context.put(SPAN_CONTEXT_KEY, span);
@@ -71,6 +75,9 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
         }
         try {
             Resp response = this.getResponse(methodInfo.getInvoker(), methodInfo.getArgs(), methodInfo.getRetValue());
+            if (response == null) {
+                return chain.doAfter(methodInfo, context);
+            }
             Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
             HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
             clientHandler.handleReceive(responseWrapper, span);

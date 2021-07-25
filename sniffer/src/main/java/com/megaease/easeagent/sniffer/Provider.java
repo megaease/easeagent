@@ -85,6 +85,7 @@ import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.ServletHttpLogInterceptor;
+import com.megaease.easeagent.zipkin.http.httpclient.HttpClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
@@ -494,6 +495,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .addInterceptor(new WebClientBuildInterceptor(chainBuilder, chainInvoker))
                     ;
         };
+    }
+
+    @Injection.Bean("supplier4HttpClient")
+    public Supplier<AgentInterceptorChain.Builder> getSupplier4HttpClient() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new HttpClientTracingInterceptor(tracing, config));
     }
 
     @Injection.Bean("supplier4OnApplicationEvent")
