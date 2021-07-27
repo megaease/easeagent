@@ -72,6 +72,7 @@
         <version.amqp-client>5.11.0</version.amqp-client>
         <version.prometheus>0.10.0</version.prometheus>
         <version.sparkjava>2.9.2</version.sparkjava>
+        <version.httpclient>4.5.13</version.httpclient>
     </properties>
 
     <dependencies>
@@ -320,6 +321,11 @@
                 <groupId>org.nanohttpd</groupId>
                 <artifactId>nanohttpd-nanolets</artifactId>
                 <version>2.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${version.httpclient}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
