@@ -74,13 +74,20 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
             return chain.doAfter(methodInfo, context);
         }
         try {
-            Resp response = this.getResponse(methodInfo.getInvoker(), methodInfo.getArgs(), methodInfo.getRetValue());
-            if (response == null) {
-                return chain.doAfter(methodInfo, context);
+            if (!methodInfo.isSuccess()) {
+                Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+                if (span != null) {
+                    span.abandon();
+                }
+            } else {
+                Resp response = this.getResponse(methodInfo.getInvoker(), methodInfo.getArgs(), methodInfo.getRetValue());
+                if (response == null) {
+                    return chain.doAfter(methodInfo, context);
+                }
+                Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+                HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
+                clientHandler.handleReceive(responseWrapper, span);
             }
-            Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
-            HttpClientResponse responseWrapper = this.buildHttpClientResponse(response);
-            clientHandler.handleReceive(responseWrapper, span);
             return chain.doAfter(methodInfo, context);
         } finally {
             scope.close();

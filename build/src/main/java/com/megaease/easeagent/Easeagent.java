@@ -22,6 +22,7 @@ import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
 import com.megaease.easeagent.sniffer.healthy.advice.SpringApplicationAdminMXBeanRegistrarAdvice;
 import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5Advice;
+import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5AsyncAdvice;
 import com.megaease.easeagent.sniffer.httpclient.advice.HttpClientAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
 import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
@@ -67,6 +68,7 @@ import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
         SpringApplicationAdminMXBeanRegistrarAdvice.class,
         HttpClientAdvice.class,
         HttpClient5Advice.class,
+        HttpClient5AsyncAdvice.class,
 
 
 })

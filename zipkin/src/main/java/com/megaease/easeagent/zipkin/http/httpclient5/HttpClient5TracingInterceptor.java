@@ -66,39 +66,39 @@ public class HttpClient5TracingInterceptor extends BaseClientTracingInterceptor<
 
     static class InternalRequest extends HttpClientRequest {
 
-        private final HttpRequest httpRequestBase;
+        private final HttpRequest httpRequest;
 
         public InternalRequest(HttpRequest httpRequestBase) {
-            this.httpRequestBase = httpRequestBase;
+            this.httpRequest = httpRequestBase;
         }
 
         @Override
         public void header(String name, String value) {
-            httpRequestBase.addHeader(name, value);
+            httpRequest.addHeader(name, value);
         }
 
         @Override
         public String method() {
-            return httpRequestBase.getMethod();
+            return httpRequest.getMethod();
         }
 
         @Override
         public String path() {
             try {
-                return httpRequestBase.getUri().toString();
+                return httpRequest.getUri().toString();
             } catch (URISyntaxException e) {
-                return httpRequestBase.getRequestUri();
+                return httpRequest.getRequestUri();
             }
         }
 
         @Override
         public String url() {
-            return httpRequestBase.getRequestUri();
+            return httpRequest.getRequestUri();
         }
 
         @Override
         public String header(String name) {
-            Header header = httpRequestBase.getFirstHeader(name);
+            Header header = httpRequest.getFirstHeader(name);
             if (header != null) {
                 return header.getValue();
             }
@@ -107,7 +107,7 @@ public class HttpClient5TracingInterceptor extends BaseClientTracingInterceptor<
 
         @Override
         public Object unwrap() {
-            return httpRequestBase;
+            return httpRequest;
         }
     }
 
