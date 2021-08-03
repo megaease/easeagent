@@ -120,6 +120,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>gen</artifactId>
             <version>${project.version}</version>
