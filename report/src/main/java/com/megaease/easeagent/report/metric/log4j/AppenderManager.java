@@ -20,6 +20,7 @@ package com.megaease.easeagent.report.metric.log4j;
 import com.google.common.collect.ImmutableList;
 import com.megaease.easeagent.report.OutputProperties;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -88,6 +89,9 @@ public interface AppenderManager {
         }
 
         private Appender newAppender(OutputProperties outputProperties, String topic) {
+            if (StringUtils.isEmpty(outputProperties.getServers())) {
+                return null;
+            }
             try {
                 String s = RandomStringUtils.randomAscii(8);
                 Property[] properties = {

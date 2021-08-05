@@ -54,6 +54,7 @@
         <version.servlet>3.1.0</version.servlet>
         <version.brave>5.13.3</version.brave>
         <version.zipkin-sender-kafka11>2.8.0</version.zipkin-sender-kafka11>
+        <version.zipkin-reporter2>2.15.0</version.zipkin-reporter2>
         <version.moco>1.1.0</version.moco>
         <version.okhttp3>4.9.0</version.okhttp3>
         <version.disruptor>3.4.2</version.disruptor>
@@ -178,6 +179,11 @@
                         <groupId>*</groupId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-sender-urlconnection</artifactId>
+                <version>${version.zipkin-reporter2}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.dreamhead</groupId>
