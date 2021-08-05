@@ -147,5 +147,9 @@
             <artifactId>okhttp</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-sender-urlconnection</artifactId>
+        </dependency>
     </dependencies>
 </project>

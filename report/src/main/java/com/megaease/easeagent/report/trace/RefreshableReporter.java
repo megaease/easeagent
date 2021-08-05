@@ -18,6 +18,7 @@
 package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.report.OutputProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zipkin2.codec.Encoding;
@@ -70,7 +71,8 @@ public class RefreshableReporter<S> implements Reporter<S> {
             }
         }
 
-        if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()) {
+        if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()
+                && StringUtils.isNotEmpty(agentOutputProperties.getServers())) {
             final SDKKafkaSender sender = SDKKafkaSender.wrap(traceProperties,
                     KafkaSender.newBuilder()
                             .bootstrapServers(agentOutputProperties.getServers())

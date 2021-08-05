@@ -105,7 +105,12 @@ import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingIntercep
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
+import org.apache.commons.lang3.StringUtils;
+import zipkin2.Span;
+import zipkin2.reporter.AsyncReporter;
+import zipkin2.reporter.Reporter;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
+import zipkin2.reporter.urlconnection.URLConnectionSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,13 +158,25 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 .addScopeDecorator(AgentMDCScopeDecorator.get())
                 .build();
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
+        String target = config.getString("observability.tracings.output.target");
+        String zipkinUrl = config.getString("observability.tracings.output.target.zipkinUrl");
+        boolean toZipkin = false;
+        if (target.equalsIgnoreCase("zipkin") && StringUtils.isNotEmpty(zipkinUrl)) {
+            toZipkin = true;
+        }
+        Reporter<Span> reporter;
+        if (toZipkin) {
+            reporter = AsyncReporter.create(URLConnectionSender.create(zipkinUrl));
+        } else {
+            reporter = span -> agentReport.report(span);
+        }
         this.tracing = Tracing.newBuilder()
                 .localServiceName(serviceName.getValue())
                 .traceId128Bit(false)
                 .sampler(CountingSampler.create(1))
                 .addSpanHandler(new CustomTagsSpanHandler(serviceName::getValue, AdditionalAttributes.getHostName()))
                 .addSpanHandler(AsyncZipkinSpanHandler
-                        .newBuilder(span -> agentReport.report(span))
+                        .newBuilder(reporter)
                         .alwaysReportSpans(true)
                         .build()
                 )

@@ -20,6 +20,7 @@ package com.megaease.easeagent.report.trace;
 import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;
+import org.apache.commons.lang3.StringUtils;
 import zipkin2.Span;
 import zipkin2.codec.Encoding;
 import zipkin2.internal.GlobalExtrasSupplier;
@@ -47,7 +48,8 @@ public class TraceReport {
         OutputProperties outputProperties = Utils.extractOutputProperties(configs);
         Sender sender = new SimpleSender();
         TraceProps traceProperties = Utils.extractTraceProps(configs);
-        if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()) {
+        if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()
+                && StringUtils.isNotEmpty(outputProperties.getServers())) {
             sender = SDKKafkaSender.wrap(traceProperties,
                     KafkaSender.newBuilder()
                             .bootstrapServers(outputProperties.getServers())
