@@ -47,7 +47,7 @@ public class OkHttpAdviceTest extends BaseSnifferTest {
         ClassLoader loader = this.getClass().getClassLoader();
         String baseName = this.getClass().getName();
         MyCall myCall = (MyCall) Classes.transform(baseName + "$MyCall")
-                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4OkHttp", supplier))
+                .with(def, new QualifiedBean("", chainInvoker), new QualifiedBean("supplier4OkHttp", supplier), new QualifiedBean("supplier4OkHttpAsync", supplier))
                 .load(loader).get(0).newInstance();
 
         myCall.execute();

@@ -88,8 +88,7 @@ import com.megaease.easeagent.zipkin.http.ServletHttpLogInterceptor;
 import com.megaease.easeagent.zipkin.http.httpclient.HttpClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.httpclient5.HttpClient5AsyncTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.httpclient5.HttpClient5TracingInterceptor;
-import com.megaease.easeagent.zipkin.http.okhttp.OkHttpClientBuilderBuildInterceptor;
-import com.megaease.easeagent.zipkin.http.okhttp.OkHttpClientProceedInterceptor;
+import com.megaease.easeagent.zipkin.http.okhttp.OkHttpAsyncTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.okhttp.OkHttpTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
@@ -526,20 +525,16 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 .addInterceptor(new OnApplicationEventInterceptor());
     }
 
-    @Injection.Bean("supplier4OkHttpClient$Builder")
-    public Supplier<AgentInterceptorChain.Builder> supplier4OkHttpClient$Builder() {
-        return () -> {
-            AgentInterceptorChain.Builder chainBuilder = ChainBuilderFactory.DEFAULT.createBuilder();
-            chainBuilder.addInterceptor(new OkHttpClientProceedInterceptor(tracing, config));
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                    .addInterceptor(new OkHttpClientBuilderBuildInterceptor(chainBuilder, chainInvoker));
-        };
-    }
-
     @Injection.Bean("supplier4OkHttp")
     public Supplier<AgentInterceptorChain.Builder> supplier4OkHttp() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new OkHttpTracingInterceptor(tracing, config));
+    }
+
+    @Injection.Bean("supplier4OkHttpAsync")
+    public Supplier<AgentInterceptorChain.Builder> supplier4OkHttpAsync() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new OkHttpAsyncTracingInterceptor(tracing, config));
     }
 
     class Md5ReportConsumer implements Consumer<Map<String, String>> {

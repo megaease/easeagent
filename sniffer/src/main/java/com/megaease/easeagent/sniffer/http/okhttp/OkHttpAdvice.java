@@ -28,6 +28,7 @@ import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
@@ -44,11 +45,15 @@ public abstract class OkHttpAdvice implements Transformation {
         return def.type(hasSuperType(named("okhttp3.Call"))
                         .or(named("okhttp3.internal.connection.RealCall")))
                 .transform(execute(named("execute")))
+                .transform(asyncExecute(named("enqueue")))
                 .end();
     }
 
     @AdviceTo(Execute.class)
     protected abstract Definition.Transformer execute(ElementMatcher<? super MethodDescription> matcher);
+
+    @AdviceTo(AsyncExecute.class)
+    protected abstract Definition.Transformer asyncExecute(ElementMatcher<? super MethodDescription> matcher);
 
 
     public static class Execute extends AbstractAdvice {
@@ -75,6 +80,36 @@ public abstract class OkHttpAdvice implements Transformation {
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
                   @Advice.Return Object retValue,
+                  @Advice.Thrown Throwable throwable
+        ) {
+            this.doExit(release, invoker, method, args, retValue, throwable);
+        }
+    }
+
+    public static class AsyncExecute extends AbstractAdvice {
+
+        @Injection.Autowire
+        public AsyncExecute(
+                @Injection.Qualifier("supplier4OkHttpAsync") Supplier<AgentInterceptorChain.Builder> supplier,
+                AgentInterceptorChainInvoker chainInvoker) {
+            super(supplier, chainInvoker);
+        }
+
+        @Advice.OnMethodEnter
+        ForwardLock.Release<Map<Object, Object>> enter(
+                @Advice.This Object invoker,
+                @Advice.Origin("#m") String method,
+                @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args
+        ) {
+            return this.doEnter(invoker, method, args);
+        }
+
+        @Advice.OnMethodExit(onThrowable = Throwable.class)
+        void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
+                  @Advice.This Object invoker,
+                  @Advice.Origin("#m") String method,
+                  @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
+                  @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
                   @Advice.Thrown Throwable throwable
         ) {
             this.doExit(release, invoker, method, args, retValue, throwable);
