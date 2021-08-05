@@ -25,6 +25,8 @@ import lombok.SneakyThrows;
 import org.springframework.http.client.AbstractClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
+import java.util.Map;
+
 public class RestTemplateTracingInterceptor extends BaseClientTracingInterceptor<AbstractClientHttpRequest, ClientHttpResponse> {
 
     public RestTemplateTracingInterceptor(Tracing tracing, Config config) {
@@ -32,12 +34,12 @@ public class RestTemplateTracingInterceptor extends BaseClientTracingInterceptor
     }
 
     @Override
-    public AbstractClientHttpRequest getRequest(Object invoker, Object[] args) {
+    public AbstractClientHttpRequest getRequest(Object invoker, Object[] args, Map<Object, Object> context) {
         return (AbstractClientHttpRequest) invoker;
     }
 
     @Override
-    public ClientHttpResponse getResponse(Object invoker, Object[] args, Object retValue) {
+    public ClientHttpResponse getResponse(Object invoker, Object[] args, Object retValue, Map<Object, Object> context) {
         return (ClientHttpResponse) retValue;
     }
 

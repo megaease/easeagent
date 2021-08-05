@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.httpclient.advice;
+package com.megaease.easeagent.sniffer.http.okhttp;
 
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
@@ -28,35 +28,34 @@ import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static net.bytebuddy.matcher.ElementMatchers.*;
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static net.bytebuddy.matcher.ElementMatchers.named;
 
 @Injection.Provider(Provider.class)
-public abstract class HttpClient5Advice implements Transformation {
+public abstract class OkHttpAdvice implements Transformation {
+
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("org.apache.hc.client5.http.classic.HttpClient"))) // enhanced client class
-                .transform(adviceExecute(named("doExecute")
-                        .and(takesArguments(3))
-                        .and(returns(named("org.apache.hc.client5.http.impl.classic.CloseableHttpResponse")))
-                ))
+        return def.type(hasSuperType(named("okhttp3.Call"))
+                        .or(named("okhttp3.internal.connection.RealCall")))
+                .transform(execute(named("execute")))
                 .end();
     }
 
     @AdviceTo(Execute.class)
-    protected abstract Definition.Transformer adviceExecute(ElementMatcher<? super MethodDescription> matcher);
+    protected abstract Definition.Transformer execute(ElementMatcher<? super MethodDescription> matcher);
 
 
     public static class Execute extends AbstractAdvice {
 
         @Injection.Autowire
         public Execute(
-                @Injection.Qualifier("supplier4HttpClient5") Supplier<AgentInterceptorChain.Builder> supplier,
+                @Injection.Qualifier("supplier4OkHttp") Supplier<AgentInterceptorChain.Builder> supplier,
                 AgentInterceptorChainInvoker chainInvoker) {
             super(supplier, chainInvoker);
         }
@@ -75,13 +74,10 @@ public abstract class HttpClient5Advice implements Transformation {
                   @Advice.This Object invoker,
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
-                  @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
+                  @Advice.Return Object retValue,
                   @Advice.Thrown Throwable throwable
         ) {
             this.doExit(release, invoker, method, args, retValue, throwable);
-
         }
     }
 }
-
-

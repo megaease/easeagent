@@ -32,6 +32,7 @@ import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentInterceptor {
 
@@ -40,6 +41,7 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
     protected static final String SPAN_CONTEXT_KEY = BaseClientTracingInterceptor.class.getName() + "-Span";
     public static final String ENABLE_KEY = "observability.tracings.remoteInvoke.enabled";
     private final Config config;
+    private BiConsumer<MethodInfo, Map<Object, Object>> afterProcessBeforeConsumer;
 
     public BaseClientTracingInterceptor(Tracing tracing, Config config) {
         HttpTracing httpTracing = HttpTracing.create(tracing);
@@ -53,7 +55,7 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
             chain.doBefore(methodInfo, context);
             return;
         }
-        Req request = getRequest(methodInfo.getInvoker(), methodInfo.getArgs());
+        Req request = getRequest(methodInfo.getInvoker(), methodInfo.getArgs(), context);
         if (request == null) {
             chain.doBefore(methodInfo, context);
             return;
@@ -80,7 +82,7 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
                     span.abandon();
                 }
             } else {
-                Resp response = this.getResponse(methodInfo.getInvoker(), methodInfo.getArgs(), methodInfo.getRetValue());
+                Resp response = this.getResponse(methodInfo.getInvoker(), methodInfo.getArgs(), methodInfo.getRetValue(), context);
                 if (response == null) {
                     return chain.doAfter(methodInfo, context);
                 }
@@ -94,9 +96,9 @@ public abstract class BaseClientTracingInterceptor<Req, Resp> implements AgentIn
         }
     }
 
-    public abstract Req getRequest(Object invoker, Object[] args);
+    public abstract Req getRequest(Object invoker, Object[] args, Map<Object, Object> context);
 
-    public abstract Resp getResponse(Object invoker, Object[] args, Object retValue);
+    public abstract Resp getResponse(Object invoker, Object[] args, Object retValue, Map<Object, Object> context);
 
     public abstract HttpClientRequest buildHttpClientRequest(Req req);
 

@@ -18,9 +18,9 @@
 package com.megaease.easeagent;
 
 import com.megaease.easeagent.gen.Assembly;
-import com.megaease.easeagent.log4j2.PostAppender;
 import com.megaease.easeagent.sniffer.*;
 import com.megaease.easeagent.sniffer.healthy.advice.SpringApplicationAdminMXBeanRegistrarAdvice;
+import com.megaease.easeagent.sniffer.http.okhttp.OkHttpAdvice;
 import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5Advice;
 import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5AsyncAdvice;
 import com.megaease.easeagent.sniffer.httpclient.advice.HttpClientAdvice;
@@ -69,13 +69,13 @@ import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
         HttpClientAdvice.class,
         HttpClient5Advice.class,
         HttpClient5AsyncAdvice.class,
-
+        OkHttpAdvice.class,
 
 })
 abstract class Easeagent {
     // This static code is to keep the links of the dependencies for shade plugin, not for real runtime.
     static {
-        System.out.println(PostAppender.class);
+//        System.out.println(PostAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.AppenderSet.class);
         System.out.println(org.apache.logging.log4j.core.appender.CountingNoOpAppender.class);
 //        System.out.println(org.apache.logging.log4j.core.appender.db.ColumnMapping.class);
