@@ -30,6 +30,7 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.AgentFieldAccessor;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
 import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpRequest;
@@ -41,7 +42,6 @@ import java.util.Map;
 
 public class HttpClient5AsyncTracingInterceptor implements AgentInterceptor {
     private static final String SPAN_KEY = HttpClient5AsyncTracingInterceptor.class.getName() + "-SPAN";
-    public static final String ENABLE_KEY = "observability.tracings.remoteInvoke.enabled";
     private final HttpClientHandler<HttpClientRequest, HttpClientResponse> clientHandler;
     private final Config config;
 
@@ -53,7 +53,7 @@ public class HttpClient5AsyncTracingInterceptor implements AgentInterceptor {
 
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        if (!SwitchUtil.enableTracing(config, ENABLE_KEY)) {
+        if (!SwitchUtil.enableTracing(config, BaseClientTracingInterceptor.ENABLE_KEY)) {
             chain.doBefore(methodInfo, context);
             return;
         }
