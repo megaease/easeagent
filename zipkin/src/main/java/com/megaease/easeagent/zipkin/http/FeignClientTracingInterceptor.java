@@ -47,12 +47,12 @@ public class FeignClientTracingInterceptor extends BaseClientTracingInterceptor<
     }
 
     @Override
-    public Request getRequest(Object invoker, Object[] args) {
+    public Request getRequest(Object invoker, Object[] args, Map<Object, Object> context) {
         return (Request) args[0];
     }
 
     @Override
-    public Response getResponse(Object invoker, Object[] args, Object retValue) {
+    public Response getResponse(Object invoker, Object[] args, Object retValue, Map<Object, Object> context) {
         return (Response) retValue;
     }
 

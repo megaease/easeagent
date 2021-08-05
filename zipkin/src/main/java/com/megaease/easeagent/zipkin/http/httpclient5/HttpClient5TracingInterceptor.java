@@ -28,6 +28,7 @@ import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpResponse;
 
 import java.net.URISyntaxException;
+import java.util.Map;
 
 public class HttpClient5TracingInterceptor extends BaseClientTracingInterceptor<HttpRequest, HttpResponse> {
 
@@ -36,7 +37,7 @@ public class HttpClient5TracingInterceptor extends BaseClientTracingInterceptor<
     }
 
     @Override
-    public HttpRequest getRequest(Object invoker, Object[] args) {
+    public HttpRequest getRequest(Object invoker, Object[] args, Map<Object, Object> context) {
         HttpUriRequestBase httpRequestBase = null;
         if (args != null) {
             for (Object arg : args) {
@@ -50,7 +51,7 @@ public class HttpClient5TracingInterceptor extends BaseClientTracingInterceptor<
     }
 
     @Override
-    public HttpResponse getResponse(Object invoker, Object[] args, Object retValue) {
+    public HttpResponse getResponse(Object invoker, Object[] args, Object retValue, Map<Object, Object> context) {
         return (HttpResponse) retValue;
     }
 

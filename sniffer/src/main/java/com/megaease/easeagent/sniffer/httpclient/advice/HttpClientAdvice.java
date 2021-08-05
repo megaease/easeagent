@@ -63,7 +63,7 @@ public abstract class HttpClientAdvice implements Transformation {
 
         @Advice.OnMethodEnter
         ForwardLock.Release<Map<Object, Object>> enter(
-                @Advice.Origin Object invoker,
+                @Advice.This Object invoker,
                 @Advice.Origin("#m") String method,
                 @Advice.AllArguments Object[] args
         ) {
@@ -72,7 +72,7 @@ public abstract class HttpClientAdvice implements Transformation {
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
         void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                  @Advice.Origin Object invoker,
+                  @Advice.This Object invoker,
                   @Advice.Origin("#m") String method,
                   @Advice.AllArguments Object[] args,
                   @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,

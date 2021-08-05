@@ -26,6 +26,8 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 
+import java.util.Map;
+
 public class HttpClientTracingInterceptor extends BaseClientTracingInterceptor<HttpRequestBase, HttpResponse> {
 
     public HttpClientTracingInterceptor(Tracing tracing, Config config) {
@@ -33,7 +35,7 @@ public class HttpClientTracingInterceptor extends BaseClientTracingInterceptor<H
     }
 
     @Override
-    public HttpRequestBase getRequest(Object invoker, Object[] args) {
+    public HttpRequestBase getRequest(Object invoker, Object[] args, Map<Object, Object> context) {
         HttpRequestBase httpRequestBase = null;
         if (args != null) {
             for (Object arg : args) {
@@ -47,7 +49,7 @@ public class HttpClientTracingInterceptor extends BaseClientTracingInterceptor<H
     }
 
     @Override
-    public HttpResponse getResponse(Object invoker, Object[] args, Object retValue) {
+    public HttpResponse getResponse(Object invoker, Object[] args, Object retValue, Map<Object, Object> context) {
         return (HttpResponse) retValue;
     }
 
