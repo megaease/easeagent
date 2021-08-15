@@ -53,6 +53,7 @@ public class RedisClientAdviceTest extends BaseSnifferTest {
             classList = Classes.transform(this.getClass().getName() + "$MyRedisClient")
                     .with(def,
                             new QualifiedBean("supplier4RedisClientConnectAsync", mockSupplier()),
+                            new QualifiedBean("supplier4RedisClientConstruct", mockSupplier()),
                             new QualifiedBean("", chainInvoker)
                     )
                     .load(loader);
@@ -62,6 +63,7 @@ public class RedisClientAdviceTest extends BaseSnifferTest {
     @Test
     public void connect() throws Exception {
         MyRedisClient myRedisClient = (MyRedisClient) classList.get(0).newInstance();
+        reset(chainInvoker);
         myRedisClient.connectStandaloneAsync();
         this.verifyInvokeTimes(chainInvoker, 1);
     }

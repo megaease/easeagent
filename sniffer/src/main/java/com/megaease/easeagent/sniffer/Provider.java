@@ -73,6 +73,7 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollIn
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
+import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisClientConstructInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
@@ -349,6 +350,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .addInterceptor(metricInterceptor)
                     .addInterceptor(new CommonLettuceTracingInterceptor(this.tracing, config));
         };
+    }
+
+    @Injection.Bean("supplier4RedisClientConstruct")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConstruct() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new RedisClientConstructInterceptor());
     }
 
     @Injection.Bean("supplier4Jedis")

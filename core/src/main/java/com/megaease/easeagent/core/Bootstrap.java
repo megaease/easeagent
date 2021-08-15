@@ -53,6 +53,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.FluentIterable.from;
@@ -70,9 +71,13 @@ public class Bootstrap {
 
     private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
 
+    private static final String AGENT_MIDDLEWARE_UPDATE = "easeagent.middleware.update";
+
     private static final int DEF_AGENT_SERVER_PORT = 9900;
 
     private static WrappedConfigManager wrappedConfigManager;
+
+    private static final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
@@ -98,10 +103,17 @@ public class Bootstrap {
         agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_ON_INIT);
         Boolean httpServerEnabled = conf.getBoolean(AGENT_SERVER_ENABLED_KEY);
         String httpServerEnabledInProp = System.getProperty(AGENT_SERVER_ENABLED_KEY, String.valueOf(httpServerEnabled));
+        String agentChangeResourceStr = System.getProperty(AGENT_MIDDLEWARE_UPDATE, "false");
         httpServerEnabled = Boolean.parseBoolean(httpServerEnabledInProp);
         if (httpServerEnabled) {
             agentHttpServer.startServer();
             LOGGER.info("start agent http server on port:{}", port);
+
+            if (Boolean.parseBoolean(agentChangeResourceStr)) {
+                agentHttpServer.addHttpRoute("/middleware-config", MiddlewareConfigChangeAgentHttpHandler.class);
+            }
+            LOGGER.info("waitint middleware config update");
+            countDownLatch.await();
         }
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
@@ -281,6 +293,30 @@ public class Bootstrap {
             wrappedConfigManager.updateService2(config, version);
         }
     }
+
+    public static class MiddlewareConfigChangeAgentHttpHandler extends AgentHttpHandler {
+        @Override
+        public String getPath() {
+            return "/middleware-config";
+        }
+
+        @Override
+        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            String body = this.buildRequestBody(session);
+            if (StringUtils.isEmpty(body)) {
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
+            }
+            Map<String, Object> map = JsonUtil.toMap(body);
+            if (map == null) {
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
+            }
+            MiddlewareConfigProcessor.INSTANCE.addAll(map);
+            countDownLatch.countDown();
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
+        }
+
+    }
+
 
     public static abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
 
