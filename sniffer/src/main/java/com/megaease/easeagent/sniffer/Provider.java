@@ -65,6 +65,7 @@ import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
+import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetJdbcUrlInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
@@ -231,6 +232,15 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     s -> Provider.this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, s))).run();
             return ChainBuilderFactory.DEFAULT.createBuilder()
                     .addInterceptor(interceptor);
+        };
+
+    }
+
+    @Injection.Bean("supplier4HikariSetJdbcUrl")
+    public Supplier<AgentInterceptorChain.Builder> supplier4HikariSetJdbcUrl() {
+        return () -> {
+            return ChainBuilderFactory.DEFAULT.createBuilder()
+                    .addInterceptor(new HikariSetJdbcUrlInterceptor());
         };
 
     }
