@@ -74,9 +74,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientCo
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisClientConstructInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.*;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
@@ -532,6 +530,18 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .addInterceptor(new RabbitMqMessageListenerTracingInterceptor(tracing, config))
                     ;
         };
+    }
+
+    @Injection.Bean("supplier4RabbitMqSetProperty")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqSetProperty() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new RabbitMqSetPropertyInterceptor());
+    }
+
+    @Injection.Bean("supplier4RabbitPropertiesSetProperty")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitPropertiesSetProperty() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new RabbitPropertiesSetPropertyInterceptor());
     }
 
     @Injection.Bean("supplier4WebClientBuild")
