@@ -68,9 +68,7 @@ import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInte
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
+import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.*;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisClientConstructInterceptor;
@@ -410,6 +408,18 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerConstructor() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new KafkaConsumerConstructInterceptor());
+    }
+
+    @Injection.Bean("supplier4KafkaConsumerConfigConstructor")
+    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerConfigConstructor() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new KafkaConsumerConfigConstructInterceptor());
+    }
+
+    @Injection.Bean("supplier4KafkaProducerConfigConstructor")
+    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerConfigConstructor() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new KafkaProducerConfigConstructInterceptor());
     }
 
     @Injection.Bean("supplier4KafkaConsumerDoPoll")

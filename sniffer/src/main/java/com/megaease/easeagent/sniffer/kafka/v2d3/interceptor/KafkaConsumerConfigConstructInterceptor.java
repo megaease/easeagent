@@ -15,29 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.config;
+package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class MiddlewareConfigProcessor {
-
-    public static final MiddlewareConfigProcessor INSTANCE = new MiddlewareConfigProcessor();
-
-    private final Map<String, Object> map = new HashMap<>();
-
-    public void add(String key, Object data) {
-        map.put(key, data);
-    }
-
-    public void addAll(Map<String, Object> dataMap) {
-        map.putAll(dataMap);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getData(String key) {
-        return (T) map.get(key);
-    }
-
+public class KafkaConsumerConfigConstructInterceptor extends KafkaAbstractConfigConstructInterceptor {
 }
