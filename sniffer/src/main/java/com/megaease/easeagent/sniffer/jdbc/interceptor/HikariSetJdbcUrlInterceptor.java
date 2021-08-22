@@ -27,13 +27,48 @@ import java.util.Map;
 public class HikariSetJdbcUrlInterceptor implements AgentInterceptor {
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Map<String, Object> dataMap = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_DATABASE);
+        Map<String, Object> dataMap = MiddlewareConfigProcessor.INSTANCE.getFirstData(MiddlewareConfigProcessor.ENV_DATABASE);
         if (dataMap == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
         }
-        String jdbcUrl = (String) dataMap.get("jdbcUrl");
-        methodInfo.getArgs()[0] = jdbcUrl;
+        String host = (String) dataMap.get("host");
+        if (host == null) {
+            String jdbcUrl = (String) dataMap.get(MiddlewareConfigProcessor.EASE_RESOURCE_URL);
+            methodInfo.getArgs()[0] = jdbcUrl;
+        } else {
+            Integer port = (Integer) dataMap.get("port");
+            String jdbcUrl = (String) methodInfo.getArgs()[0];
+            methodInfo.getArgs()[0] = this.replaceHostAndPort(jdbcUrl, host, port);
+        }
         AgentInterceptor.super.before(methodInfo, context, chain);
+    }
+
+    public String replaceHostAndPort(String jdbcUrl, String host, Integer port) {
+        if (jdbcUrl.startsWith("jdbc:mysql:")) {
+            return this.replaceHostAndPort4Mysql(jdbcUrl, host, port);
+        }
+        //db2 - https://www.ibm.com/docs/en/db2-for-zos/11?topic=cdsudidsdjs-url-format-data-server-driver-jdbc-sqlj-type-4-connectivity
+        //mssql - https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url?view=sql-server-ver15
+        //oracle - https://docs.oracle.com/cd/E11882_01/appdev.112/e13995/oracle/jdbc/OracleDriver.html
+        //oracle - jdbc:oracle:thin:@//host:port/service_name
+        //oracle - jdbc:oracle:thin:@host:port:SID
+        //oracle - jdbc:oracle:thin:@TNSName
+        //postgresql - https://jdbc.postgresql.org/documentation/80/connect.html
+        return null;
+    }
+
+    private static String replaceHostAndPort4Mysql(String jdbcUrl, String host, Integer port) {
+        //mysql - https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-jdbc-url-format.html
+        //mysql - jdbc:mysql://host1:33060/dbName
+        int idx = jdbcUrl.indexOf("://");
+        int hostAndPortBeginIdx = idx + 3;
+        int hostAndPortEndIdx = jdbcUrl.indexOf("/", hostAndPortBeginIdx);
+        return jdbcUrl.substring(0, hostAndPortBeginIdx) + host + ":" + port + jdbcUrl.substring(hostAndPortEndIdx);
+    }
+
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://host1/dbName";
+        System.out.println(replaceHostAndPort4Mysql(url, "localhost", 90999));
     }
 }

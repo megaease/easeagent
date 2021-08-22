@@ -31,7 +31,7 @@ public class RabbitAbstractSetPropertyInterceptor implements AgentInterceptor {
     @SneakyThrows
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Map<String, Object> dataMap = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_RABBITMQ);
+        Map<String, Object> dataMap = MiddlewareConfigProcessor.INSTANCE.getFirstData(MiddlewareConfigProcessor.ENV_RABBITMQ);
         if (dataMap == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;

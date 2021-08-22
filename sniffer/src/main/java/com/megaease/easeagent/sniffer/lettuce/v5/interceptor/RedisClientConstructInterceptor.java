@@ -30,7 +30,7 @@ public class RedisClientConstructInterceptor extends BaseRedisAgentInterceptor i
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Map<String, Object> map = MiddlewareConfigProcessor.INSTANCE.getData("redis");
+        Map<String, Object> map = MiddlewareConfigProcessor.INSTANCE.getFirstData("redis");
         if (map == null) {
             return AgentInterceptor.super.after(methodInfo, context, chain);
         }
