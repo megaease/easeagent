@@ -18,34 +18,29 @@
 package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
 
 import com.megaease.easeagent.core.MiddlewareConfigProcessor;
+import com.megaease.easeagent.core.ResourceConfig;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 public class KafkaAbstractConfigConstructInterceptor implements AgentInterceptor {
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Map<String, Object> dataMap = MiddlewareConfigProcessor.INSTANCE.getFirstData(MiddlewareConfigProcessor.ENV_KAFKA);
-        if (dataMap == null) {
+        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_KAFKA);
+        if (cnf == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
         }
-        String host = (String) dataMap.get("host");
-        Integer port = (Integer) dataMap.get("port");
-        List<String> list = new ArrayList<>();
-        list.add(host + ":" + port);
         if (methodInfo.getArgs()[0] instanceof Properties) {
             Properties properties = (Properties) methodInfo.getArgs()[0];
-            properties.put("bootstrap.servers", list);
+            properties.put("bootstrap.servers", cnf.getUrls());
         } else if (methodInfo.getArgs()[0] instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) methodInfo.getArgs()[0];
-            map.put("bootstrap.servers", list);
+            map.put("bootstrap.servers", cnf.getUrls());
         }
         AgentInterceptor.super.before(methodInfo, context, chain);
     }

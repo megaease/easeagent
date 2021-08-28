@@ -35,7 +35,7 @@ public class MiddlewareConfigProcessor {
 
     public static final MiddlewareConfigProcessor INSTANCE = new MiddlewareConfigProcessor();
 
-    private final Map<String, List<Map<String, Object>>> map = new HashMap<>();
+    private final Map<String, ResourceConfig> map = new HashMap<>();
 
     public void init() {
         this.initConfigItem(ENV_REDIS);
@@ -46,43 +46,22 @@ public class MiddlewareConfigProcessor {
 
     private void initConfigItem(String envStr) {
         String str = System.getenv(envStr);
-        if (str != null) {
-            List<String> list = JsonUtil.toObject(str, new TypeReference<List<String>>() {
-            });
-
-            List<Map<String, Object>> mapList = new ArrayList<>();
-            for (String s : list) {
-                int begin = s.indexOf(":");
-                int end = s.lastIndexOf(":");
-                Map<String, Object> dataMap = new HashMap<>();
-                if (begin == end) {
-                    String[] arr = s.split(":");
-                    dataMap.put("host", arr[0]);
-                    dataMap.put("port", Integer.parseInt(arr[1]));
-                    mapList.add(dataMap);
-                } else {
-                    //process url
-                    dataMap.put(EASE_RESOURCE_URL, s);
-                }
-            }
-            this.add(envStr, mapList);
+        if (str == null) {
+            return;
+        }
+        ResourceConfig resourceConfig = JsonUtil.toObject(str, new TypeReference<ResourceConfig>() {
+        });
+        resourceConfig.initHostAndPorts();
+        if (resourceConfig.hasUrl()) {
+            this.add(envStr, resourceConfig);
         }
     }
 
-    public void add(String key, List<Map<String, Object>> list) {
-        map.put(key, list);
+    public void add(String key, ResourceConfig resourceConfig) {
+        map.put(key, resourceConfig);
     }
 
-    public Map<String, Object> getFirstData(String key) {
-        List<Map<String, Object>> data = getData(key);
-        if (data == null || data.isEmpty()) {
-            return null;
-        }
-        return data.get(0);
-    }
-
-    public List<Map<String, Object>> getData(String key) {
+    public ResourceConfig getData(String key) {
         return map.get(key);
     }
-
 }

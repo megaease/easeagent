@@ -18,6 +18,7 @@
 package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.core.MiddlewareConfigProcessor;
+import com.megaease.easeagent.core.ResourceConfig;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -30,15 +31,15 @@ public class RedisClientConstructInterceptor extends BaseRedisAgentInterceptor i
 
     @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Map<String, Object> map = MiddlewareConfigProcessor.INSTANCE.getFirstData("redis");
-        if (map == null) {
+        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_REDIS);
+        if (cnf == null) {
             return AgentInterceptor.super.after(methodInfo, context, chain);
         }
         RedisClient redisClient = (RedisClient) methodInfo.getInvoker();
         RedisURI redisURI = this.getRedisURI(redisClient, null);
-
-        String host = (String) map.get("host");
-        Integer port = (Integer) map.get("port");
+        ResourceConfig.HostAndPort hostAndPort = cnf.getFirstHostAndPort();
+        String host = hostAndPort.getHost();
+        Integer port = hostAndPort.getPort();
         if (host != null && port != null) {
             redisURI.setHost(host);
             redisURI.setPort(port);

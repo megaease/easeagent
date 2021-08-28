@@ -18,6 +18,7 @@
 package com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor;
 
 import com.megaease.easeagent.core.MiddlewareConfigProcessor;
+import com.megaease.easeagent.core.ResourceConfig;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -31,15 +32,16 @@ public class RabbitAbstractSetPropertyInterceptor implements AgentInterceptor {
     @SneakyThrows
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Map<String, Object> dataMap = MiddlewareConfigProcessor.INSTANCE.getFirstData(MiddlewareConfigProcessor.ENV_RABBITMQ);
-        if (dataMap == null) {
+        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_RABBITMQ);
+        if (cnf == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
         }
         String method = methodInfo.getMethod();
-        String host = (String) dataMap.get("host");
-        Integer port = (Integer) dataMap.get("port");
-        String uriStr = (String) dataMap.get("uri");
+        ResourceConfig.HostAndPort hostAndPort = cnf.getFirstHostAndPort();
+        String host = hostAndPort.getHost();
+        Integer port = hostAndPort.getPort();
+        String uriStr = "";
         if (method.equals("setHost") && host != null) {
             methodInfo.getArgs()[0] = host;
         } else if (method.equals("setPort") && port != null) {

@@ -18,6 +18,7 @@
 package com.megaease.easeagent.sniffer.jdbc.interceptor;
 
 import com.megaease.easeagent.core.MiddlewareConfigProcessor;
+import com.megaease.easeagent.core.ResourceConfig;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
@@ -27,17 +28,19 @@ import java.util.Map;
 public class HikariSetJdbcUrlInterceptor implements AgentInterceptor {
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        Map<String, Object> dataMap = MiddlewareConfigProcessor.INSTANCE.getFirstData(MiddlewareConfigProcessor.ENV_DATABASE);
-        if (dataMap == null) {
+        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_DATABASE);
+        if (cnf == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
         }
-        String host = (String) dataMap.get("host");
-        if (host == null) {
-            String jdbcUrl = (String) dataMap.get(MiddlewareConfigProcessor.EASE_RESOURCE_URL);
+        ResourceConfig.HostAndPort hostAndPort = cnf.getFirstHostAndPort();
+        if (hostAndPort == null) {
+            String jdbcUrl = cnf.getFirstUrl();
             methodInfo.getArgs()[0] = jdbcUrl;
+
         } else {
-            Integer port = (Integer) dataMap.get("port");
+            String host = hostAndPort.getHost();
+            Integer port = hostAndPort.getPort();
             String jdbcUrl = (String) methodInfo.getArgs()[0];
             methodInfo.getArgs()[0] = this.replaceHostAndPort(jdbcUrl, host, port);
         }
@@ -46,7 +49,7 @@ public class HikariSetJdbcUrlInterceptor implements AgentInterceptor {
 
     public String replaceHostAndPort(String jdbcUrl, String host, Integer port) {
         if (jdbcUrl.startsWith("jdbc:mysql:")) {
-            return this.replaceHostAndPort4Mysql(jdbcUrl, host, port);
+            return replaceHostAndPort4Mysql(jdbcUrl, host, port);
         }
         //db2 - https://www.ibm.com/docs/en/db2-for-zos/11?topic=cdsudidsdjs-url-format-data-server-driver-jdbc-sqlj-type-4-connectivity
         //mssql - https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url?view=sql-server-ver15
