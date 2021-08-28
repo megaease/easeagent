@@ -22,10 +22,11 @@ import com.megaease.easeagent.core.ResourceConfig;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
-public class HikariSetJdbcUrlInterceptor implements AgentInterceptor {
+public class HikariSetPropertyInterceptor implements AgentInterceptor {
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_DATABASE);
@@ -34,15 +35,21 @@ public class HikariSetJdbcUrlInterceptor implements AgentInterceptor {
             return;
         }
         ResourceConfig.HostAndPort hostAndPort = cnf.getFirstHostAndPort();
-        if (hostAndPort == null) {
-            String jdbcUrl = cnf.getFirstUrl();
-            methodInfo.getArgs()[0] = jdbcUrl;
+        if (methodInfo.getMethod().equals("setJdbcUrl")) {
+            if (hostAndPort == null) {
+                String jdbcUrl = cnf.getFirstUrl();
+                methodInfo.getArgs()[0] = jdbcUrl;
 
-        } else {
-            String host = hostAndPort.getHost();
-            Integer port = hostAndPort.getPort();
-            String jdbcUrl = (String) methodInfo.getArgs()[0];
-            methodInfo.getArgs()[0] = this.replaceHostAndPort(jdbcUrl, host, port);
+            } else {
+                String host = hostAndPort.getHost();
+                Integer port = hostAndPort.getPort();
+                String jdbcUrl = (String) methodInfo.getArgs()[0];
+                methodInfo.getArgs()[0] = this.replaceHostAndPort(jdbcUrl, host, port);
+            }
+        } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUsername())) {
+            methodInfo.getArgs()[0] = cnf.getUsername();
+        } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
+            methodInfo.getArgs()[0] = cnf.getPassword();
         }
         AgentInterceptor.super.before(methodInfo, context, chain);
     }

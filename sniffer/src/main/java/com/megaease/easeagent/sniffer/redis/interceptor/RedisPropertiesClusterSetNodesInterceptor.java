@@ -22,11 +22,10 @@ import com.megaease.easeagent.core.ResourceConfig;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
-public class RedisPropertiesSetPropertyInterceptor implements AgentInterceptor {
+public class RedisPropertiesClusterSetNodesInterceptor implements AgentInterceptor {
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_REDIS);
@@ -34,17 +33,7 @@ public class RedisPropertiesSetPropertyInterceptor implements AgentInterceptor {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
         }
-        String method = methodInfo.getMethod();
-        ResourceConfig.HostAndPort hostAndPort = cnf.getFirstHostAndPort();
-        String host = hostAndPort.getHost();
-        Integer port = hostAndPort.getPort();
-        if (method.equals("setHost") && host != null) {
-            methodInfo.getArgs()[0] = host;
-        } else if (method.equals("setPort") && port != null) {
-            methodInfo.getArgs()[0] = port;
-        } else if (method.equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
-            methodInfo.getArgs()[0] = cnf.getPassword();
-        }
+        methodInfo.getArgs()[0] = cnf.getUrls();
         AgentInterceptor.super.before(methodInfo, context, chain);
     }
 }

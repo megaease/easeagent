@@ -65,7 +65,7 @@ import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
-import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetJdbcUrlInterceptor;
+import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
@@ -75,6 +75,7 @@ import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterI
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisClientConstructInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.*;
+import com.megaease.easeagent.sniffer.redis.interceptor.RedisPropertiesClusterSetNodesInterceptor;
 import com.megaease.easeagent.sniffer.redis.interceptor.RedisPropertiesSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
@@ -239,7 +240,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4HikariSetJdbcUrl() {
         return () -> {
             return ChainBuilderFactory.DEFAULT.createBuilder()
-                    .addInterceptor(new HikariSetJdbcUrlInterceptor());
+                    .addInterceptor(new HikariSetPropertyInterceptor());
         };
 
     }
@@ -369,6 +370,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4RedisPropertiesSetProperty() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new RedisPropertiesSetPropertyInterceptor());
+    }
+
+    @Injection.Bean("supplier4RedisPropertiesClusterSetNodes")
+    public Supplier<AgentInterceptorChain.Builder> supplier4RedisPropertiesClusterSetNodes() {
+        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
+                .addInterceptor(new RedisPropertiesClusterSetNodesInterceptor());
     }
 
     @Injection.Bean("supplier4Jedis")

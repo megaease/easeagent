@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.jdbc.advice;
+package com.megaease.easeagent.sniffer.redis.advice;
 
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.AdviceTo;
@@ -34,44 +34,48 @@ import net.bytebuddy.matcher.ElementMatcher;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static net.bytebuddy.matcher.ElementMatchers.*;
+import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
+import static net.bytebuddy.matcher.ElementMatchers.named;
 
 @Injection.Provider(Provider.class)
-public abstract class HikariDataSourceAdvice implements Transformation {
+public abstract class RedisPropertiesClusterAdvice implements Transformation {
+
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("com.zaxxer.hikari.HikariConfig")))
-                .transform(setJdbcUrl(nameStartsWith("set").and(takesArgument(0, String.class))))
-                .end();
+        return def
+                .type(named("org.springframework.boot.autoconfigure.data.redis.RedisProperties$Cluster"))
+                .transform(setNodes(named("setNodes")))
+                .end()
+                ;
     }
 
-    @AdviceTo(SetJdbcUrl.class)
-    abstract Definition.Transformer setJdbcUrl(ElementMatcher<? super MethodDescription> getConnection);
+    @AdviceTo(SetNodes.class)
+    public abstract Definition.Transformer setNodes(ElementMatcher<? super MethodDescription> matcher);
 
-    static class SetJdbcUrl extends AbstractAdvice {
-
+    static class SetNodes extends AbstractAdvice {
         @Injection.Autowire
-        SetJdbcUrl(AgentInterceptorChainInvoker chainInvoker,
-                   @Injection.Qualifier("supplier4HikariSetJdbcUrl") Supplier<AgentInterceptorChain.Builder> supplier) {
+        public SetNodes(@Injection.Qualifier("supplier4RedisPropertiesClusterSetNodes") Supplier<AgentInterceptorChain.Builder> supplier,
+                        AgentInterceptorChainInvoker chainInvoker) {
             super(supplier, chainInvoker);
         }
 
         @Advice.OnMethodEnter
-        ForwardLock.Release<Map<Object, Object>> enter(@Advice.This Object invoker,
-                                                       @Advice.Origin("#m") String method,
-                                                       @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args) {
+        public ForwardLock.Release<Map<Object, Object>> enter(
+                @Advice.This Object invoker,
+                @Advice.Origin("#m") String method,
+                @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args
+        ) {
             return this.doEnter(invoker, method, args);
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                  @Advice.This Object invoker,
-                  @Advice.Origin("#m") String method,
-                  @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
-                  @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
-                  @Advice.Thrown Exception exception) {
-            this.doExit(release, invoker, method, args, retValue, exception);
+        public void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
+                         @Advice.This Object invoker,
+                         @Advice.Origin("#m") String method,
+                         @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
+                         @Advice.Thrown Throwable throwable
+        ) {
+            this.doExitNoRetValue(release, invoker, method, args, throwable);
         }
     }
-
 }

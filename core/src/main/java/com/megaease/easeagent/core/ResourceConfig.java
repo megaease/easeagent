@@ -22,7 +22,7 @@ import java.util.List;
 
 public class ResourceConfig {
 
-    private String user;
+    private String username;
     private String password;
     private List<String> urls;
     private final List<HostAndPort> hostAndPorts = new ArrayList<>();
@@ -58,12 +58,12 @@ public class ResourceConfig {
         return this.urls.get(0);
     }
 
-    public String getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

@@ -23,6 +23,7 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
 import java.util.Map;
@@ -52,6 +53,10 @@ public class RabbitAbstractSetPropertyInterceptor implements AgentInterceptor {
             } else if (methodInfo.getArgs()[0] instanceof String) {
                 methodInfo.getArgs()[0] = uriStr;
             }
+        } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUsername())) {
+            methodInfo.getArgs()[0] = cnf.getUsername();
+        } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
+            methodInfo.getArgs()[0] = cnf.getPassword();
         }
         AgentInterceptor.super.before(methodInfo, context, chain);
     }
