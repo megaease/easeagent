@@ -97,6 +97,14 @@ observability.metrics.[xxxx].appendType=console
 # tracings output
 observability.tracings.output.enabled=false
 ```
+* Sending tracing data to zipkin server
+```
+# [zipkin]: send data to zipkin server
+# [system]: send data to kafka
+observability.tracings.output.target=zipkin
+# send data to zipkin server
+observability.tracings.output.target.zipkinUrl=http://localhost:9411/api/v2/spans
+```
 
 ### Step 3
 Building the demo application.
