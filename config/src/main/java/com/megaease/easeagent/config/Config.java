@@ -22,21 +22,21 @@ import java.util.Set;
 
 public interface Config {
 
-    public boolean hasPath(String path);
+    boolean hasPath(String path);
 
-    public String getString(String name);
+    String getString(String name);
 
-    public Integer getInt(String name);
+    Integer getInt(String name);
 
-    public Boolean getBoolean(String name);
+    Boolean getBoolean(String name);
 
-    public Double getDouble(String name);
+    Double getDouble(String name);
 
-    public Long getLong(String name);
+    Long getLong(String name);
 
-    public List<String> getStringList(String name);
+    List<String> getStringList(String name);
 
-    public Runnable addChangeListener(ConfigChangeListener listener);
+    Runnable addChangeListener(ConfigChangeListener listener);
 
     Set<String> keySet();
 }
