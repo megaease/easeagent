@@ -30,7 +30,7 @@ public class ScheduleHelper {
     private final ThreadFactory threadFactory = new AgentThreadFactory();
 
     public void execute(int initialDelay, int delay, Runnable command) {
-        Executors.newSingleThreadScheduledExecutor(threadFactory).scheduleWithFixedDelay(command, initialDelay, delay, TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor(threadFactory)
+            .scheduleWithFixedDelay(command, initialDelay, delay, TimeUnit.SECONDS);
     }
-
 }

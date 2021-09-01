@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * AdditionalAttributes hold the global attributes field values which are
  * always same in an instance, such as</p>
- * <b>host_ipv4</b>: a ip address to identical instance address
+ * <b>host_ipv4</b>: an ip address to identical instance address
  * <b>hostname</b>: a name to identical instance name
  * <b>serviceName</b> service name
  */
@@ -63,7 +63,7 @@ public class AdditionalAttributes {
 
             if (isPrimaryInterface(i)) {
                 // We treat interface name which started with "en" or "eth" as primary interface.
-                // We prefer to using address of primary interface as value of the `host_ipv4`
+                // We prefer to use address of primary interface as value of the `host_ipv4`
                 ip = ipAddressFromInetAddress(i);
                 if (!isEmpty(ip)) {
                     return ip;
@@ -71,7 +71,6 @@ public class AdditionalAttributes {
             } else if (isEmpty(secondaryIP)) {
                 secondaryIP = ipAddressFromInetAddress(i);
             }
-
         }
 
         return !isEmpty(secondaryIP) ? secondaryIP : "UnknownIP";

@@ -42,5 +42,4 @@ public abstract class HttpServletService implements Transformation {
     }
 
     protected abstract Definition.Transformer service(ElementMatcher<? super MethodDescription> matcher);
-
 }

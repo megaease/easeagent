@@ -43,11 +43,9 @@ public class DatabaseInfo {
             } else {
                 remoteServiceName = "";
             }
-            return DatabaseInfo.builder()
-                    .host(StringUtils.isNotEmpty(url.getHost()) ? url.getHost() : "")
-                    .database(remoteServiceName)
-                    .port(url.getPort() == -1 ? 3306 : url.getPort())
-                    .build();
+            return new DatabaseInfo(remoteServiceName,
+                StringUtils.isNotEmpty(url.getHost()) ? url.getHost() : "",
+                url.getPort() == -1 ? 3306 : url.getPort());
         } catch (SQLException ignored) {
         }
         return null;

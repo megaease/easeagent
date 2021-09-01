@@ -40,12 +40,12 @@ public class MethodInfo {
     private Object[] args;
 
     /**
-     * The return value of instrumented method
+     * Throwable is existed if method throws exception. Otherwise, it is null.
      */
     private Throwable throwable;
 
     /**
-     * Throwable is exist if method throws exception. Otherwise it is null.
+     * The return value of instrumented method
      */
     private Object retValue;
 

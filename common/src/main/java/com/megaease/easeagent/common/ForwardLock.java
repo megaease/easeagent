@@ -41,7 +41,6 @@ public class ForwardLock {
     @AutoService(AppendBootstrapClassLoaderSearch.class)
     public interface Release<T> {
         void apply(Consumer<T> c);
-
     }
 
     public interface Supplier<T> {

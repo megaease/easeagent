@@ -60,12 +60,7 @@ public abstract class AnyCall implements Transformation {
     protected abstract List<String> exclude_class_prefix_list();
 
     private static final Function<String, Junction<TypeDescription>> NAME_STARTS_WITH =
-            new Function<String, Junction<TypeDescription>>() {
-        @Override
-        public Junction<TypeDescription> apply(String input) {
-            return nameStartsWith(input);
-        }
-    };
+        ElementMatchers::nameStartsWith;
 
     private static <T> Junction<T> anyOf(Iterable<Junction<T>> matchers) {
         Junction<T> fold = none();
