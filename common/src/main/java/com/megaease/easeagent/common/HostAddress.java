@@ -96,15 +96,17 @@ public abstract class HostAddress {
         } catch (final UnknownHostException uhe) {
             try {
                 final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-                while (interfaces.hasMoreElements()) {
-                    final NetworkInterface nic = interfaces.nextElement();
-                    final Enumeration<InetAddress> addresses = nic.getInetAddresses();
-                    while (addresses.hasMoreElements()) {
-                        final InetAddress address = addresses.nextElement();
-                        if (!address.isLoopbackAddress()) {
-                            final String hostname = address.getHostName();
-                            if (hostname != null) {
-                                return hostname;
+                if (interfaces != null) {   // NetworkInterface.getNetworkInterfaces impl is different in different jdk
+                    while (interfaces.hasMoreElements()) {
+                        final NetworkInterface nic = interfaces.nextElement();
+                        final Enumeration<InetAddress> addresses = nic.getInetAddresses();
+                        while (addresses.hasMoreElements()) {
+                            final InetAddress address = addresses.nextElement();
+                            if (!address.isLoopbackAddress()) {
+                                final String hostname = address.getHostName();
+                                if (hostname != null) {
+                                    return hostname;
+                                }
                             }
                         }
                     }
