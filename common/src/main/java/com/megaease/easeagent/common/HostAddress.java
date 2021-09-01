@@ -58,7 +58,7 @@ public abstract class HostAddress {
             }
             if (isPrimaryInterface(i)) {
                 // We treat interface name which started with "en" or "eth" as primary interface.
-                // We prefer to using address of primary interface as value of the `host_ipv4`
+                // We prefer to use address of primary interface as value of the `host_ipv4`
                 ip = ipAddressFromInetAddress(i);
                 if (!StringUtils.isEmpty(ip)) {
                     return ip;
@@ -96,17 +96,15 @@ public abstract class HostAddress {
         } catch (final UnknownHostException uhe) {
             try {
                 final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-                if (interfaces != null) {
-                    while (interfaces.hasMoreElements()) {
-                        final NetworkInterface nic = interfaces.nextElement();
-                        final Enumeration<InetAddress> addresses = nic.getInetAddresses();
-                        while (addresses.hasMoreElements()) {
-                            final InetAddress address = addresses.nextElement();
-                            if (!address.isLoopbackAddress()) {
-                                final String hostname = address.getHostName();
-                                if (hostname != null) {
-                                    return hostname;
-                                }
+                while (interfaces.hasMoreElements()) {
+                    final NetworkInterface nic = interfaces.nextElement();
+                    final Enumeration<InetAddress> addresses = nic.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        final InetAddress address = addresses.nextElement();
+                        if (!address.isLoopbackAddress()) {
+                            final String hostname = address.getHostName();
+                            if (hostname != null) {
+                                return hostname;
                             }
                         }
                     }
