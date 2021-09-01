@@ -47,9 +47,12 @@ import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.netflix.ribbon.ServerIntrospector;
+import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
 import org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient;
 import org.springframework.cloud.openfeign.ribbon.Adaptor;
+import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
 import org.springframework.cloud.openfeign.ribbon.FeignLoadBalancer;
+import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -88,6 +91,25 @@ import static org.mockito.Matchers.any;
 
 
 public class ServiceNamePropagationAdviceTest {
+
+    @Test
+    public void test_loadBalancerFeignClient_execute() throws Exception {
+        ClassLoader loader = getClass().getClassLoader();
+        Client client = Mockito.mock(Client.class);
+        CachingSpringLoadBalancerFactory balancerFactory = Mockito.mock(CachingSpringLoadBalancerFactory.class);
+        SpringClientFactory springClientFactory = Mockito.mock(SpringClientFactory.class);
+        Definition.Default def = new GenServiceNamePropagationAdvice().define(Definition.Default.EMPTY);
+        LoadBalancerFeignClient loadBalancerFeignClient = (LoadBalancerFeignClient) Classes.transform(ServiceNamePropagationAdvice.LoadBalancerFeignClient)
+            .with(def, new QualifiedBean("", getCrossThreadPropagationConfig()))
+            .load(loader).get(0)
+            .getConstructor(Client.class, CachingSpringLoadBalancerFactory.class, SpringClientFactory.class)
+            .newInstance(client, balancerFactory, springClientFactory);
+
+        Request.Options options = new Request.Options();
+        String clientName = "client-name";
+        IClientConfig clientConfig = (IClientConfig) ReflectionTool.invokeMethod(loadBalancerFeignClient, "getClientConfig", options, clientName);
+        Assert.assertEquals(clientConfig.getClientName(), clientName);
+    }
 
     @Test
     public void test_feignLoadBalancer_execute() throws Exception {
