@@ -40,7 +40,9 @@ public class AgentKafkaCallback implements Callback {
 
     private final boolean newInterceptorChain;
 
-    public AgentKafkaCallback(Callback source, AgentInterceptorChain.Builder chainBuilder, AgentInterceptorChainInvoker chainInvoker, MethodInfo methodInfo, Map<Object, Object> context, boolean newInterceptorChain) {
+    public AgentKafkaCallback(Callback source, AgentInterceptorChain.Builder chainBuilder,
+                              AgentInterceptorChainInvoker chainInvoker, MethodInfo methodInfo,
+                              Map<Object, Object> context, boolean newInterceptorChain) {
         this.source = source;
         this.chainBuilder = chainBuilder;
         this.chainInvoker = chainInvoker;

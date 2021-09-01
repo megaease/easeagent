@@ -31,9 +31,11 @@ import java.util.function.Consumer;
 
 public abstract class HttpServletInterceptor implements AgentInterceptor {
 
-    public abstract void internalBefore(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
+    public abstract void internalBefore(MethodInfo methodInfo, Map<Object, Object> context,
+                                        HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
 
-    public abstract void internalAfter(MethodInfo methodInfo, Map<Object, Object> context, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
+    public abstract void internalAfter(MethodInfo methodInfo, Map<Object, Object> context,
+                                       HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
 
     public abstract String processedBeforeKey();
 
@@ -81,11 +83,14 @@ public abstract class HttpServletInterceptor implements AgentInterceptor {
             return chain.doAfter(methodInfo, context);
         }
         if (httpServletRequest.isAsyncStarted()) {
-            httpServletRequest.getAsyncContext().addListener(new InternalAsyncListener(asyncEvent -> {
-                HttpServletRequest suppliedRequest = (HttpServletRequest) asyncEvent.getSuppliedRequest();
-                HttpServletResponse suppliedResponse = (HttpServletResponse) asyncEvent.getSuppliedResponse();
-                this.internalAfter(methodInfo, context, suppliedRequest, suppliedResponse);
-            }));
+            httpServletRequest.getAsyncContext().addListener(new InternalAsyncListener(
+                    asyncEvent -> {
+                        HttpServletRequest suppliedRequest = (HttpServletRequest) asyncEvent.getSuppliedRequest();
+                        HttpServletResponse suppliedResponse = (HttpServletResponse) asyncEvent.getSuppliedResponse();
+                        this.internalAfter(methodInfo, context, suppliedRequest, suppliedResponse);
+                    }
+                )
+            );
         } else {
             this.internalAfter(methodInfo, context, httpServletRequest, httpServletResponse);
         }

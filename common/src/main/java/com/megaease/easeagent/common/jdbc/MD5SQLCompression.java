@@ -40,7 +40,7 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
     private static final Logger logger = LoggerFactory.getLogger(MD5SQLCompression.class);
 
     private final Cache<String, String> dictionary = CacheBuilder.newBuilder().maximumSize(1000)
-            .removalListener(this).build();
+        .removalListener(this).build();
 
     private final Cache<String, String> md5Cache = CacheBuilder.newBuilder().maximumSize(1000).build();
 
@@ -77,7 +77,8 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
 
     @Override
     public void onRemoval(RemovalNotification<String, String> notification) {
-        logger.info("remove md5 dictionary item. cause: {}, md5: {}, content: {}", notification.getCause().toString(), notification.getKey(), notification.getValue());
+        logger.info("remove md5 dictionary item. cause: {}, md5: {}, content: {}", notification.getCause().toString(),
+            notification.getKey(), notification.getValue());
         Map<String, String> map = new HashMap<>();
         map.put(notification.getKey(), notification.getValue());
         reportConsumer.accept(map);

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.common;
+package com.megaease.easeagent.common;
 
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
@@ -29,7 +29,6 @@ import java.util.Map;
 import static com.google.common.collect.Iterables.concat;
 import static java.util.Collections.singleton;
 
-
 public final class CallTrace {
 
     public final static class Frame {
@@ -38,7 +37,7 @@ public final class CallTrace {
         private final Iterable<Frame> children;
 
         private Frame(Object context) {
-            this(context, Collections.<Frame>emptySet());
+            this(context, Collections.emptySet());
         }
 
         private Frame(Object context, Iterable<Frame> children) {
@@ -61,12 +60,7 @@ public final class CallTrace {
 
     }
 
-    private static final ThreadLocal<Map<Object, Deque<Frame>>> MAP = new ThreadLocal<Map<Object, Deque<Frame>>>() {
-        @Override
-        protected Map<Object, Deque<Frame>> initialValue() {
-            return Maps.newHashMap();
-        }
-    };
+    private static final ThreadLocal<Map<Object, Deque<Frame>>> MAP = ThreadLocal.withInitial(Maps::newHashMap);
 
     public <T> boolean pushIfRoot(Supplier<T> supplier) {
         return peek() == null && push(supplier.get());
@@ -103,7 +97,7 @@ public final class CallTrace {
         for (; ; ) {
             final Deque<Frame> stack = MAP.get().get(this);
             if (stack != null) return stack;
-            MAP.get().put(this, new ArrayDeque<Frame>());
+            MAP.get().put(this, new ArrayDeque<>());
         }
     }
 }

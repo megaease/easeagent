@@ -25,5 +25,4 @@ import lombok.Data;
 public class RemoteInfo {
     private String host;
     private int port;
-
 }
