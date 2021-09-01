@@ -10,7 +10,7 @@ An agent component for Java system.
   - [Download](#Download)
   - [Build From Source](#Build-From-Source)
 - [User Manual](#User-Manual)
-- [Development Guide](#Development-Guide)  
+- [Development Guide](#Development-Guide)
 - [Licenses](#Licenses)
 
 ## Overview
@@ -38,16 +38,16 @@ net.bytebuddy.asm.Advice.OnMethodEnter, net.bytebuddy.asm.Advice.OnMethodExit
 1. When the program invokes the enhanced method of class, the method which has the annotation (`OnMethodEnter`)  will be invoked at first.
 2. `Method Advice` will invoke `Metric Interceptor` and `Tracing Interceptor` to processing.
 3. `Metric` and `Tracing` information will be stored in `MetricRegistry` and `Tracing`.
-4. The `Reporter` module will get information from `MetricRegistry` and `Tracing` and send it to `Kafka`. 
+4. The `Reporter` module will get information from `MetricRegistry` and `Tracing` and send it to `Kafka`.
 5. The method  which has the annotation (`OnMethodExit`) will be invoked at last.
 
 ## Features
 * Collecting Metric & Tracing Logs.
     * `JDBC 4.0`
     * `HTTP Servlet`、`HTTP Filter`
-    * `Spring Boot 2.2.x`: `WebClient` 、 `RestTemplate`、`FeignClient` 
+    * `Spring Boot 2.2.x`: `WebClient` 、 `RestTemplate`、`FeignClient`
     * `RabbitMQ Client 5.x`、 `Kafka Client 2.4.x`
-    * `Jedis 3.5.x`、 `Lettuce 5.3.x` 
+    * `Jedis 3.5.x`、 `Lettuce 5.3.x`
 * Collecting Access Logs.
     * `HTTP Servlet`、`HTTP Filter`
     * `Spring Cloud Gateway`
@@ -73,6 +73,9 @@ $ cd easeagent
 $ mvn clean package -am -pl build
 ```
 The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
+
+> Windows platform user please make sure git `core.autocrlf` is set to false before git clone.
+> You can use `git config --global core.autocrlf false` to modify `core.autocrlf`.
 
 ### Step 1
 Extracting the default configuration file.
@@ -142,7 +145,7 @@ $ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent
 ```
 
 ### Step 5
-Adding the following configuration in `prometheus.yml` 
+Adding the following configuration in `prometheus.yml`
 ```
   - job_name: 'petclinic-vets-service'
     static_configs:
