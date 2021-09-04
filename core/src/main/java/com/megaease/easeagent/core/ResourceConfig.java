@@ -22,16 +22,16 @@ import java.util.List;
 
 public class ResourceConfig {
 
-    private String username;
+    private String userName;
     private String password;
-    private List<String> urls;
+    private List<String> uris;
     private final List<HostAndPort> hostAndPorts = new ArrayList<>();
 
     public void initHostAndPorts() {
-        if (urls == null || urls.isEmpty()) {
+        if (uris == null || uris.isEmpty()) {
             return;
         }
-        for (String url : urls) {
+        for (String url : uris) {
             int begin = url.indexOf(":");
             int end = url.lastIndexOf(":");
             if (begin == end) {
@@ -51,19 +51,19 @@ public class ResourceConfig {
         return this.hostAndPorts.get(0);
     }
 
-    public String getFirstUrl() {
-        if (urls == null || urls.isEmpty()) {
+    public String getFirstUri() {
+        if (uris == null || uris.isEmpty()) {
             return null;
         }
-        return this.urls.get(0);
+        return this.uris.get(0);
     }
 
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getPassword() {
@@ -75,15 +75,15 @@ public class ResourceConfig {
     }
 
     public boolean hasUrl() {
-        return this.urls != null && !this.urls.isEmpty();
+        return this.uris != null && !this.uris.isEmpty();
     }
 
-    public List<String> getUrls() {
-        return urls;
+    public List<String> getUris() {
+        return uris;
     }
 
-    public void setUrls(List<String> urls) {
-        this.urls = urls;
+    public void setUris(List<String> uris) {
+        this.uris = uris;
     }
 
     public List<HostAndPort> getHostAndPorts() {

@@ -33,7 +33,7 @@ public class RedisPropertiesClusterSetNodesInterceptor implements AgentIntercept
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
         }
-        methodInfo.getArgs()[0] = cnf.getUrls();
+        methodInfo.getArgs()[0] = cnf.getUris();
         AgentInterceptor.super.before(methodInfo, context, chain);
     }
 }

@@ -20,18 +20,16 @@ package com.megaease.easeagent.core;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.megaease.easeagent.core.utils.JsonUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MiddlewareConfigProcessor {
 
     public static final String ENV_REDIS = "EASE_RESOURCE_REDIS";
+    public static final String ENV_ES = "EASE_RESOURCE_ELASTICSEARCH";
     public static final String ENV_KAFKA = "EASE_RESOURCE_KAFKA";
     public static final String ENV_RABBITMQ = "EASE_RESOURCE_RABBITMQ";
     public static final String ENV_DATABASE = "EASE_RESOURCE_DATABASE";
-    public static final String EASE_RESOURCE_URL = "EASE_RESOURCE_URL";
 
     public static final MiddlewareConfigProcessor INSTANCE = new MiddlewareConfigProcessor();
 
@@ -42,6 +40,7 @@ public class MiddlewareConfigProcessor {
         this.initConfigItem(ENV_KAFKA);
         this.initConfigItem(ENV_RABBITMQ);
         this.initConfigItem(ENV_DATABASE);
+        this.initConfigItem(ENV_ES);
     }
 
     private void initConfigItem(String envStr) {

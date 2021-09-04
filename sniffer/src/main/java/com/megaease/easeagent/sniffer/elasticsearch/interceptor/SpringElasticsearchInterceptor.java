@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.jdbc.interceptor;
+package com.megaease.easeagent.sniffer.elasticsearch.interceptor;
 
 import com.megaease.easeagent.core.MiddlewareConfigProcessor;
 import com.megaease.easeagent.core.ResourceConfig;
@@ -24,24 +24,41 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public class HikariSetPropertyInterceptor implements AgentInterceptor {
+public class SpringElasticsearchInterceptor implements AgentInterceptor {
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_DATABASE);
+        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_ES);
         if (cnf == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
         }
-        if (methodInfo.getMethod().equals("setJdbcUrl")) {
-            String jdbcUrl = cnf.getFirstUri();
-            methodInfo.getArgs()[0] = jdbcUrl;
-        } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
+        String method = methodInfo.getMethod();
+        List<String> uris = this.formatUris(cnf.getUris());
+        if (method.equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
             methodInfo.getArgs()[0] = cnf.getUserName();
-        } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
+        } else if (method.equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
             methodInfo.getArgs()[0] = cnf.getPassword();
+        } else if (method.equals("setEndpoints")) {
+            methodInfo.getArgs()[0] = uris;
+        } else if (method.equals("setUris")) {
+            methodInfo.getArgs()[0] = uris;
         }
         AgentInterceptor.super.before(methodInfo, context, chain);
+    }
+
+    private List<String> formatUris(List<String> uris) {
+        List<String> list = new ArrayList<>();
+        for (String url : uris) {
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                list.add(url);
+            } else {
+                list.add("http://" + url);
+            }
+        }
+        return list;
     }
 }

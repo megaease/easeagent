@@ -53,8 +53,8 @@ public class RabbitAbstractSetPropertyInterceptor implements AgentInterceptor {
             } else if (methodInfo.getArgs()[0] instanceof String) {
                 methodInfo.getArgs()[0] = uriStr;
             }
-        } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUsername())) {
-            methodInfo.getArgs()[0] = cnf.getUsername();
+        } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
+            methodInfo.getArgs()[0] = cnf.getUserName();
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
             methodInfo.getArgs()[0] = cnf.getPassword();
         }

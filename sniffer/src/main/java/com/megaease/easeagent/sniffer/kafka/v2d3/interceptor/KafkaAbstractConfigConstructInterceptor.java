@@ -36,11 +36,11 @@ public class KafkaAbstractConfigConstructInterceptor implements AgentInterceptor
         }
         if (methodInfo.getArgs()[0] instanceof Properties) {
             Properties properties = (Properties) methodInfo.getArgs()[0];
-            properties.put("bootstrap.servers", cnf.getUrls());
+            properties.put("bootstrap.servers", cnf.getUris());
         } else if (methodInfo.getArgs()[0] instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) methodInfo.getArgs()[0];
-            map.put("bootstrap.servers", cnf.getUrls());
+            map.put("bootstrap.servers", cnf.getUris());
         }
         AgentInterceptor.super.before(methodInfo, context, chain);
     }
