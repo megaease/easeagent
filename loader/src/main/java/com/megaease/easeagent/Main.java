@@ -44,22 +44,20 @@ public class Main {
     private static final String EASEAGENT_LOG_CONF = "easeagent.log.conf";
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-        final JarFileArchive archive = new JarFileArchive(getArchiveFileContains(Main.class));
-        final Attributes attributes = archive.getManifest().getMainAttributes();
-        final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
-        final String bootstrap = attributes.getValue("Bootstrap-Class");
+        final JarFileArchive archive = new JarFileArchive(getArchiveFileContains());
+
         final URL[] urls = nestArchiveUrls(archive);
         final ClassLoader loader = new CompoundableClassLoader(urls);
 
-        switchLoggingProperty(loader, loggingProperty, EASEAGENT_LOG_CONF, new Callable<Void>() {
+        final Attributes attributes = archive.getManifest().getMainAttributes();
+        final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
+        final String bootstrap = attributes.getValue("Bootstrap-Class");
 
-            @Override
-            public Void call() throws Exception {
-                loader.loadClass(bootstrap)
-                        .getMethod("premain", String.class, Instrumentation.class)
-                        .invoke(null, args, inst);
-                return null;
-            }
+        switchLoggingProperty(loader, loggingProperty, () -> {
+            loader.loadClass(bootstrap)
+                    .getMethod("premain", String.class, Instrumentation.class)
+                    .invoke(null, args, inst);
+            return null;
         });
     }
 
@@ -67,16 +65,19 @@ public class Main {
      * Switching the system property temporary could fix the problem of conflict of logging configuration
      * when host used the same logging library as agent.
      */
-    private static void switchLoggingProperty(ClassLoader loader, String hostKey, String agentKey, Callable<Void> callable)
+    private static void switchLoggingProperty(ClassLoader loader, String hostKey, Callable<Void> callable)
             throws Exception {
         final Thread t = Thread.currentThread();
         final ClassLoader ccl = t.getContextClassLoader();
+
         t.setContextClassLoader(loader);
 
         final String host = System.getProperty(hostKey);
-        final String agent = System.getProperty(agentKey, "log4j2.xml");
+        final String agent = System.getProperty(Main.EASEAGENT_LOG_CONF, "log4j2.xml");
+
         // Redirect config of host to agent
         System.setProperty(hostKey, agent);
+
         try {
             callable.call();
         } finally {
@@ -88,7 +89,6 @@ public class Main {
                 System.setProperty(hostKey, host);
             }
         }
-
     }
 
     private static URL[] nestArchiveUrls(Archive archive) throws IOException {
@@ -96,6 +96,7 @@ public class Main {
                 archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(LIB),
                         entry -> true
                 ));
+
         final URL[] urls = new URL[archives.size()];
 
         for (int i = 0; i < urls.length; i++) {
@@ -105,14 +106,16 @@ public class Main {
         return urls;
     }
 
-    private static File getArchiveFileContains(Class<?> klass) throws URISyntaxException {
-        final ProtectionDomain protectionDomain = klass.getProtectionDomain();
+    private static File getArchiveFileContains() throws URISyntaxException {
+        final ProtectionDomain protectionDomain = Main.class.getProtectionDomain();
         final CodeSource codeSource = protectionDomain.getCodeSource();
         final URI location = (codeSource == null ? null : codeSource.getLocation().toURI());
         final String path = (location == null ? null : location.getSchemeSpecificPart());
+
         if (path == null) {
             throw new IllegalStateException("Unable to determine code source archive");
         }
+
         final File root = new File(path);
         if (!root.exists() || root.isDirectory()) {
             throw new IllegalStateException("Unable to determine code source archive from " + root);
@@ -121,10 +124,10 @@ public class Main {
     }
 
     public static class CompoundableClassLoader extends LaunchedURLClassLoader {
-        private final Set<ClassLoader> externals = new CopyOnWriteArraySet<ClassLoader>();
+        private final Set<ClassLoader> externals = new CopyOnWriteArraySet<>();
 
         CompoundableClassLoader(URL[] urls) {
-//            super(urls, ClassLoader.getSystemClassLoader());
+            // super(urls, ClassLoader.getSystemClassLoader());
             super(urls, Main.BOOTSTRAP_CLASS_LOADER);
         }
 

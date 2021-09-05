@@ -15,14 +15,9 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.google.auto.service.AutoService;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Iterables;
 import com.megaease.easeagent.core.Injection;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
@@ -30,7 +25,6 @@ import com.squareup.javapoet.TypeSpec;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -39,17 +33,23 @@ import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import static com.google.common.collect.FluentIterable.from;
 import static java.util.Collections.singleton;
 
 @AutoService(Processor.class)
 public class AssemblyProcessor extends AbstractProcessor {
+    Class<Injection.Provider> annotationClass = Injection.Provider.class;
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         final ProcessUtils utils = ProcessUtils.of(processingEnv);
-        for (final Element element : roundEnv.getElementsAnnotatedWith(Assembly.class)) {
+
+        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Assembly.class);
+        for (final Element element : elements) {
             try {
                 process(utils, element.getAnnotation(Assembly.class), utils.packageNameOf((TypeElement) element));
             } catch (ElementException e) {
@@ -63,35 +63,18 @@ public class AssemblyProcessor extends AbstractProcessor {
         return false;
     }
 
-    private void process(final ProcessUtils utils, final Assembly assembly, String packageName) throws IOException {
-        final Iterable<TypeElement> transformations = utils.asTypeElements(new Supplier<Class<?>[]>() {
-            @Override
-            public Class<?>[] get() {
-                return assembly.value();
+    private void process(final ProcessUtils utils, final Assembly assembly, String packageName) {
+        final Iterable<TypeElement> transformations = utils.asTypeElements(assembly::value);
+        Iterable<JavaFile> files = process(packageName, utils, transformations);
+        files.forEach(file -> {
+            try {
+                file.toBuilder().indent("    ")
+                    .addFileComment("This ia a generated file.")
+                    .build().writeTo(processingEnv.getFiler());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }).toList();
-
-        final Iterable<TypeElement> providers = from(transformations).filter(new Predicate<TypeElement>() {
-            @Override
-            public boolean apply(TypeElement input) {
-                return input.getAnnotation(Injection.Provider.class) != null;
-            }
-        }).transform(new Function<TypeElement, TypeElement>() {
-            @Override
-            public TypeElement apply(final TypeElement input) {
-                return utils.asTypeElement(new Supplier<Class<?>>() {
-                    @Override
-                    public Class<?> get() {
-                        return input.getAnnotation(Injection.Provider.class).value();
-                    }
-                });
-            }
-        }).toSet();
-
-        for (JavaFile file : process(packageName, utils, providers, transformations)) {
-            file.toBuilder().indent("    ").addFileComment("This ia a generated file.").build()
-                .writeTo(processingEnv.getFiler());
-        }
+        });
     }
 
     @Override
@@ -105,65 +88,53 @@ public class AssemblyProcessor extends AbstractProcessor {
     }
 
     private static Iterable<JavaFile> process(String packageName, ProcessUtils utils,
-                                              Iterable<TypeElement> providers,
                                               Iterable<TypeElement> transformations) {
+        Class<Injection.Provider> annotationClass = Injection.Provider.class;
+        Stream<TypeElement> providers = StreamSupport.stream(transformations.spliterator(), false)
+            .filter(element -> element.getAnnotation(annotationClass) != null)
+            .map(element -> utils.asTypeElement(() -> element.getAnnotation(annotationClass).value()));
 
-        final Iterable<JavaFile> providerFiles =
-                from(providers).transform(new GenerateFunction(utils, FOR_PROVIDER)).toList();
-        final Iterable<JavaFile> transformationFiles =
-                from(transformations).transform(new GenerateFunction(utils, FOR_TRANSFORMATION)).toList();
+        Set<JavaFile> transformationFiles = StreamSupport.stream(transformations.spliterator(), false)
+            .map(new GenerateFunction(utils, FOR_TRANSFORMATION))
+            .collect(Collectors.toSet());
 
-        return Iterables.concat(providerFiles, transformationFiles, singleton(
-                new GenerateStarter(packageName, classesOf(providerFiles), classesOf(transformationFiles)).apply())
-        );
+        Set<JavaFile> providerFiles = providers
+            .map(new GenerateFunction(utils, FOR_PROVIDER))
+            .collect(Collectors.toSet());
 
+        JavaFile startBootstrap = new GenerateStarter(packageName,
+            classesOf(providerFiles),
+            classesOf(transformationFiles)).apply();
+
+        providerFiles.addAll(transformationFiles);
+        providerFiles.add(startBootstrap);
+
+        return providerFiles;
     }
 
     private void error(Element e, String msg) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg, e);
     }
 
-    private static String classesOf(Iterable<JavaFile> providers) {
-        return from(providers).transform(TO_CLASS_NAME).transform(APPEND_CLASS_SUFFIX).join(ON_COMMA);
+    private static String classesOf(Set<JavaFile> providers) {
+        return providers.stream()
+            .map(TO_CLASS_NAME)
+            .map(APPEND_CLASS_SUFFIX)
+            .collect(Collectors.joining(ON_COMMA_STR));
     }
 
-    private static final Function<String, String> APPEND_CLASS_SUFFIX = new Function<String, String>() {
-        @Override
-        public String apply(String input) {
-            return input + ".class";
-        }
-    };
+    private static final Function<String, String> APPEND_CLASS_SUFFIX = input -> input + ".class";
 
-    private static final Function<JavaFile, String> TO_CLASS_NAME = new Function<JavaFile, String>() {
-        @Override
-        public String apply(JavaFile input) {
-            return input.packageName + "." + input.typeSpec.name;
-        }
-    };
+    private static final Function<JavaFile, String> TO_CLASS_NAME = input -> input.packageName + "." + input.typeSpec.name;
 
-    private static final Joiner ON_COMMA = Joiner.on(",\n");
+    private static final String ON_COMMA_STR = ",\n";
 
-    private static final Iterable<? extends GenerateSpecFactory> FOR_PROVIDER = singleton(new GenerateSpecFactory() {
-        @Override
-        public ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> create(TypeSpec.Builder builder, String generatedClassName) {
-            return new GenerateConfiguration(builder);
-        }
-    });
+    private static final Iterable<? extends GenerateSpecFactory> FOR_PROVIDER = singleton(
+        (builder, generatedClassName) -> new GenerateConfiguration(builder));
 
     private static final Iterable<? extends GenerateSpecFactory> FOR_TRANSFORMATION = Arrays.asList(
-            new GenerateSpecFactory() {
-                @Override
-                public ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> create(TypeSpec.Builder builder, String generatedClassName) {
-                    return new GenerateTransformation(builder, generatedClassName);
-                }
-            },
-            new GenerateSpecFactory() {
-
-                @Override
-                public ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> create(TypeSpec.Builder builder, String generatedClassName) {
-                    return new GenerateConfiguration(builder);
-                }
-            }
+        GenerateTransformation::new,
+        (builder, generatedClassName) -> new GenerateConfiguration(builder)
     );
 
     interface GenerateSpecFactory {

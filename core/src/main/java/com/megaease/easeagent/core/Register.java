@@ -73,7 +73,7 @@ class Register {
     }
 
     private Object newInstanceOf(Class<?> aClass) {
-        return from(aClass.getConstructors()).firstMatch(Injection.Autowire.AUTOWIRED_CONS)
+        return from(aClass.getConstructors()).firstMatch(Injection.Autowire.AUTOWIRED_CONS::test)
                 .transform(new ConstructorNew())
                 .or(new DefaultConstructorNew(aClass));
     }
