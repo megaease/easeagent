@@ -17,13 +17,12 @@
 
  package com.megaease.easeagent.core;
 
-import com.google.common.base.Predicate;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
+import java.util.function.Predicate;
 
 public interface Injection {
     @Retention(RetentionPolicy.RUNTIME)
@@ -35,12 +34,7 @@ public interface Injection {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.CONSTRUCTOR)
     @interface Autowire {
-        Predicate<Constructor<?>> AUTOWIRED_CONS = new Predicate<Constructor<?>>() {
-            @Override
-            public boolean apply(Constructor<?> input) {
-                return input.getAnnotation(Autowire.class) != null;
-            }
-        };
+        Predicate<Constructor<?>> AUTOWIRED_CONS = input -> input.getAnnotation(Autowire.class) != null;
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -54,5 +48,4 @@ public interface Injection {
     @interface Qualifier {
         String value();
     }
-
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.Configurable;
@@ -35,8 +35,6 @@ import static com.squareup.javapoet.MethodSpec.overriding;
 import static javax.lang.model.element.Modifier.*;
 
 class GenerateConfiguration extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
-
-
     GenerateConfiguration(TypeSpec.Builder builder) {
         super(builder);
     }
@@ -52,7 +50,7 @@ class GenerateConfiguration extends ElementKindVisitor6<TypeSpec.Builder, Proces
         }
 
         return builder.addField(Config.class, "conf", FINAL)
-                      .addMethod(constructor(Config.class));
+                      .addMethod(constructor());
     }
 
     private static String methodNameOf(TypeMirror type, ProcessUtils utils) {
@@ -79,8 +77,9 @@ class GenerateConfiguration extends ElementKindVisitor6<TypeSpec.Builder, Proces
 
     }
 
-    private static MethodSpec constructor(Class<?> c) {
-        return constructorBuilder().addParameter(c, "conf").addModifiers(PUBLIC).addStatement("this.conf = conf").build();
+    private static MethodSpec constructor() {
+        return constructorBuilder().addParameter(Config.class, "conf")
+            .addModifiers(PUBLIC).addStatement("this.conf = conf").build();
     }
 
     private static class GenerateMethods extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {

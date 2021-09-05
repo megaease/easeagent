@@ -17,9 +17,6 @@
 
 package com.megaease.easeagent.gen;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Supplier;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Dispatcher;
@@ -33,9 +30,8 @@ import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementKindVisitor6;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.google.common.collect.FluentIterable.from;
 
 class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
     private final String generatedClassName;
@@ -64,12 +60,6 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
             final List<? extends VariableElement> parameters = e.getParameters();
             final TypeMirror returnType = e.getReturnType();
 
-//            if (!e.getModifiers().contains(Modifier.ABSTRACT)
-//                    || !utils.isSameType(returnType, Definition.Transformer.class)
-//                    || (parameters.size() != 1 && parameters.size() != 2)
-//                    || isNotMethodElementMatcher(parameters.get(0).asType(), utils))
-//                return super.visitExecutableAsMethod(e, utils);
-
             if (parameters.size() > 2) {
                 return super.visitExecutableAsMethod(e, utils);
             }
@@ -95,12 +85,7 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
 
             final TypeSpec.Builder builder = super.visitExecutableAsMethod(e, utils);
 
-            final TypeElement adviceElement = utils.asTypeElement(new Supplier<Class<?>>() {
-                @Override
-                public Class<?> get() {
-                    return e.getAnnotation(AdviceTo.class).value();
-                }
-            });
+            final TypeElement adviceElement = utils.asTypeElement(() -> e.getAnnotation(AdviceTo.class).value());
 
             if (adviceElement.getNestingKind() == NestingKind.MEMBER && !adviceElement.getModifiers().contains(Modifier.STATIC))
                 throw new ElementException(e, "should be top level or static");
@@ -173,16 +158,11 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                         if (aa == null) {
                             return false;
                         }
-                        if (aa.readOnly()) {
-                            return false;
-                        }
-                        return true;
+                        return !aa.readOnly();
                     }).findFirst();
 
 
-                    changeAllArgs.ifPresent(p -> {
-                        result.put(p, "allArgsDump");
-                    });
+                    changeAllArgs.ifPresent(p -> result.put(p, "allArgsDump"));
                     return result;
                 }
 
@@ -203,9 +183,7 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                         return "";
                     }
                     StringBuilder sb = new StringBuilder();
-                    replaceMap.forEach((k, v) -> {
-                        sb.append(String.format("\n%s = %s;", k.getSimpleName(), v));
-                    });
+                    replaceMap.forEach((k, v) -> sb.append(String.format("\n%s = %s;", k.getSimpleName(), v)));
                     return sb.toString();
                 }
 
@@ -269,7 +247,6 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
         }
 
         private class GenerateAdviceFactoryClass extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
-
             GenerateAdviceFactoryClass(TypeSpec.Builder builder) {
                 super(builder);
             }
@@ -323,20 +300,25 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
                 }
 
                 private MethodSpec adviceFactoryMethod(ExecutableElement e, final ProcessUtils utils) {
-                    final ExecutableElement execute = (ExecutableElement) utils.asTypeElement(ADVICE_CLASS).getEnclosedElements().get(0);
+                    final ExecutableElement execute = (ExecutableElement)utils
+                        .asTypeElement(() -> Dispatcher.Advice.class)
+                        .getEnclosedElements().get(0);
 
                     final String name = utils.simpleNameOf(e);
                     final TypeName returnType = utils.typeNameOf(e.getReturnType());
                     final MethodSpec.Builder builder = MethodSpec.overriding(execute);
-                    final Object[] args = new Object[]{name, from(e.getParameters()).transform(new Function<VariableElement, String>() {
-                        int i = 0;
 
+                    final Function<VariableElement, String> mapFunction = new Function<VariableElement, String>() {
+                        int i = 0;
                         @Override
                         public String apply(VariableElement input) {
                             final TypeName tn = utils.typeNameOf(input.asType());
                             return String.format("(%s) arg0[%d]", tn.isPrimitive() ? tn.box() : tn, i++);
                         }
-                    }).join(Joiner.on(", "))};
+                    };
+                    final Object[] args = new Object[]{name,
+                        e.getParameters().stream().map(mapFunction).collect(Collectors.joining(", "))
+                    };
 
                     if (TypeName.VOID == returnType) {
                         builder.addStatement("$L($L)", args);
@@ -364,11 +346,5 @@ class GenerateTransformation extends ElementKindVisitor6<TypeSpec.Builder, Proce
     private static String join(List<? extends VariableElement> parameters, Map<VariableElement, String> replaces) {
         return parameters.stream().map(e -> replaces.getOrDefault(e, e.toString())).collect(Collectors.joining(", "));
     }
-
-    private static final Supplier<Class<?>> ADVICE_CLASS = new Supplier<Class<?>>() {
-        @Override
-        public Class<?> get() {
-            return Dispatcher.Advice.class;
-        }
-    };
 }
+

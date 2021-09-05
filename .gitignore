@@ -3,3 +3,10 @@
 target/
 dependency-reduced-pom.xml
 *.class
+*.swp
+
+.classpath
+.factorypath
+.project
+.settings
+logs/

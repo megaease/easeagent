@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.google.common.base.Function;
 import com.squareup.javapoet.JavaFile;
@@ -40,9 +40,13 @@ class GenerateFunction implements Function<TypeElement, JavaFile> {
 
     @Override
     public JavaFile apply(TypeElement e) {
-        if (!e.getModifiers().contains(ABSTRACT)) throw new ElementException(e, "should be abstract");
-
-        if (e.getNestingKind() == NestingKind.MEMBER) throw new ElementException(e, "should not be nest");
+        assert e != null;
+        if (!e.getModifiers().contains(ABSTRACT)) {
+            throw new ElementException(e, "should be abstract");
+        }
+        if (e.getNestingKind() == NestingKind.MEMBER) {
+            throw new ElementException(e, "should not be nest");
+        }
 
         final String packageName = utils.packageNameOf(e);
         final String simpleName = Generated.PREFIX + utils.simpleNameOf(e);

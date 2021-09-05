@@ -17,9 +17,6 @@
 
 package com.megaease.easeagent.gen;
 
-import com.google.common.base.Function;
-import com.google.common.base.Supplier;
-import com.google.common.collect.FluentIterable;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
@@ -33,10 +30,12 @@ import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-
-import static com.google.common.collect.FluentIterable.from;
-import static com.google.common.collect.Iterables.transform;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 abstract class ProcessUtils {
 
@@ -54,14 +53,20 @@ abstract class ProcessUtils {
     }
 
     boolean isSameType(TypeMirror t, Class<?> c, Class<?>... typeParams) {
-        if (typeParams.length == 0) return isSameType(t, c.getCanonicalName());
+        if (typeParams.length == 0) {
+            return isSameType(t, c.getCanonicalName());
+        }
 
-        if (!isSameType(asElement(t).asType(), c.getCanonicalName())) return false;
+        if (!isSameType(asElement(t).asType(), c.getCanonicalName())) {
+            return false;
+        }
 
         final List<? extends TypeMirror> arguments = ((DeclaredType) t).getTypeArguments();
 
         for (int i = 0; i < typeParams.length; i++) {
-            if (!isSameType(arguments.get(i), typeParams[i].getCanonicalName())) return false;
+            if (!isSameType(arguments.get(i), typeParams[i].getCanonicalName())) {
+                return false;
+            }
         }
 
         return true;
@@ -88,34 +93,36 @@ abstract class ProcessUtils {
     }
 
     Iterable<AnnotationSpec> asAnnotationSpecs(List<? extends AnnotationMirror> ams) {
-        return transform(ams, ANNOTATION_MIRROR_TO_SPEC);
+        Iterator<AnnotationSpec> it = ams.stream().map(AnnotationSpec::get).iterator();
+        return () -> it;
     }
 
     Iterable<ParameterSpec> asParameterSpecs(List<? extends VariableElement> params) {
-        return transform(params, PARAMETER_TO_SPEC);
+        Iterator<ParameterSpec> it = params.stream().map(input -> ParameterSpec
+            .builder(TypeName.get(input.asType()), input.getSimpleName().toString())
+            .addAnnotations(asAnnotationSpecs(input.getAnnotationMirrors()))
+            .build()).iterator();
+
+        return () -> it;
     }
 
-    FluentIterable<TypeElement> asTypeElements(Supplier<Class<?>[]> supplier) {
+    Iterable<TypeElement> asTypeElements(Supplier<Class<?>[]> supplier) {
         try {
-            return from(supplier.get()).transform(new Function<Class<?>, TypeElement>() {
-                @Override
-                public TypeElement apply(Class<?> input) {
-                    return getTypeElement(input.getCanonicalName());
-                }
-            });
+            Class<?>[] classes = supplier.get();
+            return Arrays.stream(classes)
+                .map(clazz -> getTypeElement(clazz.getCanonicalName()))
+                .collect(Collectors.toSet());
         } catch (MirroredTypesException e) {
-            return from(e.getTypeMirrors()).transform(new Function<TypeMirror, TypeElement>() {
-                @Override
-                public TypeElement apply(TypeMirror input) {
-                    return (TypeElement) asElement(input);
-                }
-            });
+            return e.getTypeMirrors().stream()
+                .map(input -> (TypeElement)asElement(input))
+                .collect(Collectors.toSet());
         }
     }
 
     TypeElement asTypeElement(Supplier<Class<?>> supplier) {
         try {
-            return getTypeElement(supplier.get().getCanonicalName());
+            Class<?> clazz = supplier.get();
+            return getTypeElement(clazz.getCanonicalName());
         } catch (MirroredTypeException e) {
             return (TypeElement) asElement(e.getTypeMirror());
         }
@@ -133,23 +140,4 @@ abstract class ProcessUtils {
     private TypeElement getTypeElement(CharSequence name) {
         return elements.getTypeElement(name);
     }
-
-
-    private static final Function<AnnotationMirror, AnnotationSpec> ANNOTATION_MIRROR_TO_SPEC = new Function<AnnotationMirror, AnnotationSpec>() {
-        @Override
-        public AnnotationSpec apply(AnnotationMirror input) {
-            return AnnotationSpec.get(input);
-        }
-    };
-
-    private static final Function<VariableElement, ParameterSpec> PARAMETER_TO_SPEC = new Function<VariableElement, ParameterSpec>() {
-        @Override
-        public ParameterSpec apply(VariableElement input) {
-            return ParameterSpec.builder(TypeName.get(input.asType()), input.getSimpleName().toString())
-//                                .addModifiers(Modifier.FINAL)
-                    .addAnnotations(transform(input.getAnnotationMirrors(), ANNOTATION_MIRROR_TO_SPEC))
-                    .build();
-
-        }
-    };
 }
