@@ -32,6 +32,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementKindVisitor6;
 import javax.tools.Diagnostic;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -82,7 +84,8 @@ public class AssemblyProcessor extends AbstractProcessor {
                     .addFileComment("This ia a generated file.")
                     .build().writeTo(processingEnv.getFiler());
             } catch (IOException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getLocalizedMessage());
             }
         });
     }
@@ -91,24 +94,44 @@ public class AssemblyProcessor extends AbstractProcessor {
         ClassLoader loader = this.getClass().getClassLoader();
         final String providers = "META-INF/services/" + Transformation.class.getCanonicalName();
         Enumeration<URL> configs;
-        TreeSet<String> pset = new TreeSet<>();
+        TreeSet<String> providerSet = new TreeSet<>();
         try {
             configs = loader.getResources(providers);
+            InputStream in = null;
+            BufferedReader r = null;
             while (configs.hasMoreElements()) {
                 URL path = configs.nextElement();
-                InputStream in = path.openStream();
-                BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-                String line;
-                while((line = r.readLine()) != null) {
-                    pset.add(line);
+                try {
+                    in = path.openStream();
+                    r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                    String line;
+                    while((line = r.readLine()) != null) {
+                        providerSet.add(line);
+                    }
+                } catch (IOException e) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getLocalizedMessage());
+                } finally {
+                    Consumer<Closeable> close = (cls) -> {
+                        if (cls != null) {
+                            try {
+                                cls.close();
+                            } catch (Exception e) {
+                                // do nothing
+                            }
+                        }
+                    };
+                    close.accept(r);
+                    close.accept(in);
+                    r = null;
+                    in = null;
                 }
-                r.close();
-                in.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                "File not found:" + providers);
         }
-        return pset;
+
+        return providerSet;
     }
 
     @Override
