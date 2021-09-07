@@ -40,36 +40,6 @@ import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
 
 
-@Assembly({
-        JdbcDataSourceAdvice.class,
-        JdbcConAdvice.class,
-        JdbcStatementAdvice.class,
-        HttpFilterAdvice.class,
-        RestTemplateAdvice.class,
-        FeignClientAdvice.class,
-        SpringGatewayInitGlobalFilterAdvice.class,
-        SpringGatewayHttpHeadersFilterAdvice.class,
-        ServiceNamePropagationAdvice.class,
-        RedisClientAdvice.class,
-        StatefulRedisConnectionAdvice.class,
-        RedisChannelWriterAdvice.class,
-        RedisClusterClientAdvice.class,
-        JedisAdvice.class,
-        KafkaProducerAdvice.class,
-        KafkaConsumerAdvice.class,
-        CrossThreadPropagationAdvice.class,
-        RabbitMqChannelAdvice.class,
-        RabbitMqConsumerAdvice.class,
-        KafkaMessageListenerAdvice.class,
-        RabbitMqMessageListenerAdvice.class,
-        WebClientBuilderAdvice.class,
-        SpringApplicationAdminMXBeanRegistrarAdvice.class,
-        HttpClientAdvice.class,
-        HttpClient5Advice.class,
-        HttpClient5AsyncAdvice.class,
-        OkHttpAdvice.class,
-
-
-})
+@Assembly
 public interface GeneratedTest {
 }

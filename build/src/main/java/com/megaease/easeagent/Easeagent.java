@@ -18,81 +18,17 @@
 package com.megaease.easeagent;
 
 import com.megaease.easeagent.gen.Assembly;
-import com.megaease.easeagent.sniffer.*;
-import com.megaease.easeagent.sniffer.healthy.advice.SpringApplicationAdminMXBeanRegistrarAdvice;
-import com.megaease.easeagent.sniffer.http.okhttp.OkHttpAdvice;
-import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5Advice;
-import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5AsyncAdvice;
-import com.megaease.easeagent.sniffer.httpclient.advice.HttpClientAdvice;
-import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
-import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
-import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
-import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
-import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerAdvice;
-import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
-import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerRecordAdvice;
-import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClusterClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
-import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerAdvice;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
-import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
 
-@Assembly({
-        HttpFilterAdvice.class,
-        SpringGatewayHttpHeadersFilterAdvice.class,
-        SpringGatewayInitGlobalFilterAdvice.class,
-        RestTemplateAdvice.class,
-        FeignClientAdvice.class,
-        JdbcDataSourceAdvice.class,
-        JdbcConAdvice.class,
-        JdbcStatementAdvice.class,
-        ServiceNamePropagationAdvice.class,
-        StatefulRedisConnectionAdvice.class,
-        RedisClientAdvice.class,
-        RedisClusterClientAdvice.class,
-        RedisChannelWriterAdvice.class,
-        JedisAdvice.class,
-        CrossThreadPropagationAdvice.class,
-        RabbitMqChannelAdvice.class,
-        RabbitMqConsumerAdvice.class,
-        RabbitMqMessageListenerAdvice.class,
-        KafkaMessageListenerAdvice.class,
-        KafkaConsumerRecordAdvice.class,
-        KafkaProducerAdvice.class,
-        KafkaConsumerAdvice.class,
-        WebClientBuilderAdvice.class,
-        SpringApplicationAdminMXBeanRegistrarAdvice.class,
-        HttpClientAdvice.class,
-        HttpClient5Advice.class,
-        HttpClient5AsyncAdvice.class,
-        OkHttpAdvice.class,
-
-})
+@Assembly
 abstract class Easeagent {
     // This static code is to keep the links of the dependencies for shade plugin, not for real runtime.
     static {
-//        System.out.println(PostAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.AppenderSet.class);
         System.out.println(org.apache.logging.log4j.core.appender.CountingNoOpAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.db.ColumnMapping.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.db.jdbc.ColumnConfig.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.db.jdbc.DataSourceConnectionSource.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.db.jdbc.FactoryMethodConnectionSource.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.db.jdbc.JdbcAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.db.jpa.JpaAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.FailoverAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.FailoversPlugin.class);
         System.out.println(org.apache.logging.log4j.core.appender.FileAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.MemoryMappedFileAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.mom.jeromq.JeroMqAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.mom.JmsAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.mom.JmsAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.mom.JmsAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.mom.kafka.KafkaAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.NullAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.OutputStreamAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.RandomAccessFileAppender.class);
@@ -124,9 +60,7 @@ abstract class Easeagent {
         System.out.println(org.apache.logging.log4j.core.appender.routing.Routes.class);
         System.out.println(org.apache.logging.log4j.core.appender.routing.RoutingAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.ScriptAppenderSelector.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.SmtpAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.SocketAppender.class);
-//        System.out.println(org.apache.logging.log4j.core.appender.SyslogAppender.class);
         System.out.println(org.apache.logging.log4j.core.appender.WriterAppender.class);
         System.out.println(org.apache.logging.log4j.core.async.DisruptorBlockingQueueFactory.class);
         System.out.println(org.apache.logging.log4j.core.async.JCToolsBlockingQueueFactory.class);
@@ -138,35 +72,10 @@ abstract class Easeagent {
         System.out.println(org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory.class);
         System.out.println(org.apache.logging.log4j.core.config.ScriptsPlugin.class);
         System.out.println(org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory.class);
-//        System.out.println(org.apache.logging.log4j.core.config.yaml.YamlConfigurationFactory.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.BurstFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.DynamicThresholdFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.LevelRangeFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.MapFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.MarkerFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.RegexFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.ScriptFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.StructuredDataFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.ThreadContextMapFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.ThreadContextMapFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.ThresholdFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.filter.TimeFilter.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.CsvLogEventLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.CsvParameterLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.GelfLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.HtmlLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.JsonLayout.class);
         System.out.println(org.apache.logging.log4j.core.layout.LoggerFields.class);
         System.out.println(org.apache.logging.log4j.core.layout.MarkerPatternSelector.class);
         System.out.println(org.apache.logging.log4j.core.layout.PatternMatch.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.Rfc5424Layout.class);
         System.out.println(org.apache.logging.log4j.core.layout.ScriptPatternSelector.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.SerializedLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.SyslogLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.XmlLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.layout.YamlLayout.class);
-//        System.out.println(org.apache.logging.log4j.core.lookup.JmxRuntimeInputArgumentsLookup.class);
-//        System.out.println(org.apache.logging.log4j.core.lookup.JndiLookup.class);
         System.out.println(org.apache.logging.log4j.core.lookup.ResourceBundleLookup.class);
         System.out.println(org.apache.logging.log4j.core.lookup.StructuredDataLookup.class);
         System.out.println(org.apache.logging.log4j.core.net.MulticastDnsAdvertiser.class);

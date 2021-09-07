@@ -23,7 +23,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.*;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.MirroredTypesException;
@@ -33,9 +36,9 @@ import javax.lang.model.util.Types;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 abstract class ProcessUtils {
 
@@ -106,15 +109,21 @@ abstract class ProcessUtils {
         return () -> it;
     }
 
-    Iterable<TypeElement> asTypeElements(Supplier<Class<?>[]> supplier) {
+    Set<TypeElement> asTypeElements(Set<String> classNames) {
+        return classNames.stream()
+            .map(this::getTypeElement)
+            .collect(Collectors.toSet());
+    }
+
+    Set<String> asClassNames(Supplier<Class<?>[]> supplier) {
         try {
             Class<?>[] classes = supplier.get();
             return Arrays.stream(classes)
-                .map(clazz -> getTypeElement(clazz.getCanonicalName()))
+                .map(Class::getCanonicalName)
                 .collect(Collectors.toSet());
         } catch (MirroredTypesException e) {
             return e.getTypeMirrors().stream()
-                .map(input -> (TypeElement)asElement(input))
+                .map(TypeMirror::toString)
                 .collect(Collectors.toSet());
         }
     }
@@ -131,7 +140,6 @@ abstract class ProcessUtils {
     private boolean isSameType(TypeMirror t, String canonical) {
         return isSameType(t, getTypeElement(canonical).asType());
     }
-
 
     private boolean isSameType(TypeMirror t1, TypeMirror t2) {
         return types.isSameType(t1, t2);

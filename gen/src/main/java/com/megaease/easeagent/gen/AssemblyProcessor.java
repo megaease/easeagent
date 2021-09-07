@@ -19,6 +19,7 @@ package com.megaease.easeagent.gen;
 
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.Injection;
+import com.megaease.easeagent.core.Transformation;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -30,9 +31,13 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementKindVisitor6;
 import javax.tools.Diagnostic;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Set;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,8 +47,6 @@ import static java.util.Collections.singleton;
 
 @AutoService(Processor.class)
 public class AssemblyProcessor extends AbstractProcessor {
-    Class<Injection.Provider> annotationClass = Injection.Provider.class;
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         final ProcessUtils utils = ProcessUtils.of(processingEnv);
@@ -64,7 +67,11 @@ public class AssemblyProcessor extends AbstractProcessor {
     }
 
     private void process(final ProcessUtils utils, final Assembly assembly, String packageName) {
-        final Iterable<TypeElement> transformations = utils.asTypeElements(assembly::value);
+        final Set<String> assemblyClasses = utils.asClassNames(assembly::value);
+        TreeSet<String> classNames = loadProviders();
+        classNames.addAll(assemblyClasses);
+        Set<TypeElement> transformations = utils.asTypeElements(classNames);
+
         Iterable<JavaFile> files = process(packageName, utils, transformations);
         files.forEach(file -> {
             try {
@@ -75,6 +82,30 @@ public class AssemblyProcessor extends AbstractProcessor {
                 e.printStackTrace();
             }
         });
+    }
+
+    private TreeSet<String> loadProviders() {
+        ClassLoader loader = this.getClass().getClassLoader();
+        final String providers = "META-INF/services/" + Transformation.class.getCanonicalName();
+        Enumeration<URL> configs;
+        TreeSet<String> pset = new TreeSet<>();
+        try {
+            configs = loader.getResources(providers);
+            while (configs.hasMoreElements()) {
+                URL path = configs.nextElement();
+                InputStream in = path.openStream();
+                BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                String line;
+                while((line = r.readLine()) != null) {
+                    pset.add(line);
+                }
+                r.close();
+                in.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return pset;
     }
 
     @Override

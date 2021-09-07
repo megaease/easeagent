@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.megaease.easeagent.core.*;
 import net.bytebuddy.description.method.MethodDescription;

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.megaease.easeagent.core.Transformation;
 
@@ -27,5 +27,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Assembly {
-    Class<? extends Transformation>[] value();
+    Class<? extends Transformation>[] value() default {};
 }
