@@ -22,6 +22,7 @@ import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.gen.Generate;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
@@ -31,6 +32,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.none;
 
+@Generate.Advice
 @Injection.Provider(Provider.class)
 public abstract class KafkaConsumerRecordAdvice implements Transformation {
     @Override

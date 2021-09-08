@@ -40,7 +40,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("unchecked")
-@Assembly({Baz.class})
+@Generate.Assembly({Baz.class})
 public class AssemblyProcessorTest {
     private final String packageName = getClass().getPackage().getName();
     private final ElementMatcher.Junction<MethodDescription> matcher = ElementMatchers.any();

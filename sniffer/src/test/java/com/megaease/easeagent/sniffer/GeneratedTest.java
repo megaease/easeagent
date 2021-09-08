@@ -17,29 +17,9 @@
 
 package com.megaease.easeagent.sniffer;
 
-import com.megaease.easeagent.gen.Assembly;
-import com.megaease.easeagent.sniffer.healthy.advice.SpringApplicationAdminMXBeanRegistrarAdvice;
-import com.megaease.easeagent.sniffer.http.okhttp.OkHttpAdvice;
-import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5Advice;
-import com.megaease.easeagent.sniffer.httpclient.advice.HttpClient5AsyncAdvice;
-import com.megaease.easeagent.sniffer.httpclient.advice.HttpClientAdvice;
-import com.megaease.easeagent.sniffer.jdbc.advice.JdbcConAdvice;
-import com.megaease.easeagent.sniffer.jdbc.advice.JdbcDataSourceAdvice;
-import com.megaease.easeagent.sniffer.jdbc.advice.JdbcStatementAdvice;
-import com.megaease.easeagent.sniffer.jedis.v3.JedisAdvice;
-import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerAdvice;
-import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaConsumerAdvice;
-import com.megaease.easeagent.sniffer.kafka.v2d3.advice.KafkaProducerAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisChannelWriterAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.RedisClusterClientAdvice;
-import com.megaease.easeagent.sniffer.lettuce.v5.advice.StatefulRedisConnectionAdvice;
-import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerAdvice;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqChannelAdvice;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
-import com.megaease.easeagent.sniffer.webclient.WebClientBuilderAdvice;
+import com.megaease.easeagent.gen.Generate;
 
 
-@Assembly
+@Generate.Assembly
 public interface GeneratedTest {
 }

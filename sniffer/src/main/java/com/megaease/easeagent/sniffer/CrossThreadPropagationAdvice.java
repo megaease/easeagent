@@ -23,6 +23,7 @@ import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
+import com.megaease.easeagent.gen.Generate;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+@Generate.Advice
 @Injection.Provider(Provider.class)
 public abstract class CrossThreadPropagationAdvice implements Transformation {
     public static final String CLASS_THREAD_POOL_EXECUTOR = "java.util.concurrent.ThreadPoolExecutor";

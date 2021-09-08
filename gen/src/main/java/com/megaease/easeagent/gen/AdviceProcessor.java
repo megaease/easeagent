@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.megaease.easeagent.sniffer;
+package com.megaease.easeagent.gen;
 
 import com.google.auto.service.AutoService;
 
@@ -38,13 +38,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static com.megaease.easeagent.core.Injection.Provider;
 import static java.util.Collections.singleton;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
 @AutoService(Processor.class)
-public class InjectionProviderProcessor extends AbstractProcessor {
-    Class<Provider> annotationClass = Provider.class;
+public class AdviceProcessor extends AbstractProcessor {
+    Class<Generate.Advice> annotationClass = Generate.Advice.class;
 
     @Override public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent;
 
-import com.megaease.easeagent.gen.Assembly;
+import com.megaease.easeagent.gen.Generate.Assembly;
 
 @Assembly
 abstract class Easeagent {

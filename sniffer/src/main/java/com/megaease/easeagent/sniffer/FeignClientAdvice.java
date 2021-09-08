@@ -24,6 +24,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.gen.Generate;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
@@ -34,6 +35,7 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+@Generate.Advice
 @Injection.Provider(Provider.class)
 public abstract class FeignClientAdvice implements Transformation {
     @Override

@@ -20,6 +20,7 @@ package com.megaease.easeagent.gen;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
+import com.megaease.easeagent.gen.Generate.Assembly;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -52,14 +53,15 @@ import static java.util.Collections.singleton;
 
 @AutoService(Processor.class)
 public class AssemblyProcessor extends AbstractProcessor {
+    Class<Assembly>  annotationClass = Assembly.class;
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         final ProcessUtils utils = ProcessUtils.of(processingEnv);
 
-        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Assembly.class);
+        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotationClass);
         for (final Element element : elements) {
             try {
-                process(utils, element.getAnnotation(Assembly.class), utils.packageNameOf((TypeElement) element));
+                process(utils, element.getAnnotation(annotationClass), utils.packageNameOf((TypeElement) element));
             } catch (ElementException e) {
                 error(e.element, e.getLocalizedMessage());
                 return true;
@@ -136,7 +138,7 @@ public class AssemblyProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return singleton(Assembly.class.getCanonicalName());
+        return singleton(annotationClass.getCanonicalName());
     }
 
     @Override
