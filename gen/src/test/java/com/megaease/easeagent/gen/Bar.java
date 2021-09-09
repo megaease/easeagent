@@ -24,6 +24,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import static net.bytebuddy.asm.Advice.*;
 
 @Injection.Provider(Qux.class)
+@Generate.Advice
 @Configurable(bind = "foo.bar")
 public abstract class Bar implements Transformation {
 

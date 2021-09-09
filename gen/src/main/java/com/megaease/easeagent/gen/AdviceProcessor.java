@@ -30,6 +30,7 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -60,8 +61,7 @@ public class AdviceProcessor extends AbstractProcessor {
             return false;
         }
 
-        Map<String,Set<String>> services = new HashMap<>();
-        String cn = "com.megaease.easeagent.core.Transformation";
+        TreeSet<String> services = new TreeSet<>();
         Elements elements = processingEnv.getElementUtils();
 
         Set<? extends Element> roundElements = roundEnv.getElementsAnnotatedWith(annotationClass);
@@ -73,31 +73,30 @@ public class AdviceProcessor extends AbstractProcessor {
                 continue;
             }
             TypeElement type = (TypeElement)e;
-
-            Set<String> v = services.computeIfAbsent(cn, k -> new TreeSet<>());
-            v.add(elements.getBinaryName(type).toString());
+            services.add(elements.getBinaryName(type).toString());
         }
 
         Filer filer = processingEnv.getFiler();
-        String prefix = "META-INF/services/";
+        String fileName = "META-INF/services/com.megaease.easeagent.core.Transformation";
 
-        Set<String> providers = services.get(cn);
-        if (providers == null || providers.isEmpty()) {
+        if (services == null || services.isEmpty()) {
             return false;
-        } else {
-            try {
-                String contract = prefix + cn;
-                processingEnv.getMessager().printMessage(Kind.NOTE,"Writing " + contract);
-                FileObject f = filer.createResource(StandardLocation.CLASS_OUTPUT, "", contract);
-                PrintWriter pw = new PrintWriter(new OutputStreamWriter(f.openOutputStream(), StandardCharsets.UTF_8));
-                providers.forEach(pw::println);
+        }
+
+        PrintWriter pw = null;
+        try {
+            processingEnv.getMessager().printMessage(Kind.NOTE,"Writing " + fileName);
+            FileObject f = filer.createResource(StandardLocation.CLASS_OUTPUT, "", fileName);
+            pw = new PrintWriter(new OutputStreamWriter(f.openOutputStream(), StandardCharsets.UTF_8));
+            services.forEach(pw::println);
+        } catch (IOException x) {
+            processingEnv.getMessager().printMessage(Kind.ERROR, "Failed to write generated files: " + x);
+        } finally {
+            if (pw != null) {
                 pw.close();
-            } catch (IOException x) {
-                processingEnv.getMessager().printMessage(Kind.ERROR, "Failed to write generated files: " + x);
             }
         }
 
         return false;
     }
 }
-
