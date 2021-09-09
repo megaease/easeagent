@@ -73,7 +73,7 @@ public class Main {
         t.setContextClassLoader(loader);
 
         final String host = System.getProperty(hostKey);
-        final String agent = System.getProperty(Main.EASEAGENT_LOG_CONF, "log4j2.xml");
+        final String agent = System.getProperty(Main.EASEAGENT_LOG_CONF, "easeagent-log4j2.xml");
 
         // Redirect config of host to agent
         System.setProperty(hostKey, agent);
