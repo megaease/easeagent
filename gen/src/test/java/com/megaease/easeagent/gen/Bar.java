@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.gen;
+package com.megaease.easeagent.gen;
 
 import com.megaease.easeagent.core.*;
 import net.bytebuddy.description.method.MethodDescription;
@@ -24,6 +24,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import static net.bytebuddy.asm.Advice.*;
 
 @Injection.Provider(Qux.class)
+@Generate.Advice
 @Configurable(bind = "foo.bar")
 public abstract class Bar implements Transformation {
 

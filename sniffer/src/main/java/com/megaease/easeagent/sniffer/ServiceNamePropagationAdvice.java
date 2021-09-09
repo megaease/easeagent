@@ -23,6 +23,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.TextUtils;
 import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
+import com.megaease.easeagent.gen.Generate;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import feign.Request;
 import net.bytebuddy.asm.Advice;
@@ -44,6 +45,7 @@ import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+@Generate.Advice
 @Injection.Provider(Provider.class)
 public abstract class ServiceNamePropagationAdvice implements Transformation {
     public static final String FeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.FeignLoadBalancer";

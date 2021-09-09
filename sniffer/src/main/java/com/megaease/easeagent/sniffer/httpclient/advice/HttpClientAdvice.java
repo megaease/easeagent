@@ -24,6 +24,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
+import com.megaease.easeagent.gen.Generate;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import net.bytebuddy.asm.Advice;
@@ -36,6 +37,7 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+@Generate.Advice
 @Injection.Provider(Provider.class)
 public abstract class HttpClientAdvice implements Transformation {
     @Override

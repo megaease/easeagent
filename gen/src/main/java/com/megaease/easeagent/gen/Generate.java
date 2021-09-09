@@ -17,6 +17,25 @@
 
 package com.megaease.easeagent.gen;
 
-interface Generated {
+import com.megaease.easeagent.core.Transformation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+public interface Generate {
     String PREFIX = "Gen";
+
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.TYPE)
+    @interface Assembly {
+        Class<? extends Transformation>[] value() default {};
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface Advice {
+        Class<?> value() default Object.class;
+    }
 }

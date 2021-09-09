@@ -19,6 +19,8 @@ package com.megaease.easeagent.gen;
 
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.Injection;
+import com.megaease.easeagent.core.Transformation;
+import com.megaease.easeagent.gen.Generate.Assembly;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -30,9 +32,18 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementKindVisitor6;
 import javax.tools.Diagnostic;
+import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,16 +53,15 @@ import static java.util.Collections.singleton;
 
 @AutoService(Processor.class)
 public class AssemblyProcessor extends AbstractProcessor {
-    Class<Injection.Provider> annotationClass = Injection.Provider.class;
-
+    Class<Assembly>  annotationClass = Assembly.class;
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         final ProcessUtils utils = ProcessUtils.of(processingEnv);
 
-        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Assembly.class);
+        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotationClass);
         for (final Element element : elements) {
             try {
-                process(utils, element.getAnnotation(Assembly.class), utils.packageNameOf((TypeElement) element));
+                process(utils, element.getAnnotation(annotationClass), utils.packageNameOf((TypeElement) element));
             } catch (ElementException e) {
                 error(e.element, e.getLocalizedMessage());
                 return true;
@@ -64,7 +74,11 @@ public class AssemblyProcessor extends AbstractProcessor {
     }
 
     private void process(final ProcessUtils utils, final Assembly assembly, String packageName) {
-        final Iterable<TypeElement> transformations = utils.asTypeElements(assembly::value);
+        final Set<String> assemblyClasses = utils.asClassNames(assembly::value);
+        TreeSet<String> classNames = loadProviders();
+        classNames.addAll(assemblyClasses);
+        Set<TypeElement> transformations = utils.asTypeElements(classNames);
+
         Iterable<JavaFile> files = process(packageName, utils, transformations);
         files.forEach(file -> {
             try {
@@ -72,14 +86,59 @@ public class AssemblyProcessor extends AbstractProcessor {
                     .addFileComment("This ia a generated file.")
                     .build().writeTo(processingEnv.getFiler());
             } catch (IOException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getLocalizedMessage());
             }
         });
     }
 
+    private TreeSet<String> loadProviders() {
+        ClassLoader loader = this.getClass().getClassLoader();
+        final String providers = "META-INF/services/" + Transformation.class.getCanonicalName();
+        Enumeration<URL> configs;
+        TreeSet<String> providerSet = new TreeSet<>();
+        try {
+            configs = loader.getResources(providers);
+            InputStream in = null;
+            BufferedReader r = null;
+            while (configs.hasMoreElements()) {
+                URL path = configs.nextElement();
+                try {
+                    in = path.openStream();
+                    r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                    String line;
+                    while((line = r.readLine()) != null) {
+                        providerSet.add(line);
+                    }
+                } catch (IOException e) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getLocalizedMessage());
+                } finally {
+                    Consumer<Closeable> close = (cls) -> {
+                        if (cls != null) {
+                            try {
+                                cls.close();
+                            } catch (Exception e) {
+                                // do nothing
+                            }
+                        }
+                    };
+                    close.accept(r);
+                    close.accept(in);
+                    r = null;
+                    in = null;
+                }
+            }
+        } catch (IOException e) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                "File not found:" + providers);
+        }
+
+        return providerSet;
+    }
+
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return singleton(Assembly.class.getCanonicalName());
+        return singleton(annotationClass.getCanonicalName());
     }
 
     @Override
