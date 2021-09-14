@@ -22,6 +22,9 @@ header:
     - './'
 
   paths-ignore:
+    - '.editorconfig'
+    - 'install'
+    - 'release'
     - '**/*.xml'
     - '**/*.properties'
     - '**/*.md'
@@ -29,7 +32,7 @@ header:
     - '.github/'
     - '.git/'
     - 'doc/'
-    - '**/resources/'
+    - '**/resources/**'
     - 'CHANGELOG.md'
     - '.gitignore'
     - 'README.md'
