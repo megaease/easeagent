@@ -25,6 +25,7 @@ import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.gen.Generate;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.advice.RabbitPropertiesAdvice;
@@ -39,16 +40,17 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+@Generate.Advice
 @Injection.Provider(Provider.class)
 public abstract class RedisPropertiesAdvice implements Transformation {
 
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type(named("org.springframework.boot.autoconfigure.data.redis.RedisProperties"))
-                .transform(setProperty(nameStartsWith("set")))
-                .end()
-                ;
+            .type(named("org.springframework.boot.autoconfigure.data.redis.RedisProperties"))
+            .transform(setProperty(nameStartsWith("set")))
+            .end()
+            ;
     }
 
     @AdviceTo(SetProperty.class)
@@ -63,9 +65,9 @@ public abstract class RedisPropertiesAdvice implements Transformation {
 
         @Advice.OnMethodEnter
         public ForwardLock.Release<Map<Object, Object>> enter(
-                @Advice.This Object invoker,
-                @Advice.Origin("#m") String method,
-                @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args
+            @Advice.This Object invoker,
+            @Advice.Origin("#m") String method,
+            @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args
         ) {
             return this.doEnter(invoker, method, args);
         }
