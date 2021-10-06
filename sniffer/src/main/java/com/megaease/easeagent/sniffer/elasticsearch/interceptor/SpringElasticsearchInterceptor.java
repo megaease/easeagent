@@ -37,7 +37,7 @@ public class SpringElasticsearchInterceptor implements AgentInterceptor {
             return;
         }
         String method = methodInfo.getMethod();
-        List<String> uris = this.formatUris(cnf.getUris());
+        List<String> uris = this.formatUris(cnf.getUriList());
         if (method.equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
             methodInfo.getArgs()[0] = cnf.getUserName();
         } else if (method.equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
@@ -50,13 +50,13 @@ public class SpringElasticsearchInterceptor implements AgentInterceptor {
         AgentInterceptor.super.before(methodInfo, context, chain);
     }
 
-    private List<String> formatUris(List<String> uris) {
+    private List<String> formatUris(List<String> uriList) {
         List<String> list = new ArrayList<>();
-        for (String url : uris) {
-            if (url.startsWith("http://") || url.startsWith("https://")) {
-                list.add(url);
+        for (String uri : uriList) {
+            if (uri.startsWith("http://") || uri.startsWith("https://")) {
+                list.add(uri);
             } else {
-                list.add("http://" + url);
+                list.add("http://" + uri);
             }
         }
         return list;
