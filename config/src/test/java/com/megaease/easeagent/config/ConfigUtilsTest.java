@@ -77,4 +77,43 @@ public class ConfigUtilsTest {
         Map<String, String> map = ConfigUtils.json2KVMap("{\"serviceHeaders\":{\"mesh-app-backend\":[\"X-canary\"]}}");
         Assert.assertEquals("X-canary", map.get("serviceHeaders.mesh-app-backend.0"));
     }
+
+    @Test
+    public void isSelf() {
+        Assert.assertTrue(ConfigUtils.isSelf("self"));
+        Assert.assertFalse(ConfigUtils.isSelf("selddf"));
+    }
+
+    @Test
+    public void isPluginConfig() {
+        Assert.assertTrue(ConfigUtils.isPluginConfig("plugin."));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin"));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugins."));
+        Assert.assertTrue(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observability", "kafka"));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observabilitys", "kafka"));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observability", "kafkas"));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observabilitys", "kafkas"));
+    }
+
+    @Test
+    public void pluginProperty() {
+        PluginProperty pluginProperty = ConfigUtils.pluginProperty("plugin.observability.kafka.self.enabled");
+        Assert.assertEquals(pluginProperty.getDomain(), "observability");
+        Assert.assertEquals(pluginProperty.getNamespace(), "kafka");
+        Assert.assertEquals(pluginProperty.getId(), "self");
+        Assert.assertEquals(pluginProperty.getProperty(), "enabled");
+        pluginProperty = ConfigUtils.pluginProperty("plugin.observability.kafka.self.tcp.enabled");
+        Assert.assertEquals(pluginProperty.getDomain(), "observability");
+        Assert.assertEquals(pluginProperty.getNamespace(), "kafka");
+        Assert.assertEquals(pluginProperty.getId(), "self");
+        Assert.assertEquals(pluginProperty.getProperty(), "tcp.enabled");
+        try{
+            ConfigUtils.pluginProperty("plugin.observability.kafka.self.tcp");
+            throw new RuntimeException("must be error");
+        }catch (Exception e ){
+            Assert.assertNotNull(e);
+        }
+
+
+    }
 }

@@ -26,6 +26,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.megaease.easeagent.config.ConfigConst.*;
+
 public class ConfigUtils {
     public static String extractServiceName(Configs configs) {
         return configs.getString(ConfigConst.SERVICE_NAME);
@@ -90,4 +92,31 @@ public class ConfigUtils {
     private static String join(String prefix, String current) {
         return prefix == null ? current : ConfigConst.join(prefix, current);
     }
+
+    public static boolean isSelf(String id) {
+        return PLUGIN_SELF.equals(id);
+    }
+
+    public static boolean isPluginConfig(String key) {
+        if (key.startsWith(PLUGIN_PREFIX)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isPluginConfig(String key, String domain, String namespace) {
+        if (key.startsWith(ConfigConst.join(PLUGIN, domain, namespace))) {
+            return true;
+        }
+        return false;
+    }
+
+    public static PluginProperty pluginProperty(String path) {
+        String[] configs = path.split("\\" + DELIMITER);
+        if (configs.length < 5) {
+            throw new ValidateUtils.ValidException(String.format("Property[%s] must be format: %s", path, ConfigConst.join(PLUGIN, "<Domain>", "<Namespace>", "<Id>", "<Properties>")));
+        }
+        return new PluginProperty(configs[1], configs[2], configs[3], ConfigConst.join(Arrays.copyOfRange(configs, 4, configs.length)));
+    }
+
 }
