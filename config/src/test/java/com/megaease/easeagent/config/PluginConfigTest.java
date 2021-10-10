@@ -23,7 +23,7 @@ public class PluginConfigTest {
         return global;
     }
 
-    Map<String, String> coverSource() {
+    public static Map<String, String> coverSource() {
         Map<String, String> cover = new HashMap<>();
         cover.put("tcp.enabled", "false");
         cover.put("http.enabled", "true");
@@ -60,7 +60,11 @@ public class PluginConfigTest {
 
     @Test
     public void hasProperty() {
-        PluginConfig config = build();
+        checkHasProperty(build());
+
+    }
+
+    public static void checkHasProperty(PluginConfig config) {
         assertTrue(config.hasProperty("enabled"));
         assertTrue(config.hasProperty("tcp.enabled"));
         assertTrue(config.hasProperty("http.enabled"));
@@ -69,7 +73,10 @@ public class PluginConfigTest {
 
     @Test
     public void getString() {
-        PluginConfig config = build();
+        checkString(build());
+    }
+
+    public static void checkString(PluginConfig config) {
         assertEquals(config.getString("enabled"), "true");
         assertEquals(config.getString("tcp.enabled"), "false");
         assertEquals(config.getString("count"), "127");
@@ -80,15 +87,22 @@ public class PluginConfigTest {
 
     @Test
     public void getInt() {
-        PluginConfig config = build();
+        checkInt(build());
+    }
+
+    public static void checkInt(PluginConfig config) {
         assertEquals((int) config.getInt("count"), 127);
         assertNull(config.getInt("enabled"));
         assertNull(config.getInt("cccccccccccccc"));
     }
 
+
     @Test
     public void getBoolean() {
-        PluginConfig config = build();
+        checkBoolean(build());
+    }
+
+    public static void checkBoolean(PluginConfig config) {
         assertTrue(config.getBoolean("enabled"));
         assertFalse(config.getBoolean("tcp.enabled"));
         assertFalse(config.getBoolean("http.enabled"));
@@ -97,7 +111,11 @@ public class PluginConfigTest {
 
     @Test
     public void getDouble() {
-        PluginConfig config = build();
+        checkDouble(build());
+    }
+
+
+    public static void checkDouble(PluginConfig config) {
         assertTrue(Math.abs(config.getDouble("double") - 127.3) < 0.0001);
         assertTrue(Math.abs(config.getDouble("double_1") - 127.2) < 0.0001);
         assertNull(config.getDouble("enabled"));
@@ -105,7 +123,10 @@ public class PluginConfigTest {
 
     @Test
     public void getLong() {
-        PluginConfig config = build();
+        checkLong(build());
+    }
+
+    public static void checkLong(PluginConfig config) {
         assertEquals((long) config.getLong("count"), 127l);
         assertNull(config.getLong("enabled"));
         assertNull(config.getLong("cccccccccccccc"));
@@ -113,13 +134,18 @@ public class PluginConfigTest {
 
     @Test
     public void getStringList() {
-        PluginConfig config = build();
+        checkStringList(build());
+    }
+
+
+    public static void checkStringList(PluginConfig config) {
         List<String> list = config.getStringList("list");
         assertEquals(list.size(), 3);
         assertEquals(list.get(0), "a");
         assertEquals(list.get(1), "b");
         assertEquals(list.get(2), "c");
     }
+
 
     @Test
     public void addChangeListener() {
@@ -136,7 +162,10 @@ public class PluginConfigTest {
 
     @Test
     public void keySet() {
-        PluginConfig config = build();
+        checkKeySet(build());
+    }
+
+    public static void checkKeySet(PluginConfig config) {
         Set<String> set = config.keySet();
         Map<String, String> source = globalSource();
         source.putAll(coverSource());
@@ -145,4 +174,18 @@ public class PluginConfigTest {
             assertTrue(source.containsKey(s));
         }
     }
+
+
+    public static void checkAllType(PluginConfig config){
+        checkHasProperty(config);
+        checkString(config);
+        checkBoolean(config);
+        checkInt(config);
+        checkLong(config);
+        checkDouble(config);
+        checkStringList(config);
+        checkKeySet(config);
+    }
+
+
 }

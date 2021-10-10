@@ -27,6 +27,7 @@ import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
+import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import fi.iki.elonen.NanoHTTPD;
@@ -74,6 +75,8 @@ public class Bootstrap {
 
     private static WrappedConfigManager wrappedConfigManager;
 
+    private static IConfigFactory iConfigFactory;
+
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
         long begin = System.nanoTime();
@@ -87,7 +90,7 @@ public class Bootstrap {
             LOGGER.debug("Loaded conf:\n{}", display);
         }
         registerMBeans(conf);
-
+        iConfigFactory = PluginConfigContext.builder(conf).build();
         Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
@@ -109,26 +112,26 @@ public class Bootstrap {
 //                .with(new AgentBuilder.Listener.Filtering(
 //                        new StringMatcher("java.lang.Thread", StringMatcher.Mode.EQUALS_FULLY),
 //                        AgentBuilder.Listener.StreamWriting.toSystemOut()))
-                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
-                .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
-                .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG.withFallbackTo(ClassFileLocator.ForClassLoader.ofBootLoader()))
+            .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+            .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+            .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
+            .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG.withFallbackTo(ClassFileLocator.ForClassLoader.ofBootLoader()))
 //                .ignore(any(), protectedLoaders()) // we need to redefine java.lang and java.util
-                .ignore(isSynthetic())
-                .or(nameStartsWith("sun."))
-                .or(nameStartsWith("com.sun."))
-                .or(nameStartsWith("brave."))
-                .or(nameStartsWith("zipkin2."))
-                .or(nameStartsWith("com.fasterxml"))
-                .or(nameStartsWith("org.apache.logging"))
-                .or(nameStartsWith("kotlin."))
-                .or(nameStartsWith("javax."))
-                .or(nameStartsWith("net.bytebuddy."))
-                .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
-                .or(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
-                .or(nameStartsWith("org.junit."))
-                .or(nameStartsWith("junit."))
-                .or(nameStartsWith("com.intellij."));
+            .ignore(isSynthetic())
+            .or(nameStartsWith("sun."))
+            .or(nameStartsWith("com.sun."))
+            .or(nameStartsWith("brave."))
+            .or(nameStartsWith("zipkin2."))
+            .or(nameStartsWith("com.fasterxml"))
+            .or(nameStartsWith("org.apache.logging"))
+            .or(nameStartsWith("kotlin."))
+            .or(nameStartsWith("javax."))
+            .or(nameStartsWith("net.bytebuddy."))
+            .or(nameStartsWith("com\\.sun\\.proxy\\.\\$Proxy.+"))
+            .or(nameStartsWith("java\\.lang\\.invoke\\.BoundMethodHandle\\$Species_L.+"))
+            .or(nameStartsWith("org.junit."))
+            .or(nameStartsWith("junit."))
+            .or(nameStartsWith("com.intellij."));
         LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
 
         final AgentReport agentReport = AgentReport.create(conf);
@@ -152,17 +155,17 @@ public class Bootstrap {
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
         return ImmutableMap.copyOf(Maps.transformValues(
-                from(providers).uniqueIndex(new Function<Class<?>, Class<?>>() {
-                    @Override
-                    public Class<?> apply(Class<?> input) {
-                        return input.getSuperclass();
-                    }
-                }), new Function<Class<?>, Iterable<QualifiedBean>>() {
-                    @Override
-                    public Iterable<QualifiedBean> apply(Class<?> input) {
-                        return beans(input, conf, agentReport);
-                    }
-                }));
+            from(providers).uniqueIndex(new Function<Class<?>, Class<?>>() {
+                @Override
+                public Class<?> apply(Class<?> input) {
+                    return input.getSuperclass();
+                }
+            }), new Function<Class<?>, Iterable<QualifiedBean>>() {
+                @Override
+                public Iterable<QualifiedBean> apply(Class<?> input) {
+                    return beans(input, conf, agentReport);
+                }
+            }));
     }
 
     private static ElementMatcher<ClassLoader> protectedLoaders() {
@@ -178,7 +181,7 @@ public class Bootstrap {
             final Register register = new Register(beans);
 
             for (Map.Entry<ElementMatcher<? super TypeDescription>, Iterable<Definition.Transformer>> entry :
-                    newInstance(tc, conf, report).define(Definition.Default.EMPTY).asMap().entrySet()) {
+                newInstance(tc, conf, report).define(Definition.Default.EMPTY).asMap().entrySet()) {
                 ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register));
             }
             if (LOGGER.isDebugEnabled()) {
@@ -191,12 +194,12 @@ public class Bootstrap {
 
     private static AgentBuilder.Transformer compound(Iterable<Definition.Transformer> transformers, final Register register) {
         return new CompoundTransformer(from(transformers).transform(
-                new Function<Definition.Transformer, AgentBuilder.Transformer>() {
-                    @Override
-                    public AgentBuilder.Transformer apply(final Definition.Transformer input) {
-                        return new ForRegisterAdvice(register, input);
-                    }
-                }).toList());
+            new Function<Definition.Transformer, AgentBuilder.Transformer>() {
+                @Override
+                public AgentBuilder.Transformer apply(final Definition.Transformer input) {
+                    return new ForRegisterAdvice(register, input);
+                }
+            }).toList());
     }
 
     private static Iterable<QualifiedBean> beans(Class<?> provider, Configs conf, AgentReport agentReport) {
@@ -225,7 +228,7 @@ public class Bootstrap {
         final Configurable configurable = aClass.getAnnotation(Configurable.class);
         try {
             final T t = configurable == null ? aClass.newInstance()
-                    : aClass.getConstructor(Config.class).newInstance(conf);
+                : aClass.getConstructor(Config.class).newInstance(conf);
             if (t instanceof ConfigAware) {
                 ((ConfigAware) t).setConfig(conf);
             }
@@ -346,7 +349,7 @@ public class Bootstrap {
             this.agentTransformer = transformer;
             this.adviceFactoryClassName = transformer.adviceFactoryClassName;
             this.transformer = new ForAdvice().include(getClass().getClassLoader())
-                    .advice(transformer.matcher, transformer.inlineAdviceClassName);
+                .advice(transformer.matcher, transformer.inlineAdviceClassName);
 
         }
 
@@ -356,7 +359,7 @@ public class Bootstrap {
             if (!td.isAssignableTo(DynamicFieldAccessor.class)) {
                 if (this.agentTransformer.fieldName != null) {
                     b = b.defineField(this.agentTransformer.fieldName, this.agentTransformer.fieldClass, Opcodes.ACC_PRIVATE)
-                            .implement(DynamicFieldAccessor.class).intercept(FieldAccessor.ofField(this.agentTransformer.fieldName));
+                        .implement(DynamicFieldAccessor.class).intercept(FieldAccessor.ofField(this.agentTransformer.fieldName));
                 }
             }
             return transformer.transform(b, td, cl, m);

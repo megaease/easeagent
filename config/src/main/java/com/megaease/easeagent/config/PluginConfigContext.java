@@ -44,7 +44,7 @@ public class PluginConfigContext implements IConfigFactory {
             if (ConfigUtils.isSelf(id)) {
                 continue;
             }
-            PluginSourceConfig otherConfig = pluginSourceConfigs.get(id);
+            PluginSourceConfig otherConfig = pluginSourceConfigs.get(new SourceKey(sourceConfigs.getDomain(), id));
             if (otherConfig == null) {
                 continue;
             }
@@ -232,7 +232,7 @@ public class PluginConfigContext implements IConfigFactory {
         }
     }
 
-    class Builder {
+    public class Builder {
         public PluginConfigContext build() {
             synchronized (PluginConfigContext.this) {
                 Map<String, String> sources = configs.getConfigs();

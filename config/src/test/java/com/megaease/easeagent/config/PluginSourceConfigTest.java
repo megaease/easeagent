@@ -11,24 +11,25 @@ import static org.junit.Assert.*;
 
 public class PluginSourceConfigTest {
 
-    Map<String, String> getSource(String id) {
+    public static Map<String, String> getSource(String namespace, String id) {
         Map<String, String> properties = PluginConfigTest.globalSource();
         Map<String, String> s = new HashMap<>();
         for (Map.Entry<String, String> pEntry : properties.entrySet()) {
-            s.put("plugin.testDomain.testNamespace." + id + "." + pEntry.getKey(), pEntry.getValue());
+            s.put("plugin.testDomain." + namespace + "." + id + "." + pEntry.getKey(), pEntry.getValue());
         }
         return s;
     }
 
-
-    Map<String, String> selfSource() {
-        return getSource("self");
+    public static Map<String, String> getSource(String id) {
+        return getSource("testNamespace", id);
     }
 
 
-    PluginSourceConfig buildImpl() {
-        String domain = "testDomain";
-        String namespace = "testNamespace";
+    public static Map<String, String> selfSource() {
+        return getSource("self");
+    }
+
+    public static Map<String, String> buildSource() {
         Map<String, String> source = selfSource();
         source.putAll(getSource("kafka"));
         source.putAll(getSource("mq"));
@@ -36,6 +37,13 @@ public class PluginSourceConfigTest {
         source.put("plugin.testDomain.testssss.kafka.lll", "aaa");
         source.put("plugin.testDomain.testssss.kafka.lll", "aaa");
         source.put("plugin.testDomain.testssss.kafka.lll", "aaa");
+        return source;
+    }
+
+    PluginSourceConfig buildImpl() {
+        String domain = "testDomain";
+        String namespace = "testNamespace";
+        Map<String, String> source = buildSource();
         return PluginSourceConfig.build(domain, namespace, source);
     }
 

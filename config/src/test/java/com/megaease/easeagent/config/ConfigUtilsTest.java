@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.Assert.assertTrue;
+
 public class ConfigUtilsTest {
     @Test
     public void test_bindProp() throws Exception {
@@ -108,8 +110,8 @@ public class ConfigUtilsTest {
         Assert.assertEquals(pluginProperty.getId(), "self");
         Assert.assertEquals(pluginProperty.getProperty(), "tcp.enabled");
         try{
-            ConfigUtils.pluginProperty("plugin.observability.kafka.self.tcp");
-            throw new RuntimeException("must be error");
+            ConfigUtils.pluginProperty("plugin.observability.kafka.self");
+            assertTrue("must be error", false);
         }catch (Exception e ){
             Assert.assertNotNull(e);
         }
