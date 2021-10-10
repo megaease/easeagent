@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,28 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.config;
+package com.megaease.easeagent.api.config;
 
-class Common {
-    static String fixPrefix(String text) {
-        if (text.endsWith(".")) {
-            return text;
-        }
-        return text + ".";
-    }
+import java.util.List;
+import java.util.Set;
+
+@SuppressWarnings("unused")
+public interface Config {
+    boolean hasPath(String path);
+
+    String getString(String name);
+
+    Integer getInt(String name);
+
+    Boolean getBoolean(String name);
+
+    Double getDouble(String name);
+
+    Long getLong(String name);
+
+    List<String> getStringList(String name);
+
+    Runnable addChangeListener(ConfigChangeListener listener);
+
+    Set<String> keySet();
 }

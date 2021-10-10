@@ -15,13 +15,8 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.api.interceptor;
+package com.megaease.easeagent.api.config;
 
-public class ChainBuilderFactory {
-
-    public static final ChainBuilderFactory DEFAULT = new ChainBuilderFactory();
-
-    public AgentInterceptorChain.Builder createBuilder() {
-        return new DefaultAgentInterceptorChain.Builder();
-    }
+public interface ConfigAware {
+    void setConfig(Config config);
 }

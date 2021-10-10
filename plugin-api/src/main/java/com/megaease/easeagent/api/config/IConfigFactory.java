@@ -1,4 +1,4 @@
-package com.megaease.easeagent.config;
+package com.megaease.easeagent.api.config;
 
 public interface IConfigFactory {
     /**

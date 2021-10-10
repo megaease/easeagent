@@ -1,7 +1,7 @@
 package com.megaease.easeagent.bridge;
 
-import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.config.IConfigFactory;
+import com.megaease.easeagent.api.config.Config;
+import com.megaease.easeagent.api.config.IConfigFactory;
 
 public class NoOpConfigFactory implements IConfigFactory {
     @Override

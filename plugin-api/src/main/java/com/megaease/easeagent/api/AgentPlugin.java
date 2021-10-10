@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.api;
 
-import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.api.config.Config;
 
 public interface AgentPlugin {
     // current plugin name
