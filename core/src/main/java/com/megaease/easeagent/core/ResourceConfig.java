@@ -28,7 +28,11 @@ public class ResourceConfig {
     private final List<String> uriList = new ArrayList<>();
     private final List<HostAndPort> hostAndPorts = new ArrayList<>();
 
-    public void initHostAndPorts() {
+    public void parseHostAndPorts(boolean needParse) {
+        if (!needParse) {
+            uriList.add(this.uris);
+            return;
+        }
         if (uris == null || uris.isEmpty()) {
             return;
         }

@@ -36,21 +36,21 @@ public class MiddlewareConfigProcessor {
     private final Map<String, ResourceConfig> map = new HashMap<>();
 
     public void init() {
-        this.initConfigItem(ENV_REDIS);
-        this.initConfigItem(ENV_KAFKA);
-        this.initConfigItem(ENV_RABBITMQ);
-        this.initConfigItem(ENV_DATABASE);
-        this.initConfigItem(ENV_ES);
+        this.initConfigItem(ENV_REDIS, true);
+        this.initConfigItem(ENV_KAFKA, true);
+        this.initConfigItem(ENV_RABBITMQ, true);
+        this.initConfigItem(ENV_DATABASE, false);
+        this.initConfigItem(ENV_ES, true);
     }
 
-    private void initConfigItem(String envStr) {
+    private void initConfigItem(String envStr, boolean needParse) {
         String str = System.getenv(envStr);
         if (str == null) {
             return;
         }
         ResourceConfig resourceConfig = JsonUtil.toObject(str, new TypeReference<ResourceConfig>() {
         });
-        resourceConfig.initHostAndPorts();
+        resourceConfig.parseHostAndPorts(needParse);
         if (resourceConfig.hasUrl()) {
             this.add(envStr, resourceConfig);
         }
