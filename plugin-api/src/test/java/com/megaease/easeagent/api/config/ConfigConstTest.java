@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.config;
+package com.megaease.easeagent.api.config;
 
 import org.junit.Test;
 
