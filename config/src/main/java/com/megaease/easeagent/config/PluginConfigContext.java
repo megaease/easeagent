@@ -1,5 +1,6 @@
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,7 +8,7 @@ import java.util.*;
 
 import static com.megaease.easeagent.config.ConfigConst.PLUGIN_SELF;
 
-public class PluginConfigContext {
+public class PluginConfigContext implements IConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginConfigContext.class);
     private volatile Runnable shutdownRunnable;
     private final Configs configs;
@@ -53,9 +54,14 @@ public class PluginConfigContext {
     }
 
 
+    @Override
+    public String getConfig(String property) {
+        return configs.getString(property);
+    }
+
     public PluginConfig getConfig(String domain, String namespace, String id) {
-        String pluginId = id;
-        if (pluginId == null || pluginId.trim().isEmpty()) {
+        String pluginId = id == null ? null : id.trim();
+        if (pluginId == null || pluginId.isEmpty() || id.equals(namespace)) {
             pluginId = PLUGIN_SELF;
         }
         Key key = new Key(domain, namespace, pluginId);
