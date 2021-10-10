@@ -492,10 +492,10 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         @Override
         public void run() {
             try {
-                while (!result.closed.get() && !sender.isClose()) { //当sender 关闭 则不进行处理
-                    if (traceProperties.isEnabled()) {
-                        result.flush(consumer, result.pending);
-                    }
+                while (!result.closed.get() && !sender.isClose()) {
+                    // flush will be block if there is no data ready, don't check trace is enable,
+                    // otherwise the cpu will spin.
+                    result.flush(consumer, result.pending);
                 }
             } catch (RuntimeException | Error e) {
                 logger.log(Level.WARNING, "Unexpected error flushing spans", e);
