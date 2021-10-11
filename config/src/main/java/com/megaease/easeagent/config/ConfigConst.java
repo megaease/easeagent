@@ -21,7 +21,8 @@ public interface ConfigConst {
     String PLUGIN = "plugin";
     String PLUGIN_GLOBAL = "global";
     String DELIMITER = ".";
-    String PLUGIN_PREFIX = PLUGIN+DELIMITER;
+    String PLUGIN_PREFIX = PLUGIN + DELIMITER;
+    String PLUGIN_FORMAT = join(PLUGIN, "%s", "%s", "%s", "%s");//plugin.<Domain>.<Namespace>.<ID>.<Properties>
     String SERVICE_NAME = "name";
     String SYSTEM_NAME = "system";
     String OBSERVABILITY = "observability";
@@ -30,7 +31,6 @@ public interface ConfigConst {
     static String join(String... texts) {
         return String.join(DELIMITER, texts);
     }
-
 
     interface GlobalCanaryLabels {
         String SERVICE_HEADERS = join(GLOBAL_CANARY_LABELS, "serviceHeaders");

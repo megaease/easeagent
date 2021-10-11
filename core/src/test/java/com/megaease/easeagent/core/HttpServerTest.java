@@ -1,0 +1,151 @@
+package com.megaease.easeagent.core;
+
+import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.PluginConfigContext;
+import com.megaease.easeagent.httpserver.AgentHttpHandler;
+import com.megaease.easeagent.httpserver.AgentHttpServer;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.IConfigFactory;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.DatagramSocket;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class HttpServerTest {
+    @Test
+    public void httpServer() throws Exception {
+        HashMap<String, String> source = new HashMap<>();
+        source.put("plugin.observability.global.metrics.enabled", "true");
+        source.put("plugin.observability.global.tracings.enabled", "true");
+
+        source.put("plugin.observability.global.kafka-tracings.enabled", "true");
+        source.put("plugin.observability.global.kafka-tracings.size", "12");
+
+        source.put("plugin.observability.kafka.kafka-tracings.size", "13");
+        source.put("plugin.observability.kafka.tracings.enabled", "true");
+        source.put("plugin.observability.kafka.tracings.servicePrefix", "true");
+        source.put("plugin.observability.kafka.metrics.enabled", "true");
+        source.put("plugin.observability.kafka.metrics.interval", "30");
+
+        source.put("plugin.observability.kafka.metrics.topic", "platform-meter");
+        source.put("plugin.observability.kafka.metrics.appendType", "kafka");
+
+        Configs configs = new Configs(source);
+        IConfigFactory iConfigFactory = PluginConfigContext.builder(configs).build();
+        AtomicInteger count = new AtomicInteger(0);
+///plugins/domains/observability/namespaces/kafka/kafka-tracings/properties/enabled/true/1
+        iConfigFactory.getConfig("observability", "kafka", "kafka-tracings").addChangeListener(new ConfigChange(count, "kafka.kafka-tracings"));
+        iConfigFactory.getConfig("observability", "kafka", "tracings").addChangeListener(new ConfigChange(count, "kafka.tracings"));
+        iConfigFactory.getConfig("observability", "kafka", "metrics").addChangeListener(new ConfigChange(count, "kafka.metrics"));
+        Bootstrap.registerMBeans(configs);
+        DatagramSocket s = new DatagramSocket(0);
+        int port = s.getLocalPort();
+        String httpServer = "http://127.0.0.1:" + port;
+        System.out.println("run up http server : " + httpServer);
+        AgentHttpServer agentHttpServer = new AgentHttpServer(port);
+        List<AgentHttpHandler> list = new ArrayList<>();
+        list.add(new Bootstrap.PluginPropertyHttpHandler());
+        list.add(new Bootstrap.PluginPropertiesHttpHandler());
+        agentHttpServer.addHttpRoutes(list);
+        agentHttpServer.startServer();
+
+        Thread.sleep(100);
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/15/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/14/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/13/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/12/1");
+        Assert.assertEquals(count.get(), 4);
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/kafka-tracings/properties/enabled/false/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/kafka-tracings/properties/enabled/true/1");
+        Assert.assertEquals(count.get(), 6);
+        get(httpServer + "/plugins/domains/observability/namespaces/global/tracings/properties/enabled/false/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/global/tracings/properties/enabled/true/1");
+        Assert.assertEquals(count.get(), 8);
+        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties", "{\"enabled\":\"false\",\"interval\": 15, \"version\": \"1\"}");
+        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties", "{\"enabled\":\"true\",\"interval\": 15, \"version\": \"1\"}");
+        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties", "{\"enabled\":\"true\",\"interval\": 13, \"version\": \"1\"}");
+        Assert.assertEquals(count.get(), 11);
+//        Thread.sleep(TimeUnit.HOURS.toMillis(1));
+    }
+
+    static String get(String urlStr) throws IOException {
+        StringBuilder result = new StringBuilder();
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(conn.getInputStream()))) {
+            for (String line; (line = reader.readLine()) != null; ) {
+                result.append(line);
+            }
+        }
+        return result.toString();
+    }
+
+    static String post(String urlStr, String body) throws IOException {
+        String charset = "UTF-8";
+        StringBuilder result = new StringBuilder();
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Accept-Charset", charset);
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        try (OutputStream output = conn.getOutputStream()) {
+            output.write(body.getBytes(charset));
+            output.flush();
+        }
+
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(conn.getInputStream()))) {
+            for (String line; (line = reader.readLine()) != null; ) {
+                result.append(line);
+            }
+        }
+        return result.toString();
+    }
+
+    static class ConfigChange implements ConfigChangeListener {
+        final AtomicInteger count;
+        final String name;
+
+        public ConfigChange(AtomicInteger count, String name) {
+            this.count = count;
+            this.name = name;
+        }
+
+        @Override
+        public void onChange(Config oldConfig, Config newConfig) {
+            count.incrementAndGet();
+            System.out.println(String.format("----------------------- on change %s begin ----------------------", name));
+            System.out.println("old config:");
+            printConfig(oldConfig);
+            System.out.println("\n-------------------------------\n");
+            System.out.println("new config:");
+            printConfig(newConfig);
+            System.out.println(String.format("----------------------- on change %s end ---------------------- \n\n", name));
+        }
+
+        public void printConfig(Config config) {
+            for (String s : config.keySet()) {
+                String value = config.getString(s);
+                if (value != null && "TRUE".equals(value.toUpperCase())) {
+                    System.out.println(String.format("%s=%s", s, config.getBoolean(s)));
+                } else {
+                    System.out.println(String.format("%s=%s", s, config.getString(s)));
+                }
+            }
+        }
+    }
+}

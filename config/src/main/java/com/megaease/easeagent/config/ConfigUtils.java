@@ -119,4 +119,15 @@ public class ConfigUtils {
         return new PluginProperty(configs[1], configs[2], configs[3], ConfigConst.join(Arrays.copyOfRange(configs, 4, configs.length)));
     }
 
+
+    public static String requireNonEmpty(String obj, String message) {
+        if (obj == null || obj.trim().isEmpty()) {
+            throw new ValidateUtils.ValidException(message);
+        }
+        return obj.trim();
+    }
+
+    public static String buildPluginProperty(String domain, String namespace, String id, String property) {
+        return String.format(PLUGIN_FORMAT, domain, namespace, id, property);
+    }
 }

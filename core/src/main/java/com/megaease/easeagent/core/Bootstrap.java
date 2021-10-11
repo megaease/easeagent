@@ -252,6 +252,8 @@ public class Bootstrap {
         }
         AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new ServiceUpdateAgentHttpHandler());
         AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new CanaryUpdateAgentHttpHandler());
+        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new PluginPropertyHttpHandler());
+        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new PluginPropertiesHttpHandler());
         return configs;
     }
 
@@ -268,8 +270,9 @@ public class Bootstrap {
         }
 
         @Override
-        public void processConfig(Map<String, String> config, String version) {
+        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
             wrappedConfigManager.updateCanary2(config, version);
+            return null;
         }
     }
 
@@ -280,14 +283,78 @@ public class Bootstrap {
         }
 
         @Override
-        public void processConfig(Map<String, String> config, String version) {
+        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
             wrappedConfigManager.updateService2(config, version);
+            return null;
+        }
+    }
+
+    public static class PluginPropertyHttpHandler extends AgentHttpHandler {
+
+        public PluginPropertyHttpHandler() {
+            methods = Collections.singleton(NanoHTTPD.Method.GET);
+        }
+
+        @Override
+        public String getPath() {
+            return "/plugins/domains/:domain/namespaces/:namespace/:id/properties/:property/:value/:version";
+        }
+
+        @SneakyThrows
+        @Override
+        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            String version = urlParams.get("version");
+            if (version == null) {
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
+            }
+            try {
+                String property = ConfigUtils.buildPluginProperty(
+                    ConfigUtils.requireNonEmpty(urlParams.get("domain"), "urlParams.domain must not be null and empty."),
+                    ConfigUtils.requireNonEmpty(urlParams.get("namespace"), "urlParams.namespace must not be null and empty."),
+                    ConfigUtils.requireNonEmpty(urlParams.get("id"), "urlParams.id must not be null and empty."),
+                    ConfigUtils.requireNonEmpty(urlParams.get("property"), "urlParams.property must not be null and empty."));
+                String value = Objects.requireNonNull(urlParams.get("value"), "urlParams.value must not be null.");
+                wrappedConfigManager.updateService2(Collections.singletonMap(property, value), version);
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
+            } catch (Exception e) {
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, e.getMessage());
+            }
+
+        }
+    }
+
+    public static class PluginPropertiesHttpHandler extends ConfigsUpdateAgentHttpHandler {
+        @Override
+        public String getPath() {
+            return "/plugins/domains/:domain/namespaces/:namespace/:id/properties";
+        }
+
+        @Override
+        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
+            try {
+                String domain = ConfigUtils.requireNonEmpty(urlParams.get("domain"), "urlParams.domain must not be null and empty.");
+                String namespace = ConfigUtils.requireNonEmpty(urlParams.get("namespace"), "urlParams.namespace must not be null and empty.");
+                String id = ConfigUtils.requireNonEmpty(urlParams.get("id"), "urlParams.id must not be null and empty.");
+                Map<String, String> changeConfig = new HashMap<>();
+                for (Map.Entry<String, String> propertyEntry : config.entrySet()) {
+                    String property = ConfigUtils.buildPluginProperty(domain,
+                        namespace,
+                        id,
+                        ConfigUtils.requireNonEmpty(propertyEntry.getKey(), "body.key must not be null and empty."));
+                    String value = Objects.requireNonNull(propertyEntry.getValue(), String.format("body.%s must not be null.", propertyEntry.getKey()));
+                    changeConfig.put(property, value);
+                }
+                wrappedConfigManager.updateService2(changeConfig, version);
+                return null;
+            } catch (Exception e) {
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, e.getMessage());
+            }
         }
     }
 
     public static abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
 
-        public abstract void processConfig(Map<String, String> config, String version);
+        public abstract NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version);
 
         @SneakyThrows
         @Override
@@ -305,7 +372,10 @@ public class Bootstrap {
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
             }
             Map<String, String> config = toConfigMap(map);
-            processConfig(config, version);
+            NanoHTTPD.Response response = processConfig(config, urlParams, version);
+            if (response != null) {
+                return response;
+            }
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
         }
     }
