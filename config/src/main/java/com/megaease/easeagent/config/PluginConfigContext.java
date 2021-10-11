@@ -64,6 +64,9 @@ public class PluginConfigContext implements IConfigFactory {
     private Set<Key> keys(Set<String> keys) {
         Set<Key> propertyKeys = new HashSet<>();
         for (String k : keys) {
+            if (!ConfigUtils.isPluginConfig(k)) {
+                continue;
+            }
             PluginProperty property = ConfigUtils.pluginProperty(k);
             Key key = new Key(property.getDomain(), property.getNamespace(), property.getId());
             propertyKeys.add(key);

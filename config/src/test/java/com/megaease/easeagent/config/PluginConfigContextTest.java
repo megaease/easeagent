@@ -1,7 +1,6 @@
 package com.megaease.easeagent.config;
 
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -69,7 +68,7 @@ public class PluginConfigContextTest {
     }
 
     @Test
-    public void getConfig1() {
+    public void getConfig1() throws InterruptedException {
         PluginConfigContext pluginConfigContext = build();
         PluginConfig pluginConfig = pluginConfigContext.getConfig(PluginSourceConfigTest.DOMAIN, "global", PluginSourceConfigTest.GLOBAL_ID);
         checkPluginConfigString(pluginConfig, PluginConfigTest.globalSource());
@@ -116,6 +115,8 @@ public class PluginConfigContextTest {
         Config newConfig = newPluginConfig.get();
         configs.updateConfigs(Collections.singletonMap(String.format("plugin.%s.global.%s.enabled", DOMAIN, TEST_AAA_ID), "false"));
         assertTrue(newPluginConfig.get() == newConfig);
+
+        configs.updateConfigs(Collections.singletonMap(String.format("ssss.%s.global.%s.enabled", DOMAIN, TEST_AAA_ID), "false"));
     }
 
     @Test
