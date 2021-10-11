@@ -37,7 +37,7 @@ public class PluginConfigTest {
     PluginConfig build() {
         String domain = "testdomain";
         String id = "testid";
-        String namespace = "namespace";
+        String namespace = "NAMESPACE";
         Map<String, String> global = globalSource();
         Map<String, String> cover = coverSource();
         return new PluginConfig(domain, id, global, namespace, cover);
@@ -50,7 +50,7 @@ public class PluginConfigTest {
 
     @Test
     public void namespace() {
-        assertEquals(build().namespace(), "namespace");
+        assertEquals(build().namespace(), "NAMESPACE");
     }
 
     @Test

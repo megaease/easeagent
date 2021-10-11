@@ -19,7 +19,7 @@ package com.megaease.easeagent.config;
 
 public interface ConfigConst {
     String PLUGIN = "plugin";
-    String PLUGIN_SELF = "self";
+    String PLUGIN_GLOBAL = "global";
     String DELIMITER = ".";
     String PLUGIN_PREFIX = PLUGIN+DELIMITER;
     String SERVICE_NAME = "name";

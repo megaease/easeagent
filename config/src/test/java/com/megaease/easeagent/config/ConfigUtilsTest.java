@@ -42,25 +42,25 @@ public class ConfigUtilsTest {
     @Test
     public void test_json2KVMap() throws Exception {
         Map<String, String> map = ConfigUtils.json2KVMap("{\n" +
-                "  \"output\": {\n" +
-                "    \"servers\": \"127.0.0.1\",\n" +
-                "    \"timeout\": 1000,\n" +
-                "    \"enabled\": true,\n" +
-                "    \"arr\": [\"x\", { \"test\": 0 }]\n" +
-                "  },\n" +
-                "  \"hello\":null,\n" +
-                "  \"metrics\": {\n" +
-                "    \"obj\": {\n" +
-                "      \"a\": 1,\n" +
-                "      \"b\": \"2\",\n" +
-                "      \"c\": false\n" +
-                "    },\n" +
-                "    \"request\": {\n" +
-                "      \"topic\": \"hello\",\n" +
-                "      \"enabled\": false\n" +
-                "    }\n" +
-                "  }\n" +
-                "}");
+            "  \"output\": {\n" +
+            "    \"servers\": \"127.0.0.1\",\n" +
+            "    \"timeout\": 1000,\n" +
+            "    \"enabled\": true,\n" +
+            "    \"arr\": [\"x\", { \"test\": 0 }]\n" +
+            "  },\n" +
+            "  \"hello\":null,\n" +
+            "  \"metrics\": {\n" +
+            "    \"obj\": {\n" +
+            "      \"a\": 1,\n" +
+            "      \"b\": \"2\",\n" +
+            "      \"c\": false\n" +
+            "    },\n" +
+            "    \"request\": {\n" +
+            "      \"topic\": \"hello\",\n" +
+            "      \"enabled\": false\n" +
+            "    }\n" +
+            "  }\n" +
+            "}");
         Assert.assertEquals("127.0.0.1", map.get("output.servers"));
         Assert.assertEquals("1000", map.get("output.timeout"));
         Assert.assertEquals("true", map.get("output.enabled"));
@@ -81,9 +81,9 @@ public class ConfigUtilsTest {
     }
 
     @Test
-    public void isSelf() {
-        Assert.assertTrue(ConfigUtils.isSelf("self"));
-        Assert.assertFalse(ConfigUtils.isSelf("selddf"));
+    public void isGlobal() {
+        Assert.assertTrue(ConfigUtils.isGlobal("global"));
+        Assert.assertFalse(ConfigUtils.isGlobal("globaldf"));
     }
 
     @Test
@@ -91,10 +91,10 @@ public class ConfigUtilsTest {
         Assert.assertTrue(ConfigUtils.isPluginConfig("plugin."));
         Assert.assertFalse(ConfigUtils.isPluginConfig("plugin"));
         Assert.assertFalse(ConfigUtils.isPluginConfig("plugins."));
-        Assert.assertTrue(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observability", "kafka"));
-        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observabilitys", "kafka"));
-        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observability", "kafkas"));
-        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.", "observabilitys", "kafkas"));
+        Assert.assertTrue(ConfigUtils.isPluginConfig("plugin.observability.kafka.kafka-trace", "observability", "kafka", "kafka-trace"));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.kafka-trace", "observabilitys", "kafka", "kafka-trace"));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.kafka-trace", "observability", "kafkas", "kafka-trace"));
+        Assert.assertFalse(ConfigUtils.isPluginConfig("plugin.observability.kafka.kafka-trace", "observability", "kafka", "kafka-traces"));
     }
 
     @Test
@@ -109,10 +109,10 @@ public class ConfigUtilsTest {
         Assert.assertEquals(pluginProperty.getNamespace(), "kafka");
         Assert.assertEquals(pluginProperty.getId(), "self");
         Assert.assertEquals(pluginProperty.getProperty(), "tcp.enabled");
-        try{
+        try {
             ConfigUtils.pluginProperty("plugin.observability.kafka.self");
             assertTrue("must be error", false);
-        }catch (Exception e ){
+        } catch (Exception e) {
             Assert.assertNotNull(e);
         }
 

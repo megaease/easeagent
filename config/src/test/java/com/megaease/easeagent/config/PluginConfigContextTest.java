@@ -12,6 +12,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.*;
 
 public class PluginConfigContextTest {
+    public static String DOMAIN = "testDomain";
+    public static String NAMESPACE = "testNamespace";
+    public static String TEST_TRACE_ID = "test-trace";
+    public static String GLOBAL_ID = TEST_TRACE_ID;
+    public static String TEST_METRIC_ID = "test-metric";
+    public static String TEST_AAA_ID = "test-AAA";
 
 
     PluginConfigContext build() {
@@ -43,9 +49,9 @@ public class PluginConfigContextTest {
     }
 
     public static Map<String, String> buildSource() {
-        Map<String, String> source = getSource("trace", "self", PluginConfigTest.globalSource());
-        source.putAll(getSource("kafka", "self", PluginConfigTest.globalSource()));
-        source.putAll(getSource("kafka", "trace", PluginConfigTest.coverSource()));
+        Map<String, String> source = getSource("global", GLOBAL_ID, PluginConfigTest.globalSource());
+        source.putAll(getSource("global", TEST_AAA_ID, PluginConfigTest.globalSource()));
+        source.putAll(getSource(NAMESPACE, TEST_TRACE_ID, PluginConfigTest.coverSource()));
         source.put("plugin.testDomain.testssss.self.lll", "aaa");
         source.put("plugin.testDomain.testssss.kafka.lll", "aaa");
         source.put("plugin.testDomain.testssss.kafka.lll", "aaa");
@@ -57,7 +63,7 @@ public class PluginConfigContextTest {
     public static Map<String, String> getSource(String namespace, String id, Map<String, String> properties) {
         Map<String, String> s = new HashMap<>();
         for (Map.Entry<String, String> pEntry : properties.entrySet()) {
-            s.put("plugin.testDomain." + namespace + "." + id + "." + pEntry.getKey(), pEntry.getValue());
+            s.put("plugin." + DOMAIN + "." + namespace + "." + id + "." + pEntry.getKey(), pEntry.getValue());
         }
         return s;
     }
@@ -65,25 +71,21 @@ public class PluginConfigContextTest {
     @Test
     public void getConfig1() {
         PluginConfigContext pluginConfigContext = build();
-        PluginConfig pluginConfig = pluginConfigContext.getConfig("testDomain", "testNamespace", "self");
+        PluginConfig pluginConfig = pluginConfigContext.getConfig(PluginSourceConfigTest.DOMAIN, "global", PluginSourceConfigTest.GLOBAL_ID);
         checkPluginConfigString(pluginConfig, PluginConfigTest.globalSource());
-        pluginConfig = pluginConfigContext.getConfig("testDomain", "testNamespace", "kafka");
+        pluginConfig = pluginConfigContext.getConfig(PluginSourceConfigTest.DOMAIN, PluginSourceConfigTest.NAMESPACE, PluginSourceConfigTest.TEST_TRACE_ID);
         checkPluginConfigString(pluginConfig, PluginConfigTest.globalSource());
-        pluginConfig = pluginConfigContext.getConfig("testDomain", "testNamespace", "mq");
+        pluginConfig = pluginConfigContext.getConfig(PluginSourceConfigTest.DOMAIN, PluginSourceConfigTest.NAMESPACE, PluginSourceConfigTest.TEST_METRIC_ID);
         checkPluginConfigString(pluginConfig, PluginConfigTest.globalSource());
 
         Map<String, String> source = buildSource();
-        source.putAll(getSource("trace", "kafka", PluginConfigTest.coverSource()));
-        try {
-            pluginConfigContext = build(source);
-            assertTrue("must be error", false);
-        } catch (Exception e) {
-            assertNotNull(e);
-        }
+        source.putAll(getSource("trace", TEST_TRACE_ID, PluginConfigTest.coverSource()));
+        source.putAll(getSource("trace", GLOBAL_ID, PluginConfigTest.coverSource()));
+        build(source);
 
         Configs configs = new Configs(buildSource());
         pluginConfigContext = PluginConfigContext.builder(configs).build();
-        final PluginConfig pluginConfig1 = pluginConfigContext.getConfig("testDomain", "kafka", "trace");
+        final PluginConfig pluginConfig1 = pluginConfigContext.getConfig(DOMAIN, NAMESPACE, TEST_TRACE_ID);
         final AtomicReference<Config> oldPluginConfig = new AtomicReference<>();
         final AtomicReference<Config> newPluginConfig = new AtomicReference<>();
         PluginConfigTest.checkAllType(pluginConfig1);
@@ -92,7 +94,7 @@ public class PluginConfigContextTest {
             newPluginConfig.set(newConfig);
         });
 
-        configs.updateConfigs(Collections.singletonMap("plugin.testDomain.kafka.trace.enabled", "false"));
+        configs.updateConfigs(Collections.singletonMap(String.format("plugin.%s.%s.%s.enabled", DOMAIN, NAMESPACE, TEST_TRACE_ID), "false"));
         assertNotNull(oldPluginConfig.get());
         assertNotNull(newPluginConfig.get());
         assertTrue(oldPluginConfig.get() == pluginConfig1);
@@ -101,18 +103,18 @@ public class PluginConfigContextTest {
         assertFalse(newPluginConfig.get().getBoolean("enabled"));
         PluginConfigTest.checkAllType((PluginConfig) oldPluginConfig.get());
 
-        configs.updateConfigs(Collections.singletonMap("plugin.testDomain.kafka.trace.enabled", "true"));
+        configs.updateConfigs(Collections.singletonMap(String.format("plugin.%s.%s.%s.enabled", DOMAIN, NAMESPACE, TEST_TRACE_ID), "true"));
         assertFalse(oldPluginConfig.get().getBoolean("enabled"));
         assertTrue(newPluginConfig.get().getBoolean("enabled"));
 
 
-        configs.updateConfigs(Collections.singletonMap("plugin.testDomain.trace.self.enabled", "false"));
+        configs.updateConfigs(Collections.singletonMap(String.format("plugin.%s.global.%s.enabled", DOMAIN, TEST_TRACE_ID), "false"));
         assertTrue(oldPluginConfig.get().getBoolean("enabled"));
         assertFalse(newPluginConfig.get().getBoolean("enabled"));
 
 
         Config newConfig = newPluginConfig.get();
-        configs.updateConfigs(Collections.singletonMap("plugin.testDomain.kafka.self.enabled", "false"));
+        configs.updateConfigs(Collections.singletonMap(String.format("plugin.%s.global.%s.enabled", DOMAIN, TEST_AAA_ID), "false"));
         assertTrue(newPluginConfig.get() == newConfig);
     }
 

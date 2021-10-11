@@ -2,37 +2,44 @@ package com.megaease.easeagent.config;
 
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
 public class PluginSourceConfigTest {
 
+    public static String DOMAIN = "testDomain";
+    public static String NAMESPACE = "testNamespace";
+    public static String TEST_TRACE_ID = "test-trace";
+    public static String GLOBAL_ID = TEST_TRACE_ID;
+    public static String TEST_METRIC_ID = "test-metric";
+    public static String TEST_AAA_ID = "test-AAA";
+
+
     public static Map<String, String> getSource(String namespace, String id) {
         Map<String, String> properties = PluginConfigTest.globalSource();
         Map<String, String> s = new HashMap<>();
         for (Map.Entry<String, String> pEntry : properties.entrySet()) {
-            s.put("plugin.testDomain." + namespace + "." + id + "." + pEntry.getKey(), pEntry.getValue());
+            s.put("plugin." + DOMAIN + "." + namespace + "." + id + "." + pEntry.getKey(), pEntry.getValue());
         }
         return s;
     }
 
     public static Map<String, String> getSource(String id) {
-        return getSource("testNamespace", id);
+        return getSource(NAMESPACE, id);
     }
 
 
-    public static Map<String, String> selfSource() {
-        return getSource("self");
+    public static Map<String, String> getGlobal() {
+        return getSource("global", GLOBAL_ID);
     }
 
     public static Map<String, String> buildSource() {
-        Map<String, String> source = selfSource();
-        source.putAll(getSource("kafka"));
-        source.putAll(getSource("mq"));
+        Map<String, String> source = getGlobal();
+        source.putAll(getSource(TEST_METRIC_ID));
+        source.putAll(getSource(TEST_TRACE_ID));
         source.put("plugin.testDomain.testssss.self.lll", "aaa");
         source.put("plugin.testDomain.testssss.kafka.lll", "aaa");
         source.put("plugin.testDomain.testssss.kafka.lll", "aaa");
@@ -40,51 +47,53 @@ public class PluginSourceConfigTest {
         return source;
     }
 
-    PluginSourceConfig buildImpl() {
-        String domain = "testDomain";
-        String namespace = "testNamespace";
+    PluginSourceConfig buildImpl(String namespace, String id) {
+
         Map<String, String> source = buildSource();
-        return PluginSourceConfig.build(domain, namespace, source);
+        return PluginSourceConfig.build(DOMAIN, namespace, id, source);
     }
 
     @Test
     public void build() {
-        buildImpl();
+        buildImpl(NAMESPACE, TEST_TRACE_ID);
     }
 
     @Test
     public void getSource() {
-        Map<String, String> source = selfSource();
-        source.putAll(getSource("kafka"));
-        source.putAll(getSource("mq"));
-        assertEquals(buildImpl().getSource(), source);
+        assertEquals(buildImpl("global", GLOBAL_ID).getSource(), getGlobal());
+        assertEquals(buildImpl(NAMESPACE, TEST_AAA_ID).getSource(), Collections.emptyMap());
+        assertEquals(buildImpl(NAMESPACE, TEST_TRACE_ID).getSource(), getSource(TEST_TRACE_ID));
+        assertEquals(buildImpl(NAMESPACE, TEST_METRIC_ID).getSource(), getSource(TEST_METRIC_ID));
     }
 
     @Test
     public void getDomain() {
-        assertEquals(buildImpl().getDomain(), "testDomain");
+        assertEquals(buildImpl(NAMESPACE, TEST_AAA_ID).getDomain(), DOMAIN);
+        assertEquals(buildImpl(NAMESPACE, TEST_TRACE_ID).getDomain(), DOMAIN);
+        assertEquals(buildImpl(NAMESPACE, TEST_METRIC_ID).getDomain(), DOMAIN);
     }
 
     @Test
     public void getNamespace() {
-        assertEquals(buildImpl().getNamespace(), "testNamespace");
+        assertEquals(buildImpl(NAMESPACE, TEST_AAA_ID).getNamespace(), NAMESPACE);
+        assertEquals(buildImpl(NAMESPACE, TEST_TRACE_ID).getNamespace(), NAMESPACE);
+        assertEquals(buildImpl(NAMESPACE, TEST_METRIC_ID).getNamespace(), NAMESPACE);
     }
 
+
     @Test
-    public void getIds() {
-        Set<String> ids = new HashSet<>();
-        ids.add("self");
-        ids.add("kafka");
-        ids.add("mq");
-        assertEquals(buildImpl().getIds(), ids);
+    public void getId() {
+        assertEquals(buildImpl(NAMESPACE, TEST_AAA_ID).getId(), TEST_AAA_ID);
+        assertEquals(buildImpl(NAMESPACE, TEST_TRACE_ID).getId(), TEST_TRACE_ID);
+        assertEquals(buildImpl(NAMESPACE, TEST_METRIC_ID).getId(), TEST_METRIC_ID);
     }
 
     @Test
     public void getProperties() {
 
-        assertEquals(buildImpl().getProperties("self"), PluginConfigTest.globalSource());
-        assertEquals(buildImpl().getProperties("kafka"), PluginConfigTest.globalSource());
-        assertEquals(buildImpl().getProperties("mq"), PluginConfigTest.globalSource());
-        assertEquals(buildImpl().getProperties("selfss"), new HashMap<>());
+        assertEquals(buildImpl("global", GLOBAL_ID).getProperties(), PluginConfigTest.globalSource());
+        assertEquals(buildImpl(NAMESPACE, TEST_TRACE_ID).getProperties(), PluginConfigTest.globalSource());
+        assertEquals(buildImpl(NAMESPACE, TEST_METRIC_ID).getProperties(), PluginConfigTest.globalSource());
+        assertEquals(buildImpl(NAMESPACE, TEST_AAA_ID).getProperties(), new HashMap<>());
     }
 }

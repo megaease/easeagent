@@ -93,8 +93,8 @@ public class ConfigUtils {
         return prefix == null ? current : ConfigConst.join(prefix, current);
     }
 
-    public static boolean isSelf(String id) {
-        return PLUGIN_SELF.equals(id);
+    public static boolean isGlobal(String namespace) {
+        return namespace != null && PLUGIN_GLOBAL.equals(namespace);
     }
 
     public static boolean isPluginConfig(String key) {
@@ -104,8 +104,8 @@ public class ConfigUtils {
         return false;
     }
 
-    public static boolean isPluginConfig(String key, String domain, String namespace) {
-        if (key.startsWith(ConfigConst.join(PLUGIN, domain, namespace))) {
+    public static boolean isPluginConfig(String key, String domain, String namespace, String id) {
+        if (key.startsWith(ConfigConst.join(PLUGIN, domain, namespace, id))) {
             return true;
         }
         return false;
