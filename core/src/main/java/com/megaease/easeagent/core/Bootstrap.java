@@ -28,6 +28,7 @@ import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import fi.iki.elonen.NanoHTTPD;
@@ -91,6 +92,7 @@ public class Bootstrap {
         }
         registerMBeans(conf);
         iConfigFactory = PluginConfigContext.builder(conf).build();
+        EaseAgent.configFactory = iConfigFactory;
         Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
