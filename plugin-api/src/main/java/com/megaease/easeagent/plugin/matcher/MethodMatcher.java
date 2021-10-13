@@ -45,6 +45,16 @@ public class MethodMatcher implements Operator<MethodMatcher>, Matcher {
     protected MethodMatcher() {
     }
 
+    protected MethodMatcher(String name, StringMatch type, Class<?> returnType,
+                            String[] args, int argLength, int modifier) {
+        this.name = name;
+        this.nameMatchType = type;
+        this.returnType = returnType;
+        this.args = args;
+        this.argsLength = argLength;
+        this.modifier = modifier;
+    }
+
     public MethodMatcher isPublic() {
         this.modifier |= Modifier.ACC_PUBLIC;
         return this;
