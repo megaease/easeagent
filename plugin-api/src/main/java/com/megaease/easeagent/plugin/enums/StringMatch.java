@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.api.enums;
+package com.megaease.easeagent.plugin.enums;
 
 public enum StringMatch {
     START_WITH,

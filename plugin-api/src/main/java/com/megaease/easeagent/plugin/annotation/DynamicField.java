@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.api.annotation;
+package com.megaease.easeagent.plugin.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface OnMethods {
-    OnMethod[] value();
+public @interface DynamicField {
 }

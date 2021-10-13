@@ -15,20 +15,16 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.annotation;
+package com.megaease.easeagent.plugin.matcher.operator;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.megaease.easeagent.plugin.matcher.ClassMatcher;
+import lombok.Getter;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface OnComplexClasses {
-    OnClasses[] value();
+@Getter
+public class NotClassMatcher extends ClassMatcher {
+    protected ClassMatcher matcher;
 
-    /**
-     * when true, except all match classes through above conditions
-     */
-    boolean negate() default false;
+    public NotClassMatcher(ClassMatcher matcher) {
+        this.matcher = matcher;
+    }
 }

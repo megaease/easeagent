@@ -38,7 +38,6 @@
         <module>config</module>
         <module>report</module>
         <module>httpserver</module>
-        <module>plugin-api</module>
     </modules>
 
     <properties>
