@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

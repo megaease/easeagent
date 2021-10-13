@@ -25,24 +25,29 @@ import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
  * and also can be defined through @OnClass and @OnMethod annotation
  */
 @SuppressWarnings("unused")
-public interface ProbeDefine extends Probe {
+public interface Point {
     /**
      * return the defined class matcher matching a class or a group of classes
      * eg.
-     * ClassMatchers.hadInterface(A)
+     * ClassMatcher.builder().hadInterface(A)
      *      .isPublic()
      *      .isAbstract()
-     *      .or(ClassMatchers.hasSuperClass(B).isPublic())
+     *      .build()
+     *      .or(ClassMatcher.builder()
+     *          .hasSuperClass(B)
+     *          .isPublic()
+     *          .build())
      */
     IClassMatcher getClassMatcher();
 
     /**
      * return the defined method matcher
      * eg.
-     * MethodMatchers.named("execute")
+     * MethodMatcher.builder().named("execute")
      *      .isPublic()
      *      .argNum(2)
      *      .arg(1, "java.lang.String")
+     *      .build()
      */
     IMethodMatcher getMethodMatcher();
 

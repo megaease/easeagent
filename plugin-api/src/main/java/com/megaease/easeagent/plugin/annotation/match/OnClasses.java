@@ -15,16 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.logging;
+package com.megaease.easeagent.plugin.annotation.match;
 
-public interface ILoggerFactory {
+import java.lang.annotation.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Repeatable(OnComplexClasses.class)
+public @interface OnClasses {
+    OnClass[] value();
+
     /**
-     * Returns a logger that logs to the Java agent log output.
-     * @return A log where messages can be written to the Java agent log file or console.
+     * when true, except all match classes through above conditions
      */
-    public Logger getLogger(String name);
-
-    default public Logger getLogger(Class<?> clazz) {
-        return getLogger(clazz.getCanonicalName());
-    }
+    boolean negate() default false;
 }

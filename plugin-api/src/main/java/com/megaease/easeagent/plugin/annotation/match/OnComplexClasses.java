@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.annotation.match;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Repeatable(OnComplexClasses.class)
-public @interface OnClasses {
-    OnClass[] value();
+public @interface OnComplexClasses {
+    OnClasses[] value();
 
     /**
      * when true, except all match classes through above conditions

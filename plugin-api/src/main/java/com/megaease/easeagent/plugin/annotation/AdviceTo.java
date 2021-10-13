@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.annotation;
+
+import com.megaease.easeagent.plugin.Point;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,10 +25,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * this annotation used to indicate the class which defined the pointcut,
- * processed by PluginProcessor to generate META-INF/service file
+ * use to annotate Interceptor implementation,
+ * to link Interceptor to Pointcut
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Aspect {
+public @interface AdviceTo {
+    Class<? extends Point> value();
 }

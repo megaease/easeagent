@@ -21,7 +21,7 @@ import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.gen.Generate;
 import com.megaease.easeagent.sniffer.AbstractAdvice;
 import com.megaease.easeagent.sniffer.Provider;

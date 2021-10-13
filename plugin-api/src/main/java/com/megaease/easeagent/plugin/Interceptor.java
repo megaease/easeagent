@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
 
 import java.util.Map;
 
-public interface Probe {
+public interface Interceptor {
     /**
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
@@ -35,4 +35,3 @@ public interface Probe {
      */
     Object after(MethodInfo methodInfo, Map<Object, Object> context);
 }
-

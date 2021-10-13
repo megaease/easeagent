@@ -21,8 +21,8 @@ import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
-import com.megaease.easeagent.core.utils.AgentFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentFieldAccessor;
 import com.rabbitmq.client.AMQP;
 
 import java.util.HashMap;

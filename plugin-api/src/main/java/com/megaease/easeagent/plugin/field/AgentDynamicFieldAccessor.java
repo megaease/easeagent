@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +15,21 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.utils;
+package com.megaease.easeagent.plugin.field;
 
-import com.megaease.easeagent.core.DynamicFieldAccessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
 import java.lang.reflect.Field;
 
 public class AgentDynamicFieldAccessor {
-
-    private static final Logger logger = LoggerFactory.getLogger(AgentDynamicFieldAccessor.class);
+    private static final Logger logger = EaseAgent.loggerFactory.getLogger(AgentDynamicFieldAccessor.class);
 
     public static final String DYNAMIC_FIELD_NAME = "ease_agent_dynamic_$$$_data";
 
     @SuppressWarnings("unchecked")
     public static <T> T getDynamicFieldValue(Object target) {
         if (!(target instanceof DynamicFieldAccessor)) {
-//            throw new IllegalArgumentException(target.getClass().getName() + " must implements DynamicFieldAccessor");
             logger.warn(target.getClass().getName() + " must implements DynamicFieldAccessor");
             return null;
         }
@@ -41,7 +38,6 @@ public class AgentDynamicFieldAccessor {
 
     public static void setDynamicFieldValue(Object target, Object value) {
         if (!(target instanceof DynamicFieldAccessor)) {
-//            throw new IllegalArgumentException(target.getClass().getName() + " must implements DynamicFieldAccessor");
             logger.warn(target.getClass().getName() + " must implements DynamicFieldAccessor");
             return;
         }

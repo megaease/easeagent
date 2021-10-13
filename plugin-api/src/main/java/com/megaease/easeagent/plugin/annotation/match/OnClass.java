@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.annotation.match;
 
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.ClassMatch;

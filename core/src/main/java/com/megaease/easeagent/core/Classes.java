@@ -20,6 +20,7 @@ package com.megaease.easeagent.core;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;

@@ -19,8 +19,8 @@ package com.megaease.easeagent.plugin.processor;
 
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.Plugin;
-import com.megaease.easeagent.plugin.Aspect;
+import com.megaease.easeagent.plugin.annotation.Plugin;
+import com.megaease.easeagent.plugin.annotation.Pointcut;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -48,7 +48,7 @@ public class PluginProcessor extends AbstractProcessor {
     TreeSet<String>  annotations = new TreeSet<>();
     {
         annotations.add(Plugin.class.getCanonicalName());
-        annotations.add(Aspect.class.getCanonicalName());
+        annotations.add(Pointcut.class.getCanonicalName());
     }
 
     @Override
@@ -110,7 +110,7 @@ public class PluginProcessor extends AbstractProcessor {
 
         Elements elements = processingEnv.getElementUtils();
         process(Plugin.class, elements, roundEnv);
-        process(Aspect.class, elements, roundEnv);
+        process(Pointcut.class, elements, roundEnv);
 
         return false;
     }

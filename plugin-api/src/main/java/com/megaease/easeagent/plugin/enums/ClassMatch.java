@@ -1,7 +1,7 @@
 package com.megaease.easeagent.plugin.enums;
 
 public enum ClassMatch {
-    BASE,
+    SUPER_CLASS,
     INTERFACE,
     NAMED,
     ANNOTATION,

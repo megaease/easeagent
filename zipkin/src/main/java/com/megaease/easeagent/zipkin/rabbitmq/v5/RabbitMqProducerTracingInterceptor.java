@@ -29,7 +29,7 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.utils.AgentFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentFieldAccessor;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.rabbitmq.client.AMQP;
 import org.apache.commons.lang3.StringUtils;

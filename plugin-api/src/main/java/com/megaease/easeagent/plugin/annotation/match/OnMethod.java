@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.annotation.match;
 
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.Operator;
 import com.megaease.easeagent.plugin.enums.StringMatch;
 
-import javax.lang.model.type.NullType;
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -48,13 +47,13 @@ public @interface OnMethod {
     /**
      * if args equals NullType.class, it ignore the args value
      */
-    Class[] args() default NullType.class;
+    String[] args() default {};
 
     /**
      * returnType
      * if the value is NullType, it ignore the returnType
      */
-    Class returnType() default NullType.class;
+    String returnType() default "";
 
     /**
      * when true, except all match classes through above conditions

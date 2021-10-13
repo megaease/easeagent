@@ -20,7 +20,7 @@ package com.megaease.easeagent.sniffer.jdbc.advice;
 import com.megaease.easeagent.common.jdbc.SqlInfo;
 import com.megaease.easeagent.core.Classes;
 import com.megaease.easeagent.core.Definition;
-import com.megaease.easeagent.core.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.core.QualifiedBean;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;

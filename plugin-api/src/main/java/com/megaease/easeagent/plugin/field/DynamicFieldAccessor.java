@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,8 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core;
+package com.megaease.easeagent.plugin.field;
 
-import com.google.auto.service.AutoService;
-
-@AutoService(AppendBootstrapClassLoaderSearch.class)
 public interface DynamicFieldAccessor {
 
     void setEaseAgent$$DynamicField$$Data(Object data);

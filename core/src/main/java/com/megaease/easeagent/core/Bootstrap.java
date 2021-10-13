@@ -27,6 +27,7 @@ import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
+import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.report.AgentReport;

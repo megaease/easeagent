@@ -18,7 +18,7 @@
 package com.megaease.easeagent.sniffer.jdbc.interceptor;
 
 import com.megaease.easeagent.common.jdbc.SqlInfo;
-import com.megaease.easeagent.core.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
