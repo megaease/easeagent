@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.matcher;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.megaease.easeagent.plugin.matcher.operator.Operator;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface OnComplexClasses {
-    OnClasses[] value();
+public interface IClassMatcher extends Operator<IClassMatcher>, Matcher {
+    default IClassMatcher and(IClassMatcher m) {
+        return null;
+    }
 
-    /**
-     * when true, except all match classes through above conditions
-     */
-    boolean negate() default false;
+    default IClassMatcher or(IClassMatcher m) {
+        return null;
+    }
+
+    default IClassMatcher not() {
+        return null;
+    }
 }

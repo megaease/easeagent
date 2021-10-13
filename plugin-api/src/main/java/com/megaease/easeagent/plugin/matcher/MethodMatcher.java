@@ -19,25 +19,18 @@ package com.megaease.easeagent.plugin.matcher;
 
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.StringMatch;
-import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.NotMethodMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.Operator;
-import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
-import lombok.Builder;
 import lombok.Data;
 
-import javax.lang.model.type.NullType;
 import java.util.Arrays;
 
 @Data
-@Builder
 @SuppressWarnings("unused")
-public class MethodMatcher implements Operator<MethodMatcher>, Matcher {
+public class MethodMatcher implements IMethodMatcher {
     private String name;
     private StringMatch nameMatchType;
 
     // ignored when with default value
-    private Class<?> returnType = NullType.class;
+    private String returnType = null;
     private String[] args;
     private int argsLength = -1;
     private int modifier = Modifier.ACC_NONE;
@@ -45,7 +38,7 @@ public class MethodMatcher implements Operator<MethodMatcher>, Matcher {
     protected MethodMatcher() {
     }
 
-    protected MethodMatcher(String name, StringMatch type, Class<?> returnType,
+    private MethodMatcher(String name, StringMatch type, String returnType,
                             String[] args, int argLength, int modifier) {
         this.name = name;
         this.nameMatchType = type;
@@ -55,57 +48,109 @@ public class MethodMatcher implements Operator<MethodMatcher>, Matcher {
         this.modifier = modifier;
     }
 
-    public MethodMatcher isPublic() {
-        this.modifier |= Modifier.ACC_PUBLIC;
-        return this;
+    public static MethodMatcherBuilder builder() {
+        return new MethodMatcherBuilder();
     }
 
-    public MethodMatcher isPrivate() {
-        this.modifier |= Modifier.ACC_PRIVATE;
-        return this;
-    }
 
-    public MethodMatcher isAbstract() {
-        this.modifier |= Modifier.ACC_ABSTRACT;
-        return this;
-    }
 
-    public MethodMatcher arg(int idx, String argType) {
-        if (args == null) {
-            this.args = new String[idx + 1];
-        } else if (this.args.length < idx + 1) {
-            this.args = Arrays.copyOf(this.args, idx + 1);
+    public static class MethodMatcherBuilder {
+        private String name;
+        private StringMatch nameMatchType;
+        private String returnType;
+        private String[] args;
+        private int argsLength;
+        private int modifier;
+
+        MethodMatcherBuilder() {
         }
 
-        return this;
-    }
-
-    public MethodMatcher argsLength(int length) {
-        this.argsLength = length;
-
-        if (length <= 0) {
-            this.args = null;
-        } else if (this.args == null) {
-            this.args = new String[length];
-        } else if (this.args.length < length) {
-            this.args = Arrays.copyOf(this.args, length);
+        public MethodMatcherBuilder named(String methodName) {
+            return this.name(methodName).nameMatchType(StringMatch.EQUALS);
         }
 
-        return this;
-    }
+        public MethodMatcherBuilder nameStartWith(String methodName) {
+            return this.name(methodName).nameMatchType(StringMatch.START_WITH);
+        }
 
-    @Override
-    public MethodMatcher and(MethodMatcher matcher) {
-        return new AndMethodMatcher(this, matcher);
-    }
+        public MethodMatcherBuilder nameEndWith(String methodName) {
+            return this.name(methodName).nameMatchType(StringMatch.END_WITH);
+        }
 
-    @Override
-    public MethodMatcher or(MethodMatcher matcher) {
-        return new OrMethodMatcher(this, matcher);
-    }
+        public MethodMatcherBuilder nameContains(String methodName) {
+            return this.name(methodName).nameMatchType(StringMatch.CONTAINS);
+        }
 
-    @Override
-    public MethodMatcher not() {
-        return new NotMethodMatcher(this);
+        public MethodMatcherBuilder isPublic() {
+            this.modifier |= Modifier.ACC_PUBLIC;
+            return this;
+        }
+
+        public MethodMatcherBuilder isPrivate() {
+            this.modifier |= Modifier.ACC_PRIVATE;
+            return this;
+        }
+
+        public MethodMatcherBuilder isAbstract() {
+            this.modifier |= Modifier.ACC_ABSTRACT;
+            return this;
+        }
+
+        public MethodMatcherBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public MethodMatcherBuilder nameMatchType(StringMatch nameMatchType) {
+            this.nameMatchType = nameMatchType;
+            return this;
+        }
+
+        public MethodMatcherBuilder returnType(String returnType) {
+            this.returnType = returnType;
+            return this;
+        }
+
+        public MethodMatcherBuilder args(String[] args) {
+            this.args = args;
+            return this;
+        }
+
+        public MethodMatcherBuilder arg(int idx, String argType) {
+            if (args == null) {
+                this.args = new String[idx + 1];
+            } else if (this.args.length < idx + 1) {
+                this.args = Arrays.copyOf(this.args, idx + 1);
+            }
+
+            return this;
+        }
+
+        public MethodMatcherBuilder argsLength(int length) {
+            this.argsLength = length;
+
+            if (length <= 0) {
+                this.args = null;
+            } else if (this.args == null) {
+                this.args = new String[length];
+            } else if (this.args.length < length) {
+                this.args = Arrays.copyOf(this.args, length);
+            }
+
+            return this;
+        }
+
+        public MethodMatcherBuilder modifier(int modifier) {
+            this.modifier = modifier;
+            return this;
+        }
+
+        public MethodMatcher build() {
+            return new MethodMatcher(name, nameMatchType, returnType, args, argsLength, modifier);
+        }
+
+        public String toString() {
+            return "MethodMatcher.MethodMatcherBuilder(name=" + this.name + ", nameMatchType=" + this.nameMatchType + ", returnType=" + this.returnType + ", args=" + Arrays.deepToString(this.args) + ", argsLength=" + this.argsLength + ", modifier=" + this.modifier + ")";
+        }
     }
 }

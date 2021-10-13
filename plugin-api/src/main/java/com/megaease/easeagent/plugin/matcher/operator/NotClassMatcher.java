@@ -18,13 +18,14 @@
 package com.megaease.easeagent.plugin.matcher.operator;
 
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
+import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import lombok.Getter;
 
 @Getter
-public class NotClassMatcher extends ClassMatcher {
-    protected ClassMatcher matcher;
+public class NotClassMatcher implements IClassMatcher {
+    protected IClassMatcher matcher;
 
-    public NotClassMatcher(ClassMatcher matcher) {
+    public NotClassMatcher(IClassMatcher matcher) {
         this.matcher = matcher;
     }
 }

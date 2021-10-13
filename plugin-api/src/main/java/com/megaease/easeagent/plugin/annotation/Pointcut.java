@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.matcher.operator;
+package com.megaease.easeagent.plugin.annotation;
 
-import com.megaease.easeagent.plugin.matcher.ClassMatcher;
-import com.megaease.easeagent.plugin.matcher.IClassMatcher;
-import lombok.Getter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Getter
-public class OrClassMatcher implements IClassMatcher {
-    protected IClassMatcher left;
-    protected IClassMatcher right;
-
-    public OrClassMatcher(IClassMatcher left, IClassMatcher right) {
-        this.left = left;
-        this.right = right;
-    }
+/**
+ * this annotation used to indicate the class which defined the pointcut,
+ * processed by PluginProcessor to generate META-INF/service file
+ */
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.TYPE)
+public @interface Pointcut {
 }

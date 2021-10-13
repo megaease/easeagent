@@ -23,17 +23,17 @@ import lombok.Data;
 @Builder
 @Data
 public class ClassMethodMatcher {
-    private ClassMatcher classMatcher;
-    private MethodMatcher methodMatcher;
+    private IClassMatcher classMatcher;
+    private IMethodMatcher methodMatcher;
 
-    public ClassMethodMatcher(ClassMatcher classMatcher, MethodMatcher methodMatcher) {
+    public ClassMethodMatcher(IClassMatcher classMatcher, IMethodMatcher methodMatcher) {
         this.classMatcher = classMatcher;
         this.methodMatcher = methodMatcher;
     }
 
     public static class Builder {
-        private ClassMatcher classMatcher;
-        private MethodMatcher methodMatcher = null;
+        private IClassMatcher classMatcher;
+        private IMethodMatcher methodMatcher = null;
 
         public Builder type(ClassMatcher matcher) {
             this.classMatcher = matcher;

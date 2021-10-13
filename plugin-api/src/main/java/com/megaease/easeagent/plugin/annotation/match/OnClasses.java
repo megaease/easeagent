@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.matcher.operator;
+package com.megaease.easeagent.plugin.annotation.match;
 
-import com.megaease.easeagent.plugin.matcher.ClassMatcher;
-import com.megaease.easeagent.plugin.matcher.IClassMatcher;
-import lombok.Getter;
+import java.lang.annotation.*;
 
-@Getter
-public class OrClassMatcher implements IClassMatcher {
-    protected IClassMatcher left;
-    protected IClassMatcher right;
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Repeatable(OnComplexClasses.class)
+public @interface OnClasses {
+    OnClass[] value();
 
-    public OrClassMatcher(IClassMatcher left, IClassMatcher right) {
-        this.left = left;
-        this.right = right;
-    }
+    /**
+     * when true, except all match classes through above conditions
+     */
+    boolean negate() default false;
 }

@@ -15,18 +15,12 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.field;
 
-import java.lang.annotation.*;
+public interface DynamicFieldAccessor {
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Repeatable(OnComplexClasses.class)
-public @interface OnClasses {
-    OnClass[] value();
+    void setEaseAgent$$DynamicField$$Data(Object data);
 
-    /**
-     * when true, except all match classes through above conditions
-     */
-    boolean negate() default false;
+    Object getEaseAgent$$DynamicField$$Data();
+
 }

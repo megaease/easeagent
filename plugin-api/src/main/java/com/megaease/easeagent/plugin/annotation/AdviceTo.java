@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,21 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core;
+package com.megaease.easeagent.plugin.annotation;
 
-import com.google.auto.service.AutoService;
+import com.megaease.easeagent.plugin.Point;
 
-@AutoService(AppendBootstrapClassLoaderSearch.class)
-public interface DynamicFieldAccessor {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    void setEaseAgent$$DynamicField$$Data(Object data);
-
-    Object getEaseAgent$$DynamicField$$Data();
-
+/**
+ * use to annotate Interceptor implementation,
+ * to link Interceptor to Pointcut
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface AdviceTo {
+    Class<? extends Point> value();
 }

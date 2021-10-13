@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
 
-import com.megaease.easeagent.core.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;

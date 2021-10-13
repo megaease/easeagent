@@ -23,7 +23,7 @@ import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.common.ContextCons;
 import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.core.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;

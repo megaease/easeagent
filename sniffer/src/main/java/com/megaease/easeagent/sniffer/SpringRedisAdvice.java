@@ -17,19 +17,11 @@
 
 package com.megaease.easeagent.sniffer;
 
-import com.megaease.easeagent.common.ForwardLock;
-import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
-import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
-import net.bytebuddy.asm.Advice;
+import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-
-import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 

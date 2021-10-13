@@ -19,7 +19,7 @@ package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.core.utils.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;

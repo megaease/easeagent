@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 
+@SuppressWarnings("unused")
 public interface AgentPlugin extends ConfigChangeListener {
     void load(Config config);
 

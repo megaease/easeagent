@@ -16,68 +16,126 @@
  */
 
 package com.megaease.easeagent.plugin.matcher;
+
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.ClassMatch;
-import com.megaease.easeagent.plugin.matcher.operator.AndClassMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.NotClassMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.Operator;
-import com.megaease.easeagent.plugin.matcher.operator.OrClassMatcher;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 @SuppressWarnings("unused")
-public class ClassMatcher implements Operator<ClassMatcher>, Matcher {
+public class ClassMatcher implements IClassMatcher {
     private String name;
     private ClassMatch matchType;
     private int modifier = Modifier.ACC_NONE;
+    private int notModifier = Modifier.ACC_NONE;
     private String classLoader;
 
     protected ClassMatcher() {
     }
 
-    protected ClassMatcher(String name, ClassMatch type, int modifier, String loaderName) {
+    private ClassMatcher(String name, ClassMatch type, int modifier, int notModifier, String loaderName) {
         this.name = name;
         this.matchType = type;
         this.modifier = modifier;
+        this.notModifier = notModifier;
         this.classLoader = loaderName;
     }
 
-    public ClassMatcher isPublic() {
-        this.modifier |= Modifier.ACC_PUBLIC;
-        return this;
-    }
-
-    public ClassMatcher isPrivate() {
-        this.modifier |= Modifier.ACC_PRIVATE;
-        return this;
-    }
-
-    public ClassMatcher isAbstract() {
-        this.modifier |= Modifier.ACC_ABSTRACT;
-        return this;
-    }
-
-    public ClassMatcher classLoader(String classLoaderName) {
-        this.classLoader = classLoaderName;
-        return this;
+    public static ClassMatcherBuilder builder() {
+        return new ClassMatcherBuilder();
     }
 
 
-    @Override
-    public ClassMatcher and(ClassMatcher matcher) {
-        return new AndClassMatcher(this, matcher);
-    }
+    public static class ClassMatcherBuilder {
+        private String name;
+        private ClassMatch matchType;
+        private int modifier;
+        private int notModifier;
+        private String classLoader;
 
-    @Override
-    public ClassMatcher or(ClassMatcher matcher) {
-        return new OrClassMatcher(this, matcher);
-    }
+        ClassMatcherBuilder() {
+        }
 
-    @Override
-    public ClassMatcher not() {
-        return new NotClassMatcher(this);
+        public ClassMatcherBuilder hasSuperClass(String className) {
+            return this.name(className).matchType(ClassMatch.SUPER_CLASS);
+        }
+
+        public ClassMatcherBuilder hasClassName(String className) {
+            return this.name(className).matchType(ClassMatch.NAMED);
+        }
+
+        public ClassMatcherBuilder hasInterface(String className) {
+            return this.name(className).matchType(ClassMatch.INTERFACE);
+        }
+
+        public ClassMatcherBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ClassMatcherBuilder matchType(ClassMatch matchType) {
+            this.matchType = matchType;
+            return this;
+        }
+
+        public ClassMatcherBuilder modifier(int modifier) {
+            this.modifier = modifier;
+            return this;
+        }
+
+        public ClassMatcherBuilder notModifier(int notModifier) {
+            this.notModifier = notModifier;
+            return this;
+        }
+
+        public ClassMatcherBuilder classLoader(String classLoader) {
+            this.classLoader = classLoader;
+            return this;
+        }
+
+        public ClassMatcherBuilder isPublic() {
+            this.modifier |= Modifier.ACC_PUBLIC;
+            return this;
+        }
+
+        public ClassMatcherBuilder isPrivate() {
+            this.modifier |= Modifier.ACC_PRIVATE;
+            return this;
+        }
+
+        public ClassMatcherBuilder isAbstract() {
+            this.modifier |= Modifier.ACC_ABSTRACT;
+            return this;
+        }
+
+        public ClassMatcherBuilder isInterface() {
+            this.modifier |= Modifier.ACC_INTERFACE;
+            return this;
+        }
+
+        public ClassMatcherBuilder notPrivate() {
+            this.notModifier |= Modifier.ACC_PRIVATE;
+            return this;
+        }
+
+        public ClassMatcherBuilder notAbstract() {
+            this.notModifier |= Modifier.ACC_ABSTRACT;
+            return this;
+        }
+
+        public ClassMatcherBuilder notInterface() {
+            this.notModifier |= Modifier.ACC_INTERFACE;
+            return this;
+        }
+
+        public ClassMatcher build() {
+            return new ClassMatcher(name, matchType, modifier, notModifier, classLoader);
+        }
+
+        public String toString() {
+            return "ClassMatcher.ClassMatcherBuilder(name=" + this.name + ", matchType=" + this.matchType + ", modifier=" + this.modifier + ", notModifier=" + this.notModifier + ", classLoader=" + this.classLoader + ")";
+        }
     }
 }
+
 

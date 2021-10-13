@@ -19,11 +19,12 @@ package com.megaease.easeagent.plugin.matcher;
 
 import com.megaease.easeagent.plugin.enums.ClassMatch;
 
+@SuppressWarnings("unused")
 public class ClassMatchers {
     public static ClassMatcher hasSuperClass(String className) {
         return ClassMatcher.builder()
             .name(className)
-            .matchType(ClassMatch.BASE)
+            .matchType(ClassMatch.SUPER_CLASS)
             .build();
     }
 
