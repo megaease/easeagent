@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.annotation;
+package com.megaease.easeagent.plugin.annotation;
 
-import com.megaease.easeagent.plugin.api.asm.Modifier;
-import com.megaease.easeagent.plugin.api.enums.Operator;
-import com.megaease.easeagent.plugin.api.enums.StringMatch;
+import com.megaease.easeagent.plugin.asm.Modifier;
+import com.megaease.easeagent.plugin.enums.Operator;
+import com.megaease.easeagent.plugin.enums.StringMatch;
 
 import javax.lang.model.type.NullType;
 import java.lang.annotation.*;

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.asm;
+package com.megaease.easeagent.plugin.asm;
 
 /**
  * Modifier class extract ACC_* form Opcodes.java in ASM.
