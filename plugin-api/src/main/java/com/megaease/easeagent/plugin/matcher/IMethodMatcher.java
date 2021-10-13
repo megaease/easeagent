@@ -17,5 +17,21 @@
 
 package com.megaease.easeagent.plugin.matcher;
 
-public interface Matcher {
+import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.NotMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.Operator;
+import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
+
+public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
+    default IMethodMatcher and(IMethodMatcher other) {
+        return new AndMethodMatcher(this, other);
+    }
+
+    default IMethodMatcher or(IMethodMatcher other) {
+        return new OrMethodMatcher(this, other);
+    }
+
+    default IMethodMatcher not() {
+        return new NotMethodMatcher(this);
+    }
 }

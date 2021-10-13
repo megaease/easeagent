@@ -18,14 +18,15 @@
 package com.megaease.easeagent.plugin.matcher.operator;
 
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
+import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import lombok.Getter;
 
 @Getter
-public class AndClassMatcher extends ClassMatcher {
-    protected ClassMatcher left;
-    protected ClassMatcher right;
+public class AndClassMatcher implements IClassMatcher {
+    protected IClassMatcher left;
+    protected IClassMatcher right;
 
-    public AndClassMatcher(ClassMatcher left, ClassMatcher right) {
+    public AndClassMatcher(IClassMatcher left, IClassMatcher right) {
         this.left = left;
         this.right = right;
     }

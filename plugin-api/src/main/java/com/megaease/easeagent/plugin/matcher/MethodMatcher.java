@@ -19,10 +19,6 @@ package com.megaease.easeagent.plugin.matcher;
 
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.StringMatch;
-import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.NotMethodMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.Operator;
-import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
 import lombok.Builder;
 import lombok.Data;
 
@@ -32,7 +28,7 @@ import java.util.Arrays;
 @Data
 @Builder
 @SuppressWarnings("unused")
-public class MethodMatcher implements Operator<MethodMatcher>, Matcher {
+public class MethodMatcher implements IMethodMatcher {
     private String name;
     private StringMatch nameMatchType;
 
@@ -45,7 +41,7 @@ public class MethodMatcher implements Operator<MethodMatcher>, Matcher {
     protected MethodMatcher() {
     }
 
-    protected MethodMatcher(String name, StringMatch type, Class<?> returnType,
+    private MethodMatcher(String name, StringMatch type, Class<?> returnType,
                             String[] args, int argLength, int modifier) {
         this.name = name;
         this.nameMatchType = type;
@@ -92,20 +88,5 @@ public class MethodMatcher implements Operator<MethodMatcher>, Matcher {
         }
 
         return this;
-    }
-
-    @Override
-    public MethodMatcher and(MethodMatcher matcher) {
-        return new AndMethodMatcher(this, matcher);
-    }
-
-    @Override
-    public MethodMatcher or(MethodMatcher matcher) {
-        return new OrMethodMatcher(this, matcher);
-    }
-
-    @Override
-    public MethodMatcher not() {
-        return new NotMethodMatcher(this);
     }
 }

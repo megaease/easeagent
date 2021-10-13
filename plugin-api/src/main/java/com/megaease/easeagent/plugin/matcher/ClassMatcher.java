@@ -16,19 +16,16 @@
  */
 
 package com.megaease.easeagent.plugin.matcher;
+
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.ClassMatch;
-import com.megaease.easeagent.plugin.matcher.operator.AndClassMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.NotClassMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.Operator;
-import com.megaease.easeagent.plugin.matcher.operator.OrClassMatcher;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
 @SuppressWarnings("unused")
-public class ClassMatcher implements Operator<ClassMatcher>, Matcher {
+public class ClassMatcher implements IClassMatcher {
     private String name;
     private ClassMatch matchType;
     private int modifier = Modifier.ACC_NONE;
@@ -37,7 +34,7 @@ public class ClassMatcher implements Operator<ClassMatcher>, Matcher {
     protected ClassMatcher() {
     }
 
-    protected ClassMatcher(String name, ClassMatch type, int modifier, String loaderName) {
+    private ClassMatcher(String name, ClassMatch type, int modifier, String loaderName) {
         this.name = name;
         this.matchType = type;
         this.modifier = modifier;
@@ -63,21 +60,6 @@ public class ClassMatcher implements Operator<ClassMatcher>, Matcher {
         this.classLoader = classLoaderName;
         return this;
     }
-
-
-    @Override
-    public ClassMatcher and(ClassMatcher matcher) {
-        return new AndClassMatcher(this, matcher);
-    }
-
-    @Override
-    public ClassMatcher or(ClassMatcher matcher) {
-        return new OrClassMatcher(this, matcher);
-    }
-
-    @Override
-    public ClassMatcher not() {
-        return new NotClassMatcher(this);
-    }
 }
+
 

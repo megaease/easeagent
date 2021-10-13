@@ -15,18 +15,20 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.matcher;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.megaease.easeagent.plugin.matcher.operator.Operator;
 
-/**
- * this annotation used to indicate the class which defined the pointcut,
- * processed by PluginProcessor to generate META-INF/service file
- */
-@Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.TYPE)
-public @interface Aspect {
+public interface IClassMatcher extends Operator<IClassMatcher>, Matcher {
+    default IClassMatcher and(IClassMatcher m) {
+        return null;
+    }
+
+    default IClassMatcher or(IClassMatcher m) {
+        return null;
+    }
+
+    default IClassMatcher not() {
+        return null;
+    }
 }
