@@ -37,6 +37,13 @@ public class ClassMatcher implements Operator<ClassMatcher>, Matcher {
     protected ClassMatcher() {
     }
 
+    protected ClassMatcher(String name, ClassMatch type, int modifier, String loaderName) {
+        this.name = name;
+        this.matchType = type;
+        this.modifier = modifier;
+        this.classLoader = loaderName;
+    }
+
     public ClassMatcher isPublic() {
         this.modifier |= Modifier.ACC_PUBLIC;
         return this;
