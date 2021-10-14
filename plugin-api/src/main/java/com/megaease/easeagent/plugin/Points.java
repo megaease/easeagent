@@ -56,5 +56,7 @@ public interface Points {
     /**
      * when return true, the transformer will add a Object field and a accessor
      */
-    boolean isAddDynamicField();
+    default boolean isAddDynamicField() {
+        return false;
+    }
 }

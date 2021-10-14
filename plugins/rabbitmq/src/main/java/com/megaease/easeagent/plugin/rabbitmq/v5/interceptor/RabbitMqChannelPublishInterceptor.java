@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,34 +15,39 @@
  * limitations under the License.
  */
 
-package com.megaease.plugin.v5.interceptor;
+package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
-import com.megaease.plugin.v5.advice.RabbitMqChannelAdvice;
-import com.megaease.plugin.v5.advice.RabbitMqConsumerAdvice;
+import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.MessageProperties;
 
 import java.net.InetAddress;
 import java.util.Map;
 
-@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicConsume")
-public class RabbitMqChannelConsumeInterceptor implements Interceptor {
+@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish")
+public class RabbitMqChannelPublishInterceptor implements Interceptor {
     public void before(MethodInfo methodInfo, Map<Object, Object> context) {
         Channel channel = (Channel) methodInfo.getInvoker();
+        AMQP.BasicProperties basicProperties = (AMQP.BasicProperties) methodInfo.getArgs()[4];
+        if (basicProperties == null) {
+            basicProperties = MessageProperties.MINIMAL_BASIC;
+            methodInfo.getArgs()[4] = basicProperties;
+        }
         Connection connection = channel.getConnection();
         InetAddress address = connection.getAddress();
         String hostAddress = address.getHostAddress();
         String uri = hostAddress + ":" + connection.getPort();
-        Consumer consumer = (Consumer) methodInfo.getArgs()[6];
-        AgentDynamicFieldAccessor.setDynamicFieldValue(consumer, uri);
+        context.put(ContextCons.MQ_URI, uri);
+
     }
 
     public Object after(MethodInfo methodInfo, Map<Object, Object> context) {
-        return null;
-    }
+            return null;
+        }
 }
