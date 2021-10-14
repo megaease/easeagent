@@ -15,39 +15,34 @@
  * limitations under the License.
  */
 
-package com.megaease.plugin.v5.interceptor;
+package com.megaease.easeagent.plugin.rabbitmq.spring;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
-import com.megaease.plugin.v5.advice.RabbitMqChannelAdvice;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.MessageProperties;
+import org.springframework.amqp.core.Message;
 
-import java.net.InetAddress;
+import java.util.List;
 import java.util.Map;
 
-@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish")
-public class RabbitMqChannelPublishInterceptor implements Interceptor {
+@AdviceTo(RabbitMqMessageListenerAdvice.class)
+public class RabbitMqMessageListenerOnMessageInterceptor implements Interceptor {
+    @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context) {
-        Channel channel = (Channel) methodInfo.getInvoker();
-        AMQP.BasicProperties basicProperties = (AMQP.BasicProperties) methodInfo.getArgs()[4];
-        if (basicProperties == null) {
-            basicProperties = MessageProperties.MINIMAL_BASIC;
-            methodInfo.getArgs()[4] = basicProperties;
+        Message message;
+        if (methodInfo.getArgs()[0] instanceof List) {
+            List<Message> messageList = (List<Message>) methodInfo.getArgs()[0];
+            message = messageList.get(0);
+        } else {
+            message = (Message) methodInfo.getArgs()[0];
         }
-        Connection connection = channel.getConnection();
-        InetAddress address = connection.getAddress();
-        String hostAddress = address.getHostAddress();
-        String uri = hostAddress + ":" + connection.getPort();
+        String uri = message.getMessageProperties().getHeader(ContextCons.MQ_URI);
         context.put(ContextCons.MQ_URI, uri);
-
     }
 
+    @Override
     public Object after(MethodInfo methodInfo, Map<Object, Object> context) {
-            return null;
-        }
+        return null;
+    }
 }

@@ -18,6 +18,16 @@ public interface Config {
 
     Boolean getBoolean(String property);
 
+    default Boolean getBoolean(String property, Boolean defaultValue) {
+        Boolean ret;
+        if (!hasProperty(property)) {
+            return defaultValue;
+        } else {
+            ret = getBoolean(property);
+            return ret != null ? ret : defaultValue;
+        }
+    }
+
     Double getDouble(String property);
 
     Long getLong(String property);

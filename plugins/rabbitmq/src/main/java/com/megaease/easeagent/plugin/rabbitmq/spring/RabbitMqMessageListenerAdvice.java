@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.plugin.v5.advice;
+package com.megaease.easeagent.plugin.rabbitmq.spring;
 
-import com.megaease.easeagent.plugin.annotation.Pointcut;
+
 import com.megaease.easeagent.plugin.Points;
+import com.megaease.easeagent.plugin.annotation.Pointcut;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -27,62 +28,44 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 @Pointcut
-public class RabbitMqConsumerAdvice implements Points {
+public class RabbitMqMessageListenerAdvice implements Points {
+    @Override
     public IClassMatcher getClassMatcher() {
-        Class<?> cls = com.rabbitmq.client.Consumer.class;
         return ClassMatcher.builder()
-                .hasSuperClass("com.rabbitmq.client.Consumer")
-                .notAbstract()
-                .notInterface()
-                .build();
+            .hasInterface("org.springframework.amqp.core.MessageListener")
+            .build();
     }
 
-    public boolean isAddDynamicField() {
-        return true;
-    }
-
+    @Override
     public Set<IMethodMatcher> getMethodMatcher() {
-        return MethodMatcher.builder().named("handleDelivery")
-                .build()
-                .toSet();
+        return MethodMatcher.builder()
+            .named("OnMessage")
+            .build()
+            .or(MethodMatcher.builder()
+                .named("OnMessageBatch")
+                .build())
+            .toSet();
     }
-
-
 
     /*
     @Override
     public <T extends Definition> T define(Definition<T> def) {
-        return def
-                .type(hasSuperType(named("com.rabbitmq.client.Consumer")).and(not(isInterface().or(isAbstract()))))
-                .transform(objConstruct(none(), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
-                .transform(doHandleDelivery(named("handleDelivery")))
+        return def.type(hasSuperType(named("org.springframework.amqp.core.MessageListener")))
+                .transform(onMessage((named("onMessage").or(named("onMessageBatch")))
+                ))
                 .end()
                 ;
     }
 
-    @AdviceTo(ObjConstruct.class)
-    public abstract Definition.Transformer objConstruct(ElementMatcher<? super MethodDescription> matcher, String fieldName);
+    @AdviceTo(OnMessage.class)
+    public abstract Definition.Transformer onMessage(ElementMatcher<? super MethodDescription> matcher);
 
-    static class ObjConstruct extends AbstractAdvice {
+    static class OnMessage extends AbstractAdvice {
 
-        public ObjConstruct() {
-            super(null, null);
-        }
-
-        @Advice.OnMethodExit
-        public void exit() {
-
-        }
-    }
-
-
-    @AdviceTo(DoHandleDelivery.class)
-    public abstract Definition.Transformer doHandleDelivery(ElementMatcher<? super MethodDescription> matcher);
-
-    static class DoHandleDelivery extends AbstractAdvice {
         @Injection.Autowire
-        public DoHandleDelivery(@Injection.Qualifier("supplier4RabbitMqHandleDelivery") Supplier<AgentInterceptorChain.Builder> supplier,
-                                AgentInterceptorChainInvoker chainInvoker) {
+        public OnMessage(AgentInterceptorChainInvoker chainInvoker,
+                         @Injection.Qualifier("supplier4SpringRabbitMqMessageListenerOnMessage") Supplier<AgentInterceptorChain.Builder> supplier
+        ) {
             super(supplier, chainInvoker);
         }
 
@@ -90,7 +73,7 @@ public class RabbitMqConsumerAdvice implements Points {
         public ForwardLock.Release<Map<Object, Object>> enter(
                 @Advice.This Object invoker,
                 @Advice.Origin("#m") String method,
-                @Advice.AllArguments Object[] args
+                @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args
         ) {
             return this.doEnter(invoker, method, args);
         }
@@ -99,12 +82,11 @@ public class RabbitMqConsumerAdvice implements Points {
         public void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
                          @Advice.This Object invoker,
                          @Advice.Origin("#m") String method,
-                         @Advice.AllArguments Object[] args,
+                         @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                          @Advice.Thrown Throwable throwable
         ) {
             this.doExitNoRetValue(release, invoker, method, args, throwable);
         }
     }
     */
-
 }

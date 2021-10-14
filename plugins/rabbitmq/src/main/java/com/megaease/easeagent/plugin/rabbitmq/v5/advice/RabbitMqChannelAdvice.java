@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,33 +15,22 @@
  * limitations under the License.
  */
 
-package com.megaease.plugin.v5.advice;
+package com.megaease.easeagent.plugin.rabbitmq.v5.advice;
 
 import com.megaease.easeagent.plugin.Points;
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.annotation.AdviceTo;
-import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
-import java.util.Map;
 import java.util.Set;
 
 public class RabbitMqChannelAdvice implements Points {
-    public final String CONSUME_QUALIFIER = "basicConsume";
-    public final String PUBLISH_QUALIFIER = "basicPublish";
-
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder().hasInterface("com.rabbitmq.client.Channel")
                 .notAbstract()
                 .notInterface()
                 .build();
-    }
-
-    public boolean isAddDynamicField() {
-        return false;
     }
 
     public Set<IMethodMatcher> getMethodMatcher() {
@@ -58,6 +47,10 @@ public class RabbitMqChannelAdvice implements Points {
                         .qualifier("basicConsume")
                         .build())
                 .build();
+    }
+
+    public boolean isAddDynamicField() {
+        return false;
     }
 
     /*
