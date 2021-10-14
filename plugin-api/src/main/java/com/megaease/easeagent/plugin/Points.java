@@ -20,12 +20,14 @@ package com.megaease.easeagent.plugin;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 
+import java.util.Set;
+
 /**
  * Pointcut can be defined by ProbeDefine implementation
  * and also can be defined through @OnClass and @OnMethod annotation
  */
 @SuppressWarnings("unused")
-public interface Point {
+public interface Points {
     /**
      * return the defined class matcher matching a class or a group of classes
      * eg.
@@ -49,7 +51,7 @@ public interface Point {
      *      .arg(1, "java.lang.String")
      *      .build()
      */
-    IMethodMatcher getMethodMatcher();
+    Set<IMethodMatcher> getMethodMatcher();
 
     /**
      * when return true, the transformer will add a Object field and a accessor

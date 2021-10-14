@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor;
+package com.megaease.plugin.v5.interceptor;
 
+import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
+import com.megaease.plugin.v5.advice.RabbitMqChannelAdvice;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -29,8 +30,9 @@ import com.rabbitmq.client.MessageProperties;
 import java.net.InetAddress;
 import java.util.Map;
 
-public class RabbitMqChannelPublishInterceptor implements AgentInterceptor {
-    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish")
+public class RabbitMqChannelPublishInterceptor implements Interceptor {
+    public void before(MethodInfo methodInfo, Map<Object, Object> context) {
         Channel channel = (Channel) methodInfo.getInvoker();
         AMQP.BasicProperties basicProperties = (AMQP.BasicProperties) methodInfo.getArgs()[4];
         if (basicProperties == null) {
@@ -42,6 +44,10 @@ public class RabbitMqChannelPublishInterceptor implements AgentInterceptor {
         String hostAddress = address.getHostAddress();
         String uri = hostAddress + ":" + connection.getPort();
         context.put(ContextCons.MQ_URI, uri);
-        chain.doBefore(methodInfo, context);
+
     }
+
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context) {
+            return null;
+        }
 }

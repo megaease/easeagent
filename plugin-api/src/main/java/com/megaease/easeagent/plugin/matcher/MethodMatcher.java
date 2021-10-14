@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.StringMatch;
 import lombok.Data;
 
-import java.util.Arrays;
+import java.util.*;
 
 @Data
 @SuppressWarnings("unused")
@@ -35,24 +35,25 @@ public class MethodMatcher implements IMethodMatcher {
     private int argsLength = -1;
     private int modifier = Modifier.ACC_NONE;
 
+    private String qualifier;
+
     protected MethodMatcher() {
     }
 
     private MethodMatcher(String name, StringMatch type, String returnType,
-                            String[] args, int argLength, int modifier) {
+                            String[] args, int argLength, int modifier, String qualifier) {
         this.name = name;
         this.nameMatchType = type;
         this.returnType = returnType;
         this.args = args;
         this.argsLength = argLength;
         this.modifier = modifier;
+        this.qualifier = qualifier;
     }
 
     public static MethodMatcherBuilder builder() {
         return new MethodMatcherBuilder();
     }
-
-
 
     public static class MethodMatcherBuilder {
         private String name;
@@ -61,6 +62,7 @@ public class MethodMatcher implements IMethodMatcher {
         private String[] args;
         private int argsLength;
         private int modifier;
+        private String qualifier = "default";
 
         MethodMatcherBuilder() {
         }
@@ -145,12 +147,52 @@ public class MethodMatcher implements IMethodMatcher {
             return this;
         }
 
+        public MethodMatcherBuilder qualifier(String qualifier) {
+            this.qualifier = qualifier;
+            return this;
+        }
+
         public MethodMatcher build() {
-            return new MethodMatcher(name, nameMatchType, returnType, args, argsLength, modifier);
+            return new MethodMatcher(name, nameMatchType, returnType, args, argsLength, modifier, qualifier);
         }
 
         public String toString() {
             return "MethodMatcher.MethodMatcherBuilder(name=" + this.name + ", nameMatchType=" + this.nameMatchType + ", returnType=" + this.returnType + ", args=" + Arrays.deepToString(this.args) + ", argsLength=" + this.argsLength + ", modifier=" + this.modifier + ")";
+        }
+    }
+
+    public static MethodMatchersBuilder multiBuilder() {
+        return new MethodMatchersBuilder();
+    }
+
+    public static class MethodMatchersBuilder {
+        private Set<IMethodMatcher> methodMatchers;
+
+        MethodMatchersBuilder() {
+        }
+
+        public MethodMatchersBuilder methodMatchers(Set<IMethodMatcher> methodMatchers) {
+            this.methodMatchers = methodMatchers;
+            return this;
+        }
+
+        public MethodMatchersBuilder match(MethodMatcher matcher) {
+            if (matcher == null) {
+                return this;
+            }
+            if (this.methodMatchers == null) {
+                this.methodMatchers = new LinkedHashSet<>();
+            }
+            this.methodMatchers.add(matcher);
+            return this;
+        }
+
+        public Set<IMethodMatcher> build() {
+            return this.methodMatchers;
+        }
+
+        public String toString() {
+            return "MethodMatchers.MethodMatchersBuilder(methodMatchers=" + this.methodMatchers + ")";
         }
     }
 }

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.annotation;
 
-import com.megaease.easeagent.plugin.Point;
+import com.megaease.easeagent.plugin.Points;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -31,5 +31,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface AdviceTo {
-    Class<? extends Point> value();
+    Class<? extends Points> value();
+    String qualifier() default "default";
 }

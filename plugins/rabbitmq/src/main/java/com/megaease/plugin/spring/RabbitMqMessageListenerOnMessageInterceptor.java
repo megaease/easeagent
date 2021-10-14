@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.rabbitmq.spring;
+package com.megaease.plugin.spring;
 
+import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
 import org.springframework.amqp.core.Message;
 
 import java.util.List;
 import java.util.Map;
 
-public class RabbitMqMessageListenerOnMessageInterceptor implements AgentInterceptor {
-
-    @SuppressWarnings("unchecked")
+@AdviceTo(RabbitMqMessageListenerAdvice.class)
+public class RabbitMqMessageListenerOnMessageInterceptor implements Interceptor {
     @Override
-    public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public void before(MethodInfo methodInfo, Map<Object, Object> context) {
         Message message;
         if (methodInfo.getArgs()[0] instanceof List) {
             List<Message> messageList = (List<Message>) methodInfo.getArgs()[0];
@@ -40,6 +39,10 @@ public class RabbitMqMessageListenerOnMessageInterceptor implements AgentInterce
         }
         String uri = message.getMessageProperties().getHeader(ContextCons.MQ_URI);
         context.put(ContextCons.MQ_URI, uri);
-        chain.doBefore(methodInfo, context);
+    }
+
+    @Override
+    public Object after(MethodInfo methodInfo, Map<Object, Object> context) {
+        return null;
     }
 }

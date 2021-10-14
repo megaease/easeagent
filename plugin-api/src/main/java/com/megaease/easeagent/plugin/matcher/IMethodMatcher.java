@@ -22,6 +22,9 @@ import com.megaease.easeagent.plugin.matcher.operator.NotMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.Operator;
 import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
     default IMethodMatcher and(IMethodMatcher other) {
         return new AndMethodMatcher(this, other);
@@ -33,5 +36,11 @@ public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
 
     default IMethodMatcher not() {
         return new NotMethodMatcher(this);
+    }
+
+    default Set<IMethodMatcher> toSet() {
+        Set<IMethodMatcher> set = new HashSet<>();
+        set.add(this);
+        return set;
     }
 }
