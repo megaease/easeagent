@@ -17,35 +17,16 @@
 
 package com.megaease.easeagent.plugin.matcher;
 
-import com.megaease.easeagent.plugin.enums.StringMatch;
+import java.util.Collection;
+import java.util.LinkedList;
 
 @SuppressWarnings("unused")
 public class MethodMatchers {
-    public static MethodMatcher named(String methodName) {
-        return MethodMatcher.builder()
-            .name(methodName)
-            .nameMatchType(StringMatch.EQUALS)
-            .build();
+    private Collection<MethodMatcher> methodMatchers;
+
+    MethodMatchers(Collection<MethodMatcher> methodMatchers) {
+        this.methodMatchers = methodMatchers;
     }
 
-    public static MethodMatcher nameStartWith(String methodName) {
-        return MethodMatcher.builder()
-            .name(methodName)
-            .nameMatchType(StringMatch.START_WITH)
-            .build();
-    }
 
-    public static MethodMatcher nameEndWith(String methodName) {
-        return MethodMatcher.builder()
-            .name(methodName)
-            .nameMatchType(StringMatch.END_WITH)
-            .build();
-    }
-
-    public static MethodMatcher nameContains(String methodName) {
-        return MethodMatcher.builder()
-            .name(methodName)
-            .nameMatchType(StringMatch.CONTAINS)
-            .build();
-    }
 }

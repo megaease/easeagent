@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.common.kafka;
 
-import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.MethodInfo;

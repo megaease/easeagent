@@ -18,7 +18,7 @@
 package com.megaease.easeagent.zipkin.http.reactive;
 
 import brave.Span;
-import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;

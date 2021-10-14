@@ -23,7 +23,7 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
-import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;

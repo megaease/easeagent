@@ -18,7 +18,7 @@
 package com.megaease.easeagent.metrics.redis;
 
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.MethodInfo;
 

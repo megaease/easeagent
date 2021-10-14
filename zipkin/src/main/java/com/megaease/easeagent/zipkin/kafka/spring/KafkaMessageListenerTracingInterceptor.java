@@ -20,7 +20,7 @@ package com.megaease.easeagent.zipkin.kafka.spring;
 import brave.Span;
 import brave.Tracing;
 import brave.propagation.CurrentTraceContext;
-import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;

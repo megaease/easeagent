@@ -26,6 +26,7 @@
     <version>1.0.0</version>
     <modules>
         <module>plugin-api</module>
+        <module>plugins</module>
         <module>core</module>
         <module>gen</module>
         <module>build</module>
