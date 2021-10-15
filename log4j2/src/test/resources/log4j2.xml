@@ -6,7 +6,8 @@
         <EaseHttp name="https" uri="https://localhost:8443/requests" contentType="text/plain; charset=utf-8"
                   userAgent="iOS/x.x.x"/>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>
+            <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>-->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36}:%L (%X{testMdc}) - %msg%xEx%n"/>
         </Console>
         <Failover name="failover" primary="http" retryIntervalSeconds="1">
             <Failovers>

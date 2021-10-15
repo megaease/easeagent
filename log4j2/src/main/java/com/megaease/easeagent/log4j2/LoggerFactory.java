@@ -1,39 +1,68 @@
-package com.megaease.easeagent.plugin.bridge;
+package com.megaease.easeagent.log4j2;
 
-import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
-import com.megaease.easeagent.plugin.api.logging.Logger;
-import com.megaease.easeagent.plugin.api.logging.Mdc;
+import com.megaease.easeagent.log4j2.impl.AgentLogger;
+import com.megaease.easeagent.log4j2.impl.AgentLoggerFactory;
+import com.megaease.easeagent.log4j2.supplier.AllUrlsSupplier;
+import com.megaease.easeagent.log4j2.supplier.JarUrlsSupplier;
 
-public class NoOpLoggerFactory implements ILoggerFactory {
-    public static final NoOpLoggerFactory INSTANCE = new NoOpLoggerFactory();
-    public static final NoOpMdc NO_OP_MDC_INSTANCE = new NoOpMdc();
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.logging.Level;
 
-    public Logger getLogger(String name) {
-        return new NoOpLogger(name);
+public class LoggerFactory {
+    public static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LoggerFactory.class.getName());
+    protected static final AgentLoggerFactory<AgentLogger> FACTORY;
+
+    static {
+        Supplier<String> supplier = () -> "build agent logger fail.";
+        AgentLoggerFactory<AgentLogger> factory = null;
+        try {
+            factory = AgentLoggerFactory.builder(
+                new JarUrlsSupplier(new AllUrlsSupplier()),
+                AgentLogger.LOGGER_SUPPLIER,
+                AgentLogger.class
+            ).build();
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.WARNING, e, supplier);
+        } catch (NoSuchMethodException e) {
+            logger.log(Level.WARNING, e, supplier);
+        } catch (IllegalAccessException e) {
+            logger.log(Level.WARNING, e, supplier);
+        } catch (InvocationTargetException e) {
+            logger.log(Level.WARNING, e, supplier);
+        } catch (InstantiationException e) {
+            logger.log(Level.WARNING, e, supplier);
+        } catch (NoSuchFieldException e) {
+            logger.log(Level.WARNING, e, supplier);
+        }
+        FACTORY = factory;
     }
 
-    public static class NoOpMdc implements Mdc {
-
-        @Override
-        public void put(String key, String value) {
-
-        }
-
-        @Override
-        public void remove(String key) {
-
-        }
-
-        @Override
-        public String get(String key) {
+    public static <N extends AgentLogger> AgentLoggerFactory<N> newFactory(Function<java.util.logging.Logger, N> loggerSupplier, Class<N> tClass) {
+        if (FACTORY == null) {
             return null;
         }
+        return FACTORY.newFactory(loggerSupplier, tClass);
     }
 
-    public static class NoOpLogger implements Logger {
+    public static Logger getLogger(String name) {
+        if (FACTORY == null) {
+            return new NoopLogger(name);
+        }
+        return FACTORY.getLogger(name);
+    }
+
+
+    public static Logger getLogger(Class<?> clazz) {
+        return getLogger(clazz.getName());
+    }
+
+
+    public static class NoopLogger implements Logger {
         private final String name;
 
-        public NoOpLogger(String name) {
+        public NoopLogger(String name) {
             this.name = name;
         }
 

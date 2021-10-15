@@ -27,9 +27,9 @@ import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
-import com.megaease.easeagent.plugin.api.config.IConfigFactory;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import fi.iki.elonen.NanoHTTPD;
@@ -46,8 +46,6 @@ import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -77,7 +75,7 @@ public class Bootstrap {
 
     private static WrappedConfigManager wrappedConfigManager;
 
-    private static IConfigFactory iConfigFactory;
+    private static ContextManager contextManager;
 
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
@@ -92,8 +90,7 @@ public class Bootstrap {
             LOGGER.debug("Loaded conf:\n{}", display);
         }
         registerMBeans(conf);
-        iConfigFactory = PluginConfigContext.builder(conf).build();
-        EaseAgent.configFactory = iConfigFactory;
+        contextManager = ContextManager.build(conf);
         Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
