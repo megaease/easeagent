@@ -41,7 +41,7 @@ import java.io.Serializable;
  */
 public class AgentLoggerProxy implements LocationAwareLogger, Serializable {
 
-    private static final long serialVersionUID = 7869000638091304326L;
+    private static final long serialVersionUID = 4906175597262951747L;
     private static final Marker EVENT_MARKER = MarkerFactory.getMarker("EVENT");
     private static final EventDataConverter CONVERTER = createConverter();
 

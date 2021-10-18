@@ -6,14 +6,17 @@ import java.net.URL;
 import java.util.function.Supplier;
 
 public class DirUrlsSupplier implements Supplier<URL[]> {
-    private final String dir;
+    public static final String LIB_DIR_ENV = "EASEAGENT-SLF4J2-LIB-DIR";
 
-    public DirUrlsSupplier(String dir) {
-        this.dir = dir;
+    public DirUrlsSupplier() {
     }
 
     @Override
     public URL[] get() {
+        String dir = System.getProperty(LIB_DIR_ENV);
+        if (dir == null) {
+            return new URL[0];
+        }
         File file = new File(dir);
         if (!file.isDirectory()) {
             return null;

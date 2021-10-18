@@ -26,9 +26,11 @@ import org.springframework.boot.loader.archive.JarFileArchive;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
@@ -44,6 +46,7 @@ public class Main {
     private static final ClassLoader BOOTSTRAP_CLASS_LOADER = null;
     private static final String LIB = "lib/";
     private static final String BOOTSTRAP = "boot/";
+    private static final String SLf4J2 = "log4j2/";
     private static final String LOGGING_PROPERTY = "Logging-Property";
     private static final String EASEAGENT_LOG_CONF = "easeagent.log.conf";
 
@@ -61,11 +64,12 @@ public class Main {
         final Attributes attributes = archive.getManifest().getMainAttributes();
         final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
         final String bootstrap = attributes.getValue("Bootstrap-Class");
+        initEaseAgentSlf4j2Dir(archive, loader);
 
         switchLoggingProperty(loader, loggingProperty, () -> {
             loader.loadClass(bootstrap)
-                    .getMethod("premain", String.class, Instrumentation.class)
-                    .invoke(null, args, inst);
+                .getMethod("premain", String.class, Instrumentation.class)
+                .invoke(null, args, inst);
             return null;
         });
     }
@@ -79,12 +83,20 @@ public class Main {
         }
     }
 
+    private static void initEaseAgentSlf4j2Dir(JarFileArchive archive, final ClassLoader bootstrapLoader) throws Exception {
+        final URL[] slf4j2Urls = nestArchiveUrls(archive, SLf4J2);
+        final ClassLoader slf4j2Loader = new URLClassLoader(slf4j2Urls, null);
+        Class<?> classLoaderSupplier = bootstrapLoader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
+        Field field = classLoaderSupplier.getDeclaredField("CLASSLOADER");
+        field.set(null, slf4j2Loader);
+    }
+
     /**
      * Switching the system property temporary could fix the problem of conflict of logging configuration
      * when host used the same logging library as agent.
      */
     private static void switchLoggingProperty(ClassLoader loader, String hostKey, Callable<Void> callable)
-            throws Exception {
+        throws Exception {
         final Thread t = Thread.currentThread();
         final ClassLoader ccl = t.getContextClassLoader();
 
@@ -111,9 +123,9 @@ public class Main {
 
     private static URL[] nestArchiveUrls(JarFileArchive archive, String prefix) throws IOException {
         ArrayList<Archive> archives = Lists.newArrayList(
-                archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(prefix),
-                        entry -> true
-                ));
+            archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(prefix),
+                entry -> true
+            ));
 
         final URL[] urls = new URL[archives.size()];
 

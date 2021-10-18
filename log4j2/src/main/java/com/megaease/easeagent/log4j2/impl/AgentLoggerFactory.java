@@ -15,13 +15,13 @@ import java.util.logging.Logger;
 
 public class AgentLoggerFactory<T extends AgentLogger> {
     private final AgentLogger agentLogger;
-    private final URLClassLoader classLoader;
+    private final ClassLoader classLoader;
     private final Object factory;
     private final Method method;
     private final Function<Logger, T> loggerSupplier;
     private final Mdc mdc;
 
-    private AgentLoggerFactory(@Nonnull URLClassLoader classLoader,@Nonnull Object factory,@Nonnull Method method,@Nonnull Function<Logger, T> loggerSupplier,@Nonnull Mdc mdc) {
+    private AgentLoggerFactory(@Nonnull ClassLoader classLoader, @Nonnull Object factory, @Nonnull Method method, @Nonnull Function<Logger, T> loggerSupplier, @Nonnull Mdc mdc) {
         this.classLoader = classLoader;
         this.factory = factory;
         this.method = method;
@@ -30,8 +30,8 @@ public class AgentLoggerFactory<T extends AgentLogger> {
         this.agentLogger = this.getLogger(AgentLoggerFactory.class.getName());
     }
 
-    public static <T extends AgentLogger> Builder<T> builder(Supplier<URL[]> urls, Function<Logger, T> loggerSupplier, Class<T> tClass) {
-        URLClassLoader classLoader = new URLClassLoader(Objects.requireNonNull(urls.get(), "urls must not be null."), null);
+    public static <T extends AgentLogger> Builder<T> builder(Supplier<ClassLoader> classLoaderSupplier, Function<Logger, T> loggerSupplier, Class<T> tClass) {
+        ClassLoader classLoader = Objects.requireNonNull(classLoaderSupplier.get(), "classLoader must not be null.");
         return new Builder<T>(classLoader, loggerSupplier, tClass);
     }
 
@@ -77,11 +77,11 @@ public class AgentLoggerFactory<T extends AgentLogger> {
     }
 
     public static class Builder<T extends AgentLogger> {
-        private final URLClassLoader classLoader;
+        private final ClassLoader classLoader;
         private final Function<java.util.logging.Logger, T> loggerSupplier;
         private final Class<T> tClass;
 
-        public Builder(URLClassLoader classLoader, Function<Logger, T> loggerSupplier, Class<T> tClass) {
+        public Builder(ClassLoader classLoader, Function<Logger, T> loggerSupplier, Class<T> tClass) {
             this.classLoader = Objects.requireNonNull(classLoader, "classLoader must not be null.");
             this.loggerSupplier = Objects.requireNonNull(loggerSupplier, "loggerSupplier must not be null.");
             this.tClass = Objects.requireNonNull(tClass, "tClass must not be null.");

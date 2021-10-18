@@ -2,8 +2,7 @@ package com.megaease.easeagent.log4j2;
 
 import com.megaease.easeagent.log4j2.impl.AgentLogger;
 import com.megaease.easeagent.log4j2.impl.AgentLoggerFactory;
-import com.megaease.easeagent.log4j2.supplier.AllUrlsSupplier;
-import com.megaease.easeagent.log4j2.supplier.JarUrlsSupplier;
+import com.megaease.easeagent.log4j2.supplier.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
@@ -11,32 +10,42 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class LoggerFactory {
-    public static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LoggerFactory.class.getName());
+    public static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(LoggerFactory.class.getName());
     protected static final AgentLoggerFactory<AgentLogger> FACTORY;
 
     static {
-        Supplier<String> supplier = () -> "build agent logger fail.";
+        Supplier<String> supplier = () -> "build agent logger factory fail.";
         AgentLoggerFactory<AgentLogger> factory = null;
         try {
             factory = AgentLoggerFactory.builder(
-                new JarUrlsSupplier(new AllUrlsSupplier()),
+                classLoaderSupplier(),
                 AgentLogger.LOGGER_SUPPLIER,
                 AgentLogger.class
             ).build();
         } catch (ClassNotFoundException e) {
-            logger.log(Level.WARNING, e, supplier);
+            LOGGER.log(Level.WARNING, e, supplier);
         } catch (NoSuchMethodException e) {
-            logger.log(Level.WARNING, e, supplier);
+            LOGGER.log(Level.WARNING, e, supplier);
         } catch (IllegalAccessException e) {
-            logger.log(Level.WARNING, e, supplier);
+            LOGGER.log(Level.WARNING, e, supplier);
         } catch (InvocationTargetException e) {
-            logger.log(Level.WARNING, e, supplier);
+            LOGGER.log(Level.WARNING, e, supplier);
         } catch (InstantiationException e) {
-            logger.log(Level.WARNING, e, supplier);
+            LOGGER.log(Level.WARNING, e, supplier);
         } catch (NoSuchFieldException e) {
-            logger.log(Level.WARNING, e, supplier);
+            LOGGER.log(Level.WARNING, e, supplier);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, e, supplier);
         }
         FACTORY = factory;
+    }
+
+    private static Supplier<ClassLoader> classLoaderSupplier() {
+        FinalClassloaderSupplier supplier = new FinalClassloaderSupplier();
+        if (supplier.get() != null) {
+            return supplier;
+        }
+        return new URLClassLoaderSupplier(new JarUrlsSupplier(new AllUrlsSupplier(), new DirUrlsSupplier()));
     }
 
     public static <N extends AgentLogger> AgentLoggerFactory<N> newFactory(Function<java.util.logging.Logger, N> loggerSupplier, Class<N> tClass) {
