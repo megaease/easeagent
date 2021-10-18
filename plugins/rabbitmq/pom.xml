@@ -9,8 +9,9 @@
         <version>1.0.0</version>
     </parent>
 
-
+    <!--
     <groupId>com.megaease.easeagent.plugin</groupId>
+    -->
     <artifactId>rabbitMq</artifactId>
 
     <packaging>jar</packaging>

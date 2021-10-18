@@ -18,12 +18,12 @@
 package com.megaease.easeagent.plugin.processor;
 
 import com.google.auto.service.AutoService;
-import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.annotation.Plugin;
 import com.megaease.easeagent.plugin.annotation.Pointcut;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -42,7 +42,7 @@ import java.util.TreeSet;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-@AutoService(AgentPlugin.class)
+@AutoService(Processor.class)
 public class PluginProcessor extends AbstractProcessor {
     Class<Plugin> annotationClass = Plugin.class;
     TreeSet<String>  annotations = new TreeSet<>();
@@ -71,7 +71,7 @@ public class PluginProcessor extends AbstractProcessor {
             if (!e.getKind().isClass()) {
                 continue;
             }
-            if (!e.getModifiers().contains(ABSTRACT)) {
+            if (e.getModifiers().contains(ABSTRACT)) {
                 continue;
             }
             TypeElement type = (TypeElement)e;
