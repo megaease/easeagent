@@ -16,10 +16,47 @@
                 <include>log4j2.xml</include>
             </includes>
         </fileSet>
+        
+        <!--
+        <fileSet>
+            <directory>${project.build.basedir}/plugins/</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <includes>
+                <include>pom.xml</include>
+                <include>**/*.jar</include>
+            </includes>
+        </fileSet>
+        
+        <fileSet>
+            <directory>${project.basedir}/target/plugins/</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <includes>
+                <include>pom.xml</include>
+                <include>**/*.jar</include>
+            </includes>
+        </fileSet>
+        -->
+        
+        <fileSet>
+            <directory>${project.basedir}/target/plugins/</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
+            <outputDirectory>boot</outputDirectory>
+            <includes>
+                <include>com.megaease.easeagent:plugin-api</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
             <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>com.megaease.easeagent:plugin-api</exclude>
+            </excludes>
             <includes>
                 <include>com.megaease.easeagent:build</include>
             </includes>

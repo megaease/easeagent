@@ -37,6 +37,11 @@
         -->
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
+            <artifactId>plugin-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
