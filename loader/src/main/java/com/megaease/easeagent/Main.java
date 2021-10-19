@@ -18,6 +18,7 @@
 package com.megaease.easeagent;
 
 import com.google.common.collect.Lists;
+import lombok.SneakyThrows;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.JarFileArchive;
@@ -31,23 +32,31 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 
 public class Main {
     private static final ClassLoader BOOTSTRAP_CLASS_LOADER = null;
     private static final String LIB = "lib/";
+    private static final String BOOTSTRAP = "boot/";
     private static final String LOGGING_PROPERTY = "Logging-Property";
     private static final String EASEAGENT_LOG_CONF = "easeagent.log.conf";
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
         final JarFileArchive archive = new JarFileArchive(getArchiveFileContains());
 
-        final URL[] urls = nestArchiveUrls(archive);
+        // custom classloader
+        final URL[] urls = nestArchiveUrls(archive, LIB);
         final ClassLoader loader = new CompoundableClassLoader(urls);
+
+        // install bootstrap jar
+        final URL[] bootUrls = nestArchiveUrls(archive, BOOTSTRAP);
+        Arrays.stream(bootUrls).forEach(url -> installBootstrapJar(url, inst));
 
         final Attributes attributes = archive.getManifest().getMainAttributes();
         final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
@@ -59,6 +68,15 @@ public class Main {
                     .invoke(null, args, inst);
             return null;
         });
+    }
+
+    private static void installBootstrapJar(URL url, Instrumentation inst) {
+        try {
+            JarFile file = JarUtils.getNestedJarFile(url);
+            inst.appendToBootstrapClassLoaderSearch(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -91,9 +109,9 @@ public class Main {
         }
     }
 
-    private static URL[] nestArchiveUrls(Archive archive) throws IOException {
+    private static URL[] nestArchiveUrls(JarFileArchive archive, String prefix) throws IOException {
         ArrayList<Archive> archives = Lists.newArrayList(
-                archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(LIB),
+                archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(prefix),
                         entry -> true
                 ));
 
@@ -131,6 +149,7 @@ public class Main {
             super(urls, Main.BOOTSTRAP_CLASS_LOADER);
         }
 
+        @SuppressWarnings("unused")
         public void add(ClassLoader cl) {
             if (cl != null && !Objects.equals(cl, this)) {
                 externals.add(cl);
@@ -156,7 +175,14 @@ public class Main {
         }
     }
 
+    @SneakyThrows
     public static void main(String[] args) {
         System.out.println(void.class.getCanonicalName());
+
+        final JarFileArchive archive = new JarFileArchive(getArchiveFileContains());
+
+        final URL[] urls = nestArchiveUrls(archive, LIB);
+
+        System.out.println(Arrays.toString(urls));
     }
 }
