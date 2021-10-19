@@ -51,15 +51,19 @@
             <includes>
                 <include>com.megaease.easeagent:plugin-api</include>
             </includes>
+            <unpack>false</unpack>
         </dependencySet>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <excludes>
-                <exclude>com.megaease.easeagent:plugin-api</exclude>
+                <exclude>**/com/megaease/easeagent/plugin/*</exclude>
             </excludes>
             <includes>
                 <include>com.megaease.easeagent:build</include>
             </includes>
+            <!--
+            <unpack>false</unpack>
+            -->
         </dependencySet>
         <dependencySet>
             <outputDirectory/>
