@@ -26,73 +26,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>log4j2</artifactId>
-
-    <properties>
-
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${version.java}</source>
-                    <target>${version.java}</target>
-                    <encoding>${encoding.file}</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>log4j-plugin-processor</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <phase>process-classes</phase>
-                        <configuration>
-                            <proc>only</proc>
-                            <annotationProcessors>
-                                <annotationProcessor>
-                                    org.apache.logging.log4j.core.config.plugins.processor.PluginProcessor
-                                </annotationProcessor>
-                            </annotationProcessors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${version.maven-shade-plugin}</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <minimizeJar>true</minimizeJar>
-                            <shadedArtifactAttached>true</shadedArtifactAttached><!-- optional -->
-                            <shadedClassifierName>agent-lib</shadedClassifierName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-
-
-    </build>
+    <packaging>pom</packaging>
+    <modules>
+        <module>log4j2-api</module>
+        <module>log4j2-impl</module>
+    </modules>
 
 </project>

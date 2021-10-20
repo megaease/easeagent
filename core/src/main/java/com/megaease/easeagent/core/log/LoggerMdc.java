@@ -3,9 +3,9 @@ package com.megaease.easeagent.core.log;
 import com.megaease.easeagent.plugin.api.logging.Mdc;
 
 public class LoggerMdc implements Mdc {
-    private final com.megaease.easeagent.log4j2.impl.Mdc mdc;
+    private final com.megaease.easeagent.log4j2.api.Mdc mdc;
 
-    public LoggerMdc(com.megaease.easeagent.log4j2.impl.Mdc mdc) {
+    public LoggerMdc(com.megaease.easeagent.log4j2.api.Mdc mdc) {
         this.mdc = mdc;
     }
 

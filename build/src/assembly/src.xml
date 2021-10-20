@@ -68,7 +68,6 @@
             </excludes>
             <includes>
                 <include>com.megaease.easeagent:build</include>
-                <include>com.megaease.easeagent:log4j2</include>
             </includes>
             <!--
             <unpack>false</unpack>

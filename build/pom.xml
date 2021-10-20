@@ -79,7 +79,7 @@
         </dependency>
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
-            <artifactId>log4j2</artifactId>
+            <artifactId>log4j2-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -125,7 +125,7 @@
                                 
                                 <mkdir dir="target/log4j2"/>
                                 <copy todir="target/log4j2" flatten="true">
-                                    <fileset dir="${project.basedir}/../log4j2" includes="**/*agent-lib.jar"/>
+                                    <fileset dir="${project.basedir}/../log4j2/log4j2-impl" includes="**/*agent-lib.jar"/>
                                 </copy>
                             </target>
                         </configuration>

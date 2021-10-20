@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
-            <artifactId>log4j2</artifactId>
+            <artifactId>log4j2-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
