@@ -18,8 +18,12 @@
 package com.megaease.easeagent.plugin.processor;
 
 import com.google.auto.service.AutoService;
+import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.Points;
+import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.Plugin;
 import com.megaease.easeagent.plugin.annotation.Pointcut;
+import com.megaease.easeagent.plugin.annotation.ProviderBean;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -49,6 +53,8 @@ public class PluginProcessor extends AbstractProcessor {
     {
         annotations.add(Plugin.class.getCanonicalName());
         annotations.add(Pointcut.class.getCanonicalName());
+        // for test temporarily
+        annotations.add(ProviderBean.class.getCanonicalName());
     }
 
     @Override
@@ -62,6 +68,7 @@ public class PluginProcessor extends AbstractProcessor {
     }
 
     private boolean process(Class<? extends Annotation> annotationClass,
+                            Class<?> dstClass,
                             Elements elements,
                             RoundEnvironment roundEnv) {
         TreeSet<String> services = new TreeSet<>();
@@ -78,7 +85,7 @@ public class PluginProcessor extends AbstractProcessor {
             services.add(elements.getBinaryName(type).toString());
         }
 
-        String fileName = "META-INF/services/" + annotationClass.getCanonicalName();
+        String fileName = "META-INF/services/" + dstClass.getCanonicalName();
 
         if (services.isEmpty()) {
             return false;
@@ -109,8 +116,9 @@ public class PluginProcessor extends AbstractProcessor {
         }
 
         Elements elements = processingEnv.getElementUtils();
-        process(Plugin.class, elements, roundEnv);
-        process(Pointcut.class, elements, roundEnv);
+        process(Plugin.class, AgentPlugin.class, elements, roundEnv);
+        process(Pointcut.class, Points.class, elements, roundEnv);
+        process(ProviderBean.class, Provider.class, elements, roundEnv);
 
         return false;
     }

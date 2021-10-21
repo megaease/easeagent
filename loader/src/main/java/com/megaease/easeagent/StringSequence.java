@@ -19,6 +19,10 @@ package com.megaease.easeagent;
 
 import java.util.Objects;
 
+/**
+ * extract org.springframework.boot.loader
+ */
+@SuppressWarnings({"unused", "SameParameterValue"})
 public class StringSequence implements CharSequence {
     private final String source;
 

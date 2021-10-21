@@ -34,20 +34,25 @@ public class MethodMatcher implements IMethodMatcher {
     private String[] args;
     private int argsLength = -1;
     private int modifier = Modifier.ACC_NONE;
+    private int notModifier = Modifier.ACC_NONE;
 
     private String qualifier;
+
+    public static int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_STATIC
+        | Modifier.ACC_PRIVATE | Modifier.ACC_PUBLIC | Modifier.ACC_PROTECTED;
 
     protected MethodMatcher() {
     }
 
     private MethodMatcher(String name, StringMatch type, String returnType,
-                            String[] args, int argLength, int modifier, String qualifier) {
+                            String[] args, int argLength, int modifier, int notModifier, String qualifier) {
         this.name = name;
         this.nameMatchType = type;
         this.returnType = returnType;
         this.args = args;
         this.argsLength = argLength;
         this.modifier = modifier;
+        this.notModifier = notModifier;
         this.qualifier = qualifier;
     }
 
@@ -62,6 +67,7 @@ public class MethodMatcher implements IMethodMatcher {
         private String[] args;
         private int argsLength;
         private int modifier;
+        private int notModifier;
         private String qualifier = "default";
 
         MethodMatcherBuilder() {
@@ -95,6 +101,32 @@ public class MethodMatcher implements IMethodMatcher {
 
         public MethodMatcherBuilder isAbstract() {
             this.modifier |= Modifier.ACC_ABSTRACT;
+            return this;
+        }
+
+        public MethodMatcherBuilder isStatic() {
+            this.modifier |= Modifier.ACC_STATIC;
+            return this;
+        }
+
+
+        public MethodMatcherBuilder notPublic() {
+            this.notModifier |= Modifier.ACC_PUBLIC;
+            return this;
+        }
+
+        public MethodMatcherBuilder notPrivate() {
+            this.notModifier |= Modifier.ACC_PRIVATE;
+            return this;
+        }
+
+        public MethodMatcherBuilder notAbstract() {
+            this.notModifier |= Modifier.ACC_ABSTRACT;
+            return this;
+        }
+
+        public MethodMatcherBuilder notStatic() {
+            this.notModifier|= Modifier.ACC_STATIC;
             return this;
         }
 
@@ -153,11 +185,16 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcher build() {
-            return new MethodMatcher(name, nameMatchType, returnType, args, argsLength, modifier, qualifier);
+            return new MethodMatcher(name, nameMatchType, returnType,
+                args, argsLength, modifier, notModifier, qualifier);
         }
 
         public String toString() {
-            return "MethodMatcher.MethodMatcherBuilder(name=" + this.name + ", nameMatchType=" + this.nameMatchType + ", returnType=" + this.returnType + ", args=" + Arrays.deepToString(this.args) + ", argsLength=" + this.argsLength + ", modifier=" + this.modifier + ")";
+            return "MethodMatcher.MethodMatcherBuilder(name=" + this.name
+                + ", nameMatchType=" + this.nameMatchType + ", returnType=" + this.returnType
+                + ", args=" + Arrays.deepToString(this.args) + ", argsLength=" + this.argsLength
+                + ", modifier=" + this.modifier
+                + ", notModifier=" + this.notModifier + ")";
         }
     }
 

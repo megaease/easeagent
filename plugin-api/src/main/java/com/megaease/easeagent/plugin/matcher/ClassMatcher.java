@@ -30,6 +30,9 @@ public class ClassMatcher implements IClassMatcher {
     private int notModifier = Modifier.ACC_NONE;
     private String classLoader;
 
+    public static int MODIFIER_MASK = Modifier.ACC_ABSTRACT
+        | Modifier.ACC_PRIVATE | Modifier.ACC_PUBLIC | Modifier.ACC_PROTECTED;
+
     protected ClassMatcher() {
     }
 

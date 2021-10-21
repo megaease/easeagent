@@ -48,7 +48,7 @@
         <version.mockito>1.10.19</version.mockito>
         <version.guava>30.1-jre</version.guava>
         <version.slf4j>1.7.21</version.slf4j>
-        <version.byte-buddy>1.11.20</version.byte-buddy>
+        <version.byte-buddy>1.11.21</version.byte-buddy>
         <version.auto-service>1.0-rc2</version.auto-service>
         <version.lombok>1.18.20</version.lombok>
         <version.config>1.2.1</version.config>
@@ -274,11 +274,13 @@
                 <artifactId>brave-instrumentation-messaging</artifactId>
                 <version>${version.brave}</version>
             </dependency>
+            <!--
             <dependency>
                 <groupId>com.rabbitmq</groupId>
                 <artifactId>amqp-client</artifactId>
                 <version>${version.amqp-client}</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
@@ -290,11 +292,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!--
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-amqp</artifactId>
                 <version>${version.spring-boot}</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webflux</artifactId>

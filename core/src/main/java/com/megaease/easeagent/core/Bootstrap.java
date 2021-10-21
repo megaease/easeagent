@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.*;
+import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.utils.JsonUtil;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
@@ -133,6 +134,9 @@ public class Bootstrap {
             .or(nameStartsWith("junit."))
             .or(nameStartsWith("com.intellij."));
         LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
+
+        // load plugins
+        PluginLoader.load();
 
         final AgentReport agentReport = AgentReport.create(conf);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);

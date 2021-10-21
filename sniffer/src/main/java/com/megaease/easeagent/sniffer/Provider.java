@@ -54,7 +54,7 @@ import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMessageListenerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
-import com.megaease.easeagent.metrics.rabbitmq.*;
+// import com.megaease.easeagent.metrics.rabbitmq.*;
 import com.megaease.easeagent.metrics.redis.JedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
@@ -73,10 +73,12 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollIn
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
+/*
 import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
+*/
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
@@ -100,9 +102,11 @@ import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInt
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
+/*
 import com.megaease.easeagent.zipkin.rabbitmq.spring.RabbitMqMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
+*/
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import org.apache.commons.lang3.StringUtils;
@@ -442,6 +446,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         };
     }
 
+    /*
     @Injection.Bean("supplier4RabbitMqBasicPublish")
     public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicPublish() {
         return () -> {
@@ -506,6 +511,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     ;
         };
     }
+    */
 
     @Injection.Bean("supplier4WebClientBuild")
     public Supplier<AgentInterceptorChain.Builder> supplier4WebClientBuild() {
