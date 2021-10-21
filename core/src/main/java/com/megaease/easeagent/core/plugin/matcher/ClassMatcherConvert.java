@@ -30,26 +30,26 @@ import net.bytebuddy.matcher.NegatingMatcher;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class ClassMatcherConvert
-    implements Converter<IClassMatcher, Junction<? extends TypeDescription>> {
+    implements Converter<IClassMatcher, Junction<TypeDescription>> {
     @Override
-    public Junction<? extends TypeDescription> convert(IClassMatcher source) {
+    public Junction<TypeDescription> convert(IClassMatcher source) {
         if (source == null) {
             return null;
         }
 
         if (source instanceof AndClassMatcher) {
             AndClassMatcher andMatcher = (AndClassMatcher) source;
-            Junction<? extends TypeDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            Junction<? extends TypeDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<TypeDescription> leftMatcher = this.convert(andMatcher.getLeft());
+            Junction<TypeDescription> rightMatcher = this.convert(andMatcher.getLeft());
             return leftMatcher.and(rightMatcher);
         } else if (source instanceof OrClassMatcher) {
             OrClassMatcher andMatcher = (OrClassMatcher) source;
-            Junction<? extends TypeDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            Junction<? extends TypeDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<TypeDescription> leftMatcher = this.convert(andMatcher.getLeft());
+            Junction<TypeDescription> rightMatcher = this.convert(andMatcher.getLeft());
             return leftMatcher.or(rightMatcher);
         } else if (source instanceof NotClassMatcher) {
             NotClassMatcher matcher = (NotClassMatcher) source;
-            Junction<? extends TypeDescription> notMatcher = this.convert(matcher.getMatcher());
+            Junction<TypeDescription> notMatcher = this.convert(matcher.getMatcher());
             return new NegatingMatcher<>(notMatcher);
         }
 
@@ -60,8 +60,8 @@ public class ClassMatcherConvert
         return this.convert((ClassMatcher) source);
     }
 
-    private Junction<? extends TypeDescription> convert(ClassMatcher matcher) {
-        Junction<? extends TypeDescription> c;
+    private Junction<TypeDescription> convert(ClassMatcher matcher) {
+        Junction<TypeDescription> c;
         switch (matcher.getMatchType()) {
             case NAMED:
                 c = named(matcher.getName());
@@ -77,7 +77,7 @@ public class ClassMatcherConvert
                 return null;
         }
 
-        Junction<? extends TypeDescription> mc = fromModifier(matcher.getModifier(), false);
+        Junction<TypeDescription> mc = fromModifier(matcher.getModifier(), false);
         if (mc != null) {
             c = c.and(mc);
         }
@@ -91,8 +91,8 @@ public class ClassMatcherConvert
         return c;
     }
 
-    Junction<? extends TypeDescription> fromModifier(int modifier, boolean not) {
-        Junction<? extends TypeDescription> mc = null;
+    Junction<TypeDescription> fromModifier(int modifier, boolean not) {
+        Junction<TypeDescription> mc = null;
         if ((modifier & ClassMatcher.MODIFIER_MASK) != 0) {
             if ((modifier & Modifier.ACC_ABSTRACT) != 0) {
                 mc = isAbstract();
