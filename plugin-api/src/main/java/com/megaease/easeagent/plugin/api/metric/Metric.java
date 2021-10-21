@@ -1,11 +1,13 @@
 package com.megaease.easeagent.plugin.api.metric;
 
+import java.util.function.Supplier;
+
 public interface Metric {
     Meter meter(String name);
 
     Counter counter(String name);
 
-    Gauge<?> gauge(String name);
+    <T> Gauge<T> gauge(String name, Supplier<Gauge<T>> supplier);
 
     Histogram histogram(String name);
 

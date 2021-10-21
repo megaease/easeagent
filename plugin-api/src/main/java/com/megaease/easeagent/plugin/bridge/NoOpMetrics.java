@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public final class NoOpMetrics {
-    public static final Gauge<?> NO_OP_GAUGE = NoopGauge.INSTANCE;
+    public static final Gauge NO_OP_GAUGE = NoopGauge.INSTANCE;
     public static final Snapshot NO_OP_SNAPSHOT = EmptySnapshot.INSTANCE;
     public static final Timer NO_OP_TIMER = NoopTimer.INSTANCE;
     public static final Histogram NO_OP_HISTOGRAM = NoopHistogram.INSTANCE;
@@ -18,7 +18,7 @@ public final class NoOpMetrics {
     public static final Metric NO_OP_METRIC = NoopMetric.INSTANCE;
 
     private static final class NoopGauge<T> implements Gauge<T> {
-        private static final NoopGauge<?> INSTANCE = new NoopGauge<>();
+        private static final NoopGauge INSTANCE = new NoopGauge<>();
 
         /**
          * {@inheritDoc}
@@ -372,7 +372,7 @@ public final class NoOpMetrics {
         }
 
         @Override
-        public Gauge<?> gauge(String name) {
+        public <T> Gauge<T> gauge(String name, Supplier<Gauge<T>> supplier) {
             return NoopGauge.INSTANCE;
         }
 

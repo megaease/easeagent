@@ -10,4 +10,6 @@ public interface Request {
     Object unwrap();
 
     String header(String name);
+
+    void setHeader(String name, String value);
 }

@@ -4,13 +4,16 @@ import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.PluginConfigContext;
 import com.megaease.easeagent.core.log.LoggerFactoryImpl;
 import com.megaease.easeagent.core.log.LoggerMdc;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.bridge.NoOpLoggerFactory;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class ContextManager {
+    private static final ThreadLocal<SessionContext> LOCAL_SESSION_CONTEXT = ThreadLocal.withInitial(() -> new SessionContext());
     private final Configs conf;
     private final PluginConfigContext pluginConfigContext;
     private final ILoggerFactory loggerFactory;
@@ -34,6 +37,11 @@ public class ContextManager {
             EaseAgent.loggerMdc = new LoggerMdc(loggerFactory.facotry().mdc());
             iLoggerFactory = loggerFactory;
         }
+        EaseAgent.contextSupplier = () -> get();
         return new ContextManager(conf, iConfigFactory, iLoggerFactory);
+    }
+
+    public static SessionContext get() {
+        return LOCAL_SESSION_CONTEXT.get();
     }
 }

@@ -1,10 +1,28 @@
 package com.megaease.easeagent.plugin.api;
 
+import com.megaease.easeagent.plugin.api.context.AsyncContext;
+import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.metric.Metric;
-import com.megaease.easeagent.plugin.api.trace.Tracer;
+import com.megaease.easeagent.plugin.api.trace.Request;
+import com.megaease.easeagent.plugin.api.trace.Tracing;
+
+import java.util.Map;
 
 public interface Context {
-    Tracer currentTrace();
+    boolean isNoop();
+
+    Tracing currentTracing();
 
     Metric getMetric();
+
+    <V> V getValue(Object key);
+
+    AsyncContext exportAsync(Request request);
+
+    void importAsync(AsyncContext snapshot);
+
+    ProgressContext nextProgress(Request request);
+
+    void importProgress(Request request);
+
 }
