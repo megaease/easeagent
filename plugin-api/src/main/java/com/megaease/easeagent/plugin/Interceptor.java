@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
 
 import java.util.Map;
 
-public interface Interceptor {
+public interface Interceptor extends Ordered {
     /**
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data

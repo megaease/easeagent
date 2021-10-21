@@ -17,14 +17,8 @@
 
 package com.megaease.easeagent;
 
-import sun.management.VMManagement;
-
 import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -101,21 +95,8 @@ public class JarUtils {
         }
     }
 
-    private static int getCurrentProcessId() throws Exception {
-        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-        Field jvm = runtime.getClass().getDeclaredField("jvm");
-        jvm.setAccessible(true);
-
-        VMManagement management = (VMManagement) jvm.get(runtime);
-        Method method = management.getClass().getDeclaredMethod("getProcessId");
-        method.setAccessible(true);
-
-        return (Integer) method.invoke(management);
-    }
-
     private static File createTempJarFile(InputStream input, String outputName) throws IOException {
-        // f = File.createTempFile(outputName, ".jar");
-        File dir = null;
+        File dir;
         String fName = (new File(outputName)).getName();
         if (fName.length() < outputName.length()) {
             String localDir = outputName.substring(0, outputName.length() - fName.length());
