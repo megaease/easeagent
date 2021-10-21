@@ -31,26 +31,26 @@ import net.bytebuddy.matcher.NegatingMatcher;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class MethodMatcherConvert
-    implements Converter<IMethodMatcher, ElementMatcher.Junction<? extends MethodDescription>> {
+    implements Converter<IMethodMatcher, ElementMatcher.Junction<MethodDescription>> {
     @Override
-    public ElementMatcher.Junction<? extends MethodDescription> convert(IMethodMatcher source) {
+    public ElementMatcher.Junction<MethodDescription> convert(IMethodMatcher source) {
         if (source == null) {
             return null;
         }
 
         if (source instanceof AndMethodMatcher) {
             AndMethodMatcher andMatcher = (AndMethodMatcher) source;
-            ElementMatcher.Junction<? extends MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            ElementMatcher.Junction<? extends MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            ElementMatcher.Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
+            ElementMatcher.Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
             return leftMatcher.and(rightMatcher);
         } else if (source instanceof OrMethodMatcher) {
             OrMethodMatcher andMatcher = (OrMethodMatcher) source;
-            ElementMatcher.Junction<? extends MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            ElementMatcher.Junction<? extends MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            ElementMatcher.Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
+            ElementMatcher.Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
             return leftMatcher.or(rightMatcher);
         } else if (source instanceof NotMethodMatcher) {
             NotMethodMatcher matcher = (NotMethodMatcher) source;
-            ElementMatcher.Junction<? extends MethodDescription> notMatcher = this.convert(matcher.getMatcher());
+            ElementMatcher.Junction<MethodDescription> notMatcher = this.convert(matcher.getMatcher());
             return new NegatingMatcher<>(notMatcher);
         }
 
@@ -61,8 +61,8 @@ public class MethodMatcherConvert
         return this.convert((MethodMatcher) source);
     }
 
-    private ElementMatcher.Junction<? extends MethodDescription> convert(MethodMatcher matcher) {
-        ElementMatcher.Junction<? extends MethodDescription> c;
+    private ElementMatcher.Junction<MethodDescription> convert(MethodMatcher matcher) {
+        ElementMatcher.Junction<MethodDescription> c;
         switch (matcher.getNameMatchType()) {
             case EQUALS:
                 c = named(matcher.getName());
@@ -80,7 +80,7 @@ public class MethodMatcherConvert
                 return null;
         }
 
-        ElementMatcher.Junction<? extends MethodDescription> mc = fromModifier(matcher.getModifier(), false);
+        ElementMatcher.Junction<MethodDescription> mc = fromModifier(matcher.getModifier(), false);
         if (mc != null) {
             c = c.and(mc);
         }
@@ -92,8 +92,8 @@ public class MethodMatcherConvert
         return c;
     }
 
-    ElementMatcher.Junction<? extends MethodDescription> fromModifier(int modifier, boolean not) {
-        ElementMatcher.Junction<? extends MethodDescription> mc = null;
+    ElementMatcher.Junction<MethodDescription> fromModifier(int modifier, boolean not) {
+        ElementMatcher.Junction<MethodDescription> mc = null;
         if ((modifier & ClassMatcher.MODIFIER_MASK) != 0) {
             if ((modifier & Modifier.ACC_ABSTRACT) != 0) {
                 mc = isAbstract();

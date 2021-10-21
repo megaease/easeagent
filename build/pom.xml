@@ -122,22 +122,7 @@
                                 <copy todir="target/plugins" flatten="true">
                                     <fileset dir="${project.basedir}/../plugins" includes="**/*.jar"/>
                                 </copy>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <configuration>
-                            <target>
+                                
                                 <mkdir dir="target/log4j2"/>
                                 <copy todir="target/log4j2" flatten="true">
                                     <fileset dir="${project.basedir}/../log4j2" includes="**/*agent-lib.jar"/>
@@ -150,7 +135,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
