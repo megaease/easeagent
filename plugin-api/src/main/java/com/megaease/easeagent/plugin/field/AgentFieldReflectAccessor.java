@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AgentFieldAccessor {
+public class AgentFieldReflectAccessor {
 
     private static final Map<String, Field> FIELD_MAP = new ConcurrentHashMap<>();
 

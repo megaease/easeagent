@@ -18,6 +18,7 @@
 package com.megaease.easeagent.core.interceptor;
 
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.plugin.MethodInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 

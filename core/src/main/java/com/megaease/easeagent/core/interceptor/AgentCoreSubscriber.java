@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.core.interceptor;
 
+import com.megaease.easeagent.plugin.MethodInfo;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.util.context.Context;

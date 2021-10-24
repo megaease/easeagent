@@ -23,7 +23,7 @@ import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.okhttp.OkHttpAsyncTracingInterceptor;

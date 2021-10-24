@@ -18,7 +18,7 @@
 package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisClient;

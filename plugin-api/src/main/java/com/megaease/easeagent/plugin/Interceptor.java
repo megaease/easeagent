@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.plugin;
 
-import com.megaease.easeagent.plugin.api.interceptor.MethodInfo;
-
 import java.util.Map;
 
 public interface Interceptor extends Ordered {
@@ -26,12 +24,12 @@ public interface Interceptor extends Ordered {
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
      */
-    void before(MethodInfo methodInfo, Map<Object, Object> context);
+    void before(MethodInfo methodInfo, Object context);
 
     /**
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
      * @return The return value can change instrumented method result
      */
-    Object after(MethodInfo methodInfo, Map<Object, Object> context);
+    Object after(MethodInfo methodInfo, Object context);
 }

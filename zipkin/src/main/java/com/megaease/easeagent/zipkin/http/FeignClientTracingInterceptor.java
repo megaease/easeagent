@@ -23,7 +23,7 @@ import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import feign.Request;
 import feign.Response;

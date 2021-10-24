@@ -22,7 +22,7 @@ import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.zipkin.kafka.brave.KafkaTracing;
 import com.megaease.easeagent.zipkin.kafka.brave.TracingConsumer;

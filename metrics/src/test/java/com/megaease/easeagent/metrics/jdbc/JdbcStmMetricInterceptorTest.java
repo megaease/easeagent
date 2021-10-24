@@ -23,7 +23,7 @@ import com.megaease.easeagent.common.jdbc.SQLCompression;
 import com.megaease.easeagent.common.jdbc.SqlInfo;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.BaseMetricsTest;
 import com.megaease.easeagent.metrics.MetricNameFactory;

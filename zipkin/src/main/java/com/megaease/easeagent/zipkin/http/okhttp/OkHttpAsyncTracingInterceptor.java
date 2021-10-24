@@ -27,8 +27,8 @@ import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.field.AgentFieldAccessor;
+import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -58,7 +58,7 @@ public class OkHttpAsyncTracingInterceptor implements AgentInterceptor {
             return;
         }
         RealCall realCall = (RealCall) methodInfo.getInvoker();
-        Request originalRequest = AgentFieldAccessor.getFieldValue(realCall, "originalRequest");
+        Request originalRequest = AgentFieldReflectAccessor.getFieldValue(realCall, "originalRequest");
         if (originalRequest == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;
@@ -69,7 +69,7 @@ public class OkHttpAsyncTracingInterceptor implements AgentInterceptor {
         Callback callback = (Callback) methodInfo.getArgs()[0];
         InternalCallback internalCallback = new InternalCallback(callback, this.clientHandler, span);
         methodInfo.getArgs()[0] = internalCallback;
-        AgentFieldAccessor.setFieldValue(realCall, "originalRequest", requestBuilder.build());
+        AgentFieldReflectAccessor.setFieldValue(realCall, "originalRequest", requestBuilder.build());
     }
 
     public static class InternalCallback implements Callback {

@@ -19,7 +19,7 @@ package com.megaease.easeagent.zipkin.http.okhttp;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import okhttp3.Interceptor;
 import okhttp3.Request;

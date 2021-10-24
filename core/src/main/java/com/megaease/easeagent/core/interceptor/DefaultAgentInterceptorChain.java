@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.core.interceptor;
 
+import com.megaease.easeagent.plugin.MethodInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

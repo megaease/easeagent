@@ -27,8 +27,8 @@ import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.field.AgentFieldAccessor;
+import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
 import org.apache.hc.core5.concurrent.FutureCallback;
@@ -58,7 +58,7 @@ public class HttpClient5AsyncTracingInterceptor implements AgentInterceptor {
             return;
         }
         AsyncRequestProducer requestProducer = (AsyncRequestProducer) methodInfo.getArgs()[0];
-        HttpRequest request = AgentFieldAccessor.getFieldValue(requestProducer, "request");
+        HttpRequest request = AgentFieldReflectAccessor.getFieldValue(requestProducer, "request");
         if (request == null) {
             AgentInterceptor.super.before(methodInfo, context, chain);
             return;

@@ -19,7 +19,7 @@ package com.megaease.easeagent.common.http;
 
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;

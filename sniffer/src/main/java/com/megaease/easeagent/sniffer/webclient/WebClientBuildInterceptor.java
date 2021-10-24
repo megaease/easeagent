@@ -20,7 +20,7 @@ package com.megaease.easeagent.sniffer.webclient;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;

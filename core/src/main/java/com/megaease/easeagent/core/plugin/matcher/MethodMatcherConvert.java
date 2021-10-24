@@ -32,6 +32,9 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class MethodMatcherConvert
     implements Converter<IMethodMatcher, ElementMatcher.Junction<MethodDescription>> {
+
+    public final static MethodMatcherConvert INSTANCE = new MethodMatcherConvert();
+
     @Override
     public ElementMatcher.Junction<MethodDescription> convert(IMethodMatcher source) {
         if (source == null) {
@@ -87,6 +90,20 @@ public class MethodMatcherConvert
         mc = fromModifier(matcher.getNotModifier(), true);
         if (mc != null) {
             c = c.and(mc);
+        }
+        if (matcher.getReturnType() != null) {
+            c = c.and(returns(named(matcher.getReturnType())));
+        }
+        if (matcher.getArgsLength() > -1) {
+            c.and(takesArguments(matcher.getArgsLength()));
+        }
+        String [] args = matcher.getArgs();
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] != null) {
+                    c = c.and(takesArgument(i, named(args[i])));
+                }
+            }
         }
 
         return c;
