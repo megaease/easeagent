@@ -45,6 +45,6 @@ public class AgentDynamicFieldAccessor {
     }
 
     public static Field getDynamicFieldFromClass(Class<?> clazz) {
-        return AgentFieldAccessor.getFieldFromClass(clazz, DYNAMIC_FIELD_NAME);
+        return AgentFieldReflectAccessor.getFieldFromClass(clazz, DYNAMIC_FIELD_NAME);
     }
 }

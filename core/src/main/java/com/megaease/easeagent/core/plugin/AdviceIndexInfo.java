@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +15,17 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.interceptor;
+package com.megaease.easeagent.core.plugin;
 
-import java.util.Map;
+import com.google.auto.service.AutoService;
+import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
+import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.plugin.api.config.Config;
+import lombok.Data;
 
-public interface AgentInterceptorChain {
-
-    void doBefore(MethodInfo methodInfo, Map<Object, Object> context);
-
-    Object doAfter(MethodInfo methodInfo, Map<Object, Object> context);
-
-    void skipBegin();
-
-    interface Builder {
-
-        Builder addInterceptor(AgentInterceptor agentInterceptor);
-
-        AgentInterceptorChain build();
-    }
+@Data
+@AutoService(AppendBootstrapClassLoaderSearch.class)
+public class AdviceIndexInfo {
+    private AgentInterceptorChain chain;
+    private Config config;
 }

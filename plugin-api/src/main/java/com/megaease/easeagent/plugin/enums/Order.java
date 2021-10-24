@@ -18,16 +18,17 @@
 package com.megaease.easeagent.plugin.enums;
 
 public enum Order {
-    TRACING(100),
-    METRIC(200);
+    PREPARE((short)50),
+    TRACING((short)100),
+    METRIC((short)200);
 
-    private int order;
+    private final short order;
 
-    Order(int s) {
+    Order(short s) {
         this.order = s;
     }
 
-    public int getOrder() {
+    public short getOrder() {
         return order;
     }
 }

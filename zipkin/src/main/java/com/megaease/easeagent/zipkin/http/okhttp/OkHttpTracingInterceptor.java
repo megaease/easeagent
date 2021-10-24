@@ -22,8 +22,8 @@ import brave.http.HttpClientRequest;
 import brave.http.HttpClientResponse;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.field.AgentFieldAccessor;
+import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
 import okhttp3.Request;
@@ -45,7 +45,7 @@ public class OkHttpTracingInterceptor extends BaseClientTracingInterceptor<OkHtt
     @Override
     public void before(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         RealCall realCall = (RealCall) methodInfo.getInvoker();
-        Request originalRequest = AgentFieldAccessor.getFieldValue(realCall, "originalRequest");
+        Request originalRequest = AgentFieldReflectAccessor.getFieldValue(realCall, "originalRequest");
         if (originalRequest == null) {
             super.before(methodInfo, context, chain);
             return;
@@ -54,7 +54,7 @@ public class OkHttpTracingInterceptor extends BaseClientTracingInterceptor<OkHtt
         context.put(REQUEST_BUILDER_KEY, requestBuilder);
         context.put(ORIGIN_REQUEST_KEY, originalRequest);
         super.before(methodInfo, context, chain);
-        AgentFieldAccessor.setFieldValue(realCall, "originalRequest", requestBuilder.build());
+        AgentFieldReflectAccessor.setFieldValue(realCall, "originalRequest", requestBuilder.build());
     }
 
 

@@ -23,21 +23,15 @@ import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.httpclient.HttpClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.okhttp.OkHttpTracingInterceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.connection.RealCall;
-import org.apache.http.HttpHost;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,7 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class OkHttpTracingInterceptorTest extends BaseZipkinTest {
     @Test

@@ -17,13 +17,12 @@
 
 package com.megaease.easeagent.core;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.*;
-import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.context.ContextManager;
+import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.utils.JsonUtil;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
@@ -57,10 +56,13 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.FluentIterable.from;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+@SuppressWarnings("unused")
 public class Bootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
@@ -137,7 +139,7 @@ public class Bootstrap {
         LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
 
         // load plugins
-        PluginLoader.load();
+        PluginLoader.load(builder, conf);
 
         final AgentReport agentReport = AgentReport.create(conf);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
@@ -159,18 +161,9 @@ public class Bootstrap {
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
-        return ImmutableMap.copyOf(Maps.transformValues(
-            from(providers).uniqueIndex(new Function<Class<?>, Class<?>>() {
-                @Override
-                public Class<?> apply(Class<?> input) {
-                    return input.getSuperclass();
-                }
-            }), new Function<Class<?>, Iterable<QualifiedBean>>() {
-                @Override
-                public Iterable<QualifiedBean> apply(Class<?> input) {
-                    return beans(input, conf, agentReport);
-                }
-            }));
+        return ImmutableMap.copyOf(
+            Maps.transformValues(from(providers).uniqueIndex(Class::getSuperclass),
+                input -> beans(input, conf, agentReport)));
     }
 
     private static ElementMatcher<ClassLoader> protectedLoaders() {
@@ -182,7 +175,7 @@ public class Bootstrap {
         long begin = System.currentTimeMillis();
         for (Class<? extends Transformation> tc : transformations) {
             final Injection.Provider ann = tc.getAnnotation(Injection.Provider.class);
-            final Iterable<QualifiedBean> beans = ann == null ? Collections.<QualifiedBean>emptySet() : scopedBeans.get(ann.value());
+            final Iterable<QualifiedBean> beans = ann == null ? Collections.emptySet() : scopedBeans.get(ann.value());
             final Register register = new Register(beans);
 
             for (Map.Entry<ElementMatcher<? super TypeDescription>, Iterable<Definition.Transformer>> entry :
@@ -197,14 +190,13 @@ public class Bootstrap {
         return ab;
     }
 
-    private static AgentBuilder.Transformer compound(Iterable<Definition.Transformer> transformers, final Register register) {
-        return new CompoundTransformer(from(transformers).transform(
-            new Function<Definition.Transformer, AgentBuilder.Transformer>() {
-                @Override
-                public AgentBuilder.Transformer apply(final Definition.Transformer input) {
-                    return new ForRegisterAdvice(register, input);
-                }
-            }).toList());
+    private static AgentBuilder.Transformer compound(Iterable<Definition.Transformer> transformers,
+                                                     final Register register) {
+        List<AgentBuilder.Transformer> agentTransformers = StreamSupport.stream(transformers.spliterator(), false)
+            .map(transformation -> new ForRegisterAdvice(register, transformation))
+            .collect(Collectors.toList());
+
+        return new CompoundTransformer(agentTransformers);
     }
 
     private static Iterable<QualifiedBean> beans(Class<?> provider, Configs conf, AgentReport agentReport) {

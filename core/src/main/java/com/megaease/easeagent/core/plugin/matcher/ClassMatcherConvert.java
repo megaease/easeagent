@@ -31,6 +31,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class ClassMatcherConvert
     implements Converter<IClassMatcher, Junction<TypeDescription>> {
+    public final static ClassMatcherConvert INSTANCE = new ClassMatcherConvert();
     @Override
     public Junction<TypeDescription> convert(IClassMatcher source) {
         if (source == null) {

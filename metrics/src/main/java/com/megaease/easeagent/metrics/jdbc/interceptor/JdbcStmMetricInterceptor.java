@@ -30,7 +30,7 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.metrics.MetricSubType;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;

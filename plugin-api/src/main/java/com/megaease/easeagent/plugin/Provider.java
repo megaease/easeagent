@@ -23,9 +23,9 @@ import java.util.function.Supplier;
  * used in autogenerate code
  */
 public interface Provider {
-    Supplier<Interceptor> getInterceptor();
+    Supplier<Interceptor> getInterceptorProvider();
 
     String getAdviceTo();
 
-    String getPluginName();
+    String getPluginClassName();
 }

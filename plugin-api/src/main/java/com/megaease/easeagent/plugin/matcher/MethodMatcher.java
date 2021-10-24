@@ -65,7 +65,7 @@ public class MethodMatcher implements IMethodMatcher {
         private StringMatch nameMatchType;
         private String returnType;
         private String[] args;
-        private int argsLength;
+        private int argsLength = -1;
         private int modifier;
         private int notModifier;
         private String qualifier = "default";
@@ -152,7 +152,7 @@ public class MethodMatcher implements IMethodMatcher {
 
         public MethodMatcherBuilder arg(int idx, String argType) {
             if (args == null) {
-                this.args = new String[idx + 1];
+                this.args = new String[idx > 4 ? idx + 1 : 5];
             } else if (this.args.length < idx + 1) {
                 this.args = Arrays.copyOf(this.args, idx + 1);
             }

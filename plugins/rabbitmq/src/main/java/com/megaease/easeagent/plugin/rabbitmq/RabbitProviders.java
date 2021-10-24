@@ -37,7 +37,7 @@ public class RabbitProviders {
     @ProviderBean
     public static class RabbitMqMessageListenerOnMessageProvider implements Provider {
         @Override
-        public Supplier<Interceptor> getInterceptor() {
+        public Supplier<Interceptor> getInterceptorProvider() {
             return RabbitMqMessageListenerOnMessageInterceptor::new;
         }
 
@@ -48,7 +48,7 @@ public class RabbitProviders {
         }
 
         @Override
-        public String getPluginName() {
+        public String getPluginClassName() {
             return RabbitMqPlugin.class.getCanonicalName();
         }
     }
@@ -56,7 +56,7 @@ public class RabbitProviders {
     @ProviderBean
     public static class RabbitMqChannelConsumeInterceptorProvider implements Provider {
         @Override
-        public Supplier<Interceptor> getInterceptor() {
+        public Supplier<Interceptor> getInterceptorProvider() {
             return RabbitMqChannelConsumeInterceptor::new;
         }
 
@@ -67,7 +67,7 @@ public class RabbitProviders {
         }
 
         @Override
-        public String getPluginName() {
+        public String getPluginClassName() {
             return RabbitMqPlugin.class.getCanonicalName();
         }
     }
@@ -75,7 +75,7 @@ public class RabbitProviders {
     @ProviderBean
     public static class RabbitMqChannelPublishInterceptorProvider implements Provider {
         @Override
-        public Supplier<Interceptor> getInterceptor() {
+        public Supplier<Interceptor> getInterceptorProvider() {
             return RabbitMqChannelPublishInterceptor::new;
         }
 
@@ -86,7 +86,7 @@ public class RabbitProviders {
         }
 
         @Override
-        public String getPluginName() {
+        public String getPluginClassName() {
             return RabbitMqPlugin.class.getCanonicalName();
         }
     }
@@ -94,7 +94,7 @@ public class RabbitProviders {
     @ProviderBean
     public static class RabbitMqConsumerHandleDeliveryInterceptorProvider implements Provider {
         @Override
-        public Supplier<Interceptor> getInterceptor() {
+        public Supplier<Interceptor> getInterceptorProvider() {
             return RabbitMqConsumerHandleDeliveryInterceptor::new;
         }
 
@@ -105,7 +105,7 @@ public class RabbitProviders {
         }
 
         @Override
-        public String getPluginName() {
+        public String getPluginClassName() {
             return RabbitMqPlugin.class.getCanonicalName();
         }
     }

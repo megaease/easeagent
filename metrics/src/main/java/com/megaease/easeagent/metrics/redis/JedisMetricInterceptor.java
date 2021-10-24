@@ -19,7 +19,7 @@ package com.megaease.easeagent.metrics.redis;
 
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 
 import java.util.Map;
 

@@ -21,7 +21,7 @@ package com.megaease.easeagent.common.kafka;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import org.apache.kafka.clients.producer.Callback;
 
 import java.util.Map;

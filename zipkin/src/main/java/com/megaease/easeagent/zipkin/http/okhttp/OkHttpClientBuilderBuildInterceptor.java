@@ -20,7 +20,7 @@ package com.megaease.easeagent.zipkin.http.okhttp;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import okhttp3.OkHttpClient;
 
 import java.util.Map;

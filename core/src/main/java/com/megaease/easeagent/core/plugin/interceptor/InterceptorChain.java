@@ -17,5 +17,10 @@
 
 package com.megaease.easeagent.core.plugin.interceptor;
 
+import com.megaease.easeagent.plugin.MethodInfo;
+
 public interface InterceptorChain {
+    void doBefore(MethodInfo methodInfo, Object context);
+
+    Object doAfter(MethodInfo methodInfo, Object context);
 }

@@ -19,7 +19,7 @@ package com.megaease.easeagent.sniffer.lettuce.v5.interceptor;
 
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.plugin.field.AgentFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.cluster.RedisClusterClient;
@@ -30,7 +30,7 @@ abstract class BaseRedisAgentInterceptor implements AgentInterceptor {
 
     protected RedisURI getRedisURI(RedisClient redisClient, Object[] args) {
         if (args == null) {
-            return AgentFieldAccessor.getFieldValue(redisClient, REDIS_URI);
+            return AgentFieldReflectAccessor.getFieldValue(redisClient, REDIS_URI);
         }
         RedisURI redisURI = null;
         for (Object arg : args) {
@@ -40,13 +40,13 @@ abstract class BaseRedisAgentInterceptor implements AgentInterceptor {
             }
         }
         if (redisURI == null) {
-            redisURI = AgentFieldAccessor.getFieldValue(redisClient, REDIS_URI);
+            redisURI = AgentFieldReflectAccessor.getFieldValue(redisClient, REDIS_URI);
         }
         return redisURI;
     }
 
     protected Iterable<RedisURI> getRedisURIs(RedisClusterClient redisClusterClient) {
-        return AgentFieldAccessor.getFieldValue(redisClusterClient, REDIS_URIS);
+        return AgentFieldReflectAccessor.getFieldValue(redisClusterClient, REDIS_URIS);
     }
 
     @SuppressWarnings("unchecked")

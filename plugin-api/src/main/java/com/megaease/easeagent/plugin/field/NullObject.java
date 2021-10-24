@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,16 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.interceptor;
+package com.megaease.easeagent.plugin.field;
 
-public class MockAgentInterceptor implements AgentInterceptor {
+/**
+ * default value for Agent Dynamic Field,
+ * avoiding NullPointerException when serialized
+ */
+public class NullObject {
+    public static Object NULL = new Object();
+
+    public String toString() {
+        return "null";
+    }
 }

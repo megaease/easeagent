@@ -27,7 +27,7 @@ import com.megaease.easeagent.common.jdbc.SqlInfo;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.core.interceptor;
 
+import com.megaease.easeagent.plugin.MethodInfo;
+
 import java.util.Map;
 
 public interface AgentInterceptorChain {

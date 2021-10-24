@@ -22,7 +22,7 @@ public interface Ordered {
      * Higher values are operated later
      * For example: a interceptor with order=1 will called after an interceptor with order=0.
      */
-    default int order() {
+    default short order() {
         return 100;
     }
 }

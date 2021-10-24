@@ -17,23 +17,38 @@
 
 package com.megaease.easeagent.core.plugin;
 
+import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
+import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
+import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
+import com.megaease.easeagent.core.plugin.transformer.CompoundPluginTransformer;
+import com.megaease.easeagent.core.plugin.transformer.DynamicFieldTransformer;
+import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import net.bytebuddy.agent.builder.AgentBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-@SuppressWarnings("unused")
 public class PluginLoader {
     static Logger log = LoggerFactory.getLogger(PluginLoader.class);
-    static ConcurrentHashMap<String, AgentPlugin> pluginMap = new ConcurrentHashMap<>();
 
-    public static void load() {
+    public static void load(AgentBuilder ab, Configs conf) {
         pluginLoad();
         providerLoad();
-        pointsLoad();
+        Set<ClassTransformation> sortedTransformations = pointsLoad();
+
+        for (ClassTransformation transformation : sortedTransformations) {
+            ab = ab.type(transformation.getClassMatcher())
+                .transform(compound(transformation.isHasDynamicField(),transformation.getMethodTransformations()));
+        }
     }
 
     public static void providerLoad() {
@@ -41,9 +56,10 @@ public class PluginLoader {
             log.info("loading provider:{}", provider.getClass().getName());
 
             try {
-                provider.getInterceptor();
                 log.info("provider for:{} at {}",
-                    provider.getPluginName(), provider.getAdviceTo());
+                    provider.getPluginClassName(), provider.getAdviceTo());
+
+                QualifierRegistry.register(provider);
             } catch (Exception | LinkageError e) {
                 log.error(
                     "Unable to load provider in [class {}]",
@@ -53,19 +69,21 @@ public class PluginLoader {
         }
     }
 
-    public static void pointsLoad() {
-        for (Points points : BaseLoader.load(Points.class)) {
-            log.info("loading pointcut:{}", points.getClass().getName());
-
+    public static Set<ClassTransformation> pointsLoad() {
+        List<Points> points = BaseLoader.load(Points.class);
+        return points.stream().map(point -> {
             try {
-                // xxx: what happens when there are two classes with a same name?
-            } catch (Exception | LinkageError e) {
+                return QualifierRegistry.register(point);
+            } catch (Exception e) {
                 log.error(
                     "Unable to load points in [class {}]",
-                    points.getClass().getName(),
+                    point.getClass().getName(),
                     e);
+                return null;
             }
-        }
+        }).filter(Objects::nonNull)
+            .sorted(Comparator.comparing(Ordered::order))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static void pluginLoad() {
@@ -77,7 +95,7 @@ public class PluginLoader {
                 plugin.getClass().getName());
 
             try {
-                pluginMap.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
+                QualifierRegistry.register(plugin);
             } catch (Exception | LinkageError e) {
                 log.error(
                     "Unable to load extension {}:{} [class {}]",
@@ -89,11 +107,21 @@ public class PluginLoader {
         }
     }
 
-    public static AgentPlugin getPlugin(String name) {
-        return pluginMap.get(name);
-    }
+    /**
+     * @param methodTransformations method matchers under a special classMatcher
+     * @return transform
+     */
+    private static AgentBuilder.Transformer compound(boolean hasDynamicField,
+                                                     Iterable<MethodTransformation> methodTransformations) {
+        List<AgentBuilder.Transformer> agentTransformers = StreamSupport
+            .stream(methodTransformations.spliterator(), false)
+            .map(ForAdviceTransformer::new)
+            .collect(Collectors.toList());
 
-    public static AgentPlugin getPlugin(Class<?> clazz) {
-        return pluginMap.get(clazz.getCanonicalName());
+        if (hasDynamicField) {
+            agentTransformers.add(new DynamicFieldTransformer(AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME));
+        }
+
+        return new CompoundPluginTransformer(agentTransformers);
     }
 }

@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
+    String DEFAULT_QUALIFIER = "default";
+
     default IMethodMatcher and(IMethodMatcher other) {
         return new AndMethodMatcher(this, other);
     }
@@ -37,6 +39,8 @@ public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
     default IMethodMatcher not() {
         return new NotMethodMatcher(this);
     }
+
+    String getQualifier();
 
     default Set<IMethodMatcher> toSet() {
         Set<IMethodMatcher> set = new HashSet<>();

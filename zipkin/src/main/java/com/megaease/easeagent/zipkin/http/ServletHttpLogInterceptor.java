@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.http.HttpServletInterceptor;
 import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 

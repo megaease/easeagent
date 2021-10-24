@@ -20,7 +20,7 @@ package com.megaease.easeagent.metrics.servlet;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.http.HttpServletInterceptor;
 import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ServletUtils;
 
 import javax.servlet.http.HttpServletRequest;
