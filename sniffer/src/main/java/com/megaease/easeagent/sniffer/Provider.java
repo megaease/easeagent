@@ -124,6 +124,7 @@ import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRIC
 public abstract class Provider implements AgentReportAware, ConfigAware, IProvider, AgentHttpHandlerProvider {
 
     private static final String EASEAGENT_HEALTH_READINESS_ENABLED = "easeagent.health.readiness.enabled";
+    private static final String ENV_ZIPKIN_SERVER_URL = "ZIPKIN_SERVER_URL";
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(false);
     private Tracing tracing;
     private AgentReport agentReport;
@@ -164,6 +165,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         boolean toZipkin = false;
         if (target.equalsIgnoreCase("zipkin") && StringUtils.isNotEmpty(zipkinUrl)) {
             toZipkin = true;
+        }
+        String zipkinUrlFromEnv = System.getenv(ENV_ZIPKIN_SERVER_URL);
+        if (StringUtils.isNotEmpty(zipkinUrlFromEnv)) {
+            toZipkin = true;
+            zipkinUrl = zipkinUrlFromEnv;
         }
         Reporter<Span> reporter;
         if (toZipkin) {
