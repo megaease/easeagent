@@ -70,6 +70,11 @@ public class NoOpConfig implements Config {
     }
 
     @Override
+    public Config getGlobal() {
+        return this;
+    }
+
+    @Override
     public void addChangeListener(ConfigChangeListener listener) {
 
     }

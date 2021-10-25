@@ -95,6 +95,11 @@ public class NoOpTracer {
         }
 
         @Override
+        public void inject(Request request) {
+
+        }
+
+        @Override
         public String toString() {
             return "NoopSpan";
         }
@@ -109,7 +114,12 @@ public class NoOpTracer {
         }
 
         @Override
-        public Span nextSpan(Object message) {
+        public Span nextSpan() {
+            return null;
+        }
+
+        @Override
+        public Span nextSpan(Message message) {
             return NoopSpan.INSTANCE;
         }
 
@@ -119,8 +129,8 @@ public class NoOpTracer {
         }
 
         @Override
-        public void importAsync(AsyncContext snapshot) {
-
+        public Span importAsync(AsyncContext snapshot) {
+            return NoopSpan.INSTANCE;
         }
 
         @Override
@@ -129,8 +139,8 @@ public class NoOpTracer {
         }
 
         @Override
-        public void importProgress(Request request) {
-
+        public Span importProgress(Request request) {
+            return NoopSpan.INSTANCE;
         }
 
         @Override
@@ -184,13 +194,23 @@ public class NoOpTracer {
         }
     }
 
-    private static class EmptyExtractor implements Extractor {
-        private static final EmptyExtractor INSTANCE = new EmptyExtractor();
+    private static class EmptyMessage implements Message {
+        private static final EmptyMessage INSTANCE = new EmptyMessage();
         private static final Object OBJ_INSTANCE = new Object();
 
         @Override
-        public Object extract(Request request) {
+        public Object get() {
             return OBJ_INSTANCE;
+        }
+    }
+
+    private static class EmptyExtractor implements Extractor {
+        private static final EmptyExtractor INSTANCE = new EmptyExtractor();
+
+
+        @Override
+        public Message extract(Request request) {
+            return EmptyMessage.INSTANCE;
         }
     }
 

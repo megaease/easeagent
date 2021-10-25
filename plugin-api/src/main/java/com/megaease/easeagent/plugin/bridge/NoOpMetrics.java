@@ -1,5 +1,6 @@
 package com.megaease.easeagent.plugin.bridge;
 
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.*;
 
 import java.io.OutputStream;
@@ -9,13 +10,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public final class NoOpMetrics {
+    public static final MetricSupplier NO_OP_METRIC_SUPPLIER = NoopMetricsSupplier.INSTANCE;
     public static final Gauge NO_OP_GAUGE = NoopGauge.INSTANCE;
-    public static final Snapshot NO_OP_SNAPSHOT = EmptySnapshot.INSTANCE;
+    public static final Snapshot NO_OP_SNAPSHOT = NoopSnapshot.INSTANCE;
     public static final Timer NO_OP_TIMER = NoopTimer.INSTANCE;
     public static final Histogram NO_OP_HISTOGRAM = NoopHistogram.INSTANCE;
     public static final Counter NO_OP_COUNTER = NoopCounter.INSTANCE;
     public static final Meter NO_OP_METER = NoopMeter.INSTANCE;
     public static final Metric NO_OP_METRIC = NoopMetric.INSTANCE;
+
+    private static final class NoopMetricsSupplier implements MetricSupplier {
+        private static final NoopMetricsSupplier INSTANCE = new NoopMetricsSupplier();
+
+        @Override
+        public Metric newMetric(Config config) {
+            return NoopMetric.INSTANCE;
+        }
+    }
 
     private static final class NoopGauge<T> implements Gauge<T> {
         private static final NoopGauge INSTANCE = new NoopGauge<>();
@@ -29,8 +40,8 @@ public final class NoOpMetrics {
         }
     }
 
-    private static final class EmptySnapshot implements Snapshot {
-        private static final EmptySnapshot INSTANCE = new EmptySnapshot();
+    private static final class NoopSnapshot implements Snapshot {
+        private static final NoopSnapshot INSTANCE = new NoopSnapshot();
         private static final long[] EMPTY_LONG_ARRAY = new long[0];
 
         /**
@@ -214,7 +225,7 @@ public final class NoOpMetrics {
          */
         @Override
         public Snapshot getSnapshot() {
-            return EmptySnapshot.INSTANCE;
+            return NoopSnapshot.INSTANCE;
         }
     }
 
@@ -250,7 +261,7 @@ public final class NoOpMetrics {
          */
         @Override
         public Snapshot getSnapshot() {
-            return EmptySnapshot.INSTANCE;
+            return NoopSnapshot.INSTANCE;
         }
     }
 

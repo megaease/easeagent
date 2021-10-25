@@ -13,9 +13,9 @@ public interface Context {
 
     Tracing currentTracing();
 
-    Metric getMetric();
-
     <V> V getValue(Object key);
+
+    <V> V remove(Object key);
 
     AsyncContext exportAsync(Request request);
 
@@ -25,4 +25,5 @@ public interface Context {
 
     void importProgress(Request request);
 
+    Map<Object, Object>  clear();
 }

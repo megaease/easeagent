@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.tracer;
+package com.megaease.easeagent.sniffer.impl.tracing;
 
 import com.megaease.easeagent.plugin.api.trace.Request;
 
@@ -44,5 +44,9 @@ public class AsyncRequest implements Request {
     public void setHeader(String name, String value) {
         request.setHeader(name, value);
         header.put(name, value);
+    }
+
+    public Map<String, String> getHeader() {
+        return header;
     }
 }

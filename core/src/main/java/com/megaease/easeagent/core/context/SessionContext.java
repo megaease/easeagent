@@ -3,12 +3,9 @@ package com.megaease.easeagent.core.context;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.api.metric.Metric;
-import com.megaease.easeagent.plugin.api.metric.MetricContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.TraceContext;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
-import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
@@ -16,9 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SessionContext implements Context, TraceContext, MetricContext {
+public class SessionContext implements Context, TraceContext {
     private Tracing tracing = NoOpTracer.NO_OP_TRACING;
-    private Metric metric = NoOpMetrics.NO_OP_METRIC;
     private Map<Object, Object> context = new HashMap<>();
 
     @Override
@@ -32,27 +28,28 @@ public class SessionContext implements Context, TraceContext, MetricContext {
     }
 
     @Override
-    public Metric getMetric() {
-        return NoNull.of(metric, NoOpMetrics.NO_OP_METRIC);
+    public <V> V getValue(Object key) {
+        Object v = context.get(key);
+        return v == null ? null : (V) v;
     }
 
     @Override
-    public <V> V getValue(Object key) {
-        Object v = context.get(key);
-        if (v == null) {
-            return null;
-        }
-        return (V) v;
+    public <V> V remove(Object key) {
+        Object v = context.remove(key);
+        return v == null ? null : (V) v;
     }
 
     @Override
     public AsyncContext exportAsync(Request request) {
-        return currentTracing().exportAsync(request);
+        AsyncContext asyncContext = currentTracing().exportAsync(request);
+        asyncContext.putContext(context);
+        return asyncContext;
     }
 
     @Override
     public void importAsync(AsyncContext snapshot) {
         currentTracing().importAsync(snapshot);
+        context.putAll(snapshot.getContext());
     }
 
     @Override
@@ -66,8 +63,11 @@ public class SessionContext implements Context, TraceContext, MetricContext {
     }
 
     @Override
-    public void setMetric(Metric metric) {
-        this.metric = NoNull.of(metric, NoOpMetrics.NO_OP_METRIC);
+    public Map<Object, Object> clear() {
+        this.tracing = NoOpTracer.NO_OP_TRACING;
+        Map<Object, Object> old = this.context;
+        this.context = new HashMap<>();
+        return old;
     }
 
     @Override

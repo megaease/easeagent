@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.metrics;
+package com.megaease.easeagent.metrics.impl;
 
 import com.codahale.metrics.Snapshot;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;

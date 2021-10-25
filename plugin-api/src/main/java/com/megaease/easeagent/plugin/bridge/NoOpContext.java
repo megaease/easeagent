@@ -4,7 +4,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.metric.Metric;
-import com.megaease.easeagent.plugin.api.metric.MetricContext;
+import com.megaease.easeagent.plugin.api.metric.MetricSupplier;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TraceContext;
@@ -18,7 +18,7 @@ public class NoOpContext {
     public static final EmptyAsyncContext NO_OP_ASYNC_CONTEXT = EmptyAsyncContext.INSTANCE;
     public static final NoopProgressContext NO_OP_PROGRESS_CONTEXT = NoopProgressContext.INSTANCE;
 
-    private static class NoopContext implements Context, MetricContext, TraceContext {
+    private static class NoopContext implements Context, TraceContext {
         private static final NoopContext INSTANCE = new NoopContext();
 
         @Override
@@ -32,12 +32,12 @@ public class NoOpContext {
         }
 
         @Override
-        public Metric getMetric() {
-            return NoOpMetrics.NO_OP_METRIC;
+        public <V> V getValue(Object key) {
+            return null;
         }
 
         @Override
-        public <V> V getValue(Object key) {
+        public <V> V remove(Object key) {
             return null;
         }
 
@@ -61,13 +61,11 @@ public class NoOpContext {
 
         }
 
-
         @Override
-        public void setMetric(Metric metric) {
-
+        public Map<Object, Object> clear() {
+            return Collections.emptyMap();
         }
 
-        @Override
         public void setCurrentTracing(Tracing tracing) {
 
         }
@@ -88,8 +86,13 @@ public class NoOpContext {
         }
 
         @Override
-        public Map<String, Object> getContext() {
+        public Map<Object, Object> getContext() {
             return Collections.emptyMap();
+        }
+
+        @Override
+        public void putContext(Map<Object, Object> context) {
+
         }
     }
 

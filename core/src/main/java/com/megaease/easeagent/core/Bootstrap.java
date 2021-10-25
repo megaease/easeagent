@@ -30,6 +30,7 @@ import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.trace.Tracing;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
@@ -139,7 +140,7 @@ public class Bootstrap {
         LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
 
         // load plugins
-        PluginLoader.load(builder, conf);
+//        PluginLoader.load(builder, conf);
 
         final AgentReport agentReport = AgentReport.create(conf);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
@@ -217,6 +218,12 @@ public class Bootstrap {
         }
         if (instance instanceof IProvider) {
             ((IProvider) instance).afterPropertiesSet();
+        }
+        if (instance instanceof TracingProvider) {
+            contextManager.setTracing(((TracingProvider) instance).tracingSupplier());
+        }
+        if (instance instanceof MetricProvider) {
+            contextManager.setMetric(((MetricProvider) instance).metricSupplier());
         }
         return builder.build();
     }

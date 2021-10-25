@@ -32,8 +32,6 @@
 
     <modules>
         <module>rabbitmq</module>
-        <module>zipkin-tracer</module>
-        <module>dropwizard-metrics</module>
     </modules>
 
     <build>

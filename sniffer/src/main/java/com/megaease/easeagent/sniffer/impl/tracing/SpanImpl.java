@@ -1,14 +1,18 @@
-package com.megaease.easeagent.plugin.tracer;
+package com.megaease.easeagent.sniffer.impl.tracing;
 
+import brave.Tracer;
+import brave.propagation.TraceContext;
+import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ZipkinSpan implements Span {
+public class SpanImpl implements Span {
     private static final Map<Kind, brave.Span.Kind> KINDS;
 
     static {
@@ -21,16 +25,20 @@ public class ZipkinSpan implements Span {
     }
 
     private final brave.Span span;
+    private final Tracer.SpanInScope spanInScope;
+    private final TraceContext.Injector<Request> injector;
 
-    private ZipkinSpan(brave.Span span) {
+    private SpanImpl(@Nonnull brave.Span span, Tracer.SpanInScope spanInScope, @Nonnull TraceContext.Injector<Request> injector) {
         this.span = span;
+        this.spanInScope = spanInScope;
+        this.injector = injector;
     }
 
-    public static Span build(brave.Span span) {
+    public static Span build(brave.Span span, Tracer.SpanInScope spanInScope, TraceContext.Injector<Request> injector) {
         if (span == null) {
             return NoOpTracer.NO_OP_SPAN;
         }
-        return new ZipkinSpan(span);
+        return new SpanImpl(span, spanInScope, injector);
     }
 
     protected brave.Span getSpan() {
@@ -110,10 +118,18 @@ public class ZipkinSpan implements Span {
     @Override
     public void finish(long timestamp) {
         span.finish(timestamp);
+        if (spanInScope != null) {
+            spanInScope.close();
+        }
     }
 
     @Override
     public void flush() {
         span.flush();
+    }
+
+    @Override
+    public void inject(Request request) {
+        injector.inject(span.context(), request);
     }
 }

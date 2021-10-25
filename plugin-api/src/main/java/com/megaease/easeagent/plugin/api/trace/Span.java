@@ -37,4 +37,6 @@ public interface Span {
     void finish(long timestamp);
 
     void flush();
+
+    void inject(Request request);
 }

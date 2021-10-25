@@ -3,6 +3,7 @@ package com.megaease.easeagent.config;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,12 +15,12 @@ public class PluginConfig implements Config {
     private final Map<String, String> global;
     private final Map<String, String> cover;
 
-    public PluginConfig(String domain, String id, Map<String, String> global, String namespace, Map<String, String> cover) {
-        this.domain = Objects.requireNonNull(domain, "domain must not be null.");
-        this.namespace = Objects.requireNonNull(namespace, "namespace must not be null.");
-        this.id = Objects.requireNonNull(id, "id must not be null.");
-        this.global = Objects.requireNonNull(global, "global must not be null.");
-        this.cover = Objects.requireNonNull(cover, "cover must not be null.");
+    public PluginConfig(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover) {
+        this.domain = domain;
+        this.namespace = namespace;
+        this.id = id;
+        this.global = global;
+        this.cover = cover;
     }
 
     @Override
@@ -121,12 +122,8 @@ public class PluginConfig implements Config {
     }
 
     @Override
-    public void addChangeListener(ConfigChangeListener listener) {
-        this.listener = listener;
-    }
-
-    public ConfigChangeListener getConfigChangeListener() {
-        return listener;
+    public Config getGlobal() {
+        return new Global(domain, id, global, namespace);
     }
 
     @Override
@@ -136,4 +133,29 @@ public class PluginConfig implements Config {
         return keys;
     }
 
+    @Override
+    public void addChangeListener(ConfigChangeListener listener) {
+        this.listener = listener;
+    }
+
+    public ConfigChangeListener getConfigChangeListener() {
+        return listener;
+    }
+
+    public class Global extends PluginConfig implements Config {
+
+        public Global(String domain, String id, Map<String, String> global, String namespace) {
+            super(domain, id, global, namespace, Collections.emptyMap());
+        }
+
+        @Override
+        public void addChangeListener(ConfigChangeListener listener) {
+            PluginConfig.this.addChangeListener(listener);
+        }
+
+        @Override
+        public ConfigChangeListener getConfigChangeListener() {
+            return PluginConfig.this.getConfigChangeListener();
+        }
+    }
 }

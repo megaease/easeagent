@@ -1,5 +1,6 @@
 package com.megaease.easeagent.plugin.api.context;
 
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
@@ -12,6 +13,8 @@ public interface AsyncContext {
 
     Tracing getTracer();
 
-    Map<String, Object> getContext();
+    Map<Object, Object> getContext();
+
+    void putContext(Map<Object, Object> context);
 
 }
