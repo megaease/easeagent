@@ -19,6 +19,9 @@ package com.megaease.easeagent.plugin.matcher;
 
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.enums.ClassMatch;
+import com.megaease.easeagent.plugin.enums.Operator;
+import com.megaease.easeagent.plugin.matcher.operator.AndClassMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.OrClassMatcher;
 import lombok.Data;
 
 @Data
@@ -56,10 +59,26 @@ public class ClassMatcher implements IClassMatcher {
         private int notModifier;
         private String classLoader;
 
+        private IClassMatcher left;
+        private Operator operator = Operator.AND;
+
         ClassMatcherBuilder() {
         }
 
         public ClassMatcherBuilder hasSuperClass(String className) {
+            if (this.name != null && this.name.length() > 0) {
+                if (this.matchType.equals(ClassMatch.SUPER_CLASS)) {
+                    // replace
+                    return this.name(className).matchType(ClassMatch.SUPER_CLASS);
+                } else {
+                    // and operate
+                    ClassMatcherBuilder builder = new ClassMatcherBuilder();
+                    builder.hasSuperClass(className).matchType(ClassMatch.SUPER_CLASS);
+                    builder.left = this.build();
+                    builder.operator = Operator.AND;
+                    return builder;
+                }
+            }
             return this.name(className).matchType(ClassMatch.SUPER_CLASS);
         }
 
@@ -67,7 +86,27 @@ public class ClassMatcher implements IClassMatcher {
             return this.name(className).matchType(ClassMatch.NAMED);
         }
 
+        public ClassMatcherBuilder hasAnnotation(String className) {
+            if (this.name != null && this.name.length() > 0) {
+                // and operate
+                ClassMatcherBuilder builder = new ClassMatcherBuilder();
+                builder.hasSuperClass(className).matchType(ClassMatch.ANNOTATION);
+                builder.left = this.build();
+                builder.operator = Operator.AND;
+                return builder;
+            }
+            return this.name(className).matchType(ClassMatch.ANNOTATION);
+        }
+
         public ClassMatcherBuilder hasInterface(String className) {
+            if (this.name != null && this.name.length() > 0) {
+                // and operate
+                ClassMatcherBuilder builder = new ClassMatcherBuilder();
+                builder.hasSuperClass(className).matchType(ClassMatch.INTERFACE);
+                builder.left = this.build();
+                builder.operator = Operator.AND;
+                return builder;
+            }
             return this.name(className).matchType(ClassMatch.INTERFACE);
         }
 
@@ -131,8 +170,27 @@ public class ClassMatcher implements IClassMatcher {
             return this;
         }
 
-        public ClassMatcher build() {
-            return new ClassMatcher(name, matchType, modifier, notModifier, classLoader);
+        public void setLeft(IClassMatcher matcher) {
+            this.left = matcher;
+        }
+
+        public void setOperator(Operator opt) {
+            this.operator = opt;
+        }
+
+        public IClassMatcher build() {
+            IClassMatcher matcher = new ClassMatcher(name, matchType, modifier, notModifier, classLoader);
+            if (this.left == null || this.operator == null) {
+                return matcher;
+            }
+            switch (this.operator) {
+                case OR:
+                    return new OrClassMatcher(this.left, matcher);
+                case AND:
+                    return new AndClassMatcher(this.left, matcher);
+                default:
+                    return matcher;
+            }
         }
 
         public String toString() {

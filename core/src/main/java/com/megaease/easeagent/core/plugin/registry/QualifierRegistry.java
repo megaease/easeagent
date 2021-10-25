@@ -37,7 +37,6 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class QualifierRegistry {
@@ -45,8 +44,8 @@ public class QualifierRegistry {
     static ConcurrentHashMap<String, AgentPlugin> pointsToPlugin = new ConcurrentHashMap<>();
     static ConcurrentHashMap<String, AgentPlugin> pluginClassnameToPlugin = new ConcurrentHashMap<>();
 
-    static ConcurrentHashMap<String, Integer> qualifierToIndex = new ConcurrentHashMap<>();
-    static AgentArray<Builder<Interceptor>> interceptorSuppliers = new AgentArray<>();
+    static final ConcurrentHashMap<String, Integer> qualifierToIndex = new ConcurrentHashMap<>();
+    static final AgentArray<Builder<Interceptor>> interceptorSuppliers = new AgentArray<>();
 
     public static void register(AgentPlugin plugin) {
         pluginClassnameToPlugin.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
@@ -98,9 +97,15 @@ public class QualifierRegistry {
         if (index != null) {
             interceptorSuppliers.get(index).addSupplier(provider.getInterceptorProvider());
             return index;
+        } else {
+            synchronized (qualifierToIndex) {
+                index = qualifierToIndex.get(provider.getAdviceTo());
+                if (index == null) {
+                    index = interceptorSuppliers.add(SupplierChain.builder());
+                    qualifierToIndex.putIfAbsent(provider.getAdviceTo(), index);
+                }
+            }
         }
-        index = interceptorSuppliers.add(SupplierChain.builder());
-        qualifierToIndex.put(provider.getAdviceTo(), index);
 
         return index;
     }
