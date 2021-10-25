@@ -29,7 +29,6 @@
         <module>plugins</module>
         <module>core</module>
         <module>gen</module>
-        <module>build</module>
         <module>common</module>
         <module>metrics</module>
         <module>zipkin</module>
@@ -39,6 +38,7 @@
         <module>config</module>
         <module>report</module>
         <module>httpserver</module>
+        <module>build</module>
     </modules>
 
     <properties>

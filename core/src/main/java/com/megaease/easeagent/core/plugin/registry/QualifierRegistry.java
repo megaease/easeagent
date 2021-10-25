@@ -17,11 +17,14 @@
 
 package com.megaease.easeagent.core.plugin.registry;
 
+import com.google.common.base.Strings;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
+import com.megaease.easeagent.core.plugin.interceptor.SupplierChain.Builder;
 import com.megaease.easeagent.core.plugin.matcher.ClassMatcherConvert;
 import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
 import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
+import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Points;
@@ -32,21 +35,18 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class QualifierRegistry {
-    static AtomicInteger currentIndex = new AtomicInteger(0);
-
     static ConcurrentHashMap<String, AgentPlugin> qualifierToPlugin = new ConcurrentHashMap<>();
     static ConcurrentHashMap<String, AgentPlugin> pointsToPlugin = new ConcurrentHashMap<>();
     static ConcurrentHashMap<String, AgentPlugin> pluginClassnameToPlugin = new ConcurrentHashMap<>();
 
     static ConcurrentHashMap<String, Integer> qualifierToIndex = new ConcurrentHashMap<>();
-    static ArrayList<SupplierChain.Builder<Interceptor>> interceptorSuppliers;
+    static AgentArray<Builder<Interceptor>> interceptorSuppliers = new AgentArray<>();
 
     public static void register(AgentPlugin plugin) {
         pluginClassnameToPlugin.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
@@ -68,7 +68,7 @@ public class QualifierRegistry {
             ElementMatcher<MethodDescription> bMethodMatcher = MethodMatcherConvert.INSTANCE.convert(matcher);
             String qualifier = getMethodQualifier(pointsClassName, matcher.getQualifier());
             int index = qualifierToIndex.get(qualifier);
-            SupplierChain.Builder<Interceptor> chainBuilder = interceptorSuppliers.get(index);
+            Builder<Interceptor> chainBuilder = interceptorSuppliers.get(index);
             return new MethodTransformation(index, bMethodMatcher, chainBuilder);
         }).collect(Collectors.toSet());
         AgentPlugin plugin = pointsToPlugin.get(pointsClassName);
@@ -99,21 +99,18 @@ public class QualifierRegistry {
             interceptorSuppliers.get(index).addSupplier(provider.getInterceptorProvider());
             return index;
         }
-        index = currentIndex.incrementAndGet();
+        index = interceptorSuppliers.add(SupplierChain.builder());
         qualifierToIndex.put(provider.getAdviceTo(), index);
-
-        if (interceptorSuppliers.size() < index + 1) {
-            synchronized (QualifierRegistry.class) {
-                interceptorSuppliers.ensureCapacity(index + 1);
-            }
-        }
-        interceptorSuppliers.set(index, SupplierChain.builder());
 
         return index;
     }
 
     static String getPointsClassName(String name) {
-        int index = name.indexOf(':');
+        int index;
+        if (Strings.isNullOrEmpty(name)) {
+            return "unknown";
+        }
+        index = name.indexOf(':');
         if (index < 0) {
             return name;
         }
