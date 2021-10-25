@@ -20,37 +20,24 @@ package com.megaease.easeagent.core.plugin;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
-import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.MethodInfo;
-
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public final class Dispatcher {
-    private final static ConcurrentMap<String, com.megaease.easeagent.core.Dispatcher.Advice> MAP = new ConcurrentHashMap<String, com.megaease.easeagent.core.Dispatcher.Advice>();
-
-    static ArrayList<AgentInterceptorChain> chains = new ArrayList<>();
+    static AgentArray<AgentInterceptorChain> chains = new AgentArray<>();
 
     public static void register(int index, AgentInterceptorChain chain) {
-        if (chains.size() < index + 1) {
-            synchronized (Dispatcher.class) {
-                chains.ensureCapacity(index + 1);
-            }
-        }
         chains.set(index, chain);
     }
 
     public static void enter(int index, MethodInfo info, Object ctx) {
-        AgentInterceptorChain chain = chains.get(index);
+        AgentInterceptorChain chain = chains.getUncheck(index);
         chain.doBefore(info, ctx);
     }
 
     public static Object exit(int index, MethodInfo info, Object ctx) {
-        AgentInterceptorChain chain = chains.get(index);
+        AgentInterceptorChain chain = chains.getUncheck(index);
         return chain.doAfter(info, ctx);
     }
 
