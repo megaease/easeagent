@@ -1,7 +1,7 @@
 package com.megaease.easeagent.core;
 
-import com.megaease.easeagent.plugin.api.metric.MetricSupplier;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 
 public interface MetricProvider {
-    MetricSupplier metricSupplier();
+    MetricRegistrySupplier metricSupplier();
 }

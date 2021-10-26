@@ -17,8 +17,9 @@
 
 package com.megaease.easeagent.metrics.converter;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,26 +31,24 @@ import java.util.function.Supplier;
 public abstract class AbstractConverter implements Converter {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConverter.class);
 
-    private static final String CATEGORY = "category";
-    private static final String TYPE = "type";
-    protected final String category;
-    protected final String type;
     private final String rateUnit;
     private final String durationUnit;
     final Long durationFactor;
     final Long rateFactor;
-    private final String keyFieldName;
+    private final Tags tags;
     private final Supplier<Map<String, Object>> additionalAttributes;
 
     AbstractConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> additionalAttributes) {
-        this.category = category;
-        this.type = type;
+        this(additionalAttributes, new Tags(category, type, keyFieldName));
+    }
+
+    AbstractConverter(Supplier<Map<String, Object>> additionalAttributes, Tags tags) {
         this.rateFactor = TimeUnit.SECONDS.toSeconds(1);
         this.rateUnit = calculateRateUnit();
         this.durationFactor = TimeUnit.MILLISECONDS.toNanos(1);
         this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US);
-        this.keyFieldName = keyFieldName;
         this.additionalAttributes = additionalAttributes;
+        this.tags = tags;
     }
 
     private String calculateRateUnit() {
@@ -72,7 +71,7 @@ public abstract class AbstractConverter implements Converter {
             try {
                 Map<String, Object> output = buildMap();
                 writeKey(output, k);
-                writerCategoryAndType(output);
+                writeTag(output);
                 writeGauges(k, gauges, output);
                 writeCounters(k, counters, output);
                 writeHistograms(k, histograms, output);
@@ -93,8 +92,15 @@ public abstract class AbstractConverter implements Converter {
         return map;
     }
 
+
+    private void writeTag(Map<String, Object> output) {
+        output.put(Tags.CATEGORY, tags.getCategory());
+        output.put(Tags.TYPE, tags.getType());
+        output.putAll(tags.getTags());
+    }
+
     private void writeKey(Map<String, Object> output, String key) {
-        output.put(keyFieldName, key);
+        output.put(tags.getKeyFieldName(), key);
     }
 
     @SuppressWarnings("rawtypes")
@@ -103,11 +109,6 @@ public abstract class AbstractConverter implements Converter {
                                                     SortedMap<String, Histogram> histograms,
                                                     SortedMap<String, Meter> meters,
                                                     SortedMap<String, Timer> timers);
-
-    private void writerCategoryAndType(Map<String, Object> output) {
-        output.put(CATEGORY, category);
-        output.put(TYPE, type);
-    }
 
 
     @SuppressWarnings("rawtypes")

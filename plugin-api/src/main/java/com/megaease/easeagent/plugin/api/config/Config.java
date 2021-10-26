@@ -18,11 +18,6 @@ public interface Config {
 
     Boolean getBoolean(String property);
 
-    default boolean enabled() {
-        Boolean enabled = getBoolean("enabled");
-        return enabled == null ? false : enabled;
-    }
-
     default Boolean getBoolean(String property, Boolean defaultValue) {
         Boolean ret;
         if (!hasProperty(property)) {

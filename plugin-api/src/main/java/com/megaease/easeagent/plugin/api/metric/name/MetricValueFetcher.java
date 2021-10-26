@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics.converter;
+package com.megaease.easeagent.plugin.api.metric.name;
 
-import com.codahale.metrics.Counting;
-import com.codahale.metrics.Metered;
-import com.codahale.metrics.Snapshot;
+import com.megaease.easeagent.plugin.api.metric.Counter;
+import com.megaease.easeagent.plugin.api.metric.Meter;
+import com.megaease.easeagent.plugin.api.metric.Metric;
+import com.megaease.easeagent.plugin.api.metric.Snapshot;
 
 import java.util.function.Function;
 
 public enum MetricValueFetcher {
-    CountingCount(Counting::getCount, Counting.class),
+    CountingCount(Counter::getCount, Counter.class),
     SnapshotMaxValue(Snapshot::getMax, Snapshot.class),
     SnapshotMeanValue(Snapshot::getMean, Snapshot.class),
     SnapshotMinValue(Snapshot::getMin, Snapshot.class),
@@ -36,20 +37,20 @@ public enum MetricValueFetcher {
     Snapshot98PercentileValue(Snapshot::get98thPercentile, Snapshot.class),
     Snapshot99PercentileValue(Snapshot::get99thPercentile, Snapshot.class),
     Snapshot999PercentileValue(Snapshot::get999thPercentile, Snapshot.class),
-    MeteredM1Rate(Metered::getOneMinuteRate, Metered.class),
-    MeteredM1RateIgnoreZero(Metered::getOneMinuteRate, Metered.class, aDouble -> aDouble),
-    MeteredM5Rate(Metered::getFiveMinuteRate, Metered.class),
-    MeteredM15Rate(Metered::getFifteenMinuteRate, Metered.class),
-    MeteredMeanRate(Metered::getMeanRate, Metered.class),
-    MeteredCount(Metered::getCount, Metered.class);
+    MeteredM1Rate(Meter::getOneMinuteRate, Meter.class),
+    MeteredM1RateIgnoreZero(Meter::getOneMinuteRate, Meter.class, aDouble -> aDouble),
+    MeteredM5Rate(Meter::getFiveMinuteRate, Meter.class),
+    MeteredM15Rate(Meter::getFifteenMinuteRate, Meter.class),
+    MeteredMeanRate(Meter::getMeanRate, Meter.class),
+    MeteredCount(Meter::getCount, Meter.class);
 
     public static <T, V> Function<T, V> wrapIgnoreZeroFunc(Function<T, V> origin) {
         return null;
     }
 
-    Function func;
-    Class clazz;
-    Function checker;
+    private final Function func;
+    private final Class clazz;
+    private final Function checker;
 
     <T, V> MetricValueFetcher(Function<T, V> function, Class<T> clazz) {
         this(function, clazz, v -> v);
@@ -61,7 +62,19 @@ public enum MetricValueFetcher {
         this.checker = checker;
     }
 
-    Object apply(Object obj) {
+    public Function getFunc() {
+        return func;
+    }
+
+    public Class getClazz() {
+        return clazz;
+    }
+
+    public Function getChecker() {
+        return checker;
+    }
+
+    public Object apply(Metric obj) {
         return checker.apply(func.apply(clazz.cast(obj)));
     }
 }

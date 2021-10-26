@@ -31,7 +31,7 @@ import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
 import org.slf4j.Logger;
@@ -84,12 +84,12 @@ public class JdbcStmMetricInterceptor extends AbstractJdbcMetric implements Remo
         try {
             String key = notification.getKey();
             ImmutableList<String> list = ImmutableList.of(
-                    Optional.ofNullable(this.metricNameFactory.counterName(key, MetricSubType.DEFAULT)).orElse(""),
-                    Optional.ofNullable(this.metricNameFactory.counterName(key, MetricSubType.ERROR)).orElse(""),
-                    Optional.ofNullable(this.metricNameFactory.meterName(key, MetricSubType.DEFAULT)).orElse(""),
-                    Optional.ofNullable(this.metricNameFactory.meterName(key, MetricSubType.ERROR)).orElse(""),
-                    Optional.ofNullable(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT)).orElse(""),
-                    Optional.ofNullable(this.metricNameFactory.gaugeName(key, MetricSubType.DEFAULT)).orElse(""));
+                    Optional.ofNullable(this.nameFactory.counterName(key, MetricSubType.DEFAULT)).orElse(""),
+                    Optional.ofNullable(this.nameFactory.counterName(key, MetricSubType.ERROR)).orElse(""),
+                    Optional.ofNullable(this.nameFactory.meterName(key, MetricSubType.DEFAULT)).orElse(""),
+                    Optional.ofNullable(this.nameFactory.meterName(key, MetricSubType.ERROR)).orElse(""),
+                    Optional.ofNullable(this.nameFactory.timerName(key, MetricSubType.DEFAULT)).orElse(""),
+                    Optional.ofNullable(this.nameFactory.gaugeName(key, MetricSubType.DEFAULT)).orElse(""));
 
             list.forEach(metricRegistry::remove);
         } catch (Exception e) {

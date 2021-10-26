@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics;
+package com.megaease.easeagent.metrics.config;
 
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigConst;
 import com.megaease.easeagent.config.ConfigUtils;
 
-import static com.megaease.easeagent.config.ConfigConst.*;
+import static com.megaease.easeagent.config.ConfigConst.Observability;
+import static com.megaease.easeagent.config.ConfigConst.join;
 
-public class MetricsCollectorConfig {
+public class MetricsCollectorConfig implements MetricsConfig{
     private volatile boolean globalEnabled;
     private volatile boolean enabled;
     private volatile int interval;
@@ -40,14 +41,17 @@ public class MetricsCollectorConfig {
         });
     }
 
+    @Override
     public boolean isEnabled() {
         return globalEnabled && enabled;
     }
 
+    @Override
     public int getInterval() {
         return interval;
     }
 
+    @Override
     public void setIntervalChangeCallback(Runnable runnable) {
         this.callback = runnable;
     }

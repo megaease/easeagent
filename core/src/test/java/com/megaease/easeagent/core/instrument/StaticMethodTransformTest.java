@@ -22,7 +22,7 @@ import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import com.megaease.easeagent.log4j2.supplier.AllUrlsSupplier;
+import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -32,9 +32,10 @@ import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ByteArrayClassLoader;
 import net.bytebuddy.dynamic.scaffold.TypeWriter;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.MethodRule;
 
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
@@ -50,10 +51,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class TransformerTest {
-    static {
-        AllUrlsSupplier.ENABLED = true;
-    }
+public class StaticMethodTransformTest {
     private static final String FOO = "foo",
         BAR = "bar",
         QUX = "qux",
@@ -101,10 +99,13 @@ public class TransformerTest {
     private static String dumpFolder;
     private static AtomicInteger globalIndex = new AtomicInteger(0);
 
+    @Rule
+    public MethodRule agentAttachmentRule = new AgentAttachmentRule();
+
     @BeforeClass
     public static void setUp() {
         classLoader = new ByteArrayClassLoader.ChildFirst(
-            TransformerTest.class.getClassLoader(),
+            NonStaticMethodTransformTest.class.getClassLoader(),
             ClassFileLocator.ForClassLoader.readToNames(Foo.class, CommonInlineAdvice.class),
             ByteArrayClassLoader.PersistenceHandler.MANIFEST);
 
@@ -131,34 +132,7 @@ public class TransformerTest {
     }
 
     @Test
-    public void testAdviceTransformer() throws Exception {
-        System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
-        assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
-
-        assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
-        AgentBuilder builder = Bootstrap.getAgentBuilder(null);
-
-        Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(), FOO);
-
-        ClassFileTransformer classFileTransformer = builder
-            .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
-            .transform(PluginLoader.compound(true, transformations))
-            .installOnByteBuddyAgent();
-        try {
-            Class<?> type = classLoader.loadClass(Foo.class.getName());
-            // check
-            Object instance = type.getDeclaredConstructor().newInstance();
-            AgentDynamicFieldAccessor.setDynamicFieldValue(instance, BAR);
-            assertEquals(AgentDynamicFieldAccessor.getDynamicFieldValue(instance), BAR);
-            assertThat(type.getDeclaredMethod(FOO, String.class)
-                    .invoke(instance, "kkk"),
-                is(QUX + BAR));
-        } finally {
-            assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
-        }
-    }
-
-    @Test
+    @AgentAttachmentRule.Enforce
     public void testStaticAdviceTransformer() throws Exception {
         System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
         assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
@@ -184,8 +158,8 @@ public class TransformerTest {
         }
     }
 
-
     @Test
+    @AgentAttachmentRule.Enforce
     public void testTypeInitialAdviceTransformer() throws Exception {
         System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
         assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);

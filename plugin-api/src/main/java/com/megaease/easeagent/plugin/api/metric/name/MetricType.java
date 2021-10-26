@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, MegaEase
+ * Copyright (c) 2017, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.plugin;
+package com.megaease.easeagent.plugin.api.metric.name;
 
-import com.google.auto.service.AutoService;
-import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
-import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.plugin.api.config.Config;
-import lombok.Data;
+import com.megaease.easeagent.plugin.api.metric.*;
 
-@Data
-@AutoService(AppendBootstrapClassLoaderSearch.class)
-public class AdviceIndexInfo {
-    private AgentInterceptorChain chain;
-    private Config config;
+public enum MetricType {
+
+    TimerType(Timer.class),
+    HistogramType(Histogram.class),
+    MeterType(Meter.class),
+    CounterType(Counter.class),
+    GaugeType(Gauge.class);
+
+    <T> MetricType(Class<T> clazz) {
+    }
 }

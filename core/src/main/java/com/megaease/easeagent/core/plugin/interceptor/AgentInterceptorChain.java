@@ -17,15 +17,17 @@
 
 package com.megaease.easeagent.core.plugin.interceptor;
 
+import com.google.auto.service.AutoService;
+import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AgentInterceptorChain implements InterceptorChain {
+@AutoService(AppendBootstrapClassLoaderSearch.class)
+public class AgentInterceptorChain {
     public final ArrayList<Interceptor> interceptors;
-    int pos = 0;
 
     public AgentInterceptorChain(List<Interceptor> interceptors) {
         this.interceptors = new ArrayList<>(interceptors);
@@ -33,37 +35,6 @@ public class AgentInterceptorChain implements InterceptorChain {
 
     public AgentInterceptorChain(ArrayList<Interceptor> interceptors) {
         this.interceptors = interceptors;
-    }
-
-    @Override
-    public void doBefore(MethodInfo methodInfo, Object context) {
-        if (pos == this.interceptors.size()) {
-            return;
-        }
-        Interceptor interceptor = interceptors.get(pos++);
-        try {
-            interceptor.before(methodInfo, context);
-        } catch (Exception e) {
-            // set error message to context;
-        }
-        this.doBefore(methodInfo, context);
-    }
-
-    @Override
-    public Object doAfter(MethodInfo methodInfo, Object context) {
-        pos--;
-        if (pos < 0) {
-            return methodInfo.getRetValue();
-        }
-        Interceptor interceptor = interceptors.get(pos);
-        try {
-            interceptor.after(methodInfo, context);
-        } catch (Exception e) {
-            // set error message to context;
-        }
-        this.doAfter(methodInfo, context);
-
-        return methodInfo.getRetValue();
     }
 
     public void doBefore(MethodInfo methodInfo, int pos, Object context) {

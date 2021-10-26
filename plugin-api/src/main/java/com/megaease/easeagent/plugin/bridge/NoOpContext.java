@@ -4,7 +4,6 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.metric.Metric;
-import com.megaease.easeagent.plugin.api.metric.MetricSupplier;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TraceContext;

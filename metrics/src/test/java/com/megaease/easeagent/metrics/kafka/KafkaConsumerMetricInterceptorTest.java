@@ -24,8 +24,8 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.BaseMetricsTest;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
@@ -66,7 +66,7 @@ public class KafkaConsumerMetricInterceptorTest extends BaseMetricsTest {
 
     @Test
     public void invokeSuccess() {
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .meterType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .counterType(MetricSubType.CONSUMER, Maps.newHashMap())

@@ -10,17 +10,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
-public class MetricImpl implements Metric {
+public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.metric.MetricRegistry {
     private final ConcurrentMap<String, Gauge> gauges;
     private final MetricRegistry metricRegistry;
 
-    private MetricImpl(MetricRegistry metricRegistry) {
+    private MetricRegistryImpl(MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
         this.gauges = new ConcurrentHashMap<>();
     }
 
-    public static Metric build(MetricRegistry metricRegistry) {
-        return metricRegistry == null ? NoOpMetrics.NO_OP_METRIC : new MetricImpl(metricRegistry);
+    public static com.megaease.easeagent.plugin.api.metric.MetricRegistry build(MetricRegistry metricRegistry) {
+        return metricRegistry == null ? NoOpMetrics.NO_OP_METRIC : new MetricRegistryImpl(metricRegistry);
     }
 
     @Override

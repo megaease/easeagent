@@ -24,8 +24,8 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.BaseMetricsTest;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.rabbitmq.client.Envelope;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class RabbitMqConsumerInterceptorTest extends BaseMetricsTest {
         Config config = this.createConfig(RabbitMqConsumerMetricInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .build();
@@ -61,7 +61,7 @@ public class RabbitMqConsumerInterceptorTest extends BaseMetricsTest {
         Config config = this.createConfig(RabbitMqConsumerMetricInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .meterType(MetricSubType.CONSUMER_ERROR, Maps.newHashMap())

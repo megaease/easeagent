@@ -16,9 +16,6 @@ import java.util.function.Function;
 import static org.junit.Assert.*;
 
 public class AgentLoggerFactoryTest {
-    static {
-        AllUrlsSupplier.ENABLED = true;
-    }
 
     @Test
     public void builder() throws NoSuchMethodException, IllegalAccessException, InstantiationException, NoSuchFieldException, InvocationTargetException, ClassNotFoundException {

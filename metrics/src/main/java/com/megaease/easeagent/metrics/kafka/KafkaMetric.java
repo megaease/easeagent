@@ -23,13 +23,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.metrics.AbstractMetric;
-import com.megaease.easeagent.metrics.MetricField;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.MetricField;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
-import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
+import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +39,7 @@ public class KafkaMetric extends AbstractMetric {
 
     public KafkaMetric(MetricRegistry metricRegistry) {
         super(metricRegistry);
-        this.metricNameFactory = MetricNameFactory.createBuilder()
+        this.nameFactory = NameFactory.createBuilder()
                 .counterType(MetricSubType.PRODUCER, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.EXECUTION_PRODUCER_COUNT, MetricValueFetcher.CountingCount)
                         .build())
@@ -109,7 +109,7 @@ public class KafkaMetric extends AbstractMetric {
 
     public void meter(String topic, MetricSubType... meterTypes) {
         for (MetricSubType meterType : meterTypes) {
-            Meter meter = this.metricRegistry.meter(metricNameFactory.meterName(topic, meterType));
+            Meter meter = this.metricRegistry.meter(nameFactory.meterName(topic, meterType));
             if (meter != null) {
                 meter.mark();
             }
@@ -118,44 +118,44 @@ public class KafkaMetric extends AbstractMetric {
 
     void producerStop(long beginTime, String topic) {
         meter(topic, MetricSubType.PRODUCER);
-        Timer timer = this.metricRegistry.timer(metricNameFactory.timerName(topic, MetricSubType.PRODUCER));
+        Timer timer = this.metricRegistry.timer(nameFactory.timerName(topic, MetricSubType.PRODUCER));
         timer.update(beginTime, TimeUnit.MILLISECONDS);
-        Counter counter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.PRODUCER));
+        Counter counter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.PRODUCER));
         counter.inc();
     }
 
     public void errorProducer(String topic) {
         meter(topic, MetricSubType.PRODUCER_ERROR);
-        Counter counter = metricRegistry.counter(this.metricNameFactory.counterName(topic, MetricSubType.PRODUCER_ERROR));
+        Counter counter = metricRegistry.counter(this.nameFactory.counterName(topic, MetricSubType.PRODUCER_ERROR));
         counter.inc();
     }
 
     public Timer.Context consumeStart(String topic) {
         meter(topic, MetricSubType.CONSUMER);// meter
-        Timer timer = this.metricRegistry.timer(metricNameFactory.timerName(topic, MetricSubType.CONSUMER)); //timer
+        Timer timer = this.metricRegistry.timer(nameFactory.timerName(topic, MetricSubType.CONSUMER)); //timer
         return timer.time();
     }
 
     public void consumeStop(Timer.Context context, String topic) {
         context.stop();
-        Counter counter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER));
+        Counter counter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.CONSUMER));
         counter.inc();
     }
 
     public void consumeError(String topic) {
         meter(topic, MetricSubType.CONSUMER_ERROR);
-        Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
+        Counter errorCounter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
         errorCounter.inc();
     }
 
     public void consume(String topic, long beginTime, boolean success) {
         meter(topic, MetricSubType.CONSUMER);
-        this.metricRegistry.timer(metricNameFactory.timerName(topic, MetricSubType.CONSUMER)).update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
-        Counter counter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER));
+        this.metricRegistry.timer(nameFactory.timerName(topic, MetricSubType.CONSUMER)).update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
+        Counter counter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.CONSUMER));
         counter.inc();
         if (!success) {
             meter(topic, MetricSubType.CONSUMER_ERROR);
-            Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
+            Counter errorCounter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
             errorCounter.inc();
         }
     }
@@ -163,7 +163,7 @@ public class KafkaMetric extends AbstractMetric {
     protected class KafkaConverter extends ConverterAdapter {
 
         public KafkaConverter(Supplier<Map<String, Object>> attributes) {
-            super("application", "kafka", metricNameFactory, KeyType.Timer, attributes, "resource");
+            super("application", "kafka", nameFactory, KeyType.Timer, attributes, "resource");
         }
     }
 }

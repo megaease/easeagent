@@ -15,18 +15,14 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics;
-
-import com.megaease.easeagent.core.utils.MutableObject;
-import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
+package com.megaease.easeagent.plugin.api.metric.name;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
-public interface MetricNameFactory {
+public interface NameFactory {
 
     static Builder createBuilder() {
         return new Builder();
@@ -52,7 +48,7 @@ public interface MetricNameFactory {
 
     String gaugeName(String key, MetricSubType subType);
 
-    class DefaultNameFactory implements MetricNameFactory {
+    class DefaultNameFactory implements NameFactory {
 
         private final List<Tuple<MetricSubType, Map<MetricField, MetricValueFetcher>>> histogramTypes;
         private final List<Tuple<MetricSubType, Map<MetricField, MetricValueFetcher>>> counterTypes;
@@ -77,7 +73,7 @@ public interface MetricNameFactory {
         public Map<MetricSubType, MetricName> meterNames(String key) {
             final Map<MetricSubType, MetricName> results = new HashMap<>();
             meterTypes.forEach(t -> results.put(t.getX(),
-                    new MetricName(t.getX(), key, MetricType.MeterType, t.getY())));
+                new MetricName(t.getX(), key, MetricType.MeterType, t.getY())));
             return results;
         }
 
@@ -90,7 +86,7 @@ public interface MetricNameFactory {
         public Map<MetricSubType, MetricName> histogramNames(String key) {
             final Map<MetricSubType, MetricName> results = new HashMap<>();
             histogramTypes.forEach(t -> results.put(t.getX(),
-                    new MetricName(t.getX(), key, MetricType.HistogramType, t.getY())));
+                new MetricName(t.getX(), key, MetricType.HistogramType, t.getY())));
             return results;
         }
 
@@ -103,7 +99,7 @@ public interface MetricNameFactory {
         public Map<MetricSubType, MetricName> counterNames(String key) {
             final Map<MetricSubType, MetricName> results = new HashMap<>();
             counterTypes.forEach(t -> results.put(t.getX(),
-                    new MetricName(t.getX(), key, MetricType.CounterType, t.getY())));
+                new MetricName(t.getX(), key, MetricType.CounterType, t.getY())));
             return results;
         }
 
@@ -117,7 +113,7 @@ public interface MetricNameFactory {
         public Map<MetricSubType, MetricName> timerNames(String key) {
             final Map<MetricSubType, MetricName> results = new HashMap<>();
             timerTypes.forEach(t -> results.put(t.getX(),
-                    new MetricName(t.getX(), key, MetricType.TimerType, t.getY())));
+                new MetricName(t.getX(), key, MetricType.TimerType, t.getY())));
             return results;
         }
 
@@ -130,7 +126,7 @@ public interface MetricNameFactory {
         public Map<MetricSubType, MetricName> gaugeNames(String key) {
             final Map<MetricSubType, MetricName> results = new HashMap<>();
             gaugeTypes.forEach(t -> results.put(t.getX(),
-                    new MetricName(t.getX(), key, MetricType.GaugeType, t.getY())));
+                new MetricName(t.getX(), key, MetricType.GaugeType, t.getY())));
             return results;
         }
 
@@ -140,23 +136,18 @@ public interface MetricNameFactory {
         }
 
         private String getName(String key, MetricType metricType, MetricSubType metricSubType, List<Tuple<MetricSubType,
-                Map<MetricField, MetricValueFetcher>>> metricsTypes) {
-            final MutableObject<MetricName> result = MutableObject.nullMutableObject();
-            metricsTypes.forEach(updateMetricName(result, key, metricType, metricSubType));
-            if (result.getValue() == null) {
-                throw new IllegalArgumentException("Invalid metricSubType [" + metricSubType.name() + "] of " + metricType.name() +
-                        " not be registered in MetricNameFactory");
-            }
-            return result.getValue().name();
-        }
-
-        private Consumer<Tuple<MetricSubType, Map<MetricField, MetricValueFetcher>>> updateMetricName(
-                MutableObject<MetricName> metricName, String key, MetricType metricType, MetricSubType metricSubType) {
-            return t -> {
+            Map<MetricField, MetricValueFetcher>>> metricsTypes) {
+            MetricName metricName = null;
+            for (Tuple<MetricSubType, Map<MetricField, MetricValueFetcher>> t : metricsTypes) {
                 if (t.getX().equals(metricSubType)) {
-                    metricName.setValue(new MetricName(t.getX(), key, metricType, t.getY()));
+                    metricName = new MetricName(t.getX(), key, metricType, t.getY());
                 }
-            };
+            }
+            if (metricName == null) {
+                throw new IllegalArgumentException("Invalid metricSubType [" + metricSubType.name() + "] of " + metricType.name() +
+                    " not be registered in NameFactory");
+            }
+            return metricName.name();
         }
     }
 
@@ -198,7 +189,7 @@ public interface MetricNameFactory {
         Builder() {
         }
 
-        public MetricNameFactory build() {
+        public NameFactory build() {
             return new DefaultNameFactory(meterTypes, histogramTypes, counterTypes, timerTypes, gaugeTypes);
         }
 

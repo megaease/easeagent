@@ -26,8 +26,8 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.BaseMetricsTest;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStmMetricInterceptor;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,7 +63,7 @@ public class JdbcStmMetricInterceptorTest extends BaseMetricsTest {
         interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
         ContextUtils.setEndTime(context);
         interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
+        NameFactory metricNameFactory = NameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .build();
@@ -80,7 +80,7 @@ public class JdbcStmMetricInterceptorTest extends BaseMetricsTest {
         interceptor.before(methodInfo, context, mock(AgentInterceptorChain.class));
         ContextUtils.setEndTime(context);
         interceptor.after(methodInfo, context, mock(AgentInterceptorChain.class));
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
+        NameFactory metricNameFactory = NameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.ERROR, Maps.newHashMap())

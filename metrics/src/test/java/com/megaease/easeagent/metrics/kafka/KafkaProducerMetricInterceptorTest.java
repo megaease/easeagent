@@ -25,8 +25,8 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.BaseMetricsTest;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,7 +60,7 @@ public class KafkaProducerMetricInterceptorTest extends BaseMetricsTest {
 
     @Test
     public void invokeSuccessAsync() {
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.PRODUCER, Maps.newHashMap())
                 .meterType(MetricSubType.PRODUCER, Maps.newHashMap())
                 .counterType(MetricSubType.PRODUCER, Maps.newHashMap())
@@ -77,7 +77,7 @@ public class KafkaProducerMetricInterceptorTest extends BaseMetricsTest {
 
     @Test
     public void invokeSuccessSyncErr() {
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .meterType(MetricSubType.PRODUCER_ERROR, Maps.newHashMap())
                 .counterType(MetricSubType.PRODUCER_ERROR, Maps.newHashMap())
                 .build();
@@ -92,7 +92,7 @@ public class KafkaProducerMetricInterceptorTest extends BaseMetricsTest {
 
     @Test
     public void invokeSuccessAsyncErr() {
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.PRODUCER, Maps.newHashMap())
                 .meterType(MetricSubType.PRODUCER, Maps.newHashMap())
                 .meterType(MetricSubType.PRODUCER_ERROR, Maps.newHashMap())
