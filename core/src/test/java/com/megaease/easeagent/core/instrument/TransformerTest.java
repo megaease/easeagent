@@ -49,9 +49,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TransformerTest {
-    static {
-        AllUrlsSupplier.ENABLED = true;
-    }
     private static final String FOO = "foo", BAR = "bar", QUX = "qux";
 
     @SuppressWarnings("unused")

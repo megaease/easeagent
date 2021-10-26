@@ -109,6 +109,13 @@
             <artifactId>byte-buddy-agent</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>log4j2-impl</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
