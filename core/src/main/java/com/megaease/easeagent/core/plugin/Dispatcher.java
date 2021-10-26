@@ -33,16 +33,13 @@ public final class Dispatcher {
 
     public static void enter(int index, MethodInfo info, Object ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
-        chain.doBefore(info, ctx);
+        int pos = 0;
+        chain.doBefore(info, pos, ctx);
     }
 
     public static Object exit(int index, MethodInfo info, Object ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
-        return chain.doAfter(info, ctx);
-    }
-
-    @AutoService(AppendBootstrapClassLoaderSearch.class)
-    public interface Advice {
-        Object execute(Object... args);
+        int pos = chain.size() - 1;
+        return chain.doAfter(info, pos, ctx);
     }
 }

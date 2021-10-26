@@ -111,7 +111,7 @@ public class PluginLoader {
      * @param methodTransformations method matchers under a special classMatcher
      * @return transform
      */
-    private static AgentBuilder.Transformer compound(boolean hasDynamicField,
+    public static AgentBuilder.Transformer compound(boolean hasDynamicField,
                                                      Iterable<MethodTransformation> methodTransformations) {
         List<AgentBuilder.Transformer> agentTransformers = StreamSupport
             .stream(methodTransformations.spliterator(), false)

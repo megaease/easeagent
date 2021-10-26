@@ -29,20 +29,24 @@ import net.bytebuddy.implementation.bytecode.assign.Assigner;
 @SuppressWarnings("unused")
 public class CommonInlineAdvice {
     private static final String CONTEXT = "easeagent_context";
+    private static final String POS = "easeagent_pos";
 
     @Advice.OnMethodEnter
     public static MethodInfo enter(@Index int index,
                                    @Advice.This Object invoker,
                                    @Advice.Origin("#m") String method,
-                                   @Advice.AllArguments Object[] args,
+                                   @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                                    @Advice.Local(CONTEXT) Object context) {
+        // check context stack info here
+
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(invoker)
             .method(method)
             .args(args)
             .build();
-
         Dispatcher.enter(index, methodInfo, context);
+        args = methodInfo.getArgs();
+
 
         return methodInfo;
     }
@@ -53,7 +57,10 @@ public class CommonInlineAdvice {
                             @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,
                             @Advice.Thrown Throwable throwable,
                             @Advice.Local(CONTEXT) Object context) {
+        // check context stack info here
+
         methodInfo.setThrowable(throwable);
+        methodInfo.setRetValue(result);
         Dispatcher.exit(index, methodInfo, context);
         result = methodInfo.getRetValue();
     }

@@ -111,9 +111,24 @@ public class Bootstrap {
             agentHttpServer.startServer();
             LOGGER.info("start agent http server on port:{}", port);
         }
+        AgentBuilder builder = getAgentBuilder(conf);
+
+        // load plugins
+        PluginLoader.load(builder, conf);
+
+        final AgentReport agentReport = AgentReport.create(conf);
+        builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
+        long installBegin = System.currentTimeMillis();
+        builder.installOn(inst);
+        LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
+        agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER);
+        LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
+    }
+
+    public static AgentBuilder getAgentBuilder(Configs config) {
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
-//                .with(LISTENER)
+//          .with(LISTENER)
 //                .with(new AgentBuilder.Listener.Filtering(
 //                        new StringMatcher("java.lang.Thread", StringMatcher.Mode.EQUALS_FULLY),
 //                        AgentBuilder.Listener.StreamWriting.toSystemOut()))
@@ -139,16 +154,7 @@ public class Bootstrap {
             .or(nameStartsWith("com.intellij."));
         LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
 
-        // load plugins
-//        PluginLoader.load(builder, conf);
-
-        final AgentReport agentReport = AgentReport.create(conf);
-        builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
-        long installBegin = System.currentTimeMillis();
-        builder.installOn(inst);
-        LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
-        agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER);
-        LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
+        return builder;
     }
 
     static void registerMBeans(ConfigManagerMXBean conf) throws Exception {

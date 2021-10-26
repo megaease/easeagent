@@ -28,9 +28,7 @@ public class AgentInterceptorChain implements InterceptorChain {
     int pos = 0;
 
     public AgentInterceptorChain(List<Interceptor> interceptors) {
-        ArrayList<Interceptor> aList = new ArrayList<>();
-        aList.addAll(interceptors);
-        this.interceptors = aList;
+        this.interceptors = new ArrayList<>(interceptors);
     }
 
     public AgentInterceptorChain(ArrayList<Interceptor> interceptors) {
@@ -42,7 +40,7 @@ public class AgentInterceptorChain implements InterceptorChain {
         if (pos == this.interceptors.size()) {
             return;
         }
-        Interceptor interceptor = interceptors.get(pos);
+        Interceptor interceptor = interceptors.get(pos++);
         try {
             interceptor.before(methodInfo, context);
         } catch (Exception e) {
@@ -66,5 +64,35 @@ public class AgentInterceptorChain implements InterceptorChain {
         this.doAfter(methodInfo, context);
 
         return methodInfo.getRetValue();
+    }
+
+    public void doBefore(MethodInfo methodInfo, int pos, Object context) {
+        if (pos == this.interceptors.size()) {
+            return;
+        }
+        Interceptor interceptor = interceptors.get(pos);
+        try {
+            interceptor.before(methodInfo, context);
+        } catch (Exception e) {
+            // set error message to context;
+        }
+        this.doBefore(methodInfo, pos + 1, context);
+    }
+
+    public Object doAfter(MethodInfo methodInfo, int pos, Object context) {
+        if (pos < 0) {
+            return methodInfo.getRetValue();
+        }
+        Interceptor interceptor = interceptors.get(pos);
+        try {
+            interceptor.after(methodInfo, context);
+        } catch (Exception e) {
+            // set error message to context;
+        }
+        return this.doAfter(methodInfo, pos - 1, context);
+    }
+
+    public int size() {
+        return this.interceptors.size();
     }
 }

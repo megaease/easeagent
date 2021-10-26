@@ -39,7 +39,7 @@ public class SupplierChain<T extends Ordered> {
     }
 
     public static class Builder<T extends Ordered> {
-        private ArrayList<Supplier<T>> suppliers;
+        private ArrayList<Supplier<T>> suppliers = new ArrayList<>();
 
         Builder() {
         }
