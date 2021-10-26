@@ -34,6 +34,7 @@ import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.config.ConfigConst;
 import com.megaease.easeagent.core.IProvider;
 import com.megaease.easeagent.core.Injection;
+import com.megaease.easeagent.core.MetricProvider;
 import com.megaease.easeagent.core.TracingProvider;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
@@ -44,9 +45,14 @@ import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
 import com.megaease.easeagent.metrics.MetricRegistryService;
-import com.megaease.easeagent.metrics.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.PrometheusAgentHttpHandler;
+import com.megaease.easeagent.metrics.config.MetricsCollectorConfig;
+import com.megaease.easeagent.metrics.config.MetricsConfig;
+import com.megaease.easeagent.metrics.config.PluginMetricsConfig;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
+import com.megaease.easeagent.metrics.impl.MetricRegistryImpl;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcDataSourceMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStmMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
@@ -55,14 +61,17 @@ import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMessageListenerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
-// import com.megaease.easeagent.metrics.rabbitmq.*;
 import com.megaease.easeagent.metrics.redis.JedisMetricInterceptor;
 import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.ServletMetric;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
+import com.megaease.easeagent.report.PluginMetricReporter;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
@@ -75,12 +84,6 @@ import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollIn
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
-/*
-import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
-*/
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
@@ -104,11 +107,6 @@ import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInt
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
-/*
-import com.megaease.easeagent.zipkin.rabbitmq.spring.RabbitMqMessageListenerTracingInterceptor;
-import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
-import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
-*/
 import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
 import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import org.apache.commons.lang3.StringUtils;
@@ -126,7 +124,20 @@ import java.util.function.Supplier;
 
 import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY;
 
-public abstract class Provider implements AgentReportAware, ConfigAware, IProvider, AgentHttpHandlerProvider, TracingProvider {
+// import com.megaease.easeagent.metrics.rabbitmq.*;
+/*
+import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
+import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
+*/
+/*
+import com.megaease.easeagent.zipkin.rabbitmq.spring.RabbitMqMessageListenerTracingInterceptor;
+import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
+import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
+*/
+
+public abstract class Provider implements AgentReportAware, ConfigAware, IProvider, AgentHttpHandlerProvider, TracingProvider, MetricProvider {
 
     private static final String EASEAGENT_HEALTH_READINESS_ENABLED = "easeagent.health.readiness.enabled";
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(false);
@@ -198,6 +209,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Override
     public Supplier<com.megaease.easeagent.plugin.api.trace.Tracing> tracingSupplier() {
         return () -> TracingImpl.build(tracing);
+    }
+
+    @Override
+    public MetricRegistrySupplier metricSupplier() {
+        return new ApplicationMetricRegistrySupplier();
     }
 
     @Injection.Bean
@@ -598,6 +614,21 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 String json = JsonUtil.toJson(item);
                 agentReport.report(new MetricItem(KEY_METRICS_MD5_DICTIONARY, json));
             }
+        }
+    }
+
+    class ApplicationMetricRegistrySupplier implements MetricRegistrySupplier {
+
+        @Override
+        public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(com.megaease.easeagent.plugin.api.config.Config config, NameFactory nameFactory, Tags tags) {
+            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
+            MetricsConfig metricsConfig = new PluginMetricsConfig(config);
+            ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, KeyType.Timer, Provider.this.additionalAttributes, tags);
+            PluginMetricReporter.Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
+            new AutoRefreshReporter(metricRegistry, metricsConfig,
+                converterAdapter,
+                s -> reporter.report(s)).run();
+            return MetricRegistryImpl.build(metricRegistry);
         }
     }
 }

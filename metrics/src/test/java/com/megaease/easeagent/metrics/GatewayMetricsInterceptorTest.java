@@ -24,6 +24,8 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
@@ -45,7 +47,7 @@ public class GatewayMetricsInterceptorTest extends BaseMetricsTest {
         Config config = this.createConfig(GatewayMetricsInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         GatewayMetricsInterceptor interceptor = new GatewayMetricsInterceptor(metricRegistry, config);
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
@@ -86,7 +88,7 @@ public class GatewayMetricsInterceptorTest extends BaseMetricsTest {
         Config config = this.createConfig(GatewayMetricsInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
         GatewayMetricsInterceptor interceptor = new GatewayMetricsInterceptor(metricRegistry, config);
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.ERROR, Maps.newHashMap())
                 .counterType(MetricSubType.ERROR, Maps.newHashMap())

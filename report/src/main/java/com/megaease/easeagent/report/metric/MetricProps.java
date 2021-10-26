@@ -35,6 +35,10 @@ public interface MetricProps {
         return new Default(configs, key);
     }
 
+    static MetricProps newDefault(com.megaease.easeagent.plugin.api.config.Config config) {
+        return new Default(config.getBoolean(KEY_COMM_ENABLED), config.getString(KEY_COMM_APPEND_TYPE), config.getString(KEY_COMM_TOPIC));
+    }
+
     class Default implements MetricProps {
         private volatile boolean enabled = false;
         private volatile String appendType;
@@ -44,6 +48,12 @@ public interface MetricProps {
             ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_ENABLED), configs, Config::getBoolean, v -> this.enabled = v);
             ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_APPEND_TYPE), configs, Config::getString, v -> this.appendType = v);
             ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_TOPIC), configs, Config::getString, v -> this.topic = v);
+        }
+
+        public Default(boolean enabled, String appendType, String topic) {
+            this.enabled = enabled;
+            this.appendType = appendType;
+            this.topic = topic;
         }
 
         @Override

@@ -17,7 +17,6 @@ public class LoggerFactory {
     protected static final AgentLoggerFactory<AgentLogger> FACTORY;
 
     static {
-        Supplier<String> supplier = () -> "build agent logger factory fail.";
         AgentLoggerFactory<AgentLogger> factory = null;
         try {
             factory = AgentLoggerFactory.builder(
@@ -25,20 +24,8 @@ public class LoggerFactory {
                 AgentLogger.LOGGER_SUPPLIER,
                 AgentLogger.class
             ).build();
-        } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.WARNING, e, supplier);
-        } catch (NoSuchMethodException e) {
-            LOGGER.log(Level.WARNING, e, supplier);
-        } catch (IllegalAccessException e) {
-            LOGGER.log(Level.WARNING, e, supplier);
-        } catch (InvocationTargetException e) {
-            LOGGER.log(Level.WARNING, e, supplier);
-        } catch (InstantiationException e) {
-            LOGGER.log(Level.WARNING, e, supplier);
-        } catch (NoSuchFieldException e) {
-            LOGGER.log(Level.WARNING, e, supplier);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e, supplier);
+            LOGGER.log(Level.WARNING, String.format("build agent logger factory fail: %s<%s>.", e.getClass().getName(), e.getMessage()));
         }
         FACTORY = factory;
     }

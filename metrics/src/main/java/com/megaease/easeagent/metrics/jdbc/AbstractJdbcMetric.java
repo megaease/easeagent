@@ -29,7 +29,7 @@ import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
-import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
+import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 
 import java.time.Duration;
@@ -43,7 +43,7 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
 
     public AbstractJdbcMetric(MetricRegistry metricRegistry) {
         super(metricRegistry);
-        this.metricNameFactory = MetricNameFactory.createBuilder()
+        this.nameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
                         ImmutableMap.<MetricField, MetricValueFetcher>builder()
                                 .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
@@ -85,19 +85,19 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
     }
 
     protected void collectMetric(String key, boolean success, Map<Object, Object> context) {
-        Timer timer = this.metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT));
+        Timer timer = this.metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT));
         timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
-        Counter counter = this.metricRegistry.counter(this.metricNameFactory.counterName(key, MetricSubType.DEFAULT));
-        Meter meter = this.metricRegistry.meter(this.metricNameFactory.meterName(key, MetricSubType.DEFAULT));
+        Counter counter = this.metricRegistry.counter(this.nameFactory.counterName(key, MetricSubType.DEFAULT));
+        Meter meter = this.metricRegistry.meter(this.nameFactory.meterName(key, MetricSubType.DEFAULT));
         meter.mark();
         counter.inc();
         if (!success) {
-            Counter errCounter = this.metricRegistry.counter(this.metricNameFactory.counterName(key, MetricSubType.ERROR));
-            Meter errMeter = this.metricRegistry.meter(this.metricNameFactory.meterName(key, MetricSubType.ERROR));
+            Counter errCounter = this.metricRegistry.counter(this.nameFactory.counterName(key, MetricSubType.ERROR));
+            Meter errMeter = this.metricRegistry.meter(this.nameFactory.meterName(key, MetricSubType.ERROR));
             errMeter.mark();
             errCounter.inc();
         }
-        MetricName gaugeName = metricNameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
+        MetricName gaugeName = nameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
         metricRegistry.gauge(gaugeName.name(), () -> () -> LastMinutesCounterGauge.builder()
                 .m1Count((long) meter.getOneMinuteRate() * 60)
                 .m5Count((long) meter.getFiveMinuteRate() * 60 * 5)
@@ -107,7 +107,7 @@ public abstract class AbstractJdbcMetric extends AbstractMetric implements Agent
     }
     protected class JDBCConverter extends ConverterAdapter {
         public JDBCConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
-            super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
+            super(category, type, nameFactory, KeyType.Timer, attributes, keyFieldName);
         }
     }
 }

@@ -7,8 +7,10 @@ import com.megaease.easeagent.core.log.LoggerMdc;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
-import com.megaease.easeagent.plugin.api.metric.Metric;
-import com.megaease.easeagent.plugin.api.metric.MetricSupplier;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.bridge.NoOpLoggerFactory;
@@ -18,7 +20,6 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ContextManager {
@@ -27,7 +28,7 @@ public class ContextManager {
     private final PluginConfigContext pluginConfigContext;
     private final ILoggerFactory loggerFactory;
     private volatile Supplier<Tracing> tracing = () -> null;
-    private volatile MetricSupplier metric = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
+    private volatile MetricRegistrySupplier metric = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
 
     public ContextManager(Configs conf, PluginConfigContext pluginConfigContext, ILoggerFactory loggerFactory) {
         this.conf = Objects.requireNonNull(conf, "conf must not be null.");
@@ -50,7 +51,7 @@ public class ContextManager {
         }
         ContextManager contextManager = new ContextManager(conf, iConfigFactory, iLoggerFactory);
         EaseAgent.contextSupplier = contextManager.new SessionContextSupplier();
-        EaseAgent.metricSupplier = contextManager.new MetricSupplierImpl();
+        EaseAgent.metricRegistrySupplier = contextManager.new MetricRegistrySupplierImpl();
         return contextManager;
     }
 
@@ -58,7 +59,7 @@ public class ContextManager {
         this.tracing = tracing;
     }
 
-    public void setMetric(@Nonnull MetricSupplier metric) {
+    public void setMetric(@Nonnull MetricRegistrySupplier metric) {
         this.metric = metric;
     }
 
@@ -72,11 +73,11 @@ public class ContextManager {
         }
     }
 
-    public class MetricSupplierImpl implements com.megaease.easeagent.plugin.api.metric.MetricSupplier {
+    public class MetricRegistrySupplierImpl implements MetricRegistrySupplier {
 
         @Override
-        public Metric newMetric(Config config) {
-            return NoNull.of(metric.newMetric(config), NoOpMetrics.NO_OP_METRIC);
+        public MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
+            return NoNull.of(metric.newMetricRegistry(config, nameFactory, tags), NoOpMetrics.NO_OP_METRIC);
         }
     }
 }

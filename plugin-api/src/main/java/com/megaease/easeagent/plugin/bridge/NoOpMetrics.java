@@ -2,6 +2,8 @@ package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.*;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 
 import java.io.OutputStream;
 import java.time.Duration;
@@ -10,21 +12,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public final class NoOpMetrics {
-    public static final MetricSupplier NO_OP_METRIC_SUPPLIER = NoopMetricsSupplier.INSTANCE;
+    public static final MetricRegistrySupplier NO_OP_METRIC_SUPPLIER = NoopMetricsRegistrySupplier.INSTANCE;
     public static final Gauge NO_OP_GAUGE = NoopGauge.INSTANCE;
     public static final Snapshot NO_OP_SNAPSHOT = NoopSnapshot.INSTANCE;
     public static final Timer NO_OP_TIMER = NoopTimer.INSTANCE;
     public static final Histogram NO_OP_HISTOGRAM = NoopHistogram.INSTANCE;
     public static final Counter NO_OP_COUNTER = NoopCounter.INSTANCE;
     public static final Meter NO_OP_METER = NoopMeter.INSTANCE;
-    public static final Metric NO_OP_METRIC = NoopMetric.INSTANCE;
+    public static final MetricRegistry NO_OP_METRIC = NoopMetricRegistry.INSTANCE;
 
-    private static final class NoopMetricsSupplier implements MetricSupplier {
-        private static final NoopMetricsSupplier INSTANCE = new NoopMetricsSupplier();
+    private static final class NoopMetricsRegistrySupplier implements MetricRegistrySupplier {
+        private static final NoopMetricsRegistrySupplier INSTANCE = new NoopMetricsRegistrySupplier();
 
         @Override
-        public Metric newMetric(Config config) {
-            return NoopMetric.INSTANCE;
+        public MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
+            return NoopMetricRegistry.INSTANCE;
         }
     }
 
@@ -369,8 +371,8 @@ public final class NoOpMetrics {
         }
     }
 
-    static final class NoopMetric implements Metric {
-        private static final NoopMetric INSTANCE = new NoopMetric();
+    static final class NoopMetricRegistry implements MetricRegistry {
+        private static final NoopMetricRegistry INSTANCE = new NoopMetricRegistry();
 
         @Override
         public Meter meter(String name) {

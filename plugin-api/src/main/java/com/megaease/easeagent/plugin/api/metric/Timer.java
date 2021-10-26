@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public interface Timer {
+public interface Timer extends Metric {
 
     interface Context {
 

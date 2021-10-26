@@ -15,22 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics;
+package com.megaease.easeagent.plugin.api.metric.name;
 
-public enum ConverterType {
+import com.megaease.easeagent.plugin.api.metric.*;
 
-    NONE(0),
-    RATE(1),
-    DURATION(2),
-    ;
+public enum MetricType {
 
-    private int value;
+    TimerType(Timer.class),
+    HistogramType(Histogram.class),
+    MeterType(Meter.class),
+    CounterType(Counter.class),
+    GaugeType(Gauge.class);
 
-    public int getValue() {
-        return value;
-    }
-
-    ConverterType(int value) {
-        this.value = value;
+    <T> MetricType(Class<T> clazz) {
     }
 }

@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics;
-
-import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
+package com.megaease.easeagent.plugin.api.metric.name;
 
 import java.util.HashMap;
 import java.util.Map;

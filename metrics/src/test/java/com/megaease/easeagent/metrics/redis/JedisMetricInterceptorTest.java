@@ -24,8 +24,8 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.BaseMetricsTest;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class JedisMetricInterceptorTest extends BaseMetricsTest {
     public void invokeSuccess() {
         Config config = this.createConfig(AbstractRedisMetricInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
@@ -62,7 +62,7 @@ public class JedisMetricInterceptorTest extends BaseMetricsTest {
     public void invokeErr() {
         Config config = this.createConfig(AbstractRedisMetricInterceptor.ENABLE_KEY, "true");
         MetricRegistry metricRegistry = new MetricRegistry();
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .counterType(MetricSubType.DEFAULT, Maps.newHashMap())

@@ -17,13 +17,14 @@
 
 package com.megaease.easeagent.metrics.converter;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
-import com.megaease.easeagent.metrics.MetricField;
-import com.megaease.easeagent.metrics.MetricName;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.codahale.metrics.Timer;
+import com.megaease.easeagent.metrics.impl.CounterImpl;
+import com.megaease.easeagent.metrics.impl.MeterImpl;
+import com.megaease.easeagent.metrics.impl.SnapshotImpl;
+import com.megaease.easeagent.metrics.impl.TimerImpl;
 import com.megaease.easeagent.metrics.model.GaugeMetricModel;
+import com.megaease.easeagent.plugin.api.metric.name.*;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -33,16 +34,23 @@ public class ConverterAdapter extends AbstractConverter {
 
     private final KeyType keyType;
 
-    private final MetricNameFactory metricNameFactory;
+    private final NameFactory nameFactory;
 
-    public ConverterAdapter(String category, String type, MetricNameFactory metricNameFactory, KeyType keyType,
+    public ConverterAdapter(String category, String type, NameFactory metricNameFactory, KeyType keyType,
                             Supplier<Map<String, Object>> attributes, String keyFieldName) {
         super(category, type, keyFieldName, attributes);
         this.keyType = keyType;
-        this.metricNameFactory = metricNameFactory;
+        this.nameFactory = metricNameFactory;
     }
 
-    public ConverterAdapter(String category, String type, MetricNameFactory metricNameFactory, KeyType keyType,
+    public ConverterAdapter(NameFactory metricNameFactory, KeyType keyType,
+                            Supplier<Map<String, Object>> attributes, Tags tags) {
+        super(attributes, tags);
+        this.keyType = keyType;
+        this.nameFactory = metricNameFactory;
+    }
+
+    public ConverterAdapter(String category, String type, NameFactory metricNameFactory, KeyType keyType,
                             Supplier<Map<String, Object>> attributes) {
         this(category, type, metricNameFactory, keyType, attributes, "resource");
     }
@@ -137,7 +145,7 @@ public class ConverterAdapter extends AbstractConverter {
     @Override
     @SuppressWarnings("rawtypes")
     protected void writeGauges(String key, SortedMap<String, Gauge> gauges, Map<String, Object> output) {
-        Map<MetricSubType, MetricName> map = metricNameFactory.gaugeNames(key);
+        Map<MetricSubType, MetricName> map = nameFactory.gaugeNames(key);
         map.values().forEach(v -> {
             Gauge gauge = gauges.get(v.name());
             if (gauge == null) {
@@ -153,13 +161,13 @@ public class ConverterAdapter extends AbstractConverter {
 
     @Override
     protected void writeCounters(String key, SortedMap<String, Counter> counters, Map<String, Object> output) {
-        Map<MetricSubType, MetricName> map = metricNameFactory.counterNames(key);
+        Map<MetricSubType, MetricName> map = nameFactory.counterNames(key);
         map.values().forEach(v -> Optional
-                .ofNullable(counters.get(v.name()))
-                .ifPresent(c -> v.getValueFetcher().forEach((fieldName, fetcher) -> {
-                    // for test
-                    appendField(output, fieldName, fetcher, c);
-                })));
+            .ofNullable(counters.get(v.name()))
+            .ifPresent(c -> v.getValueFetcher().forEach((fieldName, fetcher) -> {
+                // for test
+                appendField(output, fieldName, fetcher, CounterImpl.build(c));
+            })));
 
     }
 
@@ -170,45 +178,45 @@ public class ConverterAdapter extends AbstractConverter {
 
     @Override
     protected void writeMeters(String key, SortedMap<String, Meter> meters, Map<String, Object> output) {
-        Map<MetricSubType, MetricName> map = metricNameFactory.meterNames(key);
+        Map<MetricSubType, MetricName> map = nameFactory.meterNames(key);
         map.values().forEach(v -> Optional
-                .ofNullable(meters.get(v.name()))
-                .ifPresent(m -> v.getValueFetcher().forEach(
-                        (fieldName, fetcher) -> {
-                            // for test
-                            appendField(output, fieldName, fetcher, m);
-                        }))
+            .ofNullable(meters.get(v.name()))
+            .ifPresent(m -> v.getValueFetcher().forEach(
+                (fieldName, fetcher) -> {
+                    // for test
+                    appendField(output, fieldName, fetcher, MeterImpl.build(m));
+                }))
         );
     }
 
     private void appendField(Map<String, Object> output, MetricField fieldName, MetricValueFetcher fetcher,
-                             Object object) {
+                             com.megaease.easeagent.plugin.api.metric.Metric metric) {
         switch (fieldName.getType()) {
             case DURATION:
-                appendDuration(output, fieldName.getField(), fetcher.apply(object), fieldName.getScale());
+                appendDuration(output, fieldName.getField(), fetcher.apply(metric), fieldName.getScale());
                 break;
             case RATE:
-                appendRate(output, fieldName.getField(), fetcher.apply(object), fieldName.getScale());
+                appendRate(output, fieldName.getField(), fetcher.apply(metric), fieldName.getScale());
                 break;
             default:
-                output.put(fieldName.getField(), fetcher.apply(object));
+                output.put(fieldName.getField(), fetcher.apply(metric));
                 break;
         }
     }
 
     @Override
     protected void writeTimers(String key, SortedMap<String, Timer> timers, Map<String, Object> output) {
-        Map<MetricSubType, MetricName> map = metricNameFactory.timerNames(key);
+        Map<MetricSubType, MetricName> map = nameFactory.timerNames(key);
         map.values().forEach(v -> Optional.ofNullable(timers.get(v.name())).ifPresent(t -> {
-                    final Snapshot snapshot = t.getSnapshot();
-                    v.getValueFetcher().forEach((fieldName, fetcher) -> {
-                        if (fetcher.clazz.equals(Snapshot.class)) {
-                            appendField(output, fieldName, fetcher, snapshot);
-                        } else {
-                            appendField(output, fieldName, fetcher, t);
-                        }
-                    });
-                })
+                final Snapshot snapshot = t.getSnapshot();
+                v.getValueFetcher().forEach((fieldName, fetcher) -> {
+                    if (fetcher.getClazz().equals(com.megaease.easeagent.plugin.api.metric.Snapshot.class)) {
+                        appendField(output, fieldName, fetcher, SnapshotImpl.build(snapshot));
+                    } else {
+                        appendField(output, fieldName, fetcher, TimerImpl.build(t));
+                    }
+                });
+            })
         );
     }
 }

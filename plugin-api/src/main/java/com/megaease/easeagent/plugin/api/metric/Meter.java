@@ -1,6 +1,6 @@
 package com.megaease.easeagent.plugin.api.metric;
 
-public interface Meter {
+public interface Meter extends Metric {
 
     void mark();
 

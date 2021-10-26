@@ -31,7 +31,7 @@ import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
-import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
+import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
 
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public abstract class AbstractRedisMetricInterceptor extends AbstractMetric impl
     public AbstractRedisMetricInterceptor(MetricRegistry metricRegistry, Config config) {
         super(metricRegistry);
         this.config = config;
-        this.metricNameFactory = MetricNameFactory.createBuilder()
+        this.nameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT,
                         ImmutableMap.<MetricField, MetricValueFetcher>builder()
                                 .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
@@ -90,7 +90,7 @@ public abstract class AbstractRedisMetricInterceptor extends AbstractMetric impl
 
     protected class RedisConverter extends ConverterAdapter {
         public RedisConverter(Supplier<Map<String, Object>> attributes) {
-            super("application", "cache-redis", metricNameFactory, KeyType.Timer, attributes, "signature");
+            super("application", "cache-redis", nameFactory, KeyType.Timer, attributes, "signature");
         }
     }
 
@@ -107,11 +107,11 @@ public abstract class AbstractRedisMetricInterceptor extends AbstractMetric impl
         if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
             return;
         }
-        metricRegistry.timer(this.metricNameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
-        final Meter defaultMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
-        final Counter defaultCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT));
-        final Meter errorMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.ERROR));
-        final Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR));
+        metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
+        final Meter defaultMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.DEFAULT));
+        final Counter defaultCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT));
+        final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
+        final Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
 
         if (!success) {
             errorMeter.mark();
@@ -120,7 +120,7 @@ public abstract class AbstractRedisMetricInterceptor extends AbstractMetric impl
         defaultMeter.mark();
         defaultCounter.inc();
 
-        MetricName gaugeName = metricNameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
+        MetricName gaugeName = nameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
         metricRegistry.gauge(gaugeName.name(), () -> () ->
                 LastMinutesCounterGauge.builder()
                         .m1Count((long) (defaultMeter.getOneMinuteRate() * 60))

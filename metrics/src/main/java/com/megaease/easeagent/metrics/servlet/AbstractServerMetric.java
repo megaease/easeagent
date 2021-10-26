@@ -24,13 +24,13 @@ import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.AbstractMetric;
-import com.megaease.easeagent.metrics.MetricField;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.MetricField;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
-import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
+import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
 import com.megaease.easeagent.metrics.model.ErrorPercentModelGauge;
 
 import java.math.BigDecimal;
@@ -43,7 +43,7 @@ public abstract class AbstractServerMetric extends AbstractMetric {
 
     public AbstractServerMetric(MetricRegistry metricRegistry) {
         super(metricRegistry);
-        this.metricNameFactory = MetricNameFactory.createBuilder()
+        this.nameFactory = NameFactory.createBuilder()
                 .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
                         .build())
@@ -80,12 +80,12 @@ public abstract class AbstractServerMetric extends AbstractMetric {
     }
 
     public void collectMetric(String key, int statusCode, Throwable throwable, Map<Object, Object> context) {
-        Timer timer = metricRegistry.timer(metricNameFactory.timerName(key, MetricSubType.DEFAULT));
+        Timer timer = metricRegistry.timer(nameFactory.timerName(key, MetricSubType.DEFAULT));
         timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
-        final Meter errorMeter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.ERROR));
-        final Meter meter = metricRegistry.meter(metricNameFactory.meterName(key, MetricSubType.DEFAULT));
-        Counter errorCounter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.ERROR));
-        Counter counter = metricRegistry.counter(metricNameFactory.counterName(key, MetricSubType.DEFAULT));
+        final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
+        final Meter meter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.DEFAULT));
+        Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
+        Counter counter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT));
         boolean hasException = throwable != null;
         if (statusCode >= 400 || hasException) {
             errorMeter.mark();
@@ -94,7 +94,7 @@ public abstract class AbstractServerMetric extends AbstractMetric {
         counter.inc();
         meter.mark();
 
-        metricRegistry.gauge(metricNameFactory.gaugeName(key, MetricSubType.DEFAULT), () -> () -> {
+        metricRegistry.gauge(nameFactory.gaugeName(key, MetricSubType.DEFAULT), () -> () -> {
             BigDecimal m1ErrorPercent = BigDecimal.ZERO;
             BigDecimal m5ErrorPercent = BigDecimal.ZERO;
             BigDecimal m15ErrorPercent = BigDecimal.ZERO;
@@ -126,7 +126,7 @@ public abstract class AbstractServerMetric extends AbstractMetric {
 
     protected class ServerConverter extends ConverterAdapter {
         ServerConverter(String category, String type, String keyFieldName, Supplier<Map<String, Object>> attributes) {
-            super(category, type, metricNameFactory, KeyType.Timer, attributes, keyFieldName);
+            super(category, type, nameFactory, KeyType.Timer, attributes, keyFieldName);
         }
     }
 }

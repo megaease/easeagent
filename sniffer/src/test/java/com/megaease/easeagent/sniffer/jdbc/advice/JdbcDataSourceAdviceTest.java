@@ -26,8 +26,8 @@ import com.megaease.easeagent.core.QualifiedBean;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcDataSourceMetricInterceptor;
 import com.megaease.easeagent.sniffer.BaseSnifferTest;
 import org.junit.Assert;
@@ -60,7 +60,7 @@ public class JdbcDataSourceAdviceTest extends BaseSnifferTest {
         Connection connection = ds.getConnection();
         System.out.println(connection);
         String key = "url";
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
+        NameFactory metricNameFactory = NameFactory.createBuilder().timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .build();
@@ -87,7 +87,7 @@ public class JdbcDataSourceAdviceTest extends BaseSnifferTest {
         } catch (SQLException ignored) {
         }
         String key = JdbcDataSourceMetricInterceptor.ERR_CON_METRIC_KEY;
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .meterType(MetricSubType.ERROR, Maps.newHashMap())
                 .counterType(MetricSubType.ERROR, Maps.newHashMap())
                 .build();

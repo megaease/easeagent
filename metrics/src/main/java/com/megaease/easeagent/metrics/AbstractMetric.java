@@ -20,6 +20,7 @@ package com.megaease.easeagent.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.concurrent.ScheduleHelper;
 import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -28,7 +29,7 @@ public abstract class AbstractMetric {
 
     protected MetricRegistry metricRegistry;
 
-    protected MetricNameFactory metricNameFactory;
+    protected NameFactory nameFactory;
 
     protected boolean enableSchedule;
 

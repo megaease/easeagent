@@ -1,6 +1,6 @@
 package com.megaease.easeagent.plugin.api.metric;
 
-public interface Counter {
+public interface Counter extends Metric {
     void inc();
 
     void inc(long n);

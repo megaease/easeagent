@@ -26,6 +26,8 @@ import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.core.utils.ServletUtils;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.ServletMetric;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -48,7 +50,7 @@ public class HttpFilterMetricsInterceptorTest extends BaseMetricsTest {
         ServletMetric servletMetric = new ServletMetric(metricRegistry);
         HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric, config);
 
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .counterType(MetricSubType.DEFAULT, Maps.newHashMap())
@@ -104,7 +106,7 @@ public class HttpFilterMetricsInterceptorTest extends BaseMetricsTest {
         ServletMetric servletMetric = new ServletMetric(metricRegistry);
         HttpFilterMetricsInterceptor interceptor = new HttpFilterMetricsInterceptor(servletMetric, config);
 
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.DEFAULT, Maps.newHashMap())
                 .meterType(MetricSubType.ERROR, Maps.newHashMap())
                 .counterType(MetricSubType.ERROR, Maps.newHashMap())

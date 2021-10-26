@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics;
+package com.megaease.easeagent.plugin.api.metric.name;
 
 public enum MetricSubType {
     DEFAULT("00"),
