@@ -33,7 +33,7 @@ public class CommonInlineAdvice {
 
     @Advice.OnMethodEnter
     public static MethodInfo enter(@Index int index,
-                                   @Advice.This Object invoker,
+                                   @Advice.This(optional = true) Object invoker,
                                    @Advice.Origin("#m") String method,
                                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                                    @Advice.Local(CONTEXT) Object context) {
@@ -51,7 +51,7 @@ public class CommonInlineAdvice {
         return methodInfo;
     }
 
-    @Advice.OnMethodExit(onThrowable = Exception.class)
+    @Advice.OnMethodExit(onThrowable = Exception.class, backupArguments = false)
     public static void exit(@Index int index,
                             @Advice.Enter MethodInfo methodInfo,
                             @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,

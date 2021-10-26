@@ -33,6 +33,7 @@ import net.bytebuddy.dynamic.loading.ByteArrayClassLoader;
 import net.bytebuddy.dynamic.scaffold.TypeWriter;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -40,6 +41,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -52,10 +54,18 @@ public class TransformerTest {
     static {
         AllUrlsSupplier.ENABLED = true;
     }
-    private static final String FOO = "foo", BAR = "bar", QUX = "qux";
+    private static final String FOO = "foo",
+        BAR = "bar",
+        QUX = "qux",
+        CLASS_INIT = "<clinit>",
+        FOO_STATIC = "fooStatic";
 
     @SuppressWarnings("unused")
     public static class Foo {
+        static String clazzInitString = FOO;
+        public static String fooStatic(String a) {
+            return a;
+        }
         public String foo(String a) {
             return a;
         }
@@ -75,13 +85,26 @@ public class TransformerTest {
         }
     }
 
-    private ClassLoader classLoader;
-    private String dumpFolder;
+    public static class FooClassInitInterceptor implements Interceptor {
+        @Override
+        public void before(MethodInfo methodInfo, Object context) {
+        }
 
-    @Before
-    public void setUp() {
+        @Override
+        public Object after(MethodInfo methodInfo, Object context) {
+            Foo.clazzInitString = BAR;
+            return null;
+        }
+    }
+
+    private static ClassLoader classLoader;
+    private static String dumpFolder;
+    private static AtomicInteger globalIndex = new AtomicInteger(0);
+
+    @BeforeClass
+    public static void setUp() {
         classLoader = new ByteArrayClassLoader.ChildFirst(
-            getClass().getClassLoader(),
+            TransformerTest.class.getClassLoader(),
             ClassFileLocator.ForClassLoader.readToNames(Foo.class, CommonInlineAdvice.class),
             ByteArrayClassLoader.PersistenceHandler.MANIFEST);
 
@@ -92,23 +115,30 @@ public class TransformerTest {
         assertTrue(dumpFolder.endsWith("target/test-classes"));
     }
 
-    @Test
-    public void testAdviceTransformer() throws Exception {
-        System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
-        assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
-        assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
-        AgentBuilder builder = Bootstrap.getAgentBuilder(null);
-
+    private Set<MethodTransformation> getMethodTransformations(int index, String methodName) {
         Supplier<Interceptor> supplier = FooInterceptor::new;
         SupplierChain.Builder<Interceptor> chainBuilder = SupplierChain.builder();
         chainBuilder.addSupplier(supplier);
 
-        MethodTransformation methodTransformation = new MethodTransformation(1,
-            ElementMatchers.named(FOO),
+        MethodTransformation methodTransformation = new MethodTransformation(index,
+            ElementMatchers.named(methodName),
             chainBuilder);
 
         Set<MethodTransformation> transformations = new HashSet<>();
         transformations.add(methodTransformation);
+
+        return transformations;
+    }
+
+    @Test
+    public void testAdviceTransformer() throws Exception {
+        System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
+        assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
+
+        assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
+        AgentBuilder builder = Bootstrap.getAgentBuilder(null);
+
+        Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(), FOO);
 
         ClassFileTransformer classFileTransformer = builder
             .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
@@ -123,6 +153,66 @@ public class TransformerTest {
             assertThat(type.getDeclaredMethod(FOO, String.class)
                     .invoke(instance, "kkk"),
                 is(QUX + BAR));
+        } finally {
+            assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
+        }
+    }
+
+    @Test
+    public void testStaticAdviceTransformer() throws Exception {
+        System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
+        assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
+
+        assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
+        AgentBuilder builder = Bootstrap.getAgentBuilder(null);
+
+        Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(), FOO_STATIC);
+
+        ClassFileTransformer classFileTransformer = builder
+            .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
+            .transform(PluginLoader.compound(false, transformations))
+            .installOnByteBuddyAgent();
+
+        try {
+            Class<?> type = classLoader.loadClass(Foo.class.getName());
+            // check
+            assertThat(type.getDeclaredMethod(FOO_STATIC, String.class)
+                    .invoke(null, "kkk"),
+                is(QUX + BAR));
+        } finally {
+            assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
+        }
+    }
+
+
+    @Test
+    public void testTypeInitialAdviceTransformer() throws Exception {
+        System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
+        assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
+
+        assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
+        AgentBuilder builder = Bootstrap.getAgentBuilder(null);
+
+        Supplier<Interceptor> supplier = FooClassInitInterceptor::new;
+        SupplierChain.Builder<Interceptor> chainBuilder = SupplierChain.builder();
+        chainBuilder.addSupplier(supplier);
+
+        MethodTransformation methodTransformation = new MethodTransformation(globalIndex.incrementAndGet(),
+            ElementMatchers.named(CLASS_INIT),
+            chainBuilder);
+
+        Set<MethodTransformation> transformations = new HashSet<>();
+        transformations.add(methodTransformation);
+
+        ClassFileTransformer classFileTransformer = builder
+            .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
+            .transform(PluginLoader.compound(false, transformations))
+            .installOnByteBuddyAgent();
+
+        try {
+            Class<?> type = classLoader.loadClass(Foo.class.getName());
+            // check, wait to finish
+            // assertEquals(Foo.clazzInitString, BAR);
         } finally {
             assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
         }
