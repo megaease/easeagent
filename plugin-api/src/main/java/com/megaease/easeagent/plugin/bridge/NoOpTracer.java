@@ -100,6 +100,11 @@ public class NoOpTracer {
         }
 
         @Override
+        public Span maybeScope() {
+            return this;
+        }
+
+        @Override
         public String toString() {
             return "NoopSpan";
         }
@@ -159,7 +164,7 @@ public class NoOpTracer {
         }
     }
 
-    private static class EmptyMessagingTracing<R extends Request> implements MessagingTracing {
+    private static class EmptyMessagingTracing<R extends MessagingRequest> implements MessagingTracing {
         private static final EmptyMessagingTracing INSTANCE = new EmptyMessagingTracing();
         private static final Function NOOP_SAMPLER = r -> false;
 
@@ -184,12 +189,12 @@ public class NoOpTracer {
         }
 
         @Override
-        public boolean consumerSampler(Request request) {
+        public boolean consumerSampler(MessagingRequest request) {
             return false;
         }
 
         @Override
-        public boolean producerSampler(Request request) {
+        public boolean producerSampler(MessagingRequest request) {
             return false;
         }
     }
@@ -209,7 +214,7 @@ public class NoOpTracer {
 
 
         @Override
-        public Message extract(Request request) {
+        public Message extract(MessagingRequest request) {
             return EmptyMessage.INSTANCE;
         }
     }
@@ -218,7 +223,7 @@ public class NoOpTracer {
         private static final EmptyInjector INSTANCE = new EmptyInjector();
 
         @Override
-        public void inject(Span span, Request request) {
+        public void inject(Span span, MessagingRequest request) {
 
         }
     }

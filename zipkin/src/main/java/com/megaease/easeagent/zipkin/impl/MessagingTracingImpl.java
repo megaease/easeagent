@@ -1,4 +1,4 @@
-package com.megaease.easeagent.sniffer.impl.tracing;
+package com.megaease.easeagent.zipkin.impl;
 
 import brave.messaging.ConsumerRequest;
 import brave.messaging.MessagingRequest;
@@ -11,7 +11,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import javax.annotation.Nonnull;
 import java.util.function.Function;
 
-public class MessagingTracingImpl<R extends Request> implements MessagingTracing {
+public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.trace.MessagingRequest> implements MessagingTracing {
     private final brave.messaging.MessagingTracing messagingTracing;
 
     private MessagingTracingImpl(brave.messaging.MessagingTracing messagingTracing) {
@@ -28,12 +28,12 @@ public class MessagingTracingImpl<R extends Request> implements MessagingTracing
 
     @Override
     public Extractor<R> extractor() {
-        return new ExtractorImpl(messagingTracing.propagation().extractor(Request::header));
+        return new ExtractorImpl(messagingTracing.propagation().extractor(com.megaease.easeagent.plugin.api.trace.MessagingRequest::header));
     }
 
     @Override
     public Injector<R> injector() {
-        return new InjectorImpl(messagingTracing.propagation().injector(Request::setHeader));
+        return new InjectorImpl(messagingTracing.propagation().injector(com.megaease.easeagent.plugin.api.trace.MessagingRequest::setHeader));
     }
 
     @Override
@@ -47,38 +47,38 @@ public class MessagingTracingImpl<R extends Request> implements MessagingTracing
     }
 
     @Override
-    public boolean consumerSampler(Request request) {
+    public boolean consumerSampler(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
         return messagingTracing.consumerSampler().trySample(new ZipkinConsumerRequest(request));
     }
 
     @Override
-    public boolean producerSampler(Request request) {
+    public boolean producerSampler(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
         return messagingTracing.producerSampler().trySample(new ZipkinProducerRequest(request));
     }
 
 
     public class ExtractorImpl implements Extractor {
-        private final TraceContext.Extractor<Request> extractor;
+        private final TraceContext.Extractor<com.megaease.easeagent.plugin.api.trace.MessagingRequest> extractor;
 
-        public ExtractorImpl(TraceContext.Extractor<Request> extractor) {
+        public ExtractorImpl(TraceContext.Extractor<com.megaease.easeagent.plugin.api.trace.MessagingRequest> extractor) {
             this.extractor = extractor;
         }
 
         @Override
-        public Message<TraceContextOrSamplingFlags> extract(Request request) {
+        public Message<TraceContextOrSamplingFlags> extract(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
             return new MessageImpl(extractor.extract(request));
         }
     }
 
     public class InjectorImpl implements Injector {
-        private final TraceContext.Injector<Request> injector;
+        private final TraceContext.Injector<com.megaease.easeagent.plugin.api.trace.MessagingRequest> injector;
 
-        public InjectorImpl(TraceContext.Injector<Request> injector) {
+        public InjectorImpl(TraceContext.Injector<com.megaease.easeagent.plugin.api.trace.MessagingRequest> injector) {
             this.injector = injector;
         }
 
         @Override
-        public void inject(Span span, Request request) {
+        public void inject(Span span, com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
             if (span instanceof SpanImpl) {
                 this.injector.inject(((SpanImpl) span).getSpan().context(), request);
             }
@@ -101,10 +101,10 @@ public class MessagingTracingImpl<R extends Request> implements MessagingTracing
     }
 
     public static class ZipkinProducerRequest extends ProducerRequest {
-        public static Function<Request, MessagingRequest> BUILDER = request -> new ZipkinProducerRequest(request);
-        private final Request request;
+        public static Function<com.megaease.easeagent.plugin.api.trace.MessagingRequest, MessagingRequest> BUILDER = request -> new ZipkinProducerRequest(request);
+        private final com.megaease.easeagent.plugin.api.trace.MessagingRequest request;
 
-        public ZipkinProducerRequest(Request request) {
+        public ZipkinProducerRequest(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
             this.request = request;
         }
 
@@ -130,10 +130,10 @@ public class MessagingTracingImpl<R extends Request> implements MessagingTracing
     }
 
     public static class ZipkinConsumerRequest extends ConsumerRequest {
-        public static Function<Request, MessagingRequest> BUILDER = request -> new ZipkinConsumerRequest(request);
-        private final Request request;
+        public static Function<com.megaease.easeagent.plugin.api.trace.MessagingRequest, MessagingRequest> BUILDER = request -> new ZipkinConsumerRequest(request);
+        private final com.megaease.easeagent.plugin.api.trace.MessagingRequest request;
 
-        public ZipkinConsumerRequest(Request request) {
+        public ZipkinConsumerRequest(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
             this.request = request;
         }
 

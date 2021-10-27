@@ -75,7 +75,7 @@ import com.megaease.easeagent.report.PluginMetricReporter;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
-import com.megaease.easeagent.sniffer.impl.tracing.TracingImpl;
+import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;

@@ -1,4 +1,4 @@
-package com.megaease.easeagent.sniffer.impl.tracing;
+package com.megaease.easeagent.zipkin.impl;
 
 import brave.propagation.TraceContextOrSamplingFlags;
 import com.megaease.easeagent.plugin.api.trace.Message;

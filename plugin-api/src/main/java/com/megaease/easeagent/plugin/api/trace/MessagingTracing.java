@@ -2,7 +2,7 @@ package com.megaease.easeagent.plugin.api.trace;
 
 import java.util.function.Function;
 
-public interface MessagingTracing<R extends Request> {
+public interface MessagingTracing<R extends MessagingRequest> {
     Extractor<R> extractor();
 
     Injector<R> injector();

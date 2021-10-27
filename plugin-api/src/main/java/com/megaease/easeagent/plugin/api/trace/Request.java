@@ -1,13 +1,9 @@
 package com.megaease.easeagent.plugin.api.trace;
 
 public interface Request {
-    String operation();
+    Span.Kind kind();
 
-    String channelKind();
-
-    String channelName();
-
-    Object unwrap();
+    String name();
 
     String header(String name);
 

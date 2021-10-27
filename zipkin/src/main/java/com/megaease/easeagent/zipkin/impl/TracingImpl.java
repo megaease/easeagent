@@ -1,4 +1,4 @@
-package com.megaease.easeagent.sniffer.impl.tracing;
+package com.megaease.easeagent.zipkin.impl;
 
 import brave.Tracer;
 import brave.propagation.ThreadLocalSpan;
@@ -12,24 +12,19 @@ import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TracingImpl implements Tracing {
     private final brave.Tracing tracing;
     private final brave.Tracer tracer;
-    private final Sampler sampler;
     private final TraceContext.Injector<Request> defaultInjector;
     private final TraceContext.Extractor<Request> defaultExtractor;
 
     private TracingImpl(@Nonnull brave.Tracing tracing,
                         @Nonnull Tracer tracer,
-                        @Nonnull Sampler sampler,
                         @Nonnull TraceContext.Injector<Request> defaultInjector,
                         @Nonnull TraceContext.Extractor<Request> defaultExtractor) {
         this.tracing = tracing;
         this.tracer = tracer;
-        this.sampler = sampler;
         this.defaultInjector = defaultInjector;
         this.defaultExtractor = defaultExtractor;
     }
@@ -39,7 +34,6 @@ public class TracingImpl implements Tracing {
         return tracing == null ? NoOpTracer.NO_OP_TRACING :
             new TracingImpl(tracing,
                 tracing.tracer(),
-                tracing.sampler(),
                 tracing.propagation().injector(Request::setHeader),
                 tracing.propagation().extractor(Request::header)
             );
@@ -52,11 +46,11 @@ public class TracingImpl implements Tracing {
 
 
     private brave.Tracer tracer() {
-        return this.tracer == null ? brave.Tracing.currentTracer() : this.tracer;
+        return this.tracer;
     }
 
     private brave.Tracing tracing() {
-        return this.tracing == null ? brave.Tracing.current() : this.tracing;
+        return this.tracing;
     }
 
     @Override
@@ -74,7 +68,19 @@ public class TracingImpl implements Tracing {
     }
 
     private Span build(brave.Span bSpan, boolean inScope) {
-        return SpanImpl.build(bSpan, inScope ? tracer().withSpanInScope(bSpan) : null, defaultInjector);
+        Span span = SpanImpl.build(tracing(), bSpan, defaultInjector);
+        if (inScope) {
+            span.maybeScope();
+        }
+        return span;
+    }
+
+    private void setInfo(brave.Span span, Request request) {
+        Span.Kind kind = request.kind();
+        if (kind != null) {
+            span.kind(SpanImpl.braveKind(kind));
+        }
+        span.name(request.name());
     }
 
     @Override
@@ -94,7 +100,7 @@ public class TracingImpl implements Tracing {
                 return NoOpTracer.NO_OP_SPAN;
             }
             bSpan.start();
-            span = build(bSpan);
+            span = build(bSpan, true);
         }
         return NoOpTracer.noNullSpan(span);
     }
@@ -115,9 +121,10 @@ public class TracingImpl implements Tracing {
         if (span.isNoop()) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
+        setInfo(span, request);
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultInjector.inject(span.context(), asyncRequest);
-        return new ProgressContextImpl(build(span, true), asyncRequest);
+        return new ProgressContextImpl(build(span), asyncRequest);
     }
 
     @Override
@@ -127,6 +134,7 @@ public class TracingImpl implements Tracing {
         if (span.isNoop()) {
             return NoOpTracer.NO_OP_SPAN;
         }
+        setInfo(span, request);
         defaultInjector.inject(span.context(), request);
         return build(span, true);
     }
@@ -142,9 +150,9 @@ public class TracingImpl implements Tracing {
         Object msg = message == null ? null : message.get();
         Span span = null;
         if (msg == null) {
-            span = build(ThreadLocalSpan.CURRENT_TRACER.next());
+            span = build(tracer().nextSpan(), true);
         } else if (msg instanceof TraceContextOrSamplingFlags) {
-            span = build(ThreadLocalSpan.CURRENT_TRACER.next((TraceContextOrSamplingFlags) msg));
+            span = build(tracer().nextSpan((TraceContextOrSamplingFlags) msg), true);
         }
         return NoOpTracer.noNullSpan(span);
     }

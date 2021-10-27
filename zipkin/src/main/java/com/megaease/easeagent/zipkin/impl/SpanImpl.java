@@ -1,6 +1,7 @@
-package com.megaease.easeagent.sniffer.impl.tracing;
+package com.megaease.easeagent.zipkin.impl;
 
-import brave.Tracer;
+import brave.Tracing;
+import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -24,21 +25,26 @@ public class SpanImpl implements Span {
         KINDS = Collections.unmodifiableMap(kinds);
     }
 
+    private final Tracing tracing;
     private final brave.Span span;
-    private final Tracer.SpanInScope spanInScope;
+    private CurrentTraceContext.Scope scope;
     private final TraceContext.Injector<Request> injector;
 
-    private SpanImpl(@Nonnull brave.Span span, Tracer.SpanInScope spanInScope, @Nonnull TraceContext.Injector<Request> injector) {
+    private SpanImpl(@Nonnull Tracing tracing, @Nonnull brave.Span span, @Nonnull TraceContext.Injector<Request> injector) {
+        this.tracing = tracing;
         this.span = span;
-        this.spanInScope = spanInScope;
         this.injector = injector;
     }
 
-    public static Span build(brave.Span span, Tracer.SpanInScope spanInScope, TraceContext.Injector<Request> injector) {
+    public static Span build(Tracing tracing, brave.Span span, TraceContext.Injector<Request> injector) {
         if (span == null) {
             return NoOpTracer.NO_OP_SPAN;
         }
-        return new SpanImpl(span, spanInScope, injector);
+        return new SpanImpl(tracing, span, injector);
+    }
+
+    public static brave.Span.Kind braveKind(Kind kind) {
+        return KINDS.get(kind);
     }
 
     protected brave.Span getSpan() {
@@ -117,10 +123,10 @@ public class SpanImpl implements Span {
 
     @Override
     public void finish(long timestamp) {
-        span.finish(timestamp);
-        if (spanInScope != null) {
-            spanInScope.close();
+        if (scope != null) {
+            scope.close();
         }
+        span.finish(timestamp);
     }
 
     @Override
@@ -131,5 +137,14 @@ public class SpanImpl implements Span {
     @Override
     public void inject(Request request) {
         injector.inject(span.context(), request);
+    }
+
+    @Override
+    public Span maybeScope() {
+        if (scope != null) {
+            return this;
+        }
+        scope = tracing.currentTraceContext().maybeScope(span.context());
+        return this;
     }
 }

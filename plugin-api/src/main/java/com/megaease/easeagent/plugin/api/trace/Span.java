@@ -39,4 +39,7 @@ public interface Span {
     void flush();
 
     void inject(Request request);
+
+    Span maybeScope();
+
 }
