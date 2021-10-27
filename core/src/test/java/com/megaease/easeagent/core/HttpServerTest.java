@@ -2,18 +2,22 @@ package com.megaease.easeagent.core;
 
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.PluginConfigContext;
+import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,7 +27,31 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpServerTest {
-    // @Test
+    WrappedConfigManager oldWrappedConfigManager;
+
+    @Before
+    public void before() throws NoSuchFieldException, IllegalAccessException {
+        Field field = Bootstrap.class.getDeclaredField("wrappedConfigManager");
+        field.setAccessible(true);
+        oldWrappedConfigManager = (WrappedConfigManager) field.get(null);
+        field.setAccessible(false);
+    }
+
+    @After
+    public void after() throws NoSuchFieldException, IllegalAccessException {
+        setWrappedConfigManager(oldWrappedConfigManager);
+    }
+
+
+    private void setWrappedConfigManager(WrappedConfigManager wrappedConfigManager) throws NoSuchFieldException, IllegalAccessException {
+        Field field = Bootstrap.class.getDeclaredField("wrappedConfigManager");
+        field.setAccessible(true);
+        field.set(null, wrappedConfigManager);
+        field.setAccessible(false);
+    }
+
+
+    @Test
     public void httpServer() throws Exception {
         HashMap<String, String> source = new HashMap<>();
         source.put("plugin.observability.global.metrics.enabled", "true");
@@ -48,7 +76,13 @@ public class HttpServerTest {
         iConfigFactory.getConfig("observability", "kafka", "kafka-tracings").addChangeListener(new ConfigChange(count, "kafka.kafka-tracings"));
         iConfigFactory.getConfig("observability", "kafka", "tracings").addChangeListener(new ConfigChange(count, "kafka.tracings"));
         iConfigFactory.getConfig("observability", "kafka", "metrics").addChangeListener(new ConfigChange(count, "kafka.metrics"));
-        Bootstrap.registerMBeans(configs);
+        try {
+            ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
+            setWrappedConfigManager(new WrappedConfigManager(customClassLoader, configs));
+        } catch (Exception e) {
+            System.out.println("" + e.getMessage());
+        }
+
         DatagramSocket s = new DatagramSocket(0);
         int port = s.getLocalPort();
         String httpServer = "http://127.0.0.1:" + port;
