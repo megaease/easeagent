@@ -75,6 +75,7 @@ import com.megaease.easeagent.report.PluginMetricReporter;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
+import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
 import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
@@ -120,6 +121,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY;
@@ -146,6 +148,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     private Config config;
     private Supplier<Map<String, Object>> additionalAttributes;
     private AutoRefreshConfigItem<String> serviceName;
+    private Function rootSpanFinish;
 
     @Override
     public void setConfig(Config config) {
@@ -192,6 +195,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .traceId128Bit(false)
             .sampler(CountingSampler.create(1))
             .addSpanHandler(new CustomTagsSpanHandler(serviceName::getValue, AdditionalAttributes.getHostName()))
+            .addSpanHandler(new RootSpanFinishHandler((context) -> {
+                if (rootSpanFinish != null) {
+                    rootSpanFinish.apply(context);
+                }
+                return null;
+            }))
             .addSpanHandler(AsyncZipkinSpanHandler
                 .newBuilder(reporter)
                 .alwaysReportSpans(true)
@@ -209,6 +218,11 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Override
     public Supplier<com.megaease.easeagent.plugin.api.trace.Tracing> tracingSupplier() {
         return () -> TracingImpl.build(tracing);
+    }
+
+    @Override
+    public void setRootSpanFinishCall(Function rootSpanFinish) {
+        this.rootSpanFinish = rootSpanFinish;
     }
 
     @Override

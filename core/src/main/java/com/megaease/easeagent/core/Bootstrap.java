@@ -30,7 +30,6 @@ import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
@@ -226,7 +225,9 @@ public class Bootstrap {
             ((IProvider) instance).afterPropertiesSet();
         }
         if (instance instanceof TracingProvider) {
-            contextManager.setTracing(((TracingProvider) instance).tracingSupplier());
+            TracingProvider tracingProvider = (TracingProvider) instance;
+            contextManager.setTracing(tracingProvider.tracingSupplier());
+            tracingProvider.setRootSpanFinishCall(contextManager.getRootSpanFinish());
         }
         if (instance instanceof MetricProvider) {
             contextManager.setMetric(((MetricProvider) instance).metricSupplier());

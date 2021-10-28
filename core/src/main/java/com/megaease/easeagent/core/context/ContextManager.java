@@ -20,6 +20,7 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ContextManager {
@@ -29,6 +30,7 @@ public class ContextManager {
     private final ILoggerFactory loggerFactory;
     private volatile Supplier<Tracing> tracing = () -> null;
     private volatile MetricRegistrySupplier metric = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
+    private final Function rootSpanFinish;
 
     public ContextManager(Configs conf, PluginConfigContext pluginConfigContext, ILoggerFactory loggerFactory) {
         this.conf = Objects.requireNonNull(conf, "conf must not be null.");
@@ -37,6 +39,7 @@ public class ContextManager {
             loggerFactory = new NoOpLoggerFactory();
         }
         this.loggerFactory = Objects.requireNonNull(loggerFactory, "loggerFactory must not be null.");
+        this.rootSpanFinish = new RootSpanFinish();
     }
 
     public static ContextManager build(Configs conf) {
@@ -64,6 +67,10 @@ public class ContextManager {
         this.metric = metric;
     }
 
+    public Function getRootSpanFinish() {
+        return rootSpanFinish;
+    }
+
     public class SessionContextSupplier implements Supplier<Context> {
 
         @Override
@@ -79,6 +86,15 @@ public class ContextManager {
         @Override
         public MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
             return NoNull.of(metric.newMetricRegistry(config, nameFactory, tags), NoOpMetrics.NO_OP_METRIC);
+        }
+    }
+
+    public class RootSpanFinish implements Function {
+
+        @Override
+        public Object apply(Object o) {
+            LOCAL_SESSION_CONTEXT.get().clear();
+            return null;
         }
     }
 }
