@@ -19,6 +19,7 @@ package com.megaease.easeagent.core.plugin.transformer;
 
 import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.Dispatcher;
+import com.megaease.easeagent.core.plugin.annotation.EaseAgentInstrumented;
 import com.megaease.easeagent.core.plugin.annotation.Index;
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
@@ -30,6 +31,8 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +40,12 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
+import static net.bytebuddy.matcher.ElementMatchers.not;
+
 public class ForAdviceTransformer  implements AgentBuilder.Transformer {
+    private final Logger log = LoggerFactory.getLogger(ForAdviceTransformer.class);
+
     private final AgentBuilder.Transformer.ForAdvice transformer;
     private final MethodTransformation methodTransformInfo;
 
@@ -46,25 +54,19 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
         this.transformer = new AgentBuilder.Transformer
             .ForAdvice(Advice.withCustomMapping().bind(Index.class, methodTransformInfo.getIndex()))
             .include(getClass().getClassLoader())
-            .advice(methodTransformInfo.getMatcher(), CommonInlineAdvice.class.getCanonicalName());
-
+            .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
+                CommonInlineAdvice.class.getCanonicalName());
     }
 
     @Override
     public DynamicType.Builder<?> transform(DynamicType.Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
-        // registry and generate interceptor
-        SupplierChain<Interceptor> suppliersChain = this.methodTransformInfo.getSuppliersBuilder().build();
-        ArrayList<Supplier<Interceptor>> suppliers = suppliersChain.getSuppliers();
-        List<Interceptor> interceptors = suppliers.stream().map(Supplier::get)
-            .sorted(Comparator.comparing(Ordered::order))
-            .collect(Collectors.toList());
-        AgentInterceptorChain chain = new AgentInterceptorChain(interceptors);
+        // generate interceptor
+        AgentInterceptorChain chain = this.methodTransformInfo.getAgentInterceptorChain();
 
-        // have not instrumented by this advice (loading by other classloader earlier)
-        if (Dispatcher.register(this.methodTransformInfo.getIndex(), chain) == null) {
-            // get all method instrumented
+        // this advice have been register by other classloader, it return null
+        if (Dispatcher.register(this.methodTransformInfo.getIndex(), chain) != null) {
+            log.info("Advice has already registered, index {}", this.methodTransformInfo.getIndex());
         }
-
 
         return transformer.transform(b, td, cl, m);
     }

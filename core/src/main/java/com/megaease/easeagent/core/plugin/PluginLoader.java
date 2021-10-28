@@ -40,7 +40,7 @@ import java.util.stream.StreamSupport;
 public class PluginLoader {
     static Logger log = LoggerFactory.getLogger(PluginLoader.class);
 
-    public static void load(AgentBuilder ab, Configs conf) {
+    public static AgentBuilder load(AgentBuilder ab, Configs conf) {
         pluginLoad();
         providerLoad();
         Set<ClassTransformation> sortedTransformations = pointsLoad();
@@ -49,6 +49,7 @@ public class PluginLoader {
             ab = ab.type(transformation.getClassMatcher())
                 .transform(compound(transformation.isHasDynamicField(),transformation.getMethodTransformations()));
         }
+        return ab;
     }
 
     public static void providerLoad() {

@@ -25,35 +25,35 @@ import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.NotMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
 import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.NegatingMatcher;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class MethodMatcherConvert
-    implements Converter<IMethodMatcher, ElementMatcher.Junction<MethodDescription>> {
+    implements Converter<IMethodMatcher, Junction<MethodDescription>> {
 
     public final static MethodMatcherConvert INSTANCE = new MethodMatcherConvert();
 
     @Override
-    public ElementMatcher.Junction<MethodDescription> convert(IMethodMatcher source) {
+    public Junction<MethodDescription> convert(IMethodMatcher source) {
         if (source == null) {
             return null;
         }
 
         if (source instanceof AndMethodMatcher) {
             AndMethodMatcher andMatcher = (AndMethodMatcher) source;
-            ElementMatcher.Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            ElementMatcher.Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
+            Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
             return leftMatcher.and(rightMatcher);
         } else if (source instanceof OrMethodMatcher) {
             OrMethodMatcher andMatcher = (OrMethodMatcher) source;
-            ElementMatcher.Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            ElementMatcher.Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
+            Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
             return leftMatcher.or(rightMatcher);
         } else if (source instanceof NotMethodMatcher) {
             NotMethodMatcher matcher = (NotMethodMatcher) source;
-            ElementMatcher.Junction<MethodDescription> notMatcher = this.convert(matcher.getMatcher());
+            Junction<MethodDescription> notMatcher = this.convert(matcher.getMatcher());
             return new NegatingMatcher<>(notMatcher);
         }
 
@@ -64,8 +64,8 @@ public class MethodMatcherConvert
         return this.convert((MethodMatcher) source);
     }
 
-    private ElementMatcher.Junction<MethodDescription> convert(MethodMatcher matcher) {
-        ElementMatcher.Junction<MethodDescription> c;
+    private Junction<MethodDescription> convert(MethodMatcher matcher) {
+        Junction<MethodDescription> c;
         switch (matcher.getNameMatchType()) {
             case EQUALS:
                 c = named(matcher.getName());
@@ -83,7 +83,7 @@ public class MethodMatcherConvert
                 return null;
         }
 
-        ElementMatcher.Junction<MethodDescription> mc = fromModifier(matcher.getModifier(), false);
+        Junction<MethodDescription> mc = fromModifier(matcher.getModifier(), false);
         if (mc != null) {
             c = c.and(mc);
         }
@@ -109,8 +109,8 @@ public class MethodMatcherConvert
         return c;
     }
 
-    ElementMatcher.Junction<MethodDescription> fromModifier(int modifier, boolean not) {
-        ElementMatcher.Junction<MethodDescription> mc = null;
+    Junction<MethodDescription> fromModifier(int modifier, boolean not) {
+        Junction<MethodDescription> mc = null;
         if ((modifier & ClassMatcher.MODIFIER_MASK) != 0) {
             if ((modifier & Modifier.ACC_ABSTRACT) != 0) {
                 mc = isAbstract();

@@ -16,7 +16,6 @@ public class DoFilterAdvice implements Points {
         return ClassMatcher.builder()
             .hasClassName("org.springframework.web.filter.OncePerRequestFilter")
             .isAbstract()
-            .notInterface()
             .build();
     }
 

@@ -17,23 +17,42 @@
 
 package com.megaease.easeagent.core.plugin.matcher;
 
+import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.Ordered;
 import lombok.Data;
 import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Data
 public class MethodTransformation {
     private int index;
-    private ElementMatcher<? super MethodDescription> matcher;
+    private Junction<? super MethodDescription> matcher;
     private SupplierChain.Builder<Interceptor> suppliersBuilder;
 
     public MethodTransformation(int index,
-                                ElementMatcher<? super MethodDescription> matcher,
+                                Junction<? super MethodDescription> matcher,
                                 SupplierChain.Builder<Interceptor> chain) {
         this.index = index;
         this.matcher = matcher;
         this.suppliersBuilder = chain;
+    }
+
+    public AgentInterceptorChain getAgentInterceptorChain() {
+        SupplierChain<Interceptor> suppliersChain = getSuppliersBuilder().build();
+        ArrayList<Supplier<Interceptor>> suppliers = suppliersChain.getSuppliers();
+
+        List<Interceptor> interceptors = suppliers.stream().map(Supplier::get)
+            .sorted(Comparator.comparing(Ordered::order))
+            .collect(Collectors.toList());
+
+        return new AgentInterceptorChain(interceptors);
     }
 }

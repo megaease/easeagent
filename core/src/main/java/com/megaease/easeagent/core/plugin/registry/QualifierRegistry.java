@@ -33,7 +33,7 @@ import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,12 +59,12 @@ public class QualifierRegistry {
         String pointsClassName = points.getClass().getCanonicalName();
         IClassMatcher classMatcher = points.getClassMatcher();
         boolean hasDynamicField = points.isAddDynamicField();
-        ElementMatcher<TypeDescription> innerClassMatcher = ClassMatcherConvert.INSTANCE.convert(classMatcher);
+        Junction<TypeDescription> innerClassMatcher = ClassMatcherConvert.INSTANCE.convert(classMatcher);
 
         Set<IMethodMatcher> methodMatchers = points.getMethodMatcher();
 
         Set<MethodTransformation> mInfo = methodMatchers.stream().map(matcher -> {
-            ElementMatcher<MethodDescription> bMethodMatcher = MethodMatcherConvert.INSTANCE.convert(matcher);
+            Junction<MethodDescription> bMethodMatcher = MethodMatcherConvert.INSTANCE.convert(matcher);
             String qualifier = getMethodQualifier(pointsClassName, matcher.getQualifier());
             int index = qualifierToIndex.get(qualifier);
             Builder<Interceptor> chainBuilder = interceptorSuppliers.get(index);

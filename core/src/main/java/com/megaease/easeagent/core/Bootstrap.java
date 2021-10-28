@@ -113,10 +113,10 @@ public class Bootstrap {
         AgentBuilder builder = getAgentBuilder(conf);
 
         // load plugins
-        PluginLoader.load(builder, conf);
+        builder = PluginLoader.load(builder, conf);
 
         final AgentReport agentReport = AgentReport.create(conf);
-        builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
+        // builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
         long installBegin = System.currentTimeMillis();
         builder.installOn(inst);
         LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));

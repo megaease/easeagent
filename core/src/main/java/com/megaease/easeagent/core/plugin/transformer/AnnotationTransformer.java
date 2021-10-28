@@ -32,18 +32,22 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 import net.bytebuddy.utility.JavaModule;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public class AnnotationTransformer implements AgentBuilder.Transformer {
     private final AsmVisitorWrapper visitor;
     private final MethodTransformation methodTransformInfo;
+    private final AnnotationDescription annotation;
 
     public AnnotationTransformer(MethodTransformation info) {
         this.methodTransformInfo = info;
+        this.annotation = AnnotationDescription.Latent.Builder
+            .ofType(EaseAgentInstrumented.class)
+            .define("value", info.getIndex())
+            .build();
         MemberAttributeExtension.ForMethod mForMethod = new MemberAttributeExtension.ForMethod()
-            .annotateMethod(AnnotationDescription.Latent.Builder
-                .ofType(EaseAgentInstrumented.class)
-                .define("value", info.getIndex())
-                .build());
-        this.visitor = new ForMethodDelegate(mForMethod)
+            .annotateMethod(this.annotation);
+        this.visitor = new ForMethodDelegate(mForMethod, annotation, methodTransformInfo)
             .on(methodTransformInfo.getMatcher());
     }
 
@@ -53,10 +57,18 @@ public class AnnotationTransformer implements AgentBuilder.Transformer {
     }
 
     public static class ForMethodDelegate implements AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper {
-        private MemberAttributeExtension.ForMethod mForMethod;
+        private static ConcurrentHashMap<String, Integer> methodToIndex = new ConcurrentHashMap<>();
 
-        ForMethodDelegate(MemberAttributeExtension.ForMethod mForMethod) {
+        private final TypeDescription annotation;
+        private final MemberAttributeExtension.ForMethod mForMethod;
+        private final MethodTransformation info;
+
+        ForMethodDelegate(MemberAttributeExtension.ForMethod mForMethod,
+                          AnnotationDescription annotation,
+                          MethodTransformation info) {
+            this.annotation = annotation.getAnnotationType();
             this.mForMethod = mForMethod;
+            this.info = info;
         }
 
         @Override
@@ -67,7 +79,11 @@ public class AnnotationTransformer implements AgentBuilder.Transformer {
                                   TypePool typePool,
                                   int writerFlags,
                                   int readerFlags) {
-            // check and registry
+            AnnotationDescription annotation = instrumentedMethod.getDeclaredAnnotations().ofType(this.annotation);
+            if (annotation != null) {
+                // merge interceptor chain
+                Integer index = annotation.getValue("value").resolve(Integer.class);
+            }
 
             MethodVisitor visitor = this.mForMethod.wrap(instrumentedType, instrumentedMethod,
                 methodVisitor, implementationContext, typePool, writerFlags, readerFlags);

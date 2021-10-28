@@ -20,19 +20,19 @@ package com.megaease.easeagent.core.plugin.matcher;
 import com.megaease.easeagent.plugin.Ordered;
 import lombok.Data;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 import java.util.Set;
 
 @Data
 public class ClassTransformation implements Ordered {
     private int order;
-    private ElementMatcher<TypeDescription>  classMatcher;
+    private Junction<TypeDescription> classMatcher;
     private Set<MethodTransformation>  methodTransformations;
     private boolean hasDynamicField;
 
     public ClassTransformation(int order,
-                               ElementMatcher<TypeDescription> classMatcher,
+                               Junction<TypeDescription> classMatcher,
                                Set<MethodTransformation> methodTransformations,
                                boolean hasDynamicField) {
         this.order = order;
@@ -47,7 +47,7 @@ public class ClassTransformation implements Ordered {
 
     public static class Builder {
         private int order;
-        private ElementMatcher<TypeDescription> classMatcher;
+        private Junction<TypeDescription> classMatcher;
         private Set<MethodTransformation> methodTransformations;
         private boolean hasDynamicField;
 
@@ -59,7 +59,7 @@ public class ClassTransformation implements Ordered {
             return this;
         }
 
-        public Builder classMatcher(ElementMatcher<TypeDescription> classMatcher) {
+        public Builder classMatcher(Junction<TypeDescription> classMatcher) {
             this.classMatcher = classMatcher;
             return this;
         }
