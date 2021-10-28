@@ -27,8 +27,8 @@ import com.megaease.easeagent.plugin.MethodInfo;
 public final class Dispatcher {
     static AgentArray<AgentInterceptorChain> chains = new AgentArray<>();
 
-    public static void register(int index, AgentInterceptorChain chain) {
-        chains.set(index, chain);
+    public static AgentInterceptorChain register(int index, AgentInterceptorChain chain) {
+        return chains.putIfAbsent(index, chain);
     }
 
     public static void enter(int index, MethodInfo info, Object ctx) {

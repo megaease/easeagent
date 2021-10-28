@@ -59,7 +59,12 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
             .sorted(Comparator.comparing(Ordered::order))
             .collect(Collectors.toList());
         AgentInterceptorChain chain = new AgentInterceptorChain(interceptors);
-        Dispatcher.register(this.methodTransformInfo.getIndex(), chain);
+
+        // have not instrumented by this advice (loading by other classloader earlier)
+        if (Dispatcher.register(this.methodTransformInfo.getIndex(), chain) == null) {
+            // get all method instrumented
+        }
+
 
         return transformer.transform(b, td, cl, m);
     }

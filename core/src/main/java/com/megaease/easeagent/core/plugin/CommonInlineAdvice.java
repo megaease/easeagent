@@ -51,11 +51,11 @@ public class CommonInlineAdvice {
         return methodInfo;
     }
 
-    @Advice.OnMethodExit(onThrowable = Exception.class, backupArguments = false)
+    @Advice.OnMethodExit(onThrowable = Exception.class)
     public static void exit(@Index int index,
                             @Advice.Enter MethodInfo methodInfo,
                             @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,
-                            @Advice.Thrown Throwable throwable,
+                            @Advice.Thrown(readOnly = false, typing = Assigner.Typing.DYNAMIC) Throwable throwable,
                             @Advice.Local(CONTEXT) Object context) {
         // check context stack info here
 

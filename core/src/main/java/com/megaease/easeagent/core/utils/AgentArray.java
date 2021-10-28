@@ -17,13 +17,18 @@
 
 package com.megaease.easeagent.core.utils;
 
+import com.google.auto.service.AutoService;
+import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-@SuppressWarnings("unchecked, unused")
+@AutoService(AppendBootstrapClassLoaderSearch.class)
+@SuppressWarnings("unchecked")
 public class AgentArray<E> {
     private static final int DEFAULT_INIT_SIZE = 256;
+    private final Object lock = new Object();
     private Object[] a;
     private final AtomicInteger size = new AtomicInteger(0);
 
@@ -73,10 +78,24 @@ public class AgentArray<E> {
         return (E)a[index];
     }
 
-    public E set(int index, E element) {
+    /**
+     * set element for index, can't override existed value
+     *
+     * @return return null, when successful, otherwise return element already existed
+     */
+    public E putIfAbsent(int index, E element) {
         ensureCapacity(index + 1);
-        E oldValue = (E)a[index];
-        a[index] = element;
+        E oldValue;
+
+        synchronized (lock) {
+            oldValue = (E)a[index];
+            if (oldValue == null) {
+                a[index] = element;
+            } else {
+                return oldValue;
+            }
+        }
+
         int currentSize = size.get();
         if (currentSize < index + 1) {
             while(!size.compareAndSet(currentSize, index + 1)) {
@@ -86,19 +105,49 @@ public class AgentArray<E> {
                 }
             }
         }
+        return null;
+    }
+
+    /**
+     * replace the element at the index by another value
+     * when the slot of the index is null, it will fail to replace,
+     * and please use set function instead of replace
+     *
+     * @return original value,
+     */
+    public E replace(int index, E element) {
+        ensureCapacity(index + 1);
+        E oldValue;
+
+        synchronized (lock) {
+            oldValue = (E)a[index];
+            if (oldValue == null) {
+                return null;
+            } else {
+                a[index] = element;
+            }
+        }
         return oldValue;
     }
 
     public int indexOf(Object o) {
         int length = size();
+        Object s;
         if (o == null) {
-            for (int i = 0; i < length; i++)
-                if (a[i] == null)
+            for (int i = 0; i < length; i++) {
+                s = a[i];
+                if (s == null) {
                     return i;
+                }
+            }
         } else {
-            for (int i = 0; i < length; i++)
-                if (o.equals(a[i]))
+            for (int i = 0; i < length; i++) {
+                s = a[i];
+                if (o.equals(s)) {
                     return i;
+                }
+                return i;
+            }
         }
         return -1;
     }
