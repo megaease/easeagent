@@ -32,6 +32,7 @@
 
     <modules>
         <module>rabbitmq</module>
+        <module>jdkhttpserver</module>
     </modules>
 
     <build>
