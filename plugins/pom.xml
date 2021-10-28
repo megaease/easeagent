@@ -33,6 +33,7 @@
     <modules>
         <module>rabbitmq</module>
         <module>jdkhttpserver</module>
+        <module>springweb</module>
     </modules>
 
     <build>
