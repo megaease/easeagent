@@ -3,7 +3,6 @@ package com.megaease.easeagent.plugin.bridge;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.api.metric.Metric;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TraceContext;
@@ -46,8 +45,8 @@ public class NoOpContext {
         }
 
         @Override
-        public void importAsync(AsyncContext snapshot) {
-
+        public Span importAsync(AsyncContext snapshot) {
+            return NoOpTracer.NO_OP_SPAN;
         }
 
         @Override
@@ -56,8 +55,8 @@ public class NoOpContext {
         }
 
         @Override
-        public void importProgress(Request request) {
-
+        public Span importProgress(Request request) {
+            return NoOpTracer.NO_OP_SPAN;
         }
 
         @Override
@@ -101,6 +100,11 @@ public class NoOpContext {
         @Override
         public Span span() {
             return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
+        public void setHeader(String name, String value) {
+
         }
 
         @Override

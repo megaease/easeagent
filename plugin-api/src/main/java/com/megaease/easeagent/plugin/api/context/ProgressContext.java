@@ -7,5 +7,7 @@ import java.util.Map;
 public interface ProgressContext {
     Span span();
 
+    void setHeader(String name, String value);
+
     Map<String, String> getHeader();
 }

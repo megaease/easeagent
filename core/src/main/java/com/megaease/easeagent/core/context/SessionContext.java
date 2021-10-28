@@ -4,6 +4,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TraceContext;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
@@ -47,19 +48,40 @@ public class SessionContext implements Context, TraceContext {
     }
 
     @Override
-    public void importAsync(AsyncContext snapshot) {
-        currentTracing().importAsync(snapshot);
+    public Span importAsync(AsyncContext snapshot) {
+        Span span = currentTracing().importAsync(snapshot);
         context.putAll(snapshot.getContext());
+        return span;
     }
 
     @Override
     public ProgressContext nextProgress(Request request) {
-        return currentTracing().nextProgress(request);
+        ProgressContext progressContext = currentTracing().nextProgress(request);
+        String[] fields = TransparentTransmission.getFields();
+        if (TransparentTransmission.isEmpty(fields)) {
+            return progressContext;
+        }
+        for (String field : fields) {
+            Object o = context.get(field);
+            if (o != null && (o instanceof String)) {
+                progressContext.setHeader(field, (String) o);
+            }
+        }
+        return progressContext;
     }
 
     @Override
-    public void importProgress(Request request) {
-        currentTracing().importProgress(request);
+    public Span importProgress(Request request) {
+        Span span = currentTracing().importProgress(request);
+        String[] fields = TransparentTransmission.getFields();
+        if (TransparentTransmission.isEmpty(fields)) {
+            return span;
+        }
+        for (String field : fields) {
+            String value = request.header(field);
+            context.put(field, value);
+        }
+        return span;
     }
 
     @Override

@@ -40,6 +40,7 @@ public class ContextManager {
     }
 
     public static ContextManager build(Configs conf) {
+        TransparentTransmission.init(conf);
         PluginConfigContext iConfigFactory = PluginConfigContext.builder(conf).build();
         EaseAgent.configFactory = iConfigFactory;
         LoggerFactoryImpl loggerFactory = LoggerFactoryImpl.build();

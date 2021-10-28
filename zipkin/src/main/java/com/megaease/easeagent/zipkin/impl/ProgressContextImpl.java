@@ -20,6 +20,11 @@ public class ProgressContextImpl implements ProgressContext {
     }
 
     @Override
+    public void setHeader(String name, String value) {
+        asyncRequest.setHeader(name, value);
+    }
+
+    @Override
     public Map<String, String> getHeader() {
         return asyncRequest.getHeader();
     }

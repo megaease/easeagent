@@ -2,8 +2,8 @@ package com.megaease.easeagent.plugin.api;
 
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.api.metric.Metric;
 import com.megaease.easeagent.plugin.api.trace.Request;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Map;
@@ -19,11 +19,11 @@ public interface Context {
 
     AsyncContext exportAsync(Request request);
 
-    void importAsync(AsyncContext snapshot);
+    Span importAsync(AsyncContext snapshot);
 
     ProgressContext nextProgress(Request request);
 
-    void importProgress(Request request);
+    Span importProgress(Request request);
 
-    Map<Object, Object>  clear();
+    Map<Object, Object> clear();
 }
