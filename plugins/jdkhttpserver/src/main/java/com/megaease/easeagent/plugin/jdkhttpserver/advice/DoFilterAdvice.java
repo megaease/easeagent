@@ -13,7 +13,8 @@ import java.util.Set;
 public class DoFilterAdvice implements Points {
     @Override
     public IClassMatcher getClassMatcher() {
-        return ClassMatcher.builder().hasInterface("sun.net.jdkhttpserver.AuthFilter")
+        return ClassMatcher.builder()
+            .hasClassName("sun.net.httpserver.AuthFilter")
             .notAbstract()
             .notInterface()
             .build();

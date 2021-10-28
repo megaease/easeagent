@@ -14,6 +14,7 @@ public class DoFilterInterceptor implements Interceptor {
 
     @Override
     public Object after(MethodInfo methodInfo, Object context) {
+        System.out.println("run after http server");
         return null;
     }
 }
