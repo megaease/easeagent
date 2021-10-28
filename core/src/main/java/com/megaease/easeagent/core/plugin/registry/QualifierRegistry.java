@@ -103,6 +103,7 @@ public class QualifierRegistry {
                 if (index == null) {
                     index = interceptorSuppliers.add(SupplierChain.builder());
                     qualifierToIndex.putIfAbsent(provider.getAdviceTo(), index);
+                    interceptorSuppliers.get(index).addSupplier(provider.getInterceptorProvider());
                 }
             }
         }
