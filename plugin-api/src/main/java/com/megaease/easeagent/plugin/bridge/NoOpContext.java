@@ -30,13 +30,28 @@ public class NoOpContext {
         }
 
         @Override
-        public <V> V getValue(Object key) {
+        public <V> V get(Object key) {
             return null;
         }
 
         @Override
         public <V> V remove(Object key) {
             return null;
+        }
+
+        @Override
+        public <V> V put(Object key, V value) {
+            return value;
+        }
+
+        @Override
+        public int enter(Object key) {
+            return 0;
+        }
+
+        @Override
+        public int out(Object key) {
+            return 0;
         }
 
         @Override

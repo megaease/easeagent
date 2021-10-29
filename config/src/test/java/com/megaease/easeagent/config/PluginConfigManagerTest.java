@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
-public class PluginConfigContextTest {
+public class PluginConfigManagerTest {
     public static String DOMAIN = "testDomain";
     public static String NAMESPACE = "testNamespace";
     public static String TEST_TRACE_ID = "test-trace";
@@ -19,13 +19,13 @@ public class PluginConfigContextTest {
     public static String TEST_AAA_ID = "test-AAA";
 
 
-    PluginConfigContext build() {
+    PluginConfigManager build() {
         return build(PluginSourceConfigTest.buildSource());
     }
 
-    PluginConfigContext build(Map<String, String> source) {
+    PluginConfigManager build(Map<String, String> source) {
         Configs configs = new Configs(source);
-        return PluginConfigContext.builder(configs).build();
+        return PluginConfigManager.builder(configs).build();
     }
 
     @Test
@@ -35,9 +35,9 @@ public class PluginConfigContextTest {
 
     @Test
     public void getConfig() {
-        PluginConfigContext pluginConfigContext = build();
+        PluginConfigManager pluginConfigManager = build();
         for (Map.Entry<String, String> entry : PluginSourceConfigTest.buildSource().entrySet()) {
-            assertEquals(pluginConfigContext.getConfig(entry.getKey()), entry.getValue());
+            assertEquals(pluginConfigManager.getConfig(entry.getKey()), entry.getValue());
         }
     }
 
@@ -69,12 +69,12 @@ public class PluginConfigContextTest {
 
     @Test
     public void getConfig1() throws InterruptedException {
-        PluginConfigContext pluginConfigContext = build();
-        PluginConfig pluginConfig = pluginConfigContext.getConfig(PluginSourceConfigTest.DOMAIN, "global", PluginSourceConfigTest.GLOBAL_ID);
+        PluginConfigManager pluginConfigManager = build();
+        PluginConfig pluginConfig = pluginConfigManager.getConfig(PluginSourceConfigTest.DOMAIN, "global", PluginSourceConfigTest.GLOBAL_ID);
         checkPluginConfigString(pluginConfig, PluginConfigTest.globalSource());
-        pluginConfig = pluginConfigContext.getConfig(PluginSourceConfigTest.DOMAIN, PluginSourceConfigTest.NAMESPACE, PluginSourceConfigTest.TEST_TRACE_ID);
+        pluginConfig = pluginConfigManager.getConfig(PluginSourceConfigTest.DOMAIN, PluginSourceConfigTest.NAMESPACE, PluginSourceConfigTest.TEST_TRACE_ID);
         checkPluginConfigString(pluginConfig, PluginConfigTest.globalSource());
-        pluginConfig = pluginConfigContext.getConfig(PluginSourceConfigTest.DOMAIN, PluginSourceConfigTest.NAMESPACE, PluginSourceConfigTest.TEST_METRIC_ID);
+        pluginConfig = pluginConfigManager.getConfig(PluginSourceConfigTest.DOMAIN, PluginSourceConfigTest.NAMESPACE, PluginSourceConfigTest.TEST_METRIC_ID);
         checkPluginConfigString(pluginConfig, PluginConfigTest.globalSource());
 
         Map<String, String> source = buildSource();
@@ -83,8 +83,8 @@ public class PluginConfigContextTest {
         build(source);
 
         Configs configs = new Configs(buildSource());
-        pluginConfigContext = PluginConfigContext.builder(configs).build();
-        final PluginConfig pluginConfig1 = pluginConfigContext.getConfig(DOMAIN, NAMESPACE, TEST_TRACE_ID);
+        pluginConfigManager = PluginConfigManager.builder(configs).build();
+        final PluginConfig pluginConfig1 = pluginConfigManager.getConfig(DOMAIN, NAMESPACE, TEST_TRACE_ID);
         final AtomicReference<Config> oldPluginConfig = new AtomicReference<>();
         final AtomicReference<Config> newPluginConfig = new AtomicReference<>();
         PluginConfigTest.checkAllType(pluginConfig1);

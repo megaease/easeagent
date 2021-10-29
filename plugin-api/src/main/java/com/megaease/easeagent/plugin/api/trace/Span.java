@@ -34,6 +34,8 @@ public interface Span {
 
     void abandon();
 
+    void finish();
+
     void finish(long timestamp);
 
     void flush();

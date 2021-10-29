@@ -8,22 +8,22 @@ import java.util.*;
 
 import static com.megaease.easeagent.config.ConfigConst.PLUGIN_GLOBAL;
 
-public class PluginConfigContext implements IConfigFactory {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluginConfigContext.class);
+public class PluginConfigManager implements IConfigFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginConfigManager.class);
     private volatile Runnable shutdownRunnable;
     private final Configs configs;
     private final Map<Key, PluginSourceConfig> pluginSourceConfigs;
     private final Map<Key, PluginConfig> pluginConfigs;
 
-    private PluginConfigContext(Configs configs, Map<Key, PluginSourceConfig> pluginSourceConfigs, Map<Key, PluginConfig> pluginConfigs) {
+    private PluginConfigManager(Configs configs, Map<Key, PluginSourceConfig> pluginSourceConfigs, Map<Key, PluginConfig> pluginConfigs) {
         this.configs = Objects.requireNonNull(configs, "configs must not be null.");
         this.pluginSourceConfigs = Objects.requireNonNull(pluginSourceConfigs, "pluginSourceConfigs must not be null.");
         this.pluginConfigs = Objects.requireNonNull(pluginConfigs, "pluginConfigs must not be null.");
     }
 
-    public static PluginConfigContext.Builder builder(Configs configs) {
-        PluginConfigContext pluginConfigContext = new PluginConfigContext(configs, new HashMap<>(), new HashMap<>());
-        return pluginConfigContext.new Builder();
+    public static PluginConfigManager.Builder builder(Configs configs) {
+        PluginConfigManager pluginConfigManager = new PluginConfigManager(configs, new HashMap<>(), new HashMap<>());
+        return pluginConfigManager.new Builder();
     }
 
     @Override
@@ -161,8 +161,8 @@ public class PluginConfigContext implements IConfigFactory {
     }
 
     public class Builder {
-        public PluginConfigContext build() {
-            synchronized (PluginConfigContext.this) {
+        public PluginConfigManager build() {
+            synchronized (PluginConfigManager.this) {
                 Map<String, String> sources = configs.getConfigs();
                 Set<Key> sourceKeys = keys(sources.keySet());
                 for (Key sourceKey : sourceKeys) {
@@ -173,7 +173,7 @@ public class PluginConfigContext implements IConfigFactory {
                 }
                 shutdownRunnable = configs.addChangeListener(new ChangeListener());
             }
-            return PluginConfigContext.this;
+            return PluginConfigManager.this;
         }
     }
 
@@ -185,7 +185,7 @@ public class PluginConfigContext implements IConfigFactory {
             for (ChangeItem changeItem : list) {
                 sources.put(changeItem.getFullName(), changeItem.getNewValue());
             }
-            PluginConfigContext.this.onChange(sources);
+            PluginConfigManager.this.onChange(sources);
         }
     }
 }

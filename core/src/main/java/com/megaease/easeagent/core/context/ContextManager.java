@@ -1,12 +1,13 @@
 package com.megaease.easeagent.core.context;
 
 import com.megaease.easeagent.config.Configs;
-import com.megaease.easeagent.config.PluginConfigContext;
+import com.megaease.easeagent.config.PluginConfigManager;
 import com.megaease.easeagent.core.log.LoggerFactoryImpl;
 import com.megaease.easeagent.core.log.LoggerMdc;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
+import com.megaease.easeagent.plugin.api.logging.Mdc;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
@@ -19,43 +20,42 @@ import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ContextManager {
     private static final ThreadLocal<SessionContext> LOCAL_SESSION_CONTEXT = ThreadLocal.withInitial(() -> new SessionContext());
-    private final Configs conf;
-    private final PluginConfigContext pluginConfigContext;
-    private final ILoggerFactory loggerFactory;
+    private final PluginConfigManager pluginConfigManager;
+    private final Function rootSpanFinish;
+    private final Supplier<Context> sessionSupplier;
+    private final GlobalContext globalContext;
     private volatile Supplier<Tracing> tracing = () -> null;
     private volatile MetricRegistrySupplier metric = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
-    private final Function rootSpanFinish;
 
-    public ContextManager(Configs conf, PluginConfigContext pluginConfigContext, ILoggerFactory loggerFactory) {
-        this.conf = Objects.requireNonNull(conf, "conf must not be null.");
-        this.pluginConfigContext = Objects.requireNonNull(pluginConfigContext, "pluginConfigContext must not be null.");
-        if (loggerFactory == null) {
-            loggerFactory = new NoOpLoggerFactory();
-        }
-        this.loggerFactory = Objects.requireNonNull(loggerFactory, "loggerFactory must not be null.");
+
+    private ContextManager(@Nonnull Configs conf, @Nonnull PluginConfigManager pluginConfigManager, @Nonnull ILoggerFactory loggerFactory, @Nonnull Mdc mdc) {
+        this.pluginConfigManager = pluginConfigManager;
         this.rootSpanFinish = new RootSpanFinish();
+        this.sessionSupplier = new SessionContextSupplier();
+        this.globalContext = new GlobalContext(conf, new MetricRegistrySupplierImpl(), loggerFactory, mdc);
     }
 
     public static ContextManager build(Configs conf) {
         TransparentTransmission.init(conf);
-        PluginConfigContext iConfigFactory = PluginConfigContext.builder(conf).build();
-        EaseAgent.configFactory = iConfigFactory;
+        PluginConfigManager pluginConfigManager = PluginConfigManager.builder(conf).build();
         LoggerFactoryImpl loggerFactory = LoggerFactoryImpl.build();
         ILoggerFactory iLoggerFactory = NoOpLoggerFactory.INSTANCE;
+        Mdc mdc = NoOpLoggerFactory.NO_OP_MDC_INSTANCE;
         if (loggerFactory != null) {
-            EaseAgent.loggerFactory = loggerFactory;
-            EaseAgent.loggerMdc = new LoggerMdc(loggerFactory.facotry().mdc());
             iLoggerFactory = loggerFactory;
+            mdc = new LoggerMdc(loggerFactory.facotry().mdc());
         }
-        ContextManager contextManager = new ContextManager(conf, iConfigFactory, iLoggerFactory);
-        EaseAgent.contextSupplier = contextManager.new SessionContextSupplier();
-        EaseAgent.metricRegistrySupplier = contextManager.new MetricRegistrySupplierImpl();
+        ContextManager contextManager = new ContextManager(conf, pluginConfigManager, iLoggerFactory, mdc);
+        EaseAgent.loggerFactory = contextManager.globalContext.getLoggerFactory();
+        EaseAgent.loggerMdc = contextManager.globalContext.getMdc();
+        EaseAgent.contextSupplier = contextManager.sessionSupplier;
+        EaseAgent.metricRegistrySupplier = contextManager.globalContext.getMetric();
+        EaseAgent.configFactory = contextManager.pluginConfigManager;
         return contextManager;
     }
 

@@ -1,7 +1,7 @@
 package com.megaease.easeagent.core;
 
 import com.megaease.easeagent.config.Configs;
-import com.megaease.easeagent.config.PluginConfigContext;
+import com.megaease.easeagent.config.PluginConfigManager;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
@@ -70,7 +70,7 @@ public class HttpServerTest {
         source.put("plugin.observability.kafka.metrics.appendType", "kafka");
 
         Configs configs = new Configs(source);
-        IConfigFactory iConfigFactory = PluginConfigContext.builder(configs).build();
+        IConfigFactory iConfigFactory = PluginConfigManager.builder(configs).build();
         AtomicInteger count = new AtomicInteger(0);
 ///plugins/domains/observability/namespaces/kafka/kafka-tracings/properties/enabled/true/1
         iConfigFactory.getConfig("observability", "kafka", "kafka-tracings").addChangeListener(new ConfigChange(count, "kafka.kafka-tracings"));

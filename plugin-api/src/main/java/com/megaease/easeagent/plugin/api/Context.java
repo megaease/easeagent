@@ -13,9 +13,15 @@ public interface Context {
 
     Tracing currentTracing();
 
-    <V> V getValue(Object key);
+    <V> V get(Object key);
 
     <V> V remove(Object key);
+
+    <V> V put(Object key, V value);
+
+    int enter(Object key);
+
+    int out(Object key);
 
     AsyncContext exportAsync(Request request);
 
