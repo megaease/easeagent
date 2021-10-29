@@ -29,7 +29,7 @@ public class ContextManager {
     private final Function rootSpanFinish;
     private final Supplier<Context> sessionSupplier;
     private final GlobalContext globalContext;
-    private volatile Supplier<Tracing> tracing = () -> null;
+    private volatile Function<Supplier<Context>, Tracing> tracing = (supplier) -> null;
     private volatile MetricRegistrySupplier metric = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
 
 
@@ -59,7 +59,7 @@ public class ContextManager {
         return contextManager;
     }
 
-    public void setTracing(@Nonnull Supplier<Tracing> tracing) {
+    public void setTracing(@Nonnull Function<Supplier<Context>, Tracing> tracing) {
         this.tracing = tracing;
     }
 
@@ -76,7 +76,8 @@ public class ContextManager {
         @Override
         public Context get() {
             SessionContext context = LOCAL_SESSION_CONTEXT.get();
-            context.setCurrentTracing(NoNull.of(ContextManager.this.tracing.get(), NoOpTracer.NO_OP_TRACING));
+            Tracing tracing = ContextManager.this.tracing.apply(this);
+            context.setCurrentTracing(NoNull.of(tracing, NoOpTracer.NO_OP_TRACING));
             return context;
         }
     }

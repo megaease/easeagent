@@ -10,6 +10,7 @@ import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class NoOpContext {
     public static final Context NO_OP_CONTEXT = NoopContext.INSTANCE;
@@ -99,12 +100,22 @@ public class NoOpContext {
         }
 
         @Override
-        public Map<Object, Object> getContext() {
+        public Context getContext() {
+            return NoopContext.INSTANCE;
+        }
+
+        @Override
+        public Span importToCurr() {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
+        public Map<Object, Object> getAll() {
             return Collections.emptyMap();
         }
 
         @Override
-        public void putContext(Map<Object, Object> context) {
+        public void putAll(Map<Object, Object> context) {
 
         }
     }

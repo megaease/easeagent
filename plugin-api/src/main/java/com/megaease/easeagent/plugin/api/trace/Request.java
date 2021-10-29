@@ -7,5 +7,7 @@ public interface Request {
 
     String header(String name);
 
+    boolean scope();
+
     void setHeader(String name, String value);
 }

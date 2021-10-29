@@ -72,14 +72,14 @@ public class SessionContext implements Context, TraceContext {
     @Override
     public AsyncContext exportAsync(Request request) {
         AsyncContext asyncContext = currentTracing().exportAsync(request);
-        asyncContext.putContext(context);
+        asyncContext.putAll(context);
         return asyncContext;
     }
 
     @Override
     public Span importAsync(AsyncContext snapshot) {
         Span span = currentTracing().importAsync(snapshot);
-        context.putAll(snapshot.getContext());
+        context.putAll(snapshot.getAll());
         return span;
     }
 
