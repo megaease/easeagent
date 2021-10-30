@@ -122,6 +122,11 @@ public class SpanImpl implements Span {
     }
 
     @Override
+    public void finish() {
+        finish(System.currentTimeMillis());
+    }
+
+    @Override
     public void finish(long timestamp) {
         if (scope != null) {
             scope.close();

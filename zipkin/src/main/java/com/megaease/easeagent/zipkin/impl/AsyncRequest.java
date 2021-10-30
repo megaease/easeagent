@@ -32,6 +32,11 @@ public class AsyncRequest implements Request {
     }
 
     @Override
+    public boolean scope() {
+        return false;
+    }
+
+    @Override
     public void setHeader(String name, String value) {
         request.setHeader(name, value);
         header.put(name, value);

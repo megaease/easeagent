@@ -91,6 +91,11 @@ public class NoOpTracer {
         }
 
         @Override
+        public void finish() {
+
+        }
+
+        @Override
         public void flush() {
         }
 

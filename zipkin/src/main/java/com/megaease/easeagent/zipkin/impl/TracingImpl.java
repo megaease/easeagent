@@ -1,10 +1,9 @@
 package com.megaease.easeagent.zipkin.impl;
 
 import brave.Tracer;
-import brave.propagation.ThreadLocalSpan;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
-import brave.sampler.Sampler;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
@@ -12,27 +11,31 @@ import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 public class TracingImpl implements Tracing {
+    private final Supplier<Context> supplier;
     private final brave.Tracing tracing;
     private final brave.Tracer tracer;
     private final TraceContext.Injector<Request> defaultInjector;
     private final TraceContext.Extractor<Request> defaultExtractor;
 
-    private TracingImpl(@Nonnull brave.Tracing tracing,
+    private TracingImpl(@Nonnull Supplier<Context> supplier,
+                        @Nonnull brave.Tracing tracing,
                         @Nonnull Tracer tracer,
                         @Nonnull TraceContext.Injector<Request> defaultInjector,
                         @Nonnull TraceContext.Extractor<Request> defaultExtractor) {
+        this.supplier = supplier;
         this.tracing = tracing;
         this.tracer = tracer;
         this.defaultInjector = defaultInjector;
         this.defaultExtractor = defaultExtractor;
     }
 
-    public static Tracing build(brave.Tracing tracing) {
+    public static Tracing build(Supplier<Context> supplier, brave.Tracing tracing) {
         tracing.sampler();
         return tracing == null ? NoOpTracer.NO_OP_TRACING :
-            new TracingImpl(tracing,
+            new TracingImpl(supplier, tracing,
                 tracing.tracer(),
                 tracing.propagation().injector(Request::setHeader),
                 tracing.propagation().extractor(Request::header)
@@ -88,7 +91,7 @@ public class TracingImpl implements Tracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         brave.Span span = tracer().nextSpan();
         defaultInjector.inject(span.context(), asyncRequest);
-        return new AsyncContextImpl(this, span, asyncRequest);
+        return new AsyncContextImpl(this, span, asyncRequest, supplier);
     }
 
     @Override
@@ -124,7 +127,7 @@ public class TracingImpl implements Tracing {
         setInfo(span, request);
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultInjector.inject(span.context(), asyncRequest);
-        return new ProgressContextImpl(build(span), asyncRequest);
+        return new ProgressContextImpl(build(span, request.scope()), asyncRequest);
     }
 
     @Override
@@ -136,7 +139,7 @@ public class TracingImpl implements Tracing {
         }
         setInfo(span, request);
         defaultInjector.inject(span.context(), request);
-        return build(span, true);
+        return build(span, request.scope());
     }
 
     @Override

@@ -66,6 +66,7 @@ import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.ServletMetric;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -216,8 +217,8 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     }
 
     @Override
-    public Supplier<com.megaease.easeagent.plugin.api.trace.Tracing> tracingSupplier() {
-        return () -> TracingImpl.build(tracing);
+    public Function<Supplier<Context>, com.megaease.easeagent.plugin.api.trace.Tracing> tracingSupplier() {
+        return (supplier) -> TracingImpl.build(supplier, tracing);
     }
 
     @Override

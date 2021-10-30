@@ -23,7 +23,7 @@ public class SpringWebFilterPlugin implements AgentPlugin {
 
     @Override
     public String getName() {
-        return "springwebfilter-trace";
+        return "springwebfilter";
     }
 
     @Override
