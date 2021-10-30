@@ -21,6 +21,7 @@ import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
+import com.megaease.easeagent.core.plugin.transformer.AnnotationTransformer;
 import com.megaease.easeagent.core.plugin.transformer.CompoundPluginTransformer;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldTransformer;
 import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
@@ -118,6 +119,12 @@ public class PluginLoader {
             .stream(methodTransformations.spliterator(), false)
             .map(ForAdviceTransformer::new)
             .collect(Collectors.toList());
+
+        // add annotation to instrumented method
+        agentTransformers.addAll(StreamSupport
+            .stream(methodTransformations.spliterator(), false)
+            .map(AnnotationTransformer::new)
+            .collect(Collectors.toList()));
 
         if (hasDynamicField) {
             agentTransformers.add(new DynamicFieldTransformer(AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME));

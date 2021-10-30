@@ -20,9 +20,14 @@ package com.megaease.easeagent.core.instrument;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
+import com.megaease.easeagent.core.plugin.annotation.Index;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.matcher.ElementMatchers;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -31,7 +36,6 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ByteArrayClassLoader;
 import net.bytebuddy.dynamic.scaffold.TypeWriter;
-import net.bytebuddy.matcher.ElementMatchers;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,28 +46,45 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("unused")
 public class NonStaticMethodTransformTest {
     private static final String FOO = "foo",
         BAR = "bar",
         QUX = "qux";
 
     @SuppressWarnings("unused")
-    public static class Foo {
+    public static class Foo extends FooBase {
         static String clazzInitString = FOO;
         public static String fooStatic(String a) {
             return a;
         }
         public String foo(String a) {
             return a;
+        }
+
+        public int baz() {
+            return (int)System.currentTimeMillis();
+        }
+    }
+
+    public interface FooInterface {
+        String foo(String a);
+    }
+
+    public static class FooBase implements FooInterface {
+        public String foo(String a) {
+            return a + "-base";
         }
     }
 
@@ -83,7 +104,7 @@ public class NonStaticMethodTransformTest {
 
     private static ClassLoader classLoader;
     private static String dumpFolder;
-    private static final AtomicInteger globalIndex = new AtomicInteger(0);
+    private static final AtomicInteger globalIndex = new AtomicInteger(1000);
 
     @Rule
     public MethodRule agentAttachmentRule = new AgentAttachmentRule();
@@ -108,7 +129,7 @@ public class NonStaticMethodTransformTest {
         chainBuilder.addSupplier(supplier);
 
         MethodTransformation methodTransformation = new MethodTransformation(index,
-            ElementMatchers.named(methodName),
+            named(methodName),
             chainBuilder);
 
         Set<MethodTransformation> transformations = new HashSet<>();
@@ -127,10 +148,12 @@ public class NonStaticMethodTransformTest {
         AgentBuilder builder = Bootstrap.getAgentBuilder(null);
 
         Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(), FOO);
+        // Set<MethodTransformation> noTransformations = getMethodTransformations(globalIndex.incrementAndGet(), FOO);
 
         ClassFileTransformer classFileTransformer = builder
-            .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
+            .type(hasSuperType(named(FooBase.class.getName())), ElementMatchers.is(classLoader))
             .transform(PluginLoader.compound(true, transformations))
+            // .transform(PluginLoader.compound(true, transformations))
             .installOnByteBuddyAgent();
         try {
             Class<?> type = classLoader.loadClass(Foo.class.getName());
@@ -145,4 +168,19 @@ public class NonStaticMethodTransformTest {
             assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
         }
     }
+
+    /*s
+    @Test
+    public void testAdviceDynamicLambdaInvocation() throws Exception {
+        Class<?> type = new ByteBuddy()
+            .redefine(Foo.class)
+            .visit(Advice.withCustomMapping().bindLambda(Index.class,
+                Foo.class.getMethod("baz"),
+                Callable.class).to(CommonInlineAdvice.class).on(named(FOO)))
+            .make()
+            .load(Foo.class.getClassLoader(), ClassLoadingStrategy.Default.CHILD_FIRST)
+            .getLoaded();
+        assertThat(type.getMethod(FOO).invoke(type.getConstructor().newInstance()), is((Object) FOO));
+    }
+    */
 }

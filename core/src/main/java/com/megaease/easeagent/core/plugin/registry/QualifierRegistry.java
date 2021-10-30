@@ -122,4 +122,8 @@ public class QualifierRegistry {
         }
         return name.substring(0, index);
     }
+
+    public int getInstrumentIndex() {
+        return 100;
+    }
 }

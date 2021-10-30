@@ -44,7 +44,7 @@ public class AgentInterceptorChain {
         Interceptor interceptor = interceptors.get(pos);
         try {
             interceptor.before(methodInfo, context);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // set error message to context;
         }
         this.doBefore(methodInfo, pos + 1, context);
@@ -57,7 +57,7 @@ public class AgentInterceptorChain {
         Interceptor interceptor = interceptors.get(pos);
         try {
             interceptor.after(methodInfo, context);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // set error message to context;
         }
         return this.doAfter(methodInfo, pos - 1, context);

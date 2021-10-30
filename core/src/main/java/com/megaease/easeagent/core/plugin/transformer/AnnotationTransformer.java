@@ -83,6 +83,7 @@ public class AnnotationTransformer implements AgentBuilder.Transformer {
             if (annotation != null) {
                 // merge interceptor chain
                 Integer index = annotation.getValue("value").resolve(Integer.class);
+                return methodVisitor;
             }
 
             MethodVisitor visitor = this.mForMethod.wrap(instrumentedType, instrumentedMethod,

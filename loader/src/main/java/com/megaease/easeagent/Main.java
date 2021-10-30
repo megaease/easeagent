@@ -61,7 +61,6 @@ public class Main {
 
         // install bootstrap jar
         final ArrayList<URL> bootUrls = nestArchiveUrls(archive, BOOTSTRAP);
-        bootUrls.addAll(nestArchiveUrls(archive, PLUGINS));
         bootUrls.forEach(url -> installBootstrapJar(url, inst));
 
         final Attributes attributes = archive.getManifest().getMainAttributes();

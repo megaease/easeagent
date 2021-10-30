@@ -12,7 +12,7 @@ import javax.servlet.ServletRequest;
 public class DoFilterInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Object context) {
-        OncePerRequestFilter oncePerRequestFilter = (OncePerRequestFilter) methodInfo.getInvoker();
+        // OncePerRequestFilter oncePerRequestFilter = (OncePerRequestFilter) methodInfo.getInvoker();
         ServletRequest request = (ServletRequest) methodInfo.getArgs()[0];
         System.out.println("run before http server do filter");
     }

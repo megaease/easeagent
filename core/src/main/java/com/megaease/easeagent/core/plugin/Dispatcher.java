@@ -20,26 +20,41 @@ package com.megaease.easeagent.core.plugin;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain;
 import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.MethodInfo;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public final class Dispatcher {
     static AgentArray<AgentInterceptorChain> chains = new AgentArray<>();
-
-    public static AgentInterceptorChain register(int index, AgentInterceptorChain chain) {
-        return chains.putIfAbsent(index, chain);
-    }
+    static AgentArray<AgentSupplierChain> supplierChains = new AgentArray<>();
 
     public static void enter(int index, MethodInfo info, Object ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
+        if (chain == null) {
+            chain = supplierChains.getUncheck(index).getInterceptorChain();
+            chains.replace(index, chain);
+        }
+
         int pos = 0;
         chain.doBefore(info, pos, ctx);
     }
 
     public static Object exit(int index, MethodInfo info, Object ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
+        if (chain == null) {
+            chain = supplierChains.getUncheck(index).getInterceptorChain();
+            chains.replace(index, chain);
+        }
         int pos = chain.size() - 1;
         return chain.doAfter(info, pos, ctx);
+    }
+
+    public static AgentInterceptorChain register(int index, AgentInterceptorChain chain) {
+        return chains.putIfAbsent(index, chain);
+    }
+
+    public static AgentSupplierChain register(int index, AgentSupplierChain chain) {
+        return supplierChains.putIfAbsent(index, chain);
     }
 }

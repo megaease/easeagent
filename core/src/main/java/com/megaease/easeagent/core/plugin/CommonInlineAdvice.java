@@ -18,6 +18,7 @@
 package com.megaease.easeagent.core.plugin;
 
 import com.megaease.easeagent.core.plugin.annotation.Index;
+import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.NoExceptionHandler;
 import com.megaease.easeagent.plugin.MethodInfo;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
@@ -31,7 +32,7 @@ public class CommonInlineAdvice {
     private static final String CONTEXT = "easeagent_context";
     private static final String POS = "easeagent_pos";
 
-    @Advice.OnMethodEnter
+    @Advice.OnMethodEnter(suppress = NoExceptionHandler.class)
     public static MethodInfo enter(@Index int index,
                                    @Advice.This(optional = true) Object invoker,
                                    @Advice.Origin("#m") String method,
@@ -51,7 +52,7 @@ public class CommonInlineAdvice {
         return methodInfo;
     }
 
-    @Advice.OnMethodExit(onThrowable = Exception.class)
+    @Advice.OnMethodExit(onThrowable = Exception.class, suppress = NoExceptionHandler.class)
     public static void exit(@Index int index,
                             @Advice.Enter MethodInfo methodInfo,
                             @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,

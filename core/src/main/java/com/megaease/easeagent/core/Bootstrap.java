@@ -127,7 +127,7 @@ public class Bootstrap {
     public static AgentBuilder getAgentBuilder(Configs config) {
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
-//          .with(LISTENER)
+            .with(LISTENER)
 //                .with(new AgentBuilder.Listener.Filtering(
 //                        new StringMatcher("java.lang.Thread", StringMatcher.Mode.EQUALS_FULLY),
 //                        AgentBuilder.Listener.StreamWriting.toSystemOut()))
@@ -392,30 +392,29 @@ public class Bootstrap {
     }
 
     private static final AgentBuilder.Listener LISTENER = new AgentBuilder.Listener() {
-
         @Override
         public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-            LOGGER.info("onDiscovery {} from classLoader {}", typeName, classLoader);
+            //LOGGER.info("onDiscovery {} from classLoader {}", typeName, classLoader);
         }
 
         @Override
         public void onTransformation(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded, DynamicType dt) {
-//            LOGGER.info("onTransformation: {} loaded: {} from classLoader {}", td, loaded, ld);
+            LOGGER.info("onTransformation: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
         public void onIgnored(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded) {
-//            LOGGER.info("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
+            //LOGGER.info("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-//            LOGGER.warn("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
+            LOGGER.warn("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
         }
 
         @Override
         public void onComplete(String name, ClassLoader ld, JavaModule m, boolean loaded) {
-//            LOGGER.info("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
+            //LOGGER.info("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
         }
     };
 
