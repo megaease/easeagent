@@ -21,7 +21,7 @@ public final class NoOpMetrics {
     public static final Meter NO_OP_METER = NoopMeter.INSTANCE;
     public static final MetricRegistry NO_OP_METRIC = NoopMetricRegistry.INSTANCE;
 
-    private static final class NoopMetricsRegistrySupplier implements MetricRegistrySupplier {
+    public static final class NoopMetricsRegistrySupplier implements MetricRegistrySupplier {
         private static final NoopMetricsRegistrySupplier INSTANCE = new NoopMetricsRegistrySupplier();
 
         @Override
@@ -30,7 +30,7 @@ public final class NoOpMetrics {
         }
     }
 
-    private static final class NoopGauge<T> implements Gauge<T> {
+    public static final class NoopGauge<T> implements Gauge<T> {
         private static final NoopGauge INSTANCE = new NoopGauge<>();
 
         /**
@@ -42,7 +42,7 @@ public final class NoOpMetrics {
         }
     }
 
-    private static final class NoopSnapshot implements Snapshot {
+    public static final class NoopSnapshot implements Snapshot {
         private static final NoopSnapshot INSTANCE = new NoopSnapshot();
         private static final long[] EMPTY_LONG_ARRAY = new long[0];
 
@@ -111,7 +111,7 @@ public final class NoOpMetrics {
         }
     }
 
-    static final class NoopTimer implements Timer {
+    public static final class NoopTimer implements Timer {
         private static final NoopTimer INSTANCE = new NoopTimer();
         private static final Timer.Context CONTEXT = new NoopTimer.Context();
 
@@ -231,7 +231,7 @@ public final class NoOpMetrics {
         }
     }
 
-    static final class NoopHistogram implements Histogram {
+    public static final class NoopHistogram implements Histogram {
         private static final NoopHistogram INSTANCE = new NoopHistogram();
 
         /**
@@ -267,7 +267,7 @@ public final class NoOpMetrics {
         }
     }
 
-    static final class NoopCounter implements Counter {
+    public static final class NoopCounter implements Counter {
         private static final NoopCounter INSTANCE = new NoopCounter();
 
         /**
@@ -311,7 +311,7 @@ public final class NoOpMetrics {
         }
     }
 
-    static final class NoopMeter implements Meter {
+    public static final class NoopMeter implements Meter {
         private static final NoopMeter INSTANCE = new NoopMeter();
 
         /**
@@ -371,7 +371,7 @@ public final class NoOpMetrics {
         }
     }
 
-    static final class NoopMetricRegistry implements MetricRegistry {
+    public static final class NoopMetricRegistry implements MetricRegistry {
         private static final NoopMetricRegistry INSTANCE = new NoopMetricRegistry();
 
         @Override

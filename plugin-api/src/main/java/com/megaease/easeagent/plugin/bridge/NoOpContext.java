@@ -17,7 +17,7 @@ public class NoOpContext {
     public static final EmptyAsyncContext NO_OP_ASYNC_CONTEXT = EmptyAsyncContext.INSTANCE;
     public static final NoopProgressContext NO_OP_PROGRESS_CONTEXT = NoopProgressContext.INSTANCE;
 
-    private static class NoopContext implements Context, TraceContext {
+    public static class NoopContext implements Context, TraceContext {
         private static final NoopContext INSTANCE = new NoopContext();
 
         @Override
@@ -86,7 +86,7 @@ public class NoOpContext {
     }
 
 
-    private static class EmptyAsyncContext implements AsyncContext {
+    public static class EmptyAsyncContext implements AsyncContext {
         private static final EmptyAsyncContext INSTANCE = new EmptyAsyncContext();
 
         @Override
@@ -120,7 +120,7 @@ public class NoOpContext {
         }
     }
 
-    private static class NoopProgressContext implements ProgressContext {
+    public static class NoopProgressContext implements ProgressContext {
         private static final NoopProgressContext INSTANCE = new NoopProgressContext();
 
         @Override

@@ -4,6 +4,8 @@ import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.PluginConfigManager;
 import com.megaease.easeagent.core.log.LoggerFactoryImpl;
 import com.megaease.easeagent.core.log.LoggerMdc;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
@@ -24,6 +26,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ContextManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class.getName());
     private static final ThreadLocal<SessionContext> LOCAL_SESSION_CONTEXT = ThreadLocal.withInitial(() -> new SessionContext());
     private final PluginConfigManager pluginConfigManager;
     private final Function rootSpanFinish;
@@ -41,6 +44,7 @@ public class ContextManager {
     }
 
     public static ContextManager build(Configs conf) {
+        LOGGER.info("build context manager.");
         TransparentTransmission.init(conf);
         PluginConfigManager pluginConfigManager = PluginConfigManager.builder(conf).build();
         LoggerFactoryImpl loggerFactory = LoggerFactoryImpl.build();
@@ -60,10 +64,12 @@ public class ContextManager {
     }
 
     public void setTracing(@Nonnull Function<Supplier<Context>, Tracing> tracing) {
+        LOGGER.info("set tracing supplier function.");
         this.tracing = tracing;
     }
 
     public void setMetric(@Nonnull MetricRegistrySupplier metric) {
+        LOGGER.info("set metric supplier function.");
         this.metric = metric;
     }
 

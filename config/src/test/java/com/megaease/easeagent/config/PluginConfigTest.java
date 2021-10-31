@@ -1,11 +1,14 @@
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 
@@ -40,7 +43,7 @@ public class PluginConfigTest {
         String namespace = "NAMESPACE";
         Map<String, String> global = globalSource();
         Map<String, String> cover = coverSource();
-        return new PluginConfig(domain, id, global, namespace, cover);
+        return PluginConfig.build(domain, id, global, namespace, cover, null);
     }
 
     @Test
@@ -152,7 +155,14 @@ public class PluginConfigTest {
         PluginConfig config = build();
         config.addChangeListener((oldConfig, newConfig) -> {
         });
-        assertNotNull(config.getConfigChangeListener());
+        AtomicInteger count = new AtomicInteger(0);
+        config.foreachConfigChangeListener(new Consumer<ConfigChangeListener>() {
+            @Override
+            public void accept(ConfigChangeListener listener) {
+                count.incrementAndGet();
+            }
+        });
+        assertEquals(count.get(), 1);
     }
 
     @Test
@@ -176,7 +186,7 @@ public class PluginConfigTest {
     }
 
 
-    public static void checkAllType(PluginConfig config){
+    public static void checkAllType(PluginConfig config) {
         checkHasProperty(config);
         checkString(config);
         checkBoolean(config);

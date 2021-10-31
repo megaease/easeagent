@@ -38,7 +38,7 @@ public class DoFilterInterceptor implements Interceptor {
             return;
         }
         HttpRequest httpRequest = new HttpServerRequest(httpServletRequest);
-        span = sessionContext.importProgress(httpRequest);
+        span = sessionContext.importProgress(httpRequest).start();
         httpServletRequest.setAttribute(ContextCons.SPAN, span);
         HttpUtils.handleReceive(span, httpRequest);
         if (httpServletRequest.isAsyncStarted()) {
@@ -81,7 +81,7 @@ public class DoFilterInterceptor implements Interceptor {
         return httpRoute != null ? httpRoute.toString() : null;
     }
 
-    static class HttpServerRequest implements HttpRequest {
+    public static class HttpServerRequest implements HttpRequest {
         private final HttpServletRequest delegate;
 
         HttpServerRequest(HttpServletRequest httpServletRequest) {
@@ -141,7 +141,7 @@ public class DoFilterInterceptor implements Interceptor {
     }
 
 
-    static class Response implements HttpResponse {
+    public static class Response implements HttpResponse {
         private final Throwable caught;
         private final HttpServletRequest httpServletRequest;
         private final HttpServletResponse httpServletResponse;

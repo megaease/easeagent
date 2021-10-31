@@ -1,10 +1,12 @@
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.annotation.Plugin;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.megaease.easeagent.config.ConfigConst.PLUGIN_GLOBAL;
 
@@ -31,7 +33,11 @@ public class PluginConfigManager implements IConfigFactory {
         return configs.getString(property);
     }
 
-    public synchronized PluginConfig getConfig(String domain, String namespace, String id) {
+    public PluginConfig getConfig(String domain, String namespace, String id) {
+        return getConfig(domain, namespace, id, null);
+    }
+
+    public synchronized PluginConfig getConfig(String domain, String namespace, String id, PluginConfig oldConfig) {
         Key key = new Key(domain, namespace, id);
         PluginConfig pluginConfig = pluginConfigs.get(key);
         if (pluginConfig != null) {
@@ -39,7 +45,7 @@ public class PluginConfigManager implements IConfigFactory {
         }
         Map<String, String> globalConfig = getGlobalConfig(domain, id);
         Map<String, String> coverConfig = getCoverConfig(domain, namespace, id);
-        PluginConfig newPluginConfig = new PluginConfig(domain, id, globalConfig, namespace, coverConfig);
+        PluginConfig newPluginConfig = PluginConfig.build(domain, id, globalConfig, namespace, coverConfig, oldConfig);
         pluginConfigs.put(key, newPluginConfig);
         return newPluginConfig;
     }
@@ -105,18 +111,9 @@ public class PluginConfigManager implements IConfigFactory {
             }
         }
         for (Key changeKey : changeKeys) {
-            PluginConfig oldConfig = pluginConfigs.remove(changeKey);
-            PluginConfig newConfig = getConfig(changeKey.getDomain(), changeKey.getNamespace(), changeKey.id);
-            com.megaease.easeagent.plugin.api.config.ConfigChangeListener changeListener = oldConfig.getConfigChangeListener();
-            if (changeListener == null) {
-                continue;
-            }
-            newConfig.addChangeListener(changeListener);
-            try {
-                changeListener.onChange(oldConfig, newConfig);
-            } catch (Exception e) {
-                LOGGER.error("on change config fail: {}", e);
-            }
+            final PluginConfig oldConfig = pluginConfigs.remove(changeKey);
+            final PluginConfig newConfig = getConfig(changeKey.getDomain(), changeKey.getNamespace(), changeKey.id, oldConfig);
+            oldConfig.foreachConfigChangeListener(listener -> listener.onChange(oldConfig, newConfig));
         }
     }
 
