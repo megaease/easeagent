@@ -6,14 +6,18 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.context.ContextCons;
+import com.megaease.easeagent.plugin.api.context.AsyncContext;
+import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.utils.*;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.springweb.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.utils.Entrant;
 
-import javax.servlet.*;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import javax.servlet.ServletRequest;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
@@ -24,6 +28,7 @@ public class DoFilterInterceptor implements Interceptor {
     public static final String BEST_MATCHING_PATTERN_ATTRIBUTE = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
     private static final String SEND_HANDLED_KEY = DoFilterInterceptor.class.getName() + "$SendHandled";
     private static final String ASYNC_CONTEXT = DoFilterInterceptor.class.getName() + ".AsyncContext";
+    private static final String PROGRESS_CONTEXT = DoFilterInterceptor.class.getName() + ".ProgressContext";
 
     @Override
     public void before(MethodInfo methodInfo, Object context) {
@@ -33,17 +38,17 @@ public class DoFilterInterceptor implements Interceptor {
             return;
         }
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
-        Span span = (Span) httpServletRequest.getAttribute(ContextCons.SPAN);
-        if (span != null) {
+        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(PROGRESS_CONTEXT);
+        if (progressContext != null) {
             return;
         }
         HttpRequest httpRequest = new HttpServerRequest(httpServletRequest);
-        span = sessionContext.importProgress(httpRequest).start();
-        httpServletRequest.setAttribute(ContextCons.SPAN, span);
-        HttpUtils.handleReceive(span, httpRequest);
+        progressContext = sessionContext.importProgress(httpRequest);
+        httpServletRequest.setAttribute(PROGRESS_CONTEXT, progressContext);
+        HttpUtils.handleReceive(progressContext.span().start(), httpRequest);
         if (httpServletRequest.isAsyncStarted()) {
             HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-            com.megaease.easeagent.plugin.api.context.AsyncContext asyncContext = sessionContext.exportAsync(httpRequest);
+            AsyncContext asyncContext = sessionContext.exportAsync(httpRequest);
             httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener(asyncContext), httpServletRequest, httpServletResponse);
             httpServletRequest.setAttribute(ASYNC_CONTEXT, SpanAndAsyncContext.build(asyncContext));
             AtomicBoolean sendHandled = new AtomicBoolean();
@@ -60,7 +65,8 @@ public class DoFilterInterceptor implements Interceptor {
         }
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-        Span span = (Span) httpServletRequest.getAttribute(ContextCons.SPAN);
+        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(PROGRESS_CONTEXT);
+        Span span = progressContext.span();
         String httpRoute = getHttpRouteAttributeFromRequest(httpServletRequest);
         if (httpRoute != null) {
             span.tag(TraceConst.HTTP_TAG_ROUTE, httpRoute);
@@ -130,7 +136,7 @@ public class DoFilterInterceptor implements Interceptor {
         }
 
         @Override
-        public boolean scope() {
+        public boolean cacheScope() {
             return true;
         }
 
@@ -197,9 +203,9 @@ public class DoFilterInterceptor implements Interceptor {
 
 
     public static final class TracingAsyncListener implements AsyncListener {
-        final com.megaease.easeagent.plugin.api.context.AsyncContext asyncContext;
+        final AsyncContext asyncContext;
 
-        TracingAsyncListener(com.megaease.easeagent.plugin.api.context.AsyncContext asyncContext) {
+        TracingAsyncListener(AsyncContext asyncContext) {
             this.asyncContext = asyncContext;
         }
 
@@ -208,7 +214,7 @@ public class DoFilterInterceptor implements Interceptor {
             Object sendHandled = req.getAttribute(SEND_HANDLED_KEY);
             if (sendHandled instanceof AtomicBoolean && ((AtomicBoolean) sendHandled).compareAndSet(false, true)) {
                 HttpServletResponse res = (HttpServletResponse) e.getSuppliedResponse();
-                HttpUtils.finish((Span) asyncContext.getAll().get(ContextCons.SPAN), new Response(e.getThrowable(), req, res));
+                HttpUtils.finish((Span) asyncContext.getAll().get(PROGRESS_CONTEXT), new Response(e.getThrowable(), req, res));
             }
 
         }
@@ -234,8 +240,8 @@ public class DoFilterInterceptor implements Interceptor {
             HttpServletRequest req = (HttpServletRequest) e.getSuppliedRequest();
             HttpRequest httpRequest = new HttpServerRequest(req);
             HttpUtils.handleReceive(span, httpRequest);
-            asyncContext.putAll(Collections.singletonMap(ContextCons.SPAN, span));
-            AsyncContext eventAsyncContext = e.getAsyncContext();
+            asyncContext.putAll(Collections.singletonMap(PROGRESS_CONTEXT, span));
+            javax.servlet.AsyncContext eventAsyncContext = e.getAsyncContext();
             if (eventAsyncContext != null) {
                 eventAsyncContext.addListener(this, e.getSuppliedRequest(), e.getSuppliedResponse());
             }

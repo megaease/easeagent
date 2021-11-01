@@ -4,6 +4,7 @@ import brave.Tracing;
 import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
@@ -145,7 +146,15 @@ public class SpanImpl implements Span {
     }
 
     @Override
-    public Span maybeScope() {
+    public Scope maybeScope() {
+        if (scope != null) {
+            return new ScopeImpl(scope);
+        }
+        return new ScopeImpl(tracing.currentTraceContext().maybeScope(span.context()));
+    }
+
+    @Override
+    public Span cacheScope() {
         if (scope != null) {
             return this;
         }

@@ -10,6 +10,7 @@ import java.util.function.Function;
 public class NoOpTracer {
     public static final Tracing NO_OP_TRACING = NoopTracing.INSTANCE;
     public static final Span NO_OP_SPAN = NoopSpan.INSTANCE;
+    public static final Scope NO_OP_SCOPE = NoopScope.INSTANCE;
     public static final EmptyExtractor NO_OP_EXTRACTOR = EmptyExtractor.INSTANCE;
     public static final EmptyMessagingTracing NO_OP_MESSAGING_TRACING = EmptyMessagingTracing.INSTANCE;
 
@@ -105,13 +106,27 @@ public class NoOpTracer {
         }
 
         @Override
-        public Span maybeScope() {
+        public Scope maybeScope() {
+            return NoopScope.INSTANCE;
+        }
+
+        @Override
+        public Span cacheScope() {
             return this;
         }
 
         @Override
         public String toString() {
             return "NoopSpan";
+        }
+    }
+
+    public static class NoopScope implements Scope {
+        private static final NoopScope INSTANCE = new NoopScope();
+
+        @Override
+        public void close() {
+
         }
     }
 
@@ -149,8 +164,8 @@ public class NoOpTracer {
         }
 
         @Override
-        public Span importProgress(Request request) {
-            return NoopSpan.INSTANCE;
+        public ProgressContext importProgress(Request request) {
+            return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
 
         @Override

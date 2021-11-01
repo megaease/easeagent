@@ -70,10 +70,10 @@ public class TracingImpl implements Tracing {
         return build(bSpan, false);
     }
 
-    private Span build(brave.Span bSpan, boolean inScope) {
+    private Span build(brave.Span bSpan, boolean cacheScope) {
         Span span = SpanImpl.build(tracing(), bSpan, defaultInjector);
-        if (inScope) {
-            span.maybeScope();
+        if (cacheScope) {
+            span.cacheScope();
         }
         return span;
     }
@@ -88,22 +88,21 @@ public class TracingImpl implements Tracing {
 
     @Override
     public AsyncContext exportAsync(Request request) {
-        AsyncRequest asyncRequest = new AsyncRequest(request);
         brave.Span span = tracer().nextSpan();
-        defaultInjector.inject(span.context(), asyncRequest);
-        return new AsyncContextImpl(this, span, asyncRequest, supplier);
+        defaultInjector.inject(span.context(), request);
+        return new AsyncContextImpl(this, build(span, request.cacheScope()), supplier);
     }
 
     @Override
     public Span importAsync(AsyncContext snapshot) {
         Span span = null;
         if (snapshot instanceof AsyncContextImpl) {
-            brave.Span bSpan = ((AsyncContextImpl) snapshot).getSpan();
+            Span bSpan = ((AsyncContextImpl) snapshot).getSpan();
             if (bSpan.isNoop()) {
                 return NoOpTracer.NO_OP_SPAN;
             }
             bSpan.start();
-            span = build(bSpan, true);
+            span = bSpan;
         }
         return NoOpTracer.noNullSpan(span);
     }
@@ -127,19 +126,22 @@ public class TracingImpl implements Tracing {
         setInfo(span, request);
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultInjector.inject(span.context(), asyncRequest);
-        return new ProgressContextImpl(build(span, request.scope()), asyncRequest);
+        Span newSpan = build(span, request.cacheScope());
+        return new ProgressContextImpl(this, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     @Override
-    public Span importProgress(Request request) {
+    public ProgressContext importProgress(Request request) {
         TraceContextOrSamplingFlags extracted = defaultExtractor.extract(request);
         brave.Span span = tracer().nextSpan(extracted);
         if (span.isNoop()) {
-            return NoOpTracer.NO_OP_SPAN;
+            return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
         setInfo(span, request);
-        defaultInjector.inject(span.context(), request);
-        return build(span, request.scope());
+        AsyncRequest asyncRequest = new AsyncRequest(request);
+        defaultInjector.inject(span.context(), asyncRequest);
+        Span newSpan = build(span, request.cacheScope());
+        return new ProgressContextImpl(this, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     @Override

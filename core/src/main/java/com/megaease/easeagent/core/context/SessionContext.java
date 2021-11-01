@@ -100,17 +100,18 @@ public class SessionContext implements Context, TraceContext {
     }
 
     @Override
-    public Span importProgress(Request request) {
-        Span span = currentTracing().importProgress(request);
+    public ProgressContext importProgress(Request request) {
+        ProgressContext progressContext = currentTracing().importProgress(request);
         String[] fields = TransparentTransmission.getFields();
         if (TransparentTransmission.isEmpty(fields)) {
-            return span;
+            return progressContext;
         }
         for (String field : fields) {
             String value = request.header(field);
+            progressContext.setHeader(field, value);
             context.put(field, value);
         }
-        return span;
+        return progressContext;
     }
 
     @Override

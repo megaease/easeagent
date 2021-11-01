@@ -29,7 +29,7 @@ public interface Context {
 
     ProgressContext nextProgress(Request request);
 
-    Span importProgress(Request request);
+    ProgressContext importProgress(Request request);
 
     Map<Object, Object> clear();
 }

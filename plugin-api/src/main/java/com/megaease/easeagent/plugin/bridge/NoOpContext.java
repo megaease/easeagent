@@ -3,10 +3,7 @@ package com.megaease.easeagent.plugin.bridge;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.api.trace.Request;
-import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.api.trace.TraceContext;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.api.trace.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -71,8 +68,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Span importProgress(Request request) {
-            return NoOpTracer.NO_OP_SPAN;
+        public ProgressContext importProgress(Request request) {
+            return NoopProgressContext.INSTANCE;
         }
 
         @Override
@@ -129,6 +126,11 @@ public class NoOpContext {
         }
 
         @Override
+        public Scope scope() {
+            return NoOpTracer.NO_OP_SCOPE;
+        }
+
+        @Override
         public void setHeader(String name, String value) {
 
         }
@@ -136,6 +138,11 @@ public class NoOpContext {
         @Override
         public Map<String, String> getHeader() {
             return Collections.emptyMap();
+        }
+
+        @Override
+        public AsyncContext async() {
+            return EmptyAsyncContext.INSTANCE;
         }
     }
 

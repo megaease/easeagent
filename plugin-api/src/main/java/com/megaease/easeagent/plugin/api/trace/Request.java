@@ -7,7 +7,7 @@ public interface Request {
 
     String header(String name);
 
-    boolean scope();
+    boolean cacheScope();
 
     void setHeader(String name, String value);
 }

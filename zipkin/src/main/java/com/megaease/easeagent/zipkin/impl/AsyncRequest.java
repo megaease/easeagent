@@ -32,8 +32,8 @@ public class AsyncRequest implements Request {
     }
 
     @Override
-    public boolean scope() {
-        return false;
+    public boolean cacheScope() {
+        return request.cacheScope();
     }
 
     @Override

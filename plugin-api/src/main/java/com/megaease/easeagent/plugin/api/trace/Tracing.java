@@ -21,7 +21,7 @@ public interface Tracing {
 
     ProgressContext nextProgress(Request request);
 
-    Span importProgress(Request request);
+    ProgressContext importProgress(Request request);
 
     MessagingTracing<? extends Request> messagingTracing();
 }
