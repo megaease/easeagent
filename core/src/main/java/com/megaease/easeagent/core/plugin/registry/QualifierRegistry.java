@@ -45,6 +45,7 @@ public class QualifierRegistry {
     static ConcurrentHashMap<String, AgentPlugin> pluginClassnameToPlugin = new ConcurrentHashMap<>();
 
     static final ConcurrentHashMap<String, Integer> qualifierToIndex = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<Integer, MethodTransformation> indexToMethodTransformation = new ConcurrentHashMap<>();
     static final AgentArray<Builder<Interceptor>> interceptorSuppliers = new AgentArray<>();
 
     public static void register(AgentPlugin plugin) {
@@ -66,10 +67,17 @@ public class QualifierRegistry {
         Set<MethodTransformation> mInfo = methodMatchers.stream().map(matcher -> {
             Junction<MethodDescription> bMethodMatcher = MethodMatcherConvert.INSTANCE.convert(matcher);
             String qualifier = getMethodQualifier(pointsClassName, matcher.getQualifier());
-            int index = qualifierToIndex.get(qualifier);
+            Integer index = qualifierToIndex.get(qualifier);
+            if (index == null) {
+                // it is unusual for this is a pointcut without interceptor.
+                // maybe there is some error in plugin providers configuration
+                return null;
+            }
             Builder<Interceptor> chainBuilder = interceptorSuppliers.get(index);
-            return new MethodTransformation(index, bMethodMatcher, chainBuilder);
-        }).collect(Collectors.toSet());
+            MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, chainBuilder);
+            indexToMethodTransformation.putIfAbsent(index, mt);
+            return mt;
+        }).filter(mt -> mt != null).collect(Collectors.toSet());
         AgentPlugin plugin = pointsToPlugin.get(pointsClassName);
         int order = plugin.order();
 
@@ -94,19 +102,16 @@ public class QualifierRegistry {
 
         // generate index and supplier chain
         Integer index = qualifierToIndex.get(provider.getAdviceTo());
-        if (index != null) {
-            interceptorSuppliers.get(index).addSupplier(provider.getInterceptorProvider());
-            return index;
-        } else {
+        if (index == null) {
             synchronized (qualifierToIndex) {
                 index = qualifierToIndex.get(provider.getAdviceTo());
                 if (index == null) {
                     index = interceptorSuppliers.add(SupplierChain.builder());
                     qualifierToIndex.putIfAbsent(provider.getAdviceTo(), index);
-                    interceptorSuppliers.get(index).addSupplier(provider.getInterceptorProvider());
                 }
             }
         }
+        interceptorSuppliers.get(index).addSupplier(provider.getInterceptorProvider());
 
         return index;
     }
@@ -123,7 +128,11 @@ public class QualifierRegistry {
         return name.substring(0, index);
     }
 
-    public int getInstrumentIndex() {
-        return 100;
+    public static MethodTransformation getMethodTransformation(int pointcutIndex) {
+        return indexToMethodTransformation.get(pointcutIndex);
+    }
+
+    public static void addMethodTransformation(int pointcutIndex, MethodTransformation info) {
+        indexToMethodTransformation.putIfAbsent(pointcutIndex, info);
     }
 }

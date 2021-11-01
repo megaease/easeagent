@@ -400,8 +400,6 @@ public class AgentAdvice extends Advice {
         }
     }
 
-
-
     /**
      * A method visitor that weaves the advice methods' byte codes.
      */
@@ -9958,6 +9956,10 @@ public class AgentAdvice extends Advice {
 
             public ForStackManipulation with(StackManipulation stackManipulation) {
                 return new ForStackManipulation(stackManipulation, this.typeDescription, this.targetType, this.typing);
+            }
+
+            public StackManipulation getStackManipulation() {
+                return this.stackManipulation;
             }
 
             /**

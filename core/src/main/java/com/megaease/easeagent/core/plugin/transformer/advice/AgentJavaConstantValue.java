@@ -42,4 +42,8 @@ public class AgentJavaConstantValue extends JavaConstantValue {
         methodVisitor.visitLdcInsn(index);
         return constant.getTypeDescription().getStackSize().toIncreasingSize();
     }
+
+    public MethodIdentityJavaConstant getConstant() {
+        return this.constant;
+    }
 }

@@ -53,14 +53,13 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
             .include(getClass().getClassLoader())
             .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
                 CommonInlineAdvice.class.getCanonicalName());
-        */
         this.transformer = new AgentForAdvice(AgentAdvice.withCustomMapping()
             .bind(Index.class, methodTransformInfo.getIndex()))
             .include(getClass().getClassLoader())
             .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
                 CommonInlineAdvice.class.getCanonicalName());
+        */
 
-        /*
         MethodIdentityJavaConstant value = new MethodIdentityJavaConstant(methodTransformInfo.getIndex());
         StackManipulation stackManipulation = new AgentJavaConstantValue(value);
         TypeDescription typeDescription = value.getTypeDescription();
@@ -74,18 +73,18 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
             .include(getClass().getClassLoader())
             .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
                 CommonInlineAdvice.class.getCanonicalName());
-        */
     }
 
     @Override
     public DynamicType.Builder<?> transform(DynamicType.Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
+        /*
+        // generate interceptor
         AgentInterceptorChain chain = this.methodTransformInfo.getAgentInterceptorChain(cl);
         // this advice have been register by other classloader, it return null
         if (Dispatcher.register(this.methodTransformInfo.getIndex(), chain) != null) {
             log.info("Advice has already registered, index {}", this.methodTransformInfo.getIndex());
         }
 
-        /*
         // generate interceptor
         AgentSupplierChain supplierChain = this.methodTransformInfo.getSupplierChain(cl);
         // this advice have been register by other classloader, it return null

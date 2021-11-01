@@ -36,16 +36,11 @@ public class AgentArray<E> {
         this(DEFAULT_INIT_SIZE);
     }
 
-    public AgentArray(E[] e) {
-        if (e == null) {
-            a = new Object[DEFAULT_INIT_SIZE];
-        } else {
-            a = e;
-        }
-    }
-
     public AgentArray(int capacity) {
         a = new Object[capacity];
+        // don't use the first slot
+        a[0] = lock;
+        size.incrementAndGet();
     }
 
     public int size() {

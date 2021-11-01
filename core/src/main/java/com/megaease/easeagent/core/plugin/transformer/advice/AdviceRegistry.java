@@ -17,19 +17,25 @@
 
 package com.megaease.easeagent.core.plugin.transformer.advice;
 
+import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
+import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.Dispatcher;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.OffsetMapping;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AdviceRegistry {
+    private final static Logger log = LoggerFactory.getLogger(AdviceRegistry.class);
     static AtomicInteger index = new AtomicInteger(1);
-    static Map<String, Integer> methodsSet = new ConcurrentHashMap();
+    static Map<String, Integer> methodsSet = new ConcurrentHashMap<>();
 
     public static Integer check(TypeDescription instrumentedType,
                                 MethodDescription instrumentedMethod,
@@ -38,29 +44,72 @@ public class AdviceRegistry {
         String key = instrumentedType.getName() + ":" + instrumentedMethod.getDescriptor();
         Integer value = methodsSet.putIfAbsent(key, index.getAndIncrement());
 
+        Integer pointcutIndex;
         if (value != null) {
+            // merge
+            pointcutIndex = getPointcutIndex(methodEnter);
+
             return 0;
         }
         value = methodsSet.get(key);
-        updateStackManipulation(methodEnter, value);
-        updateStackManipulation(methodExit, value);
+        pointcutIndex = updateStackManipulation(methodEnter, value);
+        if (!pointcutIndex.equals(updateStackManipulation(methodExit, value))) {
+            log.warn("If this occurs in production environment, there may have some issue!");
+        }
+        // dispatcher registry
+        MethodTransformation methodTransformation = QualifierRegistry.getMethodTransformation(pointcutIndex);
+        AgentInterceptorChain chain = methodTransformation
+            .getAgentInterceptorChain(Thread.currentThread().getContextClassLoader());
+
+        // this advice have been register by other classloader, it return null
+        if (com.megaease.easeagent.core.plugin.Dispatcher.register(value, chain) != null) {
+            log.info("Advice has already registered, index {}", value);
+        }
 
         return value;
     }
 
-    static void updateStackManipulation(Dispatcher.Resolved resolved, Integer value) {
+    static Integer getPointcutIndex(Dispatcher.Resolved resolved) {
+        Integer index = 0;
         Map<Integer, OffsetMapping> enterMap = resolved.getOffsetMapping();
         for (Integer offset : enterMap.keySet()) {
             OffsetMapping om = enterMap.get(offset);
             if (!(om instanceof OffsetMapping.ForStackManipulation)) {
                 continue;
             }
+            OffsetMapping.ForStackManipulation forStackManipulation = (OffsetMapping.ForStackManipulation)om;
+            if (!(forStackManipulation.getStackManipulation() instanceof AgentJavaConstantValue)) {
+                continue;
+            }
+
+            AgentJavaConstantValue value = (AgentJavaConstantValue) forStackManipulation.getStackManipulation();
+            index = value.getConstant().getIdentity();
+            break;
+        }
+        return index;
+    }
+
+    static Integer updateStackManipulation(Dispatcher.Resolved resolved, Integer value) {
+        int index = 0;
+        Map<Integer, OffsetMapping> enterMap = resolved.getOffsetMapping();
+        for (Integer offset : enterMap.keySet()) {
+            OffsetMapping om = enterMap.get(offset);
+            if (!(om instanceof OffsetMapping.ForStackManipulation)) {
+                continue;
+            }
+            OffsetMapping.ForStackManipulation forStackManipulation = (OffsetMapping.ForStackManipulation)om;
+            if (!(forStackManipulation.getStackManipulation() instanceof AgentJavaConstantValue)) {
+                continue;
+            }
+
+            AgentJavaConstantValue oldValue = (AgentJavaConstantValue) forStackManipulation.getStackManipulation();
+            index = oldValue.getConstant().getIdentity();
 
             MethodIdentityJavaConstant constant = new MethodIdentityJavaConstant(value);
             StackManipulation stackManipulation = new AgentJavaConstantValue(constant);
-            OffsetMapping.ForStackManipulation forStackManipulation = (OffsetMapping.ForStackManipulation)om;
             enterMap.put(offset, forStackManipulation.with(stackManipulation));
+            return index;
         }
-        return;
+        return index;
     }
 }

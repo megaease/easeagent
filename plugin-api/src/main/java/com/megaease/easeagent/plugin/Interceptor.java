@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin;
 
-import java.util.Map;
+import com.megaease.easeagent.plugin.api.config.Config;
 
 public interface Interceptor extends Ordered {
     /**
@@ -32,4 +32,8 @@ public interface Interceptor extends Ordered {
      * @return The return value can change instrumented method result
      */
     Object after(MethodInfo methodInfo, Object context);
+
+    default Config getConfig() {
+        return null;
+    }
 }

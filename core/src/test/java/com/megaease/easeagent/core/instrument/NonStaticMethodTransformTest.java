@@ -23,6 +23,7 @@ import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.plugin.annotation.Index;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
+import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.Advice;
@@ -131,6 +132,7 @@ public class NonStaticMethodTransformTest {
         MethodTransformation methodTransformation = new MethodTransformation(index,
             named(methodName),
             chainBuilder);
+        QualifierRegistry.addMethodTransformation(index, methodTransformation);
 
         Set<MethodTransformation> transformations = new HashSet<>();
         transformations.add(methodTransformation);

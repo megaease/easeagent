@@ -22,6 +22,7 @@ import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
+import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
@@ -124,6 +125,7 @@ public class StaticMethodTransformTest {
         MethodTransformation methodTransformation = new MethodTransformation(index,
             ElementMatchers.named(methodName),
             chainBuilder);
+        QualifierRegistry.addMethodTransformation(index, methodTransformation);
 
         Set<MethodTransformation> transformations = new HashSet<>();
         transformations.add(methodTransformation);
