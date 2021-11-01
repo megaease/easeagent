@@ -366,6 +366,10 @@ public class AgentAdvice extends Advice {
                                    Implementation.Context implementationContext,
                                    int writerFlags,
                                    int readerFlags) {
+        if (AdviceRegistry.check(instrumentedType, instrumentedMethod, methodEnter, methodExit) == 0) {
+            return methodVisitor;
+        }
+
         methodVisitor = new FramePaddingMethodVisitor(methodEnter.isPrependLineNumber()
             ? new LineNumberPrependingMethodVisitor(methodVisitor)
             : methodVisitor);
@@ -973,7 +977,7 @@ public class AgentAdvice extends Advice {
     /**
      * A dispatcher for implementing advice.
      */
-    protected interface Dispatcher {
+    public interface Dispatcher {
 
         /**
          * Indicates that a method does not represent advice and does not need to be visited.
@@ -1736,6 +1740,9 @@ public class AgentAdvice extends Advice {
                        StackManipulation exceptionHandler,
                        RelocationHandler.Relocation relocation);
 
+
+            Map<Integer, OffsetMapping> getOffsetMapping();
+
             /**
              * Represents a resolved dispatcher for entering a method.
              */
@@ -1860,6 +1867,11 @@ public class AgentAdvice extends Advice {
                  */
                 public boolean isAlive() {
                     return true;
+                }
+
+                @Override
+                public Map<Integer, OffsetMapping> getOffsetMapping() {
+                    return this.offsetMappings;
                 }
             }
         }
@@ -2006,6 +2018,11 @@ public class AgentAdvice extends Advice {
                               StackManipulation exceptionHandler,
                               RelocationHandler.Relocation relocation) {
                 return this;
+            }
+
+            @Override
+            public Map<Integer, OffsetMapping> getOffsetMapping() {
+                return null;
             }
         }
 
@@ -9937,6 +9954,10 @@ public class AgentAdvice extends Advice {
                     throw new IllegalStateException("Cannot assign " + typeDescription + " to " + targetType);
                 }
                 return new Target.ForStackManipulation(new StackManipulation.Compound(stackManipulation, assignment));
+            }
+
+            public ForStackManipulation with(StackManipulation stackManipulation) {
+                return new ForStackManipulation(stackManipulation, this.typeDescription, this.targetType, this.typing);
             }
 
             /**

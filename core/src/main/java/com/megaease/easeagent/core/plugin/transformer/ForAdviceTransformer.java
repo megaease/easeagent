@@ -22,14 +22,16 @@ import com.megaease.easeagent.core.plugin.Dispatcher;
 import com.megaease.easeagent.core.plugin.annotation.EaseAgentInstrumented;
 import com.megaease.easeagent.core.plugin.annotation.Index;
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice;
+import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.OffsetMapping;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentForAdvice;
+import com.megaease.easeagent.core.plugin.transformer.advice.AgentJavaConstantValue;
+import com.megaease.easeagent.core.plugin.transformer.advice.MethodIdentityJavaConstant;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.utility.JavaModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,16 +48,33 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
     public ForAdviceTransformer(MethodTransformation methodTransformInfo) {
         this.methodTransformInfo = methodTransformInfo;
         /*
-        this.transformer = new AgentBuilder.Transformer
+        new AgentBuilder.Transformer
             .ForAdvice(Advice.withCustomMapping().bind(Index.class, methodTransformInfo.getIndex()))
             .include(getClass().getClassLoader())
             .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
                 CommonInlineAdvice.class.getCanonicalName());
-         */
-        this.transformer = new AgentForAdvice(AgentAdvice.withCustomMapping().bind(Index.class, methodTransformInfo.getIndex()))
+        */
+        this.transformer = new AgentForAdvice(AgentAdvice.withCustomMapping()
+            .bind(Index.class, methodTransformInfo.getIndex()))
             .include(getClass().getClassLoader())
             .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
                 CommonInlineAdvice.class.getCanonicalName());
+
+        /*
+        MethodIdentityJavaConstant value = new MethodIdentityJavaConstant(methodTransformInfo.getIndex());
+        StackManipulation stackManipulation = new AgentJavaConstantValue(value);
+        TypeDescription typeDescription = value.getTypeDescription();
+
+        OffsetMapping.Factory<Index> factory = new OffsetMapping.ForStackManipulation.Factory<>(Index.class,
+            stackManipulation,
+            typeDescription.asGenericType());
+
+        this.transformer = new AgentForAdvice(AgentAdvice.withCustomMapping()
+            .bind(factory))
+            .include(getClass().getClassLoader())
+            .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
+                CommonInlineAdvice.class.getCanonicalName());
+        */
     }
 
     @Override

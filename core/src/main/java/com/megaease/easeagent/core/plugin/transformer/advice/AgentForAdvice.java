@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.core.plugin.transformer.advice;
 
-import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.build.HashCodeAndEqualsPlugin;
@@ -32,12 +31,11 @@ import net.bytebuddy.pool.TypePool;
 import net.bytebuddy.utility.CompoundList;
 import net.bytebuddy.utility.JavaModule;
 
-import static net.bytebuddy.agent.builder.AgentBuilder.*;
-
 import java.util.*;
 
+import static net.bytebuddy.agent.builder.AgentBuilder.*;
+
 @SuppressWarnings("unused")
-//public class AgentForAdvice extends AgentBuilder.Transformer.ForAdvice {
 public class AgentForAdvice extends Transformer.ForAdvice {
     /**
      * The advice to use.

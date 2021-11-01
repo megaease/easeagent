@@ -84,12 +84,15 @@ public class AnnotationTransformer implements AgentBuilder.Transformer {
                 // merge interceptor chain
                 Integer index = annotation.getValue("value").resolve(Integer.class);
                 return methodVisitor;
+            } else {
+                return methodVisitor;
             }
-
+            /*
             MethodVisitor visitor = this.mForMethod.wrap(instrumentedType, instrumentedMethod,
                 methodVisitor, implementationContext, typePool, writerFlags, readerFlags);
 
             return visitor;
+            */
         }
 
         public AsmVisitorWrapper on(ElementMatcher<? super MethodDescription> matcher) {
