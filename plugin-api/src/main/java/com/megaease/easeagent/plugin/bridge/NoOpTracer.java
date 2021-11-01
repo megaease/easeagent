@@ -21,7 +21,7 @@ public class NoOpTracer {
         return NoNull.of(extractor, NO_OP_EXTRACTOR);
     }
 
-    private static class NoopSpan implements Span {
+    public static class NoopSpan implements Span {
         private static final NoopSpan INSTANCE = new NoopSpan();
 
         @Override
@@ -115,7 +115,7 @@ public class NoOpTracer {
         }
     }
 
-    private static class NoopTracing implements Tracing {
+    public static class NoopTracing implements Tracing {
         private static final NoopTracing INSTANCE = new NoopTracing();
 
         @Override
@@ -169,7 +169,7 @@ public class NoOpTracer {
         }
     }
 
-    private static class EmptyMessagingTracing<R extends MessagingRequest> implements MessagingTracing {
+    public static class EmptyMessagingTracing<R extends MessagingRequest> implements MessagingTracing {
         private static final EmptyMessagingTracing INSTANCE = new EmptyMessagingTracing();
         private static final Function NOOP_SAMPLER = r -> false;
 
@@ -204,7 +204,7 @@ public class NoOpTracer {
         }
     }
 
-    private static class EmptyMessage implements Message {
+    public static class EmptyMessage implements Message {
         private static final EmptyMessage INSTANCE = new EmptyMessage();
         private static final Object OBJ_INSTANCE = new Object();
 
@@ -214,7 +214,7 @@ public class NoOpTracer {
         }
     }
 
-    private static class EmptyExtractor implements Extractor {
+    public static class EmptyExtractor implements Extractor {
         private static final EmptyExtractor INSTANCE = new EmptyExtractor();
 
 
@@ -224,7 +224,7 @@ public class NoOpTracer {
         }
     }
 
-    private static class EmptyInjector implements Injector {
+    public static class EmptyInjector implements Injector {
         private static final EmptyInjector INSTANCE = new EmptyInjector();
 
         @Override

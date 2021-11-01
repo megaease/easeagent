@@ -1,12 +1,14 @@
 package com.megaease.easeagent.config;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 
@@ -97,7 +99,11 @@ public class PluginConfigManagerTest {
         assertNotNull(oldPluginConfig.get());
         assertNotNull(newPluginConfig.get());
         assertTrue(oldPluginConfig.get() == pluginConfig1);
-        assertTrue(((PluginConfig) oldPluginConfig.get()).getConfigChangeListener() == pluginConfig1.getConfigChangeListener());
+        final AtomicReference<com.megaease.easeagent.plugin.api.config.ConfigChangeListener> oldPluginConfigListener = new AtomicReference<>();
+        final AtomicReference<ConfigChangeListener> newPluginConfigListener = new AtomicReference<>();
+        ((PluginConfig) oldPluginConfig.get()).foreachConfigChangeListener(listener -> oldPluginConfigListener.set(listener));
+        ((PluginConfig) newPluginConfig.get()).foreachConfigChangeListener(listener -> newPluginConfigListener.set(listener));
+        assertTrue(oldPluginConfigListener.get() == newPluginConfigListener.get());
         assertTrue(oldPluginConfig.get().getBoolean("enabled"));
         assertFalse(newPluginConfig.get().getBoolean("enabled"));
         PluginConfigTest.checkAllType((PluginConfig) oldPluginConfig.get());
