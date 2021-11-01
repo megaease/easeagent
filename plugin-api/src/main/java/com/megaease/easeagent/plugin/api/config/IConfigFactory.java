@@ -1,8 +1,6 @@
 package com.megaease.easeagent.plugin.api.config;
 
 public interface IConfigFactory {
-
-    
     /**
      * Returns a configuration property from the agent's all configuration.
      *

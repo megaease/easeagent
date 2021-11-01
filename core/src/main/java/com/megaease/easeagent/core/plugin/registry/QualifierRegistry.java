@@ -18,6 +18,7 @@
 package com.megaease.easeagent.core.plugin.registry;
 
 import com.google.common.base.Strings;
+import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain.Builder;
 import com.megaease.easeagent.core.plugin.matcher.ClassMatcherConvert;
@@ -35,6 +36,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -77,7 +79,7 @@ public class QualifierRegistry {
             MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, chainBuilder);
             indexToMethodTransformation.putIfAbsent(index, mt);
             return mt;
-        }).filter(mt -> mt != null).collect(Collectors.toSet());
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
         AgentPlugin plugin = pointsToPlugin.get(pointsClassName);
         int order = plugin.order();
 
@@ -111,7 +113,8 @@ public class QualifierRegistry {
                 }
             }
         }
-        interceptorSuppliers.get(index).addSupplier(provider.getInterceptorProvider());
+        interceptorSuppliers.get(index)
+            .addSupplier(InterceptorPluginDecorator.getInterceptorSupplier(plugin, provider.getInterceptorProvider()));
 
         return index;
     }

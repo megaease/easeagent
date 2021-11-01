@@ -41,12 +41,12 @@ public class ClassMatcherConvert
         if (source instanceof AndClassMatcher) {
             AndClassMatcher andMatcher = (AndClassMatcher) source;
             Junction<TypeDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            Junction<TypeDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<TypeDescription> rightMatcher = this.convert(andMatcher.getRight());
             return leftMatcher.and(rightMatcher);
         } else if (source instanceof OrClassMatcher) {
             OrClassMatcher andMatcher = (OrClassMatcher) source;
             Junction<TypeDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            Junction<TypeDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<TypeDescription> rightMatcher = this.convert(andMatcher.getRight());
             return leftMatcher.or(rightMatcher);
         } else if (source instanceof NotClassMatcher) {
             NotClassMatcher matcher = (NotClassMatcher) source;

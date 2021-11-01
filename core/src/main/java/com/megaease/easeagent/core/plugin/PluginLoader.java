@@ -29,6 +29,7 @@ import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import org.slf4j.Logger;
@@ -98,6 +99,8 @@ public class PluginLoader {
 
             try {
                 QualifierRegistry.register(plugin);
+                // Config cfg = EaseAgent.configFactory.getConfig(plugin.getDomain(), plugin.getName());
+                // plugin.load(cfg);
             } catch (Exception | LinkageError e) {
                 log.error(
                     "Unable to load extension {}:{} [class {}]",

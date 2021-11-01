@@ -58,6 +58,10 @@ public class AdviceRegistry {
         }
         // dispatcher registry
         MethodTransformation methodTransformation = QualifierRegistry.getMethodTransformation(pointcutIndex);
+        if (methodTransformation == null) {
+            log.error("MethodTransformation get fail for {}", pointcutIndex);
+            return 0;
+        }
         AgentInterceptorChain chain = methodTransformation
             .getAgentInterceptorChain(Thread.currentThread().getContextClassLoader());
 
@@ -83,7 +87,7 @@ public class AdviceRegistry {
             }
 
             AgentJavaConstantValue value = (AgentJavaConstantValue) forStackManipulation.getStackManipulation();
-            index = value.getConstant().getIdentity();
+            index = value.getPointcutIndex();
             break;
         }
         return index;
@@ -103,10 +107,10 @@ public class AdviceRegistry {
             }
 
             AgentJavaConstantValue oldValue = (AgentJavaConstantValue) forStackManipulation.getStackManipulation();
-            index = oldValue.getConstant().getIdentity();
+            index = oldValue.getPointcutIndex();
 
             MethodIdentityJavaConstant constant = new MethodIdentityJavaConstant(value);
-            StackManipulation stackManipulation = new AgentJavaConstantValue(constant);
+            StackManipulation stackManipulation = new AgentJavaConstantValue(constant, index);
             enterMap.put(offset, forStackManipulation.with(stackManipulation));
             return index;
         }

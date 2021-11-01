@@ -24,14 +24,16 @@ import net.bytebuddy.utility.JavaConstant;
 
 public class AgentJavaConstantValue extends JavaConstantValue {
     private final MethodIdentityJavaConstant constant;
+    private final int pointcutIndex;
     /**
      * Creates a constant pool value representing a {@link JavaConstant}.
      *
      * @param constant The instance to load onto the operand stack.
      */
-    public AgentJavaConstantValue(MethodIdentityJavaConstant constant) {
+    public AgentJavaConstantValue(MethodIdentityJavaConstant constant, int pointcutIndex) {
         super(constant);
         this.constant = constant;
+        this.pointcutIndex = pointcutIndex;
     }
 
     /**
@@ -45,5 +47,9 @@ public class AgentJavaConstantValue extends JavaConstantValue {
 
     public MethodIdentityJavaConstant getConstant() {
         return this.constant;
+    }
+
+    public int getPointcutIndex() {
+        return this.pointcutIndex;
     }
 }

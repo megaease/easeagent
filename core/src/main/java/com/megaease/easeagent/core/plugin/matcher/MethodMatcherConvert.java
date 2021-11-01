@@ -44,12 +44,12 @@ public class MethodMatcherConvert
         if (source instanceof AndMethodMatcher) {
             AndMethodMatcher andMatcher = (AndMethodMatcher) source;
             Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getRight());
             return leftMatcher.and(rightMatcher);
         } else if (source instanceof OrMethodMatcher) {
             OrMethodMatcher andMatcher = (OrMethodMatcher) source;
             Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
-            Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getLeft());
+            Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getRight());
             return leftMatcher.or(rightMatcher);
         } else if (source instanceof NotMethodMatcher) {
             NotMethodMatcher matcher = (NotMethodMatcher) source;

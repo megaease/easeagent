@@ -27,34 +27,23 @@ import com.megaease.easeagent.plugin.MethodInfo;
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public final class Dispatcher {
     static AgentArray<AgentInterceptorChain> chains = new AgentArray<>();
-    static AgentArray<AgentSupplierChain> supplierChains = new AgentArray<>();
 
+    // for chains only modified during related class loading process,
+    // so it don't need to consider updating process
+    // otherwise, chain should store in context, avoiding changed during enter and exit
     public static void enter(int index, MethodInfo info, Object ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
-        if (chain == null) {
-            chain = supplierChains.getUncheck(index).getInterceptorChain();
-            chains.replace(index, chain);
-        }
-
         int pos = 0;
         chain.doBefore(info, pos, ctx);
     }
 
     public static Object exit(int index, MethodInfo info, Object ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
-        if (chain == null) {
-            chain = supplierChains.getUncheck(index).getInterceptorChain();
-            chains.replace(index, chain);
-        }
         int pos = chain.size() - 1;
         return chain.doAfter(info, pos, ctx);
     }
 
     public static AgentInterceptorChain register(int index, AgentInterceptorChain chain) {
         return chains.putIfAbsent(index, chain);
-    }
-
-    public static AgentSupplierChain register(int index, AgentSupplierChain chain) {
-        return supplierChains.putIfAbsent(index, chain);
     }
 }

@@ -38,13 +38,11 @@ import java.util.stream.Collectors;
 @Data
 @SuppressWarnings("unused")
 public class MethodTransformation {
-    private final Logger log = LoggerFactory.getLogger(MethodTransformation.class);
+    private final static Logger log = LoggerFactory.getLogger(MethodTransformation.class);
 
     private int index;
     private Junction<? super MethodDescription> matcher;
     private SupplierChain.Builder<Interceptor> suppliersBuilder;
-
-    private static HashSet<ClassLoader> adviceClasses = new HashSet<>();
 
     public MethodTransformation(int index,
                                 Junction<? super MethodDescription> matcher,
@@ -54,22 +52,9 @@ public class MethodTransformation {
         this.suppliersBuilder = chain;
     }
 
-    private ClassLoader compound(ClassLoader parent, ClassLoader external) {
-        try {
-            parent.getClass().getDeclaredMethod("add", ClassLoader.class).invoke(parent, external);
-        } catch (Exception e) {
-            log.warn("{}, this may be a bug if it was running in production", e.toString());
-        }
-        return parent;
-    }
-
     public AgentSupplierChain getSupplierChain(ClassLoader classLoader) {
         SupplierChain<Interceptor> suppliersChain = getSuppliersBuilder().build();
         ArrayList<Supplier<Interceptor>> suppliers = suppliersChain.getSuppliers();
-
-        if (adviceClasses.add(classLoader)) {
-            compound(this.getClass().getClassLoader(), classLoader);
-        }
 
         return new AgentSupplierChain(suppliers);
     }
@@ -77,10 +62,6 @@ public class MethodTransformation {
     public AgentInterceptorChain getAgentInterceptorChain(ClassLoader classLoader) {
         SupplierChain<Interceptor> suppliersChain = getSuppliersBuilder().build();
         ArrayList<Supplier<Interceptor>> suppliers = suppliersChain.getSuppliers();
-
-        if (adviceClasses.add(classLoader)) {
-            compound(this.getClass().getClassLoader(), classLoader);
-        }
 
         List<Interceptor> interceptors = suppliers.stream().map(supplier -> {
                 return supplier.get();

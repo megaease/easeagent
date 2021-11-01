@@ -28,6 +28,7 @@ import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.OffsetM
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentForAdvice;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentJavaConstantValue;
 import com.megaease.easeagent.core.plugin.transformer.advice.MethodIdentityJavaConstant;
+import com.megaease.easeagent.core.plugin.transformer.classloader.CompoundClassloader;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
@@ -61,7 +62,7 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
         */
 
         MethodIdentityJavaConstant value = new MethodIdentityJavaConstant(methodTransformInfo.getIndex());
-        StackManipulation stackManipulation = new AgentJavaConstantValue(value);
+        StackManipulation stackManipulation = new AgentJavaConstantValue(value, methodTransformInfo.getIndex());
         TypeDescription typeDescription = value.getTypeDescription();
 
         OffsetMapping.Factory<Index> factory = new OffsetMapping.ForStackManipulation.Factory<>(Index.class,
@@ -92,6 +93,7 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
             log.info("Advice has already registered, index {}", this.methodTransformInfo.getIndex());
         }
         */
+        CompoundClassloader.compound(this.getClass().getClassLoader(), cl);
 
         return transformer.transform(b, td, cl, m);
     }
