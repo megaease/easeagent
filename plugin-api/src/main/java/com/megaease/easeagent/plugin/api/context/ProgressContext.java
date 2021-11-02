@@ -1,5 +1,7 @@
 package com.megaease.easeagent.plugin.api.context;
 
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 
@@ -15,4 +17,8 @@ public interface ProgressContext {
     Map<String, String> getHeader();
 
     AsyncContext async();
+
+    Context getContext();
+
+    void finish(Response response);
 }

@@ -1,30 +1,31 @@
-package com.megaease.easeagent.plugin.jdkhttpserver;
+package com.megaease.easeagent.plugin.springweb;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.ProviderBean;
-import com.megaease.easeagent.plugin.jdkhttpserver.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.jdkhttpserver.interceptor.DoFilterInterceptor;
+import com.megaease.easeagent.plugin.springweb.advice.FeignClientAdvice;
+import com.megaease.easeagent.plugin.springweb.interceptor.FeignClientInterceptor;
 
 import java.util.function.Supplier;
 
-public class JdkHttpServerProviders {
+public class SpringWebProviders {
+
     @ProviderBean
-    public static class DoFilterProvider implements Provider {
+    public static class FeignClientProvider implements Provider {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
-            return DoFilterInterceptor::new;
+            return FeignClientInterceptor::new;
         }
 
         @Override
         public String getAdviceTo() {
-            return DoFilterAdvice.class.getCanonicalName()
+            return FeignClientAdvice.class.getCanonicalName()
                 + ":default";
         }
 
         @Override
         public String getPluginClassName() {
-            return JdkHttpServerPlugin.class.getCanonicalName();
+            return FeignClientPlugin.class.getCanonicalName();
         }
     }
 

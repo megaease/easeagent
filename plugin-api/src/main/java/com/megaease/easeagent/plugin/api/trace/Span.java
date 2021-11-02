@@ -45,4 +45,10 @@ public interface Span {
     Scope maybeScope();
 
     Span cacheScope();
+
+    String traceIdString();
+
+    String spanIdString();
+
+    String parentIdString();
 }

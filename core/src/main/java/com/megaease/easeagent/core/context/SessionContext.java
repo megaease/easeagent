@@ -3,6 +3,7 @@ package com.megaease.easeagent.core.context;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
@@ -116,8 +117,8 @@ public class SessionContext implements InitializeContext {
     @Override
     public ProgressContext nextProgress(Request request) {
         ProgressContext progressContext = currentTracing().nextProgress(request);
-        String[] fields = TransparentTransmission.getFields();
-        if (TransparentTransmission.isEmpty(fields)) {
+        String[] fields = ProgressFields.getPenetrationFields();
+        if (ProgressFields.isEmpty(fields)) {
             return progressContext;
         }
         for (String field : fields) {
@@ -132,8 +133,8 @@ public class SessionContext implements InitializeContext {
     @Override
     public ProgressContext importProgress(Request request) {
         ProgressContext progressContext = currentTracing().importProgress(request);
-        String[] fields = TransparentTransmission.getFields();
-        if (TransparentTransmission.isEmpty(fields)) {
+        String[] fields = ProgressFields.getPenetrationFields();
+        if (ProgressFields.isEmpty(fields)) {
             return progressContext;
         }
         for (String field : fields) {

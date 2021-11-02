@@ -8,7 +8,7 @@ public class Entrant {
         if (!config.enable()) {
             return false;
         }
-        if (context.enter(key) == 1) {
+        if (context.enter(key, 1)) {
             return true;
         }
         return false;
@@ -18,7 +18,7 @@ public class Entrant {
         if (!config.enable()) {
             return false;
         }
-        if (context.out(key) == 1) {
+        if (context.out(key, 1)) {
             return true;
         }
         return false;

@@ -60,6 +60,9 @@ public class SpanImpl implements Span {
 
     @Override
     public Span tag(String key, String value) {
+        if (key == null || value == null) {
+            return this;
+        }
         span.tag(key, value);
         return this;
     }
@@ -147,9 +150,6 @@ public class SpanImpl implements Span {
 
     @Override
     public Scope maybeScope() {
-        if (scope != null) {
-            return new ScopeImpl(scope);
-        }
         return new ScopeImpl(tracing.currentTraceContext().maybeScope(span.context()));
     }
 
@@ -160,5 +160,20 @@ public class SpanImpl implements Span {
         }
         scope = tracing.currentTraceContext().maybeScope(span.context());
         return this;
+    }
+
+    @Override
+    public String traceIdString() {
+        return span.context().traceIdString();
+    }
+
+    @Override
+    public String spanIdString() {
+        return span.context().spanIdString();
+    }
+
+    @Override
+    public String parentIdString() {
+        return span.context().parentIdString();
     }
 }

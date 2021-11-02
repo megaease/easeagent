@@ -321,7 +321,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             return ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
                 .addInterceptor(new HttpFilterMetricsInterceptor(servletMetric, config))
-                .addInterceptor(new HttpFilterTracingInterceptor(this.tracing, config))
+//                .addInterceptor(new HttpFilterTracingInterceptor(this.tracing, config))
                 .addInterceptor(new ServletHttpLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
                 ;
         };
@@ -336,7 +336,8 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Injection.Bean("supplier4FeignClient")
     public Supplier<AgentInterceptorChain.Builder> supplier4FeignClient() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new FeignClientTracingInterceptor(tracing, config));
+//            .addInterceptor(new FeignClientTracingInterceptor(tracing, config))
+            ;
     }
 
     @Injection.Bean("supplier4Gateway")

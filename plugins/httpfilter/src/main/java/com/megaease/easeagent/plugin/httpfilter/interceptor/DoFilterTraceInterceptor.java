@@ -1,18 +1,18 @@
 
-package com.megaease.easeagent.plugin.springweb.interceptor;
+package com.megaease.easeagent.plugin.httpfilter.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.context.AsyncContext;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.api.trace.utils.*;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.springweb.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.utils.Entrant;
+import com.megaease.easeagent.plugin.api.trace.utils.HttpRequest;
+import com.megaease.easeagent.plugin.api.trace.utils.HttpResponse;
+import com.megaease.easeagent.plugin.api.trace.utils.HttpUtils;
+import com.megaease.easeagent.plugin.api.trace.utils.TraceConst;
+import com.megaease.easeagent.plugin.httpfilter.advice.DoFilterAdvice;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -20,21 +20,19 @@ import javax.servlet.ServletRequest;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
-public class DoFilterInterceptor implements Interceptor {
+public class DoFilterTraceInterceptor implements Interceptor {
     public static final String BEST_MATCHING_PATTERN_ATTRIBUTE = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
-    private static final String SEND_HANDLED_KEY = DoFilterInterceptor.class.getName() + "$SendHandled";
-    private static final String ASYNC_CONTEXT = DoFilterInterceptor.class.getName() + ".AsyncContext";
-    private static final String PROGRESS_CONTEXT = DoFilterInterceptor.class.getName() + ".ProgressContext";
+    private static final Object ENTER = new Object();
+    private static final String KEY = DoFilterTraceInterceptor.class.getName() + "$Key";
+    private static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".ProgressContext";
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        Config config = EaseAgent.configFactory.getConfig("observability", "springwebfilter", "trace");
-        Context sessionContext = EaseAgent.initializeContextSupplier.get();
-        if (!Entrant.firstEnter(config, sessionContext, DoFilterInterceptor.class)) {
+        if (!context.enter(ENTER, 1)) {
             return;
         }
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
@@ -43,41 +41,40 @@ public class DoFilterInterceptor implements Interceptor {
             return;
         }
         HttpRequest httpRequest = new HttpServerRequest(httpServletRequest);
-        progressContext = sessionContext.importProgress(httpRequest);
+        progressContext = context.importProgress(httpRequest);
         httpServletRequest.setAttribute(PROGRESS_CONTEXT, progressContext);
+        httpServletRequest.setAttribute(ContextCons.SPAN, progressContext.span());
         HttpUtils.handleReceive(progressContext.span().start(), httpRequest);
-        if (httpServletRequest.isAsyncStarted()) {
-            HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-            AsyncContext asyncContext = sessionContext.exportAsync(httpRequest);
-            httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener(asyncContext), httpServletRequest, httpServletResponse);
-            httpServletRequest.setAttribute(ASYNC_CONTEXT, SpanAndAsyncContext.build(asyncContext));
-            AtomicBoolean sendHandled = new AtomicBoolean();
-            httpServletRequest.setAttribute(SEND_HANDLED_KEY, sendHandled);
-        }
     }
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        Config config = EaseAgent.configFactory.getConfig("observability", "springwebfilter", "trace");
-        Context sessionContext = EaseAgent.contextSupplier.get();
-        if (!Entrant.firstOut(config, sessionContext, DoFilterInterceptor.class)) {
+        if (!context.out(ENTER, 1)) {
             return;
         }
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
+        if (httpServletRequest.getAttribute(KEY) != null) {
+            return;
+        }
+        httpServletRequest.setAttribute(KEY, "after");
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
         ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(PROGRESS_CONTEXT);
-        Span span = progressContext.span();
-        String httpRoute = getHttpRouteAttributeFromRequest(httpServletRequest);
-        if (httpRoute != null) {
-            span.tag(TraceConst.HTTP_TAG_ROUTE, httpRoute);
-        }
-        if (httpServletRequest.isAsyncStarted()) {
-            if (methodInfo.getThrowable() != null) {
+        try {
+            Span span = progressContext.span();
+            if (!httpServletRequest.isAsyncStarted()) {
+                span.tag(TraceConst.HTTP_TAG_ROUTE, getHttpRouteAttributeFromRequest(httpServletRequest));
+                HttpUtils.finish(span, new Response(methodInfo.getThrowable(), httpServletRequest, httpServletResponse));
+            } else if (methodInfo.getThrowable() != null) {
                 span.error(methodInfo.getThrowable());
                 span.finish();
+                return;
+            } else {
+                httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener1(progressContext), httpServletRequest, httpServletResponse);
             }
-        } else {
-            HttpUtils.finish(span, new Response(methodInfo.getThrowable(), httpServletRequest, httpServletResponse));
+            return;
+        } finally {
+            httpServletRequest.removeAttribute(ContextCons.SPAN);
+            progressContext.scope().close();
         }
     }
 
@@ -85,66 +82,6 @@ public class DoFilterInterceptor implements Interceptor {
         Object httpRoute = request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE);
         return httpRoute != null ? httpRoute.toString() : null;
     }
-
-    public static class HttpServerRequest implements HttpRequest {
-        private final HttpServletRequest delegate;
-
-        HttpServerRequest(HttpServletRequest httpServletRequest) {
-            this.delegate = httpServletRequest;
-        }
-
-        @Override
-        public Span.Kind kind() {
-            return Span.Kind.SERVER;
-        }
-
-        @Override
-        public String method() {
-            return delegate.getMethod();
-        }
-
-        @Override
-        public String path() {
-            return delegate.getRequestURI();
-        }
-
-        @Override
-        public String route() {
-            Object maybeRoute = this.delegate.getAttribute(TraceConst.HTTP_ATTRIBUTE_ROUTE);
-            return maybeRoute instanceof String ? (String) maybeRoute : null;
-        }
-
-        @Override
-        public String getRemoteAddr() {
-            return this.delegate.getRemoteAddr();
-        }
-
-        @Override
-        public int getRemotePort() {
-            return this.delegate.getRemotePort();
-        }
-
-        @Override
-        public String getRemoteHost() {
-            return this.delegate.getRemoteHost();
-        }
-
-        @Override
-        public String header(String name) {
-            return this.delegate.getHeader(name);
-        }
-
-        @Override
-        public boolean cacheScope() {
-            return true;
-        }
-
-        @Override
-        public void setHeader(String name, String value) {
-//            this.delegate.setAttribute(name, value);
-        }
-    }
-
 
     public static class Response implements HttpResponse {
         private final Throwable caught;
@@ -198,22 +135,33 @@ public class DoFilterInterceptor implements Interceptor {
                 return maybeError instanceof Throwable ? (Throwable) maybeError : null;
             }
         }
+
+        @Override
+        public Set<String> keys() {
+            return null;
+        }
+
+        @Override
+        public String header(String name) {
+            return httpServletResponse.getHeader(name);
+        }
     }
 
+    public static final class TracingAsyncListener1 implements AsyncListener {
+        final ProgressContext progressContext;
+        final AtomicBoolean sendHandled = new AtomicBoolean();
 
-    public static final class TracingAsyncListener implements AsyncListener {
-        final AsyncContext asyncContext;
-
-        TracingAsyncListener(AsyncContext asyncContext) {
-            this.asyncContext = asyncContext;
+        TracingAsyncListener1(ProgressContext progressContext) {
+            this.progressContext = progressContext;
         }
 
         public void onComplete(AsyncEvent e) {
             HttpServletRequest req = (HttpServletRequest) e.getSuppliedRequest();
-            Object sendHandled = req.getAttribute(SEND_HANDLED_KEY);
-            if (sendHandled instanceof AtomicBoolean && ((AtomicBoolean) sendHandled).compareAndSet(false, true)) {
+            if (sendHandled.compareAndSet(false, true)) {
                 HttpServletResponse res = (HttpServletResponse) e.getSuppliedResponse();
-                HttpUtils.finish((Span) asyncContext.getAll().get(PROGRESS_CONTEXT), new Response(e.getThrowable(), req, res));
+                Response response = new Response(e.getThrowable(), req, res);
+                HttpUtils.finish(progressContext.span(), response);
+                progressContext.finish(response);
             }
 
         }
@@ -235,11 +183,6 @@ public class DoFilterInterceptor implements Interceptor {
         }
 
         public void onStartAsync(AsyncEvent e) {
-            Span span = asyncContext.importToCurr();
-            HttpServletRequest req = (HttpServletRequest) e.getSuppliedRequest();
-            HttpRequest httpRequest = new HttpServerRequest(req);
-            HttpUtils.handleReceive(span, httpRequest);
-            asyncContext.putAll(Collections.singletonMap(PROGRESS_CONTEXT, span));
             javax.servlet.AsyncContext eventAsyncContext = e.getAsyncContext();
             if (eventAsyncContext != null) {
                 eventAsyncContext.addListener(this, e.getSuppliedRequest(), e.getSuppliedResponse());
@@ -248,7 +191,7 @@ public class DoFilterInterceptor implements Interceptor {
         }
 
         public String toString() {
-            return "TracingAsyncListener{" + this.asyncContext + "}";
+            return "TracingAsyncListener{" + this.progressContext + "}";
         }
     }
 }

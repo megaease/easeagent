@@ -10,22 +10,20 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 @Pointcut
-public class DoFilterAdvice implements Points {
+public class FeignClientAdvice implements Points {
+
     @Override
     public IClassMatcher getClassMatcher() {
-        return ClassMatcher.builder()
-            .hasClassName("org.springframework.web.filter.OncePerRequestFilter")
-            .isAbstract()
+        return ClassMatcher.builder().hasInterface("feign.Client")
             .build();
     }
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.multiBuilder()
-            .match(MethodMatcher.builder().named("doFilter")
+            .match(MethodMatcher.builder().named("execute")
                 .isPublic()
-                .argsLength(3)
-                .returnType("void")
+                .argsLength(2)
                 .qualifier("default")
                 .build())
             .build();

@@ -6,7 +6,6 @@ import com.megaease.easeagent.core.log.LoggerFactoryImpl;
 import com.megaease.easeagent.core.log.LoggerMdc;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
@@ -48,7 +47,7 @@ public class ContextManager {
 
     public static ContextManager build(Configs conf) {
         LOGGER.info("build context manager.");
-        TransparentTransmission.init(conf);
+        ProgressFieldsManager.init(conf);
         PluginConfigManager pluginConfigManager = PluginConfigManager.builder(conf).build();
         LoggerFactoryImpl loggerFactory = LoggerFactoryImpl.build();
         ILoggerFactory iLoggerFactory = NoOpLoggerFactory.INSTANCE;

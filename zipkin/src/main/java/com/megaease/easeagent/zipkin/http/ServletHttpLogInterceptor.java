@@ -17,13 +17,13 @@
 
 package com.megaease.easeagent.zipkin.http;
 
-import brave.Span;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.http.HttpServletInterceptor;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
@@ -67,7 +67,8 @@ public class ServletHttpLogInterceptor extends HttpServletInterceptor {
             return;
         }
         Long beginTime = ContextUtils.getBeginTime(context);
-        Span span = (Span) context.get(ContextCons.SPAN);
+        Span span = (Span) httpServletRequest.getAttribute(ContextCons.SPAN);
+        context.put(ContextCons.SPAN, span);
         AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
         RequestInfo requestInfo = this.httpLog.prepare(config.getString("system"), config.getString("name"), beginTime, span, serverInfo);
         httpServletRequest.setAttribute(RequestInfo.class.getName(), requestInfo);

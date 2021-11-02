@@ -21,7 +21,7 @@ public interface Config {
     Boolean getBoolean(String property);
 
     default boolean enable() {
-        Boolean b = getBoolean(Const.ENABLE_CONFIG);
+        Boolean b = getBoolean(Const.ENABLED_CONFIG);
         if (b == null) {
             return false;
         }

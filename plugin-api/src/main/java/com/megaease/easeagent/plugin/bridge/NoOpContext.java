@@ -161,6 +161,16 @@ public class NoOpContext {
         public AsyncContext async() {
             return EmptyAsyncContext.INSTANCE;
         }
+
+        @Override
+        public Context getContext() {
+            return NoopContext.INSTANCE;
+        }
+
+        @Override
+        public void finish(Response response) {
+
+        }
     }
 
 }

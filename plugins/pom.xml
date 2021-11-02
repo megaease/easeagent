@@ -32,8 +32,8 @@
 
     <modules>
         <module>rabbitmq</module>
-        <module>jdkhttpserver</module>
         <module>springweb</module>
+        <module>httpfilter</module>
     </modules>
 
     <build>

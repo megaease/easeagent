@@ -91,7 +91,7 @@ public class TracingImpl implements Tracing {
     public AsyncContext exportAsync(Request request) {
         brave.Span span = tracer().nextSpan();
         defaultInjector.inject(span.context(), request);
-        return new AsyncContextImpl(this, build(span, request.cacheScope()), supplier);
+        return AsyncContextImpl.build(this, build(span, request.cacheScope()), supplier);
     }
 
     @Override
@@ -102,7 +102,6 @@ public class TracingImpl implements Tracing {
             if (bSpan.isNoop()) {
                 return NoOpTracer.NO_OP_SPAN;
             }
-            bSpan.start();
             span = bSpan;
         }
         return NoOpTracer.noNullSpan(span);

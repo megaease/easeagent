@@ -1,19 +1,19 @@
-package com.megaease.easeagent.plugin.springweb;
+package com.megaease.easeagent.plugin.httpfilter;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.ProviderBean;
-import com.megaease.easeagent.plugin.springweb.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.springweb.interceptor.DoFilterInterceptor;
+import com.megaease.easeagent.plugin.httpfilter.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpfilter.interceptor.DoFilterTraceInterceptor;
 
 import java.util.function.Supplier;
 
-public class SpringWebFilterProviders {
+public class HttpFilterProviders {
     @ProviderBean
     public static class DoFilterProvider implements Provider {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
-            return DoFilterInterceptor::new;
+            return DoFilterTraceInterceptor::new;
         }
 
         @Override
@@ -24,7 +24,7 @@ public class SpringWebFilterProviders {
 
         @Override
         public String getPluginClassName() {
-            return SpringWebFilterPlugin.class.getCanonicalName();
+            return HttpFilterPlugin.class.getCanonicalName();
         }
     }
 

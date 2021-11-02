@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.jdkhttpserver.advice;
+package com.megaease.easeagent.plugin.httpfilter.advice;
 
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.annotation.Pointcut;
@@ -11,12 +11,15 @@ import java.util.Set;
 
 @Pointcut
 public class DoFilterAdvice implements Points {
+    private static final String FILTER_NAME = "javax.servlet.Filter";
+    private static final String HTTP_SERVLET_NAME = "javax.servlet.http.HttpServlet";
+    static final String SERVLET_REQUEST = "javax.servlet.ServletRequest";
+    static final String SERVLET_RESPONSE = "javax.servlet.ServletResponse";
+
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
-            .hasClassName("sun.net.httpserver.AuthFilter")
-            .notAbstract()
-            .notInterface()
+            .hasInterface(FILTER_NAME)
             .build();
     }
 
@@ -25,7 +28,9 @@ public class DoFilterAdvice implements Points {
         return MethodMatcher.multiBuilder()
             .match(MethodMatcher.builder().named("doFilter")
                 .isPublic()
-                .argsLength(2)
+                .argsLength(3)
+                .arg(0, SERVLET_REQUEST)
+                .arg(1, SERVLET_RESPONSE)
                 .returnType("void")
                 .qualifier("default")
                 .build())

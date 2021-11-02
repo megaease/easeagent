@@ -1,6 +1,8 @@
 package com.megaease.easeagent.plugin.api.trace.utils;
 
-public interface HttpResponse {
+import com.megaease.easeagent.plugin.api.trace.Response;
+
+public interface HttpResponse extends Response {
 
     String method();
 

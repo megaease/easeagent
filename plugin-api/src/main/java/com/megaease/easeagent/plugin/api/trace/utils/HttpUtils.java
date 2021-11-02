@@ -10,7 +10,7 @@ public class HttpUtils {
         span.tag(TraceConst.HTTP_TAG_ROUTE, httpRequest.route());
         span.tag(TraceConst.HTTP_TAG_METHOD, httpRequest.method());
         span.tag(TraceConst.HTTP_TAG_PATH, httpRequest.path());
-        if (parseHttpClientIpFromXForwardedFor(span, httpRequest)) {
+        if (!parseHttpClientIpFromXForwardedFor(span, httpRequest)) {
             span.remoteIpAndPort(httpRequest.getRemoteAddr(), httpRequest.getRemotePort());
         }
         span.start();

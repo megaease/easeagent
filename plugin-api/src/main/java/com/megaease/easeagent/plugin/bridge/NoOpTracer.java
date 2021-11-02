@@ -116,6 +116,21 @@ public class NoOpTracer {
         }
 
         @Override
+        public String traceIdString() {
+            return "";
+        }
+
+        @Override
+        public String spanIdString() {
+            return "";
+        }
+
+        @Override
+        public String parentIdString() {
+            return "";
+        }
+
+        @Override
         public String toString() {
             return "NoopSpan";
         }

@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.zipkin.http;
 
-import brave.Span;
 import com.megaease.easeagent.common.HostAddress;
 import com.megaease.easeagent.core.utils.JsonUtil;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -29,6 +29,22 @@ import java.util.List;
 public class HttpLog {
 
     public RequestInfo prepare(String system, String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
+        RequestInfo requestInfo = prepare(system, serviceName, beginTime, serverInfo);
+        requestInfo.setTraceId(span.traceIdString());
+        requestInfo.setSpanId(span.spanIdString());
+        requestInfo.setParentSpanId(span.parentIdString());
+        return requestInfo;
+    }
+
+    public RequestInfo prepare(String system, String serviceName, Long beginTime, brave.Span span, AccessLogServerInfo serverInfo) {
+        RequestInfo requestInfo = prepare(system, serviceName, beginTime, serverInfo);
+        requestInfo.setTraceId(span.context().traceIdString());
+        requestInfo.setSpanId(span.context().spanIdString());
+        requestInfo.setParentSpanId(span.context().parentIdString());
+        return requestInfo;
+    }
+
+    private RequestInfo prepare(String system, String serviceName, Long beginTime, AccessLogServerInfo serverInfo) {
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setSystem(system);
         requestInfo.setService(serviceName);
@@ -41,9 +57,6 @@ public class HttpLog {
         requestInfo.setQueries(serverInfo.findQueries());
         requestInfo.setClientIP(serverInfo.getClientIP());
         requestInfo.setBeginCpuTime(System.nanoTime());
-        requestInfo.setTraceId(span.context().traceIdString());
-        requestInfo.setSpanId(span.context().spanIdString());
-        requestInfo.setParentSpanId(span.context().parentIdString());
         return requestInfo;
     }
 

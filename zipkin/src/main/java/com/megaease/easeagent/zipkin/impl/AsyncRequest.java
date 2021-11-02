@@ -42,7 +42,7 @@ public class AsyncRequest implements Request {
         header.put(name, value);
     }
 
-    public Map<String, String> getHeader() {
+    public Map<String, String> getHeaders() {
         return header;
     }
 }

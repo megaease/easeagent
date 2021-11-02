@@ -4,6 +4,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
+import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
@@ -24,7 +25,15 @@ public interface Context {
 
     int enter(Object key);
 
+    default boolean enter(Object key, int times) {
+        return enter(key) == times;
+    }
+
     int out(Object key);
+
+    default boolean out(Object key, int times) {
+        return out(key) == times;
+    }
 
     AsyncContext exportAsync(Request request);
 

@@ -5,14 +5,16 @@ import com.megaease.easeagent.plugin.annotation.Plugin;
 import com.megaease.easeagent.plugin.api.config.Config;
 
 @Plugin
-public class SpringWebFilterPlugin implements AgentPlugin {
+public class FeignClientPlugin implements AgentPlugin {
+
     @Override
     public String getName() {
-        return "springwebfilter";
+        return "feignclient";
     }
 
     @Override
     public String getDomain() {
         return "observability";
     }
+
 }
