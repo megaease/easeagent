@@ -4,6 +4,7 @@ import brave.Tracer;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
@@ -14,13 +15,13 @@ import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 public class TracingImpl implements Tracing {
-    private final Supplier<Context> supplier;
+    private final Supplier<InitializeContext> supplier;
     private final brave.Tracing tracing;
     private final brave.Tracer tracer;
     private final TraceContext.Injector<Request> defaultInjector;
     private final TraceContext.Extractor<Request> defaultExtractor;
 
-    private TracingImpl(@Nonnull Supplier<Context> supplier,
+    private TracingImpl(@Nonnull Supplier<InitializeContext> supplier,
                         @Nonnull brave.Tracing tracing,
                         @Nonnull Tracer tracer,
                         @Nonnull TraceContext.Injector<Request> defaultInjector,
@@ -32,7 +33,7 @@ public class TracingImpl implements Tracing {
         this.defaultExtractor = defaultExtractor;
     }
 
-    public static Tracing build(Supplier<Context> supplier, brave.Tracing tracing) {
+    public static Tracing build(Supplier<InitializeContext> supplier, brave.Tracing tracing) {
         tracing.sampler();
         return tracing == null ? NoOpTracer.NO_OP_TRACING :
             new TracingImpl(supplier, tracing,

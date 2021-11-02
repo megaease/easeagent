@@ -1,5 +1,6 @@
 package com.megaease.easeagent.plugin.api;
 
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
@@ -18,6 +19,8 @@ public interface Context {
     <V> V remove(Object key);
 
     <V> V put(Object key, V value);
+
+    Config getConfig();
 
     int enter(Object key);
 

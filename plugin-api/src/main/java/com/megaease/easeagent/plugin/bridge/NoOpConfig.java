@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public class NoOpConfig implements Config {
+    public static NoOpConfig INSTANCE = new NoOpConfig("Noop", "Noop", "Noop");
     private final String domain;
     private final String namespace;
     private final String id;

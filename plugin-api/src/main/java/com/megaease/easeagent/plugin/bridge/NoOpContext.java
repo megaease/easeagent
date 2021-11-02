@@ -1,6 +1,8 @@
 package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
@@ -10,11 +12,11 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class NoOpContext {
-    public static final Context NO_OP_CONTEXT = NoopContext.INSTANCE;
+    public static final NoopContext NO_OP_CONTEXT = NoopContext.INSTANCE;
     public static final EmptyAsyncContext NO_OP_ASYNC_CONTEXT = EmptyAsyncContext.INSTANCE;
     public static final NoopProgressContext NO_OP_PROGRESS_CONTEXT = NoopProgressContext.INSTANCE;
 
-    public static class NoopContext implements Context, TraceContext {
+    public static class NoopContext implements InitializeContext {
         private static final NoopContext INSTANCE = new NoopContext();
 
         @Override
@@ -40,6 +42,11 @@ public class NoOpContext {
         @Override
         public <V> V put(Object key, V value) {
             return value;
+        }
+
+        @Override
+        public Config getConfig() {
+            return NoOpConfig.INSTANCE;
         }
 
         @Override
@@ -79,6 +86,16 @@ public class NoOpContext {
 
         public void setCurrentTracing(Tracing tracing) {
 
+        }
+
+        @Override
+        public void pushConfig(Config config) {
+
+        }
+
+        @Override
+        public Config popConfig() {
+            return NoOpConfig.INSTANCE;
         }
     }
 

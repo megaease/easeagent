@@ -1,6 +1,6 @@
 package com.megaease.easeagent.zipkin.impl;
 
-import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -15,9 +15,9 @@ public class ProgressContextImpl implements ProgressContext {
     private final Span span;
     private final Scope scope;
     private final AsyncRequest asyncRequest;
-    private final Supplier<Context> supplier;
+    private final Supplier<InitializeContext> supplier;
 
-    public ProgressContextImpl(Tracing tracing, Span span, Scope scope, AsyncRequest asyncRequest, Supplier<Context> supplier) {
+    public ProgressContextImpl(Tracing tracing, Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
         this.tracing = tracing;
         this.span = span;
         this.scope = scope;

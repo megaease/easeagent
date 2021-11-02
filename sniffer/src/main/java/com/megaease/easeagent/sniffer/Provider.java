@@ -66,7 +66,7 @@ import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
 import com.megaease.easeagent.metrics.servlet.ServletMetric;
-import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -76,8 +76,6 @@ import com.megaease.easeagent.report.PluginMetricReporter;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
-import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
-import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbConPrepareOrCreateStmInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.JdbcStmPrepareSqlInterceptor;
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
@@ -90,6 +88,7 @@ import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
+import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
 import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
@@ -104,6 +103,7 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilter
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.webclient.WebClientTracingInterceptor;
+import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.zipkin.jdbc.JdbcStmTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
@@ -217,7 +217,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     }
 
     @Override
-    public Function<Supplier<Context>, com.megaease.easeagent.plugin.api.trace.Tracing> tracingSupplier() {
+    public Function<Supplier<InitializeContext>, com.megaease.easeagent.plugin.api.trace.Tracing> tracingSupplier() {
         return (supplier) -> TracingImpl.build(supplier, tracing);
     }
 

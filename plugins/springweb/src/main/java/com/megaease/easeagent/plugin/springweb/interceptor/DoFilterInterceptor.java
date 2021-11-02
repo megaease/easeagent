@@ -33,7 +33,7 @@ public class DoFilterInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Object context) {
         Config config = EaseAgent.configFactory.getConfig("observability", "springwebfilter", "trace");
-        Context sessionContext = EaseAgent.contextSupplier.get();
+        Context sessionContext = EaseAgent.initializeContextSupplier.get();
         if (!Entrant.firstEnter(config, sessionContext, DoFilterInterceptor.class)) {
             return;
         }

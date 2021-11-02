@@ -1,21 +1,27 @@
 package com.megaease.easeagent.core.context;
 
-import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.api.trace.TraceContext;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 
-public class SessionContext implements Context, TraceContext {
+public class SessionContext implements InitializeContext {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
     private Tracing tracing = NoOpTracer.NO_OP_TRACING;
+    private Stack<Config> configs = new Stack<>();
     private Map<Object, Object> context = new HashMap<>();
     private Map<Object, Integer> entered = new HashMap<>();
 
@@ -46,6 +52,30 @@ public class SessionContext implements Context, TraceContext {
         context.put(key, value);
         return value;
     }
+
+    @Override
+    public Config getConfig() {
+        if (configs.isEmpty()) {
+            LOGGER.warn("context.configs was empty.");
+            return NoOpConfig.INSTANCE;
+        }
+        return configs.peek();
+    }
+
+    @Override
+    public void pushConfig(Config config) {
+        configs.push(config);
+    }
+
+    @Override
+    public Config popConfig() {
+        if (configs.isEmpty()) {
+            LOGGER.warn("context.configs was empty.");
+            return NoOpConfig.INSTANCE;
+        }
+        return configs.pop();
+    }
+
 
     @Override
     public int enter(Object key) {

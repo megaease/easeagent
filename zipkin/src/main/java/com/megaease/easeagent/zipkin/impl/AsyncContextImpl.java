@@ -1,6 +1,7 @@
 package com.megaease.easeagent.zipkin.impl;
 
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
@@ -13,9 +14,9 @@ public class AsyncContextImpl implements AsyncContext {
     private final Tracing tracing;
     private final Span span;
     private final Map<Object, Object> context;
-    private final Supplier<Context> supplier;
+    private final Supplier<InitializeContext> supplier;
 
-    public AsyncContextImpl(Tracing tracing, Span span, Supplier<Context> supplier) {
+    public AsyncContextImpl(Tracing tracing, Span span, Supplier<InitializeContext> supplier) {
         this.tracing = tracing;
         this.span = span;
         this.supplier = supplier;
