@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.rabbitmq.spring;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.MethodInfo;
 import org.springframework.amqp.core.Message;
@@ -29,7 +30,7 @@ import java.util.Map;
 @AdviceTo(RabbitMqMessageListenerAdvice.class)
 public class RabbitMqMessageListenerOnMessageInterceptor implements Interceptor {
     @Override
-    public void before(MethodInfo methodInfo, Object context) {
+    public void before(MethodInfo methodInfo, Context context) {
         Message message;
         if (methodInfo.getArgs()[0] instanceof List) {
             List<Message> messageList = (List<Message>) methodInfo.getArgs()[0];
@@ -39,10 +40,5 @@ public class RabbitMqMessageListenerOnMessageInterceptor implements Interceptor 
         }
         String uri = message.getMessageProperties().getHeader(ContextCons.MQ_URI);
         // context.put(ContextCons.MQ_URI, uri);
-    }
-
-    @Override
-    public Object after(MethodInfo methodInfo, Object context) {
-        return null;
     }
 }

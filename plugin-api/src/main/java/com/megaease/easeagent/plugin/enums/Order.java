@@ -17,18 +17,32 @@
 
 package com.megaease.easeagent.plugin.enums;
 
+/**
+ * Priority definition, lower value with higher priority
+ * eg. higher priority interceptor run enter before lower ones
+ * but exit after lower priority interceptors.
+ */
 public enum Order {
-    PREPARE((short)50),
-    TRACING((short)100),
-    METRIC((short)200);
+    HIGHEST(1, "highest"),
+    HIGH(20, "high"),
+    TRACING(100, "tracing"),
+    METRIC(200, "metric"),
+    LOW(210, "low"),
+    LOWEST(255, "lowest");
 
-    private final short order;
+    private final int order;
+    private final String name;
 
-    Order(short s) {
+    Order(int s, String name) {
         this.order = s;
+        this.name = name;
     }
 
-    public short getOrder() {
-        return order;
+    public int getOrder() {
+        return this.order;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }

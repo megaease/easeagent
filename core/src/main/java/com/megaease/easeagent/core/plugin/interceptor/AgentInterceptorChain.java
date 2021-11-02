@@ -21,6 +21,7 @@ import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.api.InitializeContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class AgentInterceptorChain {
         this.interceptors = interceptors;
     }
 
-    public void doBefore(MethodInfo methodInfo, int pos, Object context) {
+    public void doBefore(MethodInfo methodInfo, int pos, InitializeContext context) {
         if (pos == this.interceptors.size()) {
             return;
         }
@@ -50,7 +51,7 @@ public class AgentInterceptorChain {
         this.doBefore(methodInfo, pos + 1, context);
     }
 
-    public Object doAfter(MethodInfo methodInfo, int pos, Object context) {
+    public Object doAfter(MethodInfo methodInfo, int pos, InitializeContext context) {
         if (pos < 0) {
             return methodInfo.getRetValue();
         }

@@ -63,7 +63,7 @@ public class AdviceRegistry {
             return 0;
         }
         AgentInterceptorChain chain = methodTransformation
-            .getAgentInterceptorChain(Thread.currentThread().getContextClassLoader());
+            .getAgentInterceptorChain();
 
         // this advice have been register by other classloader, it return null
         if (com.megaease.easeagent.core.plugin.Dispatcher.register(value, chain) != null) {

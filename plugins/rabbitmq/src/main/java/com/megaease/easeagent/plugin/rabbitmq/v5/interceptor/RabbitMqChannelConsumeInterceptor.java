@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.rabbitmq.client.Channel;
@@ -31,7 +32,7 @@ import java.util.Map;
 
 @AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicConsume")
 public class RabbitMqChannelConsumeInterceptor implements Interceptor {
-    public void before(MethodInfo methodInfo, Object context) {
+    public void before(MethodInfo methodInfo, Context context) {
         Channel channel = (Channel) methodInfo.getInvoker();
         Connection connection = channel.getConnection();
         InetAddress address = connection.getAddress();
@@ -39,9 +40,5 @@ public class RabbitMqChannelConsumeInterceptor implements Interceptor {
         String uri = hostAddress + ":" + connection.getPort();
         Consumer consumer = (Consumer) methodInfo.getArgs()[6];
         AgentDynamicFieldAccessor.setDynamicFieldValue(consumer, uri);
-    }
-
-    public Object after(MethodInfo methodInfo, Object context) {
-        return null;
     }
 }

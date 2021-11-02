@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -31,7 +32,7 @@ import java.util.Map;
 
 @AdviceTo(RabbitMqConsumerAdvice.class)
 public class RabbitMqConsumerHandleDeliveryInterceptor implements Interceptor {
-    public void before(MethodInfo methodInfo, Object context) {
+    public void before(MethodInfo methodInfo, Context context) {
         String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(methodInfo.getInvoker());
         // context.put(ContextCons.MQ_URI, uri);
         AMQP.BasicProperties properties = (AMQP.BasicProperties) methodInfo.getArgs()[2];
@@ -41,9 +42,5 @@ public class RabbitMqConsumerHandleDeliveryInterceptor implements Interceptor {
             headers.putAll(properties.getHeaders());
         }
         AgentFieldReflectAccessor.setFieldValue(properties, "headers", headers);
-    }
-
-    public Object after(MethodInfo methodInfo, Object context) {
-        return null;
     }
 }

@@ -17,27 +17,16 @@
 
 package com.megaease.easeagent.plugin;
 
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
-
-@SuppressWarnings("unused")
-public interface AgentPlugin extends ConfigChangeListener, Ordered {
-    void load(Config config);
-
-    /**
-     * when the plugin is disabled by configuration, this method will be called
-     */
-    void unload(Config config);
-
+public interface AgentPlugin extends Ordered {
     /**
      * define the plugin name, avoiding conflicts with others
+     * it will be use as namespace when get configuration.
      */
     String getName();
 
     /**
      * define the plugin domain,
      * it will be use to get configuration when loaded:
-     * like: load(EaseAgent.configFactory(getDomain(), getName())
      */
     String getDomain();
 }

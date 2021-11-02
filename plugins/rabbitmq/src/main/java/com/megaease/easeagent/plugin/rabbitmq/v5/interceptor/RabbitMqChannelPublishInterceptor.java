@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
@@ -32,7 +33,7 @@ import java.util.Map;
 
 @AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish")
 public class RabbitMqChannelPublishInterceptor implements Interceptor {
-    public void before(MethodInfo methodInfo, Object context) {
+    public void before(MethodInfo methodInfo, Context context) {
         Channel channel = (Channel) methodInfo.getInvoker();
         AMQP.BasicProperties basicProperties = (AMQP.BasicProperties) methodInfo.getArgs()[4];
         if (basicProperties == null) {

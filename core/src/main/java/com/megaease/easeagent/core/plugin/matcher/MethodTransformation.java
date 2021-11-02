@@ -59,13 +59,11 @@ public class MethodTransformation {
         return new AgentSupplierChain(suppliers);
     }
 
-    public AgentInterceptorChain getAgentInterceptorChain(ClassLoader classLoader) {
+    public AgentInterceptorChain getAgentInterceptorChain() {
         SupplierChain<Interceptor> suppliersChain = getSuppliersBuilder().build();
         ArrayList<Supplier<Interceptor>> suppliers = suppliersChain.getSuppliers();
 
-        List<Interceptor> interceptors = suppliers.stream().map(supplier -> {
-                return supplier.get();
-            })
+        List<Interceptor> interceptors = suppliers.stream().map(Supplier::get)
             .sorted(Comparator.comparing(Ordered::order))
             .collect(Collectors.toList());
 

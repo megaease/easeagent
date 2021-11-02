@@ -31,7 +31,7 @@ public class DoFilterInterceptor implements Interceptor {
     private static final String PROGRESS_CONTEXT = DoFilterInterceptor.class.getName() + ".ProgressContext";
 
     @Override
-    public void before(MethodInfo methodInfo, Object context) {
+    public void before(MethodInfo methodInfo, Context context) {
         Config config = EaseAgent.configFactory.getConfig("observability", "springwebfilter", "trace");
         Context sessionContext = EaseAgent.initializeContextSupplier.get();
         if (!Entrant.firstEnter(config, sessionContext, DoFilterInterceptor.class)) {
@@ -57,11 +57,11 @@ public class DoFilterInterceptor implements Interceptor {
     }
 
     @Override
-    public Object after(MethodInfo methodInfo, Object context) {
+    public void after(MethodInfo methodInfo, Context context) {
         Config config = EaseAgent.configFactory.getConfig("observability", "springwebfilter", "trace");
         Context sessionContext = EaseAgent.contextSupplier.get();
         if (!Entrant.firstOut(config, sessionContext, DoFilterInterceptor.class)) {
-            return null;
+            return;
         }
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
@@ -79,7 +79,6 @@ public class DoFilterInterceptor implements Interceptor {
         } else {
             HttpUtils.finish(span, new Response(methodInfo.getThrowable(), httpServletRequest, httpServletResponse));
         }
-        return null;
     }
 
     public static String getHttpRouteAttributeFromRequest(HttpServletRequest request) {

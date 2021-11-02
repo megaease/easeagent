@@ -23,6 +23,8 @@ import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain;
 import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.InitializeContext;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public final class Dispatcher {
@@ -31,13 +33,13 @@ public final class Dispatcher {
     // for chains only modified during related class loading process,
     // so it don't need to consider updating process
     // otherwise, chain should store in context, avoiding changed during enter and exit
-    public static void enter(int index, MethodInfo info, Object ctx) {
+    public static void enter(int index, MethodInfo info, InitializeContext ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
         int pos = 0;
         chain.doBefore(info, pos, ctx);
     }
 
-    public static Object exit(int index, MethodInfo info, Object ctx) {
+    public static Object exit(int index, MethodInfo info, InitializeContext ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
         int pos = chain.size() - 1;
         return chain.doAfter(info, pos, ctx);

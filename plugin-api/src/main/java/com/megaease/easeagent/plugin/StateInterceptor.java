@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin;
 
+import com.megaease.easeagent.plugin.api.Context;
+
 import java.util.ArrayDeque;
 import java.util.function.Supplier;
 
@@ -33,15 +35,15 @@ public class StateInterceptor implements Interceptor {
     }
 
     @Override
-    public void before(MethodInfo methodInfo, Object context) {
+    public void before(MethodInfo methodInfo, Context context) {
         Interceptor interceptor = this.supplier.get();
         stack.get().push(interceptor);
         interceptor.before(methodInfo, context);
     }
 
     @Override
-    public Object after(MethodInfo methodInfo, Object context) {
+    public void after(MethodInfo methodInfo, Context context) {
         Interceptor interceptor = stack.get().pop();
-        return interceptor.after(methodInfo, context);
+        interceptor.after(methodInfo, context);
     }
 }

@@ -17,23 +17,34 @@
 
 package com.megaease.easeagent.plugin;
 
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.enums.Order;
 
 public interface Interceptor extends Ordered {
     /**
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
      */
-    void before(MethodInfo methodInfo, Object context);
+    default void before(MethodInfo methodInfo, Context context) {
+    }
 
     /**
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
      * @return The return value can change instrumented method result
      */
-    Object after(MethodInfo methodInfo, Object context);
+    default void after(MethodInfo methodInfo, Context context) {
+    }
 
-    default Config getConfig() {
-        return null;
+    /**
+     * Interceptor can get interceptor config thought Config API :
+     * EaseAgent.configFactory.getConfig
+     * Config API require 3 params: domain, nameSpace, name
+     * domain and namespace are defined by plugin, the third param, name is defined here
+     *
+     * @return name, eg. tracing, metric, etc.
+     */
+    default String getName() {
+        return Order.TRACING.getName();
     }
 }

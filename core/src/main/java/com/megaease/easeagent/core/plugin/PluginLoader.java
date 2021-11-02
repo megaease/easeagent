@@ -29,7 +29,6 @@ import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import org.slf4j.Logger;

@@ -18,28 +18,15 @@
 package com.megaease.easeagent.core.instrument;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.api.config.Config;
 
 public class TestPlugin implements AgentPlugin {
     @Override
-    public void load(Config config) {
-    }
-
-    @Override
-    public void unload(Config config) {
-    }
-
-    @Override
     public String getName() {
-        return null;
+        return "test";
     }
 
     @Override
     public String getDomain() {
-        return null;
-    }
-
-    @Override
-    public void onChange(Config oldConfig, Config newConfig) {
+        return "observability";
     }
 }

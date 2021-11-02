@@ -26,6 +26,7 @@ import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -72,27 +73,25 @@ public class StaticMethodTransformTest {
 
     public static class FooInterceptor implements Interceptor {
         @Override
-        public void before(MethodInfo methodInfo, Object context) {
+        public void before(MethodInfo methodInfo, Context context) {
             Object [] args = methodInfo.getArgs();
             args[0] = QUX;
         }
 
         @Override
-        public Object after(MethodInfo methodInfo, Object context) {
+        public void after(MethodInfo methodInfo, Context context) {
             methodInfo.setRetValue(methodInfo.getRetValue() + BAR);
-            return null;
         }
     }
 
     public static class FooClassInitInterceptor implements Interceptor {
         @Override
-        public void before(MethodInfo methodInfo, Object context) {
+        public void before(MethodInfo methodInfo, Context context) {
         }
 
         @Override
-        public Object after(MethodInfo methodInfo, Object context) {
+        public void after(MethodInfo methodInfo, Context context) {
             Foo.clazzInitString = BAR;
-            return null;
         }
     }
 
