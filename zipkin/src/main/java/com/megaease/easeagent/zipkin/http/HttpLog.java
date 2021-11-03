@@ -30,6 +30,9 @@ public class HttpLog {
 
     public RequestInfo prepare(String system, String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
         RequestInfo requestInfo = prepare(system, serviceName, beginTime, serverInfo);
+        if (span == null) {
+            return requestInfo;
+        }
         requestInfo.setTraceId(span.traceIdString());
         requestInfo.setSpanId(span.spanIdString());
         requestInfo.setParentSpanId(span.parentIdString());
@@ -38,6 +41,9 @@ public class HttpLog {
 
     public RequestInfo prepare(String system, String serviceName, Long beginTime, brave.Span span, AccessLogServerInfo serverInfo) {
         RequestInfo requestInfo = prepare(system, serviceName, beginTime, serverInfo);
+        if (span == null) {
+            return requestInfo;
+        }
         requestInfo.setTraceId(span.context().traceIdString());
         requestInfo.setSpanId(span.context().spanIdString());
         requestInfo.setParentSpanId(span.context().parentIdString());

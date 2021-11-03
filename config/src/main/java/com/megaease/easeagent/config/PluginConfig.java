@@ -26,14 +26,14 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PluginConfig implements Config {
-    private final List<ConfigChangeListener> listeners;
+    private final Set<ConfigChangeListener> listeners;
     private final String domain;
     private final String namespace;
     private final String id;
     private final Map<String, String> global;
     private final Map<String, String> cover;
 
-    protected PluginConfig(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, @Nonnull List<ConfigChangeListener> listeners) {
+    protected PluginConfig(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, @Nonnull Set<ConfigChangeListener> listeners) {
         this.domain = domain;
         this.namespace = namespace;
         this.id = id;
@@ -43,9 +43,9 @@ public class PluginConfig implements Config {
     }
 
     public static PluginConfig build(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, PluginConfig oldConfig) {
-        List<ConfigChangeListener> listeners;
+        Set<ConfigChangeListener> listeners;
         if (oldConfig == null) {
-            listeners = new ArrayList<>();
+            listeners = new HashSet<>();
         } else {
             listeners = oldConfig.listeners;
         }
@@ -170,15 +170,17 @@ public class PluginConfig implements Config {
     }
 
     public void foreachConfigChangeListener(Consumer<ConfigChangeListener> action) {
+        Set<ConfigChangeListener> oldListeners;
         synchronized (listeners) {
-            listeners.forEach(action);
+            oldListeners = new HashSet<>(listeners);
         }
+        oldListeners.forEach(action);
     }
 
     public class Global extends PluginConfig implements Config {
 
         public Global(String domain, String id, Map<String, String> global, String namespace) {
-            super(domain, id, global, namespace, Collections.emptyMap(), Collections.emptyList());
+            super(domain, id, global, namespace, Collections.emptyMap(), Collections.emptySet());
         }
 
         @Override
