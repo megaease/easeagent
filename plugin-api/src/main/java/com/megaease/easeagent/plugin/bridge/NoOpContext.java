@@ -26,7 +26,6 @@ import com.megaease.easeagent.plugin.api.trace.*;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class NoOpContext {
     public static final NoopContext NO_OP_CONTEXT = NoopContext.INSTANCE;
@@ -77,7 +76,7 @@ public class NoOpContext {
         }
 
         @Override
-        public AsyncContext exportAsync(Request request) {
+        public AsyncContext exportAsync() {
             return EmptyAsyncContext.INSTANCE;
         }
 
@@ -101,7 +100,7 @@ public class NoOpContext {
             return Collections.emptyMap();
         }
 
-        public void setCurrentTracing(Tracing tracing) {
+        public void setCurrentTracing(ITracing tracing) {
 
         }
 

@@ -193,4 +193,19 @@ public class SpanImpl implements Span {
     public String parentIdString() {
         return span.context().parentIdString();
     }
+
+    @Override
+    public Long traceId() {
+        return span.context().traceId();
+    }
+
+    @Override
+    public Long spanId() {
+        return span.context().spanId();
+    }
+
+    @Override
+    public Long parentId() {
+        return span.context().parentId();
+    }
 }

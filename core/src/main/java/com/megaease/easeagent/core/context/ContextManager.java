@@ -31,7 +31,7 @@ import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.api.trace.ITracing;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.bridge.NoOpLoggerFactory;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
@@ -48,9 +48,8 @@ public class ContextManager {
     private final PluginConfigManager pluginConfigManager;
     private final Function rootSpanFinish;
     private final Supplier<InitializeContext> sessionSupplier;
-    //    private final Supplier<InitializeContext> initializeContextSupplier;
     private final GlobalContext globalContext;
-    private volatile Function<Supplier<InitializeContext>, Tracing> tracing = (supplier) -> null;
+    private volatile Function<Supplier<InitializeContext>, ITracing> tracing = (supplier) -> null;
     private volatile MetricRegistrySupplier metric = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
 
 
@@ -58,7 +57,6 @@ public class ContextManager {
         this.pluginConfigManager = pluginConfigManager;
         this.rootSpanFinish = new RootSpanFinish();
         this.sessionSupplier = new SessionContextSupplier();
-//        this.initializeContextSupplier = new InitializeContextSupplier();
         this.globalContext = new GlobalContext(conf, new MetricRegistrySupplierImpl(), loggerFactory, mdc);
     }
 
@@ -83,7 +81,7 @@ public class ContextManager {
         return contextManager;
     }
 
-    public void setTracing(@Nonnull Function<Supplier<InitializeContext>, Tracing> tracing) {
+    public void setTracing(@Nonnull Function<Supplier<InitializeContext>, ITracing> tracing) {
         LOGGER.info("set tracing supplier function.");
         this.tracing = tracing;
     }
@@ -102,22 +100,11 @@ public class ContextManager {
         @Override
         public InitializeContext get() {
             SessionContext context = LOCAL_SESSION_CONTEXT.get();
-            Tracing tracing = ContextManager.this.tracing.apply(this);
+            ITracing tracing = ContextManager.this.tracing.apply(this);
             context.setCurrentTracing(NoNull.of(tracing, NoOpTracer.NO_OP_TRACING));
             return context;
         }
     }
-
-//    public class InitializeContextSupplier implements Supplier<InitializeContext> {
-//
-//        @Override
-//        public InitializeContext get() {
-//            SessionContext context = LOCAL_SESSION_CONTEXT.get();
-//            Tracing tracing = ContextManager.this.tracing.apply((Supplier) this);
-//            context.setCurrentTracing(NoNull.of(tracing, NoOpTracer.NO_OP_TRACING));
-//            return context;
-//        }
-//    }
 
     public class MetricRegistrySupplierImpl implements MetricRegistrySupplier {
 

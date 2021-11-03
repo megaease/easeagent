@@ -17,15 +17,26 @@
 
 package com.megaease.easeagent.plugin.utils;
 
-import java.util.function.Function;
-
 public class NoNull {
+
+    /**
+     * Checks that the specified object reference is not {@code null} and
+     * return a default value if it is. This method is designed primarily
+     * for doing verify the return value in methods that returns a
+     * non-empty instance,  as demonstrated below:
+     * <blockquote><pre>
+     * public String getFoo() {
+     *     return NoNull.of(this.bar, "default");
+     * }
+     * </pre></blockquote>
+     *
+     * @param o            the object reference to check for nullity
+     * @param defaultValue default value to be used in the event
+     *                     that {@code o} is {@code null}
+     * @param <O>          the type of the reference
+     * @return {@code o} if not {@code null} else {@code defaultValue}
+     */
     public static <O> O of(O o, O defaultValue) {
         return o == null ? defaultValue : o;
     }
-
-    public static <T, R> R newOf(Function<T, R> f, T t, R defaultValue) {
-        return t == null ? defaultValue : f.apply(t);
-    }
-
 }

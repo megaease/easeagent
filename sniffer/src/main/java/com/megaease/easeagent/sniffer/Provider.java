@@ -89,8 +89,6 @@ import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
 import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
-import com.megaease.easeagent.zipkin.http.FeignClientTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.HttpFilterTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.ServletHttpLogInterceptor;
 import com.megaease.easeagent.zipkin.http.httpclient.HttpClientTracingInterceptor;
@@ -217,7 +215,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     }
 
     @Override
-    public Function<Supplier<InitializeContext>, com.megaease.easeagent.plugin.api.trace.Tracing> tracingSupplier() {
+    public Function<Supplier<InitializeContext>, com.megaease.easeagent.plugin.api.trace.ITracing> tracingSupplier() {
         return (supplier) -> TracingImpl.build(supplier, tracing);
     }
 

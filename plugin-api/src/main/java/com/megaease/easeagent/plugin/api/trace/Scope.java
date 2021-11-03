@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin.api.trace;
 
+/** A span remains in the scope it was bound to until close is called. */
 public interface Scope {
+    /** No exceptions are thrown when unbinding a span scope. */
     void close();
 }

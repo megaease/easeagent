@@ -24,6 +24,7 @@ import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.trace.ITracing;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
@@ -38,7 +39,7 @@ import java.util.Stack;
 
 public class SessionContext implements InitializeContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
-    private Tracing tracing = NoOpTracer.NO_OP_TRACING;
+    private ITracing tracing = NoOpTracer.NO_OP_TRACING;
     private Stack<Config> configs = new Stack<>();
     private Map<Object, Object> context = new HashMap<>();
     private Map<Object, Integer> entered = new HashMap<>();
@@ -118,22 +119,22 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public AsyncContext exportAsync(Request request) {
-        AsyncContext asyncContext = currentTracing().exportAsync(request);
+    public AsyncContext exportAsync() {
+        AsyncContext asyncContext = tracing.exportAsync();
         asyncContext.putAll(context);
         return asyncContext;
     }
 
     @Override
     public Span importAsync(AsyncContext snapshot) {
-        Span span = currentTracing().importAsync(snapshot);
+        Span span = tracing.importAsync(snapshot);
         context.putAll(snapshot.getAll());
         return span;
     }
 
     @Override
     public ProgressContext nextProgress(Request request) {
-        ProgressContext progressContext = currentTracing().nextProgress(request);
+        ProgressContext progressContext = tracing.nextProgress(request);
         String[] fields = ProgressFields.getPenetrationFields();
         if (ProgressFields.isEmpty(fields)) {
             return progressContext;
@@ -149,7 +150,7 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public ProgressContext importProgress(Request request) {
-        ProgressContext progressContext = currentTracing().importProgress(request);
+        ProgressContext progressContext = tracing.importProgress(request);
         String[] fields = ProgressFields.getPenetrationFields();
         if (ProgressFields.isEmpty(fields)) {
             return progressContext;
@@ -172,7 +173,7 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public void setCurrentTracing(Tracing tracing) {
+    public void setCurrentTracing(ITracing tracing) {
         this.tracing = NoNull.of(tracing, NoOpTracer.NO_OP_TRACING);
     }
 }

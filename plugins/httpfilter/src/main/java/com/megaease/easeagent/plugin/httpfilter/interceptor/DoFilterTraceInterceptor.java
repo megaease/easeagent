@@ -22,7 +22,6 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.utils.HttpRequest;
@@ -60,7 +59,6 @@ public class DoFilterTraceInterceptor implements Interceptor {
         HttpRequest httpRequest = new HttpServerRequest(httpServletRequest);
         progressContext = context.importProgress(httpRequest);
         httpServletRequest.setAttribute(PROGRESS_CONTEXT, progressContext);
-        httpServletRequest.setAttribute(ContextCons.SPAN, progressContext.span());
         HttpUtils.handleReceive(progressContext.span().start(), httpRequest);
     }
 
@@ -90,7 +88,6 @@ public class DoFilterTraceInterceptor implements Interceptor {
             }
             return;
         } finally {
-            httpServletRequest.removeAttribute(ContextCons.SPAN);
             progressContext.scope().close();
         }
     }

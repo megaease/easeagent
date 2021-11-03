@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 import java.util.function.Function;
 
 public class NoOpTracer {
-    public static final Tracing NO_OP_TRACING = NoopTracing.INSTANCE;
+    public static final ITracing NO_OP_TRACING = NoopTracing.INSTANCE;
     public static final Span NO_OP_SPAN = NoopSpan.INSTANCE;
     public static final Scope NO_OP_SCOPE = NoopScope.INSTANCE;
     public static final EmptyExtractor NO_OP_EXTRACTOR = EmptyExtractor.INSTANCE;
@@ -148,6 +148,21 @@ public class NoOpTracer {
         }
 
         @Override
+        public Long traceId() {
+            return null;
+        }
+
+        @Override
+        public Long spanId() {
+            return null;
+        }
+
+        @Override
+        public Long parentId() {
+            return null;
+        }
+
+        @Override
         public String toString() {
             return "NoopSpan";
         }
@@ -162,7 +177,7 @@ public class NoOpTracer {
         }
     }
 
-    public static class NoopTracing implements Tracing {
+    public static class NoopTracing implements ITracing {
         private static final NoopTracing INSTANCE = new NoopTracing();
 
         @Override
@@ -181,7 +196,7 @@ public class NoOpTracer {
         }
 
         @Override
-        public AsyncContext exportAsync(Request request) {
+        public AsyncContext exportAsync() {
             return NoOpContext.NO_OP_ASYNC_CONTEXT;
         }
 

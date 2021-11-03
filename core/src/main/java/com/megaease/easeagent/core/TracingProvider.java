@@ -17,15 +17,14 @@
 
 package com.megaease.easeagent.core;
 
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.api.trace.ITracing;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface TracingProvider {
-    Function<Supplier<InitializeContext>, Tracing> tracingSupplier();
+    Function<Supplier<InitializeContext>, ITracing> tracingSupplier();
 
     void setRootSpanFinishCall(Function rootSpanFinish);
 }

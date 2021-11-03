@@ -20,7 +20,6 @@ package com.megaease.easeagent.zipkin.impl;
 import brave.Tracer;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
@@ -31,7 +30,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-public class TracingImpl implements Tracing {
+public class TracingImpl implements ITracing {
     private final Supplier<InitializeContext> supplier;
     private final brave.Tracing tracing;
     private final brave.Tracer tracer;
@@ -50,7 +49,7 @@ public class TracingImpl implements Tracing {
         this.defaultExtractor = defaultExtractor;
     }
 
-    public static Tracing build(Supplier<InitializeContext> supplier, brave.Tracing tracing) {
+    public static ITracing build(Supplier<InitializeContext> supplier, brave.Tracing tracing) {
         tracing.sampler();
         return tracing == null ? NoOpTracer.NO_OP_TRACING :
             new TracingImpl(supplier, tracing,
@@ -105,10 +104,9 @@ public class TracingImpl implements Tracing {
     }
 
     @Override
-    public AsyncContext exportAsync(Request request) {
+    public AsyncContext exportAsync() {
         brave.Span span = tracer().nextSpan();
-        defaultInjector.inject(span.context(), request);
-        return AsyncContextImpl.build(this, build(span, request.cacheScope()), supplier);
+        return AsyncContextImpl.build(this, build(span, false), supplier);
     }
 
     @Override
