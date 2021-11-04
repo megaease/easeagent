@@ -24,14 +24,14 @@ import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.AbstractMetric;
-import com.megaease.easeagent.plugin.api.metric.name.MetricField;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
-import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
+import com.megaease.easeagent.plugin.api.metric.name.MetricField;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
-import com.megaease.easeagent.metrics.model.ErrorPercentModelGauge;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.utils.metrics.ErrorPercentModelGauge;
 
 import java.math.BigDecimal;
 import java.time.Duration;

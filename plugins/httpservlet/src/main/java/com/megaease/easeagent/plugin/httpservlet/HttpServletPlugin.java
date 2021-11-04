@@ -15,21 +15,20 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics.model;
+package com.megaease.easeagent.plugin.httpservlet;
 
-import java.util.Map;
+import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.annotation.Plugin;
 
-/**
- * GaugeMetricModel is dedicated to producing gauge data with label.
- * <p>Each gauge metric must to produce a object which implement
- * {@code GaugeMetricModel} interface</p> in our metric collecting
- * framework.
- */
-public interface GaugeMetricModel {
-    /**
-     * Returning gauge data and its label.
-     *
-     * @return a map which contains field-value pairs of gauge data to serialize JSON data.
-     */
-    Map<String, Object> toHashMap();
+@Plugin
+public class HttpServletPlugin implements AgentPlugin {
+    @Override
+    public String getName() {
+        return "httpservlet";
+    }
+
+    @Override
+    public String getDomain() {
+        return "observability";
+    }
 }

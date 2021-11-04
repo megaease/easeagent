@@ -25,14 +25,14 @@ import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
-import com.megaease.easeagent.metrics.*;
+import com.megaease.easeagent.metrics.AbstractMetric;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.metric.name.*;
-import com.megaease.easeagent.metrics.model.LastMinutesCounterGauge;
+import com.megaease.easeagent.plugin.utils.metrics.LastMinutesCounterGauge;
 
 import java.util.HashMap;
 import java.util.Map;

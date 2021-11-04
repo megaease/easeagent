@@ -631,7 +631,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         }
     }
 
-    class ApplicationMetricRegistrySupplier implements MetricRegistrySupplier {
+    public class ApplicationMetricRegistrySupplier implements MetricRegistrySupplier {
 
         @Override
         public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(com.megaease.easeagent.plugin.api.config.Config config, NameFactory nameFactory, Tags tags) {

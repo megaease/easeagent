@@ -15,20 +15,28 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet;
+package com.megaease.easeagent.plugin.utils;
 
-import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.annotation.Plugin;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-@Plugin
-public class HttpFilterPlugin implements AgentPlugin {
-    @Override
-    public String getName() {
-        return "com/megaease/easeagent/plugin/httpservlet";
+public class ImmutableMap {
+
+    public static <K, V> Builder builder() {
+        return new Builder();
     }
 
-    @Override
-    public String getDomain() {
-        return "observability";
+    public static class Builder<K, V> {
+        Map<K, V> result = new HashMap<>();
+
+        public Builder put(K k, V v) {
+            result.put(k, v);
+            return this;
+        }
+
+        public Map<K, V> build() {
+            return Collections.unmodifiableMap(result);
+        }
     }
 }

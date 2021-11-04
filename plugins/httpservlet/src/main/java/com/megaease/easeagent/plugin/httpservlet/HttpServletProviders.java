@@ -21,11 +21,12 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.ProviderBean;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.interceptor.DoFilterMetricInterceptor;
 import com.megaease.easeagent.plugin.httpservlet.interceptor.DoFilterTraceInterceptor;
 
 import java.util.function.Supplier;
 
-public class HttpFilterProviders {
+public class HttpServletProviders {
     @ProviderBean
     public static class DoFilterProvider implements Provider {
         @Override
@@ -41,7 +42,26 @@ public class HttpFilterProviders {
 
         @Override
         public String getPluginClassName() {
-            return HttpFilterPlugin.class.getCanonicalName();
+            return HttpServletPlugin.class.getCanonicalName();
+        }
+    }
+
+    @ProviderBean
+    public static class DoFilterMetricProvider implements Provider {
+        @Override
+        public Supplier<Interceptor> getInterceptorProvider() {
+            return DoFilterMetricInterceptor::new;
+        }
+
+        @Override
+        public String getAdviceTo() {
+            return DoFilterAdvice.class.getCanonicalName()
+                + ":default";
+        }
+
+        @Override
+        public String getPluginClassName() {
+            return HttpServletPlugin.class.getCanonicalName();
         }
     }
 

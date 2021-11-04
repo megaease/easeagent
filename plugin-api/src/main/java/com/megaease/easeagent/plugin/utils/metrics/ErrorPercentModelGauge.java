@@ -15,29 +15,30 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics.model;
+package com.megaease.easeagent.plugin.utils.metrics;
 
-import com.google.common.collect.ImmutableMap;
-import lombok.Builder;
-import lombok.Data;
+import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
-@Builder
-@Data
-public class LastMinutesCounterGauge implements GaugeMetricModel {
-    private final long m1Count;
-    private final long m5Count;
-    private final long m15Count;
-    private final String prefix;
+public class ErrorPercentModelGauge implements GaugeMetricModel {
+    private BigDecimal m1ErrorPercent;
+    private BigDecimal m5ErrorPercent;
+    private BigDecimal m15ErrorPercent;
+
+    public ErrorPercentModelGauge(BigDecimal m1ErrorPercent, BigDecimal m5ErrorPercent, BigDecimal m15ErrorPercent) {
+        this.m1ErrorPercent = m1ErrorPercent;
+        this.m5ErrorPercent = m5ErrorPercent;
+        this.m15ErrorPercent = m15ErrorPercent;
+    }
 
     @Override
     public Map<String, Object> toHashMap() {
-        String px = this.prefix == null ? "" : this.prefix;
         return ImmutableMap.<String, Object>builder()
-                .put(px + "m1cnt", m1Count)
-                .put(px + "m5cnt", m5Count)
-                .put(px + "m15cnt", m15Count)
-                .build();
+            .put("m1errpct", m1ErrorPercent)
+            .put("m5errpct", m5ErrorPercent)
+            .put("m15errpct", m15ErrorPercent)
+            .build();
     }
 }

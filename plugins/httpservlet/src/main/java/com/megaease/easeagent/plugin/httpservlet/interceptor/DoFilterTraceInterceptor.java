@@ -29,6 +29,7 @@ import com.megaease.easeagent.plugin.api.trace.utils.HttpResponse;
 import com.megaease.easeagent.plugin.api.trace.utils.HttpUtils;
 import com.megaease.easeagent.plugin.api.trace.utils.TraceConst;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -41,9 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
 public class DoFilterTraceInterceptor implements Interceptor {
-    public static final String BEST_MATCHING_PATTERN_ATTRIBUTE = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
     private static final Object ENTER = new Object();
-    private static final String KEY = DoFilterTraceInterceptor.class.getName() + "$Key";
+    private static final String AFTER_MARK = DoFilterTraceInterceptor.class.getName() + "$AfterMark";
     private static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".ProgressContext";
 
     @Override
@@ -68,33 +68,27 @@ public class DoFilterTraceInterceptor implements Interceptor {
             return;
         }
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
-        if (httpServletRequest.getAttribute(KEY) != null) {
+        if (ServletUtils.markProcessedAfter(httpServletRequest, AFTER_MARK)) {
             return;
         }
-        httpServletRequest.setAttribute(KEY, "after");
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
         ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(PROGRESS_CONTEXT);
         try {
             Span span = progressContext.span();
             if (!httpServletRequest.isAsyncStarted()) {
-                span.tag(TraceConst.HTTP_TAG_ROUTE, getHttpRouteAttributeFromRequest(httpServletRequest));
+                span.tag(TraceConst.HTTP_TAG_ROUTE, ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest));
                 HttpUtils.finish(span, new Response(methodInfo.getThrowable(), httpServletRequest, httpServletResponse));
             } else if (methodInfo.getThrowable() != null) {
                 span.error(methodInfo.getThrowable());
                 span.finish();
                 return;
             } else {
-                httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener1(progressContext), httpServletRequest, httpServletResponse);
+                httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener(progressContext), httpServletRequest, httpServletResponse);
             }
             return;
         } finally {
             progressContext.scope().close();
         }
-    }
-
-    public static String getHttpRouteAttributeFromRequest(HttpServletRequest request) {
-        Object httpRoute = request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE);
-        return httpRoute != null ? httpRoute.toString() : null;
     }
 
     public static class Response implements HttpResponse {
@@ -161,11 +155,11 @@ public class DoFilterTraceInterceptor implements Interceptor {
         }
     }
 
-    public static final class TracingAsyncListener1 implements AsyncListener {
+    public static final class TracingAsyncListener implements AsyncListener {
         final ProgressContext progressContext;
         final AtomicBoolean sendHandled = new AtomicBoolean();
 
-        TracingAsyncListener1(ProgressContext progressContext) {
+        TracingAsyncListener(ProgressContext progressContext) {
             this.progressContext = progressContext;
         }
 
