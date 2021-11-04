@@ -159,6 +159,11 @@ public class NoOpContext {
         private static final NoopProgressContext INSTANCE = new NoopProgressContext();
 
         @Override
+        public boolean isNoop() {
+            return true;
+        }
+
+        @Override
         public Span span() {
             return NoOpTracer.NO_OP_SPAN;
         }

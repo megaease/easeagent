@@ -21,6 +21,9 @@ import java.io.Closeable;
 
 /**
  * A span remains in the scope it was bound to until close is called.
+ *
+ * <p>This type can be extended so that the object graph can be built differently or overridden,
+ * for example via zipkin or when mocking.
  */
 public interface Scope extends Closeable {
     /**

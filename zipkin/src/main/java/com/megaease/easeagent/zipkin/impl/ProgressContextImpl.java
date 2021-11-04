@@ -49,6 +49,11 @@ public class ProgressContextImpl implements ProgressContext {
     }
 
     @Override
+    public boolean isNoop() {
+        return false;
+    }
+
+    @Override
     public Span span() {
         return span;
     }

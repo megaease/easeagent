@@ -21,6 +21,12 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 
+/**
+ * Subtype of {@link Tracing} which can exportAsync,importAsync,nextProgress and importProgress.
+ *
+ * <p>This type can be extended so that the object graph can be built differently or overridden,
+ * for example via zipkin or when mocking.
+ */
 public interface ITracing extends Tracing {
     /**
      * Export a {@link AsyncContext} for asynchronous program processing

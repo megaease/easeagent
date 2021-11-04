@@ -24,7 +24,11 @@ import com.megaease.easeagent.plugin.api.trace.Tracing;
 import java.util.Map;
 
 public interface AsyncContext {
-
+    /**
+     * When true, do nothing and nothing is reported . However, this AsyncContext should
+     * still be injected into outgoing requests. Use this flag to avoid performing expensive
+     * computation.
+     */
     boolean isNoop();
 
     Tracing getTracer();

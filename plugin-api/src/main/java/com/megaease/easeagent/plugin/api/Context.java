@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public interface Context {
     /**
-     * When true, do anything and nothing is reported . However, this Context should
+     * When true, do nothing and nothing is reported . However, this Context should
      * still be injected into outgoing requests. Use this flag to avoid performing expensive
      * computation.
      */
@@ -274,6 +274,11 @@ public interface Context {
      * When you want to call the next program, you can pass the necessary key:value to the next program
      * by implementing {@link Request#setHeader(String, String)}, or you can get the {@link ProgressContext} of return,
      * call {@link ProgressContext#getHeader()} to get it and pass it on.
+     * <p>
+     * It is usually called on the client when collaboration between multiple processes is required.
+     * {@code client.nextProgress(Request.setHeader<spanId,root-source...>) --> server }
+     * or
+     * {@code client.nextProgress(Request).getHeader<spanId,root-source...> --> server }
      *
      * @param request {@link Request}
      * @return {@link ProgressContext}
@@ -290,6 +295,9 @@ public interface Context {
      * <p>
      * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
      * and {@link Request#cacheScope()}.
+     * <p>
+     * It is usually called on the server side when collaboration between multiple processes is required.
+     * {@code client --> server.importProgress(Request<spanId,root-source...>) }
      *
      * @param request {@link Request}
      * @return {@link ProgressContext}

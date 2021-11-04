@@ -40,6 +40,9 @@ import javax.annotation.Nullable;
  * <h3>Usage notes</h3>
  * All methods return {@linkplain Span} for chaining, but the instance is always the same. Also,
  * when only tracing in-process operations.
+ *
+ * <p>This type can be extended so that the object graph can be built differently or overridden,
+ * for example via zipkin or when mocking.
  */
 // Design note: this does not require a builder as the span is mutable anyway. Having a single
 // mutation interface is less code to maintain. Those looking to prepare a span before starting it

@@ -17,10 +17,29 @@
 
 package com.megaease.easeagent.plugin.api.trace;
 
+import com.megaease.easeagent.plugin.api.context.ProgressContext;
+
 import java.util.Set;
 
+/**
+ * Interface Response type used for parsing and sampling.
+ * Used when multi-process collaboration is needed, information is extracted from the response and recorded in the {@link Span#tag(String, String)}
+ * Usually used to support "ease mesh".
+ *
+ * @see ProgressContext#finish(Response)
+ */
 public interface Response {
+
+    /**
+     * A custom set of tag names that need to be recorded, if it doesn’t return null, it’s fine
+     *
+     * @return {@link Set}
+     */
     Set<String> keys();
 
+
+    /**
+     * The method of extracting information from the response
+     */
     String header(String name);
 }

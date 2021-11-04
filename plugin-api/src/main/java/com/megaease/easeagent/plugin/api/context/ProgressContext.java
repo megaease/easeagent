@@ -25,6 +25,13 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import java.util.Map;
 
 public interface ProgressContext {
+    /**
+     * When true, do nothing and nothing is reported . However, this ProgressContext should
+     * still be injected into outgoing requests. Use this flag to avoid performing expensive
+     * computation.
+     */
+    boolean isNoop();
+
     Span span();
 
     Scope scope();
