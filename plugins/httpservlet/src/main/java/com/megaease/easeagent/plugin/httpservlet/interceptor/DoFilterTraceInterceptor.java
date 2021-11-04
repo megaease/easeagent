@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpfilter.interceptor;
+package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
@@ -28,7 +28,7 @@ import com.megaease.easeagent.plugin.api.trace.utils.HttpRequest;
 import com.megaease.easeagent.plugin.api.trace.utils.HttpResponse;
 import com.megaease.easeagent.plugin.api.trace.utils.HttpUtils;
 import com.megaease.easeagent.plugin.api.trace.utils.TraceConst;
-import com.megaease.easeagent.plugin.httpfilter.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;

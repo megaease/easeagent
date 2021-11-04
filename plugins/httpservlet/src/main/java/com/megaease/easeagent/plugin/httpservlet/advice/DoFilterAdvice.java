@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpfilter.advice;
+package com.megaease.easeagent.plugin.httpservlet.advice;
 
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.annotation.Pointcut;

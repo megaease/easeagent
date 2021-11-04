@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpfilter.interceptor;
+package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.utils.HttpRequest;

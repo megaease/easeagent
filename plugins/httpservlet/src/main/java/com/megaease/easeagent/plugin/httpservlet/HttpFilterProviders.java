@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpfilter;
+package com.megaease.easeagent.plugin.httpservlet;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.ProviderBean;
-import com.megaease.easeagent.plugin.httpfilter.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.httpfilter.interceptor.DoFilterTraceInterceptor;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.interceptor.DoFilterTraceInterceptor;
 
 import java.util.function.Supplier;
 
