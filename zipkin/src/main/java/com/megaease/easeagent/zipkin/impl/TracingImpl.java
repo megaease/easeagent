@@ -18,8 +18,11 @@
 package com.megaease.easeagent.zipkin.impl;
 
 import brave.Tracer;
+import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
@@ -31,6 +34,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 public class TracingImpl implements ITracing {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TracingImpl.class);
     private final Supplier<InitializeContext> supplier;
     private final brave.Tracing tracing;
     private final brave.Tracer tracer;
@@ -50,7 +54,6 @@ public class TracingImpl implements ITracing {
     }
 
     public static ITracing build(Supplier<InitializeContext> supplier, brave.Tracing tracing) {
-        tracing.sampler();
         return tracing == null ? NoOpTracer.NO_OP_TRACING :
             new TracingImpl(supplier, tracing,
                 tracing.tracer(),
@@ -103,23 +106,36 @@ public class TracingImpl implements ITracing {
         span.name(request.name());
     }
 
-    @Override
-    public AsyncContext exportAsync() {
-        brave.Span span = tracer().nextSpan();
-        return AsyncContextImpl.build(this, build(span, false), supplier);
+    private TraceContext currentTraceContext() {
+        Tracer tracer = tracer();
+        if (tracer == null) {
+            LOGGER.debug("tracer was null.");
+            return null;
+        }
+        brave.Span span = tracer.currentSpan();
+        if (span == null) {
+            return null;
+        }
+        return span.context();
     }
 
     @Override
-    public Span importAsync(AsyncContext snapshot) {
-        Span span = null;
-        if (snapshot instanceof AsyncContextImpl) {
-            Span bSpan = ((AsyncContextImpl) snapshot).getSpan();
-            if (bSpan.isNoop()) {
-                return NoOpTracer.NO_OP_SPAN;
-            }
-            span = bSpan;
+    public AsyncContext exportAsync() {
+        TraceContext traceContext = currentTraceContext();
+        if (traceContext == null) {
+            return NoOpContext.NO_OP_ASYNC_CONTEXT;
         }
-        return NoOpTracer.noNullSpan(span);
+        return AsyncContextImpl.build(this, traceContext, supplier);
+    }
+
+    @Override
+    public Scope importAsync(AsyncContext snapshot) {
+        if (snapshot instanceof AsyncContextImpl) {
+            TraceContext traceContext = ((AsyncContextImpl) snapshot).getTraceContext();
+            CurrentTraceContext.Scope scope = tracing().currentTraceContext().maybeScope(traceContext);
+            return new ScopeImpl(scope);
+        }
+        return NoOpTracer.NO_OP_SCOPE;
     }
 
     @Override
@@ -142,7 +158,7 @@ public class TracingImpl implements ITracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new ProgressContextImpl(this, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     @Override
@@ -156,7 +172,7 @@ public class TracingImpl implements ITracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new ProgressContextImpl(this, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     @Override

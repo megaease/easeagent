@@ -33,13 +33,15 @@ import java.util.function.Supplier;
 
 public class ProgressContextImpl implements ProgressContext {
     private final Tracing tracing;
+    private final brave.Span braveSpan;
     private final Span span;
     private final Scope scope;
     private final AsyncRequest asyncRequest;
     private final Supplier<InitializeContext> supplier;
 
-    public ProgressContextImpl(Tracing tracing, Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
+    public ProgressContextImpl(Tracing tracing, brave.Span braveSpan, Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
         this.tracing = tracing;
+        this.braveSpan = braveSpan;
         this.span = span;
         this.scope = scope;
         this.asyncRequest = asyncRequest;
@@ -68,7 +70,7 @@ public class ProgressContextImpl implements ProgressContext {
 
     @Override
     public AsyncContext async() {
-        return AsyncContextImpl.build(tracing, span, supplier, (Map) asyncRequest.getHeaders());
+        return AsyncContextImpl.build(tracing, braveSpan.context(), supplier, (Map) asyncRequest.getHeaders());
     }
 
     @Override

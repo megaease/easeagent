@@ -201,8 +201,8 @@ public class NoOpTracer {
         }
 
         @Override
-        public Span importAsync(AsyncContext snapshot) {
-            return NoopSpan.INSTANCE;
+        public Scope importAsync(AsyncContext snapshot) {
+            return NoopScope.INSTANCE;
         }
 
         @Override

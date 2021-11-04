@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
-import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Map;
@@ -161,12 +161,12 @@ public interface Context {
      * <pre>{@code
      *      fun1(){
      *          try{
-     *              if (context.enter(obj)<3){
+     *              if (context.enter(obj)>2){
      *                 return;
      *              }
      *              //do something1
      *          }finally{
-     *              if (context.out(obj)<3){
+     *              if (context.out(obj)>2){
      *                 return;
      *              }
      *              //do something2
@@ -174,13 +174,13 @@ public interface Context {
      *      }
      *      fun2(){
      *          try{
-     *              if (context.enter(obj)<3){
+     *              if (context.enter(obj)>2){
      *                 return;
      *              }
      *              // call fun1();
      *              //do something3
      *          }finally{
-     *              if (context.out(obj)<3){
+     *              if (context.out(obj)>2){
      *                 return;
      *              }
      *              //do something4
@@ -188,13 +188,13 @@ public interface Context {
      *      }
      *      fun3(){
      *          try{
-     *              if (context.enter(obj)<3){
+     *              if (context.enter(obj)>2){
      *                 return;
      *              }
      *              // call fun2();
      *              //do something5
      *          }finally{
-     *              if (context.out(obj)<3){
+     *              if (context.out(obj)>2){
      *                 return;
      *              }
      *              //do something6
@@ -261,9 +261,9 @@ public interface Context {
      * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurr()} proxy call
      *
      * @param snapshot the AsyncContext from {@link #exportAsync()} called
-     * @return {@link Span} for tracing
+     * @return {@link Scope} for tracing
      */
-    Span importAsync(AsyncContext snapshot);
+    Scope importAsync(AsyncContext snapshot);
 
     /**
      * Create a ProgressContext for Cross-process Trace link
@@ -295,6 +295,11 @@ public interface Context {
      * @return {@link ProgressContext}
      */
     ProgressContext importProgress(Request request);
+
+    /**
+     * Wraps the input so that it executes with the same context as now.
+     */
+    Runnable wrap(Runnable task);
 
     /**
      * clear the session context

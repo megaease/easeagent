@@ -24,6 +24,7 @@ import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
 import com.megaease.easeagent.gen.Generate;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
@@ -42,17 +43,17 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type(named(CLASS_THREAD_POOL_EXECUTOR))
-                .transform(threadPoolExecutorExecute(named("execute")
-                        .and(takesArguments(1))
-                        .and(takesArgument(0, named("java.lang.Runnable")))
-                ))
-                .type(named(CLASS_REACTOR_SCHEDULERS))
-                .transform(reactorSchedulersOnSchedule(named("onSchedule")
-                        .and(takesArguments(1))
-                        .and(takesArgument(0, named("java.lang.Runnable")))
-                ))
-                .end();
+            .type(named(CLASS_THREAD_POOL_EXECUTOR))
+            .transform(threadPoolExecutorExecute(named("execute")
+                .and(takesArguments(1))
+                .and(takesArgument(0, named("java.lang.Runnable")))
+            ))
+            .type(named(CLASS_REACTOR_SCHEDULERS))
+            .transform(reactorSchedulersOnSchedule(named("onSchedule")
+                .and(takesArguments(1))
+                .and(takesArgument(0, named("java.lang.Runnable")))
+            ))
+            .end();
     }
 
     @AdviceTo(ThreadPoolExecutorExecute.class)
@@ -72,7 +73,7 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
 //            logger.debug("enter method [{}]", method);
                 Runnable task = (Runnable) args[0];
                 if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                    Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);
+                    Runnable firstWrap = EaseAgent.contextSupplier.get().wrap(task);
                     final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(firstWrap);
                     args[0] = wrap;
                 }
@@ -92,7 +93,7 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
 //            logger.debug("enter method [{}]", method);
                 Runnable task = (Runnable) args[0];
                 if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                    Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);
+                    Runnable firstWrap = EaseAgent.contextSupplier.get().wrap(task);
                     final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(firstWrap);
                     args[0] = wrap;
                 }

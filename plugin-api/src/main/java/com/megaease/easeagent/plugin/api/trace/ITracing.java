@@ -34,14 +34,14 @@ public interface ITracing extends Tracing {
 
     /**
      * Import a {@link AsyncContext} for asynchronous program processing
-     * It will only import the information about the async Span.
-     * If you need import AsyncContext and get Span, generate result use {@link Context#importAsync(AsyncContext)}.
+     * It will only import the information about the async TraceContext.
+     * If you need import AsyncContext and get Scope, generate result use {@link Context#importAsync(AsyncContext)}.
      *
      * @param snapshot {@link AsyncContext}
-     * @return {@link Span}
+     * @return {@link Scope}
      * @see Context#importAsync(AsyncContext)
      */
-    Span importAsync(AsyncContext snapshot);
+    Scope importAsync(AsyncContext snapshot);
 
 
     /**

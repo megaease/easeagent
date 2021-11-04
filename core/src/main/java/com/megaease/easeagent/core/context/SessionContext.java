@@ -26,7 +26,7 @@ import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
 import com.megaease.easeagent.plugin.api.trace.Request;
-import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
@@ -126,10 +126,10 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public Span importAsync(AsyncContext snapshot) {
-        Span span = tracing.importAsync(snapshot);
+    public Scope importAsync(AsyncContext snapshot) {
+        Scope scope = tracing.importAsync(snapshot);
         context.putAll(snapshot.getAll());
-        return span;
+        return scope;
     }
 
     @Override
@@ -164,6 +164,11 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
+    public Runnable wrap(Runnable task) {
+        return new CurrentContextRunnable(exportAsync(), task);
+    }
+
+    @Override
     public Map<Object, Object> clear() {
         this.tracing = NoOpTracer.NO_OP_TRACING;
         Map<Object, Object> old = this.context;
@@ -175,5 +180,22 @@ public class SessionContext implements InitializeContext {
     @Override
     public void setCurrentTracing(ITracing tracing) {
         this.tracing = NoNull.of(tracing, NoOpTracer.NO_OP_TRACING);
+    }
+
+    public static class CurrentContextRunnable implements Runnable {
+        private final AsyncContext asyncContext;
+        private final Runnable task;
+
+        public CurrentContextRunnable(AsyncContext asyncContext, Runnable task) {
+            this.asyncContext = asyncContext;
+            this.task = task;
+        }
+
+        @Override
+        public void run() {
+            try (Scope scope = asyncContext.importToCurr()) {
+                task.run();
+            }
+        }
     }
 }

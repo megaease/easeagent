@@ -17,9 +17,11 @@
 
 package com.megaease.easeagent.zipkin.impl;
 
+import brave.propagation.TraceContext;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
@@ -29,24 +31,24 @@ import java.util.function.Supplier;
 
 public class AsyncContextImpl implements AsyncContext {
     private final Tracing tracing;
-    private final Span span;
+    private final TraceContext traceContext;
     private final Map<Object, Object> context;
     private final Supplier<InitializeContext> supplier;
 
-    private AsyncContextImpl(Tracing tracing, Span span, Supplier<InitializeContext> supplier, Map<Object, Object> context) {
+    private AsyncContextImpl(Tracing tracing, TraceContext traceContext, Supplier<InitializeContext> supplier, Map<Object, Object> context) {
         this.tracing = tracing;
-        this.span = span;
+        this.traceContext = traceContext;
         this.supplier = supplier;
         this.context = context;
     }
 
-    public static AsyncContextImpl build(Tracing tracing, Span span, Supplier<InitializeContext> supplier) {
-        return build(tracing, span, supplier, null);
+    public static AsyncContextImpl build(Tracing tracing, TraceContext traceContext, Supplier<InitializeContext> supplier) {
+        return build(tracing, traceContext, supplier, null);
     }
 
-    public static AsyncContextImpl build(Tracing tracing, Span span, Supplier<InitializeContext> supplier, Map<Object, Object> context) {
+    public static AsyncContextImpl build(Tracing tracing, TraceContext traceContext, Supplier<InitializeContext> supplier, Map<Object, Object> context) {
         Map<Object, Object> contextMap = context == null ? new HashMap<>() : new HashMap<>(context);
-        return new AsyncContextImpl(tracing, span, supplier, contextMap);
+        return new AsyncContextImpl(tracing, traceContext, supplier, contextMap);
     }
 
     @Override
@@ -65,12 +67,12 @@ public class AsyncContextImpl implements AsyncContext {
     }
 
     @Override
-    public Span importToCurr() {
+    public Scope importToCurr() {
         return supplier.get().importAsync(this);
     }
 
-    public Span getSpan() {
-        return span;
+    public TraceContext getTraceContext() {
+        return traceContext;
     }
 
     @Override

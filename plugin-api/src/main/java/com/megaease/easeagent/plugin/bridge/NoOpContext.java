@@ -81,8 +81,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Span importAsync(AsyncContext snapshot) {
-            return NoOpTracer.NO_OP_SPAN;
+        public Scope importAsync(AsyncContext snapshot) {
+            return NoOpTracer.NO_OP_SCOPE;
         }
 
         @Override
@@ -93,6 +93,11 @@ public class NoOpContext {
         @Override
         public ProgressContext importProgress(Request request) {
             return NoopProgressContext.INSTANCE;
+        }
+
+        @Override
+        public Runnable wrap(Runnable task) {
+            return task;
         }
 
         @Override
@@ -135,8 +140,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Span importToCurr() {
-            return NoOpTracer.NO_OP_SPAN;
+        public Scope importToCurr() {
+            return NoOpTracer.NO_OP_SCOPE;
         }
 
         @Override
