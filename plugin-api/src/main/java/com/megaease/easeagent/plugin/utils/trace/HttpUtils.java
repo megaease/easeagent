@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.trace.utils;
+package com.megaease.easeagent.plugin.utils.trace;
 
 import com.megaease.easeagent.plugin.api.trace.Span;
 
-import static com.megaease.easeagent.plugin.api.trace.utils.TraceConst.HTTP_HEADER_X_FORWARDED_FOR;
+import static com.megaease.easeagent.plugin.utils.trace.TraceConst.HTTP_HEADER_X_FORWARDED_FOR;
 
 public class HttpUtils {
     public static void handleReceive(Span span, HttpRequest httpRequest) {

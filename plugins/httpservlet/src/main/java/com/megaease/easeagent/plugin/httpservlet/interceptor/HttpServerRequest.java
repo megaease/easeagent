@@ -18,8 +18,8 @@
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.api.trace.utils.HttpRequest;
-import com.megaease.easeagent.plugin.api.trace.utils.TraceConst;
+import com.megaease.easeagent.plugin.utils.trace.HttpRequest;
+import com.megaease.easeagent.plugin.utils.trace.TraceConst;
 
 import javax.servlet.http.HttpServletRequest;
 

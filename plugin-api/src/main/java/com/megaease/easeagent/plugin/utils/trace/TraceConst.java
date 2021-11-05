@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.trace.utils;
+package com.megaease.easeagent.plugin.utils.trace;
 
 public interface TraceConst {
     String HTTP_HEADER_X_FORWARDED_FOR = "X-Forwarded-For";

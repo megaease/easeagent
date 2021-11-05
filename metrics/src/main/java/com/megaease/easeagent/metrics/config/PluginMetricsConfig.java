@@ -19,9 +19,11 @@ package com.megaease.easeagent.metrics.config;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.utils.NoNull;
 
 import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_COMM_ENABLED;
 import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_COMM_INTERVAL;
+import static com.megaease.easeagent.plugin.Const.METRIC_DEFAULT_INTERVAL;
 
 public class PluginMetricsConfig implements MetricsConfig {
     private volatile boolean enabled;
@@ -50,8 +52,8 @@ public class PluginMetricsConfig implements MetricsConfig {
     }
 
     private void set(Config config) {
-        this.enabled = config.getBoolean(KEY_COMM_ENABLED);
-        this.interval = config.getInt(KEY_COMM_INTERVAL);
+        this.enabled = config.enable();
+        this.interval = NoNull.of(config.getInt(KEY_COMM_INTERVAL), METRIC_DEFAULT_INTERVAL);
     }
 
     class ConfigChange implements ConfigChangeListener {

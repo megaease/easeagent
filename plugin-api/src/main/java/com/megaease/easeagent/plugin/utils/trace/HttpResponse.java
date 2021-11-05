@@ -15,25 +15,17 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.trace.utils;
+package com.megaease.easeagent.plugin.utils.trace;
 
-import com.megaease.easeagent.plugin.api.trace.Request;
+import com.megaease.easeagent.plugin.api.trace.Response;
 
-public interface HttpRequest extends Request {
-    @Override
-    default String name() {
-        return method();
-    }
+public interface HttpResponse extends Response {
 
     String method();
 
-    String path();
-
     String route();
 
-    String getRemoteAddr();
+    int statusCode();
 
-    int getRemotePort();
-
-    String getRemoteHost();
+    Throwable maybeError();
 }

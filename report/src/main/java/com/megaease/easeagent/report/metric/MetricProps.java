@@ -20,6 +20,8 @@ package com.megaease.easeagent.report.metric;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.Const;
+import com.megaease.easeagent.plugin.utils.NoNull;
 
 import static com.megaease.easeagent.config.ConfigConst.*;
 import static com.megaease.easeagent.config.ConfigConst.Observability.*;
@@ -36,7 +38,11 @@ public interface MetricProps {
     }
 
     static MetricProps newDefault(com.megaease.easeagent.plugin.api.config.Config config) {
-        return new Default(config.getBoolean(KEY_COMM_ENABLED), config.getString(KEY_COMM_APPEND_TYPE), config.getString(KEY_COMM_TOPIC));
+        return new Default(
+            config.enable(),
+            NoNull.of(config.getString(KEY_COMM_APPEND_TYPE), Const.METRIC_DEFAULT_APPEND_TYPE),
+            NoNull.of(config.getString(KEY_COMM_TOPIC), Const.METRIC_DEFAULT_TOPIC)
+        );
     }
 
     class Default implements MetricProps {

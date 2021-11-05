@@ -20,4 +20,7 @@ package com.megaease.easeagent.plugin;
 public interface Const {
     String ENABLED_CONFIG = "enabled";
 
+    int METRIC_DEFAULT_INTERVAL = 30;
+    String METRIC_DEFAULT_TOPIC = "application-log";
+    String METRIC_DEFAULT_APPEND_TYPE = "console";
 }

@@ -58,6 +58,7 @@ public class DoFilterMetricInterceptor implements Interceptor {
             MetricRegistry metricRegistry = EaseAgent.newMetricRegistry(config, NAME_FACTORY, tags);
             SERVER_METRIC = new ServerMetric(metricRegistry, NAME_FACTORY);
         }
+
     }
 
     @Override
