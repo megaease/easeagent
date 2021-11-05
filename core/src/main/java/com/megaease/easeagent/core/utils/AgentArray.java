@@ -64,7 +64,7 @@ public class AgentArray<E> {
 
     public E get(int index) {
         if (index >= size()) {
-            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+            return null;
         }
         return (E)a[index];
     }

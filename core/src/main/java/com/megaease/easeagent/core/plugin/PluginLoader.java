@@ -122,12 +122,6 @@ public class PluginLoader {
             .map(ForAdviceTransformer::new)
             .collect(Collectors.toList());
 
-        // add annotation to instrumented method
-        agentTransformers.addAll(StreamSupport
-            .stream(methodTransformations.spliterator(), false)
-            .map(AnnotationTransformer::new)
-            .collect(Collectors.toList()));
-
         if (hasDynamicField) {
             agentTransformers.add(new DynamicFieldTransformer(AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME));
         }

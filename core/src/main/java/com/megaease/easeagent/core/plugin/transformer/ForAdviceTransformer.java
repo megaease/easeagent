@@ -23,11 +23,8 @@ import com.megaease.easeagent.core.plugin.annotation.EaseAgentInstrumented;
 import com.megaease.easeagent.core.plugin.annotation.Index;
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice;
+import com.megaease.easeagent.core.plugin.transformer.advice.*;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.OffsetMapping;
-import com.megaease.easeagent.core.plugin.transformer.advice.AgentForAdvice;
-import com.megaease.easeagent.core.plugin.transformer.advice.AgentJavaConstantValue;
-import com.megaease.easeagent.core.plugin.transformer.advice.MethodIdentityJavaConstant;
 import com.megaease.easeagent.core.plugin.transformer.classloader.CompoundClassloader;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -94,6 +91,7 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
         }
         */
         CompoundClassloader.compound(this.getClass().getClassLoader(), cl);
+        AdviceRegistry.setCurrentClassLoader(cl);
 
         return transformer.transform(b, td, cl, m);
     }

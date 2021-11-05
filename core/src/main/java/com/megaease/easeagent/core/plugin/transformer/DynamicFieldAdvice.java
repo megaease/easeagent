@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.core.plugin.transformer;
 
-import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.NullObject;
 import net.bytebuddy.asm.Advice;
@@ -25,21 +24,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DynamicFieldAdvice {
-    static Logger log = LoggerFactory.getLogger(DynamicFieldAdvice.class);
+    public static Logger log = LoggerFactory.getLogger(DynamicFieldAdvice.class);
 
     public static class DynamicInstanceInit {
-        @Advice.OnMethodEnter
-        public static void enter(@Advice.This Object target, @Advice.Origin("#m") String method) {
-            if (((DynamicFieldAccessor) target).getEaseAgent$$DynamicField$$Data() == null) {
-                ((DynamicFieldAccessor) target).setEaseAgent$$DynamicField$$Data(NullObject.NULL);
+        @Advice.OnMethodExit
+        public static void exit(@Advice.This(optional = true) Object target) {
+            if (target instanceof DynamicFieldAccessor) {
+                DynamicFieldAccessor accessor = (DynamicFieldAccessor)target;
+                if (accessor.getEaseAgent$$DynamicField$$Data() == null) {
+                    accessor.setEaseAgent$$DynamicField$$Data(NullObject.NULL);
+                }
             }
         }
     }
 
     public static class DynamicClassInit {
-        @Advice.OnMethodExit(onThrowable = Exception.class)
-        public static void exit(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method) {
-            log.info("Add dynamic field to {} at {}", type, method);
+        @Advice.OnMethodExit
+        public static void exit(@Advice.Origin("#m") String method) {
         }
     }
 }

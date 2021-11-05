@@ -17,21 +17,32 @@
 
 package com.megaease.easeagent.core.plugin.transformer;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldAdvice.DynamicClassInit;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldAdvice.DynamicInstanceInit;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.NullObject;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FieldAccessor;
+import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicFieldTransformer implements AgentBuilder.Transformer {
-    private String fieldName;
-    private Class<?> accessor;
+    private final static Logger log = LoggerFactory.getLogger(DynamicFieldTransformer.class);
+    private final static ConcurrentHashMap<String, Cache<ClassLoader, Boolean>> fieldMap = new ConcurrentHashMap<>();
+
+    private final String fieldName;
+    private final Class<?> accessor;
     private final AgentBuilder.Transformer.ForAdvice transformer;
 
     public DynamicFieldTransformer(String fieldName) {
@@ -44,21 +55,46 @@ public class DynamicFieldTransformer implements AgentBuilder.Transformer {
         this.transformer = new AgentBuilder.Transformer
             .ForAdvice(Advice.withCustomMapping())
             .include(getClass().getClassLoader())
-            .advice(ElementMatchers.isTypeInitializer(), DynamicClassInit.class.getName())
             .advice(ElementMatchers.isConstructor(), DynamicInstanceInit.class.getName());
     }
 
     @Override
     public DynamicType.Builder<?> transform(DynamicType.Builder<?> b,
                                             TypeDescription td, ClassLoader cl, JavaModule m) {
-        if (!td.isAssignableTo(DynamicFieldAccessor.class)) {
-            if (this.fieldName != null) {
+        if (check(td, this.accessor, cl) && this.fieldName != null) {
+            try {
                 b = b.defineField(this.fieldName, Object.class, Opcodes.ACC_PRIVATE)
                     .implement(this.accessor)
                     .intercept(FieldAccessor.ofField(this.fieldName));
-
+                        //.setsArgumentAt(0).andThen(FixedValue.value(NullObject.NULL)));
+            } catch (Exception e) {
+                log.debug("Type:{} add extend field again!", td.getName());
             }
+            return transformer.transform(b, td, cl, m);
         }
         return b;
+    }
+
+    /**
+     * Avoiding add a accessor interface to a class repeatedly
+     * @param td    represent the class to be enhanced
+     * @param accessor access interface class
+     * @param cl current classloader
+     * @return return true when it is the first time
+     */
+    private static boolean check(TypeDescription td, Class<?> accessor, ClassLoader cl) {
+        String key = td.getCanonicalName() + accessor.getCanonicalName();
+
+        Cache<ClassLoader, Boolean> checkCache = fieldMap.get(key);
+        if (checkCache == null) {
+            Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
+            cache.put(cl, true);
+            checkCache = fieldMap.putIfAbsent(key, cache);
+            if (checkCache == null) {
+                return true;
+            }
+        }
+
+        return checkCache.getIfPresent(cl) == null;
     }
 }

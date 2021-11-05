@@ -48,4 +48,13 @@ public final class Dispatcher {
     public static AgentInterceptorChain register(int index, AgentInterceptorChain chain) {
         return chains.putIfAbsent(index, chain);
     }
+
+    // for interceptor 
+    public static AgentInterceptorChain getChain(int index) {
+        return chains.get(index);
+    }
+
+    public static boolean updateChain(int index, AgentInterceptorChain chain) {
+        return chains.replace(index, chain) != null;
+    }
 }

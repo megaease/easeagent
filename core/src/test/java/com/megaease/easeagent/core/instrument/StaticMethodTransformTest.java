@@ -20,6 +20,7 @@ package com.megaease.easeagent.core.instrument;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
+import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
 import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
@@ -76,6 +77,7 @@ public class StaticMethodTransformTest {
         public void before(MethodInfo methodInfo, Context context) {
             Object [] args = methodInfo.getArgs();
             args[0] = QUX;
+            methodInfo.markChanged();
         }
 
         @Override
@@ -119,7 +121,7 @@ public class StaticMethodTransformTest {
     private Set<MethodTransformation> getMethodTransformations(int index, String methodName) {
         Supplier<Interceptor> supplier = FooInterceptor::new;
         SupplierChain.Builder<Interceptor> chainBuilder = SupplierChain.builder();
-        chainBuilder.addSupplier(supplier);
+        chainBuilder.addSupplier(InterceptorPluginDecorator.getInterceptorSupplier(new TestPlugin(), supplier));
 
         MethodTransformation methodTransformation = new MethodTransformation(index,
             ElementMatchers.named(methodName),

@@ -21,14 +21,17 @@ import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public class AgentInterceptorChain {
-    public final ArrayList<Interceptor> interceptors;
+    public ArrayList<Interceptor> interceptors;
 
     public AgentInterceptorChain(List<Interceptor> interceptors) {
         this.interceptors = new ArrayList<>(interceptors);
@@ -62,6 +65,16 @@ public class AgentInterceptorChain {
             // set error message to context;
         }
         return this.doAfter(methodInfo, pos - 1, context);
+    }
+
+    public void merge(AgentInterceptorChain other) {
+        if (other == null) {
+            return;
+        }
+        interceptors.addAll(other.interceptors);
+        this.interceptors = interceptors.stream()
+            .sorted(Comparator.comparing(Ordered::order))
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public int size() {

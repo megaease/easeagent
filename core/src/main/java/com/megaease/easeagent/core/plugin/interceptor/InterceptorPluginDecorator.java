@@ -27,13 +27,14 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 
 import java.lang.reflect.Field;
 import java.util.function.Supplier;
 
 public class InterceptorPluginDecorator implements Interceptor, ConfigChangeListener {
-    private Interceptor interceptor;
-    private AgentPlugin plugin;
+    private final Interceptor interceptor;
+    private final AgentPlugin plugin;
     private Config config;
 
     public InterceptorPluginDecorator(Interceptor interceptor, AgentPlugin plugin) {
@@ -47,16 +48,16 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     public void before(MethodInfo methodInfo, Context context) {
         Config cfg = this.config;
         ((InitializeContext) context).pushConfig(cfg);
-        if (cfg != null && cfg.enable()) {
+        if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
             this.interceptor.before(methodInfo, context);
         }
     }
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        Config cfg = ((InitializeContext) context).getConfig();
-        if (cfg != null && cfg.enable()) {
-            this.interceptor.after(methodInfo, context);
+        Config cfg = context.getConfig();
+        if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
+                this.interceptor.after(methodInfo, context);
         }
         ((InitializeContext) context).popConfig();
     }
@@ -70,26 +71,21 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     public int order() {
         int pluginOrder = this.plugin.order();
         int interceptorOrder = this.interceptor.order();
-        int current = interceptorOrder << 8 + pluginOrder;
-        return current;
+        return interceptorOrder << 8 + pluginOrder;
     }
 
     public static Supplier<Interceptor> getInterceptorSupplier(final AgentPlugin plugin, final Supplier<Interceptor> supplier) {
-        Supplier<Interceptor> decoratorSupplier = new Supplier<Interceptor>() {
-            @Override
-            public Interceptor get() {
-                Interceptor interceptor = supplier.get();
-                Field[] fs = interceptor.getClass().getDeclaredFields();
-                for (Field f : fs) {
-                    // has non-static field
-                    if ((f.getModifiers() & Modifier.ACC_STATIC) == 0) {
-                        interceptor = new StateInterceptor(supplier);
-                    }
+        return () -> {
+            Interceptor interceptor1 = supplier.get();
+            Field[] fs = interceptor1.getClass().getDeclaredFields();
+            for (Field f : fs) {
+                // has non-static field
+                if ((f.getModifiers() & Modifier.ACC_STATIC) == 0) {
+                    interceptor1 = new StateInterceptor(supplier);
                 }
-                return new InterceptorPluginDecorator(interceptor, plugin);
             }
+            return new InterceptorPluginDecorator(interceptor1, plugin);
         };
-        return decoratorSupplier;
     }
 
     @Override

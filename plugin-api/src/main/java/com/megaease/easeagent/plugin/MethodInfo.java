@@ -105,6 +105,10 @@ public class MethodInfo {
         this.changed = true;
     }
 
+    public void markChanged() {
+        this.changed = true;
+    }
+
     public boolean equals(final MethodInfo o) {
         if (o == this) {
             return true;
