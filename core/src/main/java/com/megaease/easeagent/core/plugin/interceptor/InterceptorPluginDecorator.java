@@ -76,15 +76,18 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
 
     public static Supplier<Interceptor> getInterceptorSupplier(final AgentPlugin plugin, final Supplier<Interceptor> supplier) {
         return () -> {
-            Interceptor interceptor1 = supplier.get();
-            Field[] fs = interceptor1.getClass().getDeclaredFields();
+            /*
+            Interceptor interceptor = supplier.get();
+            Field[] fs = interceptor.getClass().getDeclaredFields();
             for (Field f : fs) {
                 // has non-static field
                 if ((f.getModifiers() & Modifier.ACC_STATIC) == 0) {
-                    interceptor1 = new StateInterceptor(supplier);
+                    interceptor = new StateInterceptor(supplier);
+                    break;
                 }
             }
-            return new InterceptorPluginDecorator(interceptor1, plugin);
+             */
+            return new InterceptorPluginDecorator(supplier.get(), plugin);
         };
     }
 

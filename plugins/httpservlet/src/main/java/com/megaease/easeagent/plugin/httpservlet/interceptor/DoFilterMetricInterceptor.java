@@ -43,15 +43,15 @@ public class DoFilterMetricInterceptor implements Interceptor {
     private static final Object ENTER = new Object();
     private static final Object START = new Object();
     private static final NameFactory NAME_FACTORY = ServerMetric.buildNameFactory();
-    private final ServerMetric serverMetric = null;
+    private ServerMetric serverMetric = null;
 
     public DoFilterMetricInterceptor() {
         Config config = EaseAgent.configFactory.getConfig("observability", "httpservlet", Order.METRIC.getName());
         Tags tags = new Tags("application", "http-request", "url");
 
         //TODO new metric registry: can not load from class loader
-//        MetricRegistry metricRegistry = EaseAgent.metricRegistrySupplier.newMetricRegistry(config, NAME_FACTORY, tags);
-//        this.serverMetric = new ServerMetric(metricRegistry, NAME_FACTORY);
+        MetricRegistry metricRegistry = EaseAgent.metricRegistrySupplier.newMetricRegistry(config, NAME_FACTORY, tags);
+        this.serverMetric = new ServerMetric(metricRegistry, NAME_FACTORY);
     }
 
     @Override

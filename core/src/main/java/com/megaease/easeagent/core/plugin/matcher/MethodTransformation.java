@@ -19,7 +19,7 @@ package com.megaease.easeagent.core.plugin.matcher;
 
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain;
-import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
+import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Ordered;
 import lombok.Data;
@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -42,26 +41,23 @@ public class MethodTransformation {
 
     private int index;
     private Junction<? super MethodDescription> matcher;
-    private SupplierChain.Builder<Interceptor> suppliersBuilder;
+    private ProviderChain.Builder providerBuilder;
 
     public MethodTransformation(int index,
                                 Junction<? super MethodDescription> matcher,
-                                SupplierChain.Builder<Interceptor> chain) {
+                                ProviderChain.Builder chain) {
         this.index = index;
         this.matcher = matcher;
-        this.suppliersBuilder = chain;
+        this.providerBuilder = chain;
     }
 
     public AgentSupplierChain getSupplierChain(ClassLoader classLoader) {
-        SupplierChain<Interceptor> suppliersChain = getSuppliersBuilder().build();
-        ArrayList<Supplier<Interceptor>> suppliers = suppliersChain.getSuppliers();
-
+        ArrayList<Supplier<Interceptor>> suppliers = this.providerBuilder.build().getSupplierChain();
         return new AgentSupplierChain(suppliers);
     }
 
     public AgentInterceptorChain getAgentInterceptorChain() {
-        SupplierChain<Interceptor> suppliersChain = getSuppliersBuilder().build();
-        ArrayList<Supplier<Interceptor>> suppliers = suppliersChain.getSuppliers();
+        ArrayList<Supplier<Interceptor>> suppliers = this.providerBuilder.build().getSupplierChain();
 
         List<Interceptor> interceptors = suppliers.stream().map(Supplier::get)
             .sorted(Comparator.comparing(Ordered::order))

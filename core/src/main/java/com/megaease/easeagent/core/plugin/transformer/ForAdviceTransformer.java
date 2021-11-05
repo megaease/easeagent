@@ -75,21 +75,6 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
 
     @Override
     public DynamicType.Builder<?> transform(DynamicType.Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
-        /*
-        // generate interceptor
-        AgentInterceptorChain chain = this.methodTransformInfo.getAgentInterceptorChain(cl);
-        // this advice have been register by other classloader, it return null
-        if (Dispatcher.register(this.methodTransformInfo.getIndex(), chain) != null) {
-            log.info("Advice has already registered, index {}", this.methodTransformInfo.getIndex());
-        }
-
-        // generate interceptor
-        AgentSupplierChain supplierChain = this.methodTransformInfo.getSupplierChain(cl);
-        // this advice have been register by other classloader, it return null
-        if (Dispatcher.register(this.methodTransformInfo.getIndex(), supplierChain) != null) {
-            log.info("Advice has already registered, index {}", this.methodTransformInfo.getIndex());
-        }
-        */
         CompoundClassloader.compound(this.getClass().getClassLoader(), cl);
         AdviceRegistry.setCurrentClassLoader(cl);
 

@@ -17,18 +17,14 @@
 
 package com.megaease.easeagent.core.instrument;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
-import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
-import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -46,10 +42,7 @@ import org.junit.rules.MethodRule;
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.lang.ref.WeakReference;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -62,11 +55,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("unused")
-public class NonStaticMethodTransformTest {
-    private static final String FOO = "foo",
-        BAR = "bar",
-        QUX = "qux";
-
+public class NonStaticMethodTransformTest extends TransformTestBase {
     private static ClassLoader classLoader;
     private static String dumpFolder;
     private static final AtomicInteger globalIndex = new AtomicInteger(1000);
@@ -88,24 +77,6 @@ public class NonStaticMethodTransformTest {
         assertTrue(dumpFolder.endsWith("target/test-classes"));
     }
 
-    @SuppressWarnings("all")
-    private Set<MethodTransformation> getMethodTransformations(int index,
-                                                               String methodName,
-                                                               Supplier<Interceptor> supplier) {
-        SupplierChain.Builder<Interceptor> chainBuilder = SupplierChain.builder();
-        chainBuilder.addSupplier(InterceptorPluginDecorator.getInterceptorSupplier(new TestPlugin(), supplier));
-
-        MethodTransformation methodTransformation = new MethodTransformation(index,
-            named(methodName),
-            chainBuilder);
-        QualifierRegistry.addMethodTransformation(index, methodTransformation);
-
-        Set<MethodTransformation> transformations = new HashSet<>();
-        transformations.add(methodTransformation);
-
-        return transformations;
-    }
-
     @Test
     @AgentAttachmentRule.Enforce
     public void testAdviceTransformer() throws Exception {
@@ -113,9 +84,10 @@ public class NonStaticMethodTransformTest {
         assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
 
         assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
-        AgentBuilder builder = Bootstrap.getAgentBuilder(null);
+        AgentBuilder builder = Bootstrap.getAgentBuilder(null, true);
 
-        Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(), FOO, FooInterceptor::new);
+        Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(),
+            FOO, new FooProvider());
 
         ClassFileTransformer classFileTransformer = builder
             .type(hasSuperType(named(FooBase.class.getName())), ElementMatchers.is(classLoader))
@@ -160,22 +132,5 @@ public class NonStaticMethodTransformTest {
         }
     }
 
-    public static class FooInterceptor implements Interceptor {
-        @Override
-        public void before(MethodInfo methodInfo, Context context) {
-            Object [] args = methodInfo.getArgs();
-            args[0] = QUX;
-            methodInfo.markChanged();
-        }
 
-        @Override
-        public void after(MethodInfo methodInfo, Context context) {
-            methodInfo.setRetValue(methodInfo.getRetValue() + BAR);
-        }
-
-        @Override
-        public int order() {
-            return Order.HIGHEST.getOrder();
-        }
-    }
 }

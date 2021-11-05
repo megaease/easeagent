@@ -20,17 +20,13 @@ package com.megaease.easeagent.core.instrument;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
-import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
-import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -45,24 +41,20 @@ import org.junit.rules.MethodRule;
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
-import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("unused")
-public class OrchestrationTransformTest extends TransformTestBase {
+public class ClinitMethodTransformTest extends TransformTestBase {
     private static ClassLoader classLoader;
     private static String dumpFolder;
-    private static final AtomicInteger globalIndex = new AtomicInteger(1000);
+    private static final AtomicInteger globalIndex = new AtomicInteger(0);
 
     @Rule
     public MethodRule agentAttachmentRule = new AgentAttachmentRule();
@@ -70,7 +62,7 @@ public class OrchestrationTransformTest extends TransformTestBase {
     @BeforeClass
     public static void setUp() {
         classLoader = new ByteArrayClassLoader.ChildFirst(
-            OrchestrationTransformTest.class.getClassLoader(),
+            NonStaticMethodTransformTest.class.getClassLoader(),
             ClassFileLocator.ForClassLoader.readToNames(Foo.class, CommonInlineAdvice.class),
             ByteArrayClassLoader.PersistenceHandler.MANIFEST);
 
@@ -83,41 +75,32 @@ public class OrchestrationTransformTest extends TransformTestBase {
 
     @Test
     @AgentAttachmentRule.Enforce
-    public void testOrchestration() {
+    public void testTypeInitialAdviceTransformer() throws Exception {
         System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
         assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
 
         assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
         AgentBuilder builder = Bootstrap.getAgentBuilder(null, true);
 
-        Set<MethodTransformation> transformations
-            = getMethodTransformations(globalIndex.incrementAndGet(), FOO, new FooProvider());
-        Set<MethodTransformation> secTransformations
-            = getMethodTransformations(globalIndex.incrementAndGet(), FOO, new FooSecProvider());
+        Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(),
+            CLASS_INIT, new FooClsInitProvider());
 
         ClassFileTransformer classFileTransformer = builder
-            .type(hasSuperType(named(FooBase.class.getName())), ElementMatchers.is(classLoader))
-            .transform(PluginLoader.compound(true, transformations))
-            .transform(PluginLoader.compound(true, secTransformations))
+            .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
+            .transform(PluginLoader.compound(false, transformations))
             .installOnByteBuddyAgent();
+
         try {
             Class<?> type = classLoader.loadClass(Foo.class.getName());
-            // check
-            Object instance = type.getDeclaredConstructor().newInstance();
-            AgentDynamicFieldAccessor.setDynamicFieldValue(instance, BAR);
-            assertEquals(AgentDynamicFieldAccessor.getDynamicFieldValue(instance), BAR);
-            assertThat(type.getDeclaredMethod(FOO, String.class)
-                    .invoke(instance, "kkk"),
-                is(BAR + QUX + BAR));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            // check, wait to finish
+            // assertEquals(AgentFieldReflectAccessor.getStaticFieldValue(type, "clazzInitString"), BAR);
         } finally {
             assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
         }
     }
 
     @SuppressWarnings("unused")
-    public static class Foo extends FooBase {
+    public static class Foo {
         static String clazzInitString = FOO;
         public static String fooStatic(String a) {
             return a;
@@ -125,19 +108,33 @@ public class OrchestrationTransformTest extends TransformTestBase {
         public String foo(String a) {
             return a;
         }
+    }
 
-        public int baz() {
-            return (int)System.currentTimeMillis();
+    public static class FooClassInitInterceptor implements Interceptor {
+        @Override
+        public void before(MethodInfo methodInfo, Context context) {
+            System.out.println("aaa");
+        }
+
+        @Override
+        public void after(MethodInfo methodInfo, Context context) {
         }
     }
 
-    public interface FooInterface {
-        String foo(String a);
-    }
+    static class FooClsInitProvider implements Provider {
+        @Override
+        public Supplier<Interceptor> getInterceptorProvider() {
+            return FooClassInitInterceptor::new;
+        }
 
-    public static class FooBase implements FooInterface {
-        public String foo(String a) {
-            return a + "-base";
+        @Override
+        public String getAdviceTo() {
+            return "";
+        }
+
+        @Override
+        public String getPluginClassName() {
+            return TestPlugin.class.getCanonicalName();
         }
     }
 }

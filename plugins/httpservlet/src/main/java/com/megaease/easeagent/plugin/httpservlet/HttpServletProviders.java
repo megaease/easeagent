@@ -50,7 +50,12 @@ public class HttpServletProviders {
     public static class DoFilterMetricProvider implements Provider {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
-            return DoFilterMetricInterceptor::new;
+            return new Supplier<Interceptor>() {
+                @Override
+                public Interceptor get() {
+                    return new DoFilterMetricInterceptor();
+                }
+            };
         }
 
         @Override

@@ -18,16 +18,15 @@
 package com.megaease.easeagent.core.plugin.registry;
 
 import com.google.common.base.Strings;
-import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
-import com.megaease.easeagent.core.plugin.interceptor.SupplierChain;
-import com.megaease.easeagent.core.plugin.interceptor.SupplierChain.Builder;
+import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
+import com.megaease.easeagent.core.plugin.interceptor.ProviderChain.Builder;
+import com.megaease.easeagent.core.plugin.interceptor.ProviderPluginDecorator;
 import com.megaease.easeagent.core.plugin.matcher.ClassMatcherConvert;
 import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
 import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
@@ -48,7 +47,7 @@ public class QualifierRegistry {
 
     static final ConcurrentHashMap<String, Integer> qualifierToIndex = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<Integer, MethodTransformation> indexToMethodTransformation = new ConcurrentHashMap<>();
-    static final AgentArray<Builder<Interceptor>> interceptorSuppliers = new AgentArray<>();
+    static final AgentArray<Builder> interceptorProviders = new AgentArray<>();
 
     public static void register(AgentPlugin plugin) {
         pluginClassnameToPlugin.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
@@ -75,8 +74,8 @@ public class QualifierRegistry {
                 // maybe there is some error in plugin providers configuration
                 return null;
             }
-            Builder<Interceptor> chainBuilder = interceptorSuppliers.get(index);
-            MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, chainBuilder);
+            Builder providerBuilder = interceptorProviders.get(index);
+            MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, providerBuilder);
             indexToMethodTransformation.putIfAbsent(index, mt);
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
@@ -108,13 +107,13 @@ public class QualifierRegistry {
             synchronized (qualifierToIndex) {
                 index = qualifierToIndex.get(provider.getAdviceTo());
                 if (index == null) {
-                    index = interceptorSuppliers.add(SupplierChain.builder());
+                    index = interceptorProviders.add(ProviderChain.builder());
                     qualifierToIndex.putIfAbsent(provider.getAdviceTo(), index);
                 }
             }
         }
-        interceptorSuppliers.get(index)
-            .addSupplier(InterceptorPluginDecorator.getInterceptorSupplier(plugin, provider.getInterceptorProvider()));
+        interceptorProviders.get(index)
+            .addProvider(new ProviderPluginDecorator(plugin, provider));
 
         return index;
     }

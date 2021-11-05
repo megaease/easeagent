@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AgentFieldReflectAccessor {
-
     private static final Map<String, Field> FIELD_MAP = new ConcurrentHashMap<>();
 
     public static void setFieldValue(Object target, String fieldName, Object fieldValue) {
@@ -41,6 +40,27 @@ public class AgentFieldReflectAccessor {
         }
         try {
             return (T) field.get(target);
+        } catch (IllegalAccessException ignored) {
+        }
+        return null;
+    }
+
+    public static void setStaticFieldValue(Class<?> clazz, String fieldName, Object fieldValue) {
+        Field field = getFieldFromClass(clazz, fieldName);
+        try {
+            field.set(null, fieldValue);
+        } catch (IllegalAccessException ignored) {
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getStaticFieldValue(Class<?> clazz, String fieldName) {
+        Field field = getFieldFromClass(clazz, fieldName);
+        if (field == null) {
+            return null;
+        }
+        try {
+            return (T) field.get(null);
         } catch (IllegalAccessException ignored) {
         }
         return null;

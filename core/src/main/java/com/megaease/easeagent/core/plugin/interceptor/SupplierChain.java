@@ -25,8 +25,7 @@ import java.util.function.Supplier;
 
 public class SupplierChain<T extends Ordered> {
     private final ArrayList<Supplier<T>> suppliers;
-
-    SupplierChain(ArrayList<Supplier<T>> suppliers) {
+    public SupplierChain(ArrayList<Supplier<T>> suppliers) {
         this.suppliers = suppliers;
     }
 

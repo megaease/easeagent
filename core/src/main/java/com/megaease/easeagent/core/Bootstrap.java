@@ -110,7 +110,7 @@ public class Bootstrap {
             agentHttpServer.startServer();
             LOGGER.info("start agent http server on port:{}", port);
         }
-        AgentBuilder builder = getAgentBuilder(conf);
+        AgentBuilder builder = getAgentBuilder(conf, false);
 
         // load plugins
         builder = PluginLoader.load(builder, conf);
@@ -124,19 +124,16 @@ public class Bootstrap {
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
-    public static AgentBuilder getAgentBuilder(Configs config) {
+    public static AgentBuilder getAgentBuilder(Configs config, boolean test) {
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
             .with(LISTENER)
-//                .with(new AgentBuilder.Listener.Filtering(
-//                        new StringMatcher("java.lang.Thread", StringMatcher.Mode.EQUALS_FULLY),
-//                        AgentBuilder.Listener.StreamWriting.toSystemOut()))
             .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
             .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
             .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
-            .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG.withFallbackTo(ClassFileLocator.ForClassLoader.ofBootLoader()))
-//                .ignore(any(), protectedLoaders()) // we need to redefine java.lang and java.util
-            .ignore(isSynthetic())
+            .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG
+                .withFallbackTo(ClassFileLocator.ForClassLoader.ofBootLoader()));
+        AgentBuilder.Ignored ignore = builder.ignore(isSynthetic())
             .or(nameStartsWith("sun."))
             .or(nameStartsWith("com.sun."))
             .or(nameStartsWith("brave."))
@@ -151,6 +148,12 @@ public class Bootstrap {
             .or(nameStartsWith("org.junit."))
             .or(nameStartsWith("junit."))
             .or(nameStartsWith("com.intellij."));
+
+        if (!test) {
+            builder = ignore.or(nameStartsWith("com.megaease.easeagent."));
+        } else {
+            builder = ignore;
+        }
         LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
 
         return builder;
@@ -394,28 +397,25 @@ public class Bootstrap {
     private static final AgentBuilder.Listener LISTENER = new AgentBuilder.Listener() {
         @Override
         public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-            //LOGGER.info("onDiscovery {} from classLoader {}", typeName, classLoader);
         }
 
         @Override
         public void onTransformation(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded, DynamicType dt) {
-            LOGGER.info("onTransformation: {} loaded: {} from classLoader {}", td, loaded, ld);
+            LOGGER.debug("onTransformation: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
         public void onIgnored(TypeDescription td, ClassLoader ld, JavaModule m, boolean loaded) {
-            //LOGGER.info("onIgnored: {} loaded: {} from classLoader {}", td, loaded, ld);
         }
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
             LOGGER.warn("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
-            LOGGER.warn(error.getStackTrace().toString());
+            LOGGER.error("OnError:", error);
         }
 
         @Override
         public void onComplete(String name, ClassLoader ld, JavaModule m, boolean loaded) {
-            //LOGGER.info("onComplete: {} loaded: {} from classLoader {}", name, loaded, ld);
         }
     };
 
