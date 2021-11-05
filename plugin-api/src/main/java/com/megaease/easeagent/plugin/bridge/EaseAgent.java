@@ -19,11 +19,15 @@ package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.logging.Mdc;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 
 import java.util.function.Supplier;
 
@@ -43,7 +47,17 @@ public final class EaseAgent {
      */
 
 
+    /**
+     * @see ILoggerFactory#getLogger(Class)
+     */
     public static Logger getLogger(Class clzss) {
         return loggerFactory.getLogger(clzss);
+    }
+
+    /**
+     * @see MetricRegistrySupplier#newMetricRegistry(Config, NameFactory, Tags)
+     */
+    public static MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
+        return metricRegistrySupplier.newMetricRegistry(config, nameFactory, tags);
     }
 }

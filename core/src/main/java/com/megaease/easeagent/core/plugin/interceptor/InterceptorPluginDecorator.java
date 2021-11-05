@@ -58,7 +58,7 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     public void after(MethodInfo methodInfo, Context context) {
         Config cfg = context.getConfig();
         if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
-                this.interceptor.after(methodInfo, context);
+            this.interceptor.after(methodInfo, context);
         }
         ((InitializeContext) context).popConfig();
     }
@@ -91,6 +91,11 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
              */
             return new InterceptorPluginDecorator(supplier.get(), plugin);
         };
+    }
+
+    @Override
+    public void init(Config config, String className, String methodName, String methodDescriptor) {
+        interceptor.init(config, className, methodName, methodDescriptor);
     }
 
     @Override

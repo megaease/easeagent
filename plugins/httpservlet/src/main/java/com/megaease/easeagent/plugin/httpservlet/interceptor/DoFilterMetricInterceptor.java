@@ -43,14 +43,21 @@ public class DoFilterMetricInterceptor implements Interceptor {
     private static final Object ENTER = new Object();
     private static final Object START = new Object();
     private static final NameFactory NAME_FACTORY = ServerMetric.buildNameFactory();
-    private ServerMetric serverMetric = null;
+    private static volatile ServerMetric SERVER_METRIC = null;
 
-    public DoFilterMetricInterceptor() {
-        Config config = EaseAgent.configFactory.getConfig("observability", "httpservlet", Order.METRIC.getName());
-        Tags tags = new Tags("application", "http-request", "url");
-
-        MetricRegistry metricRegistry = EaseAgent.metricRegistrySupplier.newMetricRegistry(config, NAME_FACTORY, tags);
-        this.serverMetric = new ServerMetric(metricRegistry, NAME_FACTORY);
+    @Override
+    public void init(Config config, String className, String methodName, String methodDescriptor) {
+        if (SERVER_METRIC != null) {
+            return;
+        }
+        synchronized (DoFilterMetricInterceptor.class) {
+            if (SERVER_METRIC != null) {
+                return;
+            }
+            Tags tags = new Tags("application", "http-request", "url");
+            MetricRegistry metricRegistry = EaseAgent.newMetricRegistry(config, NAME_FACTORY, tags);
+            SERVER_METRIC = new ServerMetric(metricRegistry, NAME_FACTORY);
+        }
     }
 
     @Override
@@ -92,7 +99,7 @@ public class DoFilterMetricInterceptor implements Interceptor {
 
     private void internalAfter(Throwable throwable, String key, HttpServletResponse httpServletResponse, long start) {
         long end = System.currentTimeMillis();
-        this.serverMetric.collectMetric(key, httpServletResponse.getStatus(), throwable, start, end);
+        SERVER_METRIC.collectMetric(key, httpServletResponse.getStatus(), throwable, start, end);
     }
 
     @Override
