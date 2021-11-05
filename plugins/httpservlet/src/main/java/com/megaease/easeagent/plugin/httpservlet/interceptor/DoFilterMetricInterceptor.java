@@ -49,7 +49,6 @@ public class DoFilterMetricInterceptor implements Interceptor {
         Config config = EaseAgent.configFactory.getConfig("observability", "httpservlet", Order.METRIC.getName());
         Tags tags = new Tags("application", "http-request", "url");
 
-        //TODO new metric registry: can not load from class loader
         MetricRegistry metricRegistry = EaseAgent.metricRegistrySupplier.newMetricRegistry(config, NAME_FACTORY, tags);
         this.serverMetric = new ServerMetric(metricRegistry, NAME_FACTORY);
     }
@@ -72,26 +71,28 @@ public class DoFilterMetricInterceptor implements Interceptor {
         if (ServletUtils.markProcessedAfter(httpServletRequest, AFTER_MARK)) {
             return;
         }
+        String httpRoute = ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest);
+        final String key = httpServletRequest.getMethod() + " " + httpRoute;
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-        if (httpServletRequest.isAsyncStarted()) {
+        if (methodInfo.getThrowable() != null) {
+            internalAfter(methodInfo.getThrowable(), key, httpServletResponse, start);
+        } else if (httpServletRequest.isAsyncStarted()) {
             httpServletRequest.getAsyncContext().addListener(new InternalAsyncListener(
                     asyncEvent -> {
-                        HttpServletRequest suppliedRequest = (HttpServletRequest) asyncEvent.getSuppliedRequest();
                         HttpServletResponse suppliedResponse = (HttpServletResponse) asyncEvent.getSuppliedResponse();
-                        internalAfter(methodInfo, suppliedRequest, suppliedResponse, start);
+                        internalAfter(asyncEvent.getThrowable(), key, suppliedResponse, start);
                     }
+
                 )
             );
         } else {
-            internalAfter(methodInfo, httpServletRequest, httpServletResponse, start);
+            internalAfter(null, key, httpServletResponse, start);
         }
     }
 
-    private void internalAfter(MethodInfo methodInfo, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, long start) {
+    private void internalAfter(Throwable throwable, String key, HttpServletResponse httpServletResponse, long start) {
         long end = System.currentTimeMillis();
-        String httpRoute = ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest);
-        String key = httpServletRequest.getMethod() + " " + httpRoute;
-//        this.serverMetric.collectMetric(key, httpServletResponse.getStatus(), methodInfo.getThrowable(), start, end);
+        this.serverMetric.collectMetric(key, httpServletResponse.getStatus(), throwable, start, end);
     }
 
     @Override

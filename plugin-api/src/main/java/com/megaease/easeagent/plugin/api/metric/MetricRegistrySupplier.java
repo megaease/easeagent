@@ -21,6 +21,25 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 
+/**
+ * A supplier of MetricRegistry interface.
+ */
 public interface MetricRegistrySupplier {
+    /**
+     * new and return a MetricRegistry for.
+     * Use configure report output:
+     * <pre>{@code
+     *  config.getBoolean("enabled")
+     *  config.getInt("interval")
+     *  config.getString("topic")
+     *  config.getString("appendType")
+     * }</pre>
+     * <p>
+     *
+     * @param config      {@link Config} metric config
+     * @param nameFactory {@link NameFactory} Calculation description and name description of the value of the metric.
+     * @param tags        {@link Tags} tags of metric
+     * @return
+     */
     MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags);
 }

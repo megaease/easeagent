@@ -27,11 +27,9 @@ import com.megaease.easeagent.report.metric.log4j.AppenderManager;
 import com.megaease.easeagent.report.util.Utils;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class PluginMetricReporterImpl implements PluginMetricReporter {
     private final Configs configs;
-    private final ConcurrentHashMap<String, KeySender> typeLoggers = new ConcurrentHashMap<>();
     private final AppenderManager appenderManager;
 
     public PluginMetricReporterImpl(Configs configs) {
@@ -63,20 +61,34 @@ public class PluginMetricReporterImpl implements PluginMetricReporter {
         }
     }
 
-    public class Reporter implements PluginMetricReporter.Reporter {
-        private final Config config;
+    public class Reporter implements PluginMetricReporter.Reporter, com.megaease.easeagent.plugin.api.config.ConfigChangeListener {
+        private final String domain;
+        private volatile MetricProps metricProps;
+        private volatile KeySender sender;
 
         public Reporter(Config config) {
-            this.config = config;
+            this.domain = config.domain();
+            this.metricProps = Utils.extractMetricProps(config);
+            this.sender = newKeyLogger();
+            config.addChangeListener(this);
         }
 
         public void report(String context) {
-            KeySender sender = typeLoggers.computeIfAbsent(config.domain(), this::newKeyLogger);
             sender.send(context);
         }
 
-        private KeySender newKeyLogger(String key) {
-            return new KeySender(key, PluginMetricReporterImpl.this.appenderManager, Utils.extractMetricProps(config));
+        private KeySender newKeyLogger() {
+            return new KeySender(domain, PluginMetricReporterImpl.this.appenderManager, metricProps);
+        }
+
+        @Override
+        public void onChange(Config oldConfig, Config newConfig) {
+            MetricProps newProps = Utils.extractMetricProps(newConfig);
+            if (metricProps.getTopic().equals(newProps.getTopic()) && metricProps.getAppendType().equals(newProps.getAppendType())) {
+                return;
+            }
+            this.metricProps = newProps;
+            this.sender = newKeyLogger();
         }
     }
 }

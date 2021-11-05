@@ -118,7 +118,7 @@ public class ContextManager {
 
         @Override
         public Object apply(Object o) {
-            LOCAL_SESSION_CONTEXT.get().clear();
+//            LOCAL_SESSION_CONTEXT.get().clear();
             return null;
         }
     }

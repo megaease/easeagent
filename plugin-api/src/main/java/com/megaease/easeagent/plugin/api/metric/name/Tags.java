@@ -17,9 +17,25 @@
 
 package com.megaease.easeagent.plugin.api.metric.name;
 
+import com.megaease.easeagent.plugin.api.trace.Span;
+
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A tags describing the metric.
+ * It has three predefined tags: category, type, {@code keyFieldName}
+ * Its tag is copied as follows:
+ * <pre>{@code
+ *  output.put("category", tags.category)
+ *  output.put("type", tags.type)
+ *  output.put(tags.keyFieldName, {@link NameFactory}.key[?])
+ *  tags.tags.forEach((k,v)->{
+ *      output.put(k,v)
+ *  })
+ * }</pre>
+ */
 public class Tags {
     public static final String CATEGORY = "category";
     public static final String TYPE = "type";
@@ -28,30 +44,67 @@ public class Tags {
     private final String keyFieldName;
     private final Map<String, String> tags;
 
-    public Tags(String category, String type, String keyFieldName) {
+    public Tags(@Nonnull String category, @Nonnull String type, @Nonnull String keyFieldName) {
         this.category = category;
         this.type = type;
         this.keyFieldName = keyFieldName;
         this.tags = new HashMap<>();
     }
 
+    /**
+     * put tag for.
+     *
+     * @param key   tag key
+     * @param value tag value
+     * @return this methods return {@linkplain Tags} for chaining, but the instance is always the same.
+     */
     public Tags put(String key, String value) {
         this.tags.put(key, value);
         return this;
     }
 
+    /**
+     * tag category describing of the metrics.
+     * for example: "application"
+     *
+     * @return
+     */
     public String getCategory() {
         return category;
     }
 
+    /**
+     * tag type describing of the metrics.
+     * for example: "http-request"
+     *
+     * @return
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * tag {@link NameFactory} keys describing of the metrics.
+     * for example: "url"
+     *
+     * <pre>{@code
+     *  keyFieldName="url"
+     *  nameFactory.timerName("http://127.0.0.1:8080/", ...);
+     *  // it will be tag.put("url", "http://127.0.0.1:8080/")
+     * }</pre>
+     *
+     * @return
+     * @see NameFactory
+     */
     public String getKeyFieldName() {
         return keyFieldName;
     }
 
+    /**
+     * Custom tags describing of the metrics.
+     *
+     * @return custom tags
+     */
     public Map<String, String> getTags() {
         return tags;
     }

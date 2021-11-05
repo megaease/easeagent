@@ -17,16 +17,15 @@
 
 package com.megaease.easeagent.plugin.api.metric.name;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface NameFactory {
 
     static Builder createBuilder() {
         return new Builder();
     }
+
+    Set<MetricType> metricTypes();
 
     Map<MetricSubType, MetricName> meterNames(String key);
 
@@ -67,6 +66,27 @@ public interface NameFactory {
             this.counterTypes = counterTypes;
             this.timerTypes = timerTypes;
             this.gaugeTypes = gaugeTypes;
+        }
+
+        @Override
+        public Set<MetricType> metricTypes() {
+            Set<MetricType> metricTypes = new HashSet<>();
+            if (!histogramTypes.isEmpty()) {
+                metricTypes.add(MetricType.HistogramType);
+            }
+            if (!counterTypes.isEmpty()) {
+                metricTypes.add(MetricType.CounterType);
+            }
+            if (!timerTypes.isEmpty()) {
+                metricTypes.add(MetricType.TimerType);
+            }
+            if (!gaugeTypes.isEmpty()) {
+                metricTypes.add(MetricType.GaugeType);
+            }
+            if (!meterTypes.isEmpty()) {
+                metricTypes.add(MetricType.MeterType);
+            }
+            return metricTypes;
         }
 
         @Override

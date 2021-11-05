@@ -19,14 +19,53 @@ package com.megaease.easeagent.plugin.api.metric;
 
 import java.util.function.Supplier;
 
+/**
+ * A registry of metric interface.
+ */
 public interface MetricRegistry {
+    /**
+     * Return the {@link Meter} registered under this name; or create and register
+     * a new {@link Meter} if none is registered.
+     *
+     * @param name the name of the metric
+     * @return a new or pre-existing {@link Meter}
+     */
     Meter meter(String name);
 
+    /**
+     * Return the {@link Counter} registered under this name; or create and register
+     * a new {@link Counter} if none is registered.
+     *
+     * @param name the name of the metric
+     * @return a new or pre-existing {@link Counter}
+     */
     Counter counter(String name);
 
+    /**
+     * Return the {@link Gauge} registered under this name; or create and register
+     * a new {@link Gauge} using the provided MetricSupplier if none is registered.
+     *
+     * @param name     the name of the metric
+     * @param supplier a Supplier that can be used to manufacture a Gauge
+     * @return a new or pre-existing {@link Gauge}
+     */
     <T> Gauge<T> gauge(String name, Supplier<Gauge<T>> supplier);
 
+    /**
+     * Return the {@link Histogram} registered under this name; or create and register
+     * a new {@link Histogram} if none is registered.
+     *
+     * @param name the name of the metric
+     * @return a new or pre-existing {@link Histogram}
+     */
     Histogram histogram(String name);
 
+    /**
+     * Return the {@link Timer} registered under this name; or create and register
+     * a new {@link Timer} if none is registered.
+     *
+     * @param name the name of the metric
+     * @return a new or pre-existing {@link Timer}
+     */
     Timer timer(String name);
 }

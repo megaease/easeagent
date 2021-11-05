@@ -17,13 +17,38 @@
 
 package com.megaease.easeagent.plugin.api.metric;
 
+/**
+ * A metric which calculates the distribution of a value.
+ *
+ * @see <a href="http://www.johndcook.com/standard_deviation.html">Accurately computing running
+ * variance</a>
+ */
 public interface Histogram extends Metric {
-
+    /**
+     * Adds a recorded value.
+     *
+     * @param value the length of the value
+     */
     void update(int value);
 
+    /**
+     * Adds a recorded value.
+     *
+     * @param value the length of the value
+     */
     void update(long value);
 
+    /**
+     * Returns the number of values recorded.
+     *
+     * @return the number of values recorded
+     */
     long getCount();
 
+    /**
+     * Returns a snapshot of the values.
+     *
+     * @return a snapshot of the values
+     */
     Snapshot getSnapshot();
 }

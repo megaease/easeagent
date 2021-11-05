@@ -311,14 +311,14 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Injection.Bean("supplier4Filter")
     public Supplier<AgentInterceptorChain.Builder> supplier4Filter() {
         return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
-            ServletMetric servletMetric = new ServletMetric(metricRegistry);
-            new AutoRefreshReporter(metricRegistry, collectorConfig, servletMetric.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
+//            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
+//            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
+//            ServletMetric servletMetric = new ServletMetric(metricRegistry);
+//            new AutoRefreshReporter(metricRegistry, collectorConfig, servletMetric.newConverter(this.additionalAttributes),
+//                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
             return ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
-                .addInterceptor(new HttpFilterMetricsInterceptor(servletMetric, config))
+//                .addInterceptor(new HttpFilterMetricsInterceptor(servletMetric, config))
 //                .addInterceptor(new HttpFilterTracingInterceptor(this.tracing, config))
                 .addInterceptor(new ServletHttpLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
                 ;

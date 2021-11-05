@@ -19,23 +19,72 @@ package com.megaease.easeagent.plugin.api.metric;
 
 import java.io.OutputStream;
 
+/**
+ * A statistical snapshot of a {@link Snapshot}.
+ */
 public interface Snapshot extends Metric {
+    /**
+     * Returns the value at the given quantile.
+     *
+     * @param quantile a given quantile, in {@code [0..1]}
+     * @return the value in the distribution at {@code quantile}
+     */
     double getValue(double quantile);
 
+    /**
+     * Returns the entire set of values in the snapshot.
+     *
+     * @return the entire set of values
+     */
     long[] getValues();
 
+    /**
+     * Returns the number of values in the snapshot.
+     *
+     * @return the number of values
+     */
     int size();
 
+    /**
+     * Returns the highest value in the snapshot.
+     *
+     * @return the highest value
+     */
     long getMax();
 
+    /**
+     * Returns the arithmetic mean of the values in the snapshot.
+     *
+     * @return the arithmetic mean
+     */
     double getMean();
 
+    /**
+     * Returns the lowest value in the snapshot.
+     *
+     * @return the lowest value
+     */
     long getMin();
 
+    /**
+     * Returns the standard deviation of the values in the snapshot.
+     *
+     * @return the standard value
+     */
     double getStdDev();
 
+    /**
+     * Writes the values of the snapshot to the given stream.
+     *
+     * @param output an output stream
+     */
     void dump(OutputStream output);
 
+    /**
+     * Returns the median value in the distribution.
+     *
+     * @return the median value
+     */
     default double getMedian() {
         return getValue(0.5);
     }
