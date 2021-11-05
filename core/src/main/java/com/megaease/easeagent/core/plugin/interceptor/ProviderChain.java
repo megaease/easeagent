@@ -31,22 +31,17 @@ public class ProviderChain {
         this.providers = providers;
     }
 
-    public ArrayList<Provider> getProviders() {
-        return this.providers;
-    }
-
     public ArrayList<Supplier<Interceptor>> getSupplierChain() {
-        ArrayList<Supplier<Interceptor>> ss = this.providers.stream()
+        return this.providers.stream()
             .map(Provider::getInterceptorProvider)
             .collect(Collectors.toCollection(ArrayList::new));
-
-        return ss;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
+    @SuppressWarnings("all")
     public static class Builder {
         private ArrayList<Provider> providers = new ArrayList<>();
 

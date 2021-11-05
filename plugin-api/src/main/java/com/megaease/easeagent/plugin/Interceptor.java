@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin;
 
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.enums.Order;
 
 public interface Interceptor extends Ordered {
@@ -46,5 +47,18 @@ public interface Interceptor extends Ordered {
      */
     default String getName() {
         return Order.TRACING.getName();
+    }
+
+    /**
+     * Initialization method for the interceptor,
+     * This method will be called and only be called once for every method which is injected by this interceptor,
+     * which means this method may be called several times, when there are several methods matched
+     *
+     * @param config interceptor configuration
+     * @param className injected method's class name
+     * @param methodName injected method name
+     * @param methodDescriptor injected method descriptor
+     */
+    default void init(Config config, String className, String methodName, String methodDescriptor) {
     }
 }

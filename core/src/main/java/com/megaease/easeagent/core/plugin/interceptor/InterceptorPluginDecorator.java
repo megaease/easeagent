@@ -20,16 +20,13 @@ package com.megaease.easeagent.core.plugin.interceptor;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.plugin.StateInterceptor;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
-import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 
-import java.lang.reflect.Field;
 import java.util.function.Supplier;
 
 public class InterceptorPluginDecorator implements Interceptor, ConfigChangeListener {
@@ -42,6 +39,10 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
         this.plugin = plugin;
         this.config = EaseAgent.configFactory.getConfig(plugin.getDomain(), plugin.getName(), interceptor.getName());
         this.config.addChangeListener(this);
+    }
+
+    public Config getConfig() {
+        return this.config;
     }
 
     @Override
@@ -74,6 +75,7 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
         return interceptorOrder << 8 + pluginOrder;
     }
 
+    @SuppressWarnings("all")
     public static Supplier<Interceptor> getInterceptorSupplier(final AgentPlugin plugin, final Supplier<Interceptor> supplier) {
         return () -> {
             /*

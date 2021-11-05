@@ -19,6 +19,7 @@ package com.megaease.easeagent.core.plugin.matcher;
 
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain;
+import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Ordered;
@@ -51,17 +52,24 @@ public class MethodTransformation {
         this.providerBuilder = chain;
     }
 
-    public AgentSupplierChain getSupplierChain(ClassLoader classLoader) {
-        ArrayList<Supplier<Interceptor>> suppliers = this.providerBuilder.build().getSupplierChain();
-        return new AgentSupplierChain(suppliers);
-    }
+    public AgentInterceptorChain getAgentInterceptorChain(final String type,
+                                                          final String method,
+                                                          final String methodDescription) {
+        ArrayList<Supplier<Interceptor>> suppliers = this.providerBuilder.build()
+            .getSupplierChain();
 
-    public AgentInterceptorChain getAgentInterceptorChain() {
-        ArrayList<Supplier<Interceptor>> suppliers = this.providerBuilder.build().getSupplierChain();
-
-        List<Interceptor> interceptors = suppliers.stream().map(Supplier::get)
+        List<Interceptor> interceptors = suppliers.stream()
+            .map(Supplier::get)
             .sorted(Comparator.comparing(Ordered::order))
             .collect(Collectors.toList());
+
+        interceptors.forEach(i -> {
+            InterceptorPluginDecorator interceptor;
+            if (i instanceof InterceptorPluginDecorator) {
+                interceptor = (InterceptorPluginDecorator)i;
+                interceptor.init(interceptor.getConfig(), type, method, methodDescription);
+            }
+        });
 
         return new AgentInterceptorChain(interceptors);
     }

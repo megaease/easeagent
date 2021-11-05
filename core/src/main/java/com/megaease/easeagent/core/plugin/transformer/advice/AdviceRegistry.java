@@ -46,8 +46,10 @@ public class AdviceRegistry {
                                 MethodDescription instrumentedMethod,
                                 Dispatcher.Resolved.ForMethodEnter methodEnter,
                                 Dispatcher.Resolved.ForMethodExit methodExit) {
-        String key = instrumentedType.getName()
-            + ":" + instrumentedMethod.getName() + instrumentedMethod.getDescriptor();
+        String type = instrumentedType.getName();
+        String method = instrumentedMethod.getName();
+        String methodDescriptor = instrumentedMethod.getDescriptor();
+        String key = type + ":" + method + methodDescriptor;
         IdentityPointcuts newIdentity = new IdentityPointcuts();
         IdentityPointcuts identityPointcuts = methodsSet.putIfAbsent(key, newIdentity);
 
@@ -90,7 +92,7 @@ public class AdviceRegistry {
             return 0;
         }
         int identity = identityPointcuts.getIdentify();
-        AgentInterceptorChain chain = methodTransformation.getAgentInterceptorChain();
+        AgentInterceptorChain chain = methodTransformation.getAgentInterceptorChain(type, method, methodDescriptor);
 
         try {
             identityPointcuts.lock();
