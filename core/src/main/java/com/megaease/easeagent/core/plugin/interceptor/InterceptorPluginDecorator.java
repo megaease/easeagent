@@ -99,11 +99,6 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     }
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
-        this.interceptor.init(config, className, methodName, methodDescriptor);
-    }
-
-    @Override
     public void onChange(Config oldConfig, Config newConfig) {
         this.config = newConfig;
         this.config.addChangeListener(this);
