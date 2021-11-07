@@ -32,21 +32,21 @@ import java.util.function.Supplier;
 
 public class ConverterAdapter extends AbstractConverter {
 
-    private final KeyType keyType;
+    private final List<KeyType> keyTypes;
 
     private final NameFactory nameFactory;
 
     public ConverterAdapter(String category, String type, NameFactory metricNameFactory, KeyType keyType,
                             Supplier<Map<String, Object>> attributes, String keyFieldName) {
         super(category, type, keyFieldName, attributes);
-        this.keyType = keyType;
+        this.keyTypes = Collections.singletonList(keyType);
         this.nameFactory = metricNameFactory;
     }
 
-    public ConverterAdapter(NameFactory metricNameFactory, KeyType keyType,
+    public ConverterAdapter(NameFactory metricNameFactory, List<KeyType> keyTypes,
                             Supplier<Map<String, Object>> attributes, Tags tags) {
         super(attributes, tags);
-        this.keyType = keyType;
+        this.keyTypes = Collections.unmodifiableList(keyTypes);
         this.nameFactory = metricNameFactory;
     }
 
@@ -62,48 +62,35 @@ public class ConverterAdapter extends AbstractConverter {
                                            SortedMap<String, Histogram> histograms,
                                            SortedMap<String, Meter> meters,
                                            SortedMap<String, Timer> timers) {
-        switch (keyType) {
-            case Timer:
-                return keysFromTimer(timers);
-            case Histogram:
-                return KeysFromHistograms(histograms);
-            case Gauge:
-                return KeysFromGauges(gauges);
-            case Counter:
-                return KeysFromCounters(counters);
-            case Meter:
-                return KeysFromMeters(meters);
+        Set<String> results = new HashSet<>();
+        for (KeyType keyType : this.keyTypes) {
+            if (keyType != null) {
+                switch (keyType) {
+                    case Timer:
+                        keys(timers.keySet(), results);
+                        break;
+                    case Histogram:
+                        keys(histograms.keySet(), results);
+                        break;
+                    case Gauge:
+                        keys(gauges.keySet(), results);
+                        break;
+                    case Counter:
+                        keys(counters.keySet(), results);
+                        break;
+                    case Meter:
+                        keys(meters.keySet(), results);
+                        break;
+                }
+            }
         }
 
-        return null;
-    }
-
-    private List<String> KeysFromHistograms(SortedMap<String, Histogram> histograms) {
-        return keys(histograms.keySet());
-    }
-
-    private List<String> KeysFromGauges(SortedMap<String, Gauge> gauges) {
-        return keys(gauges.keySet());
-    }
-
-    private List<String> KeysFromCounters(SortedMap<String, Counter> counters) {
-        return keys(counters.keySet());
-    }
-
-    private List<String> KeysFromMeters(SortedMap<String, Meter> meters) {
-        return keys(meters.keySet());
-    }
-
-    private List<String> keysFromTimer(SortedMap<String, Timer> timers) {
-        return keys(timers.keySet());
-    }
-
-    private List<String> keys(Set<String> origins) {
-        final Set<String> results = new HashSet<>();
-        origins.forEach(s -> results.add(MetricName.metricNameFor(s).getKey()));
         return new ArrayList<>(results);
     }
 
+    private void keys(Set<String> origins, Set<String> results) {
+        origins.forEach(s -> results.add(MetricName.metricNameFor(s).getKey()));
+    }
 
     private double convertDuration(Long duration) {
         return (double) duration / durationFactor;

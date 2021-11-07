@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.api.metric;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.metric.name.MetricField;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 
@@ -35,11 +36,43 @@ public interface MetricRegistrySupplier {
      *  config.getString("appendType")
      * }</pre>
      * <p>
+     * <p>
+     * In the metric example here, all metrics are output in the form of json.
+     * All {@code tags} will also be placed in the json text in the form of key:value.
+     * <p>
+     * Different metric types have different values. The same metric will also have different values.
+     * for example:
+     * Timer can calculate count, avg, max and so on.
+     * What type and what value is calculated? What field is this value stored in json?
+     * In this method, the {@code nameFactory} is used for control.
+     * We have implemented some commonly used content by default, or we can customize our own content.
+     *
+     * <pre>{@code
+     * NameFactory nameFactory = NameFactory.createBuilder().counterType(MetricSubType.DEFAULT,
+     *              ImmutableMap.<MetricField, MetricValueFetcher>builder()
+     *             .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
+     *             .build()).build();
+     * MetricRegistry metricRegistry = supplier.newMetricRegistry(config, nameFactory, new Tags("application", "http-request", "url"));
+     * metricRegistry.counter(nameFactory.counterName("http://127.0.0.1:8080", MetricSubType.DEFAULT)).inc();
+     * }</pre>
+     * The above code tells the calculation program:
+     * Need a Counter, this Counter calculates the value of {@link MetricField#EXECUTION_COUNT}(key="cnt"},
+     * this value is obtained using the {@link Counter#getCount}  method
+     *
+     * The output is as follows:
+     * <pre>{@code
+     *     {
+     *         "category": "application",
+     *         "type": "http-request",
+     *         "url": "http://127.0.0.1:8080",
+     *         "cnt": 1
+     *     }
+     * }</pre>
      *
      * @param config      {@link Config} metric config
      * @param nameFactory {@link NameFactory} Calculation description and name description of the value of the metric.
      * @param tags        {@link Tags} tags of metric
-     * @return
+     * @return {@link MetricRegistry}
      */
     MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags);
 }

@@ -19,6 +19,8 @@ package com.megaease.easeagent.core.context;
 
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.PluginConfigManager;
+import com.megaease.easeagent.core.MetricProvider;
+import com.megaease.easeagent.core.TracingProvider;
 import com.megaease.easeagent.core.log.LoggerFactoryImpl;
 import com.megaease.easeagent.core.log.LoggerMdc;
 import com.megaease.easeagent.log4j2.Logger;
@@ -37,6 +39,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpLoggerFactory;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.utils.NoNull;
+import com.megaease.easeagent.report.AgentReport;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
@@ -81,18 +84,15 @@ public class ContextManager {
         return contextManager;
     }
 
-    public void setTracing(@Nonnull Function<Supplier<InitializeContext>, ITracing> tracing) {
+    public void setTracing(@Nonnull TracingProvider tracing) {
         LOGGER.info("set tracing supplier function.");
-        this.tracing = tracing;
+        this.tracing = tracing.tracingSupplier();
+        tracing.setRootSpanFinishCall(rootSpanFinish);
     }
 
-    public void setMetric(@Nonnull MetricRegistrySupplier metric) {
+    public void setMetric(@Nonnull MetricProvider metricProvider) {
         LOGGER.info("set metric supplier function.");
-        this.metric = metric;
-    }
-
-    public Function getRootSpanFinish() {
-        return rootSpanFinish;
+        this.metric = metricProvider.metricSupplier();
     }
 
     public class SessionContextSupplier implements Supplier<InitializeContext> {

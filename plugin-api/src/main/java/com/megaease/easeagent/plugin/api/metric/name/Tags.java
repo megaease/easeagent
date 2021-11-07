@@ -44,6 +44,11 @@ public class Tags {
     private final String keyFieldName;
     private final Map<String, String> tags;
 
+    /**
+     * @param category     {@link #getCategory()}
+     * @param type         {@link #getType()}
+     * @param keyFieldName {@link #getKeyFieldName()}
+     */
     public Tags(@Nonnull String category, @Nonnull String type, @Nonnull String keyFieldName) {
         this.category = category;
         this.type = type;

@@ -17,6 +17,22 @@
 
 package com.megaease.easeagent.plugin.api.trace;
 
+/**
+ * Used to continue an incoming trace. For example, by reading http headers.
+ *
+ * <p><em>Note</em>: This type is safe to implement as a lambda, or use as a method reference as
+ * it is effectively a {@code FunctionalInterface}. It isn't annotated as such because the project
+ * has a minimum Java language level 6.
+ *
+ * @see Tracing#nextSpan(Message)
+ */
 public interface Extractor<R extends MessagingRequest> {
+    /**
+     * Returns either a trace context or sampling flags parsed from the request. If nothing was
+     * parsable, sampling flags will be set to {@link com.megaease.easeagent.plugin.bridge.NoOpTracer.EmptyExtractor#INSTANCE}.
+     *
+     * @param request holds propagation fields. For example, an incoming message or http request.
+     */
+
     Message extract(R request);
 }

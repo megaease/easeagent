@@ -36,12 +36,4 @@ public class NameFactoryTest {
         System.out.println(key);
     }
 
-    @Test
-    public void testKey() {
-        Map<Object, Integer> entered = new HashMap<>();
-        Object o = new Object();
-        entered.put(o, 1);
-        Object o2 = new Object();
-        System.out.println("" + entered.get(o2));
-    }
 }

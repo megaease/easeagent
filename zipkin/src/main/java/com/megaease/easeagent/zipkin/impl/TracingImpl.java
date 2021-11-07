@@ -31,6 +31,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
 import javax.annotation.Nonnull;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class TracingImpl implements ITracing {
@@ -40,17 +41,20 @@ public class TracingImpl implements ITracing {
     private final brave.Tracer tracer;
     private final TraceContext.Injector<Request> defaultInjector;
     private final TraceContext.Extractor<Request> defaultExtractor;
+    private final MessagingTracing<? extends Request> messagingTracing;
 
     private TracingImpl(@Nonnull Supplier<InitializeContext> supplier,
                         @Nonnull brave.Tracing tracing,
                         @Nonnull Tracer tracer,
                         @Nonnull TraceContext.Injector<Request> defaultInjector,
-                        @Nonnull TraceContext.Extractor<Request> defaultExtractor) {
+                        @Nonnull TraceContext.Extractor<Request> defaultExtractor,
+                        @Nonnull MessagingTracing<? extends Request> messagingTracing) {
         this.supplier = supplier;
         this.tracing = tracing;
         this.tracer = tracer;
         this.defaultInjector = defaultInjector;
         this.defaultExtractor = defaultExtractor;
+        this.messagingTracing = messagingTracing;
     }
 
     public static ITracing build(Supplier<InitializeContext> supplier, brave.Tracing tracing) {
@@ -58,8 +62,8 @@ public class TracingImpl implements ITracing {
             new TracingImpl(supplier, tracing,
                 tracing.tracer(),
                 tracing.propagation().injector(Request::setHeader),
-                tracing.propagation().extractor(Request::header)
-            );
+                tracing.propagation().extractor(Request::header),
+                MessagingTracingImpl.build(tracing));
     }
 
     @Override
@@ -195,7 +199,7 @@ public class TracingImpl implements ITracing {
 
     @Override
     public MessagingTracing<? extends Request> messagingTracing() {
-        return MessagingTracingImpl.build(tracing());
+        return messagingTracing;
     }
 
 }

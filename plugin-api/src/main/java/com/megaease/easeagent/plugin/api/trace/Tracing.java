@@ -71,7 +71,7 @@ public interface Tracing {
     Span nextSpan(Message message);
 
     /**
-     * build a MessagingTracing for message tracing
+     * get MessagingTracing for message tracing
      *
      * @return {@link MessagingRequest}
      */

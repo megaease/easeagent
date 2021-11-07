@@ -229,11 +229,10 @@ public class Bootstrap {
         }
         if (instance instanceof TracingProvider) {
             TracingProvider tracingProvider = (TracingProvider) instance;
-            contextManager.setTracing(tracingProvider.tracingSupplier());
-            tracingProvider.setRootSpanFinishCall(contextManager.getRootSpanFinish());
+            contextManager.setTracing(tracingProvider);
         }
         if (instance instanceof MetricProvider) {
-            contextManager.setMetric(((MetricProvider) instance).metricSupplier());
+            contextManager.setMetric((MetricProvider) instance);
         }
         return builder.build();
     }

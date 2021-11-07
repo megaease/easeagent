@@ -19,32 +19,106 @@ package com.megaease.easeagent.plugin.api.metric.name;
 
 import java.util.*;
 
+/**
+ * The name and value describing of the Metric.
+ */
 public interface NameFactory {
 
+    /**
+     * Create a DefaultNameFactory Builder
+     */
     static Builder createBuilder() {
         return new Builder();
     }
 
+    /**
+     * Get the Set of MetricType that NameFactory exists.
+     */
     Set<MetricType> metricTypes();
 
+    /**
+     * Return the MetricName of all meters, they must exist in the MetricSubType of
+     * the meter that exists in the NameFactory
+     *
+     * @param key the key of MetricName
+     */
     Map<MetricSubType, MetricName> meterNames(String key);
 
+    /**
+     * Return the MetricName of all histograms, they must exist in the MetricSubType of
+     * the histogram that exists in the NameFactory
+     *
+     * @param key the key of MetricName
+     */
     Map<MetricSubType, MetricName> histogramNames(String key);
 
+    /**
+     * Return the MetricName of all counters, they must exist in the MetricSubType of
+     * the counter that exists in the NameFactory
+     *
+     * @param key the key of MetricName
+     */
     Map<MetricSubType, MetricName> counterNames(String key);
 
+    /**
+     * Return the MetricName of all timers, they must exist in the MetricSubType of
+     * the timer that exists in the NameFactory
+     *
+     * @param key the key of MetricName
+     */
     Map<MetricSubType, MetricName> timerNames(String key);
 
+    /**
+     * Return the MetricName of all gauges, they must exist in the MetricSubType of
+     * the gauge that exists in the NameFactory
+     *
+     * @param key the key of MetricName
+     */
     Map<MetricSubType, MetricName> gaugeNames(String key);
 
+    /**
+     * Return a meter name. the {@code subType} must exist in the meter MetricSubType of that exists in the NameFactory
+     *
+     * @param key     the key for metric
+     * @param subType the metric type
+     * @return a metric name
+     */
     String meterName(String key, MetricSubType subType);
 
+    /**
+     * Return a meter name. the {@code subType} must exist in the meter MetricSubType of that exists in the NameFactory
+     *
+     * @param key     the key for metric
+     * @param subType the metric type
+     * @return a metric name
+     */
     String histogramName(String key, MetricSubType subType);
 
+    /**
+     * Return a counter name. the {@code subType} must exist in the counter MetricSubType of that exists in the NameFactory
+     *
+     * @param key     the key for metric
+     * @param subType the metric type
+     * @return a metric name
+     */
     String counterName(String key, MetricSubType subType);
 
+    /**
+     * Return a timer name. the {@code subType} must exist in the timer MetricSubType of that exists in the NameFactory
+     *
+     * @param key     the key for metric
+     * @param subType the metric type
+     * @return a metric name
+     */
     String timerName(String key, MetricSubType subType);
 
+    /**
+     * Return a gauge name. the {@code subType} must exist in the gauge MetricSubType of that exists in the NameFactory
+     *
+     * @param key     the key for metric
+     * @param subType the metric type
+     * @return a metric name
+     */
     String gaugeName(String key, MetricSubType subType);
 
     class DefaultNameFactory implements NameFactory {

@@ -30,9 +30,17 @@ import java.util.function.Function;
 
 public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.trace.MessagingRequest> implements MessagingTracing {
     private final brave.messaging.MessagingTracing messagingTracing;
+    private final Extractor<R> extractor;
+    private final Injector<R> injector;
+    private final Function<R, Boolean> consumerSampler;
+    private final Function<R, Boolean> producerSampler;
 
     private MessagingTracingImpl(brave.messaging.MessagingTracing messagingTracing) {
         this.messagingTracing = messagingTracing;
+        this.extractor = new ExtractorImpl(messagingTracing.propagation().extractor(com.megaease.easeagent.plugin.api.trace.MessagingRequest::header));
+        this.injector = new InjectorImpl(messagingTracing.propagation().injector(com.megaease.easeagent.plugin.api.trace.MessagingRequest::setHeader));
+        this.consumerSampler = new SamplerFunction(ZipkinConsumerRequest.BUILDER, messagingTracing.consumerSampler());
+        this.producerSampler = new SamplerFunction(ZipkinProducerRequest.BUILDER, messagingTracing.producerSampler());
     }
 
     public static MessagingTracing<? extends Request> build(brave.Tracing tracing) {
@@ -45,22 +53,22 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
 
     @Override
     public Extractor<R> extractor() {
-        return new ExtractorImpl(messagingTracing.propagation().extractor(com.megaease.easeagent.plugin.api.trace.MessagingRequest::header));
+        return extractor;
     }
 
     @Override
     public Injector<R> injector() {
-        return new InjectorImpl(messagingTracing.propagation().injector(com.megaease.easeagent.plugin.api.trace.MessagingRequest::setHeader));
+        return injector;
     }
 
     @Override
     public Function<R, Boolean> consumerSampler() {
-        return new SamplerFunction(ZipkinConsumerRequest.BUILDER, messagingTracing.consumerSampler());
+        return consumerSampler;
     }
 
     @Override
     public Function<R, Boolean> producerSampler() {
-        return new SamplerFunction(ZipkinProducerRequest.BUILDER, messagingTracing.producerSampler());
+        return producerSampler;
     }
 
     @Override

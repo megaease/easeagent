@@ -44,6 +44,7 @@ import com.megaease.easeagent.core.utils.JsonUtil;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
+import com.megaease.easeagent.metrics.MetricProviderImpl;
 import com.megaease.easeagent.metrics.MetricRegistryService;
 import com.megaease.easeagent.metrics.PrometheusAgentHttpHandler;
 import com.megaease.easeagent.metrics.config.MetricsCollectorConfig;
@@ -148,16 +149,20 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     private Supplier<Map<String, Object>> additionalAttributes;
     private AutoRefreshConfigItem<String> serviceName;
     private Function rootSpanFinish;
+    private MetricProviderImpl metricProvider = new MetricProviderImpl();
+
 
     @Override
     public void setConfig(Config config) {
         this.config = config;
         this.additionalAttributes = new MetricsAdditionalAttributes(config);
+        this.metricProvider.setConfig(config);
     }
 
     @Override
     public void setAgentReport(AgentReport report) {
         this.agentReport = report;
+        this.metricProvider.setAgentReport(report);
     }
 
     @Override
@@ -226,7 +231,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Override
     public MetricRegistrySupplier metricSupplier() {
-        return new ApplicationMetricRegistrySupplier();
+        return metricProvider.metricSupplier();
     }
 
     @Injection.Bean
@@ -628,21 +633,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 String json = JsonUtil.toJson(item);
                 agentReport.report(new MetricItem(KEY_METRICS_MD5_DICTIONARY, json));
             }
-        }
-    }
-
-    public class ApplicationMetricRegistrySupplier implements MetricRegistrySupplier {
-
-        @Override
-        public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(com.megaease.easeagent.plugin.api.config.Config config, NameFactory nameFactory, Tags tags) {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            MetricsConfig metricsConfig = new PluginMetricsConfig(config);
-            ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, KeyType.Timer, Provider.this.additionalAttributes, tags);
-            PluginMetricReporter.Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
-            new AutoRefreshReporter(metricRegistry, metricsConfig,
-                converterAdapter,
-                s -> reporter.report(s)).run();
-            return MetricRegistryImpl.build(metricRegistry);
         }
     }
 }
