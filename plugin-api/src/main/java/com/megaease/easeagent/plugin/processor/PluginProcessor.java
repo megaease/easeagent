@@ -19,20 +19,22 @@ package com.megaease.easeagent.plugin.processor;
 
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.annotation.Plugin;
 import com.megaease.easeagent.plugin.annotation.Pointcut;
-import com.megaease.easeagent.plugin.annotation.ProviderBean;
+import com.squareup.javapoet.JavaFile;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
+import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -41,20 +43,22 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
 @AutoService(Processor.class)
 public class PluginProcessor extends AbstractProcessor {
-    Class<Plugin> annotationClass = Plugin.class;
+    // Class<Plugin> annotationClass = Plugin.class;
     TreeSet<String>  annotations = new TreeSet<>();
     {
         annotations.add(Plugin.class.getCanonicalName());
         annotations.add(Pointcut.class.getCanonicalName());
+        annotations.add(AdviceTo.class.getCanonicalName());
         // for test temporarily
-        annotations.add(ProviderBean.class.getCanonicalName());
+        // annotations.add(ProviderBean.class.getCanonicalName());
     }
 
     @Override
@@ -67,11 +71,12 @@ public class PluginProcessor extends AbstractProcessor {
         return annotations;
     }
 
-    private boolean process(Class<? extends Annotation> annotationClass,
+    private Set<TypeElement> process(Class<? extends Annotation> annotationClass,
                             Class<?> dstClass,
                             Elements elements,
                             RoundEnvironment roundEnv) {
         TreeSet<String> services = new TreeSet<>();
+        Set<TypeElement> types = new HashSet<>();
 
         Set<? extends Element> roundElements = roundEnv.getElementsAnnotatedWith(annotationClass);
         for (Element e : roundElements) {
@@ -82,13 +87,22 @@ public class PluginProcessor extends AbstractProcessor {
                 continue;
             }
             TypeElement type = (TypeElement)e;
+            types.add(type);
             services.add(elements.getBinaryName(type).toString());
         }
+        if (services.isEmpty()) {
+            return types;
+        }
+        writeToMetaInf(dstClass, services);
 
+        return types;
+    }
+
+    private void writeToMetaInf(Class<?> dstClass, TreeSet<String> services) {
         String fileName = "META-INF/services/" + dstClass.getCanonicalName();
 
         if (services.isEmpty()) {
-            return false;
+            return;
         }
 
         Filer filer = processingEnv.getFiler();
@@ -105,8 +119,6 @@ public class PluginProcessor extends AbstractProcessor {
                 pw.close();
             }
         }
-
-        return false;
     }
 
     @Override
@@ -114,14 +126,65 @@ public class PluginProcessor extends AbstractProcessor {
         if (roundEnv.processingOver()) {
             return false;
         }
-
+        final BeanUtils utils = BeanUtils.of(processingEnv);
         Elements elements = processingEnv.getElementUtils();
-        process(Plugin.class, AgentPlugin.class, elements, roundEnv);
+        Set<TypeElement> plugins = process(Plugin.class, AgentPlugin.class, elements, roundEnv);
+        if (plugins.size() < 1) {
+            // processingEnv.getMessager().printMessage(Kind.ERROR, "Can't find AgentPlugin class!");
+            return false;
+        }
+        if (plugins.size() > 1) {
+            processingEnv.getMessager().printMessage(Kind.ERROR, "There are more than one AgentPlugin class: "
+                + plugins.stream()
+                .map(e -> elements.getBinaryName(e).toString())
+                .collect(Collectors.joining(",")));
+            return false;
+        }
         process(Pointcut.class, Points.class, elements, roundEnv);
-        process(ProviderBean.class, Provider.class, elements, roundEnv);
+        Set<TypeElement> interceptors = process(AdviceTo.class, Interceptor.class, elements, roundEnv);
+        // generate providerBean
+        generateProviderBeans(plugins.toArray(new TypeElement[0])[0], interceptors, utils);
+        // process(ProviderBean.class, Provider.class, elements, roundEnv);
 
         return false;
     }
+
+    public void generateProviderBeans(TypeElement plugin, Set<TypeElement> interceptors, BeanUtils utils) {
+        TreeSet<String> providers = new TreeSet<>();
+        for (TypeElement type : interceptors) {
+            if(isNull(type.getAnnotation(AdviceTo.class))) {
+                continue;
+            }
+            List<? extends AnnotationMirror> annotations = type.getAnnotationMirrors();
+            for (AnnotationMirror annotation : annotations) {
+                if (!utils.isSameType(annotation.getAnnotationType(), AdviceTo.class.getCanonicalName())) {
+                    continue;
+                }
+                Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotation.getElementValues();
+                Map<String, String> to = new HashMap<>();
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e : values.entrySet()) {
+                    String key = e.getKey().getSimpleName().toString();
+                    AnnotationValue av = e.getValue();
+                    String value;
+                    if (av.getValue() == null) {
+                        value = "default";
+                    } else {
+                        value = av.getValue().toString();
+                    }
+                    to.put(key, value);
+                }
+                GenerateProviderBean gb = new GenerateProviderBean(plugin, type, to, utils);
+                JavaFile file = gb.apply();
+                try {
+                    file.toBuilder().indent("    ")
+                        .addFileComment("This ia a generated file.")
+                        .build().writeTo(processingEnv.getFiler());
+                    providers.add(gb.getProviderClass());
+                } catch (IOException e) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getLocalizedMessage());
+                }
+            }
+        }
+        writeToMetaInf(Provider.class, providers);
+    }
 }
-
-

@@ -69,6 +69,11 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     }
 
     @Override
+    public void init(Config config, String type, String method, String methodDescriptor) {
+        this.interceptor.init(config, type, method, methodDescriptor);
+    }
+
+    @Override
     public int order() {
         int pluginOrder = this.plugin.order();
         int interceptorOrder = this.interceptor.order();
@@ -95,7 +100,7 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        interceptor.init(config, className, methodName, methodDescriptor);
+        this.interceptor.init(config, className, methodName, methodDescriptor);
     }
 
     @Override

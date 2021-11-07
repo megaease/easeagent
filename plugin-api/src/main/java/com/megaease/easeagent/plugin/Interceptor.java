@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.enums.Order;
 
+@SuppressWarnings("unused")
 public interface Interceptor extends Ordered {
     /**
      * @param methodInfo instrumented method info
@@ -32,7 +33,6 @@ public interface Interceptor extends Ordered {
     /**
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
-     * @return The return value can change instrumented method result
      */
     default void after(MethodInfo methodInfo, Context context) {
     }
