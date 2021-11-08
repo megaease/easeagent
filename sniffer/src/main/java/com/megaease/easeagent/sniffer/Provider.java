@@ -184,13 +184,14 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
         String target = config.getString("observability.tracings.output.target");
         String zipkinUrl = config.getString("observability.tracings.output.target.zipkinUrl");
+        Boolean compressionEnabled = config.getBoolean("observability.tracings.output.target.zipkin.compressionEnabled");
         boolean toZipkin = false;
         if (target.equalsIgnoreCase("zipkin") && StringUtils.isNotEmpty(zipkinUrl)) {
             toZipkin = true;
         }
         Reporter<Span> reporter;
         if (toZipkin) {
-            reporter = AsyncReporter.create(URLConnectionSender.create(zipkinUrl));
+            reporter = AsyncReporter.create(URLConnectionSender.newBuilder().endpoint(zipkinUrl).compressionEnabled(compressionEnabled == null ? true : compressionEnabled).build());
         } else {
             reporter = span -> agentReport.report(span);
         }
