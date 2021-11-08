@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.utils.trace.HttpRequest;
 import com.megaease.easeagent.plugin.utils.trace.HttpResponse;
 import com.megaease.easeagent.plugin.utils.trace.HttpUtils;
@@ -37,27 +38,19 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @AdviceTo(value = FeignClientAdvice.class, qualifier = "default")
-public class FeignClientInterceptor implements Interceptor {
-    private static final Object ENTER = new Object();
+public class FeignClientInterceptor implements FirstEnterInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
-        if (!context.enter(ENTER, 1)) {
-            return;
-        }
+    public void doBefore(MethodInfo methodInfo, Context context) {
         FeignClientRequestWrapper requestWrapper = new FeignClientRequestWrapper((Request) methodInfo.getArgs()[0]);
         ProgressContext progressContext = context.nextProgress(requestWrapper);
         HttpUtils.handleReceive(progressContext.span().start(), requestWrapper);
-        progressContext.span().tag("s", FeignClientInterceptor.class.getName());
         context.put(PROGRESS_CONTEXT, progressContext);
     }
 
     @Override
-    public void after(MethodInfo methodInfo, Context context) {
-        if (!context.out(ENTER, 1)) {
-            return;
-        }
+    public void doAfter(MethodInfo methodInfo, Context context) {
         ProgressContext progressContext = context.get(PROGRESS_CONTEXT);
         try {
             Request request = (Request) methodInfo.getArgs()[0];

@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
@@ -31,16 +30,16 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.httpservlet.utils.InternalAsyncListener;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.utils.metrics.ServerMetric;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
-public class DoFilterMetricInterceptor implements Interceptor {
+public class DoFilterMetricInterceptor implements FirstEnterInterceptor {
     private static final Logger LOGGER = EaseAgent.getLogger(DoFilterMetricInterceptor.class);
     private static final String AFTER_MARK = DoFilterMetricInterceptor.class.getName() + "$AfterMark";
-    private static final Object ENTER = new Object();
     private static final Object START = new Object();
     private static final NameFactory NAME_FACTORY = ServerMetric.buildNameFactory();
     private static volatile ServerMetric SERVER_METRIC = null;
@@ -62,18 +61,12 @@ public class DoFilterMetricInterceptor implements Interceptor {
     }
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
-        if (!context.enter(ENTER, 1)) {
-            return;
-        }
+    public void doBefore(MethodInfo methodInfo, Context context) {
         context.put(START, System.currentTimeMillis());
     }
 
     @Override
-    public void after(MethodInfo methodInfo, Context context) {
-        if (!context.out(ENTER, 1)) {
-            return;
-        }
+    public void doAfter(MethodInfo methodInfo, Context context) {
         final long start = context.remove(START);
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         if (ServletUtils.markProcessedAfter(httpServletRequest, AFTER_MARK)) {

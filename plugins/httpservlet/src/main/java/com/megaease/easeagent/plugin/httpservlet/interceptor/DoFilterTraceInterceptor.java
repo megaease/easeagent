@@ -18,18 +18,18 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.utils.trace.HttpRequest;
 import com.megaease.easeagent.plugin.utils.trace.HttpResponse;
 import com.megaease.easeagent.plugin.utils.trace.HttpUtils;
 import com.megaease.easeagent.plugin.utils.trace.TraceConst;
-import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -41,16 +41,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
-public class DoFilterTraceInterceptor implements Interceptor {
-    private static final Object ENTER = new Object();
+public class DoFilterTraceInterceptor implements FirstEnterInterceptor {
     private static final String AFTER_MARK = DoFilterTraceInterceptor.class.getName() + "$AfterMark";
     private static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".ProgressContext";
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
-        if (!context.enter(ENTER, 1)) {
-            return;
-        }
+    public void doBefore(MethodInfo methodInfo, Context context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(PROGRESS_CONTEXT);
         if (progressContext != null) {
@@ -63,10 +59,7 @@ public class DoFilterTraceInterceptor implements Interceptor {
     }
 
     @Override
-    public void after(MethodInfo methodInfo, Context context) {
-        if (!context.out(ENTER, 1)) {
-            return;
-        }
+    public void doAfter(MethodInfo methodInfo, Context context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
         if (ServletUtils.markProcessedAfter(httpServletRequest, AFTER_MARK)) {
             return;
@@ -90,6 +83,7 @@ public class DoFilterTraceInterceptor implements Interceptor {
             progressContext.scope().close();
         }
     }
+
 
     public static class Response implements HttpResponse {
         private final Throwable caught;
