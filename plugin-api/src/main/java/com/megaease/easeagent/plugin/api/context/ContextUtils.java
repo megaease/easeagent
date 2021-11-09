@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin.api.context;
 
+import com.megaease.easeagent.plugin.api.Context;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +31,14 @@ public class ContextUtils {
     }
 
     public static Long getBeginTime(Map<Object, Object> context) {
+        return (Long) context.get(BEGIN_TIME);
+    }
+
+    private static void setBeginTime(Context context) {
+        context.put(BEGIN_TIME, System.currentTimeMillis());
+    }
+
+    public static Long getBeginTime(Context context) {
         return (Long) context.get(BEGIN_TIME);
     }
 
@@ -65,6 +75,19 @@ public class ContextUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getFromContext(Map<Object, Object> context, Object key) {
+        return (T) context.get(key);
+    }
+
+    /**
+     * Get data from context
+     *
+     * @param context Store data
+     * @param key     key is the type of data. Like {@code value.getClass()}
+     * @param <T>     The type of data
+     * @return data
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getFromContext(Context context, Object key) {
         return (T) context.get(key);
     }
 

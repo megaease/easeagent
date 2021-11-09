@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.enums.Order;
 import org.springframework.amqp.core.Message;
 
 import java.util.List;
@@ -39,6 +40,11 @@ public class RabbitMqMessageListenerOnMessageInterceptor implements Interceptor 
             message = (Message) methodInfo.getArgs()[0];
         }
         String uri = message.getMessageProperties().getHeader(ContextCons.MQ_URI);
-        // context.put(ContextCons.MQ_URI, uri);
+        context.put(ContextCons.MQ_URI, uri);
+    }
+
+    @Override
+    public int order() {
+        return Order.HIGHEST.getOrder();
     }
 }

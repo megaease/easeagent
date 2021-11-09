@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
@@ -32,6 +33,7 @@ import java.util.Map;
 
 @AdviceTo(RabbitMqConsumerAdvice.class)
 public class RabbitMqConsumerHandleDeliveryInterceptor implements Interceptor {
+    @Override
     public void before(MethodInfo methodInfo, Context context) {
         String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(methodInfo.getInvoker());
         // context.put(ContextCons.MQ_URI, uri);
@@ -42,5 +44,10 @@ public class RabbitMqConsumerHandleDeliveryInterceptor implements Interceptor {
             headers.putAll(properties.getHeaders());
         }
         AgentFieldReflectAccessor.setFieldValue(properties, "headers", headers);
+    }
+
+    @Override
+    public int order() {
+        return Order.HIGHEST.getOrder();
     }
 }

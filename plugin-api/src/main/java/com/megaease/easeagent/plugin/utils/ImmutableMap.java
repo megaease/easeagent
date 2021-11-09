@@ -17,26 +17,90 @@
 
 package com.megaease.easeagent.plugin.utils;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public class ImmutableMap {
+@SuppressWarnings("NullableProblems")
+public class  ImmutableMap<K, V> implements Map<K, V> {
+    Map<K, V> delegate;
+
+    public ImmutableMap(Map<K, V> map) {
+        this.delegate = map;
+    }
+
+    @Override
+    public int size() {
+        return delegate.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return delegate.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return delegate.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return delegate.containsValue(value);
+    }
+
+    @Override
+    public V get(Object key) {
+        return delegate.get(key);
+    }
+
+    @Override
+    public V put(Object key, Object value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public V remove(Object key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void putAll(Map m) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<K> keySet() {
+        return delegate.keySet();
+    }
+
+    @Override
+    public Collection<V> values() {
+        return delegate.values();
+    }
+
+    @Override
+    public Set<Entry<K, V>> entrySet() {
+        return delegate.entrySet();
+    }
 
     public static <K, V> Builder builder() {
-        return new Builder();
+        return new Builder<K, V>();
     }
 
     public static class Builder<K, V> {
         Map<K, V> result = new HashMap<>();
 
-        public Builder put(K k, V v) {
+        public Builder<K, V> put(K k, V v) {
             result.put(k, v);
             return this;
         }
 
         public Map<K, V> build() {
-            return Collections.unmodifiableMap(result);
+            return new ImmutableMap<>(result);
         }
     }
 }
