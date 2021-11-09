@@ -23,6 +23,21 @@ import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Map;
 
+/**
+ * An asynchronous thread snapshot context
+ * code example:
+ * <pre>{@code
+ *  AsyncContext asyncContext = context.exportAsync();
+ *  class Run implements Runnable{
+ *      void run(){
+ *          try (Scope scope = asyncContext.importToCurr()) {
+ *               //do something
+ *               //or asyncContext.getTracer().nextSpan();
+ *          }
+ *      }
+ *  }
+ *  }</pre>
+ */
 public interface AsyncContext {
     /**
      * When true, do nothing and nothing is reported . However, this AsyncContext should
@@ -31,14 +46,35 @@ public interface AsyncContext {
      */
     boolean isNoop();
 
+
+    /**
+     * @return {@link Tracing}
+     */
     Tracing getTracer();
 
+    /**
+     * @return current {@link Context} for session
+     */
     Context getContext();
 
+    /**
+     * Import this AsyncContext to current {@link Context} and return a {@link Scope}
+     *
+     * @return {@link Scope}
+     */
     Scope importToCurr();
 
+    /**
+     * @return all async snapshot context key:value
+     */
     Map<Object, Object> getAll();
 
+
+    /**
+     * put all key:value to context
+     *
+     * @param context key:value
+     */
     void putAll(Map<Object, Object> context);
 
 }

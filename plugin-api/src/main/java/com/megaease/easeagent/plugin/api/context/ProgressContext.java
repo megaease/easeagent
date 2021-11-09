@@ -24,6 +24,9 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 
 import java.util.Map;
 
+/**
+ * A cross-process data context, including tracing and penetration fields
+ */
 public interface ProgressContext {
     /**
      * When true, do nothing and nothing is reported . However, this ProgressContext should
@@ -32,17 +35,45 @@ public interface ProgressContext {
      */
     boolean isNoop();
 
+    /**
+     * @return {@link Span} for next progress client span
+     */
     Span span();
 
+    /**
+     * @return {@link Scope} for current Span
+     */
     Scope scope();
 
+    /**
+     * set header for next progress
+     *
+     * @param name  of header
+     * @param value of header
+     */
     void setHeader(String name, String value);
 
-    Map<String, String> getHeader();
+    /**
+     * @return headers from the progress data context
+     */
+    Map<String, String> getHeaders();
 
+    /**
+     * Convert ProgressContext into AsyncContext and return
+     *
+     * @return {@link AsyncContext} for async
+     */
     AsyncContext async();
 
+    /**
+     * @return current {@link Context} for session
+     */
     Context getContext();
 
+    /**
+     * finish the progress span and save tag from {@link Response#header(String)}
+     *
+     * @param response {@link Response}
+     */
     void finish(Response response);
 }

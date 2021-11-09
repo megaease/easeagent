@@ -69,7 +69,7 @@ public class ProgressContextImpl implements ProgressContext {
     }
 
     @Override
-    public Map<String, String> getHeader() {
+    public Map<String, String> getHeaders() {
         return asyncRequest.getHeaders();
     }
 

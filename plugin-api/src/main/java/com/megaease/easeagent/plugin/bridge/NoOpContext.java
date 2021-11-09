@@ -179,7 +179,7 @@ public class NoOpContext {
         }
 
         @Override
-        public Map<String, String> getHeader() {
+        public Map<String, String> getHeaders() {
             return Collections.emptyMap();
         }
 

@@ -49,7 +49,7 @@ public interface Request {
      *  class IRequest implements Request{
      *      HttpRequest httpRequest;
      *      String header(String name){
-     *          return httpRequest.getHeader(name);
+     *          return httpRequest.getHeaders(name);
      *      }
      *  }
      * }</pre>
