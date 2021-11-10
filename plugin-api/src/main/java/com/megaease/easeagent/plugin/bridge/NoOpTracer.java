@@ -22,6 +22,8 @@ import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 public class NoOpTracer {
@@ -213,6 +215,21 @@ public class NoOpTracer {
         @Override
         public ProgressContext importProgress(Request request) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
+        }
+
+        @Override
+        public List<String> propagationKeys() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Span consumerSpan(MessagingRequest request) {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
+        public Span producerSpan(MessagingRequest request) {
+            return NoOpTracer.NO_OP_SPAN;
         }
 
         @Override

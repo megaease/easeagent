@@ -24,9 +24,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
-import com.megaease.easeagent.plugin.api.trace.MessagingTracing;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
@@ -62,10 +60,7 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
         //     span = Tracing.currentTracer().newChild(traceContext);
         // }
 
-        Tracing traceContext = context.currentTracing();
-        Span span = traceContext.nextSpan();
-        span.kind(Span.Kind.PRODUCER);
-        span.name("publish");
+        Span span = context.producerSpan(producerRequest);
         if (exchange != null) {
             span.tag("rabbit.exchange", exchange);
         }
@@ -81,8 +76,6 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
         // context.put(SPAN_CONTEXT_KEY, span);
         // injector.inject(span.context(), producerRequest);
 
-        MessagingTracing mt = traceContext.messagingTracing();
-        mt.injector().inject(span, producerRequest);
         context.put(SPAN_CONTEXT_KEY, span);
     }
 
@@ -143,6 +136,11 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
         }
 
         @Override
+        public Span.Kind kind() {
+            return Span.Kind.PRODUCER;
+        }
+
+        @Override
         public String header(String key) {
             Map<String, Object> headers = this.basicProperties.getHeaders();
             Object obj = headers.get(key);
@@ -150,6 +148,16 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
                 return null;
             }
             return obj.toString();
+        }
+
+        @Override
+        public String name() {
+            return "publish";
+        }
+
+        @Override
+        public boolean cacheScope() {
+            return false;
         }
 
         @Override

@@ -23,7 +23,6 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
-import com.megaease.easeagent.plugin.api.trace.Extractor;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -102,14 +101,10 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
         String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
         MessageProperties messageProperties = message.getMessageProperties();
         RabbitConsumerRequest request = new RabbitConsumerRequest(message);
-        Extractor<RabbitConsumerRequest> mt = (Extractor<RabbitConsumerRequest>) context.currentTracing()
-            .messagingTracing().extractor();
         // ProgressContext progressContext = context.importProgress(request);
         // TraceContextOrSamplingFlags samplingFlags = this.extractor.extract(request);
         // Span span = Tracing.currentTracer().nextSpan(samplingFlags);
-        Span span = context.currentTracing().nextSpan(mt.extract(request));
-        span.kind(Span.Kind.CONSUMER);
-        span.name("on-message");
+        Span span = context.consumerSpan(request);
         span.tag("rabbit.exchange", messageProperties.getReceivedExchange());
         span.tag("rabbit.routing_key", messageProperties.getReceivedRoutingKey());
         span.tag("rabbit.queue", messageProperties.getConsumerQueue());
@@ -157,8 +152,23 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
             return message;
         }
 
+        @Override
+        public Span.Kind kind() {
+            return Span.Kind.CONSUMER;
+        }
+
         public String header(String name) {
             return message.getMessageProperties().getHeader(name);
+        }
+
+        @Override
+        public String name() {
+            return "on-message";
+        }
+
+        @Override
+        public boolean cacheScope() {
+            return false;
         }
 
         @Override

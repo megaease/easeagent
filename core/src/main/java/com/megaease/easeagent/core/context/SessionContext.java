@@ -24,10 +24,7 @@ import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.api.trace.ITracing;
-import com.megaease.easeagent.plugin.api.trace.Request;
-import com.megaease.easeagent.plugin.api.trace.Scope;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.utils.NoNull;
@@ -161,6 +158,35 @@ public class SessionContext implements InitializeContext {
             context.put(field, value);
         }
         return progressContext;
+    }
+
+    @Override
+    public Span consumerSpan(MessagingRequest request) {
+        Span span = tracing.consumerSpan(request);
+        String[] fields = ProgressFields.getResponseHoldTagFields();
+        if (!ProgressFields.isEmpty(fields)) {
+            for (String field : fields) {
+                span.tag(field, request.header(field));
+            }
+        }
+        return span;
+    }
+
+    @Override
+    public Span producerSpan(MessagingRequest request) {
+        Span span = tracing.producerSpan(request);
+        String[] fields = ProgressFields.getPenetrationFields();
+        if (ProgressFields.isEmpty(fields)) {
+            return span;
+        }
+        for (String field : fields) {
+            Object o = context.get(field);
+            if (o != null && (o instanceof String)) {
+                request.setHeader(field, (String) o);
+            }
+        }
+        return span;
+
     }
 
     @Override

@@ -96,6 +96,16 @@ public class NoOpContext {
         }
 
         @Override
+        public Span consumerSpan(MessagingRequest request) {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
+        public Span producerSpan(MessagingRequest request) {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
         public Runnable wrap(Runnable task) {
             return task;
         }

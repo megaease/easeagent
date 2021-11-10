@@ -20,9 +20,7 @@ package com.megaease.easeagent.plugin.api;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.api.trace.Request;
-import com.megaease.easeagent.plugin.api.trace.Scope;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.api.trace.*;
 
 import java.util.Map;
 
@@ -303,6 +301,50 @@ public interface Context {
      * @return {@link ProgressContext}
      */
     ProgressContext importProgress(Request request);
+
+
+    /**
+     * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rebbitmq consumer
+     * <p>
+     * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
+     * and {@link Request#cacheScope()}.
+     *
+     * <p>
+     * It will set the Span's tags "messaging.operation", "messaging.channel_kind" and "messaging.channel_name" from request
+     * {@link MessagingRequest#operation()} {@link MessagingRequest#channelKind()} {@link MessagingRequest#channelName()}
+     *
+     * <p>
+     * It is usually called on the consumer.
+     * {@code Kafka Server --> consumer.consumerSpan(Record<spanId,X-EG-Circuit-Breaker...>) }
+     *
+     * @param request {@link MessagingRequest}
+     * @return {@link Span}
+     */
+    Span consumerSpan(MessagingRequest request);
+
+
+    /**
+     * Create a Span for message producer. Examples: kafka producer, rebbitmq producer
+     * <p>
+     * It will set the Span's tags "messaging.operation", "messaging.channel_kind", "messaging.channel_name" from request
+     * {@link MessagingRequest#operation()} {@link MessagingRequest#channelKind()} {@link MessagingRequest#channelName()}
+     * And set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()} and
+     * {@link Request#cacheScope()}.
+     *
+     * <p>
+     * It will not only pass multiple key:value values required by Trace through {@link Request#setHeader(String, String)},
+     * but also other necessary key:value of EaseAgent, such as the key configured in the configuration file:
+     * {@link ProgressFields#EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG}
+     * <p>
+     * <p>
+     * It is usually called on the producer.
+     * {@code producer.producerSpan(Record) -- Record<spanId,root-source...> --> Message Server}
+     *
+     * @param request {@link MessagingRequest}
+     * @return {@link Span}
+     */
+    Span producerSpan(MessagingRequest request);
+
 
     /**
      * Wraps the input so that it executes with the same context as now.

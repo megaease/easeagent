@@ -31,7 +31,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
 import javax.annotation.Nonnull;
-import java.util.function.Function;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class TracingImpl implements ITracing {
@@ -42,19 +42,21 @@ public class TracingImpl implements ITracing {
     private final TraceContext.Injector<Request> defaultInjector;
     private final TraceContext.Extractor<Request> defaultExtractor;
     private final MessagingTracing<? extends Request> messagingTracing;
+    private final List<String> propagationKeys;
 
     private TracingImpl(@Nonnull Supplier<InitializeContext> supplier,
                         @Nonnull brave.Tracing tracing,
                         @Nonnull Tracer tracer,
                         @Nonnull TraceContext.Injector<Request> defaultInjector,
                         @Nonnull TraceContext.Extractor<Request> defaultExtractor,
-                        @Nonnull MessagingTracing<? extends Request> messagingTracing) {
+                        @Nonnull MessagingTracing<? extends Request> messagingTracing, List<String> propagationKeys) {
         this.supplier = supplier;
         this.tracing = tracing;
         this.tracer = tracer;
         this.defaultInjector = defaultInjector;
         this.defaultExtractor = defaultExtractor;
         this.messagingTracing = messagingTracing;
+        this.propagationKeys = propagationKeys;
     }
 
     public static ITracing build(Supplier<InitializeContext> supplier, brave.Tracing tracing) {
@@ -63,7 +65,8 @@ public class TracingImpl implements ITracing {
                 tracing.tracer(),
                 tracing.propagation().injector(Request::setHeader),
                 tracing.propagation().extractor(Request::header),
-                MessagingTracingImpl.build(tracing));
+                MessagingTracingImpl.build(tracing),
+                tracing.propagation().keys());
     }
 
     @Override
@@ -144,6 +147,14 @@ public class TracingImpl implements ITracing {
 
     @Override
     public ProgressContext nextProgress(Request request) {
+        brave.Span span = nextBraveSpan(request);
+        AsyncRequest asyncRequest = new AsyncRequest(request);
+        defaultInjector.inject(span.context(), asyncRequest);
+        Span newSpan = build(span, request.cacheScope());
+        return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+    }
+
+    private brave.Span nextBraveSpan(Request request) {
         TraceContext maybeParent = tracing.currentTraceContext().get();
         // Unlike message consumers, we try current span before trying extraction. This is the proper
         // order because the span in scope should take precedence over a potentially stale header entry.
@@ -156,13 +167,10 @@ public class TracingImpl implements ITracing {
             span = tracer.newChild(maybeParent);
         }
         if (span.isNoop()) {
-            return NoOpContext.NO_OP_PROGRESS_CONTEXT;
+            return span;
         }
         setInfo(span, request);
-        AsyncRequest asyncRequest = new AsyncRequest(request);
-        defaultInjector.inject(span.context(), asyncRequest);
-        Span newSpan = build(span, request.cacheScope());
-        return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return span;
     }
 
     @Override
@@ -177,6 +185,11 @@ public class TracingImpl implements ITracing {
         defaultInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
         return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+    }
+
+    @Override
+    public List<String> propagationKeys() {
+        return propagationKeys;
     }
 
     @Override
@@ -201,5 +214,39 @@ public class TracingImpl implements ITracing {
     public MessagingTracing<? extends Request> messagingTracing() {
         return messagingTracing;
     }
+
+    private void setMessageInfo(brave.Span span, MessagingRequest request) {
+        if (request.operation() != null) {
+            span.tag("messaging.operation", request.operation());
+        }
+        if (request.channelKind() != null) {
+            span.tag("messaging.channel_kind", request.channelKind());
+        }
+        if (request.channelName() != null) {
+            span.tag("messaging.channel_name", request.channelName());
+        }
+    }
+
+    @Override
+    public Span consumerSpan(MessagingRequest request) {
+        brave.Span span = nextBraveSpan(request);
+        if (span.isNoop()) {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+        setMessageInfo(span, request);
+        return NoOpTracer.noNullSpan(build(span, request.cacheScope()));
+    }
+
+    @Override
+    public Span producerSpan(MessagingRequest request) {
+        brave.Span span = nextBraveSpan(request);
+        if (span.isNoop()) {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+        setMessageInfo(span, request);
+        defaultInjector.inject(span.context(), request);
+        return NoOpTracer.noNullSpan(build(span, request.cacheScope()));
+    }
+
 
 }

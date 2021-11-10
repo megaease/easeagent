@@ -18,12 +18,10 @@
 package com.megaease.easeagent.plugin.api.trace;
 
 
-import com.megaease.easeagent.plugin.api.Context;
-
 /**
  * Interface request type used for parsing and sampling of messaging producers and consumers.
  */
-public interface MessagingRequest {
+public interface MessagingRequest extends Request {
 
     /**
      * The unqualified, case-sensitive semantic message operation name. The currently defined names
@@ -41,8 +39,9 @@ public interface MessagingRequest {
      * may be operations such as "browse" or "purge" which aren't defined. Once implementation
      * matures, a constant file will be defined, with potentially more names.
      *
+     * <p>Conventionally associated with the tag "messaging.operation"
+     *
      * @return the messaging operation or null if unreadable.
-     * @since 5.9
      */
     String operation();
 
@@ -74,19 +73,6 @@ public interface MessagingRequest {
      * address of the client. Moreover, an implementation may change the type returned due to
      * refactoring. Unless you control the implementation, cast carefully (ex using {@code
      * instanceof}) instead of presuming a specific type will always be returned.
-     *
      */
     Object unwrap();
-
-    /**
-     * @see Request#header(String)
-     */
-    String header(String name);
-
-    /**
-     * @param name
-     * @param value
-     * @see Request#setHeader(String, String)
-     */
-    void setHeader(String name, String value);
 }

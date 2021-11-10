@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.api.trace;
 
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
 /**
@@ -72,6 +73,9 @@ public interface Tracing {
 
     /**
      * get MessagingTracing for message tracing
+     * <p>
+     * If you have a Message Server and need Span, generate result use {@link Context#consumerSpan(MessagingRequest)} and
+     * {@link Context#producerSpan(MessagingRequest)}.
      *
      * @return {@link MessagingRequest}
      */
