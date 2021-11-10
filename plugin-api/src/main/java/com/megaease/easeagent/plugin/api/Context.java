@@ -123,7 +123,7 @@ public interface Context {
 
     /**
      * Record and return the stacking sequence of Object{@code key}'s Session
-     * It needs to be used together with the {@link #out(Object)} to be effective
+     * It needs to be used together with the {@link #exit(Object)} to be effective
      * for example 1:
      * <pre>{@code
      *      fun1(){
@@ -133,7 +133,7 @@ public interface Context {
      *              }
      *              //do something1
      *          }finally{
-     *              if (context.out(obj)!=1){
+     *              if (context.exit(obj)!=1){
      *                 return;
      *              }
      *              //do something2
@@ -147,7 +147,7 @@ public interface Context {
      *              // call fun1();
      *              //do something3
      *          }finally{
-     *              if (context.out(obj)!=1){
+     *              if (context.exit(obj)!=1){
      *                 return;
      *              }
      *              //do something4
@@ -166,7 +166,7 @@ public interface Context {
      *              }
      *              //do something1
      *          }finally{
-     *              if (context.out(obj)>2){
+     *              if (context.exit(obj)>2){
      *                 return;
      *              }
      *              //do something2
@@ -180,7 +180,7 @@ public interface Context {
      *              // call fun1();
      *              //do something3
      *          }finally{
-     *              if (context.out(obj)>2){
+     *              if (context.exit(obj)>2){
      *                 return;
      *              }
      *              //do something4
@@ -194,7 +194,7 @@ public interface Context {
      *              // call fun2();
      *              //do something5
      *          }finally{
-     *              if (context.out(obj)>2){
+     *              if (context.exit(obj)>2){
      *                 return;
      *              }
      *              //do something6
@@ -205,13 +205,13 @@ public interface Context {
      *
      * @param key the Object of stacking sequence
      * @return stacking sequence
-     * @see #out(Object)
+     * @see #exit(Object)
      */
     int enter(Object key);
 
     /**
      * Record and verify the stacking sequence of Object{@code key}'s Session
-     * It needs to be used together with the {@link #out(Object, int)} to be effective
+     * It needs to be used together with the {@link #exit(Object, int)} to be effective
      *
      * @param key   the Object of stacking sequence
      * @param times the verify of stacking sequence
@@ -230,7 +230,7 @@ public interface Context {
      * @return stacking sequence
      * @see #enter(Object)
      */
-    int out(Object key);
+    int exit(Object key);
 
     /**
      * Release and verify the stacking sequence of Object's Session
@@ -239,10 +239,10 @@ public interface Context {
      * @param key   the Object of stacking sequence
      * @param times the verify of stacking sequence
      * @return true if stacking sequence is {@code times} else false
-     * @see #out(Object)
+     * @see #exit(Object)
      */
-    default boolean out(Object key, int times) {
-        return out(key) == times;
+    default boolean exit(Object key, int times) {
+        return exit(key) == times;
     }
 
 

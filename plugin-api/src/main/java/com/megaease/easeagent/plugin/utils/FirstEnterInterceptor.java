@@ -33,7 +33,7 @@ public interface FirstEnterInterceptor extends Interceptor {
 
     @Override
     default void after(MethodInfo methodInfo, Context context) {
-        if (!context.out(getEnterKey(methodInfo, context), 1)) {
+        if (!context.exit(getEnterKey(methodInfo, context), 1)) {
             return;
         }
         doAfter(methodInfo, context);

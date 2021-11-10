@@ -71,7 +71,7 @@ public class NoOpContext {
         }
 
         @Override
-        public int out(Object key) {
+        public int exit(Object key) {
             return 0;
         }
 

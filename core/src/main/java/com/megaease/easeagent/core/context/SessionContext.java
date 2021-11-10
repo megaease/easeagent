@@ -109,7 +109,7 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public int out(Object key) {
+    public int exit(Object key) {
         Integer count = entered.get(key);
         if (count == null) {
             return 0;
