@@ -18,8 +18,8 @@
 package com.megaease.easeagent.core.plugin.transformer.classloader;
 
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;

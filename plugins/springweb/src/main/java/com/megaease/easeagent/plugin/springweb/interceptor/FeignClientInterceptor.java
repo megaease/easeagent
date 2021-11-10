@@ -17,22 +17,21 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.springweb.advice.FeignClientAdvice;
 import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.utils.trace.HttpRequest;
 import com.megaease.easeagent.plugin.utils.trace.HttpResponse;
 import com.megaease.easeagent.plugin.utils.trace.HttpUtils;
-import com.megaease.easeagent.plugin.springweb.advice.FeignClientAdvice;
 import feign.Request;
 import feign.Response;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -200,7 +199,7 @@ public class FeignClientInterceptor implements FirstEnterInterceptor {
 
     static class HeadersFieldFinder {
 
-        private static final Logger logger = LoggerFactory.getLogger(HeadersFieldFinder.class);
+        private static final Logger logger = EaseAgent.getLogger(HeadersFieldFinder.class);
 
         private static Field headersField;
 

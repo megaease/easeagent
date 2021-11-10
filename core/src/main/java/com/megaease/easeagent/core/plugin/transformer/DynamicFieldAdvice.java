@@ -20,8 +20,8 @@ package com.megaease.easeagent.core.plugin.transformer;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.NullObject;
 import net.bytebuddy.asm.Advice;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 
 public class DynamicFieldAdvice {
     public static Logger log = LoggerFactory.getLogger(DynamicFieldAdvice.class);

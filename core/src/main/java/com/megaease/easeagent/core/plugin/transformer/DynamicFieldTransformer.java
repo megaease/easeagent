@@ -19,21 +19,18 @@ package com.megaease.easeagent.core.plugin.transformer;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.megaease.easeagent.core.plugin.transformer.DynamicFieldAdvice.DynamicClassInit;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldAdvice.DynamicInstanceInit;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
-import com.megaease.easeagent.plugin.field.NullObject;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FieldAccessor;
-import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 

@@ -25,8 +25,8 @@ import com.megaease.easeagent.common.concurrent.ScheduleHelper;
 import com.megaease.easeagent.core.utils.DataSize;
 import com.megaease.easeagent.core.utils.TextUtils;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;

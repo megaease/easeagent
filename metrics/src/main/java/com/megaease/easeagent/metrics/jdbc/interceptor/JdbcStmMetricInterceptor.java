@@ -30,12 +30,12 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.Bootstrap;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.jdbc.AbstractJdbcMetric;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class JdbcStmMetricInterceptor extends AbstractJdbcMetric implements Remo
 
     public static final String ENABLE_KEY = "observability.metrics.jdbcStatement.enabled";
 
-    private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 
     private static final int maxCacheSize = 1000;
 
@@ -93,7 +93,7 @@ public class JdbcStmMetricInterceptor extends AbstractJdbcMetric implements Remo
 
             list.forEach(metricRegistry::remove);
         } catch (Exception e) {
-            logger.warn("remove lru cache failed: " + e.getMessage());
+            LOGGER.warn("remove lru cache failed: " + e.getMessage());
         }
     }
 

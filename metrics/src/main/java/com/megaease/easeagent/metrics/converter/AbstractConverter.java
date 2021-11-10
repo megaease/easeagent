@@ -19,10 +19,10 @@ package com.megaease.easeagent.metrics.converter;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

@@ -26,8 +26,8 @@ import com.megaease.easeagent.plugin.Ordered;
 import lombok.Data;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
