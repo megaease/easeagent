@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.rabbitmq.v5.advice;
 
-import com.megaease.easeagent.plugin.annotation.Pointcut;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
@@ -26,7 +25,6 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-@Pointcut
 public class RabbitMqConsumerAdvice implements Points {
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()

@@ -18,10 +18,7 @@
 package com.megaease.easeagent.plugin.rabbitmq;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.annotation.Plugin;
-import com.megaease.easeagent.plugin.api.config.Config;
 
-@Plugin
 public class RabbitMqPlugin implements AgentPlugin {
     @Override
     public String getName() {

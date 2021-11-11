@@ -31,7 +31,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.HashMap;
 
-@SuppressWarnings("unchecked")
 public class ServerMetric {
     private MetricRegistry metricRegistry;
 

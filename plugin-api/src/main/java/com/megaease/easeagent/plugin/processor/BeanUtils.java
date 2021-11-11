@@ -71,6 +71,12 @@ abstract class BeanUtils {
         return types.isSameType(t1, t2);
     }
 
+    boolean isAssignable(TypeElement t1, TypeElement t2) {
+        TypeMirror tm1 = t1.asType();
+        TypeMirror tm2 = t2.asType();
+        return types.isAssignable(tm1, tm2);
+    }
+
     public TypeElement getTypeElement(CharSequence name) {
         return elements.getTypeElement(name);
     }

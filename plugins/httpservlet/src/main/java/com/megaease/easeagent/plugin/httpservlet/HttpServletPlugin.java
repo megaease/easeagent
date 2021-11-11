@@ -18,9 +18,7 @@
 package com.megaease.easeagent.plugin.httpservlet;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.annotation.Plugin;
 
-@Plugin
 public class HttpServletPlugin implements AgentPlugin {
     @Override
     public String getName() {

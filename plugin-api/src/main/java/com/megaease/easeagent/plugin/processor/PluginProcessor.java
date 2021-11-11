@@ -23,8 +23,6 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
-import com.megaease.easeagent.plugin.annotation.Plugin;
-import com.megaease.easeagent.plugin.annotation.Pointcut;
 import com.squareup.javapoet.JavaFile;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -44,7 +42,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -98,7 +95,7 @@ public class PluginProcessor extends AbstractProcessor {
         return types;
     }
 
-    private void writeToMetaInf(Class<?> dstClass, TreeSet<String> services) {
+    private void writeToMetaInf(Class<?> dstClass, Set<String> services) {
         String fileName = "META-INF/services/" + dstClass.getCanonicalName();
 
         if (services.isEmpty()) {
@@ -128,29 +125,39 @@ public class PluginProcessor extends AbstractProcessor {
         }
         final BeanUtils utils = BeanUtils.of(processingEnv);
         Elements elements = processingEnv.getElementUtils();
-        Set<TypeElement> plugins = process(Plugin.class, AgentPlugin.class, elements, roundEnv);
-        if (plugins.size() < 1) {
-            // processingEnv.getMessager().printMessage(Kind.ERROR, "Can't find AgentPlugin class!");
+        TypeElement plugin = searchPluginClass(roundEnv.getRootElements(), utils);
+        if (plugin == null) {
+            processingEnv.getMessager().printMessage(Kind.WARNING, "Can't find AgentPlugin class!");
             return false;
         }
-        if (plugins.size() > 1) {
-            processingEnv.getMessager().printMessage(Kind.ERROR, "There are more than one AgentPlugin class: "
-                + plugins.stream()
-                .map(e -> elements.getBinaryName(e).toString())
-                .collect(Collectors.joining(",")));
-            return false;
-        }
-        process(Pointcut.class, Points.class, elements, roundEnv);
+        // process(Pointcut.class, Points.class, elements, roundEnv);
         Set<TypeElement> interceptors = process(AdviceTo.class, Interceptor.class, elements, roundEnv);
         // generate providerBean
-        generateProviderBeans(plugins.toArray(new TypeElement[0])[0], interceptors, utils);
+        generateProviderBeans(plugin, interceptors, utils);
         // process(ProviderBean.class, Provider.class, elements, roundEnv);
 
         return false;
     }
 
+    TypeElement searchPluginClass(Set<? extends Element> elements, BeanUtils utils) {
+        TypeElement findInterface = utils.getTypeElement(AgentPlugin.class.getCanonicalName());
+        TypeElement firstFound;
+
+        ElementVisitor8 visitor = new ElementVisitor8(utils);
+        for (Element e : elements) {
+            firstFound = e.accept(visitor, findInterface);
+            if (firstFound != null) {
+                writeToMetaInf(AgentPlugin.class, Collections.singleton(utils.classNameOf(firstFound).canonicalName()));
+                return firstFound;
+            }
+        }
+
+        return null;
+    }
+
     public void generateProviderBeans(TypeElement plugin, Set<TypeElement> interceptors, BeanUtils utils) {
         TreeSet<String> providers = new TreeSet<>();
+        TreeSet<String> points = new TreeSet<>();
         for (TypeElement type : interceptors) {
             if(isNull(type.getAnnotation(AdviceTo.class))) {
                 continue;
@@ -172,6 +179,9 @@ public class PluginProcessor extends AbstractProcessor {
                         value = av.getValue().toString();
                     }
                     to.put(key, value);
+                    if (key.equals("value")) {
+                        points.add(value);
+                    }
                 }
                 GenerateProviderBean gb = new GenerateProviderBean(plugin, type, to, utils);
                 JavaFile file = gb.apply();
@@ -185,6 +195,7 @@ public class PluginProcessor extends AbstractProcessor {
                 }
             }
         }
+        writeToMetaInf(Points.class, points);
         writeToMetaInf(Provider.class, providers);
     }
 }

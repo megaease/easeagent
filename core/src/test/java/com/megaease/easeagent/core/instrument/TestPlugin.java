@@ -18,9 +18,7 @@
 package com.megaease.easeagent.core.instrument;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.annotation.Plugin;
 
-@Plugin
 public class TestPlugin implements AgentPlugin {
     @Override
     public String getName() {

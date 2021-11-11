@@ -18,7 +18,6 @@
 package com.megaease.easeagent.plugin.httpservlet.advice;
 
 import com.megaease.easeagent.plugin.Points;
-import com.megaease.easeagent.plugin.annotation.Pointcut;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -26,7 +25,6 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-@Pointcut
 public class DoFilterAdvice implements Points {
     private static final String FILTER_NAME = "javax.servlet.Filter";
     private static final String HTTP_SERVLET_NAME = "javax.servlet.http.HttpServlet";
