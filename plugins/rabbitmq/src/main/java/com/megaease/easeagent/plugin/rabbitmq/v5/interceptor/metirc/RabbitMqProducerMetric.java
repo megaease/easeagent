@@ -52,7 +52,6 @@ public class RabbitMqProducerMetric {
         defaultMeter.mark();
     }
 
-    @SuppressWarnings("unchecked")
     public static NameFactory getNameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,

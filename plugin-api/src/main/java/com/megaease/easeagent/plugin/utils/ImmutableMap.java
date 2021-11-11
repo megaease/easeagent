@@ -17,10 +17,10 @@
 
 package com.megaease.easeagent.plugin.utils;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
-@SuppressWarnings("NullableProblems")
-public class  ImmutableMap<K, V> implements Map<K, V> {
+public class ImmutableMap<K, V> implements Map<K, V> {
     Map<K, V> delegate;
 
     public ImmutableMap(Map<K, V> map) {
@@ -63,7 +63,7 @@ public class  ImmutableMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public void putAll(Map m) {
+    public void putAll(@Nonnull Map m) {
         throw new UnsupportedOperationException();
     }
 
@@ -73,21 +73,24 @@ public class  ImmutableMap<K, V> implements Map<K, V> {
     }
 
     @Override
+    @Nonnull
     public Set<K> keySet() {
         return delegate.keySet();
     }
 
     @Override
+    @Nonnull
     public Collection<V> values() {
         return delegate.values();
     }
 
     @Override
+    @Nonnull
     public Set<Entry<K, V>> entrySet() {
         return delegate.entrySet();
     }
 
-    public static <K, V> Builder builder() {
+    public static <K, V> Builder<K, V> builder() {
         return new Builder<K, V>();
     }
 

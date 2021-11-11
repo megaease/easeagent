@@ -23,7 +23,6 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
-@SuppressWarnings("all")
 public class RabbitMqConsumerMetric {
     public static NameFactory getNameFactory() {
         return NameFactory.createBuilder()
