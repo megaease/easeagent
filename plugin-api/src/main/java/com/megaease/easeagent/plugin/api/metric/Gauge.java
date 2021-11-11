@@ -31,6 +31,7 @@ package com.megaease.easeagent.plugin.api.metric;
  *
  * @param <T> the type of the metric's value
  */
+@FunctionalInterface
 public interface Gauge<T> extends Metric {
     /**
      * Returns the metric's current value.

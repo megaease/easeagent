@@ -18,18 +18,21 @@
 package com.megaease.easeagent.metrics.impl;
 
 
-import com.codahale.metrics.Gauge;
+import com.megaease.easeagent.plugin.api.metric.Gauge;
 
-public class GaugeImpl<T> implements Gauge<T> {
-    private final T t;
+public class GaugeImpl implements com.codahale.metrics.Gauge {
+    private final Gauge g;
 
-    public GaugeImpl(T t) {
-        this.t = t;
+    public GaugeImpl(Gauge g) {
+        this.g = g;
     }
 
+    Gauge getG() {
+        return g;
+    }
 
     @Override
-    public T getValue() {
-        return t;
+    public Object getValue() {
+        return g.getValue();
     }
 }

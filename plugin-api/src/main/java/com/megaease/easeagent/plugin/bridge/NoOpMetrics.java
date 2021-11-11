@@ -392,6 +392,11 @@ public final class NoOpMetrics {
         private static final NoopMetricRegistry INSTANCE = new NoopMetricRegistry();
 
         @Override
+        public boolean remove(String name) {
+            return true;
+        }
+
+        @Override
         public Meter meter(String name) {
             return NoopMeter.INSTANCE;
         }
@@ -402,7 +407,7 @@ public final class NoOpMetrics {
         }
 
         @Override
-        public <T> Gauge<T> gauge(String name, Supplier<Gauge<T>> supplier) {
+        public Gauge gauge(String name, Supplier<Gauge> supplier) {
             return NoopGauge.INSTANCE;
         }
 

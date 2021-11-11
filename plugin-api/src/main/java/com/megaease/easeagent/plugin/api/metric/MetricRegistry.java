@@ -23,6 +23,15 @@ import java.util.function.Supplier;
  * A registry of metric interface.
  */
 public interface MetricRegistry {
+
+    /**
+     * Removes the metric with the given name.
+     *
+     * @param name the name of the metric
+     * @return whether or not the metric was removed
+     */
+    boolean remove(String name);
+
     /**
      * Return the {@link Meter} registered under this name; or create and register
      * a new {@link Meter} if none is registered.
@@ -49,7 +58,8 @@ public interface MetricRegistry {
      * @param supplier a Supplier that can be used to manufacture a Gauge
      * @return a new or pre-existing {@link Gauge}
      */
-    <T> Gauge<T> gauge(String name, Supplier<Gauge<T>> supplier);
+    @SuppressWarnings("rawtypes")
+    Gauge gauge(String name, Supplier<Gauge> supplier);
 
     /**
      * Return the {@link Histogram} registered under this name; or create and register
