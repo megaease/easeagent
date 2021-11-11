@@ -51,8 +51,6 @@ public class PluginProcessor extends AbstractProcessor {
     // Class<Plugin> annotationClass = Plugin.class;
     TreeSet<String>  annotations = new TreeSet<>();
     {
-        annotations.add(Plugin.class.getCanonicalName());
-        annotations.add(Pointcut.class.getCanonicalName());
         annotations.add(AdviceTo.class.getCanonicalName());
         // for test temporarily
         // annotations.add(ProviderBean.class.getCanonicalName());
