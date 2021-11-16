@@ -65,53 +65,60 @@ public class MethodMatcherConvert
     }
 
     private Junction<MethodDescription> convert(MethodMatcher matcher) {
-        Junction<MethodDescription> c;
-        switch (matcher.getNameMatchType()) {
-            case EQUALS:
-                c = named(matcher.getName());
-                break;
-            case START_WITH:
-                c = nameStartsWith(matcher.getName());
-                break;
-            case END_WITH:
-                c = nameEndsWith(matcher.getName());
-                break;
-            case CONTAINS:
-                c = nameContains(matcher.getName());
-                break;
-            default:
-                return null;
+        Junction<MethodDescription> c = null;
+        if (matcher.getName() != null && matcher.getNameMatchType() != null) {
+            switch (matcher.getNameMatchType()) {
+                case EQUALS:
+                    c = named(matcher.getName());
+                    break;
+                case START_WITH:
+                    c = nameStartsWith(matcher.getName());
+                    break;
+                case END_WITH:
+                    c = nameEndsWith(matcher.getName());
+                    break;
+                case CONTAINS:
+                    c = nameContains(matcher.getName());
+                    break;
+                default:
+                    return null;
+            }
         }
 
         Junction<MethodDescription> mc = fromModifier(matcher.getModifier(), false);
         if (mc != null) {
-            c = c.and(mc);
+            c = c == null ? mc : c.and(mc);
         }
         mc = fromModifier(matcher.getNotModifier(), true);
         if (mc != null) {
-            c = c.and(mc);
+            c = c == null ? mc : c.and(mc);
         }
         if (matcher.getReturnType() != null) {
-            c = c.and(returns(named(matcher.getReturnType())));
+            mc = returns(named(matcher.getReturnType()));
+            c = c == null ? mc : c.and(mc);
         }
         if (matcher.getArgsLength() > -1) {
-            c.and(takesArguments(matcher.getArgsLength()));
+            mc = takesArguments(matcher.getArgsLength());
+            c = c == null ? mc : c.and(mc);
         }
         String [] args = matcher.getArgs();
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 if (args[i] != null) {
-                    c = c.and(takesArgument(i, named(args[i])));
+                    mc = takesArgument(i, named(args[i]));
+                    c = c == null ? mc : c.and(mc);
                 }
             }
         }
 
         if (matcher.getArgsLength() >= 0) {
-            c = c.and(takesArguments(matcher.getArgsLength()));
+            mc = takesArguments(matcher.getArgsLength());
+            c = c == null ? mc : c.and(mc);
         }
 
         if (matcher.getOverriddenFrom() != null) {
-            c = c.and(isOverriddenFrom(ClassMatcherConvert.INSTANCE.convert(matcher.getOverriddenFrom())));
+            mc = isOverriddenFrom(ClassMatcherConvert.INSTANCE.convert(matcher.getOverriddenFrom()));
+            c = c == null ? mc : c.and(mc);
         }
 
         return c;

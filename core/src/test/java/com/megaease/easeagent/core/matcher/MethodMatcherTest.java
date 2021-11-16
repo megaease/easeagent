@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.sql.Statement;
+import java.util.Set;
 
 public class MethodMatcherTest {
     static interface FooInterface {
@@ -48,9 +49,8 @@ public class MethodMatcherTest {
         }
     }
 
-    IClassMatcher named(String name) {
-        return ClassMatcher.builder()
-            .hasClassName(FooInterface.class.getName())
+    private IClassMatcher named(String name) {
+        return ClassMatcher.builder().hasClassName(name).isInterface()
             .build();
     }
 
@@ -60,7 +60,6 @@ public class MethodMatcherTest {
             .or(named(Statement.class.getName()));
 
         IMethodMatcher m = MethodMatcher.builder()
-            .named("basicPublish")
             .isOverriddenFrom(o)
             .build();
 
