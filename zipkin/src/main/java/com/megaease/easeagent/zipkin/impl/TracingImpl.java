@@ -176,7 +176,9 @@ public class TracingImpl implements ITracing {
     @Override
     public ProgressContext importProgress(Request request) {
         TraceContextOrSamplingFlags extracted = defaultExtractor.extract(request);
-        brave.Span span = tracer().nextSpan(extracted);
+        brave.Span span = extracted.context() != null
+            ? tracer().joinSpan(extracted.context())
+            : tracer().nextSpan(extracted);
         if (span.isNoop()) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }

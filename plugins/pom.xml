@@ -19,6 +19,7 @@
         <module>rabbitmq</module>
         <module>springweb</module>
         <module>httpservlet</module>
+        <module>redis</module>
     </modules>
 
     <build>
