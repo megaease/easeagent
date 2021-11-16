@@ -40,6 +40,7 @@ public class JedisAdvice implements Points {
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
         IClassMatcher overriddenFrom = named("redis.clients.jedis.commands.JedisCommands")
+            .or(named("redis.clients.jedis.JedisCommands"))
             .or(named("redis.clients.jedis.commands.AdvancedJedisCommands"))
             .or(named("redis.clients.jedis.commands.BasicCommands"))
             .or(named("redis.clients.jedis.commands.ClusterCommands"))
@@ -51,12 +52,14 @@ public class JedisAdvice implements Points {
             .or(named("redis.clients.jedis.commands.MultiKeyBinaryCommands"))
             .or(named("redis.clients.jedis.commands.AdvancedBinaryJedisCommands"))
             .or(named("redis.clients.jedis.commands.BinaryScriptingCommands"));
+        /*
         return MethodMatcher.multiBuilder()
             .match(MethodMatcher.builder().named("set").isPublic().build())
             .match(MethodMatcher.builder().named("exists").isPublic().build())
             .build();
-//        return MethodMatcher.multiBuilder()
-//            .match(MethodMatcher.builder().isOverriddenFrom(overriddenFrom).build())
-//            .build();
+         */
+        return MethodMatcher.multiBuilder()
+            .match(MethodMatcher.builder().isOverriddenFrom(overriddenFrom).build())
+            .build();
     }
 }

@@ -69,7 +69,7 @@ public class ForAdviceTransformer  implements AgentBuilder.Transformer {
         this.transformer = new AgentForAdvice(AgentAdvice.withCustomMapping()
             .bind(factory))
             .include(getClass().getClassLoader())
-            .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
+            .advice(methodTransformInfo.getMatcher(),
                 CommonInlineAdvice.class.getCanonicalName());
     }
 

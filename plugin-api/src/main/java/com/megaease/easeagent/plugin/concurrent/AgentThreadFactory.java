@@ -15,20 +15,16 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.concurrent;
 
-import com.megaease.easeagent.plugin.Points;
+import javax.annotation.Nullable;
+import java.util.concurrent.ThreadFactory;
 
-import java.lang.annotation.*;
-
-/**
- * use to annotate Interceptor implementation,
- * to link Interceptor to Pointcut
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Repeatable(AdvicesTo.class)
-public @interface AdviceTo {
-    Class<? extends Points> value();
-    String qualifier() default "default";
+public class AgentThreadFactory implements ThreadFactory {
+    @Override
+    public Thread newThread(@Nullable Runnable r) {
+        Thread thread = new Thread(r);
+        thread.setDaemon(true);
+        return thread;
+    }
 }

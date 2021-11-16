@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.core.matcher;
 
-import com.megaease.easeagent.core.instrument.StaticMethodTransformTest;
 import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
@@ -30,10 +29,10 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.sql.Statement;
-import java.util.Set;
 
 public class MethodMatcherTest {
-    static interface FooInterface {
+    @SuppressWarnings("unused")
+    interface FooInterface {
         void basicPublish(int a1, int a2, int a3, int a4);
     }
 

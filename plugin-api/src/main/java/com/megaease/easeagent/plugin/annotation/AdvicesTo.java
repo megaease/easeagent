@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core;
+package com.megaease.easeagent.plugin.annotation;
 
-import javax.annotation.Nullable;
-import java.util.concurrent.ThreadFactory;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class AgentThreadFactory implements ThreadFactory {
-    @Override
-    public Thread newThread(@Nullable Runnable r) {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        return thread;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface AdvicesTo {
+    AdviceTo[] value();
 }

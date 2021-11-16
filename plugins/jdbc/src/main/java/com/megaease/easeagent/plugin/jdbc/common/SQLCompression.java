@@ -15,20 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.jdbc.common;
 
-import com.megaease.easeagent.plugin.Points;
+public interface SQLCompression {
 
-import java.lang.annotation.*;
+    SQLCompression DEFAULT = origin -> origin;
 
-/**
- * use to annotate Interceptor implementation,
- * to link Interceptor to Pointcut
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Repeatable(AdvicesTo.class)
-public @interface AdviceTo {
-    Class<? extends Points> value();
-    String qualifier() default "default";
+    String compress(String origin);
 }

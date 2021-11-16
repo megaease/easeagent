@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.jdbc;
+package com.megaease.easeagent.plugin.jdbc.common;
 
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class SqlInfo {
     private final Connection connection;
 

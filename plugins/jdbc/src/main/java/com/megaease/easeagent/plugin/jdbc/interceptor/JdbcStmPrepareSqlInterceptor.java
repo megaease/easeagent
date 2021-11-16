@@ -17,35 +17,34 @@
 
 package com.megaease.easeagent.plugin.jdbc.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
-import com.megaease.easeagent.plugin.jdbc.SqlInfo;
+import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
+import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 
 import java.sql.Statement;
 
-public class JdbcStmPrepareSqlInterceptor implements Interceptor {
-    private static Logger log = EaseAgent.getLogger(JdbcStmPrepareSqlInterceptor.class);
-    private static String ENTER_KEY = JdbcStmPrepareSqlInterceptor.class.getSimpleName();
+@AdviceTo(JdbcStatementAdvice.class)
+@AdviceTo(value = JdbcStatementAdvice.class, qualifier = "batch")
+public class JdbcStmPrepareSqlInterceptor implements FirstEnterInterceptor {
+    private static final Logger log = EaseAgent.getLogger(JdbcStmPrepareSqlInterceptor.class);
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
+    public void doBefore(MethodInfo methodInfo, Context context) {
         Statement stm = (Statement) methodInfo.getInvoker();
         if (!(stm instanceof DynamicFieldAccessor)) {
             log.warn("statement must implements " + DynamicFieldAccessor.class.getName());
             return;
         }
 
-        if (!context.enter(ENTER_KEY, 1)) {
-            context.exit(ENTER_KEY);
-            return;
-        };
-
-        SqlInfo sqlInfo = (SqlInfo) AgentDynamicFieldAccessor.getDynamicFieldValue(stm);
+        SqlInfo sqlInfo = AgentDynamicFieldAccessor.getDynamicFieldValue(stm);
         if (sqlInfo == null) {
             /*
              * This happens:
@@ -76,5 +75,15 @@ public class JdbcStmPrepareSqlInterceptor implements Interceptor {
             sqlInfo.addSql(sql, false);
         }
         context.put(SqlInfo.class, sqlInfo);
+    }
+
+    @Override
+    public String getName() {
+        return Order.TRACING.getName();
+    }
+
+    @Override
+    public int order() {
+        return Order.HIGH.getOrder();
     }
 }

@@ -15,20 +15,40 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.jdbc.common;
 
-import com.megaease.easeagent.plugin.Points;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Data;
 
-import java.lang.annotation.*;
+@Data
+@Builder
+public class MD5DictionaryItem {
+    //global field
+    private long timestamp;
 
-/**
- * use to annotate Interceptor implementation,
- * to link Interceptor to Pointcut
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Repeatable(AdvicesTo.class)
-public @interface AdviceTo {
-    Class<? extends Points> value();
-    String qualifier() default "default";
+    private String category;
+
+    @JsonProperty("host_name")
+    private String hostName;
+
+    @JsonProperty("host_ipv4")
+    private String hostIpv4;
+
+    private String gid;
+
+    private String service;
+
+    private String system;
+
+    private String type;
+
+    private String tags;
+
+    private String id;
+
+    // self field
+    private String md5;
+
+    private String sql;
 }

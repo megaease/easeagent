@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.common.concurrent;
-
-import com.megaease.easeagent.core.AgentThreadFactory;
+package com.megaease.easeagent.plugin.concurrent;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;

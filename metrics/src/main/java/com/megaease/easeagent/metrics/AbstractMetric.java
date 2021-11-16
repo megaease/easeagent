@@ -18,7 +18,7 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.common.concurrent.ScheduleHelper;
+import com.megaease.easeagent.plugin.concurrent.ScheduleHelper;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 
