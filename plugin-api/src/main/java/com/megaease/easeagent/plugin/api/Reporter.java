@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.report;
+package com.megaease.easeagent.plugin.api;
 
-import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
-
-public interface PluginMetricReporter {
-    Reporter reporter(Config config);
+/**
+ * a reporter for message like metric or trace
+ */
+public interface Reporter {
+    void report(String msg);
 }

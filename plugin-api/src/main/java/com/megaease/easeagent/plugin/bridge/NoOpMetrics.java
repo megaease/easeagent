@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.bridge;
 
+import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
@@ -27,6 +28,8 @@ import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+
+import static com.megaease.easeagent.plugin.bridge.NoOpReporter.NO_OP_REPORTER;
 
 public final class NoOpMetrics {
     public static final MetricRegistrySupplier NO_OP_METRIC_SUPPLIER = NoopMetricsRegistrySupplier.INSTANCE;
@@ -44,6 +47,11 @@ public final class NoOpMetrics {
         @Override
         public MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
             return NoopMetricRegistry.INSTANCE;
+        }
+
+        @Override
+        public Reporter reporter(Config config) {
+            return NO_OP_REPORTER;
         }
     }
 

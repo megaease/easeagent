@@ -26,6 +26,7 @@ import com.megaease.easeagent.core.log.LoggerMdc;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.logging.Mdc;
@@ -34,10 +35,7 @@ import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.bridge.NoOpLoggerFactory;
-import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
-import com.megaease.easeagent.plugin.bridge.NoOpTracer;
+import com.megaease.easeagent.plugin.bridge.*;
 import com.megaease.easeagent.plugin.utils.NoNull;
 import com.megaease.easeagent.report.AgentReport;
 
@@ -111,6 +109,11 @@ public class ContextManager {
         @Override
         public MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
             return NoNull.of(metric.newMetricRegistry(config, nameFactory, tags), NoOpMetrics.NO_OP_METRIC);
+        }
+
+        @Override
+        public Reporter reporter(Config config) {
+            return NoNull.of(metric.reporter(config), NoOpReporter.NO_OP_REPORTER);
         }
     }
 

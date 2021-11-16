@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
@@ -59,5 +60,12 @@ public final class EaseAgent {
      */
     public static MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
         return metricRegistrySupplier.newMetricRegistry(config, nameFactory, tags);
+    }
+
+    /**
+     * @see MetricRegistrySupplier#reporter(Config)
+     */
+    public static Reporter metricReporter(Config config) {
+        return metricRegistrySupplier.reporter(config);
     }
 }

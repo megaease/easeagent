@@ -15,11 +15,15 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.report;
+package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
 
-public interface PluginMetricReporter {
-    Reporter reporter(Config config);
+public class NoOpReporter implements Reporter {
+    public static NoOpReporter NO_OP_REPORTER = new NoOpReporter();
+
+    @Override
+    public void report(String msg) {
+
+    }
 }
