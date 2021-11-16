@@ -17,18 +17,18 @@
 
 package com.megaease.easeagent.plugin.matcher;
 
-import com.megaease.easeagent.plugin.matcher.operator.Operator;
+import com.megaease.easeagent.plugin.matcher.operator.*;
 
 public interface IClassMatcher extends Operator<IClassMatcher>, Matcher {
     default IClassMatcher and(IClassMatcher m) {
-        return null;
+        return new AndClassMatcher(this, m);
     }
 
     default IClassMatcher or(IClassMatcher m) {
-        return null;
+        return new OrClassMatcher(this, m);
     }
 
     default IClassMatcher not() {
-        return null;
+        return new NotClassMatcher(this);
     }
 }

@@ -51,7 +51,6 @@ public class ClassMatcher implements IClassMatcher {
         return new ClassMatcherBuilder();
     }
 
-
     public static class ClassMatcherBuilder {
         private String name;
         private ClassMatch matchType;
@@ -117,7 +116,7 @@ public class ClassMatcher implements IClassMatcher {
             return this.name(className).matchType(ClassMatch.INTERFACE);
         }
 
-        public ClassMatcherBuilder name(String name) {
+        protected ClassMatcherBuilder name(String name) {
             this.name = name;
             return this;
         }

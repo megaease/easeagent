@@ -34,7 +34,7 @@ public class ContextUtils {
         return (Long) context.get(BEGIN_TIME);
     }
 
-    private static void setBeginTime(Context context) {
+    public static void setBeginTime(Context context) {
         context.put(BEGIN_TIME, System.currentTimeMillis());
     }
 
@@ -57,12 +57,6 @@ public class ContextUtils {
 
     public static long getDuration(Map<Object, Object> context) {
         return getEndTime(context) - getBeginTime(context);
-    }
-
-    public static Map<Object, Object> createContext() {
-        HashMap<Object, Object> map = new HashMap<>();
-        setBeginTime(map);
-        return map;
     }
 
     /**

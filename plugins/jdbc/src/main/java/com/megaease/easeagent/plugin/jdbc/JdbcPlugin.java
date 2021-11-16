@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.AgentPlugin;
 public class JdbcPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "jdbc-plugin";
+        return "jdbc";
     }
 
     @Override

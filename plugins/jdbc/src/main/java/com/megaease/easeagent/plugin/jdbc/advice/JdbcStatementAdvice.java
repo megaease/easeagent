@@ -37,11 +37,22 @@ public class JdbcStatementAdvice implements Points {
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
-        IClassMatcher overriddenFrom = getClassMatcher();
-        return MethodMatcher.builder()
-            .nameStartWith("execute")
-            .isOverriddenFrom(overriddenFrom)
-            .build().toSet();
+        IClassMatcher overriddenFrom = ClassMatcher.builder()
+            .hasClassName("java.sql.Statement")
+            .or().hasClassName("java.sql.PreparedStatement")
+            .build();
+
+        return MethodMatcher.multiBuilder()
+            .match(MethodMatcher.builder()
+                .nameStartWith("execute")
+                .isOverriddenFrom(overriddenFrom)
+                .build())
+            .match(MethodMatcher.builder()
+                .named("addBatch")
+                .or().named("clearBatch")
+                .qualifier("batch")
+                .build())
+            .build();
     }
 
     @Override

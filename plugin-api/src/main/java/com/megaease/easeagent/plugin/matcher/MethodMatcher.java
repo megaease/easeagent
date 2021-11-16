@@ -151,7 +151,7 @@ public class MethodMatcher implements IMethodMatcher {
             return this;
         }
 
-        public MethodMatcherBuilder name(String name) {
+        protected MethodMatcherBuilder name(String name) {
             this.name = name;
             return this;
         }

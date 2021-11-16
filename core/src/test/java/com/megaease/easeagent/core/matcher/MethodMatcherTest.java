@@ -17,7 +17,10 @@
 
 package com.megaease.easeagent.core.matcher;
 
+import com.megaease.easeagent.core.instrument.StaticMethodTransformTest;
 import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
+import com.megaease.easeagent.plugin.matcher.ClassMatcher;
+import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import net.bytebuddy.description.method.MethodDescription;
@@ -26,11 +29,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.sql.Statement;
 
 public class MethodMatcherTest {
+    static interface FooInterface {
+        void basicPublish(int a1, int a2, int a3, int a4);
+    }
 
     @SuppressWarnings("unused")
-    public static class Foo {
+    static class Foo implements FooInterface {
+        @Override
         public void basicPublish(int a1, int a2, int a3, int a4) {
             System.out.println("sum:" + a1 + a2 + a3 + a4);
         }
@@ -38,6 +46,36 @@ public class MethodMatcherTest {
         void basicConsume(int a1, int a2, int a3, int a4) {
             System.out.println("sum:" + a1 + a2 + a3 + a4);
         }
+    }
+
+    IClassMatcher named(String name) {
+        return ClassMatcher.builder()
+            .hasClassName(FooInterface.class.getName())
+            .build();
+    }
+
+    @Test
+    public void testIsOverriddenFrom() {
+        IClassMatcher o = named(FooInterface.class.getName())
+            .or(named(Statement.class.getName()));
+
+        IMethodMatcher m = MethodMatcher.builder()
+            .named("basicPublish")
+            .isOverriddenFrom(o)
+            .build();
+
+        ElementMatcher<MethodDescription> eMatcher = MethodMatcherConvert.INSTANCE.convert(m);
+        Method reflectMethod;
+        try {
+            reflectMethod = Foo.class.getDeclaredMethod("basicPublish",
+                int.class, int.class, int.class, int.class);
+        } catch (Exception e) {
+            reflectMethod = null;
+        }
+        Assert.assertNotNull(reflectMethod);
+        MethodDescription method = new MethodDescription.ForLoadedMethod(reflectMethod);
+
+        Assert.assertTrue(eMatcher.matches(method));
     }
 
     @Test
