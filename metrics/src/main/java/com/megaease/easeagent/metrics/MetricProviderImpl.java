@@ -27,6 +27,7 @@ import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.impl.MetricRegistryImpl;
+import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.MetricType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
@@ -92,11 +93,16 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
                 }
             }
             ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes, MetricProviderImpl.this.additionalAttributes, tags);
-            PluginMetricReporter.Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
+            Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
             new AutoRefreshReporter(metricRegistry, metricsConfig,
                 converterAdapter,
                 s -> reporter.report(s)).run();
             return MetricRegistryImpl.build(metricRegistry);
+        }
+
+        @Override
+        public Reporter reporter(com.megaease.easeagent.plugin.api.config.Config config) {
+            return agentReport.pluginMetricReporter().reporter(config);
         }
     }
 }

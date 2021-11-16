@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.api.metric;
 
+import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.MetricField;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
@@ -58,7 +59,7 @@ public interface MetricRegistrySupplier {
      * The above code tells the calculation program:
      * Need a Counter, this Counter calculates the value of {@link MetricField#EXECUTION_COUNT}(key="cnt"},
      * this value is obtained using the {@link Counter#getCount}  method
-     *
+     * <p>
      * The output is as follows:
      * <pre>{@code
      *     {
@@ -75,4 +76,16 @@ public interface MetricRegistrySupplier {
      * @return {@link MetricRegistry}
      */
     MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags);
+
+    /**
+     * get plugin metric reporter
+     *
+     * <pre>{@code
+     *     Reporter reporter = supplier.reporter(config);
+     *     reporter.report("{'url': 'http://127.0.0.1:8080', 'cnt': 1}");
+     * }
+     * @param config {@link Config} metric config
+     * @return {@link Reporter}
+     */
+    Reporter reporter(Config config);
 }

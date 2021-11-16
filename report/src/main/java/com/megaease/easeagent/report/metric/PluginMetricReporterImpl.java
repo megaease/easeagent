@@ -44,7 +44,7 @@ public class PluginMetricReporterImpl implements PluginMetricReporter {
     }
 
     @Override
-    public PluginMetricReporter.Reporter reporter(Config config) {
+    public com.megaease.easeagent.plugin.api.Reporter reporter(Config config) {
         return new Reporter(config);
     }
 
@@ -61,7 +61,7 @@ public class PluginMetricReporterImpl implements PluginMetricReporter {
         }
     }
 
-    public class Reporter implements PluginMetricReporter.Reporter, com.megaease.easeagent.plugin.api.config.ConfigChangeListener {
+    public class Reporter implements com.megaease.easeagent.plugin.api.Reporter, com.megaease.easeagent.plugin.api.config.ConfigChangeListener {
         private final String domain;
         private volatile MetricProps metricProps;
         private volatile KeySender sender;
