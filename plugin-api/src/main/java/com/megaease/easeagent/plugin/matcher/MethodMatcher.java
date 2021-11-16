@@ -18,10 +18,15 @@
 package com.megaease.easeagent.plugin.matcher;
 
 import com.megaease.easeagent.plugin.asm.Modifier;
+import com.megaease.easeagent.plugin.enums.Operator;
 import com.megaease.easeagent.plugin.enums.StringMatch;
+import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
 import lombok.Data;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Data
 @SuppressWarnings("unused")
@@ -36,6 +41,8 @@ public class MethodMatcher implements IMethodMatcher {
     private int modifier = Modifier.ACC_NONE;
     private int notModifier = Modifier.ACC_NONE;
 
+    private IClassMatcher overriddenFrom = null;
+
     private String qualifier;
 
     public static int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_STATIC
@@ -45,7 +52,8 @@ public class MethodMatcher implements IMethodMatcher {
     }
 
     private MethodMatcher(String name, StringMatch type, String returnType,
-                            String[] args, int argLength, int modifier, int notModifier, String qualifier) {
+                          String[] args, int argLength, int modifier,
+                          int notModifier, String qualifier, IClassMatcher overriddenFrom) {
         this.name = name;
         this.nameMatchType = type;
         this.returnType = returnType;
@@ -54,6 +62,7 @@ public class MethodMatcher implements IMethodMatcher {
         this.modifier = modifier;
         this.notModifier = notModifier;
         this.qualifier = qualifier;
+        this.overriddenFrom = overriddenFrom;
     }
 
     public static MethodMatcherBuilder builder() {
@@ -68,9 +77,22 @@ public class MethodMatcher implements IMethodMatcher {
         private int argsLength = -1;
         private int modifier;
         private int notModifier;
+
+        private IClassMatcher isOverriddenFrom;
         private String qualifier = "default";
 
+        private Operator operator = Operator.AND;
+        private IMethodMatcher left;
+
         MethodMatcherBuilder() {
+        }
+
+        public MethodMatcherBuilder or() {
+            return operate(Operator.OR);
+        }
+
+        public MethodMatcherBuilder and() {
+            return operate(Operator.AND);
         }
 
         public MethodMatcherBuilder named(String methodName) {
@@ -108,7 +130,6 @@ public class MethodMatcher implements IMethodMatcher {
             this.modifier |= Modifier.ACC_STATIC;
             return this;
         }
-
 
         public MethodMatcherBuilder notPublic() {
             this.notModifier |= Modifier.ACC_PUBLIC;
@@ -184,9 +205,33 @@ public class MethodMatcher implements IMethodMatcher {
             return this;
         }
 
-        public MethodMatcher build() {
-            return new MethodMatcher(name, nameMatchType, returnType,
-                args, argsLength, modifier, notModifier, qualifier);
+        public MethodMatcherBuilder isOverriddenFrom(IClassMatcher cMatcher) {
+            this.isOverriddenFrom = cMatcher;
+            return this;
+        }
+
+        public IMethodMatcher build() {
+            IMethodMatcher matcher = new MethodMatcher(name, nameMatchType, returnType,
+                args, argsLength, modifier, notModifier, qualifier, isOverriddenFrom);
+
+            if (this.left == null || this.operator == null) {
+                return matcher;
+            }
+            switch (this.operator) {
+                case OR:
+                    return new OrMethodMatcher(this.left, matcher);
+                case AND:
+                    return new AndMethodMatcher(this.left, matcher);
+                default:
+                    return matcher;
+            }
+        }
+
+        private MethodMatcherBuilder operate(Operator opt) {
+            MethodMatcherBuilder builder = new MethodMatcherBuilder();
+            builder.left = this.build();
+            builder.operator = opt;
+            return builder;
         }
 
         public String toString() {
@@ -213,7 +258,7 @@ public class MethodMatcher implements IMethodMatcher {
             return this;
         }
 
-        public MethodMatchersBuilder match(MethodMatcher matcher) {
+        public MethodMatchersBuilder match(IMethodMatcher matcher) {
             if (matcher == null) {
                 return this;
             }

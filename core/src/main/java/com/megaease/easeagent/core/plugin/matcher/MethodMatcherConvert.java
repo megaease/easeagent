@@ -105,8 +105,13 @@ public class MethodMatcherConvert
                 }
             }
         }
+
         if (matcher.getArgsLength() >= 0) {
             c = c.and(takesArguments(matcher.getArgsLength()));
+        }
+
+        if (matcher.getOverriddenFrom() != null) {
+            c = c.and(isOverriddenFrom(ClassMatcherConvert.INSTANCE.convert(matcher.getOverriddenFrom())));
         }
 
         return c;

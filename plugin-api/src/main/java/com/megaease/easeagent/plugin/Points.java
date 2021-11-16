@@ -55,6 +55,10 @@ public interface Points {
 
     /**
      * when return true, the transformer will add a Object field and a accessor
+     * The dynamically added member can be accessed by AgentDynamicFieldAccessor:
+     *
+     * AgentDynamicFieldAccessor.setDynamicFieldValue(instance, value)
+     * value = AgentDynamicFieldAccessor.getDynamicFieldValue(instance)
      */
     default boolean isAddDynamicField() {
         return false;

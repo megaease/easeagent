@@ -65,6 +65,13 @@ public class ClassMatcher implements IClassMatcher {
         ClassMatcherBuilder() {
         }
 
+        public ClassMatcherBuilder or() {
+            ClassMatcherBuilder builder = new ClassMatcherBuilder();
+            builder.left = this.build();
+            builder.operator = Operator.OR;
+            return builder;
+        }
+
         public ClassMatcherBuilder hasSuperClass(String className) {
             if (this.name != null && this.name.length() > 0) {
                 if (this.matchType.equals(ClassMatch.SUPER_CLASS)) {
@@ -198,5 +205,3 @@ public class ClassMatcher implements IClassMatcher {
         }
     }
 }
-
-
