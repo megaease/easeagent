@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor.metirc;
+package com.megaease.easeagent.plugin.rabbitmq;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.Meter;

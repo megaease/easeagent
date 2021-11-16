@@ -122,6 +122,13 @@
                                 <copy todir="target/plugins" flatten="true">
                                     <fileset dir="${project.basedir}/../plugins" includes="**/*.jar"/>
                                 </copy>
+
+                                <!--
+                                <mkdir dir="target/boot"/>
+                                <copy todir="target/boot" flatten="true">
+                                    <fileset dir="${project.basedir}/../log4j2/log4j2-api" includes="**/log4j2-api*.jar"/>
+                                </copy>
+                                -->
                                 
                                 <mkdir dir="target/log4j2"/>
                                 <copy todir="target/log4j2" flatten="true">

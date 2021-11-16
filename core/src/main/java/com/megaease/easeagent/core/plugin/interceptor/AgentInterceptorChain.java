@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public class AgentInterceptorChain {
+    private static Logger log = EaseAgent.loggerFactory.getLogger(AgentInterceptorChain.class);
     public ArrayList<Interceptor> interceptors;
 
     public AgentInterceptorChain(List<Interceptor> interceptors) {
@@ -50,6 +53,7 @@ public class AgentInterceptorChain {
             interceptor.before(methodInfo, context);
         } catch (Throwable e) {
             // set error message to context;
+            log.debug("Interceptor execute exception:" + e.getMessage());
         }
         this.doBefore(methodInfo, pos + 1, context);
     }
@@ -63,6 +67,7 @@ public class AgentInterceptorChain {
             interceptor.after(methodInfo, context);
         } catch (Throwable e) {
             // set error message to context;
+            log.debug("Interceptor execute exception:" + e.getMessage());
         }
         return this.doAfter(methodInfo, pos - 1, context);
     }

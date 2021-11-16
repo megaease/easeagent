@@ -15,15 +15,30 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor.metirc;
+package com.megaease.easeagent.plugin.rabbitmq;
 
-import com.megaease.easeagent.plugin.api.metric.name.MetricField;
-import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
-import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.metric.Meter;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.Timer;
+import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 public class RabbitMqConsumerMetric {
+    final NameFactory nameFactory;
+    final MetricRegistry metric;
+
+    public RabbitMqConsumerMetric(Config config) {
+        this.nameFactory = getNameFactory();
+        // Tags tags = new Tags("application", "rabbitmq-ex-ro", "resource");
+        Tags tags = new Tags("application", "rabbitmq-consumer", "resource");
+        this.metric = EaseAgent.newMetricRegistry(config, this.nameFactory, tags);
+    }
+
     public static NameFactory getNameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
@@ -50,5 +65,18 @@ public class RabbitMqConsumerMetric {
                 .put(MetricField.QUEUE_M15_ERROR_RATE, MetricValueFetcher.MeteredM15Rate)
                 .build())
             .build();
+    }
+
+    public void metricAfter(String queue, long beginTime, boolean success) {
+        Map<MetricSubType, MetricName> timerNames = this.nameFactory.timerNames(queue);
+        MetricName metricName = timerNames.get(MetricSubType.DEFAULT);
+        Timer timer = this.metric.timer(metricName.name());
+        timer.update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
+        final Meter defaultMeter = this.metric.meter(this.nameFactory.meterName(queue, MetricSubType.CONSUMER));
+        final Meter errorMeter = this.metric.meter(this.nameFactory.meterName(queue, MetricSubType.CONSUMER_ERROR));
+        if (!success) {
+            errorMeter.mark();
+        }
+        defaultMeter.mark();
     }
 }

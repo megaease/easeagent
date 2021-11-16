@@ -15,26 +15,45 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor.tracing;
+package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
+import com.rabbitmq.client.AMQP;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @AdviceTo(RabbitMqConsumerAdvice.class)
-public class RabbitMqChannelConsumerDeliveryTracingInterceptor implements Interceptor {
+public class RabbitMqChannelConsumerDeliveryInterceptor implements Interceptor {
     @Override
-    public void before(MethodInfo info, Context context) {
+    public void before(MethodInfo methodInfo, Context context) {
+        String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(methodInfo.getInvoker());
+        context.put(ContextCons.MQ_URI, uri);
+        AMQP.BasicProperties properties = (AMQP.BasicProperties) methodInfo.getArgs()[2];
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(ContextCons.MQ_URI, uri);
+        if (properties.getHeaders() != null) {
+            headers.putAll(properties.getHeaders());
+        }
+        AgentFieldReflectAccessor.setFieldValue(properties, "headers", headers);
+    }
 
+    @Override
+    public void after(MethodInfo methodInfo, Context context) {
     }
 
     @Override
     public int order() {
-        return Order.TRACING.getOrder();
+        return Order.HIGHEST.getOrder();
     }
 
     @Override

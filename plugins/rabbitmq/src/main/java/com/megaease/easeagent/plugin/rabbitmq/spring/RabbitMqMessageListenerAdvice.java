@@ -44,47 +44,4 @@ public class RabbitMqMessageListenerAdvice implements Points {
                 .build())
             .toSet();
     }
-
-    /*
-    @Override
-    public <T extends Definition> T define(Definition<T> def) {
-        return def.type(hasSuperType(named("org.springframework.amqp.core.MessageListener")))
-                .transform(onMessage((named("onMessage").or(named("onMessageBatch")))
-                ))
-                .end()
-                ;
-    }
-
-    @AdviceTo(OnMessage.class)
-    public abstract Definition.Transformer onMessage(ElementMatcher<? super MethodDescription> matcher);
-
-    static class OnMessage extends AbstractAdvice {
-
-        @Injection.Autowire
-        public OnMessage(AgentInterceptorChainInvoker chainInvoker,
-                         @Injection.Qualifier("supplier4SpringRabbitMqMessageListenerOnMessage") Supplier<AgentInterceptorChain.Builder> supplier
-        ) {
-            super(supplier, chainInvoker);
-        }
-
-        @Advice.OnMethodEnter
-        public ForwardLock.Release<Map<Object, Object>> enter(
-                @Advice.This Object invoker,
-                @Advice.Origin("#m") String method,
-                @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args
-        ) {
-            return this.doEnter(invoker, method, args);
-        }
-
-        @Advice.OnMethodExit(onThrowable = Throwable.class)
-        public void exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                         @Advice.This Object invoker,
-                         @Advice.Origin("#m") String method,
-                         @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
-                         @Advice.Thrown Throwable throwable
-        ) {
-            this.doExitNoRetValue(release, invoker, method, args, throwable);
-        }
-    }
-    */
 }

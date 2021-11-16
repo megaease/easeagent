@@ -47,6 +47,10 @@ public class RabbitMqConsumerHandleDeliveryInterceptor implements Interceptor {
     }
 
     @Override
+    public void after(MethodInfo methodInfo, Context context) {
+    }
+
+    @Override
     public int order() {
         return Order.HIGHEST.getOrder();
     }

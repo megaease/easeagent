@@ -33,6 +33,7 @@ import com.rabbitmq.client.AMQP;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 @AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish")
 public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
     private static final String SPAN_CONTEXT_KEY = RabbitMqChannelPublishTracingInterceptor.class.getName() + "-Span";
@@ -52,14 +53,6 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
         RabbitProducerRequest producerRequest = new RabbitProducerRequest(exchange, routingKey, basicProperties);
         context.put(RabbitProducerRequest.class, producerRequest);
 
-        // CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();
-        // TraceContext traceContext = currentTraceContext.get();
-        // if (traceContext == null) {
-        //     span = Tracing.currentTracer().nextSpan();
-        // } else {
-        //     span = Tracing.currentTracer().newChild(traceContext);
-        // }
-
         Span span = context.producerSpan(producerRequest);
         if (exchange != null) {
             span.tag("rabbit.exchange", exchange);
@@ -72,9 +65,6 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
             span.remoteServiceName("rabbitmq");
             span.start();
         }
-
-        // context.put(SPAN_CONTEXT_KEY, span);
-        // injector.inject(span.context(), producerRequest);
 
         context.put(SPAN_CONTEXT_KEY, span);
     }

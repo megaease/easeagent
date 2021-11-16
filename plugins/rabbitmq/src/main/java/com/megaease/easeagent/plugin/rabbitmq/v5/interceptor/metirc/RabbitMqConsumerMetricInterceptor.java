@@ -31,7 +31,8 @@ import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.rabbitmq.spring.RabbitMqOnMessageMetricInterceptor;
+import com.megaease.easeagent.plugin.rabbitmq.RabbitMqConsumerMetric;
+import com.megaease.easeagent.plugin.rabbitmq.spring.interceptor.RabbitMqOnMessageMetricInterceptor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 import com.rabbitmq.client.Envelope;
 

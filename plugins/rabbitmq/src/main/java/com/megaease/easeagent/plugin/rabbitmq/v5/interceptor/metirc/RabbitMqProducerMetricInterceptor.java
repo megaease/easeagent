@@ -24,9 +24,11 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.rabbitmq.spring.RabbitMqOnMessageMetricInterceptor;
+import com.megaease.easeagent.plugin.rabbitmq.RabbitMqProducerMetric;
+import com.megaease.easeagent.plugin.rabbitmq.spring.interceptor.RabbitMqOnMessageMetricInterceptor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 
+@SuppressWarnings("unused")
 @AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish")
 public class RabbitMqProducerMetricInterceptor implements Interceptor {
     private static volatile RabbitMqProducerMetric METRIC = null;
@@ -42,6 +44,10 @@ public class RabbitMqProducerMetricInterceptor implements Interceptor {
             }
             METRIC = new RabbitMqProducerMetric(config);
         }
+    }
+
+    @Override
+    public void before(MethodInfo methodInfo, Context context) {
     }
 
     @Override

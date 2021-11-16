@@ -27,15 +27,14 @@ public interface Interceptor extends Ordered {
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
      */
-    default void before(MethodInfo methodInfo, Context context) {
-    }
+    void before(MethodInfo methodInfo, Context context);
 
     /**
      * @param methodInfo instrumented method info
      * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
      */
     default void after(MethodInfo methodInfo, Context context) {
-    }
+    };
 
     /**
      * Interceptor can get interceptor config thought Config API :

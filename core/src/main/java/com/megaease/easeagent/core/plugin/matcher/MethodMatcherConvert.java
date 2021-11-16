@@ -105,6 +105,9 @@ public class MethodMatcherConvert
                 }
             }
         }
+        if (matcher.getArgsLength() >= 0) {
+            c = c.and(takesArguments(matcher.getArgsLength()));
+        }
 
         return c;
     }

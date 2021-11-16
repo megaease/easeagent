@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.rabbitmq.spring;
+package com.megaease.easeagent.plugin.rabbitmq.spring.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.rabbitmq.spring.RabbitMqMessageListenerAdvice;
 import org.springframework.amqp.core.Message;
 
 import java.util.List;
@@ -41,6 +42,10 @@ public class RabbitMqMessageListenerOnMessageInterceptor implements Interceptor 
         }
         String uri = message.getMessageProperties().getHeader(ContextCons.MQ_URI);
         context.put(ContextCons.MQ_URI, uri);
+    }
+
+    @Override
+    public void after(MethodInfo methodInfo, Context context) {
     }
 
     @Override

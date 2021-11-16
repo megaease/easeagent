@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.rabbitmq.spring;
+package com.megaease.easeagent.plugin.rabbitmq.spring.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
@@ -26,6 +26,7 @@ import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.rabbitmq.spring.RabbitMqMessageListenerAdvice;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 
