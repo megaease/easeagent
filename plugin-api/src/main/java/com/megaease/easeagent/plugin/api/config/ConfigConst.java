@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.config;
+package com.megaease.easeagent.plugin.api.config;
 
+@SuppressWarnings("unused")
 public interface ConfigConst {
     String PLUGIN = "plugin";
     String PLUGIN_GLOBAL = "global";

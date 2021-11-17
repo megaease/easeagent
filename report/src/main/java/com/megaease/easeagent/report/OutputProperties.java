@@ -21,7 +21,7 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 
-import static com.megaease.easeagent.config.ConfigConst.Observability.*;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
 
 public interface OutputProperties {
     String getServers();

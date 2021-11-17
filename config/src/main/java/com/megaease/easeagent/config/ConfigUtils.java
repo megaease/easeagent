@@ -19,6 +19,7 @@ package com.megaease.easeagent.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import java.io.IOException;
 import java.util.*;
@@ -26,7 +27,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static com.megaease.easeagent.config.ConfigConst.*;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.*;
 
 public class ConfigUtils {
     public static String extractServiceName(Configs configs) {

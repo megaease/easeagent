@@ -21,8 +21,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
-import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_COMM_ENABLED;
-import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_COMM_INTERVAL;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.KEY_COMM_INTERVAL;
 import static com.megaease.easeagent.plugin.Const.METRIC_DEFAULT_INTERVAL;
 
 public class PluginMetricsConfig implements MetricsConfig {

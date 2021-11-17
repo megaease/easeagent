@@ -22,7 +22,7 @@ import brave.propagation.ThreadLocalCurrentTraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
-import com.megaease.easeagent.common.HostAddress;
+import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.jdbc.MD5DictionaryItem;
 import com.megaease.easeagent.common.jdbc.MD5SQLCompression;
@@ -31,7 +31,7 @@ import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
-import com.megaease.easeagent.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.core.IProvider;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.MetricProvider;
@@ -40,7 +40,7 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.ChainBuilderFactory;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
-import com.megaease.easeagent.core.utils.JsonUtil;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
@@ -108,7 +108,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.megaease.easeagent.config.ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY;
 
 // import com.megaease.easeagent.metrics.rabbitmq.*;
 /*

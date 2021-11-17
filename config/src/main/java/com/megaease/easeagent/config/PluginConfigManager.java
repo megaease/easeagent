@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 
 import java.util.*;
 
-import static com.megaease.easeagent.config.ConfigConst.PLUGIN_GLOBAL;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.PLUGIN_GLOBAL;
 
 public class PluginConfigManager implements IConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginConfigManager.class);

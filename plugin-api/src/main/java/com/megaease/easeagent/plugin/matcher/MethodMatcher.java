@@ -95,6 +95,11 @@ public class MethodMatcher implements IMethodMatcher {
             return operate(Operator.AND);
         }
 
+        public MethodMatcherBuilder negative() {
+            this.operator = Operator.NOT;
+            return this;
+        }
+
         public MethodMatcherBuilder named(String methodName) {
             return this.name(methodName).nameMatchType(StringMatch.EQUALS);
         }
@@ -222,6 +227,8 @@ public class MethodMatcher implements IMethodMatcher {
                     return new OrMethodMatcher(this.left, matcher);
                 case AND:
                     return new AndMethodMatcher(this.left, matcher);
+                case NOT:
+                    return matcher.not();
                 default:
                     return matcher;
             }

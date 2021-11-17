@@ -21,6 +21,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.concurrent.ScheduleHelper;
@@ -30,13 +31,16 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 public class MD5SQLCompression implements SQLCompression, RemovalListener<String, String> {
+    private static final Logger logger = EaseAgent.getLogger(MD5SQLCompression.class);
+
     public static final DataSize MAX_SQL_SIZE = DataSize.ofKilobytes(32);//32KB
 
-    private static final Logger logger = EaseAgent.getLogger(MD5SQLCompression.class);
+    private static final ConcurrentHashMap<String, MD5SQLCompression> INSTANCE_MAP = new ConcurrentHashMap<>();
 
     private final Cache<String, String> dictionary = CacheBuilder.newBuilder().maximumSize(1000)
         .removalListener(this).build();
@@ -48,6 +52,15 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
     public MD5SQLCompression(Consumer<Map<String, String>> reportConsumer) {
         this.reportConsumer = reportConsumer;
         ScheduleHelper.DEFAULT.execute(10, 5, this::pushItems);
+    }
+
+    public static MD5SQLCompression getInstance(Config config) {
+        String key = config.namespace();
+        if (INSTANCE_MAP.get(key) == null) {
+            MD5SQLCompression instance = new MD5SQLCompression(new MD5ReportConsumer(config));
+            INSTANCE_MAP.putIfAbsent(key, instance);
+        }
+        return INSTANCE_MAP.get(key);
     }
 
     @Override

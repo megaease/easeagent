@@ -71,6 +71,11 @@ public class ClassMatcher implements IClassMatcher {
             return builder;
         }
 
+        public ClassMatcherBuilder negative() {
+            this.operator = Operator.NOT;
+            return this;
+        }
+
         public ClassMatcherBuilder hasSuperClass(String className) {
             if (this.name != null && this.name.length() > 0) {
                 if (this.matchType.equals(ClassMatch.SUPER_CLASS)) {
@@ -194,6 +199,8 @@ public class ClassMatcher implements IClassMatcher {
                     return new OrClassMatcher(this.left, matcher);
                 case AND:
                     return new AndClassMatcher(this.left, matcher);
+                case NOT:
+                    return matcher.not();
                 default:
                     return matcher;
             }

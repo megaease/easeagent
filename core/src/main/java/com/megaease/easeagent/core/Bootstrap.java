@@ -23,7 +23,7 @@ import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.core.context.ContextManager;
 import com.megaease.easeagent.core.plugin.PluginLoader;
-import com.megaease.easeagent.core.utils.JsonUtil;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;

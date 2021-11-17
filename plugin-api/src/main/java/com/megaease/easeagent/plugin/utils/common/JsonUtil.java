@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.utils;
+package com.megaease.easeagent.plugin.utils.common;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.megaease.easeagent.log4j2.Logger;
-import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class JsonUtil {
-
     static final ObjectMapper mapper = new ObjectMapper();
-    private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);
+    private static final Logger logger = EaseAgent.loggerFactory.getLogger(JsonUtil.class);
 
     static {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
@@ -54,5 +53,4 @@ public class JsonUtil {
             return new HashMap<>();
         }
     }
-
 }

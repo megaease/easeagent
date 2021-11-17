@@ -43,16 +43,11 @@ public final class EaseAgent {
     public static volatile Mdc loggerMdc = NoOpLoggerFactory.NO_OP_MDC_INSTANCE;
     public static volatile IConfigFactory configFactory = new NoOpConfigFactory();
 
-    /*
-     * api interface add here
-     */
-
-
     /**
      * @see ILoggerFactory#getLogger(Class)
      */
-    public static Logger getLogger(Class clzss) {
-        return loggerFactory.getLogger(clzss);
+    public static Logger getLogger(Class clazz) {
+        return loggerFactory.getLogger(clazz);
     }
 
     /**

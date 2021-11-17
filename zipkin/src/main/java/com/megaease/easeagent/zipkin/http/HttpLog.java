@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.zipkin.http;
 
-import com.megaease.easeagent.common.HostAddress;
-import com.megaease.easeagent.core.utils.JsonUtil;
+import com.megaease.easeagent.plugin.utils.common.HostAddress;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
 

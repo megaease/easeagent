@@ -18,7 +18,7 @@
 package com.megaease.easeagent.report.util;
 
 import com.megaease.easeagent.config.ChangeItem;
-import com.megaease.easeagent.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.report.OutputProperties;

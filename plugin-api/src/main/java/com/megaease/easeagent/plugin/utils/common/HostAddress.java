@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.common;
-
-import org.apache.commons.lang3.StringUtils;
+package com.megaease.easeagent.plugin.utils.common;
 
 import java.net.*;
 import java.util.Enumeration;

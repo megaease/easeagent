@@ -19,7 +19,6 @@ package com.megaease.easeagent.plugin.api.context;
 
 import com.megaease.easeagent.plugin.api.Context;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ContextUtils {
@@ -85,4 +84,7 @@ public class ContextUtils {
         return (T) context.get(key);
     }
 
+    public static <T> void setToContext(Context context, Object key, T value) {
+        context.put(key, value);
+    }
 }
