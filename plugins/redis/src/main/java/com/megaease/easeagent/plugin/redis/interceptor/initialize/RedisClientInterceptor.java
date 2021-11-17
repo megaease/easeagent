@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.redis.interceptor.initialize;
 
-public interface Const {
-    String ENABLED_CONFIG = "enabled";
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.redis.advice.RedisClientAdvice;
 
-    int METRIC_DEFAULT_INTERVAL = 30;
-    String METRIC_DEFAULT_TOPIC = "application-meter";
-    String METRIC_DEFAULT_APPEND_TYPE = "console";
+@AdviceTo(value = RedisClientAdvice.class, qualifier = "default")
+public class RedisClientInterceptor extends CommonRedisClientInterceptor {
 }

@@ -27,12 +27,15 @@ import com.megaease.easeagent.report.metric.log4j.AppenderManager;
 import com.megaease.easeagent.report.util.Utils;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PluginMetricReporterImpl implements PluginMetricReporter {
+    private final ConcurrentHashMap<String, Reporter> reporters;
     private final Configs configs;
     private final AppenderManager appenderManager;
 
     public PluginMetricReporterImpl(Configs configs) {
+        this.reporters = new ConcurrentHashMap<>();
         OutputProperties outputProperties = Utils.extractOutputProperties(configs);
         this.appenderManager = AppenderManager.create(outputProperties);
         this.configs = configs;
@@ -45,7 +48,19 @@ public class PluginMetricReporterImpl implements PluginMetricReporter {
 
     @Override
     public com.megaease.easeagent.plugin.api.Reporter reporter(Config config) {
-        return new Reporter(config);
+        Reporter reporter = reporters.get(config.namespace());
+        if (reporter != null) {
+            return reporter;
+        }
+        synchronized (reporters) {
+            reporter = reporters.get(config.namespace());
+            if (reporter != null) {
+                return reporter;
+            }
+            reporter = new Reporter(config);
+            reporters.put(config.namespace(), reporter);
+            return reporter;
+        }
     }
 
     private class InternalListener implements ConfigChangeListener {
@@ -62,12 +77,12 @@ public class PluginMetricReporterImpl implements PluginMetricReporter {
     }
 
     public class Reporter implements com.megaease.easeagent.plugin.api.Reporter, com.megaease.easeagent.plugin.api.config.ConfigChangeListener {
-        private final String domain;
+        private final String namespace;
         private volatile MetricProps metricProps;
         private volatile KeySender sender;
 
         public Reporter(Config config) {
-            this.domain = config.domain();
+            this.namespace = config.namespace();
             this.metricProps = Utils.extractMetricProps(config);
             this.sender = newKeyLogger();
             config.addChangeListener(this);
@@ -78,7 +93,7 @@ public class PluginMetricReporterImpl implements PluginMetricReporter {
         }
 
         private KeySender newKeyLogger() {
-            return new KeySender(domain, PluginMetricReporterImpl.this.appenderManager, metricProps);
+            return new KeySender(namespace, PluginMetricReporterImpl.this.appenderManager, metricProps);
         }
 
         @Override

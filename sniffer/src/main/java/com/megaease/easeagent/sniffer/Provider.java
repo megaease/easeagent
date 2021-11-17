@@ -371,13 +371,15 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Injection.Bean("supplier4RedisClientConnectAsync")
     public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConnectAsync() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new CommonRedisClientConnectInterceptor());
+//            .addInterceptor(new CommonRedisClientConnectInterceptor())
+            ;
     }
 
     @Injection.Bean("supplier4RedisClusterConnectAsync")
     public Supplier<AgentInterceptorChain.Builder> supplier4RedisClusterConnectAsync() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new CommonRedisClientConnectInterceptor());
+//            .addInterceptor(new CommonRedisClientConnectInterceptor())
+            ;
     }
 
     @Injection.Bean("supplier4LettuceDoWrite")
@@ -392,9 +394,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
 
             return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new RedisChannelWriterInterceptor())
-                .addInterceptor(metricInterceptor)
-                .addInterceptor(new CommonLettuceTracingInterceptor(this.tracing, config));
+//                .addInterceptor(new RedisChannelWriterInterceptor())
+//                .addInterceptor(metricInterceptor)
+//                .addInterceptor(new CommonLettuceTracingInterceptor(this.tracing, config))
+                ;
         };
     }
 

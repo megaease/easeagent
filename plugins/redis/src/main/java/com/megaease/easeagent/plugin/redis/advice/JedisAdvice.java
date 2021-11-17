@@ -52,12 +52,6 @@ public class JedisAdvice implements Points {
             .or(named("redis.clients.jedis.commands.MultiKeyBinaryCommands"))
             .or(named("redis.clients.jedis.commands.AdvancedBinaryJedisCommands"))
             .or(named("redis.clients.jedis.commands.BinaryScriptingCommands"));
-        /*
-        return MethodMatcher.multiBuilder()
-            .match(MethodMatcher.builder().named("set").isPublic().build())
-            .match(MethodMatcher.builder().named("exists").isPublic().build())
-            .build();
-         */
         return MethodMatcher.multiBuilder()
             .match(MethodMatcher.builder().isOverriddenFrom(overriddenFrom).build())
             .build();

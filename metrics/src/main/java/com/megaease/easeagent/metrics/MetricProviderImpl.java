@@ -92,8 +92,7 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
                         break;
                 }
             }
-            ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes, MetricProviderImpl.this.additionalAttributes, tags);
-            Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
+            ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes, MetricProviderImpl.this.additionalAttributes, tags);Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
             new AutoRefreshReporter(metricRegistry, metricsConfig,
                 converterAdapter,
                 s -> reporter.report(s)).run();
