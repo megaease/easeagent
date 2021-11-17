@@ -26,6 +26,16 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 public class RedisClusterClientAdvice implements Points {
+    //return def.type(hasSuperType(named("io.lettuce.core.cluster.RedisClusterClient"))
+    //                .or(named("io.lettuce.core.cluster.RedisClusterClient"))
+    //        )
+    //                .transform(connectAsync((named("connectClusterAsync")
+    //                                .or(named("connectClusterPubSubAsync")))
+    //                                .and(isPrivate())
+    //                        )
+    //                )
+    //                .end()
+    //                ;
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder().hasSuperClass("io.lettuce.core.cluster.RedisClusterClient")

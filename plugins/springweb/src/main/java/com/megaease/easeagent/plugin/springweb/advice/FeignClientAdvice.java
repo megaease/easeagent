@@ -27,6 +27,12 @@ import java.util.Set;
 
 public class FeignClientAdvice implements Points {
 
+    //return def.type(hasSuperType(named("feign.Client")))
+    //                .transform(execute(named("execute").and(takesArguments(2)
+    //                        .and(takesArgument(0, named("feign.Request")))
+    //                        .and(takesArgument(1, named("feign.Request$Options")))
+    //                )))
+    //                .end();
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder().hasInterface("feign.Client")
@@ -39,6 +45,8 @@ public class FeignClientAdvice implements Points {
             .match(MethodMatcher.builder().named("execute")
                 .isPublic()
                 .argsLength(2)
+                .arg(0, "feign.Request")
+                .arg(1, "feign.Request$Options")
                 .qualifier("default")
                 .build())
             .build();

@@ -48,12 +48,7 @@ import com.megaease.easeagent.metrics.MetricProviderImpl;
 import com.megaease.easeagent.metrics.MetricRegistryService;
 import com.megaease.easeagent.metrics.PrometheusAgentHttpHandler;
 import com.megaease.easeagent.metrics.config.MetricsCollectorConfig;
-import com.megaease.easeagent.metrics.config.MetricsConfig;
-import com.megaease.easeagent.metrics.config.PluginMetricsConfig;
-import com.megaease.easeagent.metrics.converter.ConverterAdapter;
-import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
-import com.megaease.easeagent.metrics.impl.MetricRegistryImpl;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcDataSourceMetricInterceptor;
 import com.megaease.easeagent.metrics.jdbc.interceptor.JdbcStmMetricInterceptor;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
@@ -62,18 +57,11 @@ import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMessageListenerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
-import com.megaease.easeagent.metrics.redis.JedisMetricInterceptor;
-import com.megaease.easeagent.metrics.redis.LettuceMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
-import com.megaease.easeagent.metrics.servlet.HttpFilterMetricsInterceptor;
-import com.megaease.easeagent.metrics.servlet.ServletMetric;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
-import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
-import com.megaease.easeagent.report.PluginMetricReporter;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
@@ -83,8 +71,6 @@ import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerIntercept
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
-import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.CommonRedisClientConnectInterceptor;
-import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisChannelWriterInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
@@ -108,8 +94,6 @@ import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInt
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
-import com.megaease.easeagent.zipkin.redis.CommonLettuceTracingInterceptor;
-import com.megaease.easeagent.zipkin.redis.JedisTracingInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import zipkin2.Span;
 import zipkin2.reporter.AsyncReporter;
@@ -337,12 +321,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .addInterceptor(new RestTemplateTracingInterceptor(tracing, config));
     }
 
-    @Injection.Bean("supplier4FeignClient")
-    public Supplier<AgentInterceptorChain.Builder> supplier4FeignClient() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-//            .addInterceptor(new FeignClientTracingInterceptor(tracing, config))
-            ;
-    }
 
     @Injection.Bean("supplier4Gateway")
     public Supplier<AgentInterceptorChain.Builder> supplier4Gateway() {
@@ -385,36 +363,19 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     @Injection.Bean("supplier4LettuceDoWrite")
     public Supplier<AgentInterceptorChain.Builder> supplier4LettuceDoWrite() {
         return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            LettuceMetricInterceptor metricInterceptor = new LettuceMetricInterceptor(metricRegistry, config);
-
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_CACHE);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                metricInterceptor.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
+//            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
+//            LettuceMetricInterceptor metricInterceptor = new LettuceMetricInterceptor(metricRegistry, config);
+//
+//            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_CACHE);
+//            new AutoRefreshReporter(metricRegistry, collectorConfig,
+//                metricInterceptor.newConverter(additionalAttributes),
+//                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
 
             return ChainBuilderFactory.DEFAULT.createBuilder()
 //                .addInterceptor(new RedisChannelWriterInterceptor())
 //                .addInterceptor(metricInterceptor)
 //                .addInterceptor(new CommonLettuceTracingInterceptor(this.tracing, config))
                 ;
-        };
-    }
-
-    @Injection.Bean("supplier4Jedis")
-    public Supplier<AgentInterceptorChain.Builder> supplier4Jedis() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            JedisMetricInterceptor metricInterceptor = new JedisMetricInterceptor(metricRegistry, config);
-
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_CACHE);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                metricInterceptor.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(metricInterceptor)
-                .addInterceptor(new JedisTracingInterceptor(this.tracing, config));
         };
     }
 

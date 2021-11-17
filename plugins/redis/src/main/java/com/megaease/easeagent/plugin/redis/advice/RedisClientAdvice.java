@@ -27,6 +27,16 @@ import io.lettuce.core.RedisClient;
 import java.util.Set;
 
 public class RedisClientAdvice implements Points {
+    //return def.type(hasSuperType(named("io.lettuce.core.RedisClient"))
+    //                .or(named("io.lettuce.core.RedisClient"))
+    //        )
+    //                .transform(connectAsync((named("connectStandaloneAsync")
+    //                                .or(named("connectPubSubAsync"))
+    //                                .or(named("connectSentinelAsync"))).and(isPrivate())
+    //                        )
+    //                )
+    //                .end()
+    //                ;
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder().hasSuperClass("io.lettuce.core.RedisClient")

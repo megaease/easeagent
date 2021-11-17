@@ -26,6 +26,23 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 public class JedisAdvice implements Points {
+
+    //return def.type(hasSuperType(named("redis.clients.jedis.BinaryJedis")))
+    //                .transform(doCommand(any()
+    //                        .and(isOverriddenFrom(named("redis.clients.jedis.commands.JedisCommands")
+    //                                .or(named("redis.clients.jedis.commands.AdvancedJedisCommands"))
+    //                                .or(named("redis.clients.jedis.commands.BasicCommands"))
+    //                                .or(named("redis.clients.jedis.commands.ClusterCommands"))
+    //                                .or(named("redis.clients.jedis.commands.ModuleCommands"))
+    //                                .or(named("redis.clients.jedis.commands.MultiKeyCommands"))
+    //                                .or(named("redis.clients.jedis.commands.ScriptingCommands"))
+    //                                .or(named("redis.clients.jedis.commands.SentinelCommands"))
+    //                                .or(named("redis.clients.jedis.commands.BinaryJedisCommands"))
+    //                                .or(named("redis.clients.jedis.commands.MultiKeyBinaryCommands"))
+    //                                .or(named("redis.clients.jedis.commands.AdvancedBinaryJedisCommands"))
+    //                                .or(named("redis.clients.jedis.commands.BinaryScriptingCommands"))
+    //                        ))
+    //                )).end();
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder().hasSuperClass("redis.clients.jedis.BinaryJedis")

@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 
 public abstract class CommonRedisTracingInterceptor implements FirstEnterInterceptor {
+    private static final Object ENTER = new Object();
     private static final Object SPAN_KEY = new Object();
 
 
@@ -33,6 +34,11 @@ public abstract class CommonRedisTracingInterceptor implements FirstEnterInterce
             return;
         }
         doTraceBefore(methodInfo, context);
+    }
+
+    @Override
+    public Object getEnterKey(MethodInfo methodInfo, Context context) {
+        return ENTER;
     }
 
     @Override

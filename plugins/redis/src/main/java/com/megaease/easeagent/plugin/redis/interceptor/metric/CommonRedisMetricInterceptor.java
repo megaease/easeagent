@@ -31,6 +31,7 @@ import com.megaease.easeagent.plugin.utils.metrics.RedisMetric;
 public abstract class CommonRedisMetricInterceptor implements FirstEnterInterceptor {
     private static volatile NameFactory NAME_FACTORY = RedisMetric.buildNameFactory();
     private static volatile RedisMetric REDIS_METRIC = null;
+    private static final Object ENTER = new Object();
     private static final Object START = new Object();
 
     @Override
@@ -60,10 +61,14 @@ public abstract class CommonRedisMetricInterceptor implements FirstEnterIntercep
         REDIS_METRIC.collect(key, System.currentTimeMillis() - start, methodInfo.isSuccess());
     }
 
-
     @Override
     public String getName() {
         return Order.METRIC.getName();
+    }
+
+    @Override
+    public Object getEnterKey(MethodInfo methodInfo, Context context) {
+        return ENTER;
     }
 
     public abstract String getKey(MethodInfo methodInfo, Context context);
