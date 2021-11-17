@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.NotMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.NegateMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
@@ -51,8 +51,8 @@ public class MethodMatcherConvert
             Junction<MethodDescription> leftMatcher = this.convert(andMatcher.getLeft());
             Junction<MethodDescription> rightMatcher = this.convert(andMatcher.getRight());
             return leftMatcher.or(rightMatcher);
-        } else if (source instanceof NotMethodMatcher) {
-            NotMethodMatcher matcher = (NotMethodMatcher) source;
+        } else if (source instanceof NegateMethodMatcher) {
+            NegateMethodMatcher matcher = (NegateMethodMatcher) source;
             Junction<MethodDescription> notMatcher = this.convert(matcher.getMatcher());
             return new NegatingMatcher<>(notMatcher);
         }

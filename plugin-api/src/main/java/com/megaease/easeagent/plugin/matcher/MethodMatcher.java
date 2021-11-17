@@ -95,8 +95,8 @@ public class MethodMatcher implements IMethodMatcher {
             return operate(Operator.AND);
         }
 
-        public MethodMatcherBuilder negative() {
-            this.operator = Operator.NOT;
+        public MethodMatcherBuilder negate() {
+            this.operator = Operator.NEGATE;
             return this;
         }
 
@@ -227,8 +227,8 @@ public class MethodMatcher implements IMethodMatcher {
                     return new OrMethodMatcher(this.left, matcher);
                 case AND:
                     return new AndMethodMatcher(this.left, matcher);
-                case NOT:
-                    return matcher.not();
+                case NEGATE:
+                    return matcher.negate();
                 default:
                     return matcher;
             }

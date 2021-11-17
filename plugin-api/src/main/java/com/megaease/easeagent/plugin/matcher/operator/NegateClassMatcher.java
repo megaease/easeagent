@@ -22,10 +22,10 @@ import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import lombok.Getter;
 
 @Getter
-public class NotClassMatcher implements IClassMatcher {
+public class NegateClassMatcher implements IClassMatcher {
     protected IClassMatcher matcher;
 
-    public NotClassMatcher(IClassMatcher matcher) {
+    public NegateClassMatcher(IClassMatcher matcher) {
         this.matcher = matcher;
     }
 }

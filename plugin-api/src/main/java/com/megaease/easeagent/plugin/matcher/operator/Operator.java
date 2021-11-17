@@ -20,5 +20,5 @@ package com.megaease.easeagent.plugin.matcher.operator;
 public interface Operator<S> {
     S and(S matcher);
     S or(S matcher);
-    S not();
+    S negate();
 }

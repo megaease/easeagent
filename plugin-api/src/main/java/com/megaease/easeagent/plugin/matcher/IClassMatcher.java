@@ -28,7 +28,7 @@ public interface IClassMatcher extends Operator<IClassMatcher>, Matcher {
         return new OrClassMatcher(this, m);
     }
 
-    default IClassMatcher not() {
-        return new NotClassMatcher(this);
+    default IClassMatcher negate() {
+        return new NegateClassMatcher(this);
     }
 }

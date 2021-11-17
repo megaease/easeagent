@@ -36,12 +36,12 @@ public class RedisChannelWriterAdvice implements Points {
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.multiBuilder()
             .match(MethodMatcher.builder().named("write").argsLength(1).isPublic().build()
-                .and(MethodMatcher.builder().returnType("void").build().not()))
+                .and(MethodMatcher.builder().returnType("void").build().negate()))
             .build();
     }
 
-//    @Override
-//    public boolean isAddDynamicField() {
-//        return true;
-//    }
+    @Override
+    public boolean isAddDynamicField() {
+        return true;
+    }
 }

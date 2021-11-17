@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.asm.Modifier;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.AndClassMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.NotClassMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.NegateClassMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.OrClassMatcher;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
@@ -48,8 +48,8 @@ public class ClassMatcherConvert
             Junction<TypeDescription> leftMatcher = this.convert(andMatcher.getLeft());
             Junction<TypeDescription> rightMatcher = this.convert(andMatcher.getRight());
             return leftMatcher.or(rightMatcher);
-        } else if (source instanceof NotClassMatcher) {
-            NotClassMatcher matcher = (NotClassMatcher) source;
+        } else if (source instanceof NegateClassMatcher) {
+            NegateClassMatcher matcher = (NegateClassMatcher) source;
             Junction<TypeDescription> notMatcher = this.convert(matcher.getMatcher());
             return new NegatingMatcher<>(notMatcher);
         }
@@ -112,6 +112,15 @@ public class ClassMatcherConvert
                     mc = isPrivate();
                 }
             }
+
+            if ((modifier & Modifier.ACC_INTERFACE) != 0) {
+                if (mc != null) {
+                    mc = not ? mc.or(isInterface()) : mc.and(isInterface());
+                } else {
+                    mc = isInterface();
+                }
+            }
+
             if ((modifier & Modifier.ACC_PROTECTED) != 0) {
                 if (mc != null) {
                     mc = not ? mc.or(isProtected()) : mc.and(isProtected());

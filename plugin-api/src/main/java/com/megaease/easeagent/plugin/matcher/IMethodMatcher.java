@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.matcher;
 
 import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
-import com.megaease.easeagent.plugin.matcher.operator.NotMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.NegateMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.Operator;
 import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
 
@@ -36,8 +36,8 @@ public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
         return new OrMethodMatcher(this, other);
     }
 
-    default IMethodMatcher not() {
-        return new NotMethodMatcher(this);
+    default IMethodMatcher negate() {
+        return new NegateMethodMatcher(this);
     }
 
     String getQualifier();

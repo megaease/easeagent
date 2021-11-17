@@ -33,7 +33,7 @@ public class ClassMatcher implements IClassMatcher {
     private int notModifier = Modifier.ACC_NONE;
     private String classLoader;
 
-    public static int MODIFIER_MASK = Modifier.ACC_ABSTRACT
+    public static int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_INTERFACE
         | Modifier.ACC_PRIVATE | Modifier.ACC_PUBLIC | Modifier.ACC_PROTECTED;
 
     protected ClassMatcher() {
@@ -71,8 +71,8 @@ public class ClassMatcher implements IClassMatcher {
             return builder;
         }
 
-        public ClassMatcherBuilder negative() {
-            this.operator = Operator.NOT;
+        public ClassMatcherBuilder negate() {
+            this.operator = Operator.NEGATE;
             return this;
         }
 
@@ -199,8 +199,8 @@ public class ClassMatcher implements IClassMatcher {
                     return new OrClassMatcher(this.left, matcher);
                 case AND:
                     return new AndClassMatcher(this.left, matcher);
-                case NOT:
-                    return matcher.not();
+                case NEGATE:
+                    return matcher.negate();
                 default:
                     return matcher;
             }

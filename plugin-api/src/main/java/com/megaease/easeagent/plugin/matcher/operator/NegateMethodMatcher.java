@@ -21,11 +21,11 @@ import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import lombok.Getter;
 
 @Getter
-public class NotMethodMatcher implements IMethodMatcher {
+public class NegateMethodMatcher implements IMethodMatcher {
     private String qualifier = DEFAULT_QUALIFIER;
     protected IMethodMatcher matcher;
 
-    public NotMethodMatcher(IMethodMatcher matcher) {
+    public NegateMethodMatcher(IMethodMatcher matcher) {
         this.matcher = matcher;
     }
 

@@ -33,6 +33,9 @@ public class ClassMatcherTest {
     public interface TestInterface {
     }
 
+    public interface TestInterface2 extends TestInterface {
+    }
+
     @Index
     public static class TestClass extends TestBaseClass implements TestInterface {
     }
@@ -54,5 +57,14 @@ public class ClassMatcherTest {
         eMatcher = ClassMatcherConvert.INSTANCE.convert(matcher);
 
         Assert.assertTrue(eMatcher.matches(type));
+
+        // no interface
+        matcher = ClassMatcher.builder()
+            .hasInterface(TestInterface.class.getName())
+            .notInterface()
+            .build();
+        type = TypeDescription.ForLoadedType.of(TestInterface2.class);
+        eMatcher = ClassMatcherConvert.INSTANCE.convert(matcher);
+        Assert.assertFalse(eMatcher.matches(type));
     }
 }
