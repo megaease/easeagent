@@ -51,4 +51,9 @@ public interface InitializeContext extends Context, TracingContext {
      * called by framework to maintain stack
      */
     void popRetBound();
+
+    /**
+     * called by framework to maintain stack
+     */
+    void popToBound();
 }

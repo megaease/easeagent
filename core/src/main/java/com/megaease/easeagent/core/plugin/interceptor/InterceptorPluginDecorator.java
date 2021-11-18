@@ -65,6 +65,7 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
             try {
                 this.interceptor.after(methodInfo, context);
             } finally {
+                innerContext.popToBound();
                 innerContext.popRetBound();
             }
         }

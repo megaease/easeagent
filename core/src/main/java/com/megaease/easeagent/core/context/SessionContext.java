@@ -27,6 +27,7 @@ import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
+import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import java.util.ArrayDeque;
@@ -40,6 +41,7 @@ public class SessionContext implements InitializeContext {
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
 
     private final Deque<Config> configs = new ArrayDeque<>();
+    private final Deque<Object> retStack = new ArrayDeque<>();
     private final Deque<RetBound> retBound = new ArrayDeque<>();
 
     // private SpanDeque spans = new SpanDeque();
@@ -213,8 +215,19 @@ public class SessionContext implements InitializeContext {
     /**
      * called by framework to maintain stack
      */
+    @Override
+    @SuppressWarnings("ConstantConditions")
+    public void popToBound() {
+        while (this.retStack.size() > this.retBound.peek().size()) {
+            this.retStack.pop();
+        }
+    }
+
+    /**
+     * called by framework to maintain stack
+     */
     public void pushRetBound() {
-        this.retBound.push(new RetBound());
+        this.retBound.push(new RetBound(this.retStack.size()));
     }
 
     /**
@@ -222,6 +235,40 @@ public class SessionContext implements InitializeContext {
      */
     public void popRetBound() {
         this.retBound.pop();
+    }
+
+    @Override
+    public <T> void push(T obj) {
+        if (obj == null) {
+            this.retStack.push(NullObject.NULL);
+        } else {
+            this.retStack.push(obj);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("ConstantConditions")
+    public <T> T pop() {
+        if (this.retStack.size() <= this.retBound.peek().size()) {
+            return null;
+        }
+        Object o = this.retStack.pop();
+        if (o == NullObject.NULL) {
+            return null;
+        }
+        return (T)o;
+    }
+
+    @Override
+    public <T> T peek() {
+        if (this.retStack.size() <= 0) {
+            return null;
+        }
+        Object o = this.retStack.pop();
+        if (o == NullObject.NULL) {
+            return null;
+        }
+        return (T)o;
     }
 
     @Override
