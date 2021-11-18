@@ -106,6 +106,26 @@ public class NoOpContext {
         }
 
         @Override
+        public Span nextSpan() {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
+        public void pushSpan(Span span) {
+
+        }
+
+        @Override
+        public Span popSpan() {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
+        public Span peekSpan() {
+            return null;
+        }
+
+        @Override
         public Runnable wrap(Runnable task) {
             return task;
         }
@@ -127,6 +147,16 @@ public class NoOpContext {
         @Override
         public Config popConfig() {
             return NoOpConfig.INSTANCE;
+        }
+
+        @Override
+        public long inc() {
+            return 0;
+        }
+
+        @Override
+        public long dec() {
+            return 0;
         }
     }
 

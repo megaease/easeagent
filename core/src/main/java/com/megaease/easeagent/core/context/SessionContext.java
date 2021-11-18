@@ -29,15 +29,16 @@ import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class SessionContext implements InitializeContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
-    private Stack<Config> configs = new Stack<>();
+    private long sequence = 0;
+    private Deque<Config> configs = new ArrayDeque<>();
+    private SpanDeque spans = new SpanDeque();
     private Map<Object, Object> context = new HashMap<>();
     private Map<Object, Integer> entered = new HashMap<>();
 
@@ -90,6 +91,20 @@ public class SessionContext implements InitializeContext {
             return NoOpConfig.INSTANCE;
         }
         return configs.pop();
+    }
+
+    @Override
+    public long inc() {
+        return sequence++;
+    }
+
+    @Override
+    public long dec() {
+        sequence--;
+        if (sequence == 0) {
+            this.clear();
+        }
+        return sequence;
     }
 
 
@@ -190,6 +205,26 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
+    public Span nextSpan() {
+        return tracing.nextSpan();
+    }
+
+    @Override
+    public void pushSpan(Span span) {
+        spans.push(span, sequence);
+    }
+
+    @Override
+    public Span peekSpan() {
+        return spans.peek(sequence);
+    }
+
+    @Override
+    public Span popSpan() {
+        return spans.pop(sequence);
+    }
+
+    @Override
     public Runnable wrap(Runnable task) {
         return new CurrentContextRunnable(exportAsync(), task);
     }
@@ -197,9 +232,22 @@ public class SessionContext implements InitializeContext {
     @Override
     public Map<Object, Object> clear() {
         this.tracing = NoOpTracer.NO_OP_TRACING;
-        Map<Object, Object> old = this.context;
-        this.context = new HashMap<>();
-        this.entered = new HashMap<>();
+        Map<Object, Object> old = Collections.emptyMap();
+        if (!this.context.isEmpty()) {
+            old = this.context;
+            this.context = new HashMap<>();
+        }
+        if (!this.entered.isEmpty()) {
+            this.entered.clear();
+        }
+        if (!configs.isEmpty()) {
+            configs.clear();
+        }
+        if (!spans.isEmpty()) {
+            spans.clear();
+        }
+        sequence = 0;
+        tracing = NoOpTracer.NO_OP_TRACING;
         return old;
     }
 
@@ -221,6 +269,8 @@ public class SessionContext implements InitializeContext {
         public void run() {
             try (Scope scope = asyncContext.importToCurr()) {
                 task.run();
+            } finally {
+                asyncContext.getContext().clear();
             }
         }
     }

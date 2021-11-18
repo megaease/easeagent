@@ -345,6 +345,38 @@ public interface Context {
      */
     Span producerSpan(MessagingRequest request);
 
+    /**
+     * Returns a new child span if there's a {@link Tracing#currentSpan()} or a new trace if there isn't.
+     *
+     * @return {@link Span}
+     */
+    Span nextSpan();
+
+    /**
+     * Pushes a Span onto the top of session context Span stack.
+     *
+     * @param span the span to be pushed onto this stack.
+     */
+    void pushSpan(Span span);
+
+    /**
+     * Removes the Span at the top of this session context Span stack
+     * and returns that Span as the value of this function.
+     *
+     * @return The span at the top of this stack (the last span of the <tt>Span</tt> object), or
+     * {@code null} if this stack is empty
+     */
+    Span popSpan();
+
+    /**
+     * Retrieves, but does not remove, the head of the stack represented by
+     * this stack (in other words, the first span of this stack), or
+     * returns {@code null} if this stack is empty.
+     *
+     * @return The span at the top of this stack (the last span of the <tt>Span</tt> object), or
+     * {@code null} if this stack is empty
+     */
+    Span peekSpan();
 
     /**
      * Wraps the input so that it executes with the same context as now.

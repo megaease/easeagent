@@ -18,14 +18,16 @@
 package com.megaease.easeagent.plugin.api;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TracingContext;
 
 /**
  * Subtype of {@link Context} and {@link TracingContext} which can push and pop Config.
  */
 public interface InitializeContext extends Context, TracingContext {
+
     /**
-     * Pushes an Config onto the top of session context config stack.
+     * Pushes a Config onto the top of session context config stack.
      *
      * @param config the config to be pushed onto this stack.
      */
@@ -39,4 +41,18 @@ public interface InitializeContext extends Context, TracingContext {
      * return {@link com.megaease.easeagent.plugin.bridge.NoOpConfig#INSTANCE} if this stack is empty.
      */
     Config popConfig();
+
+    /**
+     * Increments by one the current sequence value.
+     *
+     * @return the updated value
+     */
+    long inc();
+
+    /**
+     * Decrements by one the current sequence value.
+     *
+     * @return the updated value
+     */
+    long dec();
 }
