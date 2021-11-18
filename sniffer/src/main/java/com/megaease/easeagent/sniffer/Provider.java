@@ -346,39 +346,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing));
     }
 
-    @Injection.Bean("supplier4RedisClientConnectAsync")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConnectAsync() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-//            .addInterceptor(new CommonRedisClientConnectInterceptor())
-            ;
-    }
-
-    @Injection.Bean("supplier4RedisClusterConnectAsync")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RedisClusterConnectAsync() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-//            .addInterceptor(new CommonRedisClientConnectInterceptor())
-            ;
-    }
-
-    @Injection.Bean("supplier4LettuceDoWrite")
-    public Supplier<AgentInterceptorChain.Builder> supplier4LettuceDoWrite() {
-        return () -> {
-//            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-//            LettuceMetricInterceptor metricInterceptor = new LettuceMetricInterceptor(metricRegistry, config);
-//
-//            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_CACHE);
-//            new AutoRefreshReporter(metricRegistry, collectorConfig,
-//                metricInterceptor.newConverter(additionalAttributes),
-//                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_CACHE, s))).run();
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-//                .addInterceptor(new RedisChannelWriterInterceptor())
-//                .addInterceptor(metricInterceptor)
-//                .addInterceptor(new CommonLettuceTracingInterceptor(this.tracing, config))
-                ;
-        };
-    }
-
     @Injection.Bean("supplier4KafkaProducerDoSend")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerDoSend() {
         return () -> {
