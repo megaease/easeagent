@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.springweb.interceptor;
+package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
@@ -37,7 +37,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @AdviceTo(value = FeignClientAdvice.class, qualifier = "default")
-public class FeignClientInterceptor implements FirstEnterInterceptor {
+public class FeignClientTracingInterceptor implements FirstEnterInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
     @Override
@@ -146,7 +146,7 @@ public class FeignClientInterceptor implements FirstEnterInterceptor {
         }
     }
 
-    static class FeignClientResponseWrapper implements HttpResponse, com.megaease.easeagent.plugin.api.trace.Response {
+    static class FeignClientResponseWrapper implements HttpResponse{
         private final Throwable caught;
         private final Request request;
         private final Response response;
