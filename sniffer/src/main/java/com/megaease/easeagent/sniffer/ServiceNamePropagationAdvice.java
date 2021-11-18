@@ -49,6 +49,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @Injection.Provider(Provider.class)
 public abstract class ServiceNamePropagationAdvice implements Transformation {
     public static final String FeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.FeignLoadBalancer";
+    public static final String RetryableFeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.RetryableFeignLoadBalancer";
     public static final String LoadBalancerFeignClient = "org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient";
     public static final String FeignBlockingLoadBalancerClient = "org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient";
     public static final String RetryLoadBalancerInterceptor = "org.springframework.cloud.client.loadbalancer.RetryLoadBalancerInterceptor";
@@ -70,7 +71,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 .and(takesArgument(0,named("feign.Request$Options")))
                 .and(takesArgument(1, named("java.lang.String")))
             ))
-            .type(named(FeignLoadBalancer))
+            .type(named(FeignLoadBalancer).or(named(RetryableFeignLoadBalancer)))
             .transform(feignLoadBalancerExecute(named("execute")
                 .and(takesArguments(2))
                 .and(takesArgument(0, named(FeignLoadBalancer + "$RibbonRequest")))
