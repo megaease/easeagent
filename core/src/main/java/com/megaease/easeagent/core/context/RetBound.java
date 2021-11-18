@@ -21,15 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RetBound  {
-    int size;
     Map<String, Object> local;
 
-    RetBound(int size) {
-        this.size = size;
-    }
-
-    public int size() {
-        return this.size;
+    RetBound() {
     }
 
     public Object get(String key) {

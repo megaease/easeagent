@@ -121,20 +121,6 @@ public class NoOpContext {
         }
 
         @Override
-        public <T> T pop() {
-            return null;
-        }
-
-        @Override
-        public <T> T  peek() {
-            return null;
-        }
-
-        @Override
-        public <T> void push(T obj) {
-        }
-
-        @Override
         public Runnable wrap(Runnable task) {
             return task;
         }
@@ -157,10 +143,6 @@ public class NoOpContext {
 
         @Override
         public void popRetBound() {
-        }
-
-        @Override
-        public void popToBound() {
         }
     }
 
