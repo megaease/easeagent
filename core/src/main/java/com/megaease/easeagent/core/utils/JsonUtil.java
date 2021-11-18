@@ -19,12 +19,12 @@ package com.megaease.easeagent.core.utils;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class JsonUtil {
@@ -51,7 +51,15 @@ public class JsonUtil {
         try {
             return mapper.readValue(json, Map.class);
         } catch (JsonProcessingException e) {
-            return new HashMap<>();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T toObject(String json, TypeReference<T> valueTypeRef) {
+        try {
+            return mapper.readValue(json, valueTypeRef);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
