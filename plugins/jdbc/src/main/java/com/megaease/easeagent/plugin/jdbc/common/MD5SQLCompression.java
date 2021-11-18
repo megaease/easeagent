@@ -51,7 +51,7 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
 
     public MD5SQLCompression(Consumer<Map<String, String>> reportConsumer) {
         this.reportConsumer = reportConsumer;
-        ScheduleHelper.DEFAULT.execute(10, 5, this::pushItems);
+        ScheduleHelper.DEFAULT.nonStopExecute(10, 5, this::pushItems);
     }
 
     public static MD5SQLCompression getInstance(Config config) {

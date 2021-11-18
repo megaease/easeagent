@@ -27,12 +27,10 @@ public class AsyncScope implements Scope {
     public AsyncScope(InitializeContext context, Scope scope) {
         this.context = context;
         this.scope = scope;
-        this.context.inc();
     }
 
     @Override
     public void close() {
         this.scope.close();
-        this.context.dec();
     }
 }

@@ -17,18 +17,24 @@
 
 package com.megaease.easeagent.plugin.concurrent;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ScheduleHelper {
-
     public static final ScheduleHelper DEFAULT = new ScheduleHelper();
 
     private final ThreadFactory threadFactory = new AgentThreadFactory();
+    private ScheduledExecutorService scheduleService = Executors.newSingleThreadScheduledExecutor(threadFactory);
 
-    public void execute(int initialDelay, int delay, Runnable command) {
+    public void nonStopExecute(int initialDelay, int delay, Runnable command) {
         Executors.newSingleThreadScheduledExecutor(threadFactory)
             .scheduleWithFixedDelay(command, initialDelay, delay, TimeUnit.SECONDS);
+    }
+
+    public void execute(int initialDelay, int delay, Runnable command) {
+        this.scheduleService.scheduleWithFixedDelay(command, initialDelay, delay, TimeUnit.SECONDS);
+    }
+
+    public void shutdown() {
+        this.scheduleService.shutdown();
     }
 }

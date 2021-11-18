@@ -48,7 +48,9 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         Config cfg = this.config;
-        ((InitializeContext) context).pushConfig(cfg);
+        InitializeContext innerContext = (InitializeContext) context;
+        innerContext.pushConfig(cfg);
+        innerContext.pushRetBound();
         if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
             this.interceptor.before(methodInfo, context);
         }
@@ -60,7 +62,10 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
         if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
             this.interceptor.after(methodInfo, context);
         }
-        ((InitializeContext) context).popConfig();
+        InitializeContext innerContext = (InitializeContext) context;
+        innerContext.popConfig();
+        innerContext.popToBound();
+        innerContext.popRetBound();
     }
 
     @Override

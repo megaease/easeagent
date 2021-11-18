@@ -50,6 +50,7 @@ public class ClassMatcherTest {
         TypeDescription type = TypeDescription.ForLoadedType.of(TestClass.class);
         Assert.assertTrue(eMatcher.matches(type));
 
+        // test annotation match
         matcher = ClassMatcher.builder()
             .hasInterface(TestInterface.class.getName())
             .hasAnnotation(Index.class.getName())
@@ -66,5 +67,7 @@ public class ClassMatcherTest {
         type = TypeDescription.ForLoadedType.of(TestInterface2.class);
         eMatcher = ClassMatcherConvert.INSTANCE.convert(matcher);
         Assert.assertFalse(eMatcher.matches(type));
+        type = TypeDescription.ForLoadedType.of(TestClass.class);
+        Assert.assertTrue(eMatcher.matches(type));
     }
 }

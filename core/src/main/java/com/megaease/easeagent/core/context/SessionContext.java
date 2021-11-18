@@ -28,20 +28,25 @@ import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
+import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
+import com.sun.corba.se.impl.ior.OldJIDLObjectKeyTemplate;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+@SuppressWarnings("unused")
 public class SessionContext implements InitializeContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
-    private int sequence = 0;
-    private Deque<Config> configs = new ArrayDeque<>();
-    private SpanDeque spans = new SpanDeque();
-    private Map<Object, Object> context = new HashMap<>();
-    private Map<Object, Integer> entered = new HashMap<>();
+
+    private final Deque<Config> configs = new ArrayDeque<>();
+    private final Deque<Object> retStack = new ArrayDeque<>();
+    private final Deque<Integer> retBound = new ArrayDeque<>();
+
+    // private SpanDeque spans = new SpanDeque();
+    private final Map<Object, Object> context = new HashMap<>();
+    private final Map<Object, Integer> entered = new HashMap<>();
 
     @Override
     public boolean isNoop() {
@@ -93,26 +98,6 @@ public class SessionContext implements InitializeContext {
         }
         return configs.pop();
     }
-
-    @Override
-    public int inc() {
-        if (sequence < Const.MAX_PLUGIN_STACK) {
-            return sequence++;
-        }
-        LOGGER.warn("the context sequence >= {}, stack overflow.", Const.MAX_PLUGIN_STACK);
-        this.clear();
-        return sequence++;
-    }
-
-    @Override
-    public int dec() {
-        sequence--;
-        if (sequence <= 0) {
-            this.clear();
-        }
-        return sequence;
-    }
-
 
     @Override
     public int enter(Object key) {
@@ -207,7 +192,6 @@ public class SessionContext implements InitializeContext {
             }
         }
         return span;
-
     }
 
     @Override
@@ -215,46 +199,80 @@ public class SessionContext implements InitializeContext {
         return tracing.nextSpan();
     }
 
+    /**
+     * called by framework to maintain stack
+     */
+    public void popToBound() {
+        while (this.retStack.size() > this.retBound.peek()) {
+            this.retStack.pop();
+        }
+    }
+
+    /**
+     * called by framework to maintain stack
+     */
+    public void pushRetBound() {
+        this.retBound.push(this.retStack.size());
+    }
+
+    /**
+     * called by framework to maintain stack
+     */
+    public void popRetBound() {
+        this.retBound.pop();
+    }
+
+    @Override
+    public void push(Object obj) {
+        if (obj == null) {
+            this.retStack.push(NullObject.NULL);
+        } else {
+            this.retStack.push(obj);
+        }
+    }
+
+    @Override
+    public Object pop() {
+        if (this.retStack.size() <= this.retBound.peek()) {
+            return null;
+        }
+        Object o = this.retStack.pop();
+        if (o == NullObject.NULL) {
+            return null;
+        }
+        return o;
+    }
+
+    @Override
+    public Object peek() {
+        if (this.retStack.size() <= 0) {
+            return null;
+        }
+        Object o = this.retStack.pop();
+        if (o == NullObject.NULL) {
+            return null;
+        }
+        return o;
+    }
+
     @Override
     public void pushSpan(Span span) {
-        spans.push(span, sequence);
+        this.push(span);
     }
 
     @Override
     public Span peekSpan() {
-        return spans.peek(sequence);
+        return (Span)this.peek();
     }
 
     @Override
     public Span popSpan() {
-        return spans.pop(sequence);
+        return (Span)this.pop();
     }
 
     @Override
     public Runnable wrap(Runnable task) {
         return new CurrentContextRunnable(exportAsync(), task);
-    }
-
-    @Override
-    public Map<Object, Object> clear() {
-        this.tracing = NoOpTracer.NO_OP_TRACING;
-        Map<Object, Object> old = Collections.emptyMap();
-        if (!this.context.isEmpty()) {
-            old = this.context;
-            this.context = new HashMap<>();
-        }
-        if (!this.entered.isEmpty()) {
-            this.entered.clear();
-        }
-        if (!configs.isEmpty()) {
-            configs.clear();
-        }
-        if (!spans.isEmpty()) {
-            spans.clear();
-        }
-        sequence = 0;
-        tracing = NoOpTracer.NO_OP_TRACING;
-        return old;
     }
 
     @Override

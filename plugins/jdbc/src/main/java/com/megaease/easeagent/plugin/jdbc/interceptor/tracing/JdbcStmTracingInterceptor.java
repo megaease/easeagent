@@ -32,9 +32,10 @@ import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.utils.common.ExceptionUtil;
 
 import java.sql.Connection;
-import java.sql.Statement;
+// import java.sql.Statement;
 
 @AdviceTo(JdbcStatementAdvice.class)
 public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
@@ -46,7 +47,7 @@ public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
     public static final String SPAN_URL = "url";
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
+    public void doBefore(MethodInfo methodInfo, Context context) {
         SqlInfo sqlInfo = ContextUtils.getFromContext(context, SqlInfo.class);
         if (sqlInfo == null) {
             log.warn("must get sqlInfo from context");
@@ -70,10 +71,16 @@ public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
             span.remoteIpAndPort(databaseInfo.getHost(), databaseInfo.getPort());
         }
         span.start();
+        ContextUtils.setToContext(context, "span", span);
     }
 
     @Override
-    public void after(MethodInfo methodInfo, Context context) {
+    public void doAfter(MethodInfo methodInfo, Context context) {
+        Span span = ContextUtils.getFromContext(context, "span");
+        if (methodInfo.getThrowable() != null) {
+            span.tag(SPAN_ERROR_TAG_NAME, ExceptionUtil.getExceptionMessage(methodInfo.getThrowable()));
+        }
+        span.finish();
     }
 
     @Override

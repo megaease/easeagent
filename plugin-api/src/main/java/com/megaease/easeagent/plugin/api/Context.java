@@ -22,8 +22,6 @@ import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 
-import java.util.Map;
-
 /**
  * A Context remains in the session it was bound to until business finish.
  */
@@ -353,6 +351,15 @@ public interface Context {
     Span nextSpan();
 
     /**
+     * Push/pop/peek a object onto the top of session context retStack.
+     * usages: push an object to context when an interceptor's 'before' called,
+     * and pop it when the 'after' called
+     */
+    void push(Object obj);
+    Object pop();
+    Object peek();
+
+    /**
      * Pushes a Span onto the top of session context Span stack.
      *
      * @param span the span to be pushed onto this stack.
@@ -382,11 +389,4 @@ public interface Context {
      * Wraps the input so that it executes with the same context as now.
      */
     Runnable wrap(Runnable task);
-
-    /**
-     * clear the session context
-     *
-     * @return {@link Map} the old context
-     */
-    Map<Object, Object> clear();
 }

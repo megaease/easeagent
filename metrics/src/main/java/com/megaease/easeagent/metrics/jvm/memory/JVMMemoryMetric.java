@@ -29,6 +29,7 @@ import com.megaease.easeagent.metrics.model.JVMMemoryGaugeMetricModel;
 import com.megaease.easeagent.plugin.api.metric.name.MetricName;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
+import com.megaease.easeagent.plugin.concurrent.ScheduleRunner;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;

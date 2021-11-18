@@ -111,8 +111,21 @@ public class NoOpContext {
         }
 
         @Override
-        public void pushSpan(Span span) {
+        public void push(Object obj) {
+        }
 
+        @Override
+        public Object pop() {
+            return null;
+        }
+
+        @Override
+        public Object peek() {
+            return null;
+        }
+
+        @Override
+        public void pushSpan(Span span) {
         }
 
         @Override
@@ -122,7 +135,7 @@ public class NoOpContext {
 
         @Override
         public Span peekSpan() {
-            return null;
+            return NoOpTracer.NO_OP_SPAN;
         }
 
         @Override
@@ -130,18 +143,11 @@ public class NoOpContext {
             return task;
         }
 
-        @Override
-        public Map<Object, Object> clear() {
-            return Collections.emptyMap();
-        }
-
         public void setCurrentTracing(ITracing tracing) {
-
         }
 
         @Override
         public void pushConfig(Config config) {
-
         }
 
         @Override
@@ -150,13 +156,15 @@ public class NoOpContext {
         }
 
         @Override
-        public int inc() {
-            return 0;
+        public void pushRetBound() {
         }
 
         @Override
-        public int dec() {
-            return 0;
+        public void popRetBound() {
+        }
+
+        @Override
+        public void popToBound() {
         }
     }
 

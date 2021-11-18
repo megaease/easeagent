@@ -43,17 +43,17 @@ public interface InitializeContext extends Context, TracingContext {
     Config popConfig();
 
     /**
-     * Increments by one the current sequence value.
-     *
-     * @return the updated value
+     * called by framework to maintain stack
      */
-    int inc();
+    void pushRetBound();
 
     /**
-     * Decrements by one the current sequence value.
-     * clear context when {@code current sequence == 0}
-     *
-     * @return the updated value
+     * called by framework to maintain stack
      */
-    int dec();
+    void popRetBound();
+
+    /**
+     * called by framework to maintain stack
+     */
+    void popToBound();
 }

@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 
@@ -43,6 +44,9 @@ public class CommonInlineAdvice {
                                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                                    @Advice.Local(CONTEXT) InitializeContext context) {
         context = EaseAgent.initializeContextSupplier.get();
+        if (context.isNoop()) {
+            return null;
+        }
 
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(invoker)
@@ -63,6 +67,9 @@ public class CommonInlineAdvice {
                             @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,
                             @Advice.Thrown(readOnly = false, typing = Assigner.Typing.DYNAMIC) Throwable throwable,
                             @Advice.Local(CONTEXT) InitializeContext context) {
+        if (context.isNoop()) {
+            return;
+        }
         methodInfo.setThrowable(throwable);
         methodInfo.setRetValue(result);
         Dispatcher.exit(index, methodInfo, context);

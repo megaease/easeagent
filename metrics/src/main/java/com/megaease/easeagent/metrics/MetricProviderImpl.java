@@ -67,7 +67,9 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
     public class ApplicationMetricRegistrySupplier implements MetricRegistrySupplier {
 
         @Override
-        public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(com.megaease.easeagent.plugin.api.config.Config config, NameFactory nameFactory, Tags tags) {
+        public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(
+            com.megaease.easeagent.plugin.api.config.Config config,
+            NameFactory nameFactory, Tags tags) {
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             MetricsConfig metricsConfig = new PluginMetricsConfig(config);
             List<KeyType> keyTypes = new ArrayList<>();
@@ -92,7 +94,9 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
                         break;
                 }
             }
-            ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes, MetricProviderImpl.this.additionalAttributes, tags);Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
+            ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes,
+                MetricProviderImpl.this.additionalAttributes, tags);
+            Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
             new AutoRefreshReporter(metricRegistry, metricsConfig,
                 converterAdapter,
                 s -> reporter.report(s)).run();
