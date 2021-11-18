@@ -15,28 +15,24 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.trace;
+package com.megaease.easeagent.core.context;
 
-import java.io.Closeable;
+import com.megaease.easeagent.plugin.api.InitializeContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 
-/**
- * A span remains in the scope it was bound to until close is called.
- *
- * <p>This type can be extended so that the object graph can be built differently or overridden,
- * for example via zipkin or when mocking.
- */
-public interface Scope extends Closeable {
-    /**
-     * No exceptions are thrown when unbinding a span scope.
-     * It must be call after your business.
-     * <pre>{@code
-     *  try{
-     *      ......
-     *  }finally{
-     *      scope.close();
-     *  }
-     * }</pre>
-     */
+public class AsyncScope implements Scope {
+    private final InitializeContext context;
+    private final Scope scope;
+
+    public AsyncScope(InitializeContext context, Scope scope) {
+        this.context = context;
+        this.scope = scope;
+        this.context.inc();
+    }
+
     @Override
-    void close();
+    public void close() {
+        this.scope.close();
+        this.context.dec();
+    }
 }

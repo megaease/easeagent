@@ -19,6 +19,7 @@ package com.megaease.easeagent.core.context;
 
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.Const;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.Config;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SessionContext implements InitializeContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
-    private long sequence = 0;
+    private int sequence = 0;
     private Deque<Config> configs = new ArrayDeque<>();
     private SpanDeque spans = new SpanDeque();
     private Map<Object, Object> context = new HashMap<>();
@@ -94,14 +95,19 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public long inc() {
+    public int inc() {
+        if (sequence < Const.MAX_PLUGIN_STACK) {
+            return sequence++;
+        }
+        LOGGER.warn("the context sequence >= {}, stack overflow.", Const.MAX_PLUGIN_STACK);
+        this.clear();
         return sequence++;
     }
 
     @Override
-    public long dec() {
+    public int dec() {
         sequence--;
-        if (sequence == 0) {
+        if (sequence <= 0) {
             this.clear();
         }
         return sequence;
@@ -141,7 +147,7 @@ public class SessionContext implements InitializeContext {
     public Scope importAsync(AsyncContext snapshot) {
         Scope scope = tracing.importAsync(snapshot);
         context.putAll(snapshot.getAll());
-        return scope;
+        return new AsyncScope(this, scope);
     }
 
     @Override
@@ -269,8 +275,6 @@ public class SessionContext implements InitializeContext {
         public void run() {
             try (Scope scope = asyncContext.importToCurr()) {
                 task.run();
-            } finally {
-                asyncContext.getContext().clear();
             }
         }
     }

@@ -47,12 +47,13 @@ public interface InitializeContext extends Context, TracingContext {
      *
      * @return the updated value
      */
-    long inc();
+    int inc();
 
     /**
      * Decrements by one the current sequence value.
+     * clear context when {@code current sequence == 0}
      *
      * @return the updated value
      */
-    long dec();
+    int dec();
 }

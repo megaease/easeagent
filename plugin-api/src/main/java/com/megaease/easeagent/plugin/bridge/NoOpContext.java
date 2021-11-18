@@ -150,12 +150,12 @@ public class NoOpContext {
         }
 
         @Override
-        public long inc() {
+        public int inc() {
             return 0;
         }
 
         @Override
-        public long dec() {
+        public int dec() {
             return 0;
         }
     }

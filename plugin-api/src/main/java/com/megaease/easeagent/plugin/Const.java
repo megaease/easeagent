@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin;
 
 public interface Const {
+    int MAX_PLUGIN_STACK = 10000;
     String ENABLED_CONFIG = "enabled";
 
     int METRIC_DEFAULT_INTERVAL = 30;
