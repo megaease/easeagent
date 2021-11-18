@@ -26,6 +26,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.agent.ByteBuddyAgent;
@@ -65,6 +66,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
 
     @BeforeClass
     public static void setUp() {
+        EaseAgent.initializeContextSupplier = TestContext::new;
         classLoader = new ByteArrayClassLoader.ChildFirst(
             NonStaticMethodTransformTest.class.getClassLoader(),
             ClassFileLocator.ForClassLoader.readToNames(Foo.class, CommonInlineAdvice.class),

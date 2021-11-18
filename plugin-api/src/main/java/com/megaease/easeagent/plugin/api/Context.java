@@ -352,38 +352,12 @@ public interface Context {
 
     /**
      * Push/pop/peek a object onto the top of session context retStack.
-     * usages: push an object to context when an interceptor's 'before' called,
-     * and pop it when the 'after' called
+     * usages: push an Span to context when an interceptor's 'before' called,
+     * and pop the Span in 'after' procession
      */
-    void push(Object obj);
-    Object pop();
-    Object peek();
-
-    /**
-     * Pushes a Span onto the top of session context Span stack.
-     *
-     * @param span the span to be pushed onto this stack.
-     */
-    void pushSpan(Span span);
-
-    /**
-     * Removes the Span at the top of this session context Span stack
-     * and returns that Span as the value of this function.
-     *
-     * @return The span at the top of this stack (the last span of the <tt>Span</tt> object), or
-     * {@code null} if this stack is empty
-     */
-    Span popSpan();
-
-    /**
-     * Retrieves, but does not remove, the head of the stack represented by
-     * this stack (in other words, the first span of this stack), or
-     * returns {@code null} if this stack is empty.
-     *
-     * @return The span at the top of this stack (the last span of the <tt>Span</tt> object), or
-     * {@code null} if this stack is empty
-     */
-    Span peekSpan();
+    <T> void push(T obj);
+    <T> T pop();
+    <T> T peek();
 
     /**
      * Wraps the input so that it executes with the same context as now.

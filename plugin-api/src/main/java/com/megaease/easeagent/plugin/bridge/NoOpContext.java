@@ -111,31 +111,17 @@ public class NoOpContext {
         }
 
         @Override
-        public void push(Object obj) {
-        }
-
-        @Override
-        public Object pop() {
+        public <T> T pop() {
             return null;
         }
 
         @Override
-        public Object peek() {
+        public <T> T  peek() {
             return null;
         }
 
         @Override
-        public void pushSpan(Span span) {
-        }
-
-        @Override
-        public Span popSpan() {
-            return NoOpTracer.NO_OP_SPAN;
-        }
-
-        @Override
-        public Span peekSpan() {
-            return NoOpTracer.NO_OP_SPAN;
+        public <T> void push(T obj) {
         }
 
         @Override

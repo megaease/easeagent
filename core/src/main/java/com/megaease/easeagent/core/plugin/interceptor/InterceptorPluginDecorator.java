@@ -59,13 +59,17 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     @Override
     public void after(MethodInfo methodInfo, Context context) {
         Config cfg = context.getConfig();
-        if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
-            this.interceptor.after(methodInfo, context);
-        }
         InitializeContext innerContext = (InitializeContext) context;
+
+        if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
+            try {
+                this.interceptor.after(methodInfo, context);
+            } finally {
+                innerContext.popToBound();
+                innerContext.popRetBound();
+            }
+        }
         innerContext.popConfig();
-        innerContext.popToBound();
-        innerContext.popRetBound();
     }
 
     @Override

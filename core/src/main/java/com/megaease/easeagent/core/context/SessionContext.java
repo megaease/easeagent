@@ -19,7 +19,6 @@ package com.megaease.easeagent.core.context;
 
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.plugin.Const;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.Config;
@@ -30,12 +29,13 @@ import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
-import com.sun.corba.se.impl.ior.OldJIDLObjectKeyTemplate;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("unused, unchecked")
 public class SessionContext implements InitializeContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
@@ -144,7 +144,7 @@ public class SessionContext implements InitializeContext {
         }
         for (String field : fields) {
             Object o = context.get(field);
-            if (o != null && (o instanceof String)) {
+            if ((o instanceof String)) {
                 progressContext.setHeader(field, (String) o);
             }
         }
@@ -187,7 +187,7 @@ public class SessionContext implements InitializeContext {
         }
         for (String field : fields) {
             Object o = context.get(field);
-            if (o != null && (o instanceof String)) {
+            if ((o instanceof String)) {
                 request.setHeader(field, (String) o);
             }
         }
@@ -202,6 +202,8 @@ public class SessionContext implements InitializeContext {
     /**
      * called by framework to maintain stack
      */
+    @Override
+    @SuppressWarnings("ConstantConditions")
     public void popToBound() {
         while (this.retStack.size() > this.retBound.peek()) {
             this.retStack.pop();
@@ -223,7 +225,7 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public void push(Object obj) {
+    public <T> void push(T obj) {
         if (obj == null) {
             this.retStack.push(NullObject.NULL);
         } else {
@@ -232,7 +234,8 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public Object pop() {
+    @SuppressWarnings("ConstantConditions")
+    public <T> T pop() {
         if (this.retStack.size() <= this.retBound.peek()) {
             return null;
         }
@@ -240,11 +243,11 @@ public class SessionContext implements InitializeContext {
         if (o == NullObject.NULL) {
             return null;
         }
-        return o;
+        return (T)o;
     }
 
     @Override
-    public Object peek() {
+    public <T> T peek() {
         if (this.retStack.size() <= 0) {
             return null;
         }
@@ -252,22 +255,7 @@ public class SessionContext implements InitializeContext {
         if (o == NullObject.NULL) {
             return null;
         }
-        return o;
-    }
-
-    @Override
-    public void pushSpan(Span span) {
-        this.push(span);
-    }
-
-    @Override
-    public Span peekSpan() {
-        return (Span)this.peek();
-    }
-
-    @Override
-    public Span popSpan() {
-        return (Span)this.pop();
+        return (T)o;
     }
 
     @Override
