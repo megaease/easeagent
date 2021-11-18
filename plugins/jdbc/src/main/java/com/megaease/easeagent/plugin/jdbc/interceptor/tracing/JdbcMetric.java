@@ -18,11 +18,17 @@
 package com.megaease.easeagent.plugin.jdbc.interceptor.tracing;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
+import com.megaease.easeagent.plugin.api.metric.Counter;
+import com.megaease.easeagent.plugin.api.metric.Meter;
+import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
+import com.megaease.easeagent.plugin.utils.metrics.LastMinutesCounterGauge;
 
+import java.time.Duration;
 import java.util.HashMap;
 
 public class JdbcMetric extends AbstractMetric {
@@ -68,5 +74,27 @@ public class JdbcMetric extends AbstractMetric {
                 .build())
             .build();
         return nameFactory;
+    }
+
+    public void collectMetric(String key, boolean success, Long startTimeMs) {
+        Timer timer = this.metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT));
+        // timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
+        Counter counter = this.metricRegistry.counter(this.nameFactory.counterName(key, MetricSubType.DEFAULT));
+        Meter meter = this.metricRegistry.meter(this.nameFactory.meterName(key, MetricSubType.DEFAULT));
+        meter.mark();
+        counter.inc();
+        if (!success) {
+            Counter errCounter = this.metricRegistry.counter(this.nameFactory.counterName(key, MetricSubType.ERROR));
+            Meter errMeter = this.metricRegistry.meter(this.nameFactory.meterName(key, MetricSubType.ERROR));
+            errMeter.mark();
+            errCounter.inc();
+        }
+        MetricName gaugeName = this.nameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
+        metricRegistry.gauge(gaugeName.name(), () -> () -> LastMinutesCounterGauge.builder()
+            .m1Count((long) meter.getOneMinuteRate() * 60)
+            .m5Count((long) meter.getFiveMinuteRate() * 60 * 5)
+            .m15Count((long) meter.getFifteenMinuteRate() * 60 * 15)
+            .build());
+
     }
 }

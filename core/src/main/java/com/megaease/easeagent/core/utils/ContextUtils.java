@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ContextUtils {
-    private static final String BEGIN_TIME = ContextUtils.class.getName() + ".beginTime";
-    private static final String END_TIME = ContextUtils.class.getName() + ".endTime";
+    private static final String BEGIN_TIME = ContextUtils.class.getSimpleName() + ".beginTime";
+    private static final String END_TIME = ContextUtils.class.getSimpleName() + ".endTime";
 
     private static void setBeginTime(Map<Object, Object> context) {
         context.put(BEGIN_TIME, System.currentTimeMillis());

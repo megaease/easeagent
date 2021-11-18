@@ -22,6 +22,7 @@ import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain;
 import com.megaease.easeagent.core.utils.AgentArray;
+import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
@@ -49,7 +50,7 @@ public final class Dispatcher {
         return chains.putIfAbsent(index, chain);
     }
 
-    // for interceptor 
+    // for interceptor
     public static AgentInterceptorChain getChain(int index) {
         return chains.get(index);
     }

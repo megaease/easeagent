@@ -46,6 +46,16 @@ public class NoOpContext {
         }
 
         @Override
+        public <V> V putLocal(String key, V value) {
+            return null;
+        }
+
+        @Override
+        public <V> V getLocal(String key) {
+            return null;
+        }
+
+        @Override
         public <V> V get(Object key) {
             return null;
         }

@@ -27,7 +27,6 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.dynamic.ClassFileLocator;

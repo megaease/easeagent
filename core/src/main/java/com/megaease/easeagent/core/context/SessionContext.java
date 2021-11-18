@@ -42,7 +42,7 @@ public class SessionContext implements InitializeContext {
 
     private final Deque<Config> configs = new ArrayDeque<>();
     private final Deque<Object> retStack = new ArrayDeque<>();
-    private final Deque<Integer> retBound = new ArrayDeque<>();
+    private final Deque<RetBound> retBound = new ArrayDeque<>();
 
     // private SpanDeque spans = new SpanDeque();
     private final Map<Object, Object> context = new HashMap<>();
@@ -74,6 +74,19 @@ public class SessionContext implements InitializeContext {
     public <V> V put(Object key, V value) {
         context.put(key, value);
         return value;
+    }
+
+    @Override
+    public <V> V  putLocal(String key, V value) {
+        assert this.retBound.peek() != null;
+        this.retBound.peek().put(key, value);
+        return value;
+    }
+
+    @Override
+    public <V> V getLocal(String key) {
+        assert this.retBound.peek() != null;
+        return (V)this.retBound.peek().get(key);
     }
 
     @Override
@@ -205,7 +218,7 @@ public class SessionContext implements InitializeContext {
     @Override
     @SuppressWarnings("ConstantConditions")
     public void popToBound() {
-        while (this.retStack.size() > this.retBound.peek()) {
+        while (this.retStack.size() > this.retBound.peek().size()) {
             this.retStack.pop();
         }
     }
@@ -214,7 +227,7 @@ public class SessionContext implements InitializeContext {
      * called by framework to maintain stack
      */
     public void pushRetBound() {
-        this.retBound.push(this.retStack.size());
+        this.retBound.push(new RetBound(this.retStack.size()));
     }
 
     /**
@@ -236,7 +249,7 @@ public class SessionContext implements InitializeContext {
     @Override
     @SuppressWarnings("ConstantConditions")
     public <T> T pop() {
-        if (this.retStack.size() <= this.retBound.peek()) {
+        if (this.retStack.size() <= this.retBound.peek().size()) {
             return null;
         }
         Object o = this.retStack.pop();

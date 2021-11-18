@@ -40,6 +40,9 @@ public interface Context {
      */
     Tracing currentTracing();
 
+    <V> V putLocal(String key, V value);
+    <V> V getLocal(String key);
+
     /**
      * Returns the value to which the specified key is mapped,
      * or {@code null} if this context contains no mapping for the key.
