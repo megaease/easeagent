@@ -50,8 +50,8 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
         Config cfg = this.config;
         InitializeContext innerContext = (InitializeContext) context;
         innerContext.pushConfig(cfg);
-        innerContext.pushRetBound();
         if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
+            innerContext.pushRetBound();
             this.interceptor.before(methodInfo, context);
         }
     }
