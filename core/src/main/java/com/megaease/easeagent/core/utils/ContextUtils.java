@@ -17,21 +17,25 @@
 
 package com.megaease.easeagent.core.utils;
 
+import com.google.auto.service.AutoService;
+import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.utils.SystemClock;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@AutoService(AppendBootstrapClassLoaderSearch.class)
 public class ContextUtils {
     private static final String BEGIN_TIME = ContextUtils.class.getSimpleName() + ".beginTime";
     private static final String END_TIME = ContextUtils.class.getSimpleName() + ".endTime";
 
     private static void setBeginTime(Map<Object, Object> context) {
-        context.put(BEGIN_TIME, System.currentTimeMillis());
+        context.put(BEGIN_TIME, SystemClock.now());
     }
 
     public static void setEndTime(Map<Object, Object> context) {
-        context.put(END_TIME, System.currentTimeMillis());
+        context.put(END_TIME, SystemClock.now());
     }
 
     public static Long getBeginTime(Map<Object, Object> context) {
@@ -52,11 +56,11 @@ public class ContextUtils {
     }
 
     public static void setBeginTime(Context context) {
-        context.put(BEGIN_TIME, System.currentTimeMillis());
+        context.put(BEGIN_TIME, SystemClock.now());
     }
 
     public static void setEndTime(Context context) {
-        context.put(END_TIME, System.currentTimeMillis());
+        context.put(END_TIME, SystemClock.now());
     }
 
     public static Long getBeginTime(Context context) {
@@ -90,5 +94,4 @@ public class ContextUtils {
     public static <T> T getFromContext(Map<Object, Object> context, Object key) {
         return (T) context.get(key);
     }
-
 }

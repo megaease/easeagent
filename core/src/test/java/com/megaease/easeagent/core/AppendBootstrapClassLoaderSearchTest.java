@@ -34,6 +34,7 @@ public class AppendBootstrapClassLoaderSearchTest {
                 "com.megaease.easeagent.core.Dispatcher",
                 "com.megaease.easeagent.core.Dispatcher$Advice",
                 "com.megaease.easeagent.core.utils.AgentArray",
+                "com.megaease.easeagent.core.utils.ContextUtils",
                 "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext",
                 "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$Context",
                 "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$CurrentContextRunnable",
