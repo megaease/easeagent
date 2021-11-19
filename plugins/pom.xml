@@ -20,6 +20,7 @@
         <module>springweb</module>
         <module>httpservlet</module>
         <module>redis</module>
+        <module>kafka</module>
     </modules>
 
     <build>
