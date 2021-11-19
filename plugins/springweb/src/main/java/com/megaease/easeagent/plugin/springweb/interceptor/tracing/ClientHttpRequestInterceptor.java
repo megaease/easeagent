@@ -18,21 +18,23 @@
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.springweb.advice.ClientHttpRequestAdvice;
 import com.megaease.easeagent.plugin.utils.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.utils.trace.HttpRequest;
 import com.megaease.easeagent.plugin.utils.trace.HttpResponse;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpResponse;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-//@AdviceTo(value = WebClientFilterAdvice.class, qualifier = "default")
-public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInterceptor {
+@AdviceTo(value = ClientHttpRequestAdvice.class, qualifier = "default")
+public class ClientHttpRequestInterceptor extends BaseHttpClientTracingInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
     @Override
@@ -42,57 +44,47 @@ public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInte
 
     @Override
     protected HttpRequest getRequest(MethodInfo methodInfo, Context context) {
-        ClientRequest clientRequest = (ClientRequest) methodInfo.getArgs()[0];
-        ClientRequest.Builder builder = ClientRequest.from(clientRequest);
-        WebClientRequest request = new WebClientRequest(clientRequest, builder);
-        Object[] args = methodInfo.getArgs();
-        args[0] = builder.build();
-        methodInfo.setArgs(args);
-        return request;
+        ClientHttpRequest clientHttpRequest = (ClientHttpRequest) methodInfo.getInvoker();
+        return new ClientRequestWrapper(clientHttpRequest);
     }
 
     @Override
     protected HttpResponse getResponse(MethodInfo methodInfo, Context context) {
-        ClientResponse clientResponse = null;
-        if (methodInfo.isSuccess()) {
-            clientResponse = getClientResponse(methodInfo);
-        }
-        return new WebClientResponse(methodInfo.getThrowable(), clientResponse);
+        ClientHttpRequest clientHttpRequest = (ClientHttpRequest) methodInfo.getInvoker();
+        ClientHttpResponse response = (ClientHttpResponse) methodInfo.getRetValue();
+        return new ClientResponseWrapper(methodInfo.getThrowable(), clientHttpRequest, response);
     }
 
-    private ClientResponse getClientResponse(MethodInfo methodInfo) {
-        Object retValue = methodInfo.getRetValue();
-        if (retValue == null) {
+    private static String getFirstHeaderValue(HttpHeaders headers, String name) {
+        List<String> values = headers.get(name);
+        if (values == null || values.isEmpty()) {
             return null;
         }
-        List<ClientResponse> list = (List<ClientResponse>) retValue;
-        if (!list.isEmpty()) {
-            return list.get(0);
-        }
-        return null;
+        return values.get(0);
     }
 
+    static class ClientRequestWrapper implements HttpRequest {
 
-    static class WebClientRequest implements HttpRequest {
+        private final ClientHttpRequest request;
 
-        private final ClientRequest clientRequest;
+        public ClientRequestWrapper(ClientHttpRequest request) {
+            this.request = request;
+        }
 
-        private final ClientRequest.Builder builder;
-
-        public WebClientRequest(ClientRequest clientRequest, ClientRequest.Builder builder) {
-            this.clientRequest = clientRequest;
-            this.builder = builder;
+        @Override
+        public Span.Kind kind() {
+            return Span.Kind.CLIENT;
         }
 
 
         @Override
         public String method() {
-            return clientRequest.method().name();
+            return request.getMethodValue();
         }
 
         @Override
         public String path() {
-            return clientRequest.url().getPath();
+            return request.getURI().getPath();
         }
 
         @Override
@@ -102,29 +94,24 @@ public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInte
 
         @Override
         public String getRemoteAddr() {
-            return clientRequest.url().toString();
+            return request.getURI().getHost();
         }
 
         @Override
         public int getRemotePort() {
-            return 0;
+            return request.getURI().getPort();
         }
 
         @Override
         public String getRemoteHost() {
-            return null;
-        }
-
-        @Override
-        public Span.Kind kind() {
-            return Span.Kind.CLIENT;
+            return request.getURI().getHost();
         }
 
         @Override
         public String header(String name) {
-            HttpHeaders headers = clientRequest.headers();
-            return headers.getFirst(name);
+            return getFirstHeaderValue(request.getHeaders(), name);
         }
+
 
         @Override
         public boolean cacheScope() {
@@ -133,31 +120,24 @@ public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInte
 
         @Override
         public void setHeader(String name, String value) {
-            builder.header(name, value);
+            request.getHeaders().add(name, value);
         }
-
     }
 
-    private static String getFirstHeaderValue(ClientResponse.Headers headers, String name) {
-        Collection<String> values = headers.header(name);
-        if (values == null || values.isEmpty()) {
-            return null;
-        }
-        return values.iterator().next();
-    }
-
-    static class WebClientResponse implements HttpResponse {
+    static class ClientResponseWrapper implements HttpResponse {
         private final Throwable caught;
-        private final ClientResponse response;
+        private final ClientHttpRequest request;
+        private final ClientHttpResponse response;
 
-        public WebClientResponse(Throwable caught, ClientResponse response) {
+        public ClientResponseWrapper(Throwable caught, ClientHttpRequest request, ClientHttpResponse response) {
             this.caught = caught;
+            this.request = request;
             this.response = response;
         }
 
         @Override
         public String method() {
-            return null;
+            return request.getMethodValue();
         }
 
         @Override
@@ -165,14 +145,18 @@ public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInte
             return null;
         }
 
+        @SneakyThrows
         @Override
         public int statusCode() {
-            return response == null ? 0 : response.rawStatusCode();
+            return response.getRawStatusCode();
         }
 
         @Override
         public Throwable maybeError() {
-            return caught;
+            if (caught != null) {
+                return caught;
+            }
+            return null;
         }
 
         @Override
@@ -182,10 +166,7 @@ public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInte
 
         @Override
         public String header(String name) {
-            if (response == null) {
-                return null;
-            }
-            return getFirstHeaderValue(response.headers(), name);
+            return getFirstHeaderValue(response.getHeaders(), name);
         }
     }
 }

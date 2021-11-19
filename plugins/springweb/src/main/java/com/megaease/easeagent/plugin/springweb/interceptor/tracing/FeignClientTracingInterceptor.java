@@ -20,15 +20,13 @@ package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.springweb.advice.FeignClientAdvice;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.utils.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.utils.trace.HttpRequest;
 import com.megaease.easeagent.plugin.utils.trace.HttpResponse;
-import com.megaease.easeagent.plugin.utils.trace.HttpUtils;
 import feign.Request;
 import feign.Response;
 import lombok.SneakyThrows;
@@ -37,29 +35,24 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 @AdviceTo(value = FeignClientAdvice.class, qualifier = "default")
-public class FeignClientTracingInterceptor implements FirstEnterInterceptor {
+public class FeignClientTracingInterceptor extends BaseHttpClientTracingInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
     @Override
-    public void doBefore(MethodInfo methodInfo, Context context) {
-        FeignClientRequestWrapper requestWrapper = new FeignClientRequestWrapper((Request) methodInfo.getArgs()[0]);
-        ProgressContext progressContext = context.nextProgress(requestWrapper);
-        HttpUtils.handleReceive(progressContext.span().start(), requestWrapper);
-        context.put(PROGRESS_CONTEXT, progressContext);
+    public Object getProgressKey() {
+        return PROGRESS_CONTEXT;
     }
 
     @Override
-    public void doAfter(MethodInfo methodInfo, Context context) {
-        ProgressContext progressContext = context.get(PROGRESS_CONTEXT);
-        try {
-            Request request = (Request) methodInfo.getArgs()[0];
-            Response response = (Response) methodInfo.getRetValue();
-            FeignClientResponseWrapper responseWrapper = new FeignClientResponseWrapper(methodInfo.getThrowable(), request, response);
-            progressContext.finish(responseWrapper);
-            HttpUtils.finish(progressContext.span(), responseWrapper);
-        } finally {
-            progressContext.scope().close();
-        }
+    protected HttpRequest getRequest(MethodInfo methodInfo, Context context) {
+        return new FeignClientRequestWrapper((Request) methodInfo.getArgs()[0]);
+    }
+
+    @Override
+    protected HttpResponse getResponse(MethodInfo methodInfo, Context context) {
+        Request request = (Request) methodInfo.getArgs()[0];
+        Response response = (Response) methodInfo.getRetValue();
+        return new FeignClientResponseWrapper(methodInfo.getThrowable(), request, response);
     }
 
 
@@ -146,7 +139,7 @@ public class FeignClientTracingInterceptor implements FirstEnterInterceptor {
         }
     }
 
-    static class FeignClientResponseWrapper implements HttpResponse{
+    static class FeignClientResponseWrapper implements HttpResponse {
         private final Throwable caught;
         private final Request request;
         private final Response response;

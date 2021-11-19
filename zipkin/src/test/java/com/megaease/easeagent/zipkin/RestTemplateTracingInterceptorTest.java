@@ -26,7 +26,6 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.RestTemplateTracingInterceptor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;

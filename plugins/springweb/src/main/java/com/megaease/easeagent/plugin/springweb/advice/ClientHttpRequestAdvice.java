@@ -25,17 +25,18 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-public class WebClientFilterAdvice implements Points {
+public class ClientHttpRequestAdvice implements Points {
     @Override
     public IClassMatcher getClassMatcher() {
-        return ClassMatcher.builder().hasClassName("com.megaease.springframework.easeagent.plugin.springweb.WebClientFilter")
+        return ClassMatcher.builder().hasInterface("org.springframework.http.client.ClientHttpRequest").notInterface()
             .build();
     }
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.multiBuilder()
-            .match(MethodMatcher.builder().named("filter")
+            .match(MethodMatcher.builder().named("execute")
+                .returnType("org.springframework.http.client.ClientHttpResponse")
                 .qualifier("default")
                 .build())
             .build();

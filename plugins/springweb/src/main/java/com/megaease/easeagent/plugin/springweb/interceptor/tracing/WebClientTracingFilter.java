@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.springframework.easeagent.plugin.springweb;
+package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
 import lombok.NonNull;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -23,11 +23,14 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
-//
-public class WebClientFilter implements ExchangeFilterFunction {
+
+public class WebClientTracingFilter implements ExchangeFilterFunction {
+
     @NonNull
     @Override
     public Mono<ClientResponse> filter(@NonNull ClientRequest clientRequest, @NonNull ExchangeFunction exchangeFunction) {
+//        interceptor =  EaseAgent.getInterceptorProxy().before();
         return exchangeFunction.exchange(clientRequest);
+//        interceptor =  EaseAgent.getInterceptorProxy().after();
     }
 }

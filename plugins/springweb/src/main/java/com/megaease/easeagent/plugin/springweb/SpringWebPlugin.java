@@ -19,11 +19,11 @@ package com.megaease.easeagent.plugin.springweb;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 
-public class FeignClientPlugin implements AgentPlugin {
+public class SpringWebPlugin implements AgentPlugin {
 
     @Override
     public String getName() {
-        return "feignclient";
+        return "springweb";
     }
 
     @Override
