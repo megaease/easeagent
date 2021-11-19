@@ -33,8 +33,14 @@ public class KafkaProducerConstructInterceptor implements AgentInterceptor {
     public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
         Object invoker = methodInfo.getInvoker();
         Map<String, Object> configs = (Map<String, Object>) methodInfo.getArgs()[0];
-        List<String> serverConfig = (List<String>) configs.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
-        String uri = String.join(",", serverConfig);
+        Object bootstrapServers = configs.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
+        String uri;
+        if (bootstrapServers instanceof String) {
+            uri = (String) bootstrapServers;
+        } else {
+            List<String> serverConfig = (List<String>) bootstrapServers;
+            uri = String.join(",", serverConfig);
+        }
         AgentDynamicFieldAccessor.setDynamicFieldValue(invoker, uri);
         return chain.doAfter(methodInfo, context);
     }

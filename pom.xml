@@ -381,7 +381,7 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <includes>
-                                <!-- 自定义的注解处理器全限定名-->
+                                <!-- Fully qualified name of custom annotation processor-->
                                 <include>com.megaease.easeagent.plugin.processor.PluginProcessor</include>
                             </includes>
                         </configuration>
