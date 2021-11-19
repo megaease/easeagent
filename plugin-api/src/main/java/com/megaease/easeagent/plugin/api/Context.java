@@ -40,6 +40,17 @@ public interface Context {
      */
     Tracing currentTracing();
 
+    /**
+     * Unlike get/put method transfer cross different interceptors and even cross the whole session,
+     * putLocal/getLocal can only transfer data in current interceptor instance.
+     * eg. when putLocal is called to put a Span in an interceptor's 'before' method,
+     * it can only be accessed in current interceptor by 'getLocal', and can't accessed or modify by other interceptors.
+     *
+     * @param key the key whose associated value is to be returned
+     * @param value the value to which the specified key is mapped, or
+     * {@code null} if this context contains no mapping for the key
+     * @return the value
+     */
     <V> V putLocal(String key, V value);
     <V> V getLocal(String key);
 
@@ -305,7 +316,7 @@ public interface Context {
 
 
     /**
-     * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rebbitmq consumer
+     * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rabbitMq consumer
      * <p>
      * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
      * and {@link Request#cacheScope()}.
@@ -325,7 +336,7 @@ public interface Context {
 
 
     /**
-     * Create a Span for message producer. Examples: kafka producer, rebbitmq producer
+     * Create a Span for message producer. Examples: kafka producer, rabbitMq producer
      * <p>
      * It will set the Span's tags "messaging.operation", "messaging.channel_kind", "messaging.channel_name" from request
      * {@link MessagingRequest#operation()} {@link MessagingRequest#channelKind()} {@link MessagingRequest#channelName()}

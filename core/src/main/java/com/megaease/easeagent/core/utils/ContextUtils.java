@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.core.utils;
 
+import com.megaease.easeagent.plugin.api.Context;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,12 +30,12 @@ public class ContextUtils {
         context.put(BEGIN_TIME, System.currentTimeMillis());
     }
 
-    public static Long getBeginTime(Map<Object, Object> context) {
-        return (Long) context.get(BEGIN_TIME);
-    }
-
     public static void setEndTime(Map<Object, Object> context) {
         context.put(END_TIME, System.currentTimeMillis());
+    }
+
+    public static Long getBeginTime(Map<Object, Object> context) {
+        return (Long) context.get(BEGIN_TIME);
     }
 
     public static Long getEndTime(Map<Object, Object> context) {
@@ -47,6 +49,27 @@ public class ContextUtils {
 
     public static long getDuration(Map<Object, Object> context) {
         return getEndTime(context) - getBeginTime(context);
+    }
+
+    public static void setBeginTime(Context context) {
+        context.put(BEGIN_TIME, System.currentTimeMillis());
+    }
+
+    public static void setEndTime(Context context) {
+        context.put(END_TIME, System.currentTimeMillis());
+    }
+
+    public static Long getBeginTime(Context context) {
+        return (Long) context.get(BEGIN_TIME);
+    }
+
+    public static Long getEndTime(Context context) {
+        Long endTime = (Long) context.get(END_TIME);
+        if (endTime == null) {
+            setEndTime(context);
+            endTime = (Long) context.get(END_TIME);
+        }
+        return endTime;
     }
 
     public static Map<Object, Object> createContext() {

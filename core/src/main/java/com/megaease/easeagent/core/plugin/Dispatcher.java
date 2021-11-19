@@ -37,12 +37,14 @@ public final class Dispatcher {
     public static void enter(int index, MethodInfo info, InitializeContext ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
         int pos = 0;
+        ContextUtils.setBeginTime(ctx);
         chain.doBefore(info, pos, ctx);
     }
 
     public static Object exit(int index, MethodInfo info, InitializeContext ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
         int pos = chain.size() - 1;
+        ContextUtils.setEndTime(ctx);
         return chain.doAfter(info, pos, ctx);
     }
 

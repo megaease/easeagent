@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.jdbc.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;

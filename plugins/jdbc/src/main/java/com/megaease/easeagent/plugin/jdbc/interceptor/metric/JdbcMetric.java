@@ -15,10 +15,15 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.jdbc.interceptor.tracing;
+package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.collect.ImmutableList;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
+import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.Counter;
 import com.megaease.easeagent.plugin.api.metric.Meter;
@@ -30,8 +35,11 @@ import com.megaease.easeagent.plugin.utils.metrics.LastMinutesCounterGauge;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Optional;
 
-public class JdbcMetric extends AbstractMetric {
+public class JdbcMetric extends AbstractMetric implements RemovalListener<String, String> {
+    private final Logger logger = EaseAgent.getLogger(JdbcMetric.class);
+
     public JdbcMetric(Config config, Tags tags) {
         super(config, tags);
         this.nameFactory = getNameFactory();
@@ -39,7 +47,7 @@ public class JdbcMetric extends AbstractMetric {
     }
 
     public NameFactory getNameFactory() {
-        NameFactory nameFactory = NameFactory.createBuilder()
+        return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
                 ImmutableMap.<MetricField, MetricValueFetcher>builder()
                     .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
@@ -73,12 +81,11 @@ public class JdbcMetric extends AbstractMetric {
                 .put(MetricField.EXECUTION_ERROR_COUNT, MetricValueFetcher.CountingCount)
                 .build())
             .build();
-        return nameFactory;
     }
 
-    public void collectMetric(String key, boolean success, Long startTimeMs) {
+    public void collectMetric(String key, boolean success, Context ctx) {
         Timer timer = this.metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT));
-        // timer.update(Duration.ofMillis(ContextUtils.getDuration(context)));
+        timer.update(Duration.ofMillis(ContextUtils.getDuration(ctx)));
         Counter counter = this.metricRegistry.counter(this.nameFactory.counterName(key, MetricSubType.DEFAULT));
         Meter meter = this.metricRegistry.meter(this.nameFactory.meterName(key, MetricSubType.DEFAULT));
         meter.mark();
@@ -95,6 +102,23 @@ public class JdbcMetric extends AbstractMetric {
             .m5Count((long) meter.getFiveMinuteRate() * 60 * 5)
             .m15Count((long) meter.getFifteenMinuteRate() * 60 * 15)
             .build());
+    }
 
+    @SuppressWarnings("NullableProblems")
+    public void onRemoval(RemovalNotification<String, String> notification) {
+        try {
+            String key = notification.getKey();
+            ImmutableList<String> list = ImmutableList.of(
+                Optional.ofNullable(this.nameFactory.counterName(key, MetricSubType.DEFAULT)).orElse(""),
+                Optional.ofNullable(this.nameFactory.counterName(key, MetricSubType.ERROR)).orElse(""),
+                Optional.ofNullable(this.nameFactory.meterName(key, MetricSubType.DEFAULT)).orElse(""),
+                Optional.ofNullable(this.nameFactory.meterName(key, MetricSubType.ERROR)).orElse(""),
+                Optional.ofNullable(this.nameFactory.timerName(key, MetricSubType.DEFAULT)).orElse(""),
+                Optional.ofNullable(this.nameFactory.gaugeName(key, MetricSubType.DEFAULT)).orElse(""));
+
+            list.forEach(metricRegistry::remove);
+        } catch (Exception e) {
+            logger.warn("remove lru cache failed: " + e.getMessage());
+        }
     }
 }

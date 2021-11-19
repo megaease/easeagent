@@ -37,23 +37,25 @@ class GenerateProviderBean {
     private final String pluginClass;
     private final String point;
     private final String qualifier;
-    private final String providerClass;
+    private final String providerClassExtension;
+    private final TypeElement interceptor;
     private final BeanUtils utils;
 
     GenerateProviderBean(TypeElement plugin, TypeElement interceptor,
                          Map<String, String> to,
                          BeanUtils utils) {
+        this.interceptor = interceptor;
         this.packageName = utils.packageNameOf(interceptor);
-        this.interceptorClass = utils.classNameOf(interceptor).simpleName();
         this.pluginClass = utils.classNameOf(plugin).canonicalName();
         this.point = to.get("value");
         this.qualifier = to.get("qualifier") == null ? "default" : to.get("qualifier");
-        this.providerClass = utils.classNameOf(interceptor).canonicalName() + "Provider";
+        this.providerClassExtension = "$Provider" + to.get("seq");
+        this.interceptorClass = utils.classNameOf(interceptor).simpleName();
         this.utils = utils;
     }
 
     public String getProviderClass() {
-        return this.providerClass;
+        return utils.classNameOf(interceptor).canonicalName()  + this.providerClassExtension;
     }
 
     JavaFile apply() {
@@ -91,7 +93,8 @@ class GenerateProviderBean {
             }
         }
 
-        final TypeSpec.Builder specBuild = TypeSpec.classBuilder(this.interceptorClass + "Provider")
+        final TypeSpec.Builder specBuild = TypeSpec
+            .classBuilder(this.interceptorClass + this.providerClassExtension)
             .addSuperinterface(Provider.class)
             .addModifiers(Modifier.PUBLIC);
         for (MethodSpec method : methods) {

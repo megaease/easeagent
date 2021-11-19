@@ -15,7 +15,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -44,7 +43,7 @@
                     <relocations>
                         <relocation>
                             <pattern>com.fasterxml</pattern>
-                            <shadedPattern>com.megaease.easeagent</shadedPattern>
+                            <shadedPattern>com.megaease.easeagent.plugin.utils</shadedPattern>
                         </relocation>
                     </relocations>
 
@@ -62,7 +61,6 @@
                         </goals>
                     </execution>
                 </executions>
-
             </plugin>
         </plugins>
     </build>

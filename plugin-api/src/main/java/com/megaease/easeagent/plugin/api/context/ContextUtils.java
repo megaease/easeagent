@@ -23,7 +23,21 @@ public class ContextUtils {
     private static final String BEGIN_TIME = ContextUtils.class.getSimpleName() + ".beginTime";
     private static final String END_TIME = ContextUtils.class.getSimpleName() + ".endTime";
 
+    public static Long getBeginTime(Context context) {
+        return context.get(BEGIN_TIME);
+    }
 
+    public static Long getEndTime(Context context) {
+        Long endTime = context.get(END_TIME);
+        if (endTime == null) {
+            return System.currentTimeMillis();
+        }
+        return endTime;
+    }
+
+    public static Long getDuration(Context context) {
+        return getEndTime(context) - getBeginTime(context);
+    }
 
     /**
      * Get data from context
@@ -33,9 +47,8 @@ public class ContextUtils {
      * @param <T>     The type of data
      * @return data
      */
-    @SuppressWarnings("unchecked")
     public static <T> T getFromContext(Context context, Object key) {
-        return (T) context.get(key);
+        return context.get(key);
     }
 
     public static <T> void setToContext(Context context, Object key, T value) {

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.jdbc.common;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.megaease.easeagent.plugin.utils.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 

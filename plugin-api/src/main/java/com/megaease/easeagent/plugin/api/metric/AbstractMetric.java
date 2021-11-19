@@ -17,11 +17,10 @@
 
 package com.megaease.easeagent.plugin.api.metric;
 
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.concurrent.ScheduleHelper;
-import com.megaease.easeagent.plugin.concurrent.ScheduleRunner;
 
 public abstract class AbstractMetric {
     protected MetricRegistry metricRegistry;
@@ -35,6 +34,8 @@ public abstract class AbstractMetric {
     }
 
     public abstract NameFactory getNameFactory();
+
+    public abstract void collectMetric(String key, boolean success, Context ctx);
 
     public void shutdown() {
         // this.metricRegistry.remove(tags.)

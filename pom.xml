@@ -60,6 +60,8 @@
         <version.moco>1.1.0</version.moco>
         <version.okhttp3>4.9.0</version.okhttp3>
         <version.disruptor>3.4.2</version.disruptor>
+        <version.commons-lang3>3.11</version.commons-lang3>
+        <version.commons-codec>1.15</version.commons-codec>
         <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
         <version.spring>5.2.6.RELEASE</version.spring>
         <version.spring-kafka>2.3.13.RELEASE</version.spring-kafka>
@@ -108,6 +110,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${version.junit}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
                 <version>2020.0.4</version>
@@ -136,11 +143,6 @@
                 <artifactId>guava</artifactId>
                 <version>${version.guava}</version>
             </dependency>
-            <!--            <dependency>-->
-            <!--                <groupId>com.typesafe</groupId>-->
-            <!--                <artifactId>config</artifactId>-->
-            <!--                <version>${version.config}</version>-->
-            <!--            </dependency>-->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -215,8 +217,15 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.11</version>
+                <version>${version.commons-lang3}</version>
             </dependency>
+            
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${version.commons-codec}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>

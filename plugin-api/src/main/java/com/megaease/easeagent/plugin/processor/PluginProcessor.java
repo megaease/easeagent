@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.annotation.AdvicesTo;
 import com.squareup.javapoet.JavaFile;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -48,10 +49,10 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 
 @AutoService(Processor.class)
 public class PluginProcessor extends AbstractProcessor {
-    // Class<Plugin> annotationClass = Plugin.class;
     TreeSet<String>  annotations = new TreeSet<>();
     {
         annotations.add(AdviceTo.class.getCanonicalName());
+        annotations.add(AdvicesTo.class.getCanonicalName());
         // for test temporarily
         // annotations.add(ProviderBean.class.getCanonicalName());
     }
@@ -66,14 +67,19 @@ public class PluginProcessor extends AbstractProcessor {
         return annotations;
     }
 
-    private Set<TypeElement> process(Class<? extends Annotation> annotationClass,
+    private Set<TypeElement> process(Set<Class<? extends Annotation>> annotationClasses,
                             Class<?> dstClass,
                             Elements elements,
                             RoundEnvironment roundEnv) {
         TreeSet<String> services = new TreeSet<>();
         Set<TypeElement> types = new HashSet<>();
 
-        Set<? extends Element> roundElements = roundEnv.getElementsAnnotatedWith(annotationClass);
+        Set<Element> roundElements = new HashSet<>();
+        for (Class<? extends Annotation> annotationClass : annotationClasses) {
+            Set<? extends Element> es = roundEnv.getElementsAnnotatedWith(annotationClass);
+            roundElements.addAll(es);
+        }
+
         for (Element e : roundElements) {
             if (!e.getKind().isClass()) {
                 continue;
@@ -129,7 +135,10 @@ public class PluginProcessor extends AbstractProcessor {
             return false;
         }
         // process(Pointcut.class, Points.class, elements, roundEnv);
-        Set<TypeElement> interceptors = process(AdviceTo.class, Interceptor.class, elements, roundEnv);
+        Set<Class<? extends Annotation>> classes = new HashSet<>();
+        classes.add(AdvicesTo.class);
+        classes.add(AdviceTo.class);
+        Set<TypeElement> interceptors = process(classes, Interceptor.class, elements, roundEnv);
         // generate providerBean
         generateProviderBeans(plugin, interceptors, utils);
         // process(ProviderBean.class, Provider.class, elements, roundEnv);
@@ -157,14 +166,35 @@ public class PluginProcessor extends AbstractProcessor {
         TreeSet<String> providers = new TreeSet<>();
         TreeSet<String> points = new TreeSet<>();
         for (TypeElement type : interceptors) {
-            if(isNull(type.getAnnotation(AdviceTo.class))) {
+            if(isNull(type.getAnnotation(AdviceTo.class))
+                && isNull(type.getAnnotation(AdvicesTo.class))) {
                 continue;
             }
             List<? extends AnnotationMirror> annotations = type.getAnnotationMirrors();
+            Set<AnnotationMirror> adviceToAnnotations = new HashSet<>();
             for (AnnotationMirror annotation : annotations) {
-                if (!utils.isSameType(annotation.getAnnotationType(), AdviceTo.class.getCanonicalName())) {
+                if (utils.isSameType(annotation.getAnnotationType(), AdviceTo.class.getCanonicalName())) {
+                    adviceToAnnotations.add(annotation);
                     continue;
                 }
+                if (!utils.isSameType(annotation.getAnnotationType(), AdvicesTo.class.getCanonicalName())) {
+                    continue;
+                }
+                Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotation.getElementValues();
+                RepeatedAnnotationVisitor visitor = new RepeatedAnnotationVisitor();
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e : values.entrySet()) {
+                    String key = e.getKey().getSimpleName().toString();
+                    if (key.equals("value")) {
+                        AnnotationValue av = e.getValue();
+                        Set<AnnotationMirror> as = av.accept(visitor, AdvicesTo.class);
+                        adviceToAnnotations.addAll(as);
+                        break;
+                    }
+                }
+            }
+
+            Integer seq = 0;
+            for (AnnotationMirror annotation : adviceToAnnotations) {
                 Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotation.getElementValues();
                 Map<String, String> to = new HashMap<>();
                 for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> e : values.entrySet()) {
@@ -181,6 +211,7 @@ public class PluginProcessor extends AbstractProcessor {
                         points.add(value);
                     }
                 }
+                to.put("seq", seq.toString());
                 GenerateProviderBean gb = new GenerateProviderBean(plugin, type, to, utils);
                 JavaFile file = gb.apply();
                 try {
@@ -188,6 +219,7 @@ public class PluginProcessor extends AbstractProcessor {
                         .addFileComment("This ia a generated file.")
                         .build().writeTo(processingEnv.getFiler());
                     providers.add(gb.getProviderClass());
+                    seq += 1;
                 } catch (IOException e) {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getLocalizedMessage());
                 }

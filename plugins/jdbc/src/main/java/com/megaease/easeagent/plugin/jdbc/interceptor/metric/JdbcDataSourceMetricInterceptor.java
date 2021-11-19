@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
@@ -26,31 +24,28 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
-import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
-import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
+import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
+import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
 
-@AdviceTo(JdbcStatementAdvice.class)
-public class JdbcStmMetricInterceptor implements Interceptor {
-    private static final int maxCacheSize = 1000;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+@AdviceTo(JdbcDataSourceAdvice.class)
+public class JdbcDataSourceMetricInterceptor implements Interceptor {
     private static JdbcMetric metric;
-    private static MD5SQLCompression sqlCompression;
-    private static Cache<String, String> cache;
+    public static final String ERR_CON_METRIC_KEY = "err-con";
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
         if (metric == null) {
-            synchronized (JdbcStmMetricInterceptor.class) {
+            synchronized (JdbcMetric.class) {
                 if (metric == null) {
-                    Tags tags = new Tags("application", "jdbc-statement", "signature");
+                    Tags tags = new Tags("application", "jdbc-connection", "url");
                     metric = new JdbcMetric(config, tags);
-                    sqlCompression = MD5SQLCompression.getInstance(config);
-                    cache = CacheBuilder.newBuilder()
-                        .maximumSize(maxCacheSize).removalListener(metric).build();
-
                 }
             }
         }
+        Interceptor.super.init(config, className, methodName, methodDescriptor);
     }
 
     @Override
@@ -59,19 +54,31 @@ public class JdbcStmMetricInterceptor implements Interceptor {
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        SqlInfo sqlInfo = context.get(SqlInfo.class);
-        String sql = sqlInfo.getSql();
-        String key = sqlCompression.compress(sql);
-        metric.collectMetric(key, methodInfo.getThrowable() == null, context);
-        String value = cache.getIfPresent(key);
-        if (value == null) {
-            cache.put(key, "");
+        Connection connection = (Connection) methodInfo.getRetValue();
+        try {
+            String key;
+            boolean success = true;
+            if (methodInfo.getRetValue() == null) {
+                key = ERR_CON_METRIC_KEY;
+                success = false;
+            } else {
+                key = getMetricKey(connection, methodInfo.getThrowable());
+            }
+            metric.collectMetric(key, success, context);
+        } catch (SQLException ignored) {
         }
+    }
+
+    private static String getMetricKey(Connection con, Throwable throwable) throws SQLException {
+        if (throwable != null) {
+            return ERR_CON_METRIC_KEY;
+        }
+        return JdbcUtils.getUrl(con);
     }
 
     @Override
     public String getName() {
-        return Order.METRIC.getName() + ".jdbcStatement";
+        return Order.METRIC.getName() + ".jdbcConnection";
     }
 
     @Override

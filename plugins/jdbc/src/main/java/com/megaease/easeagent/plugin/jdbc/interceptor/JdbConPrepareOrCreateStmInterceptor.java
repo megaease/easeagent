@@ -28,20 +28,21 @@ import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcConnectionAdvice;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 
 import java.sql.Connection;
 import java.sql.Statement;
 
 @AdviceTo(JdbcConnectionAdvice.class)
-public class JdbConPrepareOrCreateStmInterceptor implements Interceptor {
+public class JdbConPrepareOrCreateStmInterceptor implements FirstEnterInterceptor {
     private static final Logger logger = EaseAgent.getLogger(JdbConPrepareOrCreateStmInterceptor.class);
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
+    public void doBefore(MethodInfo methodInfo, Context context) {
     }
 
     @Override
-    public void after(MethodInfo methodInfo, Context context) {
+    public void doAfter(MethodInfo methodInfo, Context context) {
         Statement stm = (Statement) methodInfo.getRetValue();
         SqlInfo sqlInfo = new SqlInfo((Connection) methodInfo.getInvoker());
         if (methodInfo.getMethod().startsWith("prepare")
