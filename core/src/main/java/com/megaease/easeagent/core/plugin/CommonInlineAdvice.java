@@ -18,6 +18,7 @@
 package com.megaease.easeagent.core.plugin;
 
 import com.megaease.easeagent.core.plugin.annotation.Index;
+import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.NoExceptionHandler;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
@@ -62,6 +63,7 @@ public class CommonInlineAdvice {
     }
 
     @Advice.OnMethodExit(onThrowable = Exception.class, suppress = NoExceptionHandler.class)
+    // @Advice.OnMethodExit(suppress = NoExceptionHandler.class)
     public static void exit(@Index int index,
                             @Advice.Enter MethodInfo methodInfo,
                             @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,
@@ -70,8 +72,23 @@ public class CommonInlineAdvice {
         if (context.isNoop()) {
             return;
         }
-        methodInfo.setThrowable(throwable);
-        methodInfo.setRetValue(result);
+        methodInfo.throwable(throwable);
+        methodInfo.retValue(result);
+        Dispatcher.exit(index, methodInfo, context);
+        if (methodInfo.isChanged()) {
+            result = methodInfo.getRetValue();
+        }
+    }
+
+    @Advice.OnMethodExit(suppress = NoExceptionHandler.class)
+    public static void exit(@Index int index,
+                            @Advice.Enter MethodInfo methodInfo,
+                            @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,
+                            @Advice.Local(CONTEXT) InitializeContext context) {
+        if (context.isNoop()) {
+            return;
+        }
+        methodInfo.retValue(result);
         Dispatcher.exit(index, methodInfo, context);
         if (methodInfo.isChanged()) {
             result = methodInfo.getRetValue();

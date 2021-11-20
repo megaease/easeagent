@@ -38,8 +38,8 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Generate.Advice
-@Injection.Provider(Provider.class)
+// @Generate.Advice
+// @Injection.Provider(Provider.class)
 public abstract class KafkaProducerAdvice implements Transformation {
 
     @Override

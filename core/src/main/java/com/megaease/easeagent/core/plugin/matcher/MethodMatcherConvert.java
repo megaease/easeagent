@@ -69,7 +69,11 @@ public class MethodMatcherConvert
         if (matcher.getName() != null && matcher.getNameMatchType() != null) {
             switch (matcher.getNameMatchType()) {
                 case EQUALS:
-                    c = named(matcher.getName());
+                    if (matcher.getName().equals("<init>")) {
+                        c = isConstructor();
+                    } else {
+                        c = named(matcher.getName());
+                    }
                     break;
                 case START_WITH:
                     c = nameStartsWith(matcher.getName());

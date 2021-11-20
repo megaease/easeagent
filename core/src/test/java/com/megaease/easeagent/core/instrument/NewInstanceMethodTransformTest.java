@@ -23,7 +23,6 @@ import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -49,8 +48,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("unused")
-public class NonStaticMethodTransformTest extends TransformTestBase {
+public class NewInstanceMethodTransformTest  extends TransformTestBase {
     private static ClassLoader classLoader;
     private static String dumpFolder;
     private static final AtomicInteger globalIndex = new AtomicInteger(1000);
@@ -63,7 +61,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
         EaseAgent.initializeContextSupplier = TestContext::new;
         classLoader = new ByteArrayClassLoader.ChildFirst(
             NonStaticMethodTransformTest.class.getClassLoader(),
-            ClassFileLocator.ForClassLoader.readToNames(Foo.class, CommonInlineAdvice.class),
+            ClassFileLocator.ForClassLoader.readToNames(NonStaticMethodTransformTest.Foo.class, CommonInlineAdvice.class),
             ByteArrayClassLoader.PersistenceHandler.MANIFEST);
 
         String path = "target/test-classes";
@@ -75,7 +73,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
 
     @Test
     @AgentAttachmentRule.Enforce
-    public void testAdviceTransformer() throws Exception {
+    public void testClassInstanceTransformer() throws Exception {
         System.setProperty(TypeWriter.DUMP_PROPERTY, dumpFolder);
         assertEquals(System.getProperty(TypeWriter.DUMP_PROPERTY), dumpFolder);
 
@@ -83,28 +81,26 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
         AgentBuilder builder = Bootstrap.getAgentBuilder(null, true);
 
         Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(),
-            FOO, new FooProvider());
+            "<init>", new FooProvider());
 
         ClassFileTransformer classFileTransformer = builder
-            .type(hasSuperType(named(FooBase.class.getName())), ElementMatchers.is(classLoader))
+            .type(hasSuperType(named(NonStaticMethodTransformTest.FooBase.class.getName())), ElementMatchers.is(classLoader))
             .transform(PluginLoader.compound(true, transformations))
             .installOnByteBuddyAgent();
         try {
-            Class<?> type = classLoader.loadClass(Foo.class.getName());
+            Class<?> type = classLoader.loadClass(NonStaticMethodTransformTest.Foo.class.getName());
             // check
             Object instance = type.getDeclaredConstructor(String.class).newInstance("kkk");
-            AgentDynamicFieldAccessor.setDynamicFieldValue(instance, BAR);
-            assertEquals(AgentDynamicFieldAccessor.getDynamicFieldValue(instance), BAR);
-            assertThat(type.getDeclaredMethod(FOO, String.class)
-                    .invoke(instance, "kkk"),
-                is(QUX + BAR));
+            assertThat(type.getDeclaredMethod("getInstanceT")
+                    .invoke(instance),
+                is(QUX));
         } finally {
             assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
         }
     }
 
     @SuppressWarnings("unused")
-    public static class Foo extends FooBase {
+    public static class Foo extends NonStaticMethodTransformTest.FooBase {
         public String instanceT;
 
         static String clazzInitString = FOO;
@@ -127,16 +123,6 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
 
         public int baz() {
             return (int)System.currentTimeMillis();
-        }
-    }
-
-    public interface FooInterface {
-        String foo(String a);
-    }
-
-    public static class FooBase implements FooInterface {
-        public String foo(String a) {
-            return a + "-base";
         }
     }
 }

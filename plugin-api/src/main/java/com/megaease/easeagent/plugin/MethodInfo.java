@@ -109,6 +109,15 @@ public class MethodInfo {
         this.changed = true;
     }
 
+
+    public void throwable(Throwable throwable) {
+        this.throwable = throwable;
+    }
+
+    public void retValue(Object retValue) {
+        this.retValue = retValue;
+    }
+
     public boolean equals(final MethodInfo o) {
         if (o == this) {
             return true;

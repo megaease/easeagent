@@ -19,6 +19,7 @@ package com.megaease.easeagent.core.instrument;
 
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderPluginDecorator;
+import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.plugin.Interceptor;
@@ -26,6 +27,8 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,8 +50,10 @@ public class TransformTestBase {
         ProviderChain.Builder providerBuilder = ProviderChain.builder();
         providerBuilder.addProvider(new ProviderPluginDecorator(new TestPlugin(), provider));
 
+        IMethodMatcher m = MethodMatcher.builder().named(methodName).build();
+
         MethodTransformation methodTransformation = new MethodTransformation(index,
-            named(methodName),
+            MethodMatcherConvert.INSTANCE.convert(m),
             providerBuilder);
         QualifierRegistry.addMethodTransformation(index, methodTransformation);
 
@@ -56,6 +61,24 @@ public class TransformTestBase {
         transformations.add(methodTransformation);
 
         return transformations;
+    }
+
+    public static class FooInstInterceptor implements Interceptor {
+        @Override
+        public void before(MethodInfo methodInfo, Context context) {
+            Object [] args = methodInfo.getArgs();
+            args[0] = QUX;
+            methodInfo.markChanged();
+        }
+
+        @Override
+        public void after(MethodInfo methodInfo, Context context) {
+        }
+
+        @Override
+        public int order() {
+            return Order.HIGHEST.getOrder();
+        }
     }
 
     public static class FooInterceptor implements Interceptor {
@@ -100,6 +123,23 @@ public class TransformTestBase {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
             return FooInterceptor::new;
+        }
+
+        @Override
+        public String getAdviceTo() {
+            return "";
+        }
+
+        @Override
+        public String getPluginClassName() {
+            return TestPlugin.class.getCanonicalName();
+        }
+    }
+
+    static class FooInstProvider implements Provider {
+        @Override
+        public Supplier<Interceptor> getInterceptorProvider() {
+            return FooInstInterceptor::new;
         }
 
         @Override

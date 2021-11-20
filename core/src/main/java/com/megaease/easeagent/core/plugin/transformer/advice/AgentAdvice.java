@@ -56,7 +56,7 @@ import net.bytebuddy.utility.visitor.StackAwareMethodVisitor;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
+import java.lang.annotation.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -138,6 +138,8 @@ public class AgentAdvice extends Advice {
      */
     private final Dispatcher.Resolved.ForMethodExit methodExit;
 
+    private final Dispatcher.Resolved.ForMethodExit methodExitNonThrowable;
+
     /**
      * The assigner to use.
      */
@@ -160,10 +162,22 @@ public class AgentAdvice extends Advice {
      * @param methodExit  The dispatcher for instrumenting the instrumented method upon exiting.
      */
     protected AgentAdvice(Dispatcher.Resolved.ForMethodEnter methodEnter,
+                          // Dispatcher.Resolved.ForMethodExit methodExitNonThrowable,
                           Dispatcher.Resolved.ForMethodExit methodExit) {
-        this(methodEnter, methodExit, Assigner.DEFAULT, ExceptionHandler.Default.SUPPRESSING, SuperMethodCall.INSTANCE);
+        this(methodEnter, methodExit,
+            null,
+            Assigner.DEFAULT, ExceptionHandler.Default.SUPPRESSING, SuperMethodCall.INSTANCE);
     }
 
+    protected AgentAdvice(Dispatcher.Resolved.ForMethodEnter methodEnter,
+                          Dispatcher.Resolved.ForMethodExit methodExitNonThrowable,
+                          Dispatcher.Resolved.ForMethodExit methodExit) {
+        this(methodEnter, methodExit,
+            methodExitNonThrowable,
+            Assigner.DEFAULT,
+            ExceptionHandler.Default.SUPPRESSING,
+            SuperMethodCall.INSTANCE);
+    }
 
     /**
      * Creates a new advice.
@@ -176,15 +190,22 @@ public class AgentAdvice extends Advice {
      */
     private AgentAdvice(Dispatcher.Resolved.ForMethodEnter methodEnter,
                         Dispatcher.Resolved.ForMethodExit methodExit,
+                        Dispatcher.Resolved.ForMethodExit methodExitNonThrowable,
                         Assigner assigner,
                         ExceptionHandler exceptionHandler,
                         Implementation delegate) {
         super(null, null);
         this.methodEnter = methodEnter;
         this.methodExit = methodExit;
+        this.methodExitNonThrowable = methodExitNonThrowable;
         this.assigner = assigner;
         this.exceptionHandler = exceptionHandler;
         this.delegate = delegate;
+    }
+
+    private static boolean isNoExceptionHandler(TypeDescription t) {
+        return t.getName().endsWith("NoExceptionHandler");
+        // return t.represents(NoExceptionHandler.class) || t.represents()
     }
 
     /**
@@ -202,12 +223,25 @@ public class AgentAdvice extends Advice {
                                     ClassFileLocator classFileLocator,
                                     List<? extends OffsetMapping.Factory<?>> userFactories,
                                     Delegator delegator) {
-        Dispatcher.Unresolved methodEnter = Dispatcher.Inactive.INSTANCE, methodExit = Dispatcher.Inactive.INSTANCE;
+        Dispatcher.Unresolved methodEnter = Dispatcher.Inactive.INSTANCE,
+            methodExit = Dispatcher.Inactive.INSTANCE,
+            methodExitNoException = Dispatcher.Inactive.INSTANCE;
         for (MethodDescription.InDefinedShape methodDescription : advice.getDeclaredMethods()) {
             methodEnter = locate(OnMethodEnter.class, INLINE_ENTER, methodEnter, methodDescription, delegator);
-            methodExit = locate(OnMethodExit.class, INLINE_EXIT, methodExit, methodDescription, delegator);
+            AnnotationDescription.Loadable<?> al = methodDescription.getDeclaredAnnotations().ofType(OnMethodExit.class);
+            if (al != null) {
+                TypeDescription throwable = al.getValue(ON_THROWABLE).resolve(TypeDescription.class);
+                if (isNoExceptionHandler(throwable)) {
+                    methodExitNoException = locate(OnMethodExit.class, INLINE_EXIT, methodExitNoException, methodDescription, delegator);
+                } else {
+                    methodExit = locate(OnMethodExit.class, INLINE_EXIT, methodExit, methodDescription, delegator);
+                }
+            }
         }
-        if (!methodEnter.isAlive() && !methodExit.isAlive()) {
+        if (methodExit == Dispatcher.Inactive.INSTANCE) {
+            methodEnter = methodExitNoException;
+        }
+        if (!methodEnter.isAlive() && !methodExit.isAlive() && !methodExitNoException.isAlive()) {
             throw new IllegalArgumentException("No advice defined by " + advice);
         }
         try {
@@ -215,6 +249,7 @@ public class AgentAdvice extends Advice {
                 ? OpenedClassReader.of(classFileLocator.locate(advice.getName()).resolve())
                 : UNDEFINED;
             return new AgentAdvice(methodEnter.asMethodEnter(userFactories, classReader, methodExit, postProcessorFactory),
+                methodExitNoException.asMethodExit(userFactories, classReader, methodEnter, postProcessorFactory),
                 methodExit.asMethodExit(userFactories, classReader, methodEnter, postProcessorFactory));
         } catch (IOException exception) {
             throw new IllegalStateException("Error reading class file of " + advice, exception);
@@ -248,7 +283,8 @@ public class AgentAdvice extends Advice {
      * @return A version of this advice that uses the specified assigner.
      */
     public AgentAdvice withAssigner(Assigner assigner) {
-        return new AgentAdvice(methodEnter, methodExit, assigner, exceptionHandler, delegate);
+        return new AgentAdvice(methodEnter, methodExitNonThrowable,
+            methodExit, assigner, exceptionHandler, delegate);
     }
 
     /**
@@ -259,7 +295,8 @@ public class AgentAdvice extends Advice {
      * @return A version of this advice that applies the supplied exception handler.
      */
     public AgentAdvice withExceptionHandler(ExceptionHandler exceptionHandler) {
-        return new AgentAdvice(methodEnter, methodExit, assigner, exceptionHandler, delegate);
+        return new AgentAdvice(methodEnter, methodExitNonThrowable,
+            methodExit, assigner, exceptionHandler, delegate);
     }
 
     /**
@@ -345,7 +382,8 @@ public class AgentAdvice extends Advice {
          * @return A method visitor wrapper representing the supplied advice.
          */
         public AgentAdvice to(TypeDescription advice, ClassFileLocator classFileLocator) {
-            return AgentAdvice.tto(advice, postProcessorFactory, classFileLocator, new ArrayList<>(offsetMappings.values()), delegator);
+            return AgentAdvice.tto(advice, postProcessorFactory, classFileLocator,
+                  new ArrayList<>(offsetMappings.values()), delegator);
         }
     }
 
@@ -357,8 +395,7 @@ public class AgentAdvice extends Advice {
      * @param methodVisitor         The method visitor to write to.
      * @param implementationContext The implementation context to use.
      * @param writerFlags           The ASM writer flags to use.
-     * @param readerFlags           The ASM reader flags to use.
-     * @return A method visitor that applies this advice.
+     * @param readerFlags           The, plies this advice.
      */
     protected MethodVisitor doWrap(TypeDescription instrumentedType,
                                    MethodDescription instrumentedMethod,
@@ -366,7 +403,14 @@ public class AgentAdvice extends Advice {
                                    Implementation.Context implementationContext,
                                    int writerFlags,
                                    int readerFlags) {
-        if (AdviceRegistry.check(instrumentedType, instrumentedMethod, methodEnter, methodExit) == 0) {
+        Dispatcher.Resolved.ForMethodExit exit;
+        if (instrumentedMethod.isConstructor()) {
+            exit = methodExitNonThrowable;
+        } else {
+            exit = methodExit;
+        }
+
+        if (AdviceRegistry.check(instrumentedType, instrumentedMethod, methodEnter, exit) == 0) {
             return methodVisitor;
         }
 
@@ -382,7 +426,7 @@ public class AgentAdvice extends Advice {
                 instrumentedType,
                 instrumentedMethod,
                 methodEnter,
-                methodExit,
+                methodExitNonThrowable,
                 writerFlags,
                 readerFlags);
         } else {
@@ -611,7 +655,91 @@ public class AgentAdvice extends Advice {
 
     }
 
+    /**
+     * An advice visitor that does not apply exit advice.
+     */
+    protected static class WithoutExitAdvice extends AdviceVisitor {
+
         /**
+         * Creates an advice visitor that does not apply exit advice.
+         *
+         * @param methodVisitor         The method visitor for the instrumented method.
+         * @param implementationContext The implementation context to use.
+         * @param assigner              The assigner to use.
+         * @param exceptionHandler      The stack manipulation to apply within a suppression handler.
+         * @param instrumentedType      A description of the instrumented type.
+         * @param instrumentedMethod    A description of the instrumented method.
+         * @param methodEnter           The dispatcher to be used for method enter.
+         * @param writerFlags           The ASM writer flags that were set.
+         * @param readerFlags           The ASM reader flags that were set.
+         */
+        protected WithoutExitAdvice(MethodVisitor methodVisitor,
+                                    Implementation.Context implementationContext,
+                                    Assigner assigner,
+                                    StackManipulation exceptionHandler,
+                                    TypeDescription instrumentedType,
+                                    MethodDescription instrumentedMethod,
+                                    Dispatcher.Resolved.ForMethodEnter methodEnter,
+                                    int writerFlags,
+                                    int readerFlags) {
+            super(methodVisitor,
+                implementationContext,
+                assigner,
+                exceptionHandler,
+                instrumentedType,
+                instrumentedMethod,
+                methodEnter,
+                Dispatcher.Inactive.INSTANCE,
+                Collections.emptyList(),
+                writerFlags,
+                readerFlags);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void apply(MethodVisitor methodVisitor) {
+            if (instrumentedMethod.getReturnType().represents(boolean.class)
+                || instrumentedMethod.getReturnType().represents(byte.class)
+                || instrumentedMethod.getReturnType().represents(short.class)
+                || instrumentedMethod.getReturnType().represents(char.class)
+                || instrumentedMethod.getReturnType().represents(int.class)) {
+                methodVisitor.visitInsn(Opcodes.ICONST_0);
+                methodVisitor.visitInsn(Opcodes.IRETURN);
+            } else if (instrumentedMethod.getReturnType().represents(long.class)) {
+                methodVisitor.visitInsn(Opcodes.LCONST_0);
+                methodVisitor.visitInsn(Opcodes.LRETURN);
+            } else if (instrumentedMethod.getReturnType().represents(float.class)) {
+                methodVisitor.visitInsn(Opcodes.FCONST_0);
+                methodVisitor.visitInsn(Opcodes.FRETURN);
+            } else if (instrumentedMethod.getReturnType().represents(double.class)) {
+                methodVisitor.visitInsn(Opcodes.DCONST_0);
+                methodVisitor.visitInsn(Opcodes.DRETURN);
+            } else if (instrumentedMethod.getReturnType().represents(void.class)) {
+                methodVisitor.visitInsn(Opcodes.RETURN);
+            } else {
+                methodVisitor.visitInsn(Opcodes.ACONST_NULL);
+                methodVisitor.visitInsn(Opcodes.ARETURN);
+            }
+        }
+
+        @Override
+        protected void onUserPrepare() {
+            /* do nothing */
+        }
+
+        @Override
+        protected void onUserStart() {
+            /* do nothing */
+        }
+
+        @Override
+        protected void onUserEnd() {
+            /* do nothing */
+        }
+    }
+
+     /**
      * An advice visitor that applies exit advice.
      */
     protected abstract static class WithExitAdvice extends AdviceVisitor {
@@ -1195,7 +1323,7 @@ public class AgentAdvice extends Advice {
                  * @return An appropriate suppression handler.
                  */
                 protected static SuppressionHandler of(TypeDescription suppressedType) {
-                    return suppressedType.represents(NoExceptionHandler.class)
+                    return isNoExceptionHandler(suppressedType)
                         ? NoOp.INSTANCE
                         : new Suppressing(suppressedType);
                 }
@@ -2121,7 +2249,31 @@ public class AgentAdvice extends Advice {
                         throw new IllegalStateException("Local variable for " + entry.getKey() + " is defined with inconsistent types");
                     }
                 }
-                return Resolved.ForMethodExit.of(adviceMethod, postProcessorFactory.make(adviceMethod, true), namedTypes, uninitializedNamedTypes, userFactories, classReader, methodEnter.getAdviceType());
+                return Resolved.ForMethodExit.of(adviceMethod,
+                    postProcessorFactory.make(adviceMethod, true),
+                    namedTypes, uninitializedNamedTypes, userFactories,
+                    classReader, methodEnter.getAdviceType());
+            }
+
+            public Dispatcher.Resolved.ForMethodExit asMethodExitNonThrowable(
+                List<? extends OffsetMapping.Factory<?>> userFactories,
+                ClassReader classReader,
+                Unresolved methodEnter,
+                PostProcessor.Factory postProcessorFactory) {
+                Map<String, TypeDefinition> namedTypes = new HashMap<>(methodEnter.getNamedTypes()), uninitializedNamedTypes = new HashMap<>();
+                for (Map.Entry<String, TypeDefinition> entry : this.namedTypes.entrySet()) {
+                    TypeDefinition typeDefinition = namedTypes.get(entry.getKey()), uninitializedTypeDefinition = uninitializedNamedTypes.get(entry.getKey());
+                    if (typeDefinition == null && uninitializedTypeDefinition == null) {
+                        namedTypes.put(entry.getKey(), entry.getValue());
+                        uninitializedNamedTypes.put(entry.getKey(), entry.getValue());
+                    } else if (!(typeDefinition == null ? uninitializedTypeDefinition : typeDefinition).equals(entry.getValue())) {
+                        throw new IllegalStateException("Local variable for " + entry.getKey() + " is defined with inconsistent types");
+                    }
+                }
+                return Resolved.ForMethodExit.ofNonThrowable(adviceMethod,
+                    postProcessorFactory.make(adviceMethod, true),
+                    namedTypes, uninitializedNamedTypes, userFactories,
+                    classReader, methodEnter.getAdviceType());
             }
 
             /**
@@ -2894,9 +3046,20 @@ public class AgentAdvice extends Advice {
                         TypeDescription throwable = adviceMethod.getDeclaredAnnotations()
                             .ofType(OnMethodExit.class)
                             .getValue(ON_THROWABLE).resolve(TypeDescription.class);
-                        return throwable.represents(NoExceptionHandler.class)
+                        return isNoExceptionHandler(throwable)
                             ? new WithoutExceptionHandler(adviceMethod, postProcessor, namedTypes, uninitializedNamedTypes, userFactories, classReader, enterType)
                             : new WithExceptionHandler(adviceMethod, postProcessor, namedTypes, uninitializedNamedTypes, userFactories, classReader, enterType, throwable);
+                    }
+
+                    protected static Resolved.ForMethodExit ofNonThrowable(MethodDescription.InDefinedShape adviceMethod,
+                                                               PostProcessor postProcessor,
+                                                               Map<String, TypeDefinition> namedTypes,
+                                                               Map<String, TypeDefinition> uninitializedNamedTypes,
+                                                               List<? extends OffsetMapping.Factory<?>> userFactories,
+                                                               ClassReader classReader,
+                                                               TypeDefinition enterType) {
+                        return new WithoutExceptionHandler(adviceMethod, postProcessor, namedTypes,
+                            uninitializedNamedTypes, userFactories, classReader, enterType);
                     }
 
                     @Override
@@ -2931,7 +3094,7 @@ public class AgentAdvice extends Advice {
                         return doApply(methodVisitor,
                             implementationContext,
                             assigner,
-                            argumentHandler.bindExit(adviceMethod, getThrowable().represents(NoExceptionHandler.class)),
+                            argumentHandler.bindExit(adviceMethod, isNoExceptionHandler(getThrowable())),
                             methodSizeHandler.bindExit(adviceMethod),
                             stackMapFrameHandler.bindExit(adviceMethod),
                             instrumentedType,
@@ -4261,7 +4424,7 @@ public class AgentAdvice extends Advice {
                             .ofType(OnMethodExit.class)
                             .getValue(ON_THROWABLE)
                             .resolve(TypeDescription.class);
-                        return throwable.represents(NoExceptionHandler.class)
+                        return isNoExceptionHandler(throwable)
                             ? new WithoutExceptionHandler(adviceMethod, postProcessor, namedTypes, userFactories, enterType, delegator)
                             : new WithExceptionHandler(adviceMethod, postProcessor, namedTypes, userFactories, enterType, throwable, delegator);
                     }
@@ -4282,7 +4445,7 @@ public class AgentAdvice extends Advice {
                             methodVisitor,
                             implementationContext,
                             assigner,
-                            argumentHandler.bindExit(adviceMethod, getThrowable().represents(NoExceptionHandler.class)),
+                            argumentHandler.bindExit(adviceMethod, isNoExceptionHandler(getThrowable())),
                             methodSizeHandler.bindExit(adviceMethod),
                             stackMapFrameHandler.bindExit(adviceMethod),
                             suppressionHandler.bind(exceptionHandler),
@@ -9865,11 +10028,10 @@ public class AgentAdvice extends Advice {
                  */
                 @SuppressWarnings("unchecked") // In absence of @SafeVarargs
                 protected static OffsetMapping.Factory<?> of(MethodDescription.InDefinedShape adviceMethod) {
-                    return adviceMethod.getDeclaredAnnotations()
+                    return isNoExceptionHandler(adviceMethod.getDeclaredAnnotations()
                             .ofType(OnMethodExit.class)
                             .getValue(ON_THROWABLE)
-                            .resolve(TypeDescription.class)
-                            .represents(NoExceptionHandler.class)
+                            .resolve(TypeDescription.class))
                         ? new OffsetMapping.Factory.Illegal(Thrown.class) : Factory.INSTANCE;
                 }
 
@@ -10406,7 +10568,79 @@ public class AgentAdvice extends Advice {
         }
     }
 
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @java.lang.annotation.Target(ElementType.METHOD)
+    public @interface OnMethodExitNoException {
 
+        /**
+         * <p>
+         * Determines if the execution of the instrumented method should be repeated. This does not include any enter advice.
+         * </p>
+         * <p>
+         * When specifying a non-primitive type, this method's return value that is subject to an {@code instanceof} check where
+         * the instrumented method is only executed, if the returned instance is {@code not} an instance of the specified class.
+         * Alternatively, it is possible to specify either {@link OnDefaultValue} or {@link OnNonDefaultValue} where the instrumented
+         * method is only repeated if the advice method returns a default or non-default value of the advice method's return type.
+         * It is illegal to specify a primitive type as an argument whereas setting the value to {@code void} indicates that the
+         * instrumented method should never be repeated.
+         * </p>
+         * <p>
+         * <b>Important</b>: Constructors cannot be repeated.
+         * </p>
+         *
+         * @return A value defining what return values of the advice method indicate that the instrumented method
+         * should be repeated or {@code void} if the instrumented method should never be repeated.
+         */
+        Class<?> repeatOn() default void.class;
+
+        /**
+         * Indicates a {@link Throwable} super type for which this exit advice is invoked if it was thrown from the instrumented method.
+         * If an exception is thrown, it is available via the {@link Thrown} parameter annotation. If a method returns exceptionally,
+         * any parameter annotated with {@link Return} is assigned the parameter type's default value.
+         *
+         * @return The type of {@link Throwable} for which this exit advice handler is invoked.
+         */
+        Class<? extends Throwable> onThrowable() default NoExceptionHandler.class;
+
+        /**
+         * <p>
+         * If {@code true}, all arguments of the instrumented method are copied before execution. Doing so, parameter reassignments applied
+         * by the instrumented are not effective during the execution of the annotated exit advice.
+         * </p>
+         * <p>
+         * Disabling this option can cause problems with the translation of stack map frames (meta data that is embedded in a Java class) if these
+         * frames become inconsistent with the original arguments of the instrumented method. In this case, the original arguments are no longer
+         * available to the exit advice such that Byte Buddy must abort the instrumentation with an error. If the instrumented method does not issue
+         * a stack map frame due to a lack of branching instructions, Byte Buddy might not be able to discover such an inconsistency what can cause
+         * a {@link VerifyError} instead of a Byte Buddy-issued exception as those inconsistencies are not discovered.
+         * </p>
+         *
+         * @return {@code true} if a backup of all method arguments should be made.
+         */
+        boolean backupArguments() default true;
+
+        /**
+         * Determines if the annotated method should be inlined into the instrumented method or invoked from it. When a method
+         * is inlined, its byte code is copied into the body of the target method. this makes it is possible to execute code
+         * with the visibility privileges of the instrumented method while loosing the privileges of the declared method methods.
+         * When a method is not inlined, it is invoked similarly to a common Java method call. Note that it is not possible to
+         * set breakpoints within a method when it is inlined as no debugging information is copied from the advice method into
+         * the instrumented method.
+         *
+         * @return {@code true} if the annotated method should be inlined into the instrumented method.
+         */
+        boolean inline() default true;
+
+        /**
+         * Indicates that this advice should suppress any {@link Throwable} type being thrown during the advice's execution. By default,
+         * any such exception is silently suppressed. Custom behavior can be configured by using {@link Advice#withExceptionHandler(StackManipulation)}.
+         *
+         * @return The type of {@link Throwable} to suppress.
+         * @see Advice#withExceptionPrinting()
+         */
+        Class<? extends Throwable> suppress() default NoExceptionHandler.class;
+    }
 
     /**
      * A marker class that indicates that an advice method does not suppress any {@link Throwable}.
