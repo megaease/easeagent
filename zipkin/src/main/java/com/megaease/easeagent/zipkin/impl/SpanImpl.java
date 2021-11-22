@@ -144,15 +144,20 @@ public class SpanImpl implements Span {
 
     @Override
     public void finish() {
-        finish(System.currentTimeMillis());
+        closeScope();
+        span.finish();
     }
 
     @Override
     public void finish(long timestamp) {
+        closeScope();
+        span.finish(timestamp);
+    }
+
+    private void closeScope() {
         if (scope != null) {
             scope.close();
         }
-        span.finish(timestamp);
     }
 
     @Override

@@ -32,8 +32,8 @@ import net.bytebuddy.matcher.ElementMatcher;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.none;
 
-// @Generate.Advice
-// @Injection.Provider(Provider.class)
+ @Generate.Advice
+ @Injection.Provider(Provider.class)
 public abstract class KafkaConsumerRecordAdvice implements Transformation {
     @Override
     public <T extends Definition> T define(Definition<T> def) {

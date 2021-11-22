@@ -68,8 +68,8 @@ public class KafkaProducerAdvice implements Points {
             .build();
     }
 
-//    @Override
-//    public boolean isAddDynamicField() {
-//        return true;
-//    }
+    @Override
+    public boolean isAddDynamicField() {
+        return true;
+    }
 }

@@ -24,7 +24,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.common.jdbc.MD5DictionaryItem;
-import com.megaease.easeagent.common.kafka.KafkaProducerDoSendInterceptor;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
@@ -49,7 +48,6 @@ import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMessageListenerMetricInterceptor;
 import com.megaease.easeagent.metrics.kafka.KafkaMetric;
-import com.megaease.easeagent.metrics.kafka.KafkaProducerMetricInterceptor;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -64,7 +62,6 @@ import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInte
 import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
 import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConstructInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
@@ -84,7 +81,6 @@ import com.megaease.easeagent.zipkin.http.webclient.WebClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
 import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
-import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaProducerTracingInterceptor;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
 import org.apache.commons.lang3.StringUtils;
 import zipkin2.Span;
@@ -285,36 +281,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing));
     }
 
-    @Injection.Bean("supplier4KafkaProducerDoSend")
-    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerDoSend() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
 
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_KAFKA);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                kafkaMetric.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
-
-            KafkaProducerMetricInterceptor metricInterceptor = new KafkaProducerMetricInterceptor(kafkaMetric, config);
-            KafkaProducerTracingInterceptor tracingInterceptor = new KafkaProducerTracingInterceptor(tracing, config);
-
-            AgentInterceptorChain.Builder builder4Async = ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(metricInterceptor)
-                .addInterceptor(tracingInterceptor);
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new KafkaProducerDoSendInterceptor(chainInvoker, builder4Async))
-                .addInterceptor(metricInterceptor)
-                .addInterceptor(tracingInterceptor);
-        };
-    }
-
-    @Injection.Bean("supplier4KafkaProducerConstructor")
-    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerConstructor() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new KafkaProducerConstructInterceptor());
-    }
 
     @Injection.Bean("supplier4KafkaConsumerConstructor")
     public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerConstructor() {

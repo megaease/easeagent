@@ -15,22 +15,24 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
+package com.megaease.easeagent.plugin.kafka.interceptor.initialize;
 
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.List;
 import java.util.Map;
 
-public class KafkaProducerConstructInterceptor implements AgentInterceptor {
+@AdviceTo(value = KafkaProducerAdvice.class, qualifier = "constructor")
+public class KafkaProducerConstructInterceptor implements FirstEnterInterceptor {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public void doAfter(MethodInfo methodInfo, Context context) {
         Object invoker = methodInfo.getInvoker();
         Map<String, Object> configs = (Map<String, Object>) methodInfo.getArgs()[0];
         Object bootstrapServers = configs.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
@@ -42,6 +44,5 @@ public class KafkaProducerConstructInterceptor implements AgentInterceptor {
             uri = String.join(",", serverConfig);
         }
         AgentDynamicFieldAccessor.setDynamicFieldValue(invoker, uri);
-        return chain.doAfter(methodInfo, context);
     }
 }

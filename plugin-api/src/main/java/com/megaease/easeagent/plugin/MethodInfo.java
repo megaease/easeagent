@@ -90,6 +90,11 @@ public class MethodInfo {
         this.changed = true;
     }
 
+    public void changeArg(int index, Object arg) {
+        this.args[index] = arg;
+        this.changed = true;
+    }
+
     public void setArgs(Object[] args) {
         this.args = args;
         this.changed = true;
