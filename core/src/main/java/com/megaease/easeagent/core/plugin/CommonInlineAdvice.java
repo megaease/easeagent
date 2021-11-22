@@ -82,12 +82,14 @@ public class CommonInlineAdvice {
 
     @Advice.OnMethodExit(suppress = NoExceptionHandler.class)
     public static void exit(@Index int index,
+                            @Advice.This(optional = true) Object invoker,
                             @Advice.Enter MethodInfo methodInfo,
                             @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object result,
                             @Advice.Local(CONTEXT) InitializeContext context) {
         if (context.isNoop()) {
             return;
         }
+        methodInfo.setInvoker(invoker);
         methodInfo.retValue(result);
         Dispatcher.exit(index, methodInfo, context);
         if (methodInfo.isChanged()) {
