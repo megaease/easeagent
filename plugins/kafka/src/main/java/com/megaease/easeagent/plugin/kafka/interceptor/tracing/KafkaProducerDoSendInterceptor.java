@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.AsyncCallback;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -34,6 +34,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 public class KafkaProducerDoSendInterceptor implements FirstEnterInterceptor {
     private static final String remoteServiceName = "kafka";
     private static final Object SCOPE = new Object();
+    private static final Object SPAN = new Object();
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
@@ -54,21 +55,24 @@ public class KafkaProducerDoSendInterceptor implements FirstEnterInterceptor {
         span.tag(KafkaTags.KAFKA_TOPIC_TAG, record.topic());
         span.start();
         context.put(SCOPE, span.maybeScope());
+        context.put(SPAN, span);
         Callback tracingCallback = new TraceCallback(span, AsyncCallback.callback(methodInfo));
         methodInfo.changeArg(1, tracingCallback);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        Scope scope = context.get(SCOPE);
-        Callback callback = AsyncCallback.callback(methodInfo);
-        if (scope == null || callback == null || !(callback instanceof TraceCallback)) {
+        Scope scope = context.remove(SCOPE);
+        Span span = context.remove(SPAN);
+        if (scope == null) {
             return;
         }
         try {
-            TraceCallback finishSpan = (TraceCallback) callback;
+            if (AsyncCallback.isAsync(AsyncCallback.callback(methodInfo))) {
+                return;
+            }
             if (!methodInfo.isSuccess()) {
-                finishSpan.getSpan().error(methodInfo.getThrowable()).finish();
+                span.error(methodInfo.getThrowable()).finish();
             }
         } finally {
             scope.close();

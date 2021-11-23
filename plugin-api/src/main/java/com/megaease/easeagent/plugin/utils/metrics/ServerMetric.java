@@ -17,65 +17,21 @@
 
 package com.megaease.easeagent.plugin.utils.metrics;
 
-import com.megaease.easeagent.plugin.api.metric.Counter;
-import com.megaease.easeagent.plugin.api.metric.Meter;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.Timer;
-import com.megaease.easeagent.plugin.api.metric.name.MetricField;
-import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
-import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.metric.*;
+import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.HashMap;
 
-public class ServerMetric {
-    private MetricRegistry metricRegistry;
+public class ServerMetric extends AbstractMetric {
 
-    private NameFactory nameFactory;
 
-    public ServerMetric(MetricRegistry metricRegistry, NameFactory nameFactory) {
-        this.metricRegistry = metricRegistry;
-        this.nameFactory = nameFactory;
-    }
-
-    public static NameFactory buildNameFactory() {
-        return NameFactory.createBuilder()
-            .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
-                .build())
-            .meterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                .put(MetricField.M1_RATE, MetricValueFetcher.MeteredM1RateIgnoreZero)
-                .put(MetricField.M5_RATE, MetricValueFetcher.MeteredM5Rate)
-                .put(MetricField.M15_RATE, MetricValueFetcher.MeteredM15Rate)
-                .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
-                .build())
-            .counterType(MetricSubType.ERROR, ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                .put(MetricField.EXECUTION_ERROR_COUNT, MetricValueFetcher.CountingCount)
-                .build())
-            .meterType(MetricSubType.ERROR, ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                .put(MetricField.M1_ERROR_RATE, MetricValueFetcher.MeteredM1Rate)
-                .put(MetricField.M5_ERROR_RATE, MetricValueFetcher.MeteredM5Rate)
-                .put(MetricField.M15_ERROR_RATE, MetricValueFetcher.MeteredM15Rate)
-                .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
-                .build())
-            .gaugeType(MetricSubType.DEFAULT, new HashMap<>())
-            .timerType(MetricSubType.DEFAULT,
-                ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                    .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
-                    .put(MetricField.MAX_EXECUTION_TIME, MetricValueFetcher.SnapshotMaxValue)
-                    .put(MetricField.MEAN_EXECUTION_TIME, MetricValueFetcher.SnapshotMeanValue)
-                    .put(MetricField.P25_EXECUTION_TIME, MetricValueFetcher.Snapshot25Percentile)
-                    .put(MetricField.P50_EXECUTION_TIME, MetricValueFetcher.Snapshot50PercentileValue)
-                    .put(MetricField.P75_EXECUTION_TIME, MetricValueFetcher.Snapshot75PercentileValue)
-                    .put(MetricField.P95_EXECUTION_TIME, MetricValueFetcher.Snapshot95PercentileValue)
-                    .put(MetricField.P98_EXECUTION_TIME, MetricValueFetcher.Snapshot98PercentileValue)
-                    .put(MetricField.P99_EXECUTION_TIME, MetricValueFetcher.Snapshot99PercentileValue)
-                    .put(MetricField.P999_EXECUTION_TIME, MetricValueFetcher.Snapshot999PercentileValue)
-                    .build())
-            .build();
+    public ServerMetric(@Nonnull Config config, @Nonnull Tags tags) {
+        super(config, tags);
     }
 
     public void collectMetric(String key, int statusCode, Throwable throwable, long startMillis, long endMillis) {
@@ -117,4 +73,42 @@ public class ServerMetric {
         });
     }
 
+    @Nonnull
+    @Override
+    protected NameFactory nameFactory() {
+        return NameFactory.createBuilder()
+            .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
+                .build())
+            .meterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                .put(MetricField.M1_RATE, MetricValueFetcher.MeteredM1RateIgnoreZero)
+                .put(MetricField.M5_RATE, MetricValueFetcher.MeteredM5Rate)
+                .put(MetricField.M15_RATE, MetricValueFetcher.MeteredM15Rate)
+                .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
+                .build())
+            .counterType(MetricSubType.ERROR, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                .put(MetricField.EXECUTION_ERROR_COUNT, MetricValueFetcher.CountingCount)
+                .build())
+            .meterType(MetricSubType.ERROR, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                .put(MetricField.M1_ERROR_RATE, MetricValueFetcher.MeteredM1Rate)
+                .put(MetricField.M5_ERROR_RATE, MetricValueFetcher.MeteredM5Rate)
+                .put(MetricField.M15_ERROR_RATE, MetricValueFetcher.MeteredM15Rate)
+                .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
+                .build())
+            .gaugeType(MetricSubType.DEFAULT, new HashMap<>())
+            .timerType(MetricSubType.DEFAULT,
+                ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                    .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
+                    .put(MetricField.MAX_EXECUTION_TIME, MetricValueFetcher.SnapshotMaxValue)
+                    .put(MetricField.MEAN_EXECUTION_TIME, MetricValueFetcher.SnapshotMeanValue)
+                    .put(MetricField.P25_EXECUTION_TIME, MetricValueFetcher.Snapshot25Percentile)
+                    .put(MetricField.P50_EXECUTION_TIME, MetricValueFetcher.Snapshot50PercentileValue)
+                    .put(MetricField.P75_EXECUTION_TIME, MetricValueFetcher.Snapshot75PercentileValue)
+                    .put(MetricField.P95_EXECUTION_TIME, MetricValueFetcher.Snapshot95PercentileValue)
+                    .put(MetricField.P98_EXECUTION_TIME, MetricValueFetcher.Snapshot98PercentileValue)
+                    .put(MetricField.P99_EXECUTION_TIME, MetricValueFetcher.Snapshot99PercentileValue)
+                    .put(MetricField.P999_EXECUTION_TIME, MetricValueFetcher.Snapshot999PercentileValue)
+                    .build())
+            .build();
+    }
 }

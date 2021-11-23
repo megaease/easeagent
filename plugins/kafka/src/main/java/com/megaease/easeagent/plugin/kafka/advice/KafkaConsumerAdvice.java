@@ -25,28 +25,24 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-public class KafkaProducerAdvice implements Points {
-    //return def.type(
-    //                named("org.apache.kafka.clients.producer.KafkaProducer")
-    //                .or(hasSuperType(named("org.apache.kafka.clients.producer.MockProducer")))
+public class KafkaConsumerAdvice implements Points {
+    //return def.type(named("org.apache.kafka.clients.consumer.KafkaConsumer")
+    //                .or(hasSuperType(named("org.apache.kafka.clients.consumer.MockConsumer")))
     //        )
-    //                .transform(objConstruct(isConstructor().and(takesArguments(7)), AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
-    //                .transform(doSend((named("doSend")
-    //                                .and(isPrivate())
-    //                                .and(takesArguments(2)))
-    //                                .and(takesArgument(0, named("org.apache.kafka.clients.producer.ProducerRecord")))
-    //                                .and(takesArgument(1, named("org.apache.kafka.clients.producer.Callback")))
-    //                                .and(returns(named("java.util.concurrent.Future")))
+    //                .transform(objConstruct(isConstructor().and(takesArguments(3))
+    //                                .and(takesArgument(0, named("org.apache.kafka.clients.consumer.ConsumerConfig")))
+    //                        , AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME))
+    //                .transform(doPoll((named("poll")
+    //                                .and(takesArguments(1)))
+    //                                .and(takesArgument(0, named("java.time.Duration")))
     //                        )
-    //
     //                )
-    //
     //                .end()
     //                ;
     @Override
     public IClassMatcher getClassMatcher() {
-        return ClassMatcher.builder().hasClassName("org.apache.kafka.clients.producer.KafkaProducer")
-            .build().or(ClassMatcher.builder().hasClassName("org.apache.kafka.clients.producer.MockProducer")
+        return ClassMatcher.builder().hasClassName("org.apache.kafka.clients.consumer.KafkaConsumer")
+            .build().or(ClassMatcher.builder().hasSuperClass("org.apache.kafka.clients.consumer.MockConsumer")
                 .build());
 
     }
@@ -55,16 +51,14 @@ public class KafkaProducerAdvice implements Points {
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.multiBuilder()
             .match(MethodMatcher.builder().named("<init>")
-                .argsLength(7)
+                .argsLength(3)
+                .arg(0, "org.apache.kafka.clients.consumer.ConsumerConfig")
                 .qualifier("constructor")
                 .build())
-            .match(MethodMatcher.builder().named("doSend")
-                .isPrivate()
-                .argsLength(2)
-                .arg(0, "org.apache.kafka.clients.producer.ProducerRecord")
-                .arg(1, "org.apache.kafka.clients.producer.Callback")
-                .returnType("java.util.concurrent.Future")
-                .qualifier("doSend")
+            .match(MethodMatcher.builder().named("poll")
+                .argsLength(1)
+                .arg(0, "java.time.Duration")
+                .qualifier("poll")
                 .build())
             .build();
     }

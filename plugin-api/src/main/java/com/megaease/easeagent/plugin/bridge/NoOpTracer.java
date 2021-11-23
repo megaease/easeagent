@@ -258,7 +258,12 @@ public class NoOpTracer {
         }
 
         @Override
-        public Injector injector() {
+        public Injector producerInjector() {
+            return EmptyInjector.INSTANCE;
+        }
+
+        @Override
+        public Injector consumerInjector() {
             return EmptyInjector.INSTANCE;
         }
 

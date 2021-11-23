@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -30,34 +31,24 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.httpservlet.utils.InternalAsyncListener;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.utils.metrics.ServerMetric;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.function.BiFunction;
 
 @AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
 public class DoFilterMetricInterceptor implements FirstEnterInterceptor {
     private static final Logger LOGGER = EaseAgent.getLogger(DoFilterMetricInterceptor.class);
     private static final String AFTER_MARK = DoFilterMetricInterceptor.class.getName() + "$AfterMark";
     private static final Object START = new Object();
-    private static final NameFactory NAME_FACTORY = ServerMetric.buildNameFactory();
     private static volatile ServerMetric SERVER_METRIC = null;
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        if (SERVER_METRIC != null) {
-            return;
-        }
-        synchronized (DoFilterMetricInterceptor.class) {
-            if (SERVER_METRIC != null) {
-                return;
-            }
-            Tags tags = new Tags("application", "http-request", "url");
-            MetricRegistry metricRegistry = EaseAgent.newMetricRegistry(config, NAME_FACTORY, tags);
-            SERVER_METRIC = new ServerMetric(metricRegistry, NAME_FACTORY);
-        }
-
+        SERVER_METRIC = AbstractMetric.getInstance(config, new Tags("application", "http-request", "url"),
+            (config1, tags) -> new ServerMetric(config1, tags));
     }
 
     @Override

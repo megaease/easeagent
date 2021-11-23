@@ -15,30 +15,37 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
+package com.megaease.easeagent.plugin.kafka.interceptor.initialize;
 
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
-import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
-import java.util.Map;
-
-public class KafkaConsumerPollInterceptor implements AgentInterceptor {
-
+@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "poll")
+public class KafkaConsumerPollInterceptor implements FirstEnterInterceptor {
     @Override
-    public Object after(MethodInfo methodInfo, Map<Object, Object> context, AgentInterceptorChain chain) {
+    public void doAfter(MethodInfo methodInfo, Context context) {
+        ConsumerRecords<?, ?> consumerRecords = (ConsumerRecords<?, ?>) methodInfo.getRetValue();
+        if (consumerRecords == null || consumerRecords.isEmpty()) {
+            return;
+        }
         Consumer<?, ?> consumer = (Consumer<?, ?>) methodInfo.getInvoker();
         String uri = AgentDynamicFieldAccessor.getDynamicFieldValue(consumer);
-        ConsumerRecords<?, ?> consumerRecords = (ConsumerRecords<?, ?>) methodInfo.getRetValue();
-        if (consumerRecords != null) {
-            for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
-                AgentDynamicFieldAccessor.setDynamicFieldValue(consumerRecord, uri);
-            }
+        for (ConsumerRecord<?, ?> consumerRecord : consumerRecords) {
+            AgentDynamicFieldAccessor.setDynamicFieldValue(consumerRecord, uri);
         }
-        return chain.doAfter(methodInfo, context);
+    }
+
+
+    @Override
+    public String getName() {
+        return Order.INIT.getName();
     }
 }

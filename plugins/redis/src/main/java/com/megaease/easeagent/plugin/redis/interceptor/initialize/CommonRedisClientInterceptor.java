@@ -19,9 +19,10 @@ package com.megaease.easeagent.plugin.redis.interceptor.initialize;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.redis.interceptor.RedisClientUtils;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -73,6 +74,11 @@ public class CommonRedisClientInterceptor implements FirstEnterInterceptor {
             CompletableFuture<?> future = (CompletableFuture<?>) ret;
             methodInfo.setRetValue(new CompletableFutureWrapper<>(future, uriStr));
         }
+    }
+
+    @Override
+    public String getName() {
+        return Order.INIT.getName();
     }
 
 }

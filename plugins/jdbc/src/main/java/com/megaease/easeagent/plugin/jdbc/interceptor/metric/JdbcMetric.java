@@ -24,15 +24,16 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.logging.Logger;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.Counter;
 import com.megaease.easeagent.plugin.api.metric.Meter;
 import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
+import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.utils.metrics.LastMinutesCounterGauge;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Optional;
@@ -42,11 +43,11 @@ public class JdbcMetric extends AbstractMetric implements RemovalListener<String
 
     public JdbcMetric(Config config, Tags tags) {
         super(config, tags);
-        this.nameFactory = getNameFactory();
-        this.metricRegistry = EaseAgent.newMetricRegistry(config, this.nameFactory, tags);
     }
 
-    public NameFactory getNameFactory() {
+    @Nonnull
+    @Override
+    protected NameFactory nameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
                 ImmutableMap.<MetricField, MetricValueFetcher>builder()

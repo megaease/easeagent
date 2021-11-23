@@ -25,11 +25,12 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
 public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
@@ -43,8 +44,7 @@ public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
         if (metric == null && config.enable()) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
-                    Tags tags = new Tags("application", "jdbc-statement", "signature");
-                    metric = new JdbcMetric(config, tags);
+                    metric = AbstractMetric.getInstance(config, new Tags("application", "jdbc-statement", "signature"), (config1, tags) -> new JdbcMetric(config1, tags));
                     sqlCompression = MD5SQLCompression.getInstance(config);
                     cache = CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize).removalListener(metric).build();

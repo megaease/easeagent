@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 
 public abstract class CommonRedisTracingInterceptor implements FirstEnterInterceptor {
     private static final Object ENTER = new Object();

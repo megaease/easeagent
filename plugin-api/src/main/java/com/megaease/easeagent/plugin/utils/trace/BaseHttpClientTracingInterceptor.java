@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.utils.trace;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 
 public abstract class BaseHttpClientTracingInterceptor implements FirstEnterInterceptor {
 

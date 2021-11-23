@@ -44,8 +44,4 @@ public class TraceCallback extends AsyncCallback {
             span.finish();
         }
     }
-
-    public Span getSpan() {
-        return span;
-    }
 }

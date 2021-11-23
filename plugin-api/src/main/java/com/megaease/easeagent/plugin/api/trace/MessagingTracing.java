@@ -34,7 +34,12 @@ public interface MessagingTracing<R extends MessagingRequest> {
     /**
      * @return {@link Injector}
      */
-    Injector<R> injector();
+    Injector<R> producerInjector();
+
+    /**
+     * @return {@link Injector}
+     */
+    Injector<R> consumerInjector();
 
     /**
      * Returns an overriding sampling decision for a new trace. Defaults to ignore the request and use

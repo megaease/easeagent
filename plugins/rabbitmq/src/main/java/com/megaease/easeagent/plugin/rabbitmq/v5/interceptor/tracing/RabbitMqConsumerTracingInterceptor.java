@@ -46,10 +46,8 @@ public class RabbitMqConsumerTracingInterceptor implements Interceptor {
         AMQP.BasicProperties basicProperties = (AMQP.BasicProperties) methodInfo.getArgs()[2];
         RabbitConsumerRequest consumerRequest = new RabbitConsumerRequest(envelope, basicProperties);
 
-        // TraceContextOrSamplingFlags samplingFlags = this.extractor.extract(consumerRequest);
         Span span = context.consumerSpan(consumerRequest);
         span.kind(Span.Kind.CONSUMER);
-        // span.name("next-message");
         span.tag("rabbit.exchange", envelope.getExchange());
         span.tag("rabbit.routing_key", envelope.getRoutingKey());
         span.tag("rabbit.queue", envelope.getRoutingKey());
@@ -59,7 +57,7 @@ public class RabbitMqConsumerTracingInterceptor implements Interceptor {
         span.remoteServiceName("rabbitmq");
         span.start();
         context.put(SPAN_CONTEXT_KEY, span);
-        // this.injector.inject(span.context(), consumerRequest);
+        context.consumerInject(span, consumerRequest);
     }
 
     @Override

@@ -30,7 +30,7 @@ import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.utils.common.ExceptionUtil;
 
 import java.sql.Connection;

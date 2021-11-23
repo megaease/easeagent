@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 
 public class NoOpContext {
@@ -34,6 +35,17 @@ public class NoOpContext {
 
     public static class NoopContext implements InitializeContext {
         private static final NoopContext INSTANCE = new NoopContext();
+        private static final Iterator<String> EMPTY_KEYS = new Iterator<String>() {
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public String next() {
+                return null;
+            }
+        };
 
         @Override
         public boolean isNoop() {
@@ -126,7 +138,7 @@ public class NoOpContext {
         }
 
         @Override
-        public <T> T  peek() {
+        public <T> T peek() {
             return null;
         }
 
@@ -137,6 +149,21 @@ public class NoOpContext {
         @Override
         public Runnable wrap(Runnable task) {
             return task;
+        }
+
+        @Override
+        public boolean isNecessaryKeys(String key) {
+            return false;
+        }
+
+        @Override
+        public void consumerInject(Span span, MessagingRequest request) {
+
+        }
+
+        @Override
+        public void producerInject(Span span, MessagingRequest request) {
+
         }
 
         public void setCurrentTracing(ITracing tracing) {

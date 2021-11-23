@@ -26,6 +26,7 @@ public enum Order {
     FOUNDATION(0, "foundation"),
     HIGHEST(10, "highest"),
     HIGH(20, "high"),
+    INIT(21, "init"),
     TRACING(100, "tracing"),
     METRIC(200, "metric"),
     LOW(210, "low"),

@@ -17,26 +17,49 @@
 
 package com.megaease.easeagent.plugin.utils.metrics;
 
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.Counter;
 import com.megaease.easeagent.plugin.api.metric.Meter;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 
-public class RedisMetric {
-    private MetricRegistry metricRegistry;
-
-    private NameFactory nameFactory;
-
-    public RedisMetric(MetricRegistry metricRegistry, NameFactory nameFactory) {
-        this.metricRegistry = metricRegistry;
-        this.nameFactory = nameFactory;
+public class RedisMetric extends AbstractMetric {
+    public RedisMetric(@Nonnull Config config, @Nonnull Tags tags) {
+        super(config, tags);
     }
 
-    public static NameFactory buildNameFactory() {
+    public void collect(String key, long duration, boolean success) {
+        metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
+        final Meter defaultMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.DEFAULT));
+        final Counter defaultCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT));
+        final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
+        final Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
+
+        if (!success) {
+            errorMeter.mark();
+            errorCounter.inc();
+        }
+        defaultMeter.mark();
+        defaultCounter.inc();
+
+        MetricName gaugeName = nameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
+        metricRegistry.gauge(gaugeName.name(), () -> () ->
+            LastMinutesCounterGauge.builder()
+                .m1Count((long) (defaultMeter.getOneMinuteRate() * 60))
+                .m5Count((long) (defaultMeter.getFiveMinuteRate() * 60 * 5))
+                .m15Count((long) (defaultMeter.getFifteenMinuteRate() * 60 * 15))
+                .build());
+    }
+
+    @Nonnull
+    @Override
+    protected NameFactory nameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
                 ImmutableMap.<MetricField, MetricValueFetcher>builder()
@@ -72,29 +95,5 @@ public class RedisMetric {
                 .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
                 .build())
             .build();
-    }
-
-
-    public void collect(String key, long duration, boolean success) {
-        metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
-        final Meter defaultMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.DEFAULT));
-        final Counter defaultCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT));
-        final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
-        final Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
-
-        if (!success) {
-            errorMeter.mark();
-            errorCounter.inc();
-        }
-        defaultMeter.mark();
-        defaultCounter.inc();
-
-        MetricName gaugeName = nameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
-        metricRegistry.gauge(gaugeName.name(), () -> () ->
-            LastMinutesCounterGauge.builder()
-                .m1Count((long) (defaultMeter.getOneMinuteRate() * 60))
-                .m5Count((long) (defaultMeter.getFiveMinuteRate() * 60 * 5))
-                .m15Count((long) (defaultMeter.getFifteenMinuteRate() * 60 * 15))
-                .build());
     }
 }

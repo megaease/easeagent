@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A tags describing the metric.
@@ -112,5 +113,22 @@ public class Tags {
      */
     public Map<String, String> getTags() {
         return tags;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tags tags1 = (Tags) o;
+        return Objects.equals(category, tags1.category) &&
+            Objects.equals(type, tags1.type) &&
+            Objects.equals(keyFieldName, tags1.keyFieldName) &&
+            Objects.equals(tags, tags1.tags);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(category, type, keyFieldName, tags);
     }
 }

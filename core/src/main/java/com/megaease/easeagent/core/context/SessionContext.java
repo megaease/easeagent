@@ -30,10 +30,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unused, unchecked")
 public class SessionContext implements InitializeContext {
@@ -77,7 +74,7 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public <V> V  putLocal(String key, V value) {
+    public <V> V putLocal(String key, V value) {
         assert this.retBound.peek() != null;
         this.retBound.peek().put(key, value);
         return value;
@@ -86,7 +83,7 @@ public class SessionContext implements InitializeContext {
     @Override
     public <V> V getLocal(String key) {
         assert this.retBound.peek() != null;
-        return (V)this.retBound.peek().get(key);
+        return (V) this.retBound.peek().get(key);
     }
 
     @Override
@@ -194,16 +191,7 @@ public class SessionContext implements InitializeContext {
     @Override
     public Span producerSpan(MessagingRequest request) {
         Span span = tracing.producerSpan(request);
-        String[] fields = ProgressFields.getPenetrationFields();
-        if (ProgressFields.isEmpty(fields)) {
-            return span;
-        }
-        for (String field : fields) {
-            Object o = context.get(field);
-            if ((o instanceof String)) {
-                request.setHeader(field, (String) o);
-            }
-        }
+        injectPenetrationFields(request);
         return span;
     }
 
@@ -256,7 +244,7 @@ public class SessionContext implements InitializeContext {
         if (o == NullObject.NULL) {
             return null;
         }
-        return (T)o;
+        return (T) o;
     }
 
     @Override
@@ -268,12 +256,44 @@ public class SessionContext implements InitializeContext {
         if (o == NullObject.NULL) {
             return null;
         }
-        return (T)o;
+        return (T) o;
     }
 
     @Override
     public Runnable wrap(Runnable task) {
         return new CurrentContextRunnable(exportAsync(), task);
+    }
+
+    @Override
+    public boolean isNecessaryKeys(String key) {
+        return tracing.propagationKeys().contains(key) || ProgressFields.getPenetrationFieldsSet().contains(key);
+    }
+
+    @Override
+    public void consumerInject(Span span, MessagingRequest request) {
+        Injector injector = tracing.messagingTracing().consumerInjector();
+        injector.inject(span, request);
+        injectPenetrationFields(request);
+    }
+
+    @Override
+    public void producerInject(Span span, MessagingRequest request) {
+        Injector injector = tracing.messagingTracing().producerInjector();
+        injector.inject(span, request);
+        injectPenetrationFields(request);
+    }
+
+    private void injectPenetrationFields(Request request) {
+        String[] fields = ProgressFields.getPenetrationFields();
+        if (ProgressFields.isEmpty(fields)) {
+            return;
+        }
+        for (String field : fields) {
+            Object o = context.get(field);
+            if ((o instanceof String)) {
+                request.setHeader(field, (String) o);
+            }
+        }
     }
 
     @Override

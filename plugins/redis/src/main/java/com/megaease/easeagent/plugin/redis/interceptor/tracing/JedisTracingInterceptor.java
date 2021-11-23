@@ -21,7 +21,6 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.redis.advice.JedisAdvice;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 import redis.clients.jedis.Jedis;
 
 @AdviceTo(value = JedisAdvice.class, qualifier = "default")

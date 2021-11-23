@@ -45,9 +45,6 @@ import com.megaease.easeagent.metrics.config.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
-import com.megaease.easeagent.metrics.kafka.KafkaConsumerMetricInterceptor;
-import com.megaease.easeagent.metrics.kafka.KafkaMessageListenerMetricInterceptor;
-import com.megaease.easeagent.metrics.kafka.KafkaMetric;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -59,9 +56,6 @@ import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
-import com.megaease.easeagent.sniffer.kafka.spring.KafkaMessageListenerInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConstructInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerPollInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
@@ -79,8 +73,6 @@ import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.webclient.WebClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.impl.TracingImpl;
-import com.megaease.easeagent.zipkin.kafka.spring.KafkaMessageListenerTracingInterceptor;
-import com.megaease.easeagent.zipkin.kafka.v2d3.KafkaConsumerTracingInterceptor;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
 import org.apache.commons.lang3.StringUtils;
 import zipkin2.Span;
@@ -282,49 +274,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     }
 
 
-
-    @Injection.Bean("supplier4KafkaConsumerConstructor")
-    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerConstructor() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new KafkaConsumerConstructInterceptor());
-    }
-
-    @Injection.Bean("supplier4KafkaConsumerDoPoll")
-    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerDoPoll() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
-
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_KAFKA);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                kafkaMetric.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new KafkaConsumerPollInterceptor())
-                .addInterceptor(new KafkaConsumerTracingInterceptor(tracing, config))
-                .addInterceptor(new KafkaConsumerMetricInterceptor(kafkaMetric, config))
-                ;
-        };
-    }
-
-    @Injection.Bean("supplier4SpringKafkaMessageListenerOnMessage")
-    public Supplier<AgentInterceptorChain.Builder> supplier4SpringKafkaMessageListenerOnMessage() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            KafkaMetric kafkaMetric = new KafkaMetric(metricRegistry);
-
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_KAFKA);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                kafkaMetric.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_KAFKA, s))).run();
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new KafkaMessageListenerInterceptor())
-                .addInterceptor(new KafkaMessageListenerMetricInterceptor(kafkaMetric, config))
-                .addInterceptor(new KafkaMessageListenerTracingInterceptor(tracing, config));
-        };
-    }
 
     /*
     @Injection.Bean("supplier4RabbitMqBasicPublish")

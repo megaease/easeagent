@@ -21,11 +21,11 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.AsyncCallback;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 @AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend")
@@ -35,8 +35,7 @@ public class KafkaProducerMetricInterceptor implements FirstEnterInterceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        Tags tags = new Tags("application", "kafka-new", "resource");
-        kafkaMetric = AbstractMetric.getInstance(config, tags, (config1, tags1) -> new KafkaMetric(config1, tags1));
+        kafkaMetric = AbstractMetric.getInstance(config, KafkaMetric.newTags(), (config1, tags1) -> new KafkaMetric(config1, tags1));
     }
 
     @Override

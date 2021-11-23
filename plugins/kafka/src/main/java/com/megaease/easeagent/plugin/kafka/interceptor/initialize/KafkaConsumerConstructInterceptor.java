@@ -22,22 +22,29 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
-import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
+import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
-import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
+import java.util.List;
 import java.util.Map;
 
-@AdviceTo(value = KafkaProducerAdvice.class, qualifier = "constructor")
-public class KafkaProducerConstructInterceptor implements FirstEnterInterceptor {
+@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "constructor")
+public class KafkaConsumerConstructInterceptor implements FirstEnterInterceptor {
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         Object invoker = methodInfo.getInvoker();
-        Map<String, Object> configs = (Map<String, Object>) methodInfo.getArgs()[0];
-        Object bootstrapServers = configs.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
-        String uri = KafkaUtils.getUri(bootstrapServers);
+        Object configObj = methodInfo.getArgs()[0];
+        String uri;
+        if (configObj instanceof Map) {
+            uri = KafkaUtils.getUri(((Map) configObj).get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
+        } else {
+            ConsumerConfig config = (ConsumerConfig) methodInfo.getArgs()[0];
+            List<String> list = config.getList(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
+            uri = String.join(",", list);
+        }
         AgentDynamicFieldAccessor.setDynamicFieldValue(invoker, uri);
     }
 

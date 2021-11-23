@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.redis.interceptor.metric;
+package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
 import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
-import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.kafka.advice.KafkaMessageListenerAdvice;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
-import com.megaease.easeagent.plugin.utils.metrics.RedisMetric;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-public abstract class CommonRedisMetricInterceptor implements FirstEnterInterceptor {
-    private static volatile RedisMetric REDIS_METRIC = null;
-    private static final Object ENTER = new Object();
+@AdviceTo(value = KafkaMessageListenerAdvice.class)
+public class KafkaMessageListenerMetricInterceptor implements FirstEnterInterceptor {
     private static final Object START = new Object();
+    private static KafkaMetric kafkaMetric;
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        REDIS_METRIC = AbstractMetric.getInstance(config, new Tags("application", "cache-redis", "signature"),
-            (config1, tags) -> new RedisMetric(config1, tags));
+        kafkaMetric = AbstractMetric.getInstance(config, KafkaMetric.newTags(), (config1, tags1) -> new KafkaMetric(config1, tags1));
     }
+
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
@@ -44,21 +44,7 @@ public abstract class CommonRedisMetricInterceptor implements FirstEnterIntercep
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        String key = this.getKey(methodInfo, context);
-        long start = context.remove(START);
-        REDIS_METRIC.collect(key, System.currentTimeMillis() - start, methodInfo.isSuccess());
+        ConsumerRecord<?, ?> consumerRecord = (ConsumerRecord<?, ?>) methodInfo.getArgs()[0];
+        this.kafkaMetric.consume(consumerRecord.topic(), context.remove(START), methodInfo.isSuccess());
     }
-
-    @Override
-    public String getName() {
-        return Order.METRIC.getName();
-    }
-
-    @Override
-    public Object getEnterKey(MethodInfo methodInfo, Context context) {
-        return ENTER;
-    }
-
-    public abstract String getKey(MethodInfo methodInfo, Context context);
-
 }

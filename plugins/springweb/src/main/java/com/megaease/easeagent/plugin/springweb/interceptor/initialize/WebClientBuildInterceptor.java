@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientBuilderAdvice;
 import com.megaease.easeagent.plugin.springweb.interceptor.tracing.WebClientTracingFilter;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,5 +33,10 @@ public class WebClientBuildInterceptor implements Interceptor {
     public void before(MethodInfo methodInfo, Context context) {
         WebClient.Builder builder = (WebClient.Builder) methodInfo.getInvoker();
         builder.filter(new WebClientTracingFilter());
+    }
+
+    @Override
+    public String getName() {
+        return Order.INIT.getName();
     }
 }

@@ -19,7 +19,6 @@ package com.megaease.easeagent.plugin.kafka.interceptor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.RecordMetadata;
 
 public abstract class AsyncCallback implements Callback {
     protected final Callback delegate;

@@ -31,14 +31,16 @@ import java.util.function.Function;
 public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.trace.MessagingRequest> implements MessagingTracing {
     private final brave.messaging.MessagingTracing messagingTracing;
     private final Extractor<R> extractor;
-    private final Injector<R> injector;
+    private final Injector<R> producerInjector;
+    private final Injector<R> consumerInjector;
     private final Function<R, Boolean> consumerSampler;
     private final Function<R, Boolean> producerSampler;
 
     private MessagingTracingImpl(brave.messaging.MessagingTracing messagingTracing) {
         this.messagingTracing = messagingTracing;
         this.extractor = new ExtractorImpl(messagingTracing.propagation().extractor(com.megaease.easeagent.plugin.api.trace.MessagingRequest::header));
-        this.injector = new InjectorImpl(messagingTracing.propagation().injector(com.megaease.easeagent.plugin.api.trace.MessagingRequest::setHeader));
+        this.producerInjector = new InjectorImpl(messagingTracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.PRODUCER)));
+        this.consumerInjector = new InjectorImpl(messagingTracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.CONSUMER)));
         this.consumerSampler = new SamplerFunction(ZipkinConsumerRequest.BUILDER, messagingTracing.consumerSampler());
         this.producerSampler = new SamplerFunction(ZipkinProducerRequest.BUILDER, messagingTracing.producerSampler());
     }
@@ -57,8 +59,13 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
     }
 
     @Override
-    public Injector<R> injector() {
-        return injector;
+    public Injector<R> producerInjector() {
+        return producerInjector;
+    }
+
+    @Override
+    public Injector consumerInjector() {
+        return consumerInjector;
     }
 
     @Override

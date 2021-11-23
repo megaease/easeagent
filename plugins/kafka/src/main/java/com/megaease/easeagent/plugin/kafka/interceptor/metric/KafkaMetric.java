@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.Counter;
 import com.megaease.easeagent.plugin.api.metric.Meter;
 import com.megaease.easeagent.plugin.api.metric.Timer;
@@ -32,6 +33,10 @@ public class KafkaMetric extends AbstractMetric {
 
     protected KafkaMetric(@Nonnull Config config, @Nonnull Tags tags) {
         super(config, tags);
+    }
+
+    public static Tags newTags() {
+        return new Tags("application", "kafka-new", "resource");
     }
 
     public void meter(String topic, MetricSubType... meterTypes) {

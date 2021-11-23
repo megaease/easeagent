@@ -40,7 +40,12 @@ public class TracingImpl implements ITracing {
     private final brave.Tracing tracing;
     private final brave.Tracer tracer;
     private final TraceContext.Injector<Request> defaultInjector;
+    private final TraceContext.Injector<Request> clientInjector;
+    private final TraceContext.Injector<Request> consumerInjector;
+    private final TraceContext.Injector<Request> producerInjector;
     private final TraceContext.Extractor<Request> defaultExtractor;
+    private final TraceContext.Extractor<Request> producerExtractor;
+    private final TraceContext.Extractor<Request> consumerExtractor;
     private final MessagingTracing<? extends Request> messagingTracing;
     private final List<String> propagationKeys;
 
@@ -48,13 +53,23 @@ public class TracingImpl implements ITracing {
                         @Nonnull brave.Tracing tracing,
                         @Nonnull Tracer tracer,
                         @Nonnull TraceContext.Injector<Request> defaultInjector,
+                        @Nonnull TraceContext.Injector<Request> clientInjector,
+                        @Nonnull TraceContext.Injector<Request> producerInjector,
+                        @Nonnull TraceContext.Injector<Request> consumerInjector,
                         @Nonnull TraceContext.Extractor<Request> defaultExtractor,
+                        TraceContext.Extractor<Request> producerExtractor,
+                        TraceContext.Extractor<Request> consumerExtractor,
                         @Nonnull MessagingTracing<? extends Request> messagingTracing, List<String> propagationKeys) {
         this.supplier = supplier;
         this.tracing = tracing;
         this.tracer = tracer;
         this.defaultInjector = defaultInjector;
+        this.clientInjector = clientInjector;
+        this.consumerInjector = consumerInjector;
+        this.producerInjector = producerInjector;
         this.defaultExtractor = defaultExtractor;
+        this.consumerExtractor = consumerExtractor;
+        this.producerExtractor = producerExtractor;
         this.messagingTracing = messagingTracing;
         this.propagationKeys = propagationKeys;
     }
@@ -64,7 +79,12 @@ public class TracingImpl implements ITracing {
             new TracingImpl(supplier, tracing,
                 tracing.tracer(),
                 tracing.propagation().injector(Request::setHeader),
+                tracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.CLIENT)),
+                tracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.PRODUCER)),
+                tracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.CONSUMER)),
                 tracing.propagation().extractor(Request::header),
+                tracing.propagation().extractor(new RemoteGetterImpl(brave.Span.Kind.PRODUCER)),
+                tracing.propagation().extractor(new RemoteGetterImpl(brave.Span.Kind.CONSUMER)),
                 MessagingTracingImpl.build(tracing),
                 tracing.propagation().keys());
     }
@@ -147,21 +167,21 @@ public class TracingImpl implements ITracing {
 
     @Override
     public ProgressContext nextProgress(Request request) {
-        brave.Span span = nextBraveSpan(request);
+        brave.Span span = nextBraveSpan(defaultExtractor, request);
         AsyncRequest asyncRequest = new AsyncRequest(request);
-        defaultInjector.inject(span.context(), asyncRequest);
+        clientInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
         return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
-    private brave.Span nextBraveSpan(Request request) {
+    private brave.Span nextBraveSpan(TraceContext.Extractor<Request> extractor, Request request) {
         TraceContext maybeParent = tracing.currentTraceContext().get();
         // Unlike message consumers, we try current span before trying extraction. This is the proper
         // order because the span in scope should take precedence over a potentially stale header entry.
         //
         brave.Span span;
         if (maybeParent == null) {
-            TraceContextOrSamplingFlags extracted = defaultExtractor.extract(request);
+            TraceContextOrSamplingFlags extracted = extractor.extract(request);
             span = tracer().nextSpan(extracted);
         } else { // If we have a span in scope assume headers were cleared before
             span = tracer.newChild(maybeParent);
@@ -231,7 +251,7 @@ public class TracingImpl implements ITracing {
 
     @Override
     public Span consumerSpan(MessagingRequest request) {
-        brave.Span span = nextBraveSpan(request);
+        brave.Span span = nextBraveSpan(consumerExtractor, request);
         if (span.isNoop()) {
             return NoOpTracer.NO_OP_SPAN;
         }
@@ -241,12 +261,12 @@ public class TracingImpl implements ITracing {
 
     @Override
     public Span producerSpan(MessagingRequest request) {
-        brave.Span span = nextBraveSpan(request);
+        brave.Span span = nextBraveSpan(producerExtractor, request);
         if (span.isNoop()) {
             return NoOpTracer.NO_OP_SPAN;
         }
         setMessageInfo(span, request);
-        defaultInjector.inject(span.context(), request);
+        producerInjector.inject(span.context(), request);
         return NoOpTracer.noNullSpan(build(span, request.cacheScope()));
     }
 

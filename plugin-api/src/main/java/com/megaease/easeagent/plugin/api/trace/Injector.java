@@ -23,11 +23,11 @@ package com.megaease.easeagent.plugin.api.trace;
  * <p>For example, to put the context on an {@link java.net.HttpURLConnection}, you can do this:
  * <pre>{@code
  * // in your constructor
- * injector = tracing.messagingTracing().injector();
+ * producerInjector = tracing.messagingTracing().producerInjector();
  *
  * // later in your code, reuse the function you created above to add trace headers
  * HttpURLConnection connection = (HttpURLConnection) new URL("http://myserver").openConnection();
- * injector.inject(span, new MessagingRequest(){ public void setHeader(k,v){connection.setRequestProperty(k,v);}} );
+ * producerInjector.consumerInject(span, new MessagingRequest(){ public void setHeader(k,v){connection.setRequestProperty(k,v);}} );
  * }</pre>
  */
 public interface Injector<R extends MessagingRequest> {

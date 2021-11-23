@@ -23,10 +23,11 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
-import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,14 +39,7 @@ public class JdbcDataSourceMetricInterceptor implements FirstEnterInterceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        if (metric == null && config.enable()) {
-            synchronized (JdbcMetric.class) {
-                if (metric == null) {
-                    Tags tags = new Tags("application", "jdbc-connection", "url");
-                    metric = new JdbcMetric(config, tags);
-                }
-            }
-        }
+        metric = AbstractMetric.getInstance(config, new Tags("application", "jdbc-connection", "url"), (config1, tags) -> new JdbcMetric(config1, tags));
     }
 
     @Override

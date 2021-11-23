@@ -17,9 +17,7 @@
 
 package com.megaease.easeagent.plugin.api;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -42,6 +40,7 @@ public class ProgressFields {
     };
 
     private static volatile String[] TRANSPARENT_TRANSMISSION_FIELDS = new String[0];
+    private static volatile Set<String> TRANSPARENT_TRANSMISSION_FIELDS_SET = Collections.emptySet();
     private static volatile String[] RESPONSE_HOLD_TAG_FIELDS = new String[0];
 
     public static BiFunction<String, String, String> changeListener() {
@@ -67,6 +66,7 @@ public class ProgressFields {
             }
         }
         TRANSPARENT_TRANSMISSION_FIELDS = list.toArray(new String[0]);
+        TRANSPARENT_TRANSMISSION_FIELDS_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(TRANSPARENT_TRANSMISSION_FIELDS)));
     }
 
     private static void setResponseHoldTagFields(String fieldStr) {
@@ -83,6 +83,10 @@ public class ProgressFields {
 
     public static String[] getPenetrationFields() {
         return TRANSPARENT_TRANSMISSION_FIELDS;
+    }
+
+    public static Set<String> getPenetrationFieldsSet() {
+        return TRANSPARENT_TRANSMISSION_FIELDS_SET;
     }
 
     public static String[] getResponseHoldTagFields() {

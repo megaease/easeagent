@@ -15,18 +15,26 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.zipkin.kafka.brave;
+package com.megaease.easeagent.zipkin.impl;
 
-public class MultiData<A, B> {
-    public final A data0;
-    public final B data1;
-//    public final C data2;
-//    public final D data3;
+import brave.Span;
+import brave.propagation.Propagation;
+import com.megaease.easeagent.plugin.api.trace.Request;
 
-    public MultiData(A data0, B data1) {
-        this.data0 = data0;
-        this.data1 = data1;
-//        this.data2 = data2;
-//        this.data3 = data3;
+public class RemoteSetterImpl<R extends Request> implements Propagation.RemoteSetter<R> {
+    private final brave.Span.Kind kind;
+
+    public RemoteSetterImpl(Span.Kind kind) {
+        this.kind = kind;
+    }
+
+    @Override
+    public Span.Kind spanKind() {
+        return kind;
+    }
+
+    @Override
+    public void put(Request request, String fieldName, String value) {
+        request.setHeader(fieldName, value);
     }
 }
