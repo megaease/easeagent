@@ -71,7 +71,7 @@ Download EaseAgent with `git clone https://github.com/megaease/easeagent.git`.
 ```
 $ cd easeagent
 $ mvn clean package -am -pl build
-```****
+```
 The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
 
 > Windows platform user please make sure git `core.autocrlf` is set to false before git clone.
