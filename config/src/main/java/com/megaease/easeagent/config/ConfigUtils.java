@@ -117,6 +117,13 @@ public class ConfigUtils {
         if (configs.length < 5) {
             throw new ValidateUtils.ValidException(String.format("Property[%s] must be format: %s", path, ConfigConst.join(PLUGIN, "<Domain>", "<Namespace>", "<Id>", "<Properties>")));
         }
+
+        for (int idOffsetEnd = 3; idOffsetEnd < configs.length - 1; idOffsetEnd++) {
+            new PluginProperty(configs[1], configs[2],
+                ConfigConst.join(Arrays.copyOfRange(configs, 3, idOffsetEnd)),
+                ConfigConst.join(Arrays.copyOfRange(configs, idOffsetEnd + 1, configs.length)));
+        }
+
         return new PluginProperty(configs[1], configs[2], configs[3], ConfigConst.join(Arrays.copyOfRange(configs, 4, configs.length)));
     }
 

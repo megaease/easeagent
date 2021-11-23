@@ -26,6 +26,7 @@ import org.springframework.boot.loader.archive.JarFileArchive;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -160,7 +161,7 @@ public class Main {
     }
 
     public static class CompoundableClassLoader extends LaunchedURLClassLoader {
-        private final Set<ClassLoader> externals = new CopyOnWriteArraySet<>();
+        private final Set<WeakReference<ClassLoader>> externals = new CopyOnWriteArraySet<>();
 
         CompoundableClassLoader(URL[] urls) {
             // super(urls, ClassLoader.getSystemClassLoader());
@@ -170,7 +171,7 @@ public class Main {
         @SuppressWarnings("unused")
         public void add(ClassLoader cl) {
             if (cl != null && !Objects.equals(cl, this)) {
-                externals.add(cl);
+                externals.add(new WeakReference<>(cl));
             }
         }
 
@@ -179,9 +180,13 @@ public class Main {
             try {
                 return super.loadClass(name, resolve);
             } catch (ClassNotFoundException e) {
-                for (ClassLoader external : externals) {
+                for (WeakReference<ClassLoader> external : externals) {
                     try {
-                        final Class<?> aClass = external.loadClass(name);
+                        ClassLoader cl = external.get();
+                        if (cl == null) {
+                            continue;
+                        }
+                        final Class<?> aClass = cl.loadClass(name);
                         if (resolve) resolveClass(aClass);
                         return aClass;
                     } catch (ClassNotFoundException ignore) {

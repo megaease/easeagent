@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.core.plugin.transformer.classloader;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
@@ -26,10 +28,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CompoundClassloader {
     private final static Logger log = LoggerFactory.getLogger(MethodTransformation.class);
-    private static ConcurrentHashMap<ClassLoader, ClassLoader> loaders = new ConcurrentHashMap<>();
+    private static Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
+
+
+    public static boolean checkClassloaderExist(ClassLoader loader) {
+        if (cache.getIfPresent(loader) == null) {
+            cache.put(loader, true);
+            return false;
+        }
+        return true;
+    }
 
     public static ClassLoader compound(ClassLoader parent, ClassLoader external) {
-        if (loaders.putIfAbsent(external, external) != null) {
+        if (external == null || checkClassloaderExist(external)) {
             return parent;
         }
 

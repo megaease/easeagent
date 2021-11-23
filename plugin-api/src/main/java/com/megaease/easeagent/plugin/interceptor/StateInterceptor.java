@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.interceptor;
 
+import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 
 import java.util.ArrayDeque;

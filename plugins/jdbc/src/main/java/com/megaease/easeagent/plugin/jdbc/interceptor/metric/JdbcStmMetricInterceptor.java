@@ -26,20 +26,21 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.SubmoduleInterceptor;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 
 @AdviceTo(JdbcStatementAdvice.class)
-public class JdbcStmMetricInterceptor implements Interceptor {
+public class JdbcStmMetricInterceptor extends SubmoduleInterceptor {
     private static final int maxCacheSize = 1000;
     private static JdbcMetric metric;
     private static MD5SQLCompression sqlCompression;
     private static Cache<String, String> cache;
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
-        if (metric == null) {
+    public void doInit(Config config, String className, String methodName, String methodDescriptor) {
+        if (metric == null && config.enable()) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
                     Tags tags = new Tags("application", "jdbc-statement", "signature");
@@ -54,11 +55,11 @@ public class JdbcStmMetricInterceptor implements Interceptor {
     }
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
+    public void doBefore(MethodInfo methodInfo, Context context) {
     }
 
     @Override
-    public void after(MethodInfo methodInfo, Context context) {
+    public void doAfter(MethodInfo methodInfo, Context context) {
         SqlInfo sqlInfo = context.get(SqlInfo.class);
         String sql = sqlInfo.getSql();
         String key = sqlCompression.compress(sql);
@@ -72,6 +73,11 @@ public class JdbcStmMetricInterceptor implements Interceptor {
     @Override
     public String getName() {
         return Order.METRIC.getName() + ".jdbcStatement";
+    }
+
+    @Override
+    public String getSubmoduleName() {
+        return "jdbcStatement";
     }
 
     @Override
