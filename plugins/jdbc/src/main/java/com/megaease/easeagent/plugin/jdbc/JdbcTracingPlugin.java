@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.jdbc;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 
-public class JdbcPlugin implements AgentPlugin {
+public class JdbcTracingPlugin implements AgentPlugin {
     @Override
     public String getName() {
         return "jdbc";

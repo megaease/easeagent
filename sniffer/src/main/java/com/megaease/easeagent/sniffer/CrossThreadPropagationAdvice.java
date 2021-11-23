@@ -17,12 +17,11 @@
 
 package com.megaease.easeagent.sniffer;
 
-import brave.Tracing;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
+import com.megaease.easeagent.plugin.concurrent.ThreadLocalCurrentContext;
 import com.megaease.easeagent.gen.Generate;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
@@ -34,8 +33,8 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Generate.Advice
-@Injection.Provider(Provider.class)
+// @Generate.Advice
+// @Injection.Provider(Provider.class)
 public abstract class CrossThreadPropagationAdvice implements Transformation {
     public static final String CLASS_THREAD_POOL_EXECUTOR = "java.util.concurrent.ThreadPoolExecutor";
     public static final String CLASS_REACTOR_SCHEDULERS = "reactor.core.scheduler.Schedulers";

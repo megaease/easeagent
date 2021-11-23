@@ -24,6 +24,7 @@ import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.annotation.AdvicesTo;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -99,7 +100,7 @@ public class PluginProcessor extends AbstractProcessor {
         return types;
     }
 
-    private void writeToMetaInf(Class<?> dstClass, Set<String> services) {
+    private void writeToMetaInf(Class<?> dstClass, Collection<String> services) {
         String fileName = "META-INF/services/" + dstClass.getCanonicalName();
 
         if (services.isEmpty()) {
@@ -129,8 +130,8 @@ public class PluginProcessor extends AbstractProcessor {
         }
         final BeanUtils utils = BeanUtils.of(processingEnv);
         Elements elements = processingEnv.getElementUtils();
-        TypeElement plugin = searchPluginClass(roundEnv.getRootElements(), utils);
-        if (plugin == null) {
+        LinkedHashMap<String, TypeElement> plugins = searchPluginClass(roundEnv.getRootElements(), utils);
+        if (plugins == null || plugins.isEmpty()) {
             processingEnv.getMessager().printMessage(Kind.WARNING, "Can't find AgentPlugin class!");
             return false;
         }
@@ -140,29 +141,35 @@ public class PluginProcessor extends AbstractProcessor {
         classes.add(AdviceTo.class);
         Set<TypeElement> interceptors = process(classes, Interceptor.class, elements, roundEnv);
         // generate providerBean
-        generateProviderBeans(plugin, interceptors, utils);
+        generateProviderBeans(plugins, interceptors, utils);
         // process(ProviderBean.class, Provider.class, elements, roundEnv);
 
         return false;
     }
 
-    TypeElement searchPluginClass(Set<? extends Element> elements, BeanUtils utils) {
+    LinkedHashMap<String, TypeElement> searchPluginClass(Set<? extends Element> elements, BeanUtils utils) {
         TypeElement findInterface = utils.getTypeElement(AgentPlugin.class.getCanonicalName());
-        TypeElement firstFound;
+        TypeElement found;
 
+        ArrayList<TypeElement> plugins = new ArrayList<>();
         ElementVisitor8 visitor = new ElementVisitor8(utils);
         for (Element e : elements) {
-            firstFound = e.accept(visitor, findInterface);
-            if (firstFound != null) {
-                writeToMetaInf(AgentPlugin.class, Collections.singleton(utils.classNameOf(firstFound).canonicalName()));
-                return firstFound;
+            found = e.accept(visitor, findInterface);
+            if (found != null) {
+                plugins.add(found);
             }
         }
+        LinkedHashMap<String, TypeElement> pluginNames = new LinkedHashMap<>();
+        for (TypeElement p : plugins) {
+            ClassName className = utils.classNameOf(p);
+            pluginNames.put(className.canonicalName(), p);
+        }
+        writeToMetaInf(AgentPlugin.class, pluginNames.keySet());
 
-        return null;
+        return pluginNames;
     }
 
-    public void generateProviderBeans(TypeElement plugin, Set<TypeElement> interceptors, BeanUtils utils) {
+    public void generateProviderBeans(LinkedHashMap<String, TypeElement> plugins, Set<TypeElement> interceptors, BeanUtils utils) {
         TreeSet<String> providers = new TreeSet<>();
         TreeSet<String> points = new TreeSet<>();
         for (TypeElement type : interceptors) {
@@ -194,6 +201,7 @@ public class PluginProcessor extends AbstractProcessor {
             }
 
             Integer seq = 0;
+            TypeElement plugin = plugins.values().toArray(new TypeElement[0])[0];
             for (AnnotationMirror annotation : adviceToAnnotations) {
                 Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotation.getElementValues();
                 Map<String, String> to = new HashMap<>();
@@ -209,6 +217,10 @@ public class PluginProcessor extends AbstractProcessor {
                     to.put(key, value);
                     if (key.equals("value")) {
                         points.add(value);
+                    } else if (key.equals("plugin")) {
+                        if (plugins.get(value) != null) {
+                            plugin = plugins.get(value);
+                        }
                     }
                 }
                 to.put("seq", seq.toString());

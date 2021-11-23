@@ -36,7 +36,7 @@ import com.megaease.easeagent.plugin.utils.common.ExceptionUtil;
 import java.sql.Connection;
 // import java.sql.Statement;
 
-@AdviceTo(JdbcStatementAdvice.class)
+@AdviceTo(value = JdbcStatementAdvice.class)
 public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
     private final static Logger log = EaseAgent.getLogger(JdbcStmTracingInterceptor.class);
 

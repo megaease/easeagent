@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.utils;
-
-import com.google.auto.service.AutoService;
-import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
+package com.megaease.easeagent.plugin.concurrent;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -27,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-@AutoService(AppendBootstrapClassLoaderSearch.class)
 public class ThreadLocalCurrentContext {
     public static final ThreadLocalCurrentContext DEFAULT = new ThreadLocalCurrentContext(new InheritableThreadLocal<>());
     final ThreadLocal<Context> local;
@@ -88,7 +84,6 @@ public class ThreadLocalCurrentContext {
         return ctx;
     }
 
-    @AutoService(AppendBootstrapClassLoaderSearch.class)
     public static class CurrentContextRunnable implements Runnable {
         private final ThreadLocalCurrentContext threadLocalCurrentContext;
         private final Context ctx;
@@ -108,7 +103,6 @@ public class ThreadLocalCurrentContext {
         }
     }
 
-    @AutoService(AppendBootstrapClassLoaderSearch.class)
     public interface Scope extends Closeable {
         Scope NOOP = new NOOPScope();
 
@@ -116,7 +110,6 @@ public class ThreadLocalCurrentContext {
         void close();
     }
 
-    @AutoService(AppendBootstrapClassLoaderSearch.class)
     public static class NOOPScope implements Scope {
         @Override
         public void close() {
@@ -128,7 +121,6 @@ public class ThreadLocalCurrentContext {
         }
     }
 
-    @AutoService(AppendBootstrapClassLoaderSearch.class)
     public static class Context {
         private final Map<String, String> data = new HashMap<>();
 
@@ -150,7 +142,6 @@ public class ThreadLocalCurrentContext {
         }
     }
 
-    @AutoService(AppendBootstrapClassLoaderSearch.class)
     static final class RevertToNullScope implements Scope {
         final ThreadLocal<Context> local;
 
@@ -164,7 +155,6 @@ public class ThreadLocalCurrentContext {
         }
     }
 
-    @AutoService(AppendBootstrapClassLoaderSearch.class)
     static final class RevertToPreviousScope implements Scope {
         final ThreadLocal<Context> local;
         final Context previous;

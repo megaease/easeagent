@@ -15,22 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.annotation;
+package com.megaease.easeagent.plugin.jdbc;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.Points;
 
-import java.lang.annotation.*;
+public class JdbcConnectionMetricPlugin implements AgentPlugin {
+    @Override
+    public String getName() {
+        return "jdbcConnection";
+    }
 
-/**
- * use to annotate Interceptor implementation,
- * to link Interceptor to Pointcut
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Repeatable(AdvicesTo.class)
-public @interface AdviceTo {
-    Class<? extends Points> value();
-    Class<? extends AgentPlugin> plugin() default AgentPlugin.class;
-    String qualifier() default "default";
+    @Override
+    public String getDomain() {
+        return "observability";
+    }
 }

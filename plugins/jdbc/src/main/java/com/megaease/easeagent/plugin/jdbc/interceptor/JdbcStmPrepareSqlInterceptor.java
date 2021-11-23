@@ -25,14 +25,15 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 
 import java.sql.Statement;
 
-@AdviceTo(JdbcStatementAdvice.class)
-@AdviceTo(value = JdbcStatementAdvice.class, qualifier = "batch")
+@AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcTracingPlugin.class)
+@AdviceTo(value = JdbcStatementAdvice.class, qualifier = "batch", plugin = JdbcTracingPlugin.class)
 public class JdbcStmPrepareSqlInterceptor implements FirstEnterInterceptor {
     private static final Logger log = EaseAgent.getLogger(JdbcStmPrepareSqlInterceptor.class);
 

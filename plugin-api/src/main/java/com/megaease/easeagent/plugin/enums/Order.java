@@ -23,7 +23,8 @@ package com.megaease.easeagent.plugin.enums;
  * but exit after lower priority interceptors.
  */
 public enum Order {
-    HIGHEST(1, "highest"),
+    FOUNDATION(0, "foundation"),
+    HIGHEST(10, "highest"),
     HIGH(20, "high"),
     TRACING(100, "tracing"),
     METRIC(200, "metric"),

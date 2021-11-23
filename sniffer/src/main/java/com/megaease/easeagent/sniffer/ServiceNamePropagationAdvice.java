@@ -22,7 +22,7 @@ import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.core.utils.TextUtils;
-import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
+import com.megaease.easeagent.plugin.concurrent.ThreadLocalCurrentContext;
 import com.megaease.easeagent.gen.Generate;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import feign.Request;

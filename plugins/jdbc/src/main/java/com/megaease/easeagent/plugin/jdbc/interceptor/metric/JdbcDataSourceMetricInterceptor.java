@@ -17,27 +17,28 @@
 
 package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@AdviceTo(JdbcDataSourceAdvice.class)
-public class JdbcDataSourceMetricInterceptor implements Interceptor {
+@AdviceTo(value = JdbcDataSourceAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
+public class JdbcDataSourceMetricInterceptor implements FirstEnterInterceptor {
     private static JdbcMetric metric;
     public static final String ERR_CON_METRIC_KEY = "err-con";
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        if (metric == null) {
+        if (metric == null && config.enable()) {
             synchronized (JdbcMetric.class) {
                 if (metric == null) {
                     Tags tags = new Tags("application", "jdbc-connection", "url");
@@ -45,15 +46,14 @@ public class JdbcDataSourceMetricInterceptor implements Interceptor {
                 }
             }
         }
-        Interceptor.super.init(config, className, methodName, methodDescriptor);
     }
 
     @Override
-    public void before(MethodInfo methodInfo, Context context) {
+    public void doBefore(MethodInfo methodInfo, Context context) {
     }
 
     @Override
-    public void after(MethodInfo methodInfo, Context context) {
+    public void doAfter(MethodInfo methodInfo, Context context) {
         Connection connection = (Connection) methodInfo.getRetValue();
         try {
             String key;
@@ -78,7 +78,7 @@ public class JdbcDataSourceMetricInterceptor implements Interceptor {
 
     @Override
     public String getName() {
-        return Order.METRIC.getName() + ".jdbcConnection";
+        return Order.METRIC.getName();
     }
 
     @Override

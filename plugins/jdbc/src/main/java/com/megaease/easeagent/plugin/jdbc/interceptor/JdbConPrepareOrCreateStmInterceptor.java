@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.jdbc.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
@@ -26,14 +25,15 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
-import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
+import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcConnectionAdvice;
+import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 
 import java.sql.Connection;
 import java.sql.Statement;
 
-@AdviceTo(JdbcConnectionAdvice.class)
+@AdviceTo(value = JdbcConnectionAdvice.class, plugin = JdbcTracingPlugin.class)
 public class JdbConPrepareOrCreateStmInterceptor implements FirstEnterInterceptor {
     private static final Logger logger = EaseAgent.getLogger(JdbConPrepareOrCreateStmInterceptor.class);
 

@@ -20,7 +20,7 @@ package com.megaease.easeagent.sniffer.thread;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
+import com.megaease.easeagent.plugin.concurrent.ThreadLocalCurrentContext;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 

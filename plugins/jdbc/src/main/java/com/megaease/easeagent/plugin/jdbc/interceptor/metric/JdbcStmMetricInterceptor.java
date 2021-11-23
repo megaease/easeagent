@@ -19,27 +19,27 @@ package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.interceptor.SubmoduleInterceptor;
+import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
+import com.megaease.easeagent.plugin.utils.FirstEnterInterceptor;
 
-@AdviceTo(JdbcStatementAdvice.class)
-public class JdbcStmMetricInterceptor extends SubmoduleInterceptor {
+@AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
+public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
     private static final int maxCacheSize = 1000;
     private static JdbcMetric metric;
     private static MD5SQLCompression sqlCompression;
     private static Cache<String, String> cache;
 
     @Override
-    public void doInit(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(Config config, String className, String methodName, String methodDescriptor) {
         if (metric == null && config.enable()) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
@@ -72,12 +72,7 @@ public class JdbcStmMetricInterceptor extends SubmoduleInterceptor {
 
     @Override
     public String getName() {
-        return Order.METRIC.getName() + ".jdbcStatement";
-    }
-
-    @Override
-    public String getSubmoduleName() {
-        return "jdbcStatement";
+        return Order.METRIC.getName();
     }
 
     @Override
