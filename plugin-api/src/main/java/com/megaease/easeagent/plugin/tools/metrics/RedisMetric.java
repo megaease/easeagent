@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.utils.metrics;
+package com.megaease.easeagent.plugin.tools.metrics;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
@@ -27,7 +27,6 @@ import com.megaease.easeagent.plugin.utils.ImmutableMap;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 
 public class RedisMetric extends AbstractMetric {
     public RedisMetric(@Nonnull Config config, @Nonnull Tags tags) {

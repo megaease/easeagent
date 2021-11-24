@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.metrics.model;
 
-import com.megaease.easeagent.plugin.utils.metrics.GaugeMetricModel;
+import com.megaease.easeagent.plugin.tools.metrics.GaugeMetricModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

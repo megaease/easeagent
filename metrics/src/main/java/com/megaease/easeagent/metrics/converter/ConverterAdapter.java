@@ -24,7 +24,7 @@ import com.megaease.easeagent.metrics.impl.MeterImpl;
 import com.megaease.easeagent.metrics.impl.SnapshotImpl;
 import com.megaease.easeagent.metrics.impl.TimerImpl;
 import com.megaease.easeagent.plugin.api.metric.name.*;
-import com.megaease.easeagent.plugin.utils.metrics.GaugeMetricModel;
+import com.megaease.easeagent.plugin.tools.metrics.GaugeMetricModel;
 
 import java.math.BigDecimal;
 import java.util.*;

@@ -26,10 +26,10 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
-import com.megaease.easeagent.plugin.utils.trace.HttpRequest;
-import com.megaease.easeagent.plugin.utils.trace.HttpResponse;
-import com.megaease.easeagent.plugin.utils.trace.HttpUtils;
-import com.megaease.easeagent.plugin.utils.trace.TraceConst;
+import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
+import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
+import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
+import com.megaease.easeagent.plugin.tools.trace.TraceConst;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;

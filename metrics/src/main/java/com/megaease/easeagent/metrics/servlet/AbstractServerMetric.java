@@ -31,7 +31,7 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricField;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
-import com.megaease.easeagent.plugin.utils.metrics.ErrorPercentModelGauge;
+import com.megaease.easeagent.plugin.tools.metrics.ErrorPercentModelGauge;
 
 import java.math.BigDecimal;
 import java.time.Duration;

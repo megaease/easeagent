@@ -23,8 +23,6 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -32,11 +30,10 @@ import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.httpservlet.utils.InternalAsyncListener;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
-import com.megaease.easeagent.plugin.utils.metrics.ServerMetric;
+import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.function.BiFunction;
 
 @AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
 public class DoFilterMetricInterceptor implements FirstEnterInterceptor {
