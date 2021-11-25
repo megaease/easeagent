@@ -39,6 +39,7 @@ import org.junit.rules.MethodRule;
 import java.io.File;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Constructor;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -99,11 +100,20 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
         try {
             Class<?> type = classLoader.loadClass(Foo.class.getName());
             // check
-            Object instance = type.getDeclaredConstructor(String.class).newInstance("kkk");
+            Constructor<?> c = type.getDeclaredConstructor(String.class);
+            Object instance = c.newInstance("kkk");
             assertThat(type.getDeclaredMethod("getInstanceT")
                     .invoke(instance),
                 is(QUX));
 
+            // test arg(idx, t)
+            Constructor<?> d = type.getDeclaredConstructor(CharSequence.class);
+            instance = d.newInstance(BAR);
+            assertThat(type.getDeclaredMethod("getInstanceT")
+                    .invoke(instance),
+                is(BAR));
+
+            // test argLength
             instance = type.getDeclaredConstructor(String.class, String.class).newInstance(QUX, BAR);
             assertThat(type.getDeclaredMethod("getInstanceT")
                     .invoke(instance),
@@ -124,6 +134,11 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
 
         public Foo(String a) {
             this.instanceT = a;
+            System.out.println("init:" + this.instanceT);
+        }
+
+        public Foo(CharSequence a) {
+            this.instanceT = a.toString();
             System.out.println("init:" + this.instanceT);
         }
 

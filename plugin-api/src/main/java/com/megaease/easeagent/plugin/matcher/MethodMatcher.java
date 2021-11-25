@@ -184,11 +184,12 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcherBuilder arg(int idx, String argType) {
-            if (args == null) {
+            if (args == null || args.length < 4) {
                 this.args = new String[idx > 4 ? idx + 1 : 5];
             } else if (this.args.length < idx + 1) {
                 this.args = Arrays.copyOf(this.args, idx + 1);
             }
+            this.args[idx] = argType;
 
             return this;
         }
