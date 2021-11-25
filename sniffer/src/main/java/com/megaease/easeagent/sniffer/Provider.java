@@ -49,6 +49,7 @@ import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.report.AgentReport;
@@ -185,7 +186,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     }
 
     @Override
-    public Function<Supplier<InitializeContext>, com.megaease.easeagent.plugin.api.trace.ITracing> tracingSupplier() {
+    public TracingSupplier tracingSupplier() {
         return (supplier) -> TracingImpl.build(supplier, tracing);
     }
 

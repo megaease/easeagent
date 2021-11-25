@@ -296,6 +296,10 @@ public class SessionContext implements InitializeContext {
         }
     }
 
+    public ITracing getTracing() {
+        return tracing;
+    }
+
     @Override
     public void setCurrentTracing(ITracing tracing) {
         this.tracing = NoNull.of(tracing, NoOpTracer.NO_OP_TRACING);
@@ -317,4 +321,6 @@ public class SessionContext implements InitializeContext {
             }
         }
     }
+
+
 }

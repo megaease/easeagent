@@ -15,17 +15,12 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core;
+package com.megaease.easeagent.plugin.api.trace;
 
 import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.trace.ITracing;
-import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface TracingProvider {
-    TracingSupplier tracingSupplier();
-
-    void setRootSpanFinishCall(Function rootSpanFinish);
+public interface TracingSupplier {
+    ITracing get(Supplier<InitializeContext> contextSupplier);
 }

@@ -35,6 +35,7 @@ import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
+import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.bridge.*;
 import com.megaease.easeagent.plugin.utils.NoNull;
 import com.megaease.easeagent.report.AgentReport;
@@ -50,7 +51,7 @@ public class ContextManager {
     private final Function rootSpanFinish;
     private final Supplier<InitializeContext> sessionSupplier;
     private final GlobalContext globalContext;
-    private volatile Function<Supplier<InitializeContext>, ITracing> tracing = (supplier) -> null;
+    private volatile TracingSupplier tracingSupplier = (supplier) -> null;
     private volatile MetricRegistrySupplier metric = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
 
 
@@ -84,7 +85,7 @@ public class ContextManager {
 
     public void setTracing(@Nonnull TracingProvider tracing) {
         LOGGER.info("set tracing supplier function.");
-        this.tracing = tracing.tracingSupplier();
+        this.tracingSupplier = tracing.tracingSupplier();
         tracing.setRootSpanFinishCall(rootSpanFinish);
     }
 
@@ -98,8 +99,10 @@ public class ContextManager {
         @Override
         public InitializeContext get() {
             SessionContext context = LOCAL_SESSION_CONTEXT.get();
-            ITracing tracing = ContextManager.this.tracing.apply(this);
-            context.setCurrentTracing(NoNull.of(tracing, NoOpTracer.NO_OP_TRACING));
+            ITracing tracing = context.getTracing();
+            if (tracing == null || tracing.isNoop()) {
+                context.setCurrentTracing(NoNull.of(tracingSupplier.get(this), NoOpTracer.NO_OP_TRACING));
+            }
             return context;
         }
     }
