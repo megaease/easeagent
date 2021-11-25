@@ -132,7 +132,7 @@ public class Bootstrap {
             .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
             .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
             .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG
-                .withFallbackTo(ClassFileLocator.ForClassLoader.ofBootLoader()));
+                .withFallbackTo(ClassFileLocator.ForClassLoader.ofSystemLoader()));
         AgentBuilder.Ignored ignore = builder.ignore(isSynthetic())
             .or(nameStartsWith("sun."))
             .or(nameStartsWith("com.sun."))

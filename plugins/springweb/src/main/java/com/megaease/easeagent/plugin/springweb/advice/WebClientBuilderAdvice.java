@@ -26,12 +26,6 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 public class WebClientBuilderAdvice implements Points {
-
-    //return def
-    //                .type(hasSuperType(named("org.springframework.web.reactive.function.client.WebClient$Builder"))
-    //                )
-    //                .transform(build(named("build")))
-    //                .end();
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder().hasSuperClass("org.springframework.web.reactive.function.client.WebClient$Builder")

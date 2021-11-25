@@ -29,7 +29,7 @@ public class WebClientFilterAdvice implements Points {
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
-            .hasClassName("com.megaease.plugin.easeagent.springweb.interceptor.WebClientTracingFilter")
+            .hasClassName("com.megaease.plugin.easeagent.springweb.interceptor.tracing.WebClientTracingFilter")
             .build();
     }
 

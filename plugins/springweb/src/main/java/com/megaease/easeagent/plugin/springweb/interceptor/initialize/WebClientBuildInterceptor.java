@@ -29,6 +29,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @AdviceTo(value = WebClientBuilderAdvice.class, qualifier = "default")
 public class WebClientBuildInterceptor implements Interceptor {
 
+    // org.springframework.web.reactive.function.client.WebClient$Builder
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         WebClient.Builder builder = (WebClient.Builder) methodInfo.getInvoker();
@@ -38,5 +39,10 @@ public class WebClientBuildInterceptor implements Interceptor {
     @Override
     public String getName() {
         return Order.INIT.getName();
+    }
+
+    @Override
+    public int order() {
+        return Order.INIT.getOrder();
     }
 }

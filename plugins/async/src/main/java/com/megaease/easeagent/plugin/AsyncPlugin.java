@@ -25,6 +25,6 @@ public class AsyncPlugin implements AgentPlugin {
 
     @Override
     public String getDomain() {
-        return "easeagent";
+        return "observability";
     }
 }

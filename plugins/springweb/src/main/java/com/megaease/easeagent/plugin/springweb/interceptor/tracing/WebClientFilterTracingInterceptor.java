@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-//@AdviceTo(value = WebClientFilterAdvice.class, qualifier = "default")
+@AdviceTo(value = WebClientFilterAdvice.class, qualifier = "default")
 public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
