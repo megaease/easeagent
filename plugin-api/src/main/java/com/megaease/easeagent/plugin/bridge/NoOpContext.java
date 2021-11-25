@@ -166,6 +166,11 @@ public class NoOpContext {
 
         }
 
+        @Override
+        public void injectPenetrationFields(Setter setter) {
+
+        }
+
         public void setCurrentTracing(ITracing tracing) {
         }
 
@@ -188,6 +193,11 @@ public class NoOpContext {
 
         @Override
         public void popToBound() {
+        }
+
+        @Override
+        public void clear() {
+
         }
     }
 

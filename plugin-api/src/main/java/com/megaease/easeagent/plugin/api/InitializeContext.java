@@ -18,8 +18,11 @@
 package com.megaease.easeagent.plugin.api;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.trace.Setter;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TracingContext;
+
+import java.util.Map;
 
 /**
  * Subtype of {@link Context} and {@link TracingContext} which can push and pop Config.
@@ -56,4 +59,9 @@ public interface InitializeContext extends Context, TracingContext {
      * called by framework to maintain stack
      */
     void popToBound();
+
+    /**
+     * clear the context
+     */
+    void clear();
 }

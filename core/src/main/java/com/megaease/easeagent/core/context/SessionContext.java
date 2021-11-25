@@ -41,7 +41,6 @@ public class SessionContext implements InitializeContext {
     private final Deque<Object> retStack = new ArrayDeque<>();
     private final Deque<RetBound> retBound = new ArrayDeque<>();
 
-    // private SpanDeque spans = new SpanDeque();
     private final Map<Object, Object> context = new HashMap<>();
     private final Map<Object, Integer> entered = new HashMap<>();
 
@@ -148,16 +147,7 @@ public class SessionContext implements InitializeContext {
     @Override
     public ProgressContext nextProgress(Request request) {
         ProgressContext progressContext = tracing.nextProgress(request);
-        String[] fields = ProgressFields.getPenetrationFields();
-        if (ProgressFields.isEmpty(fields)) {
-            return progressContext;
-        }
-        for (String field : fields) {
-            Object o = context.get(field);
-            if ((o instanceof String)) {
-                progressContext.setHeader(field, (String) o);
-            }
-        }
+        injectPenetrationFields(progressContext);
         return progressContext;
     }
 
@@ -283,7 +273,8 @@ public class SessionContext implements InitializeContext {
         injectPenetrationFields(request);
     }
 
-    private void injectPenetrationFields(Request request) {
+    @Override
+    public void injectPenetrationFields(Setter setter) {
         String[] fields = ProgressFields.getPenetrationFields();
         if (ProgressFields.isEmpty(fields)) {
             return;
@@ -291,7 +282,7 @@ public class SessionContext implements InitializeContext {
         for (String field : fields) {
             Object o = context.get(field);
             if ((o instanceof String)) {
-                request.setHeader(field, (String) o);
+                setter.setHeader(field, (String) o);
             }
         }
     }
@@ -303,6 +294,25 @@ public class SessionContext implements InitializeContext {
     @Override
     public void setCurrentTracing(ITracing tracing) {
         this.tracing = NoNull.of(tracing, NoOpTracer.NO_OP_TRACING);
+    }
+
+    @Override
+    public void clear() {
+        if (!this.configs.isEmpty()) {
+            this.configs.clear();
+        }
+        if (!this.retStack.isEmpty()) {
+            this.retStack.clear();
+        }
+        if (!this.retBound.isEmpty()) {
+            this.retBound.clear();
+        }
+        if (!this.context.isEmpty()) {
+            this.context.clear();
+        }
+        if (!this.entered.isEmpty()) {
+            this.entered.clear();
+        }
     }
 
     public static class CurrentContextRunnable implements Runnable {

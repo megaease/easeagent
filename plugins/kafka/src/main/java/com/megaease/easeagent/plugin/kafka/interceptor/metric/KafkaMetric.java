@@ -36,7 +36,7 @@ public class KafkaMetric extends AbstractMetric {
     }
 
     public static Tags newTags() {
-        return new Tags("application", "kafka-new", "resource");
+        return new Tags("application", "kafka", "resource");
     }
 
     public void meter(String topic, MetricSubType... meterTypes) {

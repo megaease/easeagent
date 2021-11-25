@@ -42,6 +42,11 @@ public class HttpUtils {
     }
 
     public static void finish(Span span, HttpResponse httpResponse) {
+        save(span, httpResponse);
+        span.finish();
+    }
+
+    public static void save(Span span, HttpResponse httpResponse) {
         Throwable error = httpResponse.maybeError();
         if (error != null) {
             span.error(error); // Ensures MutableSpan.error() for SpanHandler
@@ -57,7 +62,6 @@ public class HttpUtils {
         if (error == null && (statusCode < 100 || statusCode > 399)) {
             span.tag(TraceConst.HTTP_TAG_ERROR, String.valueOf(statusCode));
         }
-        span.finish();
     }
 
     static String spanNameFromRoute(HttpResponse httpRequest, int statusCode) {

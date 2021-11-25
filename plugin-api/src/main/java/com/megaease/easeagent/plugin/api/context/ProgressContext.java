@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.api.context;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.api.trace.Setter;
 import com.megaease.easeagent.plugin.api.trace.Span;
 
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Map;
 /**
  * A cross-process data context, including tracing and penetration fields
  */
-public interface ProgressContext {
+public interface ProgressContext extends Setter {
     /**
      * When true, do nothing and nothing is reported . However, this ProgressContext should
      * still be injected into outgoing requests. Use this flag to avoid performing expensive

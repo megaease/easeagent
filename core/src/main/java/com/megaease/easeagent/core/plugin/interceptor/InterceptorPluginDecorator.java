@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.core.plugin.interceptor;
 
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
@@ -30,6 +32,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import java.util.function.Supplier;
 
 public class InterceptorPluginDecorator implements Interceptor, ConfigChangeListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InterceptorPluginDecorator.class);
     private final Interceptor interceptor;
     private final AgentPlugin plugin;
     private Config config;
@@ -53,6 +56,8 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
         if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
             innerContext.pushRetBound();
             this.interceptor.before(methodInfo, context);
+        } else if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("plugin.{}.{}.{} is not enabled", config.domain(), config.namespace(), config.id());
         }
     }
 

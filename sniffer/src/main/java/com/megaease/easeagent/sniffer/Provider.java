@@ -46,9 +46,9 @@ import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
 import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
-import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.api.trace.ITracing;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -109,6 +109,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     private static final String EASEAGENT_HEALTH_READINESS_ENABLED = "easeagent.health.readiness.enabled";
     private final AgentInterceptorChainInvoker chainInvoker = AgentInterceptorChainInvoker.getInstance().setLogElapsedTime(false);
     private Tracing tracing;
+    private ITracing iTracing;
     private AgentReport agentReport;
     private Config config;
     private Supplier<Map<String, Object>> additionalAttributes;
@@ -187,7 +188,18 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 
     @Override
     public TracingSupplier tracingSupplier() {
-        return (supplier) -> TracingImpl.build(supplier, tracing);
+        return (supplier) -> {
+            if (iTracing != null) {
+                return iTracing;
+            }
+            synchronized (Provider.class) {
+                if (iTracing != null) {
+                    return iTracing;
+                }
+                iTracing = TracingImpl.build(supplier, tracing);
+            }
+            return iTracing;
+        };
     }
 
     @Override

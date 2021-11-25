@@ -37,8 +37,8 @@ public abstract class BaseHttpClientTracingInterceptor implements FirstEnterInte
         ProgressContext progressContext = context.remove(getProgressKey());
         try {
             HttpResponse responseWrapper = getResponse(methodInfo, context);
+            HttpUtils.save(progressContext.span(), responseWrapper);
             progressContext.finish(responseWrapper);
-            HttpUtils.finish(progressContext.span(), responseWrapper);
         } finally {
             progressContext.scope().close();
         }

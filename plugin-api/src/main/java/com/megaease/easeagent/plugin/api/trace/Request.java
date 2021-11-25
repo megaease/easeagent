@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.api.Context;
 /**
  * Interface request type used for parsing and sampling.
  */
-public interface Request {
+public interface Request extends Setter {
     /**
      * The remote {@link Span.Kind} describing the direction and type of the request.
      * {@code span.kind(request.kind())}
@@ -41,7 +41,7 @@ public interface Request {
      * <p>
      * It is usually called on the server side when collaboration between multiple processes is required.
      * {@code client --> <spanId,root-source...>server }
-     *
+     * <p>
      * The class that implements this method needs to provide the name: value passed by the previous process,
      * It can be passed by using http or tcp.
      *
@@ -79,7 +79,7 @@ public interface Request {
      * The header set of the span and EaseAgent for request.
      * It is usually called on the client when collaboration between multiple processes is required.
      * {@code client<spanId,root-source...> --> server }
-     *
+     * <p>
      * The class that implements this method needs to pass the name:value of the method to the next process,
      * It can be passed by using http or tcp.
      *

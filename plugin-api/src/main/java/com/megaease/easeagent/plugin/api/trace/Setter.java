@@ -15,23 +15,8 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.context;
+package com.megaease.easeagent.plugin.api.trace;
 
-import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.trace.Scope;
-
-public class AsyncScope implements Scope {
-    private final InitializeContext context;
-    private final Scope scope;
-
-    public AsyncScope(InitializeContext context, Scope scope) {
-        this.context = context;
-        this.scope = scope;
-    }
-
-    @Override
-    public void close() {
-        this.scope.close();
-        this.context.clear();
-    }
+public interface Setter {
+    void setHeader(String name, String value);
 }

@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 
 public class ContextManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class.getName());
-    private static final ThreadLocal<SessionContext> LOCAL_SESSION_CONTEXT = ThreadLocal.withInitial(() -> new SessionContext());
+    private static final ThreadLocal<SessionContext> LOCAL_SESSION_CONTEXT = ThreadLocal.withInitial(SessionContext::new);
     private final PluginConfigManager pluginConfigManager;
     private final Function rootSpanFinish;
     private final Supplier<InitializeContext> sessionSupplier;

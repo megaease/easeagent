@@ -386,6 +386,29 @@ public interface Context {
      */
     boolean isNecessaryKeys(String key);
 
+    /**
+     * Inject Consumer's Span key:value and Penetration Fields to Request {@link MessagingRequest#setHeader(String, String)}.
+     *
+     * @param span    key:value from
+     * @param request key:value to
+     * @see Request#setHeader(String, String)
+     */
     void consumerInject(Span span, MessagingRequest request);
+
+    /**
+     * Inject Producer's Span and Penetration Fields key:value to Request {@link MessagingRequest#setHeader(String, String)}.
+     *
+     * @param span    key:value from
+     * @param request key:value to
+     * @see Request#setHeader(String, String)
+     */
     void producerInject(Span span, MessagingRequest request);
+
+    /**
+     * Inject  Penetration Fields key:value to Setter {@link Setter#setHeader(String, String)}.
+     *
+     * @param setter key:value to
+     * @see Request#setHeader(String, String)
+     */
+    void injectPenetrationFields(Setter setter);
 }

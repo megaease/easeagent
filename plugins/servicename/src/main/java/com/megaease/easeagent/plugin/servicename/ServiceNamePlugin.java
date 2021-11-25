@@ -15,23 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.context;
+package com.megaease.easeagent.plugin.servicename;
 
-import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.AgentPlugin;
 
-public class AsyncScope implements Scope {
-    private final InitializeContext context;
-    private final Scope scope;
-
-    public AsyncScope(InitializeContext context, Scope scope) {
-        this.context = context;
-        this.scope = scope;
+public class ServiceNamePlugin implements AgentPlugin {
+    @Override
+    public String getName() {
+        return "servicename";
     }
 
     @Override
-    public void close() {
-        this.scope.close();
-        this.context.clear();
+    public String getDomain() {
+        return "integrability";
     }
 }

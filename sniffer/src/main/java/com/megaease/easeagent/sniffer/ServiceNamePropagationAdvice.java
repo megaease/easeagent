@@ -45,12 +45,12 @@ import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Generate.Advice
-@Injection.Provider(Provider.class)
+//@Generate.Advice
+//@Injection.Provider(Provider.class)
 public abstract class ServiceNamePropagationAdvice implements Transformation {
     public static final String FeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.FeignLoadBalancer";
     public static final String LoadBalancerFeignClient = "org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient";
-    public static final String FeignBlockingLoadBalancerClient = "org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient";
+    public static final String FeignBlockingLoadBalancerClient = "org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient";//
     public static final String RetryLoadBalancerInterceptor = "org.springframework.cloud.client.loadbalancer.RetryLoadBalancerInterceptor";
     public static final String AsyncLoadBalancerInterceptor = "org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerInterceptor";
     public static final String LoadBalancerInterceptor = "org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor";
@@ -81,7 +81,7 @@ public abstract class ServiceNamePropagationAdvice implements Transformation {
                 .and(takesArgument(0, named("feign.Request")))
             ))
             // RestTemplate
-            .type(namedOneOf(RetryLoadBalancerInterceptor, AsyncLoadBalancerInterceptor, LoadBalancerInterceptor))
+            .type(namedOneOf(RetryLoadBalancerInterceptor, AsyncLoadBalancerInterceptor, LoadBalancerInterceptor))//
             .transform(restTemplateIntercept(named("intercept").and(takesArguments(3))
                 .and(takesArgument(0, named("org.springframework.http.HttpRequest")))
             ))
