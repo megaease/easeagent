@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.api.context;
 
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.utils.SystemClock;
 
 public class ContextUtils {
     private static final String BEGIN_TIME = ContextUtils.class.getSimpleName() + ".beginTime";
@@ -28,9 +29,9 @@ public class ContextUtils {
     }
 
     public static Long getEndTime(Context context) {
-        Long endTime = context.get(END_TIME);
+        Long endTime = context.remove(END_TIME);
         if (endTime == null) {
-            return System.currentTimeMillis();
+            return SystemClock.now();
         }
         return endTime;
     }

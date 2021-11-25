@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.jdbc.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -32,6 +33,7 @@ import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.utils.common.ExceptionUtil;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.sql.Connection;
 // import java.sql.Statement;
@@ -44,6 +46,17 @@ public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
     public static final String SPAN_ERROR_TAG_NAME = "error";
     public static final String SPAN_LOCAL_COMPONENT_TAG_NAME = "local-component";
     public static final String SPAN_URL = "url";
+
+    @Override
+    public void init(Config config, String className, String methodName, String methodDescriptor) {
+        /*
+         * make reference to third-part lib,
+         * make it loaded during init, so these classes can be found
+         * during running
+         */
+        MD5SQLCompression.getInstance(config);
+        DigestUtils.md5Hex("");
+    }
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {

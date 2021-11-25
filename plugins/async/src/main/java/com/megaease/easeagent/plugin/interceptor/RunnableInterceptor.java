@@ -32,6 +32,7 @@ import com.megaease.easeagent.plugin.enums.Order;
 @AdviceTo(ReactSchedulersAdvice.class)
 public class RunnableInterceptor implements Interceptor {
     private static final Logger logger = EaseAgent.loggerFactory.getLogger(RunnableInterceptor.class);
+
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         try {

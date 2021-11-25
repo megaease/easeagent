@@ -23,6 +23,8 @@ import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -60,8 +62,9 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
     public static void setUp() {
         EaseAgent.initializeContextSupplier = TestContext::new;
         classLoader = new ByteArrayClassLoader.ChildFirst(
-            NonStaticMethodTransformTest.class.getClassLoader(),
-            ClassFileLocator.ForClassLoader.readToNames(NonStaticMethodTransformTest.Foo.class, CommonInlineAdvice.class),
+            NewInstanceMethodTransformTest.class.getClassLoader(),
+            ClassFileLocator.ForClassLoader
+                .readToNames(NewInstanceMethodTransformTest.Foo.class, CommonInlineAdvice.class),
             ByteArrayClassLoader.PersistenceHandler.MANIFEST);
 
         String path = "target/test-classes";
@@ -80,27 +83,38 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
         assertThat(ByteBuddyAgent.install(), instanceOf(Instrumentation.class));
         AgentBuilder builder = Bootstrap.getAgentBuilder(null, true);
 
+        IMethodMatcher m = MethodMatcher.builder()
+            .named("<init>")
+            .argsLength(1)
+            .arg(0, "java.lang.String")
+            .build();
+
         Set<MethodTransformation> transformations = getMethodTransformations(globalIndex.incrementAndGet(),
-            "<init>", new FooProvider());
+            m, new FooProvider());
 
         ClassFileTransformer classFileTransformer = builder
-            .type(hasSuperType(named(NonStaticMethodTransformTest.FooBase.class.getName())), ElementMatchers.is(classLoader))
+            .type(hasSuperType(named(FooBase.class.getName())), ElementMatchers.is(classLoader))
             .transform(PluginLoader.compound(true, transformations))
             .installOnByteBuddyAgent();
         try {
-            Class<?> type = classLoader.loadClass(NonStaticMethodTransformTest.Foo.class.getName());
+            Class<?> type = classLoader.loadClass(Foo.class.getName());
             // check
             Object instance = type.getDeclaredConstructor(String.class).newInstance("kkk");
             assertThat(type.getDeclaredMethod("getInstanceT")
                     .invoke(instance),
                 is(QUX));
+
+            instance = type.getDeclaredConstructor(String.class, String.class).newInstance(QUX, BAR);
+            assertThat(type.getDeclaredMethod("getInstanceT")
+                    .invoke(instance),
+                is(QUX + BAR));
         } finally {
             assertThat(ByteBuddyAgent.getInstrumentation().removeTransformer(classFileTransformer), is(true));
         }
     }
 
     @SuppressWarnings("unused")
-    public static class Foo extends NonStaticMethodTransformTest.FooBase {
+    public static class Foo extends FooBase {
         public String instanceT;
 
         static String clazzInitString = FOO;
@@ -110,6 +124,11 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
 
         public Foo(String a) {
             this.instanceT = a;
+            System.out.println("init:" + this.instanceT);
+        }
+
+        public Foo(String a, String b) {
+            this.instanceT = a + b;
             System.out.println("init:" + this.instanceT);
         }
 
@@ -123,6 +142,16 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
 
         public int baz() {
             return (int)System.currentTimeMillis();
+        }
+    }
+
+    public interface FooInterface {
+        String foo(String a);
+    }
+
+    public static class FooBase implements FooInterface {
+        public String foo(String a) {
+            return a + "-base";
         }
     }
 }

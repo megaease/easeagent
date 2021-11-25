@@ -63,11 +63,15 @@ public class MD5SQLCompression implements SQLCompression, RemovalListener<String
         return INSTANCE_MAP.get(key);
     }
 
+    private String cacheLoad(String str) {
+        return DigestUtils.md5Hex(str);
+    }
+
     @Override
     public String compress(String origin) {
         try {
             String cutStr = StringUtils.cutStrByDataSize(origin, MAX_SQL_SIZE);
-            String md5 = md5Cache.get(cutStr, () -> DigestUtils.md5Hex(cutStr));
+            String md5 = md5Cache.get(cutStr, () -> cacheLoad(cutStr));
             String value = dictionary.getIfPresent(md5);
             if (value == null) {
                 dictionary.put(md5, cutStr);

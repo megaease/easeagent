@@ -47,10 +47,16 @@ public class TransformTestBase {
     protected Set<MethodTransformation> getMethodTransformations(int index,
                                                                String methodName,
                                                                Provider provider) {
+        IMethodMatcher m = MethodMatcher.builder().named(methodName).build();
+        return getMethodTransformations(index, m, provider);
+    }
+
+    @SuppressWarnings("all")
+    protected Set<MethodTransformation> getMethodTransformations(int index,
+                                                                 IMethodMatcher m,
+                                                                 Provider provider) {
         ProviderChain.Builder providerBuilder = ProviderChain.builder();
         providerBuilder.addProvider(new ProviderPluginDecorator(new TestPlugin(), provider));
-
-        IMethodMatcher m = MethodMatcher.builder().named(methodName).build();
 
         MethodTransformation methodTransformation = new MethodTransformation(index,
             MethodMatcherConvert.INSTANCE.convert(m),

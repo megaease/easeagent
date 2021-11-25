@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientBuilderAdvice;
-import com.megaease.easeagent.plugin.springweb.interceptor.tracing.WebClientTracingFilter;
+import com.megaease.plugin.easeagent.springweb.interceptor.tracing.WebClientTracingFilter;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @AdviceTo(value = WebClientBuilderAdvice.class, qualifier = "default")

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
+package com.megaease.plugin.easeagent.springweb.interceptor.tracing;
 
 import lombok.NonNull;
 import org.springframework.web.reactive.function.client.ClientRequest;
