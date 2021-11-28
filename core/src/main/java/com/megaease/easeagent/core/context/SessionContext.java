@@ -255,6 +255,11 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
+    public boolean isWrapped(Runnable task) {
+        return task instanceof CurrentContextRunnable;
+    }
+
+    @Override
     public boolean isNecessaryKeys(String key) {
         return tracing.propagationKeys().contains(key) || ProgressFields.getPenetrationFieldsSet().contains(key);
     }

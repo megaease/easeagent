@@ -58,7 +58,6 @@ import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
-import com.megaease.easeagent.sniffer.thread.HTTPHeaderExtractInterceptor;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
 import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
@@ -253,7 +252,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
 //            new AutoRefreshReporter(metricRegistry, collectorConfig, servletMetric.newConverter(this.additionalAttributes),
 //                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
             return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
+//                .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
 //                .addInterceptor(new HttpFilterMetricsInterceptor(servletMetric, config))
 //                .addInterceptor(new HttpFilterTracingInterceptor(this.tracing, config))
                 .addInterceptor(new ServletHttpLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))

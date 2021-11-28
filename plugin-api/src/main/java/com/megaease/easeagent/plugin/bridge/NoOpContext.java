@@ -152,6 +152,11 @@ public class NoOpContext {
         }
 
         @Override
+        public boolean isWrapped(Runnable task) {
+            return true;
+        }
+
+        @Override
         public boolean isNecessaryKeys(String key) {
             return false;
         }

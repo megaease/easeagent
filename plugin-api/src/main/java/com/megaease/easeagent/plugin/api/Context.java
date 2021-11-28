@@ -382,6 +382,14 @@ public interface Context {
     Runnable wrap(Runnable task);
 
     /**
+     * Check task is wrapped.
+     *
+     * @param task Runnable
+     * @return true if task is warpped.
+     */
+    boolean isWrapped(Runnable task);
+
+    /**
      * @return true if the key is necessary for EaseAgent
      */
     boolean isNecessaryKeys(String key);
