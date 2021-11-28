@@ -18,13 +18,10 @@
 package com.megaease.easeagent.core.plugin;
 
 import com.megaease.easeagent.core.plugin.annotation.Index;
-import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.NoExceptionHandler;
 import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 
@@ -41,6 +38,7 @@ public class CommonInlineAdvice {
     @Advice.OnMethodEnter(suppress = NoExceptionHandler.class)
     public static MethodInfo enter(@Index int index,
                                    @Advice.This(optional = true) Object invoker,
+                                   @Advice.Origin("#t") String type,
                                    @Advice.Origin("#m") String method,
                                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                                    @Advice.Local(CONTEXT) InitializeContext context) {
@@ -51,6 +49,7 @@ public class CommonInlineAdvice {
 
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(invoker)
+            .type(type)
             .method(method)
             .args(args)
             .build();

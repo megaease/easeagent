@@ -22,7 +22,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.core.context.ContextManager;
+import com.megaease.easeagent.core.plugin.BridgeDispatcher;
 import com.megaease.easeagent.core.plugin.PluginLoader;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
@@ -95,6 +97,8 @@ public class Bootstrap {
         }
         registerMBeans(conf);
         contextManager = ContextManager.build(conf);
+        EaseAgent.dispatcher = new BridgeDispatcher();
+
         Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
@@ -409,8 +413,8 @@ public class Bootstrap {
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-            LOGGER.debug("onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
-            LOGGER.debug("OnError:", error);
+            LOGGER.debug("Just for Debug-log, onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
+            LOGGER.debug("Just for Debug-log, transform ends exceptionally, which is sometimes normal and sometimes there is an error,:", error);
         }
 
         @Override

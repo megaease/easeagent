@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.plugin.transformer.advice;
+package com.megaease.easeagent.core.plugin.registry;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.Dispatcher;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.OffsetMapping;
+import com.megaease.easeagent.core.plugin.transformer.advice.AgentJavaConstantValue;
+import com.megaease.easeagent.core.plugin.transformer.advice.MethodIdentityJavaConstant;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
@@ -34,7 +35,6 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AdviceRegistry {
@@ -86,13 +86,14 @@ public class AdviceRegistry {
         }
 
         // merge or registry
-        MethodTransformation methodTransformation = QualifierRegistry.getMethodTransformation(pointcutIndex);
+        MethodTransformation methodTransformation = PluginRegistry.getMethodTransformation(pointcutIndex);
         if (methodTransformation == null) {
             log.error("MethodTransformation get fail for {}", pointcutIndex);
             return 0;
         }
         int identity = identityPointcuts.getIdentify();
-        AgentInterceptorChain chain = methodTransformation.getAgentInterceptorChain(type, method, methodDescriptor);
+        AgentInterceptorChain chain = methodTransformation
+            .getAgentInterceptorChain(identity, type, method, methodDescriptor);
 
         try {
             identityPointcuts.lock();

@@ -17,8 +17,7 @@
 
 package com.megaease.easeagent.core.plugin.matcher;
 
-import com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain;
+import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.plugin.Interceptor;
@@ -52,7 +51,8 @@ public class MethodTransformation {
         this.providerBuilder = chain;
     }
 
-    public AgentInterceptorChain getAgentInterceptorChain(final String type,
+    public AgentInterceptorChain getAgentInterceptorChain(final int uniqueIndex,
+                                                          final String type,
                                                           final String method,
                                                           final String methodDescription) {
         ArrayList<Supplier<Interceptor>> suppliers = this.providerBuilder.build()

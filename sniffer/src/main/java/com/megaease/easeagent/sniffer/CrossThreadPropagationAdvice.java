@@ -19,10 +19,8 @@ package com.megaease.easeagent.sniffer;
 
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
-import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.plugin.concurrent.ThreadLocalCurrentContext;
-import com.megaease.easeagent.gen.Generate;
+import com.megaease.easeagent.plugin.async.ThreadLocalCurrentContext;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;

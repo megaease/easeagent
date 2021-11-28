@@ -21,7 +21,7 @@ import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderPluginDecorator;
 import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
+import com.megaease.easeagent.core.plugin.registry.PluginRegistry;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Provider;
@@ -33,8 +33,6 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
-
-import static net.bytebuddy.matcher.ElementMatchers.named;
 
 public class TransformTestBase {
     protected static final String FOO = "foo",
@@ -61,7 +59,7 @@ public class TransformTestBase {
         MethodTransformation methodTransformation = new MethodTransformation(index,
             MethodMatcherConvert.INSTANCE.convert(m),
             providerBuilder);
-        QualifierRegistry.addMethodTransformation(index, methodTransformation);
+        PluginRegistry.addMethodTransformation(index, methodTransformation);
 
         Set<MethodTransformation> transformations = new HashSet<>();
         transformations.add(methodTransformation);

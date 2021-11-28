@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.core.plugin.transformer.advice;
 
+import com.megaease.easeagent.core.plugin.registry.AdviceRegistry;
 import net.bytebuddy.ClassFileVersion;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;

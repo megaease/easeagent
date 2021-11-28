@@ -20,8 +20,8 @@ package com.megaease.easeagent.core.plugin.interceptor;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Ordered;
+import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 
 import java.util.ArrayList;
 import java.util.Comparator;

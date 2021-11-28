@@ -43,8 +43,8 @@ public class AppendBootstrapClassLoaderSearchTest {
                 "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$RevertToPreviousScope",
                 "com.megaease.easeagent.core.utils.ThreadLocalCurrentContext$Scope",
                 "com.megaease.easeagent.core.plugin.Dispatcher",
-                "com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain",
-                "com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain"
+                // "com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain",
+                "com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain"
             );
         Assert.assertEquals(strings, AppendBootstrapClassLoaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM));
     }

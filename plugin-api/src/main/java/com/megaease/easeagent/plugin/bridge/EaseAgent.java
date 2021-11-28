@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.dispatcher.IDispatcher;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.api.logging.Logger;
@@ -42,6 +43,8 @@ public final class EaseAgent {
     public static volatile ILoggerFactory loggerFactory = NoOpLoggerFactory.INSTANCE;
     public static volatile Mdc loggerMdc = NoOpLoggerFactory.NO_OP_MDC_INSTANCE;
     public static volatile IConfigFactory configFactory = new NoOpConfigFactory();
+
+    public static volatile IDispatcher dispatcher = new NoOpDispatcher();
 
     /**
      * @see ILoggerFactory#getLogger(Class)

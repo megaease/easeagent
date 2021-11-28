@@ -20,8 +20,7 @@ package com.megaease.easeagent.core.plugin;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
-import com.megaease.easeagent.core.plugin.registry.QualifierRegistry;
-import com.megaease.easeagent.core.plugin.transformer.AnnotationTransformer;
+import com.megaease.easeagent.core.plugin.registry.PluginRegistry;
 import com.megaease.easeagent.core.plugin.transformer.CompoundPluginTransformer;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldTransformer;
 import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
@@ -61,7 +60,7 @@ public class PluginLoader {
                 log.info("provider for:{} at {}",
                     provider.getPluginClassName(), provider.getAdviceTo());
 
-                QualifierRegistry.register(provider);
+                PluginRegistry.register(provider);
             } catch (Exception | LinkageError e) {
                 log.error(
                     "Unable to load provider in [class {}]",
@@ -75,7 +74,7 @@ public class PluginLoader {
         List<Points> points = BaseLoader.load(Points.class);
         return points.stream().map(point -> {
             try {
-                return QualifierRegistry.register(point);
+                return PluginRegistry.register(point);
             } catch (Exception e) {
                 log.error(
                     "Unable to load points in [class {}]",
@@ -97,7 +96,7 @@ public class PluginLoader {
                 plugin.getClass().getName());
 
             try {
-                QualifierRegistry.register(plugin);
+                PluginRegistry.register(plugin);
                 // Config cfg = EaseAgent.configFactory.getConfig(plugin.getDomain(), plugin.getName());
                 // plugin.load(cfg);
             } catch (Exception | LinkageError e) {

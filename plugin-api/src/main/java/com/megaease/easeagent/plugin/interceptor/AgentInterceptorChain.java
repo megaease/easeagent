@@ -15,10 +15,8 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.plugin.interceptor;
+package com.megaease.easeagent.plugin.interceptor;
 
-import com.google.auto.service.AutoService;
-import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Ordered;
@@ -31,7 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@AutoService(AppendBootstrapClassLoaderSearch.class)
 public class AgentInterceptorChain {
     private static Logger log = EaseAgent.loggerFactory.getLogger(AgentInterceptorChain.class);
     public ArrayList<Interceptor> interceptors;

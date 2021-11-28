@@ -30,11 +30,13 @@ public abstract class BaseHttpClientTracingInterceptor implements FirstEnterInte
         ProgressContext progressContext = context.nextProgress(request);
         HttpUtils.handleReceive(progressContext.span().start(), request);
         context.put(getProgressKey(), progressContext);
+        // context.push(progressContext);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         ProgressContext progressContext = context.remove(getProgressKey());
+        // ProgressContext progressContext = context.pop();
         try {
             HttpResponse responseWrapper = getResponse(methodInfo, context);
             HttpUtils.save(progressContext.span(), responseWrapper);
@@ -49,5 +51,4 @@ public abstract class BaseHttpClientTracingInterceptor implements FirstEnterInte
     protected abstract HttpRequest getRequest(MethodInfo methodInfo, Context context);
 
     protected abstract HttpResponse getResponse(MethodInfo methodInfo, Context context);
-
 }

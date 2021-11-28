@@ -19,7 +19,6 @@ package com.megaease.easeagent.plugin;
 
 import lombok.Builder;
 
-import java.beans.Transient;
 import java.util.Objects;
 
 @Builder
@@ -29,6 +28,11 @@ public class MethodInfo {
      * The this reference of the instrumented method
      */
     private Object invoker;
+
+    /**
+     * instrumented type name
+     */
+    private String type;
 
     /**
      * instrumented method name
@@ -64,6 +68,10 @@ public class MethodInfo {
         return this.invoker;
     }
 
+    public String getType() {
+        return this.type;
+    }
+
     public String getMethod() {
         return this.method;
     }
@@ -80,13 +88,16 @@ public class MethodInfo {
         return this.retValue;
     }
 
-    public void setInvoker(Object invoker) {
-        this.invoker = invoker;
-        this.changed = true;
-    }
-
     public void setMethod(String method) {
         this.method = method;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setInvoker(Object invoker) {
+        this.invoker = invoker;
         this.changed = true;
     }
 
@@ -123,7 +134,7 @@ public class MethodInfo {
         this.retValue = retValue;
     }
 
-    public boolean equals(final MethodInfo o) {
+    public boolean equals(final Object o) {
         if (o == this) {
             return true;
         }
@@ -134,6 +145,11 @@ public class MethodInfo {
         if (!Objects.equals(this.getInvoker(), other.getInvoker())) {
             return false;
         }
+
+        if (!Objects.equals(this.getType(), other.getType())) {
+            return false;
+        }
+
         if (!Objects.equals(this.getMethod(), other.getMethod())) {
             return false;
         }
@@ -143,10 +159,8 @@ public class MethodInfo {
         if (!Objects.equals(this.getThrowable(), other.getThrowable())) {
             return false;
         }
-        if (!Objects.equals(this.getRetValue(), other.getRetValue())) {
-            return false;
-        }
-        return true;
+
+        return Objects.equals(this.getRetValue(), other.getRetValue());
     }
 
     public int hashCode() {
@@ -165,7 +179,8 @@ public class MethodInfo {
     }
 
     public String toString() {
-        return "MethodInfo(invoker=" + this.getInvoker() + ", method=" + this.getMethod()
+        return "MethodInfo(invoker=" + this.getInvoker()
+            + ", type:" + this.getType() + ", method=" + this.getMethod()
             + ", args=" + java.util.Arrays.deepToString(this.getArgs())
             + ", throwable=" + this.getThrowable() + ", retValue=" + this.getRetValue() + ")";
     }

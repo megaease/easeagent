@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.concurrent;
+package com.megaease.easeagent.plugin.async;
 
 public interface ScheduleRunner {
 

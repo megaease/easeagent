@@ -29,8 +29,6 @@ public class WebClientTracingFilter implements ExchangeFilterFunction {
     @NonNull
     @Override
     public Mono<ClientResponse> filter(@NonNull ClientRequest clientRequest, @NonNull ExchangeFunction exchangeFunction) {
-//        interceptor =  EaseAgent.getInterceptorProxy().before();
         return exchangeFunction.exchange(clientRequest);
-//        interceptor =  EaseAgent.getInterceptorProxy().after();
     }
 }

@@ -24,7 +24,7 @@ import com.google.common.cache.RemovalNotification;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.concurrent.ScheduleHelper;
+import com.megaease.easeagent.plugin.async.ScheduleHelper;
 import com.megaease.easeagent.plugin.utils.common.DataSize;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;

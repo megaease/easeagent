@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.concurrent.ThreadLocalCurrentContext;
+import com.megaease.easeagent.plugin.async.ThreadLocalCurrentContext;
 import com.megaease.easeagent.plugin.enums.Order;
 
 @AdviceTo(CrossThreadAdvice.class)

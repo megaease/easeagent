@@ -20,30 +20,83 @@ package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.springweb.reactor.AgentMono;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientFilterAdvice;
 
+import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeFunction;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 @AdviceTo(value = WebClientFilterAdvice.class, qualifier = "default")
-public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInterceptor {
+public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
+    private int chainIndex;
+
     @Override
+    public void init(Config config, int index) {
+        this.chainIndex = index;
+    }
+
     public Object getProgressKey() {
         return PROGRESS_CONTEXT;
     }
 
     @Override
+    public void doBefore(MethodInfo methodInfo, Context context) {
+        HttpRequest request = getRequest(methodInfo, context);
+        ProgressContext progressContext = context.nextProgress(request);
+        Span sp = progressContext.span();
+        HttpUtils.handleReceive(sp.start(), request);
+        /*
+        ExchangeFunction exchangeFunction = (ExchangeFunction) methodInfo.getArgs()[1];
+        try {
+            ClientRequest clientRequest = (ClientRequest) methodInfo.getArgs()[0];
+            Mono<ClientResponse> mono = exchangeFunction.exchange(clientRequest);
+            methodInfo.setRetValue(new AgentMono<>(mono, methodInfo, chainIndex, context));
+        } catch (Exception exception) {
+            methodInfo.setThrowable(exception);
+        }
+        */
+        context.push(sp);
+    }
+
+    @Override
+    public void doAfter(MethodInfo methodInfo, Context context) {
+        Mono<ClientResponse> mono = (Mono<ClientResponse>)methodInfo.getRetValue();
+        methodInfo.setRetValue(new AgentMono(mono, methodInfo, chainIndex, context));
+
+        Span span = context.pop();
+        if (methodInfo.isSuccess()) {
+            span.finish();
+        } else {
+            span.error(methodInfo.getThrowable());
+        }
+        /*
+        try {
+            HttpResponse responseWrapper = getResponse(methodInfo, context);
+            progressContext.finish(responseWrapper);
+            HttpUtils.finish(progressContext.span(), responseWrapper);
+        } finally {
+            progressContext.scope().close();
+        }
+        */
+    }
+
     protected HttpRequest getRequest(MethodInfo methodInfo, Context context) {
         ClientRequest clientRequest = (ClientRequest) methodInfo.getArgs()[0];
         ClientRequest.Builder builder = ClientRequest.from(clientRequest);
@@ -54,7 +107,6 @@ public class WebClientFilterTracingInterceptor extends BaseHttpClientTracingInte
         return request;
     }
 
-    @Override
     protected HttpResponse getResponse(MethodInfo methodInfo, Context context) {
         ClientResponse clientResponse = null;
         if (methodInfo.isSuccess()) {

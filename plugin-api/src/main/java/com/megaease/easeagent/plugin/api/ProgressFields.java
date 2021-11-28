@@ -59,14 +59,16 @@ public class ProgressFields {
             TRANSPARENT_TRANSMISSION_FIELDS = new String[0];
             return;
         }
-        List<String> list = Arrays.stream(fieldStr.split(",")).filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+        List<String> list = Arrays.stream(fieldStr.split(","))
+            .filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.toList());
         for (String easeMeshHeader : EASE_MESH_HEADERS) {
             if (!list.contains(easeMeshHeader)) {
                 list.add(easeMeshHeader);
             }
         }
         TRANSPARENT_TRANSMISSION_FIELDS = list.toArray(new String[0]);
-        TRANSPARENT_TRANSMISSION_FIELDS_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(TRANSPARENT_TRANSMISSION_FIELDS)));
+        TRANSPARENT_TRANSMISSION_FIELDS_SET = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(TRANSPARENT_TRANSMISSION_FIELDS)));
     }
 
     private static void setResponseHoldTagFields(String fieldStr) {
@@ -74,7 +76,9 @@ public class ProgressFields {
             RESPONSE_HOLD_TAG_FIELDS = new String[0];
             return;
         }
-        RESPONSE_HOLD_TAG_FIELDS = Arrays.stream(fieldStr.split(",")).filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.toList()).toArray(new String[0]);
+        RESPONSE_HOLD_TAG_FIELDS = Arrays.stream(fieldStr.split(","))
+            .filter(Objects::nonNull).filter(s -> !s.isEmpty())
+            .collect(Collectors.toList()).toArray(new String[0]);
     }
 
     public static boolean isEmpty(String[] fields) {

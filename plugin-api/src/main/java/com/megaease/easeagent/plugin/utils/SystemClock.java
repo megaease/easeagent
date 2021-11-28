@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.utils;
 
-import com.megaease.easeagent.plugin.concurrent.AgentThreadFactory;
+import com.megaease.easeagent.plugin.async.AgentThreadFactory;
 
 import java.sql.Timestamp;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
