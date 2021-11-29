@@ -45,6 +45,7 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
 
     @Override
     public void onNext(ClientResponse t) {
+        actual.onNext(t);
         Scope s = asyncContext.importToCurr();
         Span sp = asyncContext.getTracer().nextSpan();
 
