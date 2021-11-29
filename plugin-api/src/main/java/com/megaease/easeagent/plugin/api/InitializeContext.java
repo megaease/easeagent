@@ -18,15 +18,12 @@
 package com.megaease.easeagent.plugin.api;
 
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.trace.Setter;
-import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TracingContext;
-
-import java.util.Map;
 
 /**
  * Subtype of {@link Context} and {@link TracingContext} which can push and pop Config.
  */
+@SuppressWarnings("unused")
 public interface InitializeContext extends Context, TracingContext {
 
     /**
@@ -44,6 +41,32 @@ public interface InitializeContext extends Context, TracingContext {
      * return {@link com.megaease.easeagent.plugin.bridge.NoOpConfig#INSTANCE} if this stack is empty.
      */
     Config popConfig();
+
+    /**
+     * Unlike get/put method transfer cross different interceptors and even cross the whole session,
+     * putLocal/getLocal can only transfer data in current interceptor instance.
+     * eg. when putLocal is called to put a Span in an interceptor's 'before' method,
+     * it can only be accessed in current interceptor by 'getLocal', and can't accessed or modify by other interceptors.
+     *
+     * @param key   the key whose associated value is to be returned
+     * @param value the value to which the specified key is mapped, or
+     *              {@code null} if this context contains no mapping for the key
+     * @return the value
+     */
+    <V> V putLocal(String key, V value);
+
+    <V> V getLocal(String key);
+
+    /**
+     * Push/pop/peek a object onto the top of session context retStack.
+     * usages: push an Span to context when an interceptor's 'before' called,
+     * and pop the Span in 'after' procession
+     */
+    <T> void push(T obj);
+
+    <T> T pop();
+
+    <T> T peek();
 
     /**
      * called by framework to maintain stack

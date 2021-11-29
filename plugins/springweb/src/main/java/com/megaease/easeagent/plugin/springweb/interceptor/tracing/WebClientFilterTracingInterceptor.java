@@ -24,32 +24,25 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.springweb.advice.WebClientFilterAdvice;
 import com.megaease.easeagent.plugin.springweb.reactor.AgentMono;
-import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
-import com.megaease.easeagent.plugin.springweb.advice.WebClientFilterAdvice;
-
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
-@AdviceTo(value = WebClientFilterAdvice.class, qualifier = "default")
+@AdviceTo(value = WebClientFilterAdvice.class)
 public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
-    private int chainIndex;
-
     @Override
     public void init(Config config, int index) {
-        this.chainIndex = index;
     }
 
     public Object getProgressKey() {
@@ -58,46 +51,29 @@ public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor 
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
-        HttpRequest request = getRequest(methodInfo, context);
+        HttpRequest request = getRequest(methodInfo);
         ProgressContext progressContext = context.nextProgress(request);
-        Span sp = progressContext.span();
-        HttpUtils.handleReceive(sp.start(), request);
-        /*
-        ExchangeFunction exchangeFunction = (ExchangeFunction) methodInfo.getArgs()[1];
-        try {
-            ClientRequest clientRequest = (ClientRequest) methodInfo.getArgs()[0];
-            Mono<ClientResponse> mono = exchangeFunction.exchange(clientRequest);
-            methodInfo.setRetValue(new AgentMono<>(mono, methodInfo, chainIndex, context));
-        } catch (Exception exception) {
-            methodInfo.setThrowable(exception);
-        }
-        */
-        context.push(sp);
+        Span span = progressContext.span();
+        HttpUtils.handleReceive(span.start(), request);
+        context.put(getProgressKey(), progressContext);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        Mono<ClientResponse> mono = (Mono<ClientResponse>)methodInfo.getRetValue();
-        methodInfo.setRetValue(new AgentMono(mono, methodInfo, chainIndex, context));
+        ProgressContext pCtx = context.get(getProgressKey());
 
-        Span span = context.pop();
-        if (methodInfo.isSuccess()) {
-            span.finish();
-        } else {
+        @SuppressWarnings("unchecked")
+        Mono<ClientResponse> mono = (Mono<ClientResponse>)methodInfo.getRetValue();
+        methodInfo.setRetValue(new AgentMono(mono, methodInfo, pCtx));
+
+        if (!methodInfo.isSuccess()) {
+            Span span = pCtx.span();
             span.error(methodInfo.getThrowable());
+            span.finish();
         }
-        /*
-        try {
-            HttpResponse responseWrapper = getResponse(methodInfo, context);
-            progressContext.finish(responseWrapper);
-            HttpUtils.finish(progressContext.span(), responseWrapper);
-        } finally {
-            progressContext.scope().close();
-        }
-        */
     }
 
-    protected HttpRequest getRequest(MethodInfo methodInfo, Context context) {
+    protected HttpRequest getRequest(MethodInfo methodInfo) {
         ClientRequest clientRequest = (ClientRequest) methodInfo.getArgs()[0];
         ClientRequest.Builder builder = ClientRequest.from(clientRequest);
         WebClientRequest request = new WebClientRequest(clientRequest, builder);
@@ -106,27 +82,6 @@ public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor 
         methodInfo.setArgs(args);
         return request;
     }
-
-    protected HttpResponse getResponse(MethodInfo methodInfo, Context context) {
-        ClientResponse clientResponse = null;
-        if (methodInfo.isSuccess()) {
-            clientResponse = getClientResponse(methodInfo);
-        }
-        return new WebClientResponse(methodInfo.getThrowable(), clientResponse);
-    }
-
-    private ClientResponse getClientResponse(MethodInfo methodInfo) {
-        Object retValue = methodInfo.getRetValue();
-        if (retValue == null) {
-            return null;
-        }
-        List<ClientResponse> list = (List<ClientResponse>) retValue;
-        if (!list.isEmpty()) {
-            return list.get(0);
-        }
-        return null;
-    }
-
 
     static class WebClientRequest implements HttpRequest {
 
@@ -190,18 +145,9 @@ public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor 
         public void setHeader(String name, String value) {
             builder.header(name, value);
         }
-
     }
 
-    private static String getFirstHeaderValue(ClientResponse.Headers headers, String name) {
-        Collection<String> values = headers.header(name);
-        if (values == null || values.isEmpty()) {
-            return null;
-        }
-        return values.iterator().next();
-    }
-
-    static class WebClientResponse implements HttpResponse {
+    public static class WebClientResponse implements HttpResponse {
         private final Throwable caught;
         private final ClientResponse response;
 
@@ -242,5 +188,13 @@ public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor 
             }
             return getFirstHeaderValue(response.headers(), name);
         }
+    }
+
+    private static String getFirstHeaderValue(ClientResponse.Headers headers, String name) {
+        Collection<String> values = headers.header(name);
+        if (values.isEmpty()) {
+            return null;
+        }
+        return values.iterator().next();
     }
 }

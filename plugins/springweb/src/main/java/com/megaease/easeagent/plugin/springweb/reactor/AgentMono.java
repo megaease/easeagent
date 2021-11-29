@@ -18,8 +18,7 @@
 package com.megaease.easeagent.plugin.springweb.reactor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.AsyncContext;
+import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
@@ -29,20 +28,16 @@ import javax.annotation.Nonnull;
 public class AgentMono extends Mono<ClientResponse> {
     private final Mono<ClientResponse> source;
     private final MethodInfo methodInfo;
-    private final Integer chainIndex;
-    private final AsyncContext context;
+    private final ProgressContext context;
 
-    public AgentMono(Mono<ClientResponse> source, MethodInfo methodInfo, Integer chainIndex, Context context) {
+    public AgentMono(Mono<ClientResponse> source, MethodInfo methodInfo, ProgressContext context) {
         this.source = source;
         this.methodInfo = methodInfo;
-        this.chainIndex = chainIndex;
-        this.context = context.exportAsync();
+        this.context = context;
     }
 
     @Override
     public void subscribe(@Nonnull CoreSubscriber<? super ClientResponse> actual) {
-        // reactor.core.scheduler.Schedulers
-        this.source.subscribe(new AgentCoreSubscriber((CoreSubscriber<ClientResponse>) actual,
-            methodInfo, chainIndex, context));
+        this.source.subscribe(new AgentCoreSubscriber(actual, methodInfo, context));
     }
 }
