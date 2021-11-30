@@ -113,10 +113,6 @@ public class FeignClientTracingInterceptor extends BaseHttpClientTracingIntercep
             return 0;
         }
 
-        @Override
-        public String getRemoteHost() {
-            return null;
-        }
 
         @Override
         public String header(String name) {
@@ -175,11 +171,6 @@ public class FeignClientTracingInterceptor extends BaseHttpClientTracingIntercep
             if (caught != null) {
                 return caught;
             }
-            return null;
-        }
-
-        @Override
-        public Set<String> keys() {
             return null;
         }
 

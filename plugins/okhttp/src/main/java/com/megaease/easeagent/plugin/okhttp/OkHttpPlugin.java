@@ -15,24 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.trace;
+package com.megaease.easeagent.plugin.okhttp;
 
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.AgentPlugin;
 
-import java.util.Set;
+public class OkHttpPlugin implements AgentPlugin {
+    @Override
+    public String getName() {
+        return "okhttp";
+    }
 
-/**
- * Interface Response type used for parsing and sampling.
- * Used when multi-process collaboration is needed, information is extracted from the response and recorded in the {@link Span#tag(String, String)}
- * Usually used to support "ease mesh".
- *
- * @see ProgressContext#finish(Response)
- */
-public interface Response {
-
-
-    /**
-     * The method of extracting information from the response
-     */
-    String header(String name);
+    @Override
+    public String getDomain() {
+        return "observability";
+    }
 }

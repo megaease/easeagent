@@ -139,11 +139,6 @@ public class DoFilterTraceInterceptor implements FirstEnterInterceptor {
         }
 
         @Override
-        public Set<String> keys() {
-            return null;
-        }
-
-        @Override
         public String header(String name) {
             return httpServletResponse.getHeader(name);
         }

@@ -15,55 +15,55 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet.interceptor;
+package com.megaease.easeagent.plugin.okhttp.interceptor;
 
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
-import com.megaease.easeagent.plugin.tools.trace.TraceConst;
+import okhttp3.Request;
 
-import javax.servlet.http.HttpServletRequest;
+public class InternalRequest implements HttpRequest {
 
-public class HttpServerRequest implements HttpRequest {
-    protected final HttpServletRequest delegate;
+    private final Request originalRequest;
+    private final Request.Builder requestBuilder;
 
-    public HttpServerRequest(HttpServletRequest httpServletRequest) {
-        this.delegate = httpServletRequest;
-    }
-
-    @Override
-    public Span.Kind kind() {
-        return Span.Kind.SERVER;
+    public InternalRequest(Request originalRequest, Request.Builder requestBuilder) {
+        this.originalRequest = originalRequest;
+        this.requestBuilder = requestBuilder;
     }
 
     @Override
     public String method() {
-        return delegate.getMethod();
+        return originalRequest.method();
     }
 
     @Override
     public String path() {
-        return delegate.getRequestURI();
+        return originalRequest.url().uri().toString();
     }
 
     @Override
     public String route() {
-        Object maybeRoute = this.delegate.getAttribute(TraceConst.HTTP_ATTRIBUTE_ROUTE);
-        return maybeRoute instanceof String ? (String) maybeRoute : null;
+        return null;
     }
 
     @Override
     public String getRemoteAddr() {
-        return this.delegate.getRemoteAddr();
+        return null;
     }
 
     @Override
     public int getRemotePort() {
-        return this.delegate.getRemotePort();
+        return 0;
+    }
+
+    @Override
+    public Span.Kind kind() {
+        return Span.Kind.CLIENT;
     }
 
     @Override
     public String header(String name) {
-        return this.delegate.getHeader(name);
+        return originalRequest.header(name);
     }
 
     @Override
@@ -73,7 +73,6 @@ public class HttpServerRequest implements HttpRequest {
 
     @Override
     public void setHeader(String name, String value) {
-//            this.delegate.setAttribute(name, value);
+        requestBuilder.addHeader(name, value);
     }
 }
-

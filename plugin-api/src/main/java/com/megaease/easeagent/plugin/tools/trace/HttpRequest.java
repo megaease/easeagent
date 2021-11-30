@@ -34,6 +34,4 @@ public interface HttpRequest extends Request {
     String getRemoteAddr();
 
     int getRemotePort();
-
-    String getRemoteHost();
 }

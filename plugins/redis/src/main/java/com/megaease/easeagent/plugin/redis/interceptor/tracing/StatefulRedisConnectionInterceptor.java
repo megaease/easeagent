@@ -15,24 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.trace;
+package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.redis.advice.StatefulRedisConnectionAdvice;
 
-import java.util.Set;
+@AdviceTo(value = StatefulRedisConnectionAdvice.class, qualifier = "constructor")
+public class StatefulRedisConnectionInterceptor implements Interceptor {
+    @Override
+    public void before(MethodInfo methodInfo, Context context) {
 
-/**
- * Interface Response type used for parsing and sampling.
- * Used when multi-process collaboration is needed, information is extracted from the response and recorded in the {@link Span#tag(String, String)}
- * Usually used to support "ease mesh".
- *
- * @see ProgressContext#finish(Response)
- */
-public interface Response {
-
-
-    /**
-     * The method of extracting information from the response
-     */
-    String header(String name);
+    }
 }

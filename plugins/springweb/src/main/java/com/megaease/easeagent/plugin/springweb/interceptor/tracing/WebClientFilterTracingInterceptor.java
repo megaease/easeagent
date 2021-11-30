@@ -35,7 +35,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
-import java.util.Set;
 
 @AdviceTo(value = WebClientFilterAdvice.class)
 public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor {
@@ -121,11 +120,6 @@ public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor 
         }
 
         @Override
-        public String getRemoteHost() {
-            return null;
-        }
-
-        @Override
         public Span.Kind kind() {
             return Span.Kind.CLIENT;
         }
@@ -174,11 +168,6 @@ public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor 
         @Override
         public Throwable maybeError() {
             return caught;
-        }
-
-        @Override
-        public Set<String> keys() {
-            return null;
         }
 
         @Override

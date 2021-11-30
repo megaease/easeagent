@@ -26,7 +26,6 @@ import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.BaseClientTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.httpclient5.HttpClient5AsyncTracingInterceptor;
 import lombok.SneakyThrows;
 import org.apache.hc.client5.http.async.HttpAsyncClient;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;

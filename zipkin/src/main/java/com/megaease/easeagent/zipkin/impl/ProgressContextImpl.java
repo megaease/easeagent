@@ -91,12 +91,6 @@ public class ProgressContextImpl implements ProgressContext {
                 span.tag(field, response.header(field));
             }
         }
-        Set<String> keys = response.keys();
-        if (keys != null && !keys.isEmpty()) {
-            for (String key : keys) {
-                span.tag(key, response.header(key));
-            }
-        }
         span.finish();
     }
 }

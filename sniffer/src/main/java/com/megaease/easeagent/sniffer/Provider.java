@@ -62,11 +62,6 @@ import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
 import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
 import com.megaease.easeagent.zipkin.http.ServletHttpLogInterceptor;
-import com.megaease.easeagent.zipkin.http.httpclient.HttpClientTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.httpclient5.HttpClient5AsyncTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.httpclient5.HttpClient5TracingInterceptor;
-import com.megaease.easeagent.zipkin.http.okhttp.OkHttpAsyncTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.okhttp.OkHttpTracingInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
@@ -365,40 +360,10 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         };
     }
 
-    @Injection.Bean("supplier4HttpClient")
-    public Supplier<AgentInterceptorChain.Builder> getSupplier4HttpClient() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new HttpClientTracingInterceptor(tracing, config));
-    }
-
-    @Injection.Bean("supplier4HttpClient5")
-    public Supplier<AgentInterceptorChain.Builder> getSupplier4HttpClient5() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new HttpClient5TracingInterceptor(tracing, config));
-    }
-
-    @Injection.Bean("supplier4HttpClient5Async")
-    public Supplier<AgentInterceptorChain.Builder> getSupplier4HttpClient5Async() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new HttpClient5AsyncTracingInterceptor(tracing, config));
-    }
-
     @Injection.Bean("supplier4OnApplicationEvent")
     public Supplier<AgentInterceptorChain.Builder> supplier4OnApplicationEvent() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
             .addInterceptor(new OnApplicationEventInterceptor());
-    }
-
-    @Injection.Bean("supplier4OkHttp")
-    public Supplier<AgentInterceptorChain.Builder> supplier4OkHttp() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new OkHttpTracingInterceptor(tracing, config));
-    }
-
-    @Injection.Bean("supplier4OkHttpAsync")
-    public Supplier<AgentInterceptorChain.Builder> supplier4OkHttpAsync() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new OkHttpAsyncTracingInterceptor(tracing, config));
     }
 
     class Md5ReportConsumer implements Consumer<Map<String, String>> {

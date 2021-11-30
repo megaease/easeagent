@@ -103,11 +103,6 @@ public class ClientHttpRequestInterceptor extends BaseHttpClientTracingIntercept
         }
 
         @Override
-        public String getRemoteHost() {
-            return request.getURI().getHost();
-        }
-
-        @Override
         public String header(String name) {
             return getFirstHeaderValue(request.getHeaders(), name);
         }
@@ -156,11 +151,6 @@ public class ClientHttpRequestInterceptor extends BaseHttpClientTracingIntercept
             if (caught != null) {
                 return caught;
             }
-            return null;
-        }
-
-        @Override
-        public Set<String> keys() {
             return null;
         }
 

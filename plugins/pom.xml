@@ -23,6 +23,8 @@
         <module>redis</module>
         <module>kafka</module>
         <module>servicename</module>
+        <module>httpclient</module>
+        <module>okhttp</module>
     </modules>
 
     <build>
