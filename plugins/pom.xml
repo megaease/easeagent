@@ -19,6 +19,7 @@
         <module>jdbc</module>
         <module>rabbitmq</module>
         <module>springweb</module>
+        <module>spring-gateway</module>
         <module>httpservlet</module>
         <module>redis</module>
         <module>kafka</module>

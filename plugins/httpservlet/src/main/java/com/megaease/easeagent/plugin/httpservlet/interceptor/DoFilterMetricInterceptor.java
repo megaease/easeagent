@@ -36,7 +36,8 @@ public class DoFilterMetricInterceptor extends BaseServletInterceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        SERVER_METRIC = AbstractMetric.getInstance(config, new Tags("application", "http-request", "url"),
+        SERVER_METRIC = AbstractMetric.getInstance(config,
+            new Tags("application", "http-request", "url"),
             (config1, tags) -> new ServerMetric(config1, tags));
     }
 

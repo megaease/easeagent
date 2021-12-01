@@ -248,10 +248,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             new AutoRefreshReporter(metricRegistry, collectorConfig,
                 gatewayMetricsInterceptor.newConverter(this.additionalAttributes),
                 s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
+
             AgentInterceptorChain.Builder headersFilterChainBuilder = ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(gatewayMetricsInterceptor)
                 .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing, config))
                 .addInterceptor(new SpringGatewayLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))));
+
             return ChainBuilderFactory.DEFAULT.createBuilder()
                 .addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
         };

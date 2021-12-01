@@ -44,7 +44,9 @@ public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
         if (metric == null && config.enabled()) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
-                    metric = AbstractMetric.getInstance(config, new Tags("application", "jdbc-statement", "signature"), (config1, tags) -> new JdbcMetric(config1, tags));
+                    metric = AbstractMetric.getInstance(config,
+                        new Tags("application", "jdbc-statement", "signature"),
+                        (config1, tags) -> new JdbcMetric(config1, tags));
                     sqlCompression = MD5SQLCompression.getInstance(config);
                     cache = CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize).removalListener(metric).build();

@@ -48,6 +48,7 @@ public abstract class AbstractMetric {
         return nameFactory;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends AbstractMetric> T getInstance(Config config, Tags tags, BiFunction<Config, Tags, T> builder) {
         Key key = new Key(config.domain(), config.namespace(), config.id(), tags);
         AbstractMetric abstractMetric = INSTANCES.get(key);

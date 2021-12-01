@@ -154,7 +154,9 @@ public class Bootstrap {
             .or(nameStartsWith("com.intellij."));
 
         if (!test) {
-            builder = ignore.or(nameStartsWith("com.megaease.easeagent."));
+            builder = ignore
+                .or(nameStartsWith("com.megaease.easeagent.")
+                    .and(not(nameStartsWith("com.megaease.easeagent.plugin"))));
         } else {
             builder = ignore;
         }
