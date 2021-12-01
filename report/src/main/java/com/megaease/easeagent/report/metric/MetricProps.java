@@ -39,7 +39,7 @@ public interface MetricProps {
 
     static MetricProps newDefault(com.megaease.easeagent.plugin.api.config.Config config) {
         return new Default(
-            config.enable(),
+            config.enabled(),
             NoNull.of(config.getString(KEY_COMM_APPEND_TYPE), Const.METRIC_DEFAULT_APPEND_TYPE),
             NoNull.of(config.getString(KEY_COMM_TOPIC), Const.METRIC_DEFAULT_TOPIC)
         );

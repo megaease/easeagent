@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.Const;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 
@@ -32,6 +33,7 @@ public class PluginConfig implements Config {
     private final String id;
     private final Map<String, String> global;
     private final Map<String, String> cover;
+    private final boolean enabled;
 
     protected PluginConfig(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, @Nonnull Set<ConfigChangeListener> listeners) {
         this.domain = domain;
@@ -40,6 +42,12 @@ public class PluginConfig implements Config {
         this.global = global;
         this.cover = cover;
         this.listeners = listeners;
+        Boolean b = getBoolean(Const.ENABLED_CONFIG);
+        if (b == null) {
+            enabled = false;
+        } else {
+            enabled = b;
+        }
     }
 
     public static PluginConfig build(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, PluginConfig oldConfig) {
@@ -113,6 +121,11 @@ public class PluginConfig implements Config {
             globalB = isTrue(value);
         }
         return implB && globalB;
+    }
+
+    @Override
+    public boolean enabled() {
+        return enabled;
     }
 
     @Override

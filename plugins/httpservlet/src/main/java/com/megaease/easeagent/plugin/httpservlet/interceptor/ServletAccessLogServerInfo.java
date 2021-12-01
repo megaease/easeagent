@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.zipkin.http;
+package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
-import com.megaease.easeagent.core.utils.ServletUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.HandlerMapping;
+import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
+import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,7 +64,7 @@ public class ServletAccessLogServerInfo implements AccessLogServerInfo {
 
     @Override
     public String getMatchURL() {
-        String matchURL = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        String matchURL = ServletUtils.matchUrlBySpringWeb(request);
         if (StringUtils.isEmpty(matchURL)) {
             return "";
         }

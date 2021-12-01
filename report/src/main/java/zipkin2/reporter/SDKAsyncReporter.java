@@ -493,7 +493,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         public void run() {
             try {
                 while (!result.closed.get() && !sender.isClose()) {
-                    // flush will be block if there is no data ready, don't check trace is enable,
+                    // flush will be block if there is no data ready, don't check trace is enabled,
                     // otherwise the cpu will spin.
                     result.flush(consumer, result.pending);
                 }

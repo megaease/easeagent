@@ -17,23 +17,95 @@
 
 package com.megaease.easeagent.plugin.httpservlet.utils;
 
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.httpservlet.interceptor.DoFilterTraceInterceptor;
+import lombok.SneakyThrows;
+
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class ServletUtils {
-    public static final String BEST_MATCHING_PATTERN_ATTRIBUTE = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
+    public static final Logger LOGGER = EaseAgent.getLogger(ServletUtils.class);
+    public static final String START_TIME = ServletUtils.class.getName() + "$StartTime";
+    public static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".ProgressContext";
+    public static final String HANDLER_MAPPING_CLASS = "org.springframework.web.servlet.HandlerMapping";
+    public static final String BEST_MATCHING_PATTERN_ATTRIBUTE;
+
+    static {
+        String pattern = null;
+        try {
+            Thread.currentThread().getContextClassLoader().loadClass(HANDLER_MAPPING_CLASS);
+            pattern = SpringWebUtils.getBestMatchingPatternAttribute();
+        } catch (ClassNotFoundException e) {
+            pattern = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
+            LOGGER.info("{} use default", e.getMessage());
+        }
+        BEST_MATCHING_PATTERN_ATTRIBUTE = pattern;
+    }
+
+    public static String matchUrlBySpringWeb(HttpServletRequest request) {
+        return (String) request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE);
+    }
 
     public static String getHttpRouteAttributeFromRequest(HttpServletRequest request) {
         Object httpRoute = request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE);
         return httpRoute != null ? httpRoute.toString() : "";
     }
 
-    public static boolean markProcessedAfter(HttpServletRequest request, String mark) {
+    public static boolean markProcessed(HttpServletRequest request, String mark) {
         if (request.getAttribute(mark) != null) {
             return true;
         }
-        request.setAttribute(mark, "after");
+        request.setAttribute(mark, "m");
         return false;
     }
 
+    public static long startTime(HttpServletRequest httpServletRequest) {
+        Object startObj = httpServletRequest.getAttribute(START_TIME);
+        Long start = null;
+        if (startObj == null) {
+            start = System.currentTimeMillis();
+            httpServletRequest.setAttribute(START_TIME, start);
+        } else {
+            start = (Long) startObj;
+        }
+        return start;
+    }
 
+
+    @SneakyThrows
+    public static Map<String, List<String>> getQueries(HttpServletRequest httpServletRequest) {
+        Map<String, List<String>> map = new HashMap<>();
+        String queryString = httpServletRequest.getQueryString();
+        if (queryString == null || queryString.isEmpty()) {
+            return map;
+        }
+        String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
+            if (!map.containsKey(key)) {
+                map.put(key, new LinkedList<>());
+            }
+            String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
+            map.get(key).add(value);
+        }
+        return map;
+    }
+
+    public static Map<String, String> getQueries4SingleValue(HttpServletRequest httpServletRequest) {
+        Map<String, List<String>> map = getQueries(httpServletRequest);
+        Map<String, String> singleValueMap = new HashMap<>();
+        map.forEach((key, values) -> {
+            if (values != null && values.size() > 0) {
+                singleValueMap.put(key, values.get(0));
+            }
+        });
+        return singleValueMap;
+    }
 }

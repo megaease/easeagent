@@ -51,7 +51,7 @@ public class PluginMetricsConfig implements MetricsConfig {
     }
 
     private void set(Config config) {
-        this.enabled = config.enable();
+        this.enabled = config.enabled();
         this.interval = NoNull.of(config.getInt(KEY_COMM_INTERVAL), METRIC_DEFAULT_INTERVAL);
     }
 

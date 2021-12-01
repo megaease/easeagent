@@ -17,29 +17,21 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.httpservlet.utils.InternalAsyncListener;
-import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
-public class DoFilterMetricInterceptor implements FirstEnterInterceptor {
-    private static final Logger LOGGER = EaseAgent.getLogger(DoFilterMetricInterceptor.class);
+@AdviceTo(value = DoFilterAdvice.class, qualifier = "default", plugin = HttpServletPlugin.class)
+public class DoFilterMetricInterceptor extends BaseServletInterceptor {
     private static final String AFTER_MARK = DoFilterMetricInterceptor.class.getName() + "$AfterMark";
-    private static final Object START = new Object();
     private static volatile ServerMetric SERVER_METRIC = null;
 
     @Override
@@ -49,37 +41,12 @@ public class DoFilterMetricInterceptor implements FirstEnterInterceptor {
     }
 
     @Override
-    public void doBefore(MethodInfo methodInfo, Context context) {
-        context.put(START, System.currentTimeMillis());
+    String getAfterMark() {
+        return AFTER_MARK;
     }
 
     @Override
-    public void doAfter(MethodInfo methodInfo, Context context) {
-        final long start = context.remove(START);
-        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
-        if (ServletUtils.markProcessedAfter(httpServletRequest, AFTER_MARK)) {
-            return;
-        }
-        String httpRoute = ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest);
-        final String key = httpServletRequest.getMethod() + " " + httpRoute;
-        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-        if (methodInfo.getThrowable() != null) {
-            internalAfter(methodInfo.getThrowable(), key, httpServletResponse, start);
-        } else if (httpServletRequest.isAsyncStarted()) {
-            httpServletRequest.getAsyncContext().addListener(new InternalAsyncListener(
-                    asyncEvent -> {
-                        HttpServletResponse suppliedResponse = (HttpServletResponse) asyncEvent.getSuppliedResponse();
-                        internalAfter(asyncEvent.getThrowable(), key, suppliedResponse, start);
-                    }
-
-                )
-            );
-        } else {
-            internalAfter(null, key, httpServletResponse, start);
-        }
-    }
-
-    private void internalAfter(Throwable throwable, String key, HttpServletResponse httpServletResponse, long start) {
+    public void internalAfter(Throwable throwable, String key, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, long start) {
         long end = System.currentTimeMillis();
         SERVER_METRIC.collectMetric(key, httpServletResponse.getStatus(), throwable, start, end);
     }

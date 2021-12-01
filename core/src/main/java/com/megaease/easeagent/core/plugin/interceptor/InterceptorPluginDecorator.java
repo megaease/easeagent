@@ -53,7 +53,7 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
         Config cfg = this.config;
         InitializeContext innerContext = (InitializeContext) context;
         innerContext.pushConfig(cfg);
-        if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
+        if (cfg == null || cfg.enabled() || cfg instanceof NoOpConfig) {
             innerContext.pushRetBound();
             this.interceptor.before(methodInfo, context);
         } else if (LOGGER.isDebugEnabled()) {
@@ -66,7 +66,7 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
         Config cfg = context.getConfig();
         InitializeContext innerContext = (InitializeContext) context;
 
-        if (cfg == null || cfg.enable() || cfg instanceof NoOpConfig) {
+        if (cfg == null || cfg.enabled() || cfg instanceof NoOpConfig) {
             try {
                 this.interceptor.after(methodInfo, context);
             } finally {

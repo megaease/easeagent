@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
+import javax.servlet.Filter;
+import javax.servlet.http.HttpServlet;
 import java.util.Set;
 
 public class DoFilterAdvice implements Points {
@@ -31,11 +33,21 @@ public class DoFilterAdvice implements Points {
     static final String SERVLET_REQUEST = "javax.servlet.ServletRequest";
     static final String SERVLET_RESPONSE = "javax.servlet.ServletResponse";
 
+    //        return def.type(
+    //                hasSuperType(namedOneOf(FILTER_NAME, HTTP_SERVLET_NAME)))
+    //                .transform(doFilterOrService(
+    //                        namedOneOf("doFilter", "service")
+    //                                .and(takesArgument(0, named(SERVLET_REQUEST)))
+    //                                .and(takesArgument(1, named(SERVLET_RESPONSE)))
+    //                        )
+    //                ).end();
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
             .hasInterface(FILTER_NAME)
-            .build();
+            .build().or(ClassMatcher.builder()
+                .hasSuperClass(HTTP_SERVLET_NAME)
+                .build());
     }
 
     @Override
@@ -47,6 +59,11 @@ public class DoFilterAdvice implements Points {
                 .arg(0, SERVLET_REQUEST)
                 .arg(1, SERVLET_RESPONSE)
                 .returnType("void")
+                .qualifier("default")
+                .build())
+            .match(MethodMatcher.builder().named("service")
+                .arg(0, SERVLET_REQUEST)
+                .arg(1, SERVLET_RESPONSE)
                 .qualifier("default")
                 .build())
             .build();

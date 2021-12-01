@@ -31,7 +31,7 @@ public abstract class SubmoduleInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         Config config = context.getConfig();
-        if (!config.enable()) {
+        if (!config.enabled()) {
             return;
         }
         InitializeContext  innerContext = (InitializeContext) context;
@@ -42,7 +42,7 @@ public abstract class SubmoduleInterceptor implements Interceptor {
     @Override
     public void after(MethodInfo methodInfo, Context context) {
         Config config = context.getConfig();
-        if (!config.enable()) {
+        if (!config.enabled()) {
             return;
         }
         InitializeContext  innerContext = (InitializeContext) context;

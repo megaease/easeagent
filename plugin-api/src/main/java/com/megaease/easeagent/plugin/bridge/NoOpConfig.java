@@ -73,6 +73,11 @@ public class NoOpConfig implements Config {
     }
 
     @Override
+    public boolean enabled() {
+        return false;
+    }
+
+    @Override
     public Double getDouble(String property) {
         return null;
     }

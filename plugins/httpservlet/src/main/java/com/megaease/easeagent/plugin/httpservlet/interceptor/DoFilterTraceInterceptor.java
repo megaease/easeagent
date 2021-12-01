@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
@@ -37,35 +38,33 @@ import javax.servlet.ServletRequest;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@AdviceTo(value = DoFilterAdvice.class, qualifier = "default")
+@AdviceTo(value = DoFilterAdvice.class, qualifier = "default", plugin = HttpServletPlugin.class)
 public class DoFilterTraceInterceptor implements FirstEnterInterceptor {
     private static final String AFTER_MARK = DoFilterTraceInterceptor.class.getName() + "$AfterMark";
-    private static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".ProgressContext";
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
-        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(PROGRESS_CONTEXT);
+        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
         if (progressContext != null) {
             return;
         }
         HttpRequest httpRequest = new HttpServerRequest(httpServletRequest);
         progressContext = context.importProgress(httpRequest);
-        httpServletRequest.setAttribute(PROGRESS_CONTEXT, progressContext);
+        httpServletRequest.setAttribute(ServletUtils.PROGRESS_CONTEXT, progressContext);
         HttpUtils.handleReceive(progressContext.span().start(), httpRequest);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
-        if (ServletUtils.markProcessedAfter(httpServletRequest, AFTER_MARK)) {
+        if (ServletUtils.markProcessed(httpServletRequest, AFTER_MARK)) {
             return;
         }
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(PROGRESS_CONTEXT);
+        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
         try {
             Span span = progressContext.span();
             if (!httpServletRequest.isAsyncStarted()) {

@@ -61,7 +61,6 @@ import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
 import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
-import com.megaease.easeagent.zipkin.http.ServletHttpLogInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
@@ -238,22 +237,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         return chainInvoker;
     }
 
-    @Injection.Bean("supplier4Filter")
-    public Supplier<AgentInterceptorChain.Builder> supplier4Filter() {
-        return () -> {
-//            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-//            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
-//            ServletMetric servletMetric = new ServletMetric(metricRegistry);
-//            new AutoRefreshReporter(metricRegistry, collectorConfig, servletMetric.newConverter(this.additionalAttributes),
-//                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-//                .addInterceptor(new HTTPHeaderExtractInterceptor(new CrossThreadPropagationConfig(this.config)))
-//                .addInterceptor(new HttpFilterMetricsInterceptor(servletMetric, config))
-//                .addInterceptor(new HttpFilterTracingInterceptor(this.tracing, config))
-                .addInterceptor(new ServletHttpLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))))
-                ;
-        };
-    }
 
 
     @Injection.Bean("supplier4Gateway")

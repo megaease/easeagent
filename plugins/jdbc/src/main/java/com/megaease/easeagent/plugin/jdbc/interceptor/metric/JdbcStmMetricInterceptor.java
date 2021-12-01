@@ -41,7 +41,7 @@ public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        if (metric == null && config.enable()) {
+        if (metric == null && config.enabled()) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
                     metric = AbstractMetric.getInstance(config, new Tags("application", "jdbc-statement", "signature"), (config1, tags) -> new JdbcMetric(config1, tags));

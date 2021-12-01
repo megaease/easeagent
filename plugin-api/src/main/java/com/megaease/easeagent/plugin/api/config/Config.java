@@ -37,7 +37,7 @@ public interface Config {
 
     Boolean getBoolean(String property);
 
-    default boolean enable() {
+    default boolean enabled() {
         Boolean b = getBoolean(Const.ENABLED_CONFIG);
         if (b == null) {
             return false;

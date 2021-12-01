@@ -66,4 +66,14 @@ public final class EaseAgent {
     public static Reporter metricReporter(Config config) {
         return metricRegistrySupplier.reporter(config);
     }
+
+    /**
+     * Returns a configuration property from the agent's all configuration.
+     *
+     * @return The configuration of this Java agent.
+     */
+
+    public static String getConfig(String property) {
+        return configFactory.getConfig(property);
+    }
 }
