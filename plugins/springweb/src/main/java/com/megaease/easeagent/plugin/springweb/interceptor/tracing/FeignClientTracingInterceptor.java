@@ -34,7 +34,7 @@ import lombok.SneakyThrows;
 import java.lang.reflect.Field;
 import java.util.*;
 
-@AdviceTo(value = FeignClientAdvice.class, qualifier = "default")
+@AdviceTo(value = FeignClientAdvice.class)
 public class FeignClientTracingInterceptor extends BaseHttpClientTracingInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
@@ -168,10 +168,7 @@ public class FeignClientTracingInterceptor extends BaseHttpClientTracingIntercep
 
         @Override
         public Throwable maybeError() {
-            if (caught != null) {
-                return caught;
-            }
-            return null;
+            return caught;
         }
 
         @Override

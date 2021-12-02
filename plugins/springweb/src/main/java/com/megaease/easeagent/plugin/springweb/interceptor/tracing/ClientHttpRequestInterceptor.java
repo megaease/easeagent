@@ -31,9 +31,8 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
 import java.util.List;
-import java.util.Set;
 
-@AdviceTo(value = ClientHttpRequestAdvice.class, qualifier = "default")
+@AdviceTo(value = ClientHttpRequestAdvice.class)
 public class ClientHttpRequestInterceptor extends BaseHttpClientTracingInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
@@ -148,10 +147,7 @@ public class ClientHttpRequestInterceptor extends BaseHttpClientTracingIntercept
 
         @Override
         public Throwable maybeError() {
-            if (caught != null) {
-                return caught;
-            }
-            return null;
+            return caught;
         }
 
         @Override

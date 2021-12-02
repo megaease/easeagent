@@ -32,6 +32,7 @@ public class GlobalFilterInterceptor implements Interceptor {
     private static boolean loadAgentFilter = false;
 
     @Override
+    @SuppressWarnings("unchecked")
     public void before(MethodInfo methodInfo, Context context) {
         List<GlobalFilter> list = null;
         switch (methodInfo.getMethod()) {

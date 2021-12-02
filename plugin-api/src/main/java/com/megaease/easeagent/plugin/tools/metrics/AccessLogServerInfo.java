@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.tools.metrics;
 import java.util.Map;
 
 public interface AccessLogServerInfo {
-
     String getMethod();
 
     String getHeader(String key);

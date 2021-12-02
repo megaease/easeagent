@@ -60,7 +60,7 @@ public class MethodTransformation {
 
         List<Interceptor> interceptors = suppliers.stream()
             .map(Supplier::get)
-            .sorted(Comparator.comparing(Ordered::order))
+            .sorted(Comparator.comparing(Ordered::order).reversed())
             .collect(Collectors.toList());
 
         interceptors.forEach(i -> {

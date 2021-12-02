@@ -26,7 +26,7 @@ import com.megaease.easeagent.plugin.springweb.advice.WebClientBuilderAdvice;
 import com.megaease.plugin.easeagent.springweb.interceptor.tracing.WebClientTracingFilter;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@AdviceTo(value = WebClientBuilderAdvice.class, qualifier = "default")
+@AdviceTo(value = WebClientBuilderAdvice.class)
 public class WebClientBuildInterceptor implements Interceptor {
 
     // org.springframework.web.reactive.function.client.WebClient$Builder
