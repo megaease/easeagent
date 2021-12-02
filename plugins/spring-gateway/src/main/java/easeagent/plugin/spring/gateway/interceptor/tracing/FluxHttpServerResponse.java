@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.spring.gateway.interceptor.tracing;
+package easeagent.plugin.spring.gateway.interceptor.tracing;
 
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import org.springframework.http.HttpHeaders;
@@ -6,8 +6,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
-
-import java.util.Set;
 
 public class FluxHttpServerResponse implements HttpResponse {
     private final FluxHttpServerRequest request;

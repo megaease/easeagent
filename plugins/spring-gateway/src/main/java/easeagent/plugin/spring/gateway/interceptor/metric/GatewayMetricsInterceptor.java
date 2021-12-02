@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.spring.gateway.interceptor.metric;
+package easeagent.plugin.spring.gateway.interceptor.metric;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
@@ -26,8 +26,8 @@ import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
-import com.megaease.easeagent.plugin.spring.gateway.reactor.AgentMono;
+import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
+import easeagent.plugin.spring.gateway.reactor.AgentMono;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
 import com.megaease.easeagent.plugin.utils.SystemClock;
 import org.springframework.cloud.gateway.route.Route;

@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.spring.gateway.interceptor.initialize;
+package easeagent.plugin.spring.gateway.interceptor.initialize;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.spring.gateway.advice.InitGlobalFilterAdvice;
+import easeagent.plugin.spring.gateway.advice.InitGlobalFilterAdvice;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 
 import java.util.List;

@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.spring.gateway.interceptor.tracing;
+package easeagent.plugin.spring.gateway.interceptor.tracing;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
-import com.megaease.easeagent.plugin.spring.gateway.advice.HttpHeadersFilterAdvice;
-import com.megaease.easeagent.plugin.spring.gateway.interceptor.GatewayCons;
+import easeagent.plugin.spring.gateway.advice.HttpHeadersFilterAdvice;
+import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.server.ServerWebExchange;

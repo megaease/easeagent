@@ -15,20 +15,10 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.spring.gateway;
+package easeagent.plugin.spring.gateway.interceptor;
 
-import com.megaease.easeagent.plugin.AgentPlugin;
-
-public class SpringGatewayPlugin implements AgentPlugin {
-
-    @Override
-    public String getName() {
-        return "spring-gateway";
-    }
-
-    @Override
-    public String getDomain() {
-        return "observability";
-    }
-
+public interface GatewayCons {
+    String SPAN_KEY = GatewayCons.class.getName() + ".SPAN";
+    String CHILD_SPAN_KEY = GatewayCons.class.getName() + ".CHILD_SPAN";
+    String CLIENT_RECEIVE_CALLBACK_KEY = GatewayCons.class.getName() + ".CLIENT_RECEIVE_CALLBACK";
 }

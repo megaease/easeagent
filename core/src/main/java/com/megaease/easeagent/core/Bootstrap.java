@@ -155,8 +155,7 @@ public class Bootstrap {
 
         if (!test) {
             builder = ignore
-                .or(nameStartsWith("com.megaease.easeagent.")
-                    .and(not(nameStartsWith("com.megaease.easeagent.plugin"))));
+                .or(nameStartsWith("com.megaease.easeagent."));
         } else {
             builder = ignore;
         }

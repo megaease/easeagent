@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.spring.gateway.reactor;
+package easeagent.plugin.spring.gateway.reactor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import reactor.core.CoreSubscriber;

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.spring.gateway.interceptor.tracing;
+package easeagent.plugin.spring.gateway.interceptor.tracing;
 
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -79,15 +79,6 @@ public class FluxHttpServerRequest implements HttpRequest {
             return this.request.getRemoteAddress().getPort();
         } else {
             return 0;
-        }
-    }
-
-    @Override
-    public String getRemoteHost() {
-        if (this.request != null && this.request.getRemoteAddress() != null) {
-            return this.request.getRemoteAddress().getHostName();
-        } else {
-            return "Unknown";
         }
     }
 }

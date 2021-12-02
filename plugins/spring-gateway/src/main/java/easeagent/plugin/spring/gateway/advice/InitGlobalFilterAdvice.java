@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.spring.gateway.advice;
+package easeagent.plugin.spring.gateway.advice;
 
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
