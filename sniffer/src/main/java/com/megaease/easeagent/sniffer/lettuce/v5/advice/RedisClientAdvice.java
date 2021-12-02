@@ -46,11 +46,6 @@ public abstract class RedisClientAdvice implements Transformation {
         return def.type(hasSuperType(named("io.lettuce.core.RedisClient"))
                         .or(named("io.lettuce.core.RedisClient"))
                 )
-                .transform(connectAsync((named("connectStandaloneAsync")
-                                .or(named("connectPubSubAsync"))
-                                .or(named("connectSentinelAsync"))).and(isPrivate())
-                        )
-                )
                 .transform(objConstruct(isConstructor()))
                 .end()
                 ;
@@ -72,38 +67,6 @@ public abstract class RedisClientAdvice implements Transformation {
                          @Advice.Origin("#m") String method,
                          @Advice.AllArguments Object[] args) {
             this.doConstructorExit(invoker, method, args);
-        }
-    }
-
-    @AdviceTo(ConnectStatefulASync.class)
-    public abstract Definition.Transformer connectAsync(ElementMatcher<? super MethodDescription> matcher);
-
-    static class ConnectStatefulASync extends AbstractAdvice {
-        @Injection.Autowire
-        public ConnectStatefulASync(@Injection.Qualifier("supplier4RedisClientConnectAsync") Supplier<AgentInterceptorChain.Builder> supplier,
-                                    AgentInterceptorChainInvoker agentInterceptorChainInvoker
-        ) {
-            super(supplier, agentInterceptorChainInvoker);
-        }
-
-        @Advice.OnMethodEnter
-        public ForwardLock.Release<Map<Object, Object>> enter(
-                @Advice.This Object invoker,
-                @Advice.Origin("#m") String method,
-                @Advice.AllArguments Object[] args
-        ) {
-            return this.doEnter(invoker, method, args);
-        }
-
-        @Advice.OnMethodExit(onThrowable = Throwable.class)
-        public Object exit(@Advice.Enter ForwardLock.Release<Map<Object, Object>> release,
-                           @Advice.This Object invoker,
-                           @Advice.Origin("#m") String method,
-                           @Advice.AllArguments Object[] args,
-                           @Advice.Return(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object retValue,
-                           @Advice.Thrown Throwable throwable
-        ) {
-            return this.doExit(release, invoker, method, args, retValue, throwable);
         }
     }
 }

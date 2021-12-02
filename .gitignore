@@ -9,4 +9,6 @@ dependency-reduced-pom.xml
 .factorypath
 .project
 .settings
+.DS_Store
 logs/
+tmp/

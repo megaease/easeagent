@@ -17,7 +17,6 @@
 
 package org.springframework.cloud.openfeign.ribbon;
 
-import com.megaease.easeagent.sniffer.ServiceNamePropagationAdvice;
 import com.netflix.client.config.IClientConfig;
 import feign.Client;
 import feign.Request;
@@ -31,7 +30,9 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.UUID;
 
+
 public class Adaptor {
+    public static final String PROPAGATE_HEAD = "X-Mesh-RPC-Service";
     public void doWork(FeignLoadBalancer balancer, IClientConfig config) throws IOException {
         Client client = Mockito.mock(Client.class);
         String randomText = UUID.randomUUID().toString();
@@ -41,7 +42,7 @@ public class Adaptor {
                 new HashMap<>(), new byte[0], Charset.defaultCharset(), new RequestTemplate()), URI.create("http://127.0.0.1/test"));
         balancer.execute(ribbonRequest, config);
         Request request = ribbonRequest.toRequest();
-        Assert.assertTrue(request.headers().containsKey(ServiceNamePropagationAdvice.PROPAGATE_HEAD));
-        Assert.assertEquals(randomText, request.headers().get(ServiceNamePropagationAdvice.PROPAGATE_HEAD).iterator().next());
+        Assert.assertTrue(request.headers().containsKey(PROPAGATE_HEAD));
+        Assert.assertEquals(randomText, request.headers().get(PROPAGATE_HEAD).iterator().next());
     }
 }

@@ -23,6 +23,7 @@ import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.interceptor.*;
+import com.megaease.easeagent.plugin.MethodInfo;
 
 import java.util.HashMap;
 import java.util.Map;

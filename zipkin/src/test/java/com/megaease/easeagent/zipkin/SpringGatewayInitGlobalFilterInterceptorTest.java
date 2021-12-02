@@ -21,7 +21,7 @@ import brave.Tracing;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.zipkin.http.reactive.AgentGlobalFilter;
 import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;

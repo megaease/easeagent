@@ -21,8 +21,6 @@ import com.codahale.metrics.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.metrics.converter.Converter;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.Marker;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

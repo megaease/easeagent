@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

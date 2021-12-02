@@ -21,11 +21,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
 import com.megaease.easeagent.metrics.BaseMetricsTest;
-import com.megaease.easeagent.metrics.MetricNameFactory;
-import com.megaease.easeagent.metrics.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Assert;
 import org.junit.Before;
@@ -58,7 +58,7 @@ public class KafkaMessageListenerMetricInterceptorTest extends BaseMetricsTest {
 
     @Test
     public void invokeSuccess() {
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .meterType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .counterType(MetricSubType.CONSUMER, Maps.newHashMap())
@@ -84,7 +84,7 @@ public class KafkaMessageListenerMetricInterceptorTest extends BaseMetricsTest {
         interceptor.before(methodInfo, context, chain);
         interceptor.after(methodInfo, context, chain);
 
-        MetricNameFactory metricNameFactory = MetricNameFactory.createBuilder()
+        NameFactory metricNameFactory = NameFactory.createBuilder()
                 .timerType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .meterType(MetricSubType.CONSUMER, Maps.newHashMap())
                 .meterType(MetricSubType.CONSUMER_ERROR, Maps.newHashMap())

@@ -17,15 +17,17 @@
 
 package com.megaease.easeagent.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Configs implements Config, ConfigManagerMXBean {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Configs.class);
     private volatile Map<String, String> source;
     private final ConfigNotifier notifier;
     private volatile String mainLatestVersion;
@@ -51,7 +53,7 @@ public class Configs implements Config, ConfigManagerMXBean {
             }
         });
         if (!items.isEmpty()) {
-            logger.info("change items: {}", items);
+            LOGGER.info("change items: {}", items);
             this.source = dump;
             this.notifier.handleChanges(items);
         }
@@ -59,12 +61,12 @@ public class Configs implements Config, ConfigManagerMXBean {
 
     @Override
     public void updateService(String json, String version) throws IOException {
-        logger.info("call updateService. version: {}, json: {}", version, json);
+        LOGGER.info("call updateService. version: {}, json: {}", version, json);
         if (hasText(mainLatestVersion) && Objects.equals(mainLatestVersion, version)) {
-            logger.info("new main version: {} is same with the old version: {}", version, mainLatestVersion);
+            LOGGER.info("new main version: {} is same with the old version: {}", version, mainLatestVersion);
             return;
         } else if (hasText(version)) {
-            logger.info("update the main latest version to {}", version);
+            LOGGER.info("update the main latest version to {}", version);
             this.mainLatestVersion = version;
         }
         this.updateConfigs(ConfigUtils.json2KVMap(json));
@@ -72,12 +74,12 @@ public class Configs implements Config, ConfigManagerMXBean {
 
     @Override
     public void updateCanary(String json, String version) throws IOException {
-        logger.info("call updateCanary. version: {}, json: {}", version, json);
+        LOGGER.info("call updateCanary. version: {}, json: {}", version, json);
         if (hasText(canaryLatestVersion) && Objects.equals(canaryLatestVersion, version)) {
-            logger.info("new canary version: {} is same with the old version: {}", version, canaryLatestVersion);
+            LOGGER.info("new canary version: {} is same with the old version: {}", version, canaryLatestVersion);
             return;
         } else if (hasText(version)) {
-            logger.info("update the canary latest version to {}", version);
+            LOGGER.info("update the canary latest version to {}", version);
             this.canaryLatestVersion = version;
         }
         Map<String, String> originals = ConfigUtils.json2KVMap(json);
@@ -88,12 +90,12 @@ public class Configs implements Config, ConfigManagerMXBean {
 
     @Override
     public void updateService2(Map<String, String> configs, String version) {
-        logger.info("call updateService. version: {}, configs: {}", version, configs);
+        LOGGER.info("call updateService. version: {}, configs: {}", version, configs);
         if (hasText(mainLatestVersion) && Objects.equals(mainLatestVersion, version)) {
-            logger.info("new main version: {} is same with the old version: {}", version, mainLatestVersion);
+            LOGGER.info("new main version: {} is same with the old version: {}", version, mainLatestVersion);
         }
         if (hasText(version)) {
-            logger.info("update the main latest version to {}", version);
+            LOGGER.info("update the main latest version to {}", version);
             this.mainLatestVersion = version;
         }
         this.updateConfigs(configs);
@@ -101,12 +103,12 @@ public class Configs implements Config, ConfigManagerMXBean {
 
     @Override
     public void updateCanary2(Map<String, String> configs, String version) {
-        logger.info("call updateCanary. version: {}, configs: {}", version, configs);
+        LOGGER.info("call updateCanary. version: {}, configs: {}", version, configs);
         if (hasText(canaryLatestVersion) && Objects.equals(canaryLatestVersion, version)) {
-            logger.info("new canary version: {} is same with the old version: {}", version, canaryLatestVersion);
+            LOGGER.info("new canary version: {} is same with the old version: {}", version, canaryLatestVersion);
             return;
         } else if (hasText(version)) {
-            logger.info("update the canary latest version to {}", version);
+            LOGGER.info("update the canary latest version to {}", version);
             this.canaryLatestVersion = version;
         }
         HashMap<String, String> rst = new HashMap<>();

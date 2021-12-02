@@ -20,9 +20,11 @@ package com.megaease.easeagent.report.metric;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.Const;
+import com.megaease.easeagent.plugin.utils.NoNull;
 
-import static com.megaease.easeagent.config.ConfigConst.*;
-import static com.megaease.easeagent.config.ConfigConst.Observability.*;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.*;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
 
 public interface MetricProps {
     String getAppendType();
@@ -35,6 +37,14 @@ public interface MetricProps {
         return new Default(configs, key);
     }
 
+    static MetricProps newDefault(com.megaease.easeagent.plugin.api.config.Config config) {
+        return new Default(
+            config.enabled(),
+            NoNull.of(config.getString(KEY_COMM_APPEND_TYPE), Const.METRIC_DEFAULT_APPEND_TYPE),
+            NoNull.of(config.getString(KEY_COMM_TOPIC), Const.METRIC_DEFAULT_TOPIC)
+        );
+    }
+
     class Default implements MetricProps {
         private volatile boolean enabled = false;
         private volatile String appendType;
@@ -44,6 +54,12 @@ public interface MetricProps {
             ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_ENABLED), configs, Config::getBoolean, v -> this.enabled = v);
             ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_APPEND_TYPE), configs, Config::getString, v -> this.appendType = v);
             ConfigUtils.bindProp(join(METRICS, key, KEY_COMM_TOPIC), configs, Config::getString, v -> this.topic = v);
+        }
+
+        public Default(boolean enabled, String appendType, String topic) {
+            this.enabled = enabled;
+            this.appendType = appendType;
+            this.topic = topic;
         }
 
         @Override
