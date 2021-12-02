@@ -31,7 +31,7 @@ public class FluxHttpServerRequest implements HttpRequest {
 
     @Override
     public Span.Kind kind() {
-        return Span.Kind.CLIENT;
+        return Span.Kind.SERVER;
     }
 
     @Override

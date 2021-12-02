@@ -68,6 +68,7 @@ public class MethodTransformation {
             if (i instanceof InterceptorPluginDecorator) {
                 interceptor = (InterceptorPluginDecorator)i;
                 interceptor.init(interceptor.getConfig(), type, method, methodDescription);
+                interceptor.init(interceptor.getConfig(), uniqueIndex);
             }
         });
 

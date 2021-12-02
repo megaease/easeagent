@@ -88,6 +88,11 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     }
 
     @Override
+    public void init(Config config, int uniqueIndex) {
+        this.interceptor.init(config, uniqueIndex);
+    }
+
+    @Override
     public int order() {
         int pluginOrder = this.plugin.order();
         int interceptorOrder = this.interceptor.order();

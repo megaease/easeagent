@@ -12,7 +12,7 @@ public class AgentGlobalFilterAdvice implements Points {
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
-            .hasClassName("com.megaease.easeagent.plugin.spring.gateway.interceptor.initialize.AgentGlobalFilter")
+            .hasClassName("easeagent.plugin.spring.gateway.interceptor.initialize.AgentGlobalFilter")
             .build();
     }
 

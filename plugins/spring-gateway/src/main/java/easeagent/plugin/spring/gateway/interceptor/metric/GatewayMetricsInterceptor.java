@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -69,11 +70,12 @@ public class GatewayMetricsInterceptor implements Interceptor {
         }
         // async
         Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
-        methodInfo.setRetValue(new AgentMono(mono, methodInfo, context, this::finishCallback));
+        methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
     }
 
-    void finishCallback(MethodInfo methodInfo, Object ctx) {
-        Context context = (Context) ctx;
+    void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
+        ctx.importToCurr();
+        Context context = ctx.getContext();
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         String key = getKey(exchange);
         HttpStatus statusCode = exchange.getResponse().getStatusCode();

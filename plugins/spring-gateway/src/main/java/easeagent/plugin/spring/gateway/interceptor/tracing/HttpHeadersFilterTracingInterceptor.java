@@ -21,11 +21,13 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import easeagent.plugin.spring.gateway.advice.HttpHeadersFilterAdvice;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.HashMap;
@@ -45,9 +47,10 @@ public class HttpHeadersFilterTracingInterceptor implements FirstEnterIntercepto
         if (pCtx == null) {
             return;
         }
-        FluxHttpServerRequest request = new FluxHttpServerRequest(exchange.getRequest());
+        FluxHttpServerRequest request = new HeaderFilterRequest(exchange.getRequest());
 
         ProgressContext pnCtx = pCtx.getContext().nextProgress(request);
+        pnCtx.span().start();
         exchange.getAttributes().put(GatewayCons.CHILD_SPAN_KEY, pnCtx);
         Map<String, String> map = getHeadersFromExchange(exchange);
         map.putAll(retHttpHeaders.toSingleValueMap());
@@ -61,6 +64,7 @@ public class HttpHeadersFilterTracingInterceptor implements FirstEnterIntercepto
                 return;
             }
             FluxHttpServerResponse response = new FluxHttpServerResponse(serverWebExchange, null);
+            p.finish(response);
             HttpUtils.finish(p.span(), response);
         };
         exchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, consumer);
@@ -74,5 +78,16 @@ public class HttpHeadersFilterTracingInterceptor implements FirstEnterIntercepto
             exchange.getAttributes().put(CLIENT_HEADER_ATTR, headers);
         }
         return headers;
+    }
+
+    static class HeaderFilterRequest extends FluxHttpServerRequest {
+        public HeaderFilterRequest(ServerHttpRequest request) {
+            super(request);
+        }
+
+        @Override
+        public Span.Kind kind() {
+            return Span.Kind.CLIENT;
+        }
     }
 }

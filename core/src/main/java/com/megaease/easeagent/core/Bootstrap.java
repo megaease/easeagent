@@ -441,8 +441,8 @@ public class Bootstrap {
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-            LOGGER.debug("Just for Debug-log, onError: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
-            LOGGER.debug("Just for Debug-log, transform ends exceptionally, which is sometimes normal and sometimes there is an error,:", error);
+            LOGGER.debug("Just for Debug-log, transform ends exceptionally, which is sometimes normal and sometimes there is an error: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
+            // LOGGER.debug("Just for Debug-log, transform ends exceptionally, which is sometimes normal and sometimes there is an error,:", error);
         }
 
         @Override

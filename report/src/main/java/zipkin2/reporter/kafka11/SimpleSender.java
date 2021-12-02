@@ -47,7 +47,7 @@ public class SimpleSender extends Sender implements SDKSender {
     @Override
     public Call<Void> sendSpans(List<byte[]> encodedSpans) {
         final byte[] bytes = BytesMessageEncoder.JSON.encode(encodedSpans);
-        LOGGER.info("{}", new String(bytes));
+        LOGGER.info("-{}-", new String(bytes));
         return Call.create(null);
     }
 

@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.enums.Order;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
@@ -66,11 +67,12 @@ public class GatewayServerTracingInterceptor implements Interceptor {
 
         // async
         Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
-        methodInfo.setRetValue(new AgentMono(mono, methodInfo, pCtx, this::finishCallback));
+        methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
     }
 
-    void finishCallback(MethodInfo methodInfo, Object ctx) {
-        ProgressContext pCtx = (ProgressContext) ctx;
+    void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
+        ctx.importToCurr();
+        ProgressContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
         if (consumer != null) {
