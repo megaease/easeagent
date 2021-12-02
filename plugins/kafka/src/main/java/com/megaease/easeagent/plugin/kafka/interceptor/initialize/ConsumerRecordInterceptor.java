@@ -22,9 +22,10 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerRecordAdvice;
 
-@AdviceTo(value = KafkaConsumerRecordAdvice.class)
+@AdviceTo(value = KafkaConsumerRecordAdvice.class, plugin = KafkaPlugin.class)
 public class ConsumerRecordInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {

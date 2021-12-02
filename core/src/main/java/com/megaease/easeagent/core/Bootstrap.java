@@ -117,6 +117,7 @@ public class Bootstrap {
             LOGGER.info("start agent http server on port:{}", port);
         }
         MiddlewareConfigProcessor.INSTANCE.init();
+        com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor.INSTANCE.init();
         AgentBuilder builder = getAgentBuilder(conf, false);
 
         // load plugins

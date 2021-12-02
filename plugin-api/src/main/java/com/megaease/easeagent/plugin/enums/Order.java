@@ -25,6 +25,7 @@ package com.megaease.easeagent.plugin.enums;
 public enum Order {
     FOUNDATION(0, "foundation"),
     HIGHEST(10, "highest"),
+    REDIRECT(19, "redirect"),
     HIGH(20, "high"),
     INIT(21, "init"),
     TRACING(100, "tracing"),

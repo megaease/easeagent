@@ -59,8 +59,6 @@ import com.megaease.easeagent.sniffer.elasticsearch.interceptor.SpringElasticsea
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetPropertyInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaConsumerConfigConstructInterceptor;
-import com.megaease.easeagent.sniffer.kafka.v2d3.interceptor.KafkaProducerConfigConstructInterceptor;
 import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisClientConstructInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitPropertiesSetPropertyInterceptor;
@@ -308,18 +306,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .addInterceptor(new RedisPropertiesClusterSetNodesInterceptor());
     }
 
-    @Injection.Bean("supplier4KafkaConsumerConfigConstructor")
-    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaConsumerConfigConstructor() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new KafkaConsumerConfigConstructInterceptor());
-    }
-
-    @Injection.Bean("supplier4KafkaProducerConfigConstructor")
-    public Supplier<AgentInterceptorChain.Builder> supplier4KafkaProducerConfigConstructor() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new KafkaProducerConfigConstructInterceptor());
-    }
-
 
     /*
     @Injection.Bean("supplier4RabbitMqBasicPublish")
@@ -410,6 +396,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                 ;
         };
     }
+
     @Injection.Bean("supplier4OnApplicationEvent")
     public Supplier<AgentInterceptorChain.Builder> supplier4OnApplicationEvent() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()

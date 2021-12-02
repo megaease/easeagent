@@ -23,10 +23,12 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 
 public class MetricCallback extends AsyncCallback {
     private final long start;
+    private final String topic;
     private final KafkaMetric kafkaMetric;
 
-    public MetricCallback(Callback delegate, KafkaMetric kafkaMetric) {
+    public MetricCallback(Callback delegate, String topic, KafkaMetric kafkaMetric) {
         super(delegate, isAsync(delegate));
+        this.topic = topic;
         this.kafkaMetric = kafkaMetric;
         this.start = System.currentTimeMillis();
     }
@@ -34,9 +36,9 @@ public class MetricCallback extends AsyncCallback {
     @Override
     public void onCompletion(RecordMetadata metadata, Exception exception) {
         try {
-            this.kafkaMetric.producerStop(start, metadata.topic());
+            this.kafkaMetric.producerStop(start, topic);
             if (exception != null) {
-                this.kafkaMetric.errorProducer(metadata.topic());
+                this.kafkaMetric.errorProducer(topic);
             }
         } finally {
             if (this.delegate != null) {

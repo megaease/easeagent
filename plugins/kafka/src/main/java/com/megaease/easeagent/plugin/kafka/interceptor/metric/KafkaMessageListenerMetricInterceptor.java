@@ -22,11 +22,12 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
+import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaMessageListenerAdvice;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-@AdviceTo(value = KafkaMessageListenerAdvice.class)
+@AdviceTo(value = KafkaMessageListenerAdvice.class, plugin = KafkaPlugin.class)
 public class KafkaMessageListenerMetricInterceptor implements FirstEnterInterceptor {
     private static final Object START = new Object();
     private static KafkaMetric kafkaMetric;

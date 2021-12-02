@@ -24,12 +24,13 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
-@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "poll")
+@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "poll", plugin = KafkaPlugin.class)
 public class KafkaConsumerMetricInterceptor implements FirstEnterInterceptor {
     private static KafkaMetric kafkaMetric;
 

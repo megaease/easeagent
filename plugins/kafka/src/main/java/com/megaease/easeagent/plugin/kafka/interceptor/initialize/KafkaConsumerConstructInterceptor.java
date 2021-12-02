@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
@@ -30,7 +31,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import java.util.List;
 import java.util.Map;
 
-@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "constructor")
+@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "constructor", plugin = KafkaPlugin.class)
 public class KafkaConsumerConstructInterceptor implements FirstEnterInterceptor {
 
     @Override
