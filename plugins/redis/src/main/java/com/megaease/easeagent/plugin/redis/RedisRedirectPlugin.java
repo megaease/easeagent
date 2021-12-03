@@ -15,12 +15,20 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.redis.interceptor.initialize;
+package com.megaease.easeagent.plugin.redis;
 
-import com.megaease.easeagent.plugin.annotation.AdviceTo;
-import com.megaease.easeagent.plugin.redis.RedisPlugin;
-import com.megaease.easeagent.plugin.redis.advice.RedisClusterClientAdvice;
+import com.megaease.easeagent.plugin.AgentPlugin;
 
-@AdviceTo(value = RedisClusterClientAdvice.class, qualifier = "default", plugin = RedisPlugin.class)
-public class RedisClusterClientInterceptor extends CommonRedisClientInterceptor {
+public class RedisRedirectPlugin implements AgentPlugin {
+
+    @Override
+    public String getName() {
+        return "redis";
+    }
+
+    @Override
+    public String getDomain() {
+        return "observability";
+    }
+
 }

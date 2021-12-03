@@ -21,10 +21,11 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.redis.RedisPlugin;
 import com.megaease.easeagent.plugin.redis.advice.RedisChannelWriterAdvice;
 import com.megaease.easeagent.plugin.redis.interceptor.RedisClientUtils;
 
-@AdviceTo(value = RedisChannelWriterAdvice.class, qualifier = "default")
+@AdviceTo(value = RedisChannelWriterAdvice.class, qualifier = "default", plugin = RedisPlugin.class)
 public class LettuceTracingInterceptor extends CommonRedisTracingInterceptor {
     @Override
     public void doTraceBefore(MethodInfo methodInfo, Context context) {

@@ -59,7 +59,6 @@ import com.megaease.easeagent.sniffer.elasticsearch.interceptor.SpringElasticsea
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetPropertyInterceptor;
-import com.megaease.easeagent.sniffer.lettuce.v5.interceptor.RedisClientConstructInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitPropertiesSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.redis.interceptor.RedisPropertiesClusterSetNodesInterceptor;
@@ -286,12 +285,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4GatewayHeaders() {
         return () -> new DefaultAgentInterceptorChain.Builder()
             .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing));
-    }
-
-    @Injection.Bean("supplier4RedisClientConstruct")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RedisClientConstruct() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new RedisClientConstructInterceptor());
     }
 
     @Injection.Bean("supplier4RedisPropertiesSetProperty")

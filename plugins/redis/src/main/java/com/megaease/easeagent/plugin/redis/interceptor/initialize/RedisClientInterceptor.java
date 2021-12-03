@@ -18,8 +18,9 @@
 package com.megaease.easeagent.plugin.redis.interceptor.initialize;
 
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
-import com.megaease.easeagent.plugin.redis.advice.RedisClientAdvice;
+import com.megaease.easeagent.plugin.redis.RedisPlugin;
+import com.megaease.easeagent.plugin.redis.advice.LettuceRedisClientAdvice;
 
-@AdviceTo(value = RedisClientAdvice.class, qualifier = "default")
+@AdviceTo(value = LettuceRedisClientAdvice.class, qualifier = "default", plugin = RedisPlugin.class)
 public class RedisClientInterceptor extends CommonRedisClientInterceptor {
 }

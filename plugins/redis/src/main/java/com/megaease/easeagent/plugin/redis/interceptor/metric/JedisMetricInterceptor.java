@@ -20,9 +20,10 @@ package com.megaease.easeagent.plugin.redis.interceptor.metric;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.redis.RedisPlugin;
 import com.megaease.easeagent.plugin.redis.advice.JedisAdvice;
 
-@AdviceTo(value = JedisAdvice.class, qualifier = "default")
+@AdviceTo(value = JedisAdvice.class, qualifier = "default", plugin = RedisPlugin.class)
 public class JedisMetricInterceptor extends CommonRedisMetricInterceptor {
     @Override
     public String getKey(MethodInfo methodInfo, Context context) {

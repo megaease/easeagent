@@ -21,9 +21,10 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.redis.RedisPlugin;
 import com.megaease.easeagent.plugin.redis.advice.StatefulRedisConnectionAdvice;
 
-@AdviceTo(value = StatefulRedisConnectionAdvice.class, qualifier = "constructor")
+@AdviceTo(value = StatefulRedisConnectionAdvice.class, qualifier = "constructor", plugin = RedisPlugin.class)
 public class StatefulRedisConnectionInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
