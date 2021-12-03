@@ -27,6 +27,7 @@ import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
@@ -35,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-@AdviceTo(RabbitMqConsumerAdvice.class)
+@AdviceTo(value = RabbitMqConsumerAdvice.class, plugin = RabbitMqPlugin.class)
 public class RabbitMqConsumerTracingInterceptor implements Interceptor {
     private static final String SPAN_CONTEXT_KEY = RabbitMqConsumerTracingInterceptor.class.getName() + "-Span";
 

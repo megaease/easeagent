@@ -32,6 +32,7 @@ import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqConsumerMetric;
+import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
 import com.megaease.easeagent.plugin.rabbitmq.spring.interceptor.RabbitMqOnMessageMetricInterceptor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 import com.rabbitmq.client.Envelope;
@@ -39,7 +40,7 @@ import com.rabbitmq.client.Envelope;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@AdviceTo(RabbitMqConsumerAdvice.class)
+@AdviceTo(value = RabbitMqConsumerAdvice.class, plugin = RabbitMqPlugin.class)
 public class RabbitMqConsumerMetricInterceptor implements Interceptor {
     private static final Object START = new Object();
     private static volatile NameFactory NAME_FACTORY = null;

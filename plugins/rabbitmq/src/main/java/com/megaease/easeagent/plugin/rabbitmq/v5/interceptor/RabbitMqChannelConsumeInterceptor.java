@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -31,7 +32,7 @@ import com.rabbitmq.client.Consumer;
 import java.net.InetAddress;
 
 @SuppressWarnings("unused")
-@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicConsume")
+@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicConsume", plugin = RabbitMqPlugin.class)
 public class RabbitMqChannelConsumeInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {

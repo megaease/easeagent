@@ -37,8 +37,8 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Generate.Advice
-@Injection.Provider(Provider.class)
+// @Generate.Advice
+// @Injection.Provider(Provider.class)
 public abstract class HikariDataSourceAdvice implements Transformation {
     @Override
     public <T extends Definition> T define(Definition<T> def) {

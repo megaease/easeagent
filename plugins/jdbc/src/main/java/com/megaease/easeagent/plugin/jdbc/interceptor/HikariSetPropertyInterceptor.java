@@ -21,12 +21,14 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.redirect.MiddlewareConfigProcessor;
-import com.megaease.easeagent.plugin.api.redirect.ResourceConfig;
+import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.jdbc.JdbcRedirectPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.HikariDataSourceAdvice;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
-@AdviceTo(HikariDataSourceAdvice.class)
+@AdviceTo(value = HikariDataSourceAdvice.class, plugin = JdbcRedirectPlugin.class)
 public class HikariSetPropertyInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
@@ -42,5 +44,10 @@ public class HikariSetPropertyInterceptor implements Interceptor {
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
             methodInfo.getArgs()[0] = cnf.getPassword();
         }
+    }
+
+    @Override
+    public int order() {
+        return Order.REDIRECT.getOrder();
     }
 }

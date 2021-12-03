@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -31,7 +32,7 @@ import com.rabbitmq.client.MessageProperties;
 
 import java.net.InetAddress;
 
-@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish")
+@AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish", plugin = RabbitMqPlugin.class)
 public class RabbitMqChannelPublishInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {

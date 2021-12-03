@@ -25,13 +25,14 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 import com.rabbitmq.client.AMQP;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@AdviceTo(RabbitMqConsumerAdvice.class)
+@AdviceTo(value = RabbitMqConsumerAdvice.class, plugin = RabbitMqPlugin.class)
 public class RabbitMqConsumerHandleDeliveryInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
