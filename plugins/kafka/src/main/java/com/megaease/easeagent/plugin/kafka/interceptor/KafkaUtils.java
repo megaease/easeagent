@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.kafka.interceptor;
 
 import com.megaease.easeagent.plugin.api.Context;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 
@@ -57,5 +58,9 @@ public class KafkaUtils {
             }
         }
         return result;
+    }
+
+    public static String getTopic(ProducerRecord producerRecord) {
+        return producerRecord.topic();
     }
 }

@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
@@ -34,7 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "poll")
+@AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "poll", plugin = KafkaPlugin.class)
 public class KafkaConsumerTracingInterceptor implements FirstEnterInterceptor {
     private static final String remoteServiceName = "kafka";
     boolean singleRootSpanOnReceiveBatch = true;

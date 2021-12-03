@@ -23,12 +23,14 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.AsyncCallback;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-@AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend")
+@AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend", plugin = KafkaPlugin.class)
 public class KafkaProducerMetricInterceptor implements FirstEnterInterceptor {
     private static volatile KafkaMetric kafkaMetric;
 
@@ -40,7 +42,7 @@ public class KafkaProducerMetricInterceptor implements FirstEnterInterceptor {
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
-        MetricCallback metricCallback = new MetricCallback(AsyncCallback.callback(methodInfo), kafkaMetric);
+        MetricCallback metricCallback = new MetricCallback(AsyncCallback.callback(methodInfo), KafkaUtils.getTopic((ProducerRecord) methodInfo.getArgs()[0]), kafkaMetric);
         methodInfo.changeArg(1, metricCallback);
     }
 

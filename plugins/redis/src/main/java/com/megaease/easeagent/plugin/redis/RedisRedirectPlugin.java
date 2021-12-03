@@ -15,7 +15,20 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.sniffer.kafka.v2d3.interceptor;
+package com.megaease.easeagent.plugin.redis;
 
-public class KafkaConsumerConfigConstructInterceptor extends KafkaAbstractConfigConstructInterceptor {
+import com.megaease.easeagent.plugin.AgentPlugin;
+
+public class RedisRedirectPlugin implements AgentPlugin {
+
+    @Override
+    public String getName() {
+        return "redis";
+    }
+
+    @Override
+    public String getDomain() {
+        return "observability";
+    }
+
 }

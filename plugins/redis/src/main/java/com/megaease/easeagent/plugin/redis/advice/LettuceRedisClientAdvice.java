@@ -26,7 +26,7 @@ import io.lettuce.core.RedisClient;
 
 import java.util.Set;
 
-public class RedisClientAdvice implements Points {
+public class LettuceRedisClientAdvice implements Points {
     //return def.type(hasSuperType(named("io.lettuce.core.RedisClient"))
     //                .or(named("io.lettuce.core.RedisClient"))
     //        )
@@ -35,6 +35,7 @@ public class RedisClientAdvice implements Points {
     //                                .or(named("connectSentinelAsync"))).and(isPrivate())
     //                        )
     //                )
+    //                .transform(objConstruct(isConstructor()))
     //                .end()
     //                ;
     @Override
@@ -54,6 +55,9 @@ public class RedisClientAdvice implements Points {
             .match(named("connectStandaloneAsync")
                 .or(named("connectPubSubAsync"))
                 .or(named("connectSentinelAsync")))
+            .match(MethodMatcher.builder().named("<init>")
+                .qualifier("constructor")
+                .build())
             .build();
     }
 }
