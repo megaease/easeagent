@@ -80,6 +80,10 @@ public class MethodInfo {
         return this.args;
     }
 
+    public int argSize() {
+        return this.args == null ? 0 : this.args.length;
+    }
+
     public Throwable getThrowable() {
         return this.throwable;
     }

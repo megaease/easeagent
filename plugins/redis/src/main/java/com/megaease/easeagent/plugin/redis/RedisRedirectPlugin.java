@@ -28,7 +28,7 @@ public class RedisRedirectPlugin implements AgentPlugin {
 
     @Override
     public String getDomain() {
-        return "observability";
+        return "integrability";
     }
 
 }

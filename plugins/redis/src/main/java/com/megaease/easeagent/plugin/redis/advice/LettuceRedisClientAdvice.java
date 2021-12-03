@@ -22,9 +22,10 @@ import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
-import io.lettuce.core.RedisClient;
 
 import java.util.Set;
+
+import static com.megaease.easeagent.plugin.tools.matcher.MethodMatcherUtils.constructor;
 
 public class LettuceRedisClientAdvice implements Points {
     //return def.type(hasSuperType(named("io.lettuce.core.RedisClient"))
@@ -55,9 +56,7 @@ public class LettuceRedisClientAdvice implements Points {
             .match(named("connectStandaloneAsync")
                 .or(named("connectPubSubAsync"))
                 .or(named("connectSentinelAsync")))
-            .match(MethodMatcher.builder().named("<init>")
-                .qualifier("constructor")
-                .build())
+            .match(constructor())
             .build();
     }
 }

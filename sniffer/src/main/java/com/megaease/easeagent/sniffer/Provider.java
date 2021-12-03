@@ -61,8 +61,6 @@ import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInte
 import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitPropertiesSetPropertyInterceptor;
-import com.megaease.easeagent.sniffer.redis.interceptor.RedisPropertiesClusterSetNodesInterceptor;
-import com.megaease.easeagent.sniffer.redis.interceptor.RedisPropertiesSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
@@ -285,18 +283,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4GatewayHeaders() {
         return () -> new DefaultAgentInterceptorChain.Builder()
             .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing));
-    }
-
-    @Injection.Bean("supplier4RedisPropertiesSetProperty")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RedisPropertiesSetProperty() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new RedisPropertiesSetPropertyInterceptor());
-    }
-
-    @Injection.Bean("supplier4RedisPropertiesClusterSetNodes")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RedisPropertiesClusterSetNodes() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new RedisPropertiesClusterSetNodesInterceptor());
     }
 
 
