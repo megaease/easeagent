@@ -5,6 +5,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -17,6 +18,10 @@ import java.net.URI;
 
 @AdviceTo(value = RabbitMqPropertyAdvice.class, plugin = RabbitMqRedirectPlugin.class)
 public class RabbitMqPropertyInterceptor implements Interceptor {
+    @Override
+    public void init(Config config, int uniqueIndex) {
+    }
+
     @SneakyThrows
     @Override
     public void before(MethodInfo methodInfo, Context context) {
@@ -44,6 +49,11 @@ public class RabbitMqPropertyInterceptor implements Interceptor {
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
             methodInfo.getArgs()[0] = cnf.getPassword();
         }
+    }
+
+    @Override
+    public String getName() {
+        return Order.REDIRECT.getName();
     }
 
     @Override

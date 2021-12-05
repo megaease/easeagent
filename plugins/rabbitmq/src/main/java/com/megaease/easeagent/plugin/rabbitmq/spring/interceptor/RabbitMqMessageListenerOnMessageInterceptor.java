@@ -18,20 +18,20 @@
 package com.megaease.easeagent.plugin.rabbitmq.spring.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.rabbitmq.spring.RabbitMqMessageListenerAdvice;
 import org.springframework.amqp.core.Message;
 
 import java.util.List;
-import java.util.Map;
 
 @AdviceTo(RabbitMqMessageListenerAdvice.class)
 public class RabbitMqMessageListenerOnMessageInterceptor implements Interceptor {
     @Override
+    @SuppressWarnings("unchecked")
     public void before(MethodInfo methodInfo, Context context) {
         Message message;
         if (methodInfo.getArgs()[0] instanceof List) {

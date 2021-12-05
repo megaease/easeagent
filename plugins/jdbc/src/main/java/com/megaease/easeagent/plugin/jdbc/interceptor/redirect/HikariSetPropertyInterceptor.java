@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.jdbc.interceptor;
+package com.megaease.easeagent.plugin.jdbc.interceptor.redirect;
 
 import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
@@ -44,6 +44,11 @@ public class HikariSetPropertyInterceptor implements Interceptor {
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
             methodInfo.getArgs()[0] = cnf.getPassword();
         }
+    }
+
+    @Override
+    public String getName() {
+        return Order.REDIRECT.getName();
     }
 
     @Override
