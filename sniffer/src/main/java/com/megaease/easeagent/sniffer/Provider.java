@@ -55,7 +55,6 @@ import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
-import com.megaease.easeagent.sniffer.elasticsearch.interceptor.SpringElasticsearchInterceptor;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
 import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetPropertyInterceptor;
@@ -251,13 +250,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     public Supplier<AgentInterceptorChain.Builder> supplier4HikariSetJdbcUrl() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
             .addInterceptor(new HikariSetPropertyInterceptor());
-
-    }
-
-    @Injection.Bean("supplier4SpringElasticsearchSetProperty")
-    public Supplier<AgentInterceptorChain.Builder> supplier4SpringElasticsearchSetProperty() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new SpringElasticsearchInterceptor());
 
     }
 
