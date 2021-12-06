@@ -26,6 +26,7 @@
         <module>servicename</module>
         <module>httpclient</module>
         <module>okhttp</module>
+        <module>elasticsearch</module>
     </modules>
 
     <build>

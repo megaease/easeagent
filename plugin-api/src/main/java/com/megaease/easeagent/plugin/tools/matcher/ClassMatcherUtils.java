@@ -25,4 +25,9 @@ public class ClassMatcherUtils {
         return ClassMatcher.builder().hasClassName(name)
             .build();
     }
+
+    public static IClassMatcher hasSuperType(String name) {
+        return ClassMatcher.builder().hasSuperClass(name)
+            .build();
+    }
 }

@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.httpservlet.utils;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.httpservlet.interceptor.DoFilterTraceInterceptor;
+import com.megaease.easeagent.plugin.utils.ClassUtils;
 import lombok.SneakyThrows;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,14 +39,16 @@ public class ServletUtils {
 
     static {
         String pattern = null;
-        try {
-            Thread.currentThread().getContextClassLoader().loadClass(HANDLER_MAPPING_CLASS);
+        if (ClassUtils.hasClass(HANDLER_MAPPING_CLASS)) {
             pattern = SpringWebUtils.getBestMatchingPatternAttribute();
-        } catch (ClassNotFoundException e) {
+        } else {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("class<{}> not found ", HANDLER_MAPPING_CLASS);
+            }
             pattern = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
-            LOGGER.info("{} use default", e.getMessage());
         }
         BEST_MATCHING_PATTERN_ATTRIBUTE = pattern;
+
     }
 
     public static String matchUrlBySpringWeb(HttpServletRequest request) {

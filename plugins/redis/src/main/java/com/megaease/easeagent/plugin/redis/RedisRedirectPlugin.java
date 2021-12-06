@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.redis;
 import com.megaease.easeagent.plugin.AgentPlugin;
 
 public class RedisRedirectPlugin implements AgentPlugin {
-
     @Override
     public String getName() {
         return "redis";
@@ -28,7 +27,7 @@ public class RedisRedirectPlugin implements AgentPlugin {
 
     @Override
     public String getDomain() {
-        return "observability";
+        return "integrability";
     }
 
 }
