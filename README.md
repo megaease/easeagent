@@ -114,7 +114,7 @@ observability.tracings.output.target=zipkin
 # send data to zipkin server
 observability.tracings.output.target.zipkinUrl=http://localhost:9411/api/v2/spans
 ```
-if you want to watch tracing information in console, comment out the outputServer configuration and set target to 'system':
+If you want to watch tracing information in console, comment out the outputServer configuration and set target to 'system':
 ```
 # observability.outputServer.bootstrapServer=127.0.0.1:9092
 # observability.outputServer.timeout=10000
@@ -136,12 +136,12 @@ If you want to print all information to console, then you can use this configura
 
 ### Step 4
 Run the demo application with EaseAgent.
+```
 # Open another console
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
 
 # Open another console
-```
 $ curl http://127.0.0.1:18888/web_client
 
 ```
@@ -151,7 +151,7 @@ Adding the following configuration in `prometheus.yml`
 ```
   - job_name: 'spring-web-service'
     static_configs:
-    - targets: ['localhost:9900']
+      - targets: ['localhost:9900']
     metrics_path: "/prometheus/metrics"
 
 ```
