@@ -141,9 +141,6 @@ Run the demo application with EaseAgent.
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
 
-# Open another console
-$ curl http://127.0.0.1:18888/web_client
-
 ```
 
 ### Step 5
@@ -158,14 +155,18 @@ Adding the following configuration in `prometheus.yml`
 Start Prometheus
 ```
 $ ./prometheus --config.file=prometheus.yml
+
+# Open another console, run curl to access the test url for serveral times.
+$ curl http://127.0.0.1:18888/web_client
+
 ```
 
 ### Step 6
 Open Browser to visit [http://localhost:9090](http://localhost:9090).
 
-After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search ``. You will see as following.
+After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search `_00GET__web_client`. You will see as following.
 
-![image](./doc/images/prometheus-demo-1.png)
+![image](./doc/images/prometheus-demo-2.png)
 
 ## User Manual
 For more information, please refer to the [User Manual](./doc/user-manual.md).
