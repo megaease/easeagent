@@ -76,7 +76,7 @@ $ curl -Lk https://github.com/megaease/easeagent/releases/download/{tag}/easeage
 Download EaseAgent with `git clone https://github.com/megaease/easeagent.git`.
 ```
 $ cd easeagent
-$ mvn clean package -am -pl build
+$ mvn clean package 
 ```
 The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
 
@@ -86,11 +86,11 @@ The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencie
 ### Step 1
 Extracting the default configuration file.
 ```
-$ jar xf easeagent.jar agent.properties log4j2.xml
+$ jar xf easeagent.jar agent.properties easeagent-log4j2.xml
 ```
 
 ### Step 2
-* Modify service name, default configuration is unknown-service.
+* Modify service name, default configuration is demo-service.
 ```
 name=[app-name]
 ```
@@ -114,63 +114,44 @@ observability.tracings.output.target=zipkin
 # send data to zipkin server
 observability.tracings.output.target.zipkinUrl=http://localhost:9411/api/v2/spans
 ```
+if you want to watch tracing information in console, comment out the outputServer configuration and set target to 'system':
+```
+# observability.outputServer.bootstrapServer=127.0.0.1:9092
+# observability.outputServer.timeout=10000
+# observability.outputServer.enabled=true
+
+observability.tracings.output.target=system
+
+```
 
 ### Step 3
 Building the demo application.
 ```
-$ git clone https://github.com/akwei/spring-petclinic-microservices.git
-$ cd spring-petclinic-microservices
-$ mvn -DskipTests=true package
+$ git clone https://github.com/megaease/easeagent-test-demo.git
+$ cd spring-web
+$ mvn clean package
 ```
+There is an agent.propertites configuration file in the demo directory, which is configured to print all information to the console.
+If you want to print all information to console, then you can use this configuration file.
 
 ### Step 4
 Run the demo application with EaseAgent.
+# Open another console
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
+
+# Open another console
 ```
-# Open another console
-$ java -jar spring-petclinic-config-server/target/spring-petclinic-config-server-2.4.2.jar
-
-# Open another console
-$ java -jar spring-petclinic-discovery-server/target/spring-petclinic-discovery-server-2.4.2.jar
-
-# Open another console
-$ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar spring-petclinic-vets-service/target/spring-petclinic-vets-service-2.4.2.jar
-
-# Open another console
-$ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9901 -jar spring-petclinic-visits-service/target/spring-petclinic-visits-service-2.4.2.jar
-
-# Open another console
-$ export EASE_AGENT_PATH=/[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9902 -jar spring-petclinic-customers-service/target/spring-petclinic-customers-service-2.4.2.jar
-
-# Open another console
-$ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9903 -jar spring-petclinic-api-gateway/target/spring-petclinic-api-gateway-2.4.2.jar
+$ curl http://127.0.0.1:18888/web_client
 
 ```
 
 ### Step 5
 Adding the following configuration in `prometheus.yml`
 ```
-  - job_name: 'petclinic-vets-service'
+  - job_name: 'spring-web-service'
     static_configs:
     - targets: ['localhost:9900']
-    metrics_path: "/prometheus/metrics"
-
-  - job_name: 'petclinic-visits-service'
-    static_configs:
-    - targets: ['localhost:9901']
-    metrics_path: "/prometheus/metrics"
-
-  - job_name: 'petclinic-customers-service'
-    static_configs:
-    - targets: ['localhost:9902']
-    metrics_path: "/prometheus/metrics"
-
-  - job_name: 'petclinic-api-gateway'
-    static_configs:
-    - targets: ['localhost:9903']
     metrics_path: "/prometheus/metrics"
 
 ```
@@ -180,9 +161,9 @@ $ ./prometheus --config.file=prometheus.yml
 ```
 
 ### Step 6
-Open Browser to visit [http://localhost:8080](http://localhost:8080).
+Open Browser to visit [http://localhost:9090](http://localhost:9090).
 
-After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search `_00GET__owners`. You will see as following.
+After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search ``. You will see as following.
 
 ![image](./doc/images/prometheus-demo-1.png)
 

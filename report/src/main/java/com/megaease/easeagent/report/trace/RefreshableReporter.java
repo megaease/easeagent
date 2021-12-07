@@ -81,6 +81,7 @@ public class RefreshableReporter<S> implements Reporter<S> {
                             .encoding(Encoding.JSON)
                             .build());
             asyncReporter.setSender(sender);
+            LOGGER.info("Set async reporter to Kafka sender");
 
         } else {
             asyncReporter.setSender(new SimpleSender());
