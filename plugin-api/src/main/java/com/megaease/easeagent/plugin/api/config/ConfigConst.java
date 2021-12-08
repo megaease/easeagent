@@ -37,6 +37,10 @@ public interface ConfigConst {
         return String.join(DELIMITER, texts);
     }
 
+    static String[] split(String text) {
+        return text.split("\\" + DELIMITER);
+    }
+
     interface GlobalCanaryLabels {
         String SERVICE_HEADERS = join(GLOBAL_CANARY_LABELS, "serviceHeaders");
 

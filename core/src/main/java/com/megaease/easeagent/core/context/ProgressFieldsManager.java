@@ -21,22 +21,51 @@ import com.megaease.easeagent.config.ChangeItem;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 public class ProgressFieldsManager {
     public static void init(Configs configs) {
-        BiFunction<String, String, String> changeListener = ProgressFields.changeListener();
-        final String key1 = ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG;
-        changeListener.apply(key1, configs.getString(key1));
-        final String key2 = ProgressFields.EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG;
-        changeListener.apply(key2, configs.getString(key2));
+        BiFunction<String, Map<String, String>, String> changeListener = ProgressFields.changeListener();
+        Change change = new Change(changeListener);
+        for (Map.Entry<String, String> entry : configs.getConfigs().entrySet()) {
+            change.put(entry.getKey(), entry.getValue());
+        }
+        change.flush();
         configs.addChangeListener(list -> {
+            Change c = new Change(changeListener);
             for (ChangeItem changeItem : list) {
-                String fullName = changeItem.getFullName();
-                if (key1.equals(fullName) || key2.equals(fullName)) {
-                    changeListener.apply(fullName, changeItem.getNewValue());
-                }
+                c.put(changeItem.getFullName(), changeItem.getNewValue());
             }
+            c.flush();
         });
+    }
+
+    static class Change {
+        private final BiFunction<String, Map<String, String>, String> changeListener;
+        Map<String, String> penetration = new HashMap<>();
+        Map<String, String> responseHoldTag = new HashMap<>();
+
+        public Change(BiFunction<String, Map<String, String>, String> changeListener) {
+            this.changeListener = changeListener;
+        }
+
+        public void put(String key, String value) {
+            if (ProgressFields.isPenetrationKey(key)) {
+                penetration.put(key, value);
+            } else if (ProgressFields.isResponseHoldTagKey(key)) {
+                responseHoldTag.put(key, value);
+            }
+        }
+
+        public void flush() {
+            if (!penetration.isEmpty()) {
+                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG, penetration);
+            }
+            if (!responseHoldTag.isEmpty()) {
+                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG, penetration);
+            }
+        }
     }
 }

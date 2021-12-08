@@ -154,8 +154,8 @@ public class SessionContext implements InitializeContext {
     @Override
     public ProgressContext importProgress(Request request) {
         ProgressContext progressContext = tracing.importProgress(request);
-        String[] fields = ProgressFields.getPenetrationFields();
-        if (ProgressFields.isEmpty(fields)) {
+        Set<String> fields = ProgressFields.getPenetrationFields();
+        if (fields.isEmpty()) {
             return progressContext;
         }
         for (String field : fields) {
@@ -261,7 +261,7 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public boolean isNecessaryKeys(String key) {
-        return tracing.propagationKeys().contains(key) || ProgressFields.getPenetrationFieldsSet().contains(key);
+        return tracing.propagationKeys().contains(key) || ProgressFields.getPenetrationFields().contains(key);
     }
 
     @Override
@@ -280,8 +280,8 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public void injectPenetrationFields(Setter setter) {
-        String[] fields = ProgressFields.getPenetrationFields();
-        if (ProgressFields.isEmpty(fields)) {
+        Set<String> fields = ProgressFields.getPenetrationFields();
+        if (fields.isEmpty()) {
             return;
         }
         for (String field : fields) {
