@@ -50,7 +50,7 @@ EaseAgent provides dedicated parameters for controlling metrics and tracing coll
 ### Getting the configuration file
 You may extract default configuration from the JAR file or create new properties from a blank file.
 ```
-$ jar xf easeagent.jar agent.properties log4j2.xml
+$ jar xf easeagent.jar agent.properties easeagent-log4j2.xml
 ```
 Run the user application with EaseAgent
 ```
@@ -188,7 +188,7 @@ When Internal HTTP Server is enabled, User can use Prometheus to collect metrics
 ```
   - job_name: 'user-app'
     static_configs:
-    - targets: ['localhost:9900']
+      - targets: ['localhost:9900']
     metrics_path: "/prometheus/metrics"
 ```
 

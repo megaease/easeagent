@@ -26,6 +26,7 @@ import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.common.DatabaseInfo;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
@@ -36,11 +37,11 @@ import com.megaease.easeagent.plugin.utils.common.ExceptionUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.sql.Connection;
-// import java.sql.Statement;
 
-@AdviceTo(value = JdbcStatementAdvice.class)
+@AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcTracingPlugin.class)
 public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
     private final static Logger log = EaseAgent.getLogger(JdbcStmTracingInterceptor.class);
+    private final static String SPAN_KEY = JdbcStmTracingInterceptor.class.getName() + "-SPAN";
 
     public static final String SPAN_SQL_QUERY_TAG_NAME = "sql";
     public static final String SPAN_ERROR_TAG_NAME = "error";
@@ -83,12 +84,12 @@ public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
             span.remoteIpAndPort(databaseInfo.getHost(), databaseInfo.getPort());
         }
         span.start();
-        ContextUtils.setToContext(context, "span", span);
+        context.put(SPAN_KEY, span);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        Span span = ContextUtils.getFromContext(context, "span");
+        Span span = context.get(SPAN_KEY);
         if (methodInfo.getThrowable() != null) {
             span.tag(SPAN_ERROR_TAG_NAME, ExceptionUtil.getExceptionMessage(methodInfo.getThrowable()));
         }

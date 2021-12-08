@@ -24,7 +24,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
-import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
+import com.megaease.easeagent.plugin.jdbc.JdbcConnectionMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
@@ -32,7 +32,7 @@ import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@AdviceTo(value = JdbcDataSourceAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
+@AdviceTo(value = JdbcDataSourceAdvice.class, plugin = JdbcConnectionMetricPlugin.class)
 public class JdbcDataSourceMetricInterceptor implements FirstEnterInterceptor {
     private static JdbcMetric metric;
     public static final String ERR_CON_METRIC_KEY = "err-con";

@@ -29,7 +29,6 @@ import java.util.function.Consumer;
 public class MD5ReportConsumer  implements Consumer<Map<String, String>> {
     private final Config config;
     private static Reporter reporter;
-    private static final String ENABLE_KEY = "observability.metrics.md5Dictionary.enabled";
 
     public MD5ReportConsumer(Config config) {
         this.config = config;
@@ -38,6 +37,9 @@ public class MD5ReportConsumer  implements Consumer<Map<String, String>> {
 
     @Override
     public void accept(Map<String, String> map) {
+        if (!this.config.enabled()) {
+            return;
+        }
         for (Map.Entry<String, String> entry : map.entrySet()) {
             MD5DictionaryItem item = MD5DictionaryItem.builder()
                 .timestamp(System.currentTimeMillis())
