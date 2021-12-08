@@ -12,15 +12,6 @@
         - [Tracing](#tracing)
         - [Redirect](#redirect)
   - [Logging](#logging)
-    - [HTTP Reqeust Metric](#http-reqeust-metric)
-    - [JDBC SQL Metric](#jdbc-sql-metric)
-    - [JDBC Connection Metric](#jdbc-connection-metric)
-    - [RabbitMQ Metric](#rabbitmq-metric)
-    - [Kafka Metric](#kafka-metric)
-    - [Redis Metric](#redis-metric)
-    - [JVM GC Metric](#jvm-gc-metric)
-    - [JVM Memory Metric](#jvm-memory-metric)
-    - [SQL MD5Dictionary](#sql-md5dictionary)
   - [Prometheus Support](#prometheus-support)
   - [Health Check and Readiness Check Endpoint](#health-check-and-readiness-check-endpoint)
   - [Tracing](#tracing-1)
@@ -142,7 +133,7 @@ rabbitmq        | `rabbitmq`        | RabbitMQ Metirc
 jvmGc           | `jvmGc`           | JVM GC Metirc
 JVM Memory      | `jvmMemory`       | JVM Memory Metric
 
-### Tracing
+#### Tracing
 Key| Default Value | Description |
 ---| ---| ---|
 `observability.tracings.enabled` | true | Enable all collection of tracing logs. `false`: Disable all collection of tracing logs. |
@@ -159,6 +150,28 @@ Key| Default Value | Description |
 `observability.tracings.jdbc.enabled` | true | Enable collection of `JDBC` tracing logs. `false`: Disable collecting. |
 `observability.tracings.redis.enabled` | true | Enable collection of tracing logs(`Jedis`、`Lettuce`). `false`: Disable collecting. |
 `observability.tracings.rabbit.enabled` | true | Enable collection of `RabbitMQ` tracing logs. `false`: Disable collecting. |
+
+
+#### Redirect
+Redirection feature combined with `Easeload` to direct traffic to shadow services to simulate real traffic for the whole site performance test in the production environment in an effective and safe way.
+For more detail, please reference [EaseLoad](https://megaease.com/docs/load/) documents.
+
+The default configuration has only one item:
+
+```
+plugin.integrability.global.redirect.enabled=true
+```
+
+Supported components/plugins and corresponding namespaces:
+
+Plugin/Components| Namespace         | Description |
+---             | ---               | --- |
+jdbc            | `jdbc`            | Database Redirection 
+redis           | `redis`           | Redis Redirection
+kafka           | `kafka`           | Kafka Redirection
+rabbitmq        | `rabbitmq`        | RabbitMQ Redirection
+elasticsearch   | `elasticsearch`   | Elasticsearch Redirection
+
 
 ## Logging
 EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `log4j2.xml` file.
