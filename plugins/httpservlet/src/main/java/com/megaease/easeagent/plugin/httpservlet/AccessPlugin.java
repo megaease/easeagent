@@ -18,15 +18,16 @@
 package com.megaease.easeagent.plugin.httpservlet;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class AccessPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "access";
+        return ConfigConst.Namespace.ACCESS;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 }

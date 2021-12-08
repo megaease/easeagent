@@ -17,14 +17,16 @@
 
 package com.megaease.easeagent.plugin;
 
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+
 public class AsyncPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "async";
+        return ConfigConst.Namespace.ASYNC;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 }

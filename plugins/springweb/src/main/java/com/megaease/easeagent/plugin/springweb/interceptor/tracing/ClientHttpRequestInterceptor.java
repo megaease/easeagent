@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.springweb.RestTemplatePlugin;
 import com.megaease.easeagent.plugin.springweb.advice.ClientHttpRequestAdvice;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -32,7 +33,7 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import java.util.List;
 
-@AdviceTo(value = ClientHttpRequestAdvice.class)
+@AdviceTo(value = ClientHttpRequestAdvice.class, plugin = RestTemplatePlugin.class)
 public class ClientHttpRequestInterceptor extends BaseHttpClientTracingInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 

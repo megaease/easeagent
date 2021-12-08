@@ -18,15 +18,16 @@
 package com.megaease.easeagent.plugin.rabbitmq;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class RabbitMqPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "rabbitmq-plugin";
+        return ConfigConst.Namespace.RABBITMQ;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 }

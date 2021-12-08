@@ -18,17 +18,18 @@
 package easeagent.plugin.spring.gateway;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class SpringGatewayPlugin implements AgentPlugin {
 
     @Override
     public String getName() {
-        return "spring-gateway";
+        return ConfigConst.Namespace.SPRING_GATEWAY;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 
 }

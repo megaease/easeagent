@@ -24,6 +24,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.springweb.WebClientPlugin;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientFilterAdvice;
 import com.megaease.easeagent.plugin.springweb.reactor.AgentMono;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -36,7 +37,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 
-@AdviceTo(value = WebClientFilterAdvice.class)
+@AdviceTo(value = WebClientFilterAdvice.class, plugin = WebClientPlugin.class)
 public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
@@ -62,7 +63,7 @@ public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor 
         ProgressContext pCtx = context.get(getProgressKey());
 
         @SuppressWarnings("unchecked")
-        Mono<ClientResponse> mono = (Mono<ClientResponse>)methodInfo.getRetValue();
+        Mono<ClientResponse> mono = (Mono<ClientResponse>) methodInfo.getRetValue();
         methodInfo.setRetValue(new AgentMono(mono, methodInfo, pCtx));
 
         if (!methodInfo.isSuccess()) {

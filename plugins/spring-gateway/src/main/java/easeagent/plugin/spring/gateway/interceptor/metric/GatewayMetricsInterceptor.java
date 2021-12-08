@@ -27,6 +27,7 @@ import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
+import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
 import easeagent.plugin.spring.gateway.reactor.AgentMono;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
@@ -38,7 +39,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-@AdviceTo(AgentGlobalFilterAdvice.class)
+@AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = SpringGatewayPlugin.class)
 public class GatewayMetricsInterceptor implements Interceptor {
     private static volatile ServerMetric SERVER_METRIC = null;
 

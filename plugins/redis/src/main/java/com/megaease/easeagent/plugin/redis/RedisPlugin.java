@@ -18,17 +18,18 @@
 package com.megaease.easeagent.plugin.redis;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class RedisPlugin implements AgentPlugin {
 
     @Override
     public String getName() {
-        return "redis";
+        return ConfigConst.Namespace.REDIS;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 
 }

@@ -18,15 +18,16 @@
 package com.megaease.easeagent.plugin.httpclient;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class HttpClientPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "httpclient";
+        return ConfigConst.Namespace.HTTPCLIENT;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 }

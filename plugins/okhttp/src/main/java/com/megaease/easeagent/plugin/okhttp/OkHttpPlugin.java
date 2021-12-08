@@ -18,15 +18,16 @@
 package com.megaease.easeagent.plugin.okhttp;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class OkHttpPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "okhttp";
+        return ConfigConst.Namespace.OK_HTTP;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 }

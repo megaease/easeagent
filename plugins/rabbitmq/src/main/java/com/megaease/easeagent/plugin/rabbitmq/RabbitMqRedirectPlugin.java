@@ -1,15 +1,16 @@
 package com.megaease.easeagent.plugin.rabbitmq;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class RabbitMqRedirectPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "rabbitmq";
+        return ConfigConst.Namespace.RABBITMQ;
     }
 
     @Override
     public String getDomain() {
-        return "integrability";
+        return ConfigConst.INTEGRABILITY;
     }
 }

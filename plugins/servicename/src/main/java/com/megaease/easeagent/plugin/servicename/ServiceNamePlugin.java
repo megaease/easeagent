@@ -18,15 +18,17 @@
 package com.megaease.easeagent.plugin.servicename;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class ServiceNamePlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "servicename";
+        return ConfigConst.Namespace.SERVICE_NAME;
     }
 
     @Override
     public String getDomain() {
-        return "integrability";
+        return ConfigConst.INTEGRABILITY;
+
     }
 }

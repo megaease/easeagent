@@ -1,17 +1,17 @@
-package com.megaease.easeagent.plugin.elasticsearch;
+package com.megaease.easeagent.plugin.springweb;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
-public class ElasticsearchRedirectPlugin implements AgentPlugin {
+public class FeignClientPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return ConfigConst.Namespace.ELASTICSEARCH;
+        return ConfigConst.Namespace.FEIGN_CLIENT;
     }
 
     @Override
     public String getDomain() {
-        return ConfigConst.INTEGRABILITY;
+        return ConfigConst.OBSERVABILITY;
     }
 
 }

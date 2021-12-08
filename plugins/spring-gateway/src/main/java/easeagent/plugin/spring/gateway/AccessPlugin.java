@@ -15,17 +15,15 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet;
+package easeagent.plugin.spring.gateway;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
-import static com.megaease.easeagent.plugin.api.config.ConfigConst.Namespace.HTTP_SERVLET;
-
-public class HttpServletPlugin implements AgentPlugin {
+public class AccessPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return HTTP_SERVLET;
+        return ConfigConst.Namespace.ACCESS;
     }
 
     @Override
