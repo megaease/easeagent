@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.jdbc.common;
 
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -26,9 +27,9 @@ import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class MD5ReportConsumer  implements Consumer<Map<String, String>> {
-    private final Config config;
-    private static Reporter reporter;
+public class MD5ReportConsumer  implements Consumer<Map<String, String>>, ConfigChangeListener {
+    private Config config;
+    private Reporter reporter;
 
     public MD5ReportConsumer(Config config) {
         this.config = config;
@@ -58,5 +59,14 @@ public class MD5ReportConsumer  implements Consumer<Map<String, String>> {
             String json = JsonUtil.toJson(item);
             this.reporter.report(json);
         }
+    }
+
+    @Override
+    public void onChange(Config oldConfig, Config newConfig) {
+        this.config = newConfig;
+        this.config.addChangeListener(this);
+
+        // reporter maintain configuration change, so don't need this
+        // this.reporter = EaseAgent.metricReporter(config);
     }
 }
