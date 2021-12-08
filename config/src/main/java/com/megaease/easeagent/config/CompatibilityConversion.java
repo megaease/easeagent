@@ -3,7 +3,6 @@ package com.megaease.easeagent.config;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.plugin.enums.Order;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -83,7 +82,7 @@ public class CompatibilityConversion {
             return new FinalConversion(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_METRIC_ENABLED, true);
         }
         String[] keys = key.split(ConfigConst.DELIMITER);
-        return conversion(key, keys, Order.METRIC.getName());
+        return conversion(key, keys, ConfigConst.PluginID.METRIC);
     }
 
 
@@ -99,7 +98,7 @@ public class CompatibilityConversion {
         if (TRACING_SKIP.contains(key2)) {
             return new FinalConversion(key, false);
         }
-        return conversion(key, keys, Order.TRACING.getName());
+        return conversion(key, keys, ConfigConst.PluginID.TRACING);
     }
 
     private static Conversion conversion(String key, String[] keys, String pluginId) {
