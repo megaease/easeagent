@@ -38,12 +38,13 @@ public class WebClientBuildInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
-        return Order.INIT.getName();
+    public int order() {
+        return Order.TRACING_INIT.getOrder();
     }
 
     @Override
-    public int order() {
-        return Order.INIT.getOrder();
+    public String getName() {
+        return Order.TRACING.getName();
     }
+
 }

@@ -134,7 +134,8 @@ public interface ConfigConst {
         String REST_TEMPLATE = "resTemplate";
     }
 
-    interface PluginID{
+    interface PluginID {
+        String TRACING_INIT = "tracingInit";
         String TRACING = "tracing";
         String METRIC = "metric";
         String REDIRECT = "redirect";

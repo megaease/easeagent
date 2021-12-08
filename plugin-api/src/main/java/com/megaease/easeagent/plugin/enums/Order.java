@@ -29,7 +29,7 @@ public enum Order {
     HIGHEST(10, "highest"),
     REDIRECT(19, ConfigConst.PluginID.REDIRECT),
     HIGH(20, "high"),
-    INIT(21, "init"),
+    TRACING_INIT(21, ConfigConst.PluginID.TRACING_INIT),
     TRACING(100, ConfigConst.PluginID.TRACING),
     METRIC(200, ConfigConst.PluginID.METRIC),
     LOW(210, "low"),

@@ -57,11 +57,11 @@ public class GlobalFilterInterceptor implements Interceptor {
 
     @Override
     public String getName() {
-        return Order.INIT.getName();
+        return Order.TRACING.getName();
     }
 
     @Override
     public int order() {
-        return Order.INIT.getOrder();
+        return Order.TRACING_INIT.getOrder();
     }
 }
