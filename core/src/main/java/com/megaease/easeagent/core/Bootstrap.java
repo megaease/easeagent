@@ -306,7 +306,7 @@ public class Bootstrap {
 
         @Override
         public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
-            wrappedConfigManager.updateService2(config, version);
+            wrappedConfigManager.updateService2(CompatibilityConversion.transform(config), version);
             return null;
         }
     }
