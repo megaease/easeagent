@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin.enums;
 
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+
 /**
  * Priority definition, lower value with higher priority
  * eg. higher priority interceptor run enter before lower ones
@@ -25,11 +27,11 @@ package com.megaease.easeagent.plugin.enums;
 public enum Order {
     FOUNDATION(0, "foundation"),
     HIGHEST(10, "highest"),
-    REDIRECT(19, "redirect"),
+    REDIRECT(19, ConfigConst.PluginID.REDIRECT),
     HIGH(20, "high"),
-    INIT(21, "init"),
-    TRACING(100, "tracing"),
-    METRIC(200, "metric"),
+    TRACING_INIT(21, ConfigConst.PluginID.TRACING_INIT),
+    TRACING(100, ConfigConst.PluginID.TRACING),
+    METRIC(200, ConfigConst.PluginID.METRIC),
     LOW(210, "low"),
     LOWEST(255, "lowest");
 

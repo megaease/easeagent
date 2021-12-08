@@ -43,7 +43,12 @@ public class KafkaProducerConstructInterceptor implements FirstEnterInterceptor 
     }
 
     @Override
+    public int order() {
+        return Order.TRACING_INIT.getOrder();
+    }
+
+    @Override
     public String getName() {
-        return Order.INIT.getName();
+        return Order.TRACING.getName();
     }
 }

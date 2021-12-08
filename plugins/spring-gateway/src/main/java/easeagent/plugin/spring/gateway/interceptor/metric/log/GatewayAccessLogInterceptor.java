@@ -31,13 +31,15 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
 import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
+import easeagent.plugin.spring.gateway.AccessPlugin;
+import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
 import easeagent.plugin.spring.gateway.reactor.AgentMono;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-@AdviceTo(AgentGlobalFilterAdvice.class)
+@AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = AccessPlugin.class)
 public class GatewayAccessLogInterceptor implements Interceptor {
     private static Reporter reportConsumer;
     private final HttpLog httpLog = new HttpLog();

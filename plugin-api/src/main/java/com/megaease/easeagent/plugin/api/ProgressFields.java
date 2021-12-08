@@ -17,83 +17,92 @@
 
 package com.megaease.easeagent.plugin.api;
 
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
+
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ProgressFields {
     public static final String EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG = "easeagent.progress.penetration.fields";
     public static final String EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG = "easeagent.progress.response.hold.tag.fields";
-    /**
-     * support ease mesh
-     * get headers
-     * X-EG-Circuit-Breaker
-     * X-EG-Retryer
-     * X-EG-Rate-Limiter
-     * X-EG-Time-Limiter
-     */
-    private static final String[] EASE_MESH_HEADERS = new String[]{
-        "X-EG-Circuit-Breaker",
-        "X-EG-Retryer",
-        "X-EG-Rate-Limiter",
-        "X-EG-Time-Limiter"
-    };
+    private static volatile Fields TRANSPARENT_TRANSMISSION_FIELDS = build(Collections.emptyMap());
+    private static volatile Fields RESPONSE_HOLD_TAG_FIELDS = build(Collections.emptyMap());
 
-    private static volatile String[] TRANSPARENT_TRANSMISSION_FIELDS = new String[0];
-    private static volatile Set<String> TRANSPARENT_TRANSMISSION_FIELDS_SET = Collections.emptySet();
-    private static volatile String[] RESPONSE_HOLD_TAG_FIELDS = new String[0];
-
-    public static BiFunction<String, String, String> changeListener() {
-        return (key, value) -> {
-            if (EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG.equals(key)) {
-                setPenetrationFields(value);
-            } else if (EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG.equals(key)) {
-                setResponseHoldTagFields(value);
+    public static BiFunction<String, Map<String, String>, String> changeListener() {
+        return (key, values) -> {
+            if (isPenetrationKey(key)) {
+                setPenetrationFields(values);
+            } else if (isResponseHoldTagKey(key)) {
+                setResponseHoldTagFields(values);
             }
             return null;
         };
     }
 
-    private static void setPenetrationFields(String fieldStr) {
-        if (fieldStr == null) {
-            TRANSPARENT_TRANSMISSION_FIELDS = new String[0];
-            return;
-        }
-        List<String> list = Arrays.stream(fieldStr.split(","))
-            .filter(Objects::nonNull).filter(s -> !s.isEmpty()).collect(Collectors.toList());
-        for (String easeMeshHeader : EASE_MESH_HEADERS) {
-            if (!list.contains(easeMeshHeader)) {
-                list.add(easeMeshHeader);
-            }
-        }
-        TRANSPARENT_TRANSMISSION_FIELDS = list.toArray(new String[0]);
-        TRANSPARENT_TRANSMISSION_FIELDS_SET = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList(TRANSPARENT_TRANSMISSION_FIELDS)));
+    public static boolean isPenetrationKey(String key) {
+        return key.startsWith(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG);
     }
 
-    private static void setResponseHoldTagFields(String fieldStr) {
-        if (fieldStr == null) {
-            RESPONSE_HOLD_TAG_FIELDS = new String[0];
-            return;
-        }
-        RESPONSE_HOLD_TAG_FIELDS = Arrays.stream(fieldStr.split(","))
-            .filter(Objects::nonNull).filter(s -> !s.isEmpty())
-            .collect(Collectors.toList()).toArray(new String[0]);
+    public static boolean isResponseHoldTagKey(String key) {
+        return key.startsWith(EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG);
+    }
+
+    private static void setPenetrationFields(Map<String, String> fields) {
+        TRANSPARENT_TRANSMISSION_FIELDS = TRANSPARENT_TRANSMISSION_FIELDS.rebuild(fields);
+    }
+
+    private static void setResponseHoldTagFields(Map<String, String> fields) {
+        RESPONSE_HOLD_TAG_FIELDS = RESPONSE_HOLD_TAG_FIELDS.rebuild(fields);
     }
 
     public static boolean isEmpty(String[] fields) {
         return fields == null || fields.length == 0;
     }
 
-    public static String[] getPenetrationFields() {
-        return TRANSPARENT_TRANSMISSION_FIELDS;
-    }
-
-    public static Set<String> getPenetrationFieldsSet() {
-        return TRANSPARENT_TRANSMISSION_FIELDS_SET;
+    public static Set<String> getPenetrationFields() {
+        return TRANSPARENT_TRANSMISSION_FIELDS.fieldSet;
     }
 
     public static String[] getResponseHoldTagFields() {
-        return RESPONSE_HOLD_TAG_FIELDS;
+        return RESPONSE_HOLD_TAG_FIELDS.fields;
+    }
+
+    private static Fields build(@Nonnull Map<String, String> map) {
+        if (map.isEmpty()) {
+            return new Fields(Collections.emptySet(), Collections.emptyMap());
+        }
+        return new Fields(Collections.unmodifiableSet(new HashSet<>(map.values())), map);
+    }
+
+
+    public static class Fields {
+        private final Set<String> fieldSet;
+        private final String[] fields;
+        private final Map<String, String> map;
+
+        public Fields(@Nonnull Set<String> fieldSet, @Nonnull Map<String, String> map) {
+            this.fieldSet = fieldSet;
+            this.fields = fieldSet.toArray(new String[0]);
+            this.map = map;
+        }
+
+        Fields rebuild(@Nonnull Map<String, String> map) {
+            if (this.map.isEmpty()) {
+                map.entrySet().removeIf(stringStringEntry -> StringUtils.isEmpty(stringStringEntry.getValue()));
+                return build(map);
+            }
+            Map<String, String> newMap = new HashMap<>(this.map);
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                if (StringUtils.isEmpty(entry.getValue())) {
+                    newMap.remove(entry.getKey());
+                } else {
+                    newMap.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return build(Collections.unmodifiableMap(newMap));
+        }
     }
 }

@@ -18,15 +18,18 @@
 package com.megaease.easeagent.plugin.jdbc;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Namespace.JDBC_STATEMENT;
 
 public class JdbcDataSourceMetricPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "jdbcStatement";
+        return JDBC_STATEMENT;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 }

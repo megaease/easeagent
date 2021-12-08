@@ -22,12 +22,13 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
+import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.InitGlobalFilterAdvice;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 
 import java.util.List;
 
-@AdviceTo(value = InitGlobalFilterAdvice.class)
+@AdviceTo(value = InitGlobalFilterAdvice.class, plugin = SpringGatewayPlugin.class)
 public class GlobalFilterInterceptor implements Interceptor {
     private static boolean loadAgentFilter = false;
 
@@ -56,11 +57,11 @@ public class GlobalFilterInterceptor implements Interceptor {
 
     @Override
     public String getName() {
-        return Order.INIT.getName();
+        return Order.TRACING.getName();
     }
 
     @Override
     public int order() {
-        return Order.INIT.getOrder();
+        return Order.TRACING_INIT.getOrder();
     }
 }

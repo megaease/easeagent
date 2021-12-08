@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.enums.Order;
+import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
 import easeagent.plugin.spring.gateway.reactor.AgentMono;
@@ -37,7 +38,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-@AdviceTo(AgentGlobalFilterAdvice.class)
+@AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = SpringGatewayPlugin.class)
 public class GatewayServerTracingInterceptor implements Interceptor {
     final String SPAN_CONTEXT_KEY = this.getClass().getName() + "-P-CTX";
 

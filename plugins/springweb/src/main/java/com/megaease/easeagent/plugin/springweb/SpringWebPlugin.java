@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.springweb;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class SpringWebPlugin implements AgentPlugin {
 
@@ -28,7 +29,7 @@ public class SpringWebPlugin implements AgentPlugin {
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 
 }

@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 
 import static com.megaease.easeagent.plugin.api.ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG;
 import static org.junit.Assert.*;
@@ -33,11 +34,13 @@ public class ProgressFieldsManagerTest {
     public void init() {
         HashMap<String, String> source = new HashMap<>();
         source.put("plugin.observability.global.metrics.enabled", "true");
-        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG, "aaa,bbb,ccc");
+        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + ".0", "aaa");
+        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + ".1", "bbb");
+        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + ".2", "ccc");
         Configs configs = new Configs(source);
         ProgressFieldsManager.init(configs);
-        String[] fields = ProgressFields.getPenetrationFields();
-        assertFalse(ProgressFields.isEmpty(fields));
+        Set<String> fields = ProgressFields.getPenetrationFields();
+        assertFalse(fields.isEmpty());
     }
 
     @Test
@@ -51,26 +54,34 @@ public class ProgressFieldsManagerTest {
     public void getFields() {
         HashMap<String, String> source = new HashMap<>();
         source.put("plugin.observability.global.metrics.enabled", "true");
-        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG, "aaa,bbb,ccc");
+        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + ".0", "aaa");
+        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + ".1", "bbb");
+        source.put(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + ".2", "ccc");
         Configs configs = new Configs(source);
         ProgressFieldsManager.init(configs);
-        String[] fields = ProgressFields.getPenetrationFields();
-        assertFalse(ProgressFields.isEmpty(fields));
-        assertEquals("aaa", fields[0]);
-        assertEquals("bbb", fields[1]);
-        assertEquals("ccc", fields[2]);
+        Set<String> fields = ProgressFields.getPenetrationFields();
+        assertFalse(fields.isEmpty());
+        assertTrue(fields.contains("aaa"));
+        assertTrue(fields.contains("bbb"));
+        assertTrue(fields.contains("ccc"));
 
-        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG, "aaa,ccc"));
+        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG+".0", "aaa"));
+        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG+".2", "ccc"));
         fields = ProgressFields.getPenetrationFields();
-        assertFalse(ProgressFields.isEmpty(fields));
-        assertEquals("aaa", fields[0]);
-        assertEquals("ccc", fields[1]);
+        assertFalse(fields.isEmpty());
+        assertTrue(fields.contains("aaa"));
+        assertTrue(fields.contains("bbb"));
+        assertTrue(fields.contains("ccc"));
 
-        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG, "aaa,ddd,,ccc"));
+        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG+".0", "aaa"));
+        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG+".1", "ddd"));
+        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG+".2", "ccc"));
         fields = ProgressFields.getPenetrationFields();
-        assertFalse(ProgressFields.isEmpty(fields));
-        assertEquals("aaa", fields[0]);
-        assertEquals("ddd", fields[1]);
-        assertEquals("ccc", fields[2]);
+        assertFalse(fields.isEmpty());
+        assertTrue(fields.contains("aaa"));
+        assertTrue(fields.contains("ddd"));
+        assertTrue(fields.contains("ccc"));
+        assertFalse(fields.contains("bbb"));
+
     }
 }

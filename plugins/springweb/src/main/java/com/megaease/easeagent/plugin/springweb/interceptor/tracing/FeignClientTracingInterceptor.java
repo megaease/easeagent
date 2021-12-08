@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.springweb.FeignClientPlugin;
 import com.megaease.easeagent.plugin.springweb.advice.FeignClientAdvice;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -32,9 +33,12 @@ import feign.Response;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-@AdviceTo(value = FeignClientAdvice.class)
+@AdviceTo(value = FeignClientAdvice.class, plugin = FeignClientPlugin.class)
 public class FeignClientTracingInterceptor extends BaseHttpClientTracingInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 

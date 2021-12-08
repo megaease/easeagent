@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -49,7 +50,7 @@ public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
                         new Tags("application", "jdbc-statement", "signature"),
                         (config1, tags) -> new JdbcMetric(config1, tags));
                     Config md5Config = EaseAgent.configFactory
-                        .getConfig("observability", "md5Dictionary", "metric");
+                        .getConfig(ConfigConst.OBSERVABILITY, ConfigConst.Namespace.MD5_DICTIONARY, ConfigConst.PluginID.METRIC);
                     sqlCompression = MD5SQLCompression.getInstance(md5Config);
                     cache = CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize).removalListener(metric).build();

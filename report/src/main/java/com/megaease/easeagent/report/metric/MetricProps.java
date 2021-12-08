@@ -24,6 +24,7 @@ import com.megaease.easeagent.plugin.Const;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.*;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.KEY_COMM_ENABLED;
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
 
 public interface MetricProps {

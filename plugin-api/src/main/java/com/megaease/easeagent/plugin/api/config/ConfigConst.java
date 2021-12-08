@@ -27,10 +27,18 @@ public interface ConfigConst {
     String SERVICE_NAME = "name";
     String SYSTEM_NAME = "system";
     String OBSERVABILITY = "observability";
+    String INTEGRABILITY = "integrability";
     String GLOBAL_CANARY_LABELS = "globalCanaryHeaders";
+    String KEY_ID_METRIC = "metric";
+    String KEY_ID_TRACING = "tracing";
+    String KEY_COMM_ENABLED = "enabled";
 
     static String join(String... texts) {
         return String.join(DELIMITER, texts);
+    }
+
+    static String[] split(String text) {
+        return text.split("\\" + DELIMITER);
     }
 
     interface GlobalCanaryLabels {
@@ -52,6 +60,14 @@ public interface ConfigConst {
     }
 
     interface Observability {
+        String KEY_COMM_ENABLED = "enabled";
+        String KEY_COMM_SAMPLED_BY_QPS = "sampledByQPS";
+        String KEY_COMM_OUTPUT = "output";
+        String KEY_COMM_SERVICE_PREFIX = "servicePrefix";
+        String KEY_COMM_INTERVAL = "interval";
+        String KEY_COMM_TOPIC = "topic";
+        String KEY_COMM_APPEND_TYPE = "appendType";
+
         String OUTPUT = join(OBSERVABILITY, "outputServer");
 
         String OUTPUT_SERVERS = join(OUTPUT, "bootstrapServer");
@@ -64,9 +80,9 @@ public interface ConfigConst {
         String METRICS_ENABLED = join(METRICS, "enabled");
 
         String TRACE_ENABLED = join(TRACE, "enabled");
-        String TRACE_SAMPLED_BY_QPS = join(TRACE, "sampledByQPS");
+        String TRACE_SAMPLED_BY_QPS = join(TRACE, KEY_COMM_SAMPLED_BY_QPS);
 
-        String TRACE_OUTPUT = join(TRACE, "output");
+        String TRACE_OUTPUT = join(TRACE, KEY_COMM_OUTPUT);
         String TRACE_OUTPUT_ENABLED = join(TRACE_OUTPUT, "enabled");
         String TRACE_OUTPUT_TOPIC = join(TRACE_OUTPUT, "topic");
         String TRACE_OUTPUT_REPORT_THREAD = join(TRACE_OUTPUT, "reportThread");
@@ -93,10 +109,40 @@ public interface ConfigConst {
         String KEY_TRACE_CACHE = "redis";
         String KEY_TRACE_RABBIT = "rabbit";
 
-        String KEY_COMM_ENABLED = "enabled";
-        String KEY_COMM_SERVICE_PREFIX = "servicePrefix";
-        String KEY_COMM_INTERVAL = "interval";
-        String KEY_COMM_TOPIC = "topic";
-        String KEY_COMM_APPEND_TYPE = "appendType";
     }
+
+    interface Plugin {
+        String OBSERVABILITY_GLOBAL_METRIC_ENABLED = join(PLUGIN, OBSERVABILITY, PLUGIN_GLOBAL, KEY_ID_METRIC, KEY_COMM_ENABLED);
+        String OBSERVABILITY_GLOBAL_TRACING_ENABLED = join(PLUGIN, OBSERVABILITY, PLUGIN_GLOBAL, KEY_ID_TRACING, KEY_COMM_ENABLED);
+    }
+
+    interface Namespace {
+        String ASYNC = "async";
+        String ELASTICSEARCH = "elasticsearch";
+        String HTTP_SERVLET = "httpServlet";
+        String JDBC = "jdbc";
+        String JDBC_CONNECTION = "jdbcConnection";
+        String JDBC_STATEMENT = "jdbcStatement";
+        String KAFKA = "kafka";
+        String RABBITMQ = "rabbitmq";
+        String REDIS = "redis";
+        String SERVICE_NAME = "serviceName";
+        String ACCESS = "access";
+        String SPRING_GATEWAY = "springGateway";
+        String MD5_DICTIONARY = "md5Dictionary";
+        // -------------  request  ------------------
+        String HTTPCLIENT = "httpclient";
+        String OK_HTTP = "okHttp";
+        String WEB_CLIENT = "webclient";
+        String FEIGN_CLIENT = "feignClient";
+        String REST_TEMPLATE = "resTemplate";
+    }
+
+    interface PluginID {
+        String TRACING_INIT = "tracingInit";
+        String TRACING = "tracing";
+        String METRIC = "metric";
+        String REDIRECT = "redirect";
+    }
+
 }

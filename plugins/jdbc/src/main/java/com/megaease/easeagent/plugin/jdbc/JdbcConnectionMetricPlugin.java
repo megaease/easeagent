@@ -18,15 +18,18 @@
 package com.megaease.easeagent.plugin.jdbc;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Namespace.JDBC_CONNECTION;
 
 public class JdbcConnectionMetricPlugin implements AgentPlugin {
     @Override
     public String getName() {
-        return "jdbcConnection";
+        return JDBC_CONNECTION;
     }
 
     @Override
     public String getDomain() {
-        return "observability";
+        return ConfigConst.OBSERVABILITY;
     }
 }

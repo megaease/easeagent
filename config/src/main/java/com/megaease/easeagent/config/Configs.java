@@ -113,7 +113,7 @@ public class Configs implements Config, ConfigManagerMXBean {
         }
         HashMap<String, String> rst = new HashMap<>();
         configs.forEach((k, v) -> rst.put(ConfigConst.join(ConfigConst.GLOBAL_CANARY_LABELS, k), v));
-        this.updateConfigs(rst);
+        this.updateConfigs(CompatibilityConversion.transform(rst));
     }
 
     private boolean hasText(String text) {
