@@ -171,8 +171,8 @@ After visit more pages, open Prometheus manager [http://localhost:9090](http://l
 ## User Manual
 For more information, please refer to the [User Manual](./doc/user-manual.md).
 
-## Development Guide
-Refer to [Development-Guide](./doc/development-guide.md).
+## Plugin Development Guide
+Refer to [Plugin-Development-Guide](./doc/development-guide.md).
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.

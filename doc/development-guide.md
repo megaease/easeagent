@@ -1,4 +1,27 @@
-# Development-Guide
+# Plugin Development Guide
+- [Overview](#Overview)
+- [Plugin Structure](#Plugin-structure)
+    - [The Simplest Plugin](#the-simplest-plugin)
+- [Tracing API](#Tracing-API)
+- [Metric API](#Metirc-API)
+- [Redirect API](#Redirect-API)
+
+## Overview
+Most of easeagent's functionalities are supported by plugins.   
+This document describes how to develop plugins for easeagent, and it will be divided into four sections to introduce plugin development.
+1. Plugin structure, the plugin contains four components, which are the plugin definition, matcher, interceptor and the binding annotations between the three.
+2. Tracing API, which helps users complete the transaction tracing task.
+3. Metirc API, helps users to complete metrics data collection.
+4. Redirect API
+
+##  Plugin Structure
+### The Simplest Plugin
+
+##  Tracing API
+##  Metric API
+##  Redirect API
+
+
 The main function of EaseAgent is to collect Java method call trace and metrics data.
 Developer need to understand trace and metric before development.
 * [metrics](https://github.com/dropwizard/metrics)

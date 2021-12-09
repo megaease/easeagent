@@ -53,11 +53,20 @@ public class Main {
     private static final String EASEAGENT_LOG_CONF = "easeagent.log.conf";
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-        final JarFileArchive archive = new JarFileArchive(getArchiveFileContains());
+        File jar = getArchiveFileContains();
+        final JarFileArchive archive = new JarFileArchive(jar);
 
         // custom classloader
         ArrayList<URL> urls = nestArchiveUrls(archive, LIB);
         urls.addAll(nestArchiveUrls(archive, PLUGINS));
+        File p = new File(jar.getParent() + File.separator + "plugins");
+        if (p.exists()) {
+            URL pUrl = p.toURI().toURL();
+            urls.add(pUrl);
+        }
+        // add plugins directory
+        CodeSource codeSource = Main.class.getProtectionDomain().getCodeSource();
+
         final ClassLoader loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
 
         // install bootstrap jar
