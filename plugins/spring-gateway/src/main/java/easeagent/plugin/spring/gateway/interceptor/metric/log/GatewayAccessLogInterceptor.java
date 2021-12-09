@@ -32,7 +32,6 @@ import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
 import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
 import easeagent.plugin.spring.gateway.AccessPlugin;
-import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
 import easeagent.plugin.spring.gateway.reactor.AgentMono;
@@ -72,7 +71,7 @@ public class GatewayAccessLogInterceptor implements Interceptor {
     }
 
     private void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        ctx.importToCurr();
+        ctx.importToCurrent();
         Context context = ctx.getContext();
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         RequestInfo requestInfo = exchange.getAttribute(RequestInfo.class.getName());

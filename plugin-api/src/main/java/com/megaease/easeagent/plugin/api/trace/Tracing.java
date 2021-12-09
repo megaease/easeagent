@@ -38,6 +38,12 @@ public interface Tracing {
     boolean isNoop();
 
     /**
+     * true if Thread
+     * @return boolean
+     */
+    boolean hasCurrentSpan();
+
+    /**
      * Returns the current span in scope or {@link NoOpTracer#NO_OP_SPAN} if there isn't one.
      *
      * <p> as it is a stable type and will never return null.

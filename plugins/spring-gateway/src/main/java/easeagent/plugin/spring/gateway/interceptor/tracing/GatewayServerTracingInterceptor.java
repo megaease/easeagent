@@ -72,7 +72,7 @@ public class GatewayServerTracingInterceptor implements Interceptor {
     }
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        ctx.importToCurr();
+        ctx.importToCurrent();
         ProgressContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);

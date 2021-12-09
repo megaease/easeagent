@@ -246,6 +246,11 @@ public class NoOpTracer {
         public boolean isNoop() {
             return true;
         }
+
+        @Override
+        public boolean hasCurrentSpan() {
+            return false;
+        }
     }
 
     public static class EmptyMessagingTracing<R extends MessagingRequest> implements MessagingTracing {

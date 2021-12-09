@@ -226,7 +226,7 @@ public class NoOpContext {
         }
 
         @Override
-        public Scope importToCurr() {
+        public Scope importToCurrent() {
             return NoOpTracer.NO_OP_SCOPE;
         }
 
