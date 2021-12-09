@@ -18,6 +18,7 @@ public class CompatibilityConversion {
         ConfigConst.Namespace.REST_TEMPLATE,
     };
     private static final Map<String, BiFunction<String, String, Conversion>> KEY_TO_NAMESPACE;
+    private static final Set<String> METRIC_SKIP;
     private static final Set<String> TRACING_SKIP;
 
     static {
@@ -26,7 +27,8 @@ public class CompatibilityConversion {
 
         map.put(ConfigConst.Observability.KEY_METRICS_REQUEST, MultipleBuilder.observability(Arrays.asList(REQUEST_NAMESPACE)));
         map.put(ConfigConst.Observability.KEY_METRICS_JDBC_STATEMENT, SingleBuilder.observability(ConfigConst.Namespace.JDBC_STATEMENT));
-        map.put(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, SingleBuilder.observability(ConfigConst.Namespace.JDBC_STATEMENT));
+        map.put(ConfigConst.Observability.KEY_METRICS_JDBC_CONNECTION, SingleBuilder.observability(ConfigConst.Namespace.JDBC_CONNECTION));
+        map.put(ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY, SingleBuilder.observability(ConfigConst.Namespace.MD5_DICTIONARY));
         map.put(ConfigConst.Observability.KEY_METRICS_RABBIT, SingleBuilder.observability(ConfigConst.Namespace.RABBITMQ));
         map.put(ConfigConst.Observability.KEY_METRICS_KAFKA, SingleBuilder.observability(ConfigConst.Namespace.KAFKA));
         map.put(ConfigConst.Observability.KEY_METRICS_CACHE, SingleBuilder.observability(ConfigConst.Namespace.REDIS));
@@ -46,6 +48,10 @@ public class CompatibilityConversion {
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_ENABLED);
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_SAMPLED_BY_QPS);
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_OUTPUT);
+
+        METRIC_SKIP = new HashSet<>();
+        METRIC_SKIP.add(ConfigConst.Observability.KEY_METRICS_JVM_GC);
+        METRIC_SKIP.add(ConfigConst.Observability.KEY_METRICS_JVM_MEMORY);
     }
 
     public static Map<String, String> transform(Map<String, String> oldConfigs) {
@@ -85,8 +91,7 @@ public class CompatibilityConversion {
         if (key.equals(ConfigConst.Observability.METRICS_ENABLED)) {
             return new FinalConversion(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_METRIC_ENABLED, true);
         }
-        String[] keys = ConfigConst.split(key);
-        return conversion(key, keys, ConfigConst.PluginID.METRIC);
+        return conversion(key, METRIC_SKIP, ConfigConst.PluginID.METRIC);
     }
 
 
@@ -94,29 +99,25 @@ public class CompatibilityConversion {
         if (key.equals(ConfigConst.Observability.TRACE_ENABLED)) {
             return new FinalConversion(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_TRACING_ENABLED, true);
         }
-        String[] keys = ConfigConst.split(key);
-        if (keys.length < 3) {
-            return null;
-        }
-        String key2 = keys[2];
-        if (TRACING_SKIP.contains(key2)) {
-            return new FinalConversion(key, false);
-        }
-        return conversion(key, keys, ConfigConst.PluginID.TRACING);
+        return conversion(key, TRACING_SKIP, ConfigConst.PluginID.TRACING);
     }
 
     private static Conversion penetrationFieldsConversion(String key) {
         return new FinalConversion(key.replace(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".", ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + "."), true);
     }
 
-    private static Conversion conversion(String key, String[] keys, String pluginId) {
+    private static Conversion conversion(String key, Set<String> skipSet, String pluginId) {
+        String[] keys = ConfigConst.split(key);
         if (keys.length < 4) {
             return new FinalConversion(key, false);
         }
         String key2 = keys[2];
+        if (skipSet.contains(key2)) {
+            return new FinalConversion(key, false);
+        }
         BiFunction<String, String, Conversion> builder = KEY_TO_NAMESPACE.get(key2);
         if (builder == null) {
-            return new FinalConversion(key, false);
+            builder = SingleBuilder.observability(key2);
         }
         String[] properties = new String[keys.length - 3];
         int index = 0;
