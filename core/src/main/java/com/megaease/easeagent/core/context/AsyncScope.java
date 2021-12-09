@@ -23,15 +23,19 @@ import com.megaease.easeagent.plugin.api.trace.Scope;
 public class AsyncScope implements Scope {
     private final InitializeContext context;
     private final Scope scope;
+    private final boolean clearContext;
 
-    public AsyncScope(InitializeContext context, Scope scope) {
+    public AsyncScope(InitializeContext context, Scope scope, boolean clearContext) {
         this.context = context;
         this.scope = scope;
+        this.clearContext = clearContext;
     }
 
     @Override
     public void close() {
         this.scope.close();
-        this.context.clear();
+        if (clearContext) {
+            this.context.clear();
+        }
     }
 }

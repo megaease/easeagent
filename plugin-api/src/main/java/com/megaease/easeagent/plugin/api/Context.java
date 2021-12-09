@@ -255,7 +255,7 @@ public interface Context {
      * Import a {@link AsyncContext} for asynchronous program processing
      * It will copy all the key: value to the current Context
      * <p>
-     * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurr()} proxy call
+     * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurrent()} proxy call
      *
      * @param snapshot the AsyncContext from {@link #exportAsync()} called
      * @return {@link Scope} for tracing

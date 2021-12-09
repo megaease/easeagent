@@ -75,7 +75,7 @@ public class GatewayMetricsInterceptor implements Interceptor {
     }
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        ctx.importToCurr();
+        ctx.importToCurrent();
         Context context = ctx.getContext();
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         String key = getKey(exchange);

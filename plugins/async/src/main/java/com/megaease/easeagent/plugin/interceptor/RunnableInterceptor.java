@@ -25,7 +25,6 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.async.ThreadLocalCurrentContext;
 import com.megaease.easeagent.plugin.enums.Order;
 
 @AdviceTo(CrossThreadAdvice.class)
@@ -38,11 +37,9 @@ public class RunnableInterceptor implements Interceptor {
         try {
             Object[] args = methodInfo.getArgs();
             Runnable task = (Runnable) args[0];
-            if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                Runnable firstWrap = EaseAgent.contextSupplier.get().wrap(task);
-                final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(firstWrap);
-                args[0] = wrap;
-                methodInfo.setArgs(args);
+            if (!context.isWrapped(task)) {
+                Runnable wrap = context.wrap(task);
+                methodInfo.changeArg(0, wrap);
             }
         } catch (Throwable e) {
             logger.warn("intercept method [{}] failure", methodInfo.getMethod(), e);

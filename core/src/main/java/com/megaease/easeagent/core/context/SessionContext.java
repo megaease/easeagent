@@ -139,9 +139,10 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public Scope importAsync(AsyncContext snapshot) {
+        boolean clearContext = !tracing.hasCurrentSpan();
         Scope scope = tracing.importAsync(snapshot);
         context.putAll(snapshot.getAll());
-        return new AsyncScope(this, scope);
+        return new AsyncScope(this, scope, clearContext);
     }
 
     @Override
@@ -331,7 +332,7 @@ public class SessionContext implements InitializeContext {
 
         @Override
         public void run() {
-            try (Scope scope = asyncContext.importToCurr()) {
+            try (Scope scope = asyncContext.importToCurrent()) {
                 task.run();
             }
         }

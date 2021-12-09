@@ -156,7 +156,7 @@ public class DoFilterTraceInterceptor implements FirstEnterInterceptor {
             if (sendHandled.compareAndSet(false, true)) {
                 HttpServletResponse res = (HttpServletResponse) e.getSuppliedResponse();
                 Response response = new Response(e.getThrowable(), req, res);
-                HttpUtils.finish(progressContext.span(), response);
+                HttpUtils.save(progressContext.span(), response);
                 progressContext.finish(response);
             }
 

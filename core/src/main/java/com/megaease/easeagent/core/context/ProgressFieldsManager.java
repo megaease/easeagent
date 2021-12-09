@@ -64,7 +64,7 @@ public class ProgressFieldsManager {
                 changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG, penetration);
             }
             if (!responseHoldTag.isEmpty()) {
-                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG, penetration);
+                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG, responseHoldTag);
             }
         }
     }

@@ -67,7 +67,7 @@ public class AsyncContextImpl implements AsyncContext {
     }
 
     @Override
-    public Scope importToCurr() {
+    public Scope importToCurrent() {
         return supplier.get().importAsync(this);
     }
 

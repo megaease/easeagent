@@ -30,7 +30,7 @@ import java.util.Map;
  *  AsyncContext asyncContext = context.exportAsync();
  *  class Run implements Runnable{
  *      void run(){
- *          try (Scope scope = asyncContext.importToCurr()) {
+ *          try (Scope scope = asyncContext.importToCurrent()) {
  *               //do something
  *               //or asyncContext.getTracer().nextSpan();
  *          }
@@ -62,7 +62,7 @@ public interface AsyncContext {
      *
      * @return {@link Scope}
      */
-    Scope importToCurr();
+    Scope importToCurrent();
 
     /**
      * @return all async snapshot context key:value

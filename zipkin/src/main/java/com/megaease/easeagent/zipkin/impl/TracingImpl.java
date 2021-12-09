@@ -94,6 +94,11 @@ public class TracingImpl implements ITracing {
         return false;
     }
 
+    @Override
+    public boolean hasCurrentSpan() {
+        return tracing().currentTraceContext().get() != null;
+    }
+
 
     private brave.Tracer tracer() {
         return this.tracer;
