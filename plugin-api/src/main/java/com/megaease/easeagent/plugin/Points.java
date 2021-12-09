@@ -26,19 +26,19 @@ import java.util.Set;
  * Pointcut can be defined by ProbeDefine implementation
  * and also can be defined through @OnClass and @OnMethod annotation
  */
-@SuppressWarnings("unused")
 public interface Points {
     /**
      * return the defined class matcher matching a class or a group of classes
      * eg.
-     * ClassMatcher.builder().hadInterface(A)
+     * ClassMatcher.builder()
+     *      .hadInterface(A)
      *      .isPublic()
      *      .isAbstract()
      *      .build()
-     *      .or(ClassMatcher.builder()
-     *          .hasSuperClass(B)
-     *          .isPublic()
-     *          .build())
+     *      .or()
+     *        .hasSuperClass(B)
+     *        .isPublic()
+     *        .build())
      */
     IClassMatcher getClassMatcher();
 
@@ -49,7 +49,20 @@ public interface Points {
      *      .isPublic()
      *      .argNum(2)
      *      .arg(1, "java.lang.String")
-     *      .build()
+     *      .build().toSet()
+     * or
+     * MethodMatcher.multiBuilder()
+     *      .match(MethodMatcher.builder().named("<init>")
+     *          .argsLength(3)
+     *          .arg(0, "org.apache.kafka.clients.consumer.ConsumerConfig")
+     *          .qualifier("constructor")
+     *          .build())
+     *      .match(MethodMatcher.builder().named("poll")
+     *          .argsLength(1)
+     *          .arg(0, "java.time.Duration")
+     *          .qualifier("poll")
+     *          .build())
+     *      .build();
      */
     Set<IMethodMatcher> getMethodMatcher();
 

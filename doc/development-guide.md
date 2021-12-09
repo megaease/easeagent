@@ -2,24 +2,186 @@
 - [Overview](#Overview)
 - [Plugin Structure](#Plugin-structure)
     - [The Simplest Plugin](#the-simplest-plugin)
+    - [Who: Plugin Definiton](#plugin-definition)
+    - [Where: Points](#points)
+    - [What: Interceptor](#interceptor)
+    - [AdviceTo Annotation](#adviceto-annotation)
 - [Tracing API](#Tracing-API)
 - [Metric API](#Metirc-API)
-- [Redirect API](#Redirect-API)
+- [Logging and Config API](#logging-and-config-API)
 
 ## Overview
-Most of easeagent's functionalities are supported by plugins.   
-This document describes how to develop plugins for easeagent, and it will be divided into four sections to introduce plugin development.
-1. Plugin structure, the plugin contains four components, which are the plugin definition, matcher, interceptor and the binding annotations between the three.
+Most of the Easeagent's functions are supported by plugins.   
+This document describes how to develop plugins for Easeagent, and it will be divided into four sections to introduce plugin development.
+1. Plugin structure, the plugin contains four components, which are the **Plugin definition**, **Points**, **Interceptor** and **Annotation** used to bind the three.
 2. Tracing API, which helps users complete the transaction tracing task.
 3. Metirc API, helps users to complete metrics data collection.
-4. Redirect API
+4. Logging and Configuration API
 
 ##  Plugin Structure
+All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains serveral plugins, eg. a "Tracking Plugin" and a "Metirc Plugin". But, we will focus on a single plugin first.
+![image](./images/plugin-structure.png)
+
 ### The Simplest Plugin
+
+### Plugin definition
+Plugin definition, defines what `domain` and `namespace` of this plugin by implement the `AgentPlugin` interface.
+
+```
+public interface AgentPlugin extends Ordered {
+    /**
+     * define the plugin name, avoiding conflicts with others
+     * it will be use as namespace when get configuration.
+     */
+    String getName();
+
+    /**
+     * define the plugin domain,
+     * it will be use to get configuration when loaded:
+     */
+    String getDomain();
+}
+
+```
+
+### Points
+Points defines the classes and methods to be enhanced and whether to add dynamic members and access methods to the instances of the classes that match.
+
+Each implementation of Points defines one or more enhancement injection points. When there are multiple methods in a matched class that need to execute different enhancement interceptors, a qualifier identifier needs to be assigned to each matched method as a keyword to bind a different Interceptor.
+```
+public interface Points {
+    /**
+     * return the defined class matcher matching a class or a group of classes
+     * eg.
+     * ClassMatcher.builder()
+     *      .hadInterface(A)
+     *      .isPublic()
+     *      .isAbstract()
+     *      .build()
+     *      .or()
+     *        .hasSuperClass(B)
+     *        .isPublic()
+     *        .build())
+     */
+    IClassMatcher getClassMatcher();
+
+    /**
+     * return the defined method matcher
+     * eg.
+     * MethodMatcher.builder().named("execute")
+     *      .isPublic()
+     *      .argNum(2)
+     *      .arg(1, "java.lang.String")
+     *      .build().toSet()
+     * or
+     * MethodMatcher.multiBuilder()
+     *      .match(MethodMatcher.builder().named("<init>")
+     *          .argsLength(3)
+     *          .arg(0, "org.apache.kafka.clients.consumer.ConsumerConfig")
+     *          .qualifier("constructor")
+     *          .build())
+     *      .match(MethodMatcher.builder().named("poll")
+     *          .argsLength(1)
+     *          .arg(0, "java.time.Duration")
+     *          .qualifier("poll")
+     *          .build())
+     *      .build();
+     */
+    Set<IMethodMatcher> getMethodMatcher();
+
+    /**
+     * when return true, the transformer will add a Object field and a accessor
+     * The dynamically added member can be accessed by AgentDynamicFieldAccessor:
+     *
+     * AgentDynamicFieldAccessor.setDynamicFieldValue(instance, value)
+     * value = AgentDynamicFieldAccessor.getDynamicFieldValue(instance)
+     */
+    default boolean isAddDynamicField() {
+        return false;
+    }
+}
+```
+
+### Interceptor
+Interceptor is the key point for implementing specific enhancements. 
+
+It has the name method `getName` and the initialization method `init`. 
+- The name will be used as `serviceId` in combination with the `domain` and `namespace` of the binding plugin to get the plugin configuration which will be automatically injected into the `Context`. The description of the plugin configuration can be found in the user manual.
+- The `init` method is invoked during transfrom, allowing users to initialize staic resources of interceptor, and also allowing to load third party classes which can't load by running time classloader.
+
+The `before` and `after` methods of the interceptor are called when the method being enhanced enters and returns, respectively.
+Both `before` and `after` methods have parameters `MethodInfo` and `Context`. 
+- `MethodInfo` contains all method information, including class name, method name, parameters, return value and exception information.
+- `Context` contains the Interceptor configuration that is automatically injected and updated ant other interface that support `tracing`, for details, please refer to the [Tracing API](#tracing-api) section.
+
+```
+public interface Interceptor extends Ordered {
+    /**
+     * @param methodInfo instrumented method info
+     * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
+     */
+    void before(MethodInfo methodInfo, Context context);
+
+    /**
+     * @param methodInfo instrumented method info
+     * @param context    Interceptor can pass data, method `after` of interceptor can receive context data
+     */
+    default void after(MethodInfo methodInfo, Context context) {
+    };
+
+    /**
+     * Interceptor can get interceptor config thought Config API :
+     * EaseAgent.configFactory.getConfig
+     * Config API require 3 params: domain, nameSpace, name
+     * domain and namespace are defined by plugin, the third param, name is defined here
+     *
+     * @return name, eg. tracing, metric, etc.
+     */
+    default String getName() {
+        return Order.TRACING.getName();
+    }
+
+    /**
+     * Initialization method for the interceptor,
+     * This method will be called and only be called once for every method which is injected by this interceptor,
+     * which means this method may be called several times, when there are several methods matched
+     *
+     * @param config interceptor configuration
+     * @param className injected method's class name
+     * @param methodName injected method name
+     * @param methodDescriptor injected method descriptor
+     */
+    default void init(Config config, String className, String methodName, String methodDescriptor) {
+    }
+}
+```
+
+### AdviceTo Annotation
+Within a plugin, there may be multiple interceptors, and multiple enhancement points, so which enhancement point is a particular interceptor used for?
+
+This can be specified through the `@AdviceTo` annotation, which is applied on the Interceptor's implemention to specify the enhancement point binding with the Interceptor.
+
+However, when there are multiple plugins within a plugin module, it is necessary to go a step further and specify the plugin to which the Interceptor is bound.
+
+```
+/**
+ * use to annotate Interceptor implementation,
+ * to link Interceptor to Points and AgentPlugin
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Repeatable(AdvicesTo.class)
+public @interface AdviceTo {
+    Class<? extends Points> value();
+    Class<? extends AgentPlugin> plugin() default AgentPlugin.class;
+    String qualifier() default "default";
+}
+```
+
 
 ##  Tracing API
 ##  Metric API
-##  Redirect API
+##  Logging and Configuration API
 
 
 The main function of EaseAgent is to collect Java method call trace and metrics data.

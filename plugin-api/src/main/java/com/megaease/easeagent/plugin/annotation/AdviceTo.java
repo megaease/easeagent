@@ -24,7 +24,7 @@ import java.lang.annotation.*;
 
 /**
  * use to annotate Interceptor implementation,
- * to link Interceptor to Pointcut
+ * to link Interceptor to Points and AgentPlugin
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

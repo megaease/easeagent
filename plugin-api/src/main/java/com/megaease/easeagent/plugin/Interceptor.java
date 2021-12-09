@@ -21,7 +21,6 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.enums.Order;
 
-@SuppressWarnings("unused")
 public interface Interceptor extends Ordered {
     /**
      * @param methodInfo instrumented method info
