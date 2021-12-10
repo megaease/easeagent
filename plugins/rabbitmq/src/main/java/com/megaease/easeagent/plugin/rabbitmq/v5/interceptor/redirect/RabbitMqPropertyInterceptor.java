@@ -35,19 +35,19 @@ public class RabbitMqPropertyInterceptor implements Interceptor {
         Integer port = hostAndPort.getPort();
         String uriStr = "";
         if (method.equals("setHost") && host != null) {
-            methodInfo.getArgs()[0] = host;
+            methodInfo.changeArg(0, host);
         } else if (method.equals("setPort") && port != null) {
-            methodInfo.getArgs()[0] = port;
+            methodInfo.changeArg(0, port);
         } else if (method.equals("setUri") && uriStr != null) {
             if (methodInfo.getArgs()[0] instanceof URI) {
-                methodInfo.getArgs()[0] = new URI(uriStr);
+                methodInfo.changeArg(0, new URI(uriStr));
             } else if (methodInfo.getArgs()[0] instanceof String) {
-                methodInfo.getArgs()[0] = uriStr;
+                methodInfo.changeArg(0, uriStr);
             }
         } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
-            methodInfo.getArgs()[0] = cnf.getUserName();
+            methodInfo.changeArg(0, cnf.getUserName());
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
-            methodInfo.getArgs()[0] = cnf.getPassword();
+            methodInfo.changeArg(0, cnf.getPassword());
         }
     }
 

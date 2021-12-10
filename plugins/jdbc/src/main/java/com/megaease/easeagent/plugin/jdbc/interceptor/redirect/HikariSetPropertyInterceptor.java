@@ -38,11 +38,11 @@ public class HikariSetPropertyInterceptor implements Interceptor {
         }
         if (methodInfo.getMethod().equals("setJdbcUrl")) {
             String jdbcUrl = cnf.getFirstUri();
-            methodInfo.getArgs()[0] = jdbcUrl;
+            methodInfo.changeArg(0, jdbcUrl);
         } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
-            methodInfo.getArgs()[0] = cnf.getUserName();
+            methodInfo.changeArg(0, cnf.getUserName());
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
-            methodInfo.getArgs()[0] = cnf.getPassword();
+            methodInfo.changeArg(0, cnf.getPassword());
         }
     }
 

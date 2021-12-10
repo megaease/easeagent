@@ -25,11 +25,11 @@ public class RedisPropertiesSetPropertyInterceptor implements Interceptor {
         String host = hostAndPort.getHost();
         Integer port = hostAndPort.getPort();
         if (method.equals("setHost") && host != null) {
-            methodInfo.getArgs()[0] = host;
+            methodInfo.changeArg(0, host);
         } else if (method.equals("setPort") && port != null) {
-            methodInfo.getArgs()[0] = port;
+            methodInfo.changeArg(0, port);
         } else if (method.equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
-            methodInfo.getArgs()[0] = cnf.getPassword();
+            methodInfo.changeArg(0, cnf.getPassword());
         }
     }
 
