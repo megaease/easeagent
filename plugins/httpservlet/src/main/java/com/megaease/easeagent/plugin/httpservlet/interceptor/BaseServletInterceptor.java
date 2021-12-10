@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.simple.interceptor;
+package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.simple.utils.InternalAsyncListener;
-import com.megaease.easeagent.plugin.simple.utils.ServletUtils;
+import com.megaease.easeagent.plugin.httpservlet.utils.InternalAsyncListener;
+import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
 import javax.servlet.http.HttpServletRequest;

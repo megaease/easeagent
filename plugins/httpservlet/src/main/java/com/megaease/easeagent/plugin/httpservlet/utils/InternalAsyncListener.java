@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.simple.utils;
+package com.megaease.easeagent.plugin.httpservlet.utils;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;

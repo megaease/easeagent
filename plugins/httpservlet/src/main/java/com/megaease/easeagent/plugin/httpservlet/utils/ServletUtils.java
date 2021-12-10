@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.simple.utils;
+package com.megaease.easeagent.plugin.httpservlet.utils;
 
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.simple.interceptor.DoFilterTraceInterceptor;
+import com.megaease.easeagent.plugin.httpservlet.interceptor.DoFilterTraceInterceptor;
 import com.megaease.easeagent.plugin.utils.ClassUtils;
 import lombok.SneakyThrows;
 

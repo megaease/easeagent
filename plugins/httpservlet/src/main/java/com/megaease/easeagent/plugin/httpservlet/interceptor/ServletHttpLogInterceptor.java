@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.simple.interceptor;
+package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
@@ -26,9 +26,9 @@ import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.simple.AccessPlugin;
-import com.megaease.easeagent.plugin.simple.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.simple.utils.ServletUtils;
+import com.megaease.easeagent.plugin.httpservlet.AccessPlugin;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
 import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
