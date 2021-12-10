@@ -47,6 +47,7 @@ public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
     public static final String SPAN_ERROR_TAG_NAME = "error";
     public static final String SPAN_LOCAL_COMPONENT_TAG_NAME = "local-component";
     public static final String SPAN_URL = "url";
+    private static volatile MD5SQLCompression md5SQLCompression;
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
@@ -55,7 +56,7 @@ public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
          * make it loaded during init, so these classes can be found
          * during running
          */
-        MD5SQLCompression.getInstance(config);
+        md5SQLCompression = MD5SQLCompression.getInstance();
         DigestUtils.md5Hex("");
     }
 
@@ -71,7 +72,7 @@ public class JdbcStmTracingInterceptor implements FirstEnterInterceptor {
         span.name(methodInfo.getMethod());
         span.kind(Span.Kind.CLIENT);
         span.tag(SPAN_SQL_QUERY_TAG_NAME,
-            MD5SQLCompression.getInstance(context.getConfig()).compress(sqlInfo.getSql()));
+            md5SQLCompression.compress(sqlInfo.getSql()));
         span.tag(SPAN_LOCAL_COMPONENT_TAG_NAME, "database");
         Connection conn = sqlInfo.getConnection();
         String url = JdbcUtils.getUrl(conn);

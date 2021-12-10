@@ -5,6 +5,7 @@ import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -89,7 +90,8 @@ public class CompatibilityConversion {
 
     private static Conversion metricConversion(String key) {
         if (key.equals(ConfigConst.Observability.METRICS_ENABLED)) {
-            return new FinalConversion(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_METRIC_ENABLED, true);
+            return new MultipleFinalConversion(Arrays.asList(new FinalConversion(ConfigConst.Observability.METRICS_ENABLED, true),
+                new FinalConversion(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_METRIC_ENABLED, true)), true);
         }
         return conversion(key, METRIC_SKIP, ConfigConst.PluginID.METRIC);
     }
@@ -148,6 +150,30 @@ public class CompatibilityConversion {
             return key;
         }
 
+        public boolean isChange() {
+            return change;
+        }
+    }
+
+    static class MultipleFinalConversion implements Conversion<List<String>> {
+        private final List<FinalConversion> conversions;
+        private final boolean change;
+
+        MultipleFinalConversion(@Nonnull List<FinalConversion> conversions, boolean change) {
+            this.conversions = conversions;
+            this.change = change;
+        }
+
+        @Override
+        public List<String> transform(Map<String, String> configs, String value) {
+            List<String> result = new ArrayList<>();
+            for (FinalConversion conversion : conversions) {
+                result.add(conversion.transform(configs, value));
+            }
+            return result;
+        }
+
+        @Override
         public boolean isChange() {
             return change;
         }

@@ -25,6 +25,8 @@ import com.megaease.easeagent.httpserver.AgentHttpServer;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.tools.config.AutoRefreshRegistry;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -41,6 +43,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpServerTest {
@@ -71,7 +74,7 @@ public class HttpServerTest {
     @Test
     public void httpServer() throws Exception {
         HashMap<String, String> source = new HashMap<>();
-        source.put("plugin.observability.global.metrics.enabled", "true");
+        source.put("plugin.observability.global.metric.enabled", "true");
         source.put("plugin.observability.global.tracings.enabled", "true");
 
         source.put("plugin.observability.global.kafka-tracings.enabled", "true");
@@ -80,11 +83,12 @@ public class HttpServerTest {
         source.put("plugin.observability.kafka.kafka-tracings.size", "13");
         source.put("plugin.observability.kafka.tracings.enabled", "true");
         source.put("plugin.observability.kafka.tracings.servicePrefix", "true");
-        source.put("plugin.observability.kafka.metrics.enabled", "true");
-        source.put("plugin.observability.kafka.metrics.interval", "30");
+        source.put("plugin.observability.kafka.metric.enabled", "true");
+        source.put("plugin.observability.kafka.metric.enabled", "true");
+        source.put("plugin.observability.kafka.metric.interval", "30");
 
-        source.put("plugin.observability.kafka.metrics.topic", "platform-meter");
-        source.put("plugin.observability.kafka.metrics.appendType", "kafka");
+        source.put("plugin.observability.kafka.metric.topic", "platform-meter");
+        source.put("plugin.observability.kafka.metric.appendType", "kafka");
 
         Configs configs = new Configs(source);
         IConfigFactory iConfigFactory = PluginConfigManager.builder(configs).build();
@@ -92,13 +96,14 @@ public class HttpServerTest {
 ///plugins/domains/observability/namespaces/kafka/kafka-tracings/properties/enabled/true/1
         iConfigFactory.getConfig("observability", "kafka", "kafka-tracings").addChangeListener(new ConfigChange(count, "kafka.kafka-tracings"));
         iConfigFactory.getConfig("observability", "kafka", "tracings").addChangeListener(new ConfigChange(count, "kafka.tracings"));
-        iConfigFactory.getConfig("observability", "kafka", "metrics").addChangeListener(new ConfigChange(count, "kafka.metrics"));
+        iConfigFactory.getConfig("observability", "kafka", "metric").addChangeListener(new ConfigChange(count, "kafka.metric"));
         try {
             ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
             setWrappedConfigManager(new WrappedConfigManager(customClassLoader, configs));
         } catch (Exception e) {
             System.out.println("" + e.getMessage());
         }
+        EaseAgent.configFactory = iConfigFactory;
 
         DatagramSocket s = new DatagramSocket(0);
         int port = s.getLocalPort();
@@ -106,16 +111,17 @@ public class HttpServerTest {
         System.out.println("run up http server : " + httpServer);
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
         List<AgentHttpHandler> list = new ArrayList<>();
+        list.add(new Bootstrap.ServiceUpdateAgentHttpHandler());
         list.add(new Bootstrap.PluginPropertyHttpHandler());
         list.add(new Bootstrap.PluginPropertiesHttpHandler());
         agentHttpServer.addHttpRoutes(list);
         agentHttpServer.startServer();
 
         Thread.sleep(100);
-        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/15/1");
-        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/14/1");
-        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/13/1");
-        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties/interval/12/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/interval/15/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/interval/14/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/interval/13/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/interval/12/1");
         Assert.assertEquals(count.get(), 4);
         get(httpServer + "/plugins/domains/observability/namespaces/kafka/kafka-tracings/properties/enabled/false/1");
         get(httpServer + "/plugins/domains/observability/namespaces/kafka/kafka-tracings/properties/enabled/true/1");
@@ -123,11 +129,27 @@ public class HttpServerTest {
         get(httpServer + "/plugins/domains/observability/namespaces/global/tracings/properties/enabled/false/1");
         get(httpServer + "/plugins/domains/observability/namespaces/global/tracings/properties/enabled/true/1");
         Assert.assertEquals(count.get(), 8);
-        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties", "{\"enabled\":\"false\",\"interval\": 15, \"version\": \"1\"}");
-        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties", "{\"enabled\":\"true\",\"interval\": 15, \"version\": \"1\"}");
-        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metrics/properties", "{\"enabled\":\"true\",\"interval\": 13, \"version\": \"1\"}");
+        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties", "{\"enabled\":\"false\",\"interval\": 15, \"version\": \"1\"}");
+        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties", "{\"enabled\":\"true\",\"interval\": 15, \"version\": \"1\"}");
+        post(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties", "{\"enabled\":\"true\",\"interval\": 13, \"version\": \"1\"}");
         Assert.assertEquals(count.get(), 11);
-//        Thread.sleep(TimeUnit.HOURS.toMillis(1));
+
+        Config config = AutoRefreshRegistry.getOrCreate("observability", "kafka", "metric");
+        Assert.assertTrue(config.enabled());
+
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/enabled/false/1");
+
+        Assert.assertFalse(config.enabled());
+
+        get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/enabled/true/1");
+        get(httpServer + "/plugins/domains/observability/namespaces/global/metric/properties/enabled/false/1");
+        Assert.assertFalse(config.enabled());
+
+        get(httpServer + "/plugins/domains/observability/namespaces/global/metric/properties/enabled/true/1");
+
+        post(httpServer + "/config-service", "{\"observability.metrics.jdbcConnection.enabled\":\"false\",\"observability.metrics.kafka.enabled\": \"false\", \"version\": \"1\"}");
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
     }
 
     static String get(String urlStr) throws IOException {

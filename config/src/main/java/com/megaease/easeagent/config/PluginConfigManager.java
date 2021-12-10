@@ -128,7 +128,14 @@ public class PluginConfigManager implements IConfigFactory {
         for (Key changeKey : changeKeys) {
             final PluginConfig oldConfig = pluginConfigs.remove(changeKey);
             final PluginConfig newConfig = getConfig(changeKey.getDomain(), changeKey.getNamespace(), changeKey.id, oldConfig);
-            oldConfig.foreachConfigChangeListener(listener -> listener.onChange(oldConfig, newConfig));
+            if (oldConfig == null) {
+                continue;
+            }
+            try {
+                oldConfig.foreachConfigChangeListener(listener -> listener.onChange(oldConfig, newConfig));
+            } catch (Exception e) {
+                LOGGER.warn("change config<{}> fail: {}", changeKey.toString(), e.getMessage());
+            }
         }
     }
 
@@ -169,6 +176,15 @@ public class PluginConfigManager implements IConfigFactory {
         public int hashCode() {
 
             return Objects.hash(domain, namespace, id);
+        }
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                "domain='" + domain + '\'' +
+                ", namespace='" + namespace + '\'' +
+                ", id='" + id + '\'' +
+                '}';
         }
     }
 
