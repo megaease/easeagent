@@ -61,5 +61,13 @@ public class CompatibilityConversionTest {
         newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.tracings.output.enabled", "true"));
         assertEquals(newMap.size(), 1);
         assertEquals(newMap.get("observability.tracings.output.enabled"), "true");
+
+        newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.metrics.jdbcConnection.interval", "30"));
+        assertEquals(newMap.size(), 1);
+        assertEquals(newMap.get("plugin.observability.jdbcConnection.metric.interval"), "30");
+
+        newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.metrics.aaaaaaaaaa.interval", "30"));
+        assertEquals(newMap.size(), 1);
+        assertEquals(newMap.get("plugin.observability.aaaaaaaaaa.metric.interval"), "30");
     }
 }

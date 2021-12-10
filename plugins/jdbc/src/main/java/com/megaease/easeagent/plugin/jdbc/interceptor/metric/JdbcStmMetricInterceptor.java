@@ -49,9 +49,7 @@ public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
                     metric = AbstractMetric.getInstance(config,
                         new Tags("application", "jdbc-statement", "signature"),
                         (config1, tags) -> new JdbcMetric(config1, tags));
-                    Config md5Config = EaseAgent.configFactory
-                        .getConfig(ConfigConst.OBSERVABILITY, ConfigConst.Namespace.MD5_DICTIONARY, ConfigConst.PluginID.METRIC);
-                    sqlCompression = MD5SQLCompression.getInstance(md5Config);
+                    sqlCompression = MD5SQLCompression.getInstance();
                     cache = CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize).removalListener(metric).build();
 

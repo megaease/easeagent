@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.tools.config;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +27,16 @@ import java.util.function.Supplier;
 
 public class AutoRefreshRegistry {
     private static final ConcurrentMap<Key, AutoRefreshConfig> configs = new ConcurrentHashMap<>();
+
+    public static BaseAutoRefreshConfig getOrCreate(String domain, String namespace, String name) {
+        Config config = EaseAgent.configFactory
+            .getConfig(domain, namespace, name);
+        return getOrCreate(config);
+    }
+
+    public static BaseAutoRefreshConfig getOrCreate(Config config) {
+        return getOrCreate(config, () -> new BaseAutoRefreshConfig());
+    }
 
     public static <C extends AutoRefreshConfig> C getOrCreate(Config config, Supplier<C> supplier) {
         Key key = new Key(config.domain(), config.namespace(), config.id());
