@@ -20,9 +20,9 @@ package com.megaease.easeagent.plugin.tools.trace;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
-public abstract class BaseHttpClientTracingInterceptor implements FirstEnterInterceptor {
+public abstract class BaseHttpClientTracingInterceptor implements NonReentrantInterceptor {
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {

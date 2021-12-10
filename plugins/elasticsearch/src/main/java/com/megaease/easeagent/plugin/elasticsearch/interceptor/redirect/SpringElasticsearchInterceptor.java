@@ -8,14 +8,14 @@ import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
 import com.megaease.easeagent.plugin.elasticsearch.ElasticsearchRedirectPlugin;
 import com.megaease.easeagent.plugin.elasticsearch.advice.SpringElasticsearchAdvice;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @AdviceTo(value = SpringElasticsearchAdvice.class, plugin = ElasticsearchRedirectPlugin.class)
-public class SpringElasticsearchInterceptor implements FirstEnterInterceptor {
+public class SpringElasticsearchInterceptor implements NonReentrantInterceptor {
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_ES);

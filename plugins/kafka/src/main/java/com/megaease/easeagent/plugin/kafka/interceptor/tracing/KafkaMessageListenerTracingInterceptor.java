@@ -26,13 +26,13 @@ import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaMessageListenerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.Map;
 
 @AdviceTo(value = KafkaMessageListenerAdvice.class, plugin = KafkaPlugin.class)
-public class KafkaMessageListenerTracingInterceptor implements FirstEnterInterceptor {
+public class KafkaMessageListenerTracingInterceptor implements NonReentrantInterceptor {
     private static final Object SPAN = new Object();
 
     @Override

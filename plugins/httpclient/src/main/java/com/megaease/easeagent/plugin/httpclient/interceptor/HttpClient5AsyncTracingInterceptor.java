@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.httpclient.advice.HttpClient5AsyncAdvice;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.Header;
@@ -36,7 +36,7 @@ import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import java.net.URISyntaxException;
 
 @AdviceTo(value = HttpClient5AsyncAdvice.class, qualifier = "default")
-public class HttpClient5AsyncTracingInterceptor implements FirstEnterInterceptor {
+public class HttpClient5AsyncTracingInterceptor implements NonReentrantInterceptor {
 
 
     @Override

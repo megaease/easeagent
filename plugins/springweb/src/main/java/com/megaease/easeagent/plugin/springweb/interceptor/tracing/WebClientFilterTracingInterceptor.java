@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.springweb.WebClientPlugin;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientFilterAdvice;
 import com.megaease.easeagent.plugin.springweb.reactor.AgentMono;
@@ -38,7 +38,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collection;
 
 @AdviceTo(value = WebClientFilterAdvice.class, plugin = WebClientPlugin.class)
-public class WebClientFilterTracingInterceptor implements FirstEnterInterceptor {
+public class WebClientFilterTracingInterceptor implements NonReentrantInterceptor {
     private static final Object PROGRESS_CONTEXT = new Object();
 
     @Override

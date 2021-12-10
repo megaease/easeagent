@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet.interceptor;
+package com.megaease.easeagent.plugin.simple.interceptor;
 
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
-import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.simple.HttpServletPlugin;
+import com.megaease.easeagent.plugin.simple.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
 
 import javax.servlet.http.HttpServletRequest;

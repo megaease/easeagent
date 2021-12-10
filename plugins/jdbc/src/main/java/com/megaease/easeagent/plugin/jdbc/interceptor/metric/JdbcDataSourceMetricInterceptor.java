@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcConnectionMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
@@ -33,7 +33,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @AdviceTo(value = JdbcDataSourceAdvice.class, plugin = JdbcConnectionMetricPlugin.class)
-public class JdbcDataSourceMetricInterceptor implements FirstEnterInterceptor {
+public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor {
     private static JdbcMetric metric;
     public static final String ERR_CON_METRIC_KEY = "err-con";
 

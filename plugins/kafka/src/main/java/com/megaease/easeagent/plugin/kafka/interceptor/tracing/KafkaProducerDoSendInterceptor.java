@@ -26,13 +26,13 @@ import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.AsyncCallback;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 @AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend", plugin = KafkaPlugin.class)
-public class KafkaProducerDoSendInterceptor implements FirstEnterInterceptor {
+public class KafkaProducerDoSendInterceptor implements NonReentrantInterceptor {
     private static final String remoteServiceName = "kafka";
     private static final Object SCOPE = new Object();
     private static final Object SPAN = new Object();

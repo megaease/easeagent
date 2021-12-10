@@ -5,7 +5,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.redis.RedisRedirectPlugin;
 import com.megaease.easeagent.plugin.redis.advice.LettuceRedisClientAdvice;
 import com.megaease.easeagent.plugin.redis.interceptor.RedisClientUtils;
@@ -13,7 +13,7 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 
 @AdviceTo(value = LettuceRedisClientAdvice.class, qualifier = "constructor", plugin = RedisRedirectPlugin.class)
-public class RedisClientConstructInterceptor implements FirstEnterInterceptor {
+public class RedisClientConstructInterceptor implements NonReentrantInterceptor {
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_REDIS);

@@ -20,9 +20,9 @@ package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
-public abstract class CommonRedisTracingInterceptor implements FirstEnterInterceptor {
+public abstract class CommonRedisTracingInterceptor implements NonReentrantInterceptor {
     private static final Object ENTER = new Object();
     private static final Object SPAN_KEY = new Object();
 

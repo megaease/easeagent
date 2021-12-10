@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet.interceptor;
+package com.megaease.easeagent.plugin.simple.interceptor;
 
-import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
+import com.megaease.easeagent.plugin.simple.utils.ServletUtils;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 

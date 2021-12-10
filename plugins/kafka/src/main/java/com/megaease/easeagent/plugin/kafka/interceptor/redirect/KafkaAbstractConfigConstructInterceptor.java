@@ -5,12 +5,12 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
 import java.util.Map;
 import java.util.Properties;
 
-public class KafkaAbstractConfigConstructInterceptor implements FirstEnterInterceptor {
+public class KafkaAbstractConfigConstructInterceptor implements NonReentrantInterceptor {
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {

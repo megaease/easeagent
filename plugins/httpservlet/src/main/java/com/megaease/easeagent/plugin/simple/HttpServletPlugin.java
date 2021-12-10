@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet;
+package com.megaease.easeagent.plugin.simple;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
-public class AccessPlugin implements AgentPlugin {
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Namespace.HTTP_SERVLET;
+
+public class HttpServletPlugin implements AgentPlugin {
     @Override
     public String getNamespace() {
-        return ConfigConst.Namespace.ACCESS;
+        return HTTP_SERVLET;
     }
 
     @Override

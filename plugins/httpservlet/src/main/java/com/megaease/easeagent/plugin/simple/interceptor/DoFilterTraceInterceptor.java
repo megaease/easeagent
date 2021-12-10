@@ -16,17 +16,17 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet.interceptor;
+package com.megaease.easeagent.plugin.simple.interceptor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
-import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
-import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.simple.HttpServletPlugin;
+import com.megaease.easeagent.plugin.simple.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.simple.utils.ServletUtils;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @AdviceTo(value = DoFilterAdvice.class, qualifier = "default", plugin = HttpServletPlugin.class)
-public class DoFilterTraceInterceptor implements FirstEnterInterceptor {
+public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
     private static final String AFTER_MARK = DoFilterTraceInterceptor.class.getName() + "$AfterMark";
 
     @Override

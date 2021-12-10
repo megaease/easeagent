@@ -23,11 +23,9 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
@@ -35,7 +33,7 @@ import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
-public class JdbcStmMetricInterceptor implements FirstEnterInterceptor {
+public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
     private static final int maxCacheSize = 1000;
     private static JdbcMetric metric;
     private static MD5SQLCompression sqlCompression;

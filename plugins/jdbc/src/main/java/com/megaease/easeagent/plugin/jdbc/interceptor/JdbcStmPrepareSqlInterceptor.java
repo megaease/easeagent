@@ -28,13 +28,13 @@ import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
 import java.sql.Statement;
 
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcTracingPlugin.class)
 @AdviceTo(value = JdbcStatementAdvice.class, qualifier = "batch", plugin = JdbcTracingPlugin.class)
-public class JdbcStmPrepareSqlInterceptor implements FirstEnterInterceptor {
+public class JdbcStmPrepareSqlInterceptor implements NonReentrantInterceptor {
     private static final Logger log = EaseAgent.getLogger(JdbcStmPrepareSqlInterceptor.class);
 
     @Override

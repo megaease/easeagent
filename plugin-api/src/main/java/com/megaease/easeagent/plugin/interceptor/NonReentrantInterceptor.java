@@ -24,7 +24,7 @@ import com.megaease.easeagent.plugin.api.Context;
 /**
  *
  */
-public interface FirstEnterInterceptor extends Interceptor {
+public interface NonReentrantInterceptor extends Interceptor {
 
     @Override
     default void before(MethodInfo methodInfo, Context context) {

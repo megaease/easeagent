@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.okhttp.advice.OkHttpAdvice;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import okhttp3.Call;
@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 @AdviceTo(value = OkHttpAdvice.class, qualifier = "enqueue")
-public class OkHttpAsyncTracingInterceptor implements FirstEnterInterceptor {
+public class OkHttpAsyncTracingInterceptor implements NonReentrantInterceptor {
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         Object realCall = methodInfo.getInvoker();

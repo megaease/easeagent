@@ -26,12 +26,12 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.AsyncCallback;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 @AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend", plugin = KafkaPlugin.class)
-public class KafkaProducerMetricInterceptor implements FirstEnterInterceptor {
+public class KafkaProducerMetricInterceptor implements NonReentrantInterceptor {
     private static volatile KafkaMetric kafkaMetric;
 
 

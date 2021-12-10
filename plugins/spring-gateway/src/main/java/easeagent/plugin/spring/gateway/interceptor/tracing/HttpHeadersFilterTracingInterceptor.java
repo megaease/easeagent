@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.HttpHeadersFilterAdvice;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @AdviceTo(value = HttpHeadersFilterAdvice.class, plugin = SpringGatewayPlugin.class)
-public class HttpHeadersFilterTracingInterceptor implements FirstEnterInterceptor {
+public class HttpHeadersFilterTracingInterceptor implements NonReentrantInterceptor {
     // org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter
     static final String CLIENT_HEADER_ATTR = HttpHeadersFilterTracingInterceptor.class.getName() + ".Headers";
 

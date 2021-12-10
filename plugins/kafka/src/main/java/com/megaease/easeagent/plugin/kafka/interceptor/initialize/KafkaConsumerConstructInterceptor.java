@@ -25,14 +25,14 @@ import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.util.List;
 import java.util.Map;
 
 @AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "constructor", plugin = KafkaPlugin.class)
-public class KafkaConsumerConstructInterceptor implements FirstEnterInterceptor {
+public class KafkaConsumerConstructInterceptor implements NonReentrantInterceptor {
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {

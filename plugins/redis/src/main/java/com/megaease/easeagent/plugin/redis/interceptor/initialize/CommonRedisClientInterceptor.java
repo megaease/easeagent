@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.redis.interceptor.RedisClientUtils;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -34,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.megaease.easeagent.plugin.redis.interceptor.RedisClientUtils.toURI;
 
-public class CommonRedisClientInterceptor implements FirstEnterInterceptor {
+public class CommonRedisClientInterceptor implements NonReentrantInterceptor {
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         if (!methodInfo.isSuccess()) {

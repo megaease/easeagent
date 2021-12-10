@@ -26,7 +26,7 @@ import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -36,7 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "poll", plugin = KafkaPlugin.class)
-public class KafkaConsumerTracingInterceptor implements FirstEnterInterceptor {
+public class KafkaConsumerTracingInterceptor implements NonReentrantInterceptor {
     private static final String remoteServiceName = "kafka";
     boolean singleRootSpanOnReceiveBatch = true;
 

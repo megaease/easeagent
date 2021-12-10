@@ -28,13 +28,13 @@ import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcConnectionAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
 import java.sql.Connection;
 import java.sql.Statement;
 
 @AdviceTo(value = JdbcConnectionAdvice.class, plugin = JdbcTracingPlugin.class)
-public class JdbConPrepareOrCreateStmInterceptor implements FirstEnterInterceptor {
+public class JdbConPrepareOrCreateStmInterceptor implements NonReentrantInterceptor {
     private static final Logger logger = EaseAgent.getLogger(JdbConPrepareOrCreateStmInterceptor.class);
 
     @Override

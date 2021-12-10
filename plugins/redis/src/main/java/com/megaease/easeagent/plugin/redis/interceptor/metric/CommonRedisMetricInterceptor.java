@@ -23,10 +23,10 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.interceptor.FirstEnterInterceptor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.metrics.RedisMetric;
 
-public abstract class CommonRedisMetricInterceptor implements FirstEnterInterceptor {
+public abstract class CommonRedisMetricInterceptor implements NonReentrantInterceptor {
     private static volatile RedisMetric REDIS_METRIC = null;
     private static final Object ENTER = new Object();
     private static final Object START = new Object();
