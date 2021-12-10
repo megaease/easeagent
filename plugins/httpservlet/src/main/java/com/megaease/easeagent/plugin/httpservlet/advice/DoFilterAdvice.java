@@ -23,8 +23,6 @@ import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
-import javax.servlet.Filter;
-import javax.servlet.http.HttpServlet;
 import java.util.Set;
 
 public class DoFilterAdvice implements Points {
@@ -54,14 +52,10 @@ public class DoFilterAdvice implements Points {
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.multiBuilder()
             .match(MethodMatcher.builder().named("doFilter")
-                .isPublic()
-                .argsLength(3)
                 .arg(0, SERVLET_REQUEST)
                 .arg(1, SERVLET_RESPONSE)
-                .returnType("void")
-                .qualifier("default")
-                .build())
-            .match(MethodMatcher.builder().named("service")
+                .or()
+                .named("service")
                 .arg(0, SERVLET_REQUEST)
                 .arg(1, SERVLET_RESPONSE)
                 .qualifier("default")

@@ -161,6 +161,9 @@ public class SessionContext implements InitializeContext {
         }
         for (String field : fields) {
             String value = request.header(field);
+            if (value == null) {
+                continue;
+            }
             progressContext.setHeader(field, value);
             context.put(field, value);
         }
