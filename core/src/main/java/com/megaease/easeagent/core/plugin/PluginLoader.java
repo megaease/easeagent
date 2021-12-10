@@ -90,7 +90,7 @@ public class PluginLoader {
     public static void pluginLoad() {
         for (AgentPlugin plugin : BaseLoader.loadOrdered(AgentPlugin.class)) {
             log.info(
-                "Loading extension {}:{} [class {}]",
+                "Loading plugin {}:{} [class {}]",
                 plugin.getDomain(),
                 plugin.getNamespace(),
                 plugin.getClass().getName());

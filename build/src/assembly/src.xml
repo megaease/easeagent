@@ -38,7 +38,7 @@
         -->
 
         <fileSet>
-            <directory>${project.basedir}/target/plugins/</directory>
+            <directory>${project.basedir}/target/inner-plugins/</directory>
             <outputDirectory>plugins</outputDirectory>
             <includes>
                 <include>*.jar</include>

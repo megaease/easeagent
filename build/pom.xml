@@ -118,8 +118,8 @@
                         <phase>prepare-package</phase>
                         <configuration>
                             <target>
-                                <mkdir dir="target/plugins"/>
-                                <copy todir="target/plugins" flatten="true">
+                                <mkdir dir="target/inner-plugins"/>
+                                <copy todir="target/inner-plugins" flatten="true">
                                     <fileset dir="${project.basedir}/../plugins" includes="**/*.jar"/>
                                 </copy>
 

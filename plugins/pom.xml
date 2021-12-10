@@ -35,6 +35,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.6.1</version>
                     <configuration>
                         <source>${version.java}</source>
                         <target>${version.java}</target>
@@ -49,6 +50,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
                     <configuration>
                         <archive>
                             <manifest>

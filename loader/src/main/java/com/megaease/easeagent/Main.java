@@ -36,6 +36,7 @@ import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -61,11 +62,8 @@ public class Main {
         urls.addAll(nestArchiveUrls(archive, PLUGINS));
         File p = new File(jar.getParent() + File.separator + "plugins");
         if (p.exists()) {
-            URL pUrl = p.toURI().toURL();
-            urls.add(pUrl);
+            urls.addAll(directoryPluginUrls(p));
         }
-        // add plugins directory
-        CodeSource codeSource = Main.class.getProtectionDomain().getCodeSource();
 
         final ClassLoader loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
 
@@ -149,6 +147,32 @@ public class Main {
             }
         });
 
+        return urls;
+    }
+
+    private static ArrayList<URL> directoryPluginUrls(File directory) {
+        if (!directory.isDirectory()) {
+            return new ArrayList<>();
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return new ArrayList<>();
+        }
+
+        final ArrayList<URL> urls = new ArrayList<>(files.length);
+
+        Arrays.stream(files).forEach(item -> {
+            if (!item.getName().endsWith("jar")) {
+                return;
+            }
+            try {
+                URL pUrl = item.toURI().toURL();
+                urls.add(pUrl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        });
         return urls;
     }
 
