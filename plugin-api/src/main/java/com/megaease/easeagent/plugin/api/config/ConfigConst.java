@@ -23,15 +23,19 @@ public interface ConfigConst {
     String PLUGIN_GLOBAL = "global";
     String DELIMITER = ".";
     String PLUGIN_PREFIX = PLUGIN + DELIMITER;
-    String PLUGIN_FORMAT = join(PLUGIN, "%s", "%s", "%s", "%s");//plugin.<Domain>.<Namespace>.<ID>.<Properties>
+    String PLUGIN_FORMAT = join(PLUGIN, "%s", "%s", "%s", "%s");//plugin.<Domain>.<Namespace>.<ServiceId>.<Properties>
     String SERVICE_NAME = "name";
     String SYSTEM_NAME = "system";
+
+    // domain
     String OBSERVABILITY = "observability";
     String INTEGRABILITY = "integrability";
     String GLOBAL_CANARY_LABELS = "globalCanaryHeaders";
-    String KEY_ID_METRIC = "metric";
-    String KEY_ID_TRACING = "tracing";
-    String KEY_COMM_ENABLED = "enabled";
+
+    // ServiceId
+    String METRIC_SERVICE_ID = "metric";
+    String TRACING_SERVICE_ID = "tracing";
+    String SERVICE_ID_ENABLED_KEY = "enabled";
 
     static String join(String... texts) {
         return String.join(DELIMITER, texts);
@@ -112,8 +116,8 @@ public interface ConfigConst {
     }
 
     interface Plugin {
-        String OBSERVABILITY_GLOBAL_METRIC_ENABLED = join(PLUGIN, OBSERVABILITY, PLUGIN_GLOBAL, KEY_ID_METRIC, KEY_COMM_ENABLED);
-        String OBSERVABILITY_GLOBAL_TRACING_ENABLED = join(PLUGIN, OBSERVABILITY, PLUGIN_GLOBAL, KEY_ID_TRACING, KEY_COMM_ENABLED);
+        String OBSERVABILITY_GLOBAL_METRIC_ENABLED = join(PLUGIN, OBSERVABILITY, PLUGIN_GLOBAL, METRIC_SERVICE_ID, SERVICE_ID_ENABLED_KEY);
+        String OBSERVABILITY_GLOBAL_TRACING_ENABLED = join(PLUGIN, OBSERVABILITY, PLUGIN_GLOBAL, TRACING_SERVICE_ID, SERVICE_ID_ENABLED_KEY);
     }
 
     interface Namespace {
@@ -144,5 +148,4 @@ public interface ConfigConst {
         String METRIC = "metric";
         String REDIRECT = "redirect";
     }
-
 }

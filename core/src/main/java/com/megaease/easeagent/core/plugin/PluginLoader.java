@@ -92,7 +92,7 @@ public class PluginLoader {
             log.info(
                 "Loading extension {}:{} [class {}]",
                 plugin.getDomain(),
-                plugin.getName(),
+                plugin.getNamespace(),
                 plugin.getClass().getName());
 
             try {
@@ -103,7 +103,7 @@ public class PluginLoader {
                 log.error(
                     "Unable to load extension {}:{} [class {}]",
                     plugin.getDomain(),
-                    plugin.getName(),
+                    plugin.getNamespace(),
                     plugin.getClass().getName(),
                     e);
             }

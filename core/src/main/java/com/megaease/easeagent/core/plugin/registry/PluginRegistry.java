@@ -29,6 +29,8 @@ import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import net.bytebuddy.description.method.MethodDescription;
@@ -41,6 +43,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class PluginRegistry {
+    static Logger log = EaseAgent.getLogger(PluginRegistry.class);
+
     static ConcurrentHashMap<String, AgentPlugin> qualifierToPlugin = new ConcurrentHashMap<>();
     static ConcurrentHashMap<String, AgentPlugin> pointsToPlugin = new ConcurrentHashMap<>();
     static ConcurrentHashMap<String, AgentPlugin> pluginClassnameToPlugin = new ConcurrentHashMap<>();
@@ -76,7 +80,9 @@ public class PluginRegistry {
             }
             Builder providerBuilder = interceptorProviders.get(index);
             MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, providerBuilder);
-            indexToMethodTransformation.putIfAbsent(index, mt);
+            if (indexToMethodTransformation.putIfAbsent(index, mt) != null) {
+                log.error("There are duplicate qualifier in Points:{}!", qualifier);
+            };
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
         AgentPlugin plugin = pointsToPlugin.get(pointsClassName);

@@ -24,7 +24,7 @@ import static com.megaease.easeagent.plugin.api.config.ConfigConst.Namespace.HTT
 
 public class HttpServletPlugin implements AgentPlugin {
     @Override
-    public String getName() {
+    public String getNamespace() {
         return HTTP_SERVLET;
     }
 

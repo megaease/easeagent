@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 public class SpringGatewayPlugin implements AgentPlugin {
 
     @Override
-    public String getName() {
+    public String getNamespace() {
         return ConfigConst.Namespace.SPRING_GATEWAY;
     }
 

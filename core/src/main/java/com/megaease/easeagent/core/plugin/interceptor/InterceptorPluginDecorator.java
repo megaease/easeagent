@@ -40,7 +40,7 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
     public InterceptorPluginDecorator(Interceptor interceptor, AgentPlugin plugin) {
         this.interceptor = interceptor;
         this.plugin = plugin;
-        this.config = EaseAgent.configFactory.getConfig(plugin.getDomain(), plugin.getName(), interceptor.getName());
+        this.config = EaseAgent.configFactory.getConfig(plugin.getDomain(), plugin.getNamespace(), interceptor.getName());
         this.config.addChangeListener(this);
     }
 

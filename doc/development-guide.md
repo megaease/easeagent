@@ -6,6 +6,7 @@
     - [Where: Points](#points)
     - [What: Interceptor](#interceptor)
     - [AdviceTo Annotation](#adviceto-annotation)
+    - [Plugin Orchestration](#plugin-orchestration)
 - [Tracing API](#Tracing-API)
 - [Metric API](#Metirc-API)
 - [Logging and Config API](#logging-and-config-API)
@@ -33,7 +34,7 @@ public interface AgentPlugin extends Ordered {
      * define the plugin name, avoiding conflicts with others
      * it will be use as namespace when get configuration.
      */
-    String getName();
+    String getNames();
 
     /**
      * define the plugin domain,
@@ -43,6 +44,7 @@ public interface AgentPlugin extends Ordered {
 }
 
 ```
+The `AgentPlugin` interface also includes the `Order` interface that defines the order of the plugins, which is related to plugin orchestration, and will be described in [Plugin Orchestration](#plugin-orchestration) section.
 
 ### Points
 Points defines the classes and methods to be enhanced and whether to add dynamic members and access methods to the instances of the classes that match.
@@ -155,6 +157,8 @@ public interface Interceptor extends Ordered {
     }
 }
 ```
+The `Interceptor` interface also includes the `Order` interface that defines the order of the interceptors, which is related to plugin orchestration, and will be described in [Plugin Orchestration](#plugin-orchestration) section.
+
 
 ### AdviceTo Annotation
 Within a plugin, there may be multiple interceptors, and multiple enhancement points, so which enhancement point is a particular interceptor used for?

@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.AgentPlugin;
 
 public class TestPlugin implements AgentPlugin {
     @Override
-    public String getName() {
+    public String getNamespace() {
         return "test";
     }
 

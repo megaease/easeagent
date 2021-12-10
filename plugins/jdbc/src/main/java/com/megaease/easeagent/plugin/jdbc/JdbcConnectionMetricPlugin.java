@@ -24,7 +24,7 @@ import static com.megaease.easeagent.plugin.api.config.ConfigConst.Namespace.JDB
 
 public class JdbcConnectionMetricPlugin implements AgentPlugin {
     @Override
-    public String getName() {
+    public String getNamespace() {
         return JDBC_CONNECTION;
     }
 

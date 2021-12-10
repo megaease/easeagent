@@ -5,7 +5,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public class FeignClientPlugin implements AgentPlugin {
     @Override
-    public String getName() {
+    public String getNamespace() {
         return ConfigConst.Namespace.FEIGN_CLIENT;
     }
 

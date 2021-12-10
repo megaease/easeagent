@@ -22,7 +22,7 @@ public interface AgentPlugin extends Ordered {
      * define the plugin name, avoiding conflicts with others
      * it will be use as namespace when get configuration.
      */
-    String getName();
+    String getNamespace();
 
     /**
      * define the plugin domain,

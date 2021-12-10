@@ -6,7 +6,7 @@ import com.megaease.easeagent.plugin.enums.Order;
 
 public class JdbcRedirectPlugin implements AgentPlugin {
     @Override
-    public String getName() {
+    public String getNamespace() {
         return ConfigConst.Namespace.JDBC;
     }
 
