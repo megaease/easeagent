@@ -7,6 +7,10 @@
     - [AdviceTo Annotation](#adviceto-annotation)
     - [Plugin Orchestration](#plugin-orchestration)
     - [A Simple Plugin Example](#a-simple-plugin-example)
+        - [AgentPlugin](#AgentPlugin)
+        - [Points of Simple Plugin](#points-of-simple-plugin)
+        - [Interceptor of Simple Plugin](#interceptor-of-simple-plugin)
+        - [Test Result](#test-result)
 - [Tracing API](#Tracing-API)
 - [Metric API](#Metirc-API)
 - [Logging and Config API](#logging-and-config-API)
@@ -14,7 +18,7 @@
 ## Overview
 Most of the Easeagent's functions are supported by plugins.   
 This document describes how to develop plugins for Easeagent, and it will be divided into four sections to introduce plugin development.
-1. Plugin structure, the plugin contains four components, which are the **Plugin definition**, **Points**, **Interceptor** and **Annotation** used to bind the three.
+1. Plugin structure, the plugin contains four components, which are the **AgentPlugin definition**, **Points**, **Interceptor** and **@AdviceTo Annotation** used to bind the three.
 2. Tracing API, which helps users complete the transaction tracing task.
 3. Metirc API, helps users to complete metrics data collection.
 4. Logging and Configuration API
@@ -42,12 +46,11 @@ public interface AgentPlugin extends Ordered {
 }
 
 ```
-The `AgentPlugin` interface also includes the `Order` interface that defines the order of the plugins, which is related to plugin orchestration, and will be described in [Plugin Orchestration](#plugin-orchestration) section.
+The `AgentPlugin` interface also includes the `Order` interface that defines the order of the plugins, which is related to plugin orchestration. Plugin orchestration will be described in [Plugin Orchestration](#plugin-orchestration) section.
 
 ### Points
-Points defines the classes and methods to be enhanced and whether to add dynamic members and access methods to the instances of the classes that match.
-
-Each implementation of Points defines one or more enhancement injection points. When there are multiple methods in a matched class that need to execute different enhancement interceptors, a qualifier identifier needs to be assigned to each matched method as a keyword to bind a different Interceptor.
+`Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
+When there are multiple methods in a matched class that require enhancement with different interceptors, a qualifier needs to be assigned to each `MethodMatcher` as the keyword used by different interceptors to bind.
 ```
 public interface Points {
     /**
@@ -103,13 +106,13 @@ public interface Points {
 ```
 
 ### Interceptor
-Interceptor is the key point for implementing specific enhancements. 
+Interceptors is the core of implementing specific enhancements. 
 
-It has the name method `getName` and the initialization method `init`. 
+`Interceptor` interface has a name method `getName` and a initialization method `init`. 
 - The name will be used as `serviceId` in combination with the `domain` and `namespace` of the binding plugin to get the plugin configuration which will be automatically injected into the `Context`. The description of the plugin configuration can be found in the user manual.
 - The `init` method is invoked during transfrom, allowing users to initialize staic resources of interceptor, and also allowing to load third party classes which can't load by running time classloader.
 
-The `before` and `after` methods of the interceptor are called when the method being enhanced enters and returns, respectively.
+The `before` and `after` methods of the interceptor are invoked when the method being enhanced enters and returns, respectively.
 Both `before` and `after` methods have parameters `MethodInfo` and `Context`. 
 - `MethodInfo` contains all method information, including class name, method name, parameters, return value and exception information.
 - `Context` contains the Interceptor configuration that is automatically injected and updated ant other interface that support `tracing`, for details, please refer to the [Tracing API](#tracing-api) section.
@@ -218,7 +221,7 @@ public class SimplePlugin implements AgentPlugin {
     }
 }
 ```
-#### Points
+#### Points of Simple Plugin
 When there is only one methodmatcher, the qualifer value defaults to default, and there is no need to explicitly assign a value.
 ```
 public class DoFilterPoints implements Points {
@@ -248,7 +251,7 @@ public class DoFilterPoints implements Points {
 }
 ```
 
-#### Interceptor
+#### Interceptor of Simple Plugin
 This `ResponseHeaderInterceptor` is bound to the enhancement point defined above via the `@AdviceTo` annotation, and does not need to be explicitly assigned a qualifier value when qualifier is the default value. 
 ```
 @AdviceTo(value = DoFilterPoints.class, plugin = SimplePlugin.class)

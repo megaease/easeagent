@@ -40,6 +40,9 @@
         <fileSet>
             <directory>${project.basedir}/target/inner-plugins/</directory>
             <outputDirectory>plugins</outputDirectory>
+            <excludes>
+                <exclude>original-*.jar</exclude>
+            </excludes>
             <includes>
                 <include>*.jar</include>
             </includes>
