@@ -17,9 +17,14 @@
 
 package com.megaease.easeagent.plugin.tools.metrics;
 
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.*;
-import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.api.metric.Counter;
+import com.megaease.easeagent.plugin.api.metric.Meter;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.Timer;
+import com.megaease.easeagent.plugin.api.metric.name.MetricField;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
 import javax.annotation.Nonnull;
@@ -27,11 +32,10 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.HashMap;
 
-public class ServerMetric extends AbstractMetric {
+public class ServerMetric extends ServiceMetric {
 
-
-    public ServerMetric(@Nonnull Config config, @Nonnull Tags tags) {
-        super(config, tags);
+    public ServerMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+        super(metricRegistry, nameFactory);
     }
 
     public void collectMetric(String key, int statusCode, Throwable throwable, long startMillis, long endMillis) {
@@ -74,8 +78,7 @@ public class ServerMetric extends AbstractMetric {
     }
 
     @Nonnull
-    @Override
-    protected NameFactory nameFactory() {
+    public static NameFactory nameFactory() {
         return NameFactory.createBuilder()
             .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                 .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)

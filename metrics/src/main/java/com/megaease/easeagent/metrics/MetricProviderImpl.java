@@ -34,7 +34,6 @@ import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
-import com.megaease.easeagent.report.PluginMetricReporter;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -24,14 +24,14 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
+import com.megaease.easeagent.plugin.utils.SystemClock;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
 import easeagent.plugin.spring.gateway.reactor.AgentMono;
-import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
-import com.megaease.easeagent.plugin.utils.SystemClock;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.http.HttpMethod;
@@ -45,13 +45,10 @@ public class GatewayMetricsInterceptor implements Interceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        synchronized (GatewayMetricsInterceptor.class) {
-            if (SERVER_METRIC == null) {
-                SERVER_METRIC = AbstractMetric.getInstance(config,
-                    new Tags("application", "http-request", "url"),
-                    ServerMetric::new);
-            }
-        }
+        SERVER_METRIC = ServiceMetricRegistry.getOrCreate(config,
+            new Tags("application", "http-request", "url"),
+            ServerMetric::nameFactory,
+            ServerMetric::new);
     }
 
     @Override

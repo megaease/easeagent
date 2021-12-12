@@ -21,5 +21,10 @@ package com.megaease.easeagent.plugin.api;
  * a reporter for message like metric or trace
  */
 public interface Reporter {
+    /**
+     * out put the metric
+     *
+     * @param msg metric string like json
+     */
     void report(String msg);
 }

@@ -25,32 +25,31 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
+import com.megaease.easeagent.plugin.tools.config.AutoRefreshRegistry;
+import com.megaease.easeagent.plugin.tools.config.BaseAutoRefreshConfig;
 
 import java.util.function.Supplier;
 
-public class InterceptorPluginDecorator implements Interceptor, ConfigChangeListener {
+public class InterceptorPluginDecorator implements Interceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(InterceptorPluginDecorator.class);
     private final Interceptor interceptor;
     private final AgentPlugin plugin;
-    private Config config;
+    private final BaseAutoRefreshConfig config;
 
     public InterceptorPluginDecorator(Interceptor interceptor, AgentPlugin plugin) {
         this.interceptor = interceptor;
         this.plugin = plugin;
-        this.config = EaseAgent.configFactory.getConfig(plugin.getDomain(), plugin.getNamespace(), interceptor.getName());
-        this.config.addChangeListener(this);
+        this.config = AutoRefreshRegistry.getOrCreate(plugin.getDomain(), plugin.getNamespace(), interceptor.getName());
     }
 
     public Config getConfig() {
-        return this.config;
+        return this.config.getConfig();
     }
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        Config cfg = this.config;
+        Config cfg = this.config.getConfig();
         InitializeContext innerContext = (InitializeContext) context;
         innerContext.pushConfig(cfg);
         if (cfg == null || cfg.enabled() || cfg instanceof NoOpConfig) {
@@ -115,11 +114,5 @@ public class InterceptorPluginDecorator implements Interceptor, ConfigChangeList
              */
             return new InterceptorPluginDecorator(supplier.get(), plugin);
         };
-    }
-
-    @Override
-    public void onChange(Config oldConfig, Config newConfig) {
-        this.config = newConfig;
-        this.config.addChangeListener(this);
     }
 }

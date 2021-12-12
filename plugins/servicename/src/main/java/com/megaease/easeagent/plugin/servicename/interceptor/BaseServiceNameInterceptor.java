@@ -24,10 +24,11 @@ import com.megaease.easeagent.plugin.servicename.ServiceNameConfig;
 import com.megaease.easeagent.plugin.tools.config.AutoRefreshRegistry;
 
 public abstract class BaseServiceNameInterceptor implements Interceptor {
-    protected static  ServiceNameConfig config = null;
+    protected static ServiceNameConfig config = null;
+
     @Override
     public void init(Config pConfig, String className, String methodName, String methodDescriptor) {
-        config = AutoRefreshRegistry.getOrCreate(pConfig, ServiceNameConfig.SUPPLIER);
+        config = AutoRefreshRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(), ServiceNameConfig.SUPPLIER);
     }
 
     @Override

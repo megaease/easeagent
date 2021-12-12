@@ -26,6 +26,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 public class NameFactoryTest {
+    Map<Key, ? extends A> keyTMap = new HashMap<>();
 
     @Test
     public void createBuilder() {
@@ -34,6 +35,21 @@ public class NameFactoryTest {
             .build()).build();
         String key = nameFactory.counterName("test_key", MetricSubType.DEFAULT);
         System.out.println(key);
+
+        Key key1 = new Key();
+        B a = (B) keyTMap.get(key1);
+    }
+
+
+    class Key {
+
+    }
+
+    interface A {
+    }
+
+    class B implements A {
+
     }
 
 }

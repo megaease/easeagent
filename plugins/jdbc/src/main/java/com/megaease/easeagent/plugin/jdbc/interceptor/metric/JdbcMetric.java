@@ -21,33 +21,31 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.Counter;
 import com.megaease.easeagent.plugin.api.metric.Meter;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.utils.ImmutableMap;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.tools.metrics.LastMinutesCounterGauge;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetric;
+import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class JdbcMetric extends AbstractMetric implements RemovalListener<String, String> {
+public class JdbcMetric extends ServiceMetric implements RemovalListener<String, String> {
     private final Logger logger = EaseAgent.getLogger(JdbcMetric.class);
 
-    public JdbcMetric(Config config, Tags tags) {
-        super(config, tags);
+    public JdbcMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+        super(metricRegistry, nameFactory);
     }
 
-    @Nonnull
-    @Override
-    protected NameFactory nameFactory() {
+    public static NameFactory nameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
                 ImmutableMap.<MetricField, MetricValueFetcher>builder()

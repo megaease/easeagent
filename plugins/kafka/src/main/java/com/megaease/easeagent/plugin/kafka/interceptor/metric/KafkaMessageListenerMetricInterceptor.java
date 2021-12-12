@@ -21,10 +21,10 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaMessageListenerAdvice;
-import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 @AdviceTo(value = KafkaMessageListenerAdvice.class, plugin = KafkaPlugin.class)
@@ -34,7 +34,9 @@ public class KafkaMessageListenerMetricInterceptor implements NonReentrantInterc
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        kafkaMetric = AbstractMetric.getInstance(config, KafkaMetric.newTags(), (config1, tags1) -> new KafkaMetric(config1, tags1));
+        kafkaMetric = ServiceMetricRegistry.getOrCreate(config, KafkaMetric.newTags(),
+            KafkaMetric::nameFactory,
+            KafkaMetric::new);
     }
 
 

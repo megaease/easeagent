@@ -19,25 +19,19 @@ package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
-import com.megaease.easeagent.plugin.api.metric.Counter;
-import com.megaease.easeagent.plugin.api.metric.Meter;
-import com.megaease.easeagent.plugin.api.metric.Timer;
+import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetric;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
-public class KafkaMetric extends AbstractMetric {
+public class KafkaMetric extends ServiceMetric {
 
-
-    protected KafkaMetric(@Nonnull Config config, @Nonnull Tags tags) {
-        super(config, tags);
+    public KafkaMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+        super(metricRegistry, nameFactory);
     }
 
-    public static Tags newTags() {
-        return new Tags("application", "kafka", "resource");
-    }
 
     public void meter(String topic, MetricSubType... meterTypes) {
         for (MetricSubType meterType : meterTypes) {
@@ -92,10 +86,13 @@ public class KafkaMetric extends AbstractMetric {
         }
     }
 
+    @Nonnull
+    public static Tags newTags() {
+        return new Tags("application", "kafka", "resource");
+    }
 
     @Nonnull
-    @Override
-    protected NameFactory nameFactory() {
+    public static NameFactory nameFactory() {
         return NameFactory.createBuilder()
             .counterType(MetricSubType.PRODUCER, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                 .put(MetricField.EXECUTION_PRODUCER_COUNT, MetricValueFetcher.CountingCount)

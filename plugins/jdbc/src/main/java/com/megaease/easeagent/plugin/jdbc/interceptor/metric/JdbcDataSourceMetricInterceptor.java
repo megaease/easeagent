@@ -27,7 +27,7 @@ import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcConnectionMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,7 +39,9 @@ public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor 
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        metric = AbstractMetric.getInstance(config, new Tags("application", "jdbc-connection", "url"), (config1, tags) -> new JdbcMetric(config1, tags));
+        metric = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "jdbc-connection", "url"),
+            JdbcMetric::nameFactory,
+            JdbcMetric::new);
     }
 
     @Override

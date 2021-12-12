@@ -6,6 +6,9 @@ import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * a base AutoRefreshConfig
+ */
 public class BaseAutoRefreshConfig implements Config, AutoRefreshConfig {
     protected volatile Config config;
 
@@ -77,5 +80,9 @@ public class BaseAutoRefreshConfig implements Config, AutoRefreshConfig {
     @Override
     public void onChange(Config oldConfig, Config newConfig) {
         this.config = newConfig;
+    }
+
+    public Config getConfig() {
+        return config;
     }
 }

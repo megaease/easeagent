@@ -21,13 +21,13 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.AsyncCallback;
-import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 @AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend", plugin = KafkaPlugin.class)
@@ -37,7 +37,9 @@ public class KafkaProducerMetricInterceptor implements NonReentrantInterceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        kafkaMetric = AbstractMetric.getInstance(config, KafkaMetric.newTags(), (config1, tags1) -> new KafkaMetric(config1, tags1));
+        kafkaMetric = ServiceMetricRegistry.getOrCreate(config, KafkaMetric.newTags(),
+            KafkaMetric::nameFactory,
+            KafkaMetric::new);
     }
 
     @Override

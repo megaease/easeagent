@@ -72,8 +72,19 @@ public final class EaseAgent {
      *
      * @return The configuration of this Java agent.
      */
-
     public static String getConfig(String property) {
         return configFactory.getConfig(property);
+    }
+
+    /**
+     * get a Config by domain, namespace and name
+     *
+     * @param domain
+     * @param namespace
+     * @param name
+     * @return {@link Config}
+     */
+    public static Config getConfig(String domain, String namespace, String name) {
+        return configFactory.getConfig(domain, namespace, name);
     }
 }

@@ -20,26 +20,41 @@ package com.megaease.easeagent.plugin.tools.config;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
 
 public class AutoRefreshRegistry {
     private static final ConcurrentMap<Key, AutoRefreshConfig> configs = new ConcurrentHashMap<>();
 
-    public static BaseAutoRefreshConfig getOrCreate(String domain, String namespace, String name) {
-        Config config = EaseAgent.configFactory
-            .getConfig(domain, namespace, name);
-        return getOrCreate(config);
+    /**
+     * Obtain an BaseAutoRefreshConfig when it is already registered. If you have not registered, create one and return
+     * The registered {@link Key} is domain, namespace, id.
+     *
+     * @param domain    String
+     * @param namespace String
+     * @param id        String
+     * @return BaseAutoRefreshConfig
+     */
+    public static BaseAutoRefreshConfig getOrCreate(String domain, String namespace, String id) {
+        return getOrCreate(domain, namespace, id, BaseAutoRefreshConfig::new);
     }
 
-    public static BaseAutoRefreshConfig getOrCreate(Config config) {
-        return getOrCreate(config, () -> new BaseAutoRefreshConfig());
-    }
-
-    public static <C extends AutoRefreshConfig> C getOrCreate(Config config, Supplier<C> supplier) {
-        Key key = new Key(config.domain(), config.namespace(), config.id());
+    /**
+     * Obtain an AutoRefreshConfig when it is already registered. If you have not registered, create one and return
+     * The registered {@link Key} is domain, namespace, id and the type by the supplier.
+     *
+     * @param domain    String
+     * @param namespace String
+     * @param id        String
+     * @param supplier  {@link ConfigSupplier} Instance Supplier
+     * @param <C>       the type of AutoRefreshConfig by the Supplier
+     * @return the type of AutoRefreshConfig by the Supplier
+     */
+    @SuppressWarnings("unchecked")
+    public static <C extends AutoRefreshConfig> C getOrCreate(String domain, String namespace, String id, ConfigSupplier<C> supplier) {
+        Key key = new Key(domain, namespace, id, supplier.getType());
         AutoRefreshConfig autoRefreshConfig = configs.get(key);
         if (autoRefreshConfig != null) {
             return (C) autoRefreshConfig;
@@ -49,10 +64,11 @@ public class AutoRefreshRegistry {
             if (autoRefreshConfig != null) {
                 return (C) autoRefreshConfig;
             }
-            autoRefreshConfig = supplier.get();
-            autoRefreshConfig.onChange(null, config);
-            config.addChangeListener(autoRefreshConfig);
-            return (C) autoRefreshConfig;
+            C newConfig = supplier.newInstance();
+            Config config = EaseAgent.getConfig(domain, namespace, id);
+            newConfig.onChange(null, config);
+            config.addChangeListener(newConfig);
+            return newConfig;
         }
     }
 
@@ -63,10 +79,13 @@ public class AutoRefreshRegistry {
 
         private final String id;
 
-        public Key(String domain, String namespace, String id) {
+        private final Type type;
+
+        public Key(String domain, String namespace, String id, Type type) {
             this.domain = domain;
             this.namespace = namespace;
             this.id = id;
+            this.type = type;
         }
 
         @Override
@@ -76,13 +95,24 @@ public class AutoRefreshRegistry {
             Key key = (Key) o;
             return Objects.equals(domain, key.domain) &&
                 Objects.equals(namespace, key.namespace) &&
-                Objects.equals(id, key.id);
+                Objects.equals(id, key.id) &&
+                Objects.equals(type, key.type);
         }
 
         @Override
         public int hashCode() {
 
-            return Objects.hash(domain, namespace, id);
+            return Objects.hash(domain, namespace, id, type);
+        }
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                "domain='" + domain + '\'' +
+                ", namespace='" + namespace + '\'' +
+                ", id='" + id + '\'' +
+                ", type=" + type +
+                '}';
         }
     }
 }

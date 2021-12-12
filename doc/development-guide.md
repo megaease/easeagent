@@ -310,14 +310,68 @@ easeagent-1639125480780* Closing connection 0
 
 
 ##  Tracing API
-##  Metric API
-##  Logging and Configuration API
+* [tracing-api](tracing-api.md)
 
+##  Metric API
+* [metric-api](metric-api.md)
 
 The main function of EaseAgent is to collect Java method call trace and metrics data.
 Developer need to understand trace and metric before development.
 * [metrics](https://github.com/dropwizard/metrics)
 * [brave](https://github.com/openzipkin/brave)
+
+##  Logging and Configuration API
+
+### Logging API
+In order to avoid conflicts between log4j and business, we have isolated loggers in EaseAgent.
+If you need to use log output, please use the API we provide to get Logger
+
+#### demo:
+```java
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+class Interceptor{
+    private static final Logger LOGGER = EaseAgent.getLogger(Interceptor.class);   
+}
+```
+
+### Configuration API
+
+Regarding configuration, we have a set of rules to follow. For detailed rules, please see: [user-manual.md#configuration](user-manual.md#configuration)
+
+When you want to get your own configuration file in the plug-in, you only need to get it from the Context.
+The framework itself will automatically maintain Confic's changes and modifications.
+
+#### demo:
+```java
+class InterceptorImpl  implements Interceptor {
+    @Override
+    public void before(MethodInfo methodInfo, Context context) {
+        Config config = context.getConfig();
+    }
+
+    @Override
+    public void after(MethodInfo methodInfo, Context context) {
+        Config config = context.getConfig();
+    }
+}
+```
+
+When you want to get the configuration outside of the plugin, we provide tools to get it.
+This tool will automatically maintain configuration updates and modifications, and the configuration obtained each time will be the latest configuration.
+It is a singleton registration factory, which also means that the singleton acquisition is locked, so it is hoped that the user can acquire it as little as possible.
+for example: acquire it once during initialization, and then put it in a static variable. 
+The registered key is domain, namespace, id.
+
+#### demo:
+```java
+import com.megaease.easeagent.plugin.tools.config.AutoRefreshRegistry;
+import com.megaease.easeagent.plugin.tools.config.BaseAutoRefreshConfig;
+class Demo{
+  BaseAutoRefreshConfig config = AutoRefreshRegistry.getOrCreate("observability", "httpclient", "metric");
+}
+```
+
 
 Instrumenting the method base on [Byte buddy](https://github.com/raphw/byte-buddy) technology.
 

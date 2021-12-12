@@ -21,5 +21,4 @@ import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 
 public interface AutoRefreshConfig extends ConfigChangeListener {
 
-
 }

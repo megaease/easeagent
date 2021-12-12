@@ -17,10 +17,9 @@
 
 package com.megaease.easeagent.plugin.tools.metrics;
 
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.Counter;
 import com.megaease.easeagent.plugin.api.metric.Meter;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
@@ -28,9 +27,10 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-public class RedisMetric extends AbstractMetric {
-    public RedisMetric(@Nonnull Config config, @Nonnull Tags tags) {
-        super(config, tags);
+public class RedisMetric extends ServiceMetric {
+
+    public RedisMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+        super(metricRegistry, nameFactory);
     }
 
     public void collect(String key, long duration, boolean success) {
@@ -57,8 +57,7 @@ public class RedisMetric extends AbstractMetric {
     }
 
     @Nonnull
-    @Override
-    protected NameFactory nameFactory() {
+    public static NameFactory nameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
                 ImmutableMap.<MetricField, MetricValueFetcher>builder()

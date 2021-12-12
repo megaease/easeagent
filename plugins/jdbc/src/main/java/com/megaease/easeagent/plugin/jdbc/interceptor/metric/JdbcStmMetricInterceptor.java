@@ -30,7 +30,7 @@ import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
 
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
 public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
@@ -44,9 +44,10 @@ public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
         if (metric == null && config.enabled()) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
-                    metric = AbstractMetric.getInstance(config,
+                    metric = ServiceMetricRegistry.getOrCreate(config,
                         new Tags("application", "jdbc-statement", "signature"),
-                        (config1, tags) -> new JdbcMetric(config1, tags));
+                        JdbcMetric::nameFactory,
+                        JdbcMetric::new);
                     sqlCompression = MD5SQLCompression.getInstance();
                     cache = CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize).removalListener(metric).build();

@@ -263,6 +263,19 @@ public interface Context {
     Scope importAsync(AsyncContext snapshot);
 
     /**
+     * Wraps the input so that it executes with the same context as now.
+     */
+    Runnable wrap(Runnable task);
+
+    /**
+     * Check task is wrapped.
+     *
+     * @param task Runnable
+     * @return true if task is warpped.
+     */
+    boolean isWrapped(Runnable task);
+
+    /**
      * Create a ProgressContext for Cross-process Trace link
      * It will pass multiple key:value values required by Trace and EaseAgent through
      * {@link Request#setHeader(String, String)}, And set the Span's kind, name and
@@ -345,31 +358,6 @@ public interface Context {
     Span producerSpan(MessagingRequest request);
 
     /**
-     * Returns a new child span if there's a {@link Tracing#currentSpan()} or a new trace if there isn't.
-     *
-     * @return {@link Span}
-     */
-    Span nextSpan();
-
-    /**
-     * Wraps the input so that it executes with the same context as now.
-     */
-    Runnable wrap(Runnable task);
-
-    /**
-     * Check task is wrapped.
-     *
-     * @param task Runnable
-     * @return true if task is warpped.
-     */
-    boolean isWrapped(Runnable task);
-
-    /**
-     * @return true if the key is necessary for EaseAgent
-     */
-    boolean isNecessaryKeys(String key);
-
-    /**
      * Inject Consumer's Span key:value and Penetration Fields to Request {@link MessagingRequest#setHeader(String, String)}.
      *
      * @param span    key:value from
@@ -386,6 +374,19 @@ public interface Context {
      * @see Request#setHeader(String, String)
      */
     void producerInject(Span span, MessagingRequest request);
+
+    /**
+     * Returns a new child span if there's a {@link Tracing#currentSpan()} or a new trace if there isn't.
+     *
+     * @return {@link Span}
+     */
+    Span nextSpan();
+
+    /**
+     * @return true if the key is necessary for EaseAgent
+     */
+    boolean isNecessaryKeys(String key);
+
 
     /**
      * Inject  Penetration Fields key:value to Setter {@link Setter#setHeader(String, String)}.

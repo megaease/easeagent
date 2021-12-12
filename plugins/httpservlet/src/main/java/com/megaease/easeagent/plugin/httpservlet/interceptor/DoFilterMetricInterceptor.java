@@ -19,12 +19,12 @@ package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.AbstractMetric;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
+import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,9 +36,8 @@ public class DoFilterMetricInterceptor extends BaseServletInterceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        SERVER_METRIC = AbstractMetric.getInstance(config,
-            new Tags("application", "http-request", "url"),
-            (config1, tags) -> new ServerMetric(config1, tags));
+        SERVER_METRIC = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "http-request", "url"),
+            ServerMetric::nameFactory, ServerMetric::new);
     }
 
     @Override
