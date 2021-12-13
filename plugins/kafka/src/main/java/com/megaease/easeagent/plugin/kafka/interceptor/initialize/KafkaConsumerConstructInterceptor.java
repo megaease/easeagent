@@ -55,7 +55,7 @@ public class KafkaConsumerConstructInterceptor implements NonReentrantIntercepto
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.TRACING.getName();
     }
 }

@@ -101,7 +101,7 @@ public class GatewayMetricsInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.METRIC.getName();
     }
 

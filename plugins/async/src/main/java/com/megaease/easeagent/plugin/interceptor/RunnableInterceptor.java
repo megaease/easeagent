@@ -47,7 +47,7 @@ public class RunnableInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.TRACING.getName();
     }
 

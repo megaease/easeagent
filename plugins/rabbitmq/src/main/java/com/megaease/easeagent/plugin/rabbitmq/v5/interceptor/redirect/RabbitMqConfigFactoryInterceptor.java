@@ -15,7 +15,7 @@ public class RabbitMqConfigFactoryInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.REDIRECT.getName();
     }
 

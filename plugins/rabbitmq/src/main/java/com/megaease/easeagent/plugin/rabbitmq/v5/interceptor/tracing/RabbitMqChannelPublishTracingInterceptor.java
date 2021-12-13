@@ -77,7 +77,7 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.TRACING.getName();
     }
 

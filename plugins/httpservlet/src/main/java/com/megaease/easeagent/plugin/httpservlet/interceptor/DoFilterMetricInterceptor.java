@@ -52,7 +52,7 @@ public class DoFilterMetricInterceptor extends BaseServletInterceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.METRIC.getName();
     }
 }

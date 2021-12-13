@@ -43,7 +43,7 @@ public interface Interceptor extends Ordered {
      *
      * @return name, eg. tracing, metric, etc.
      */
-    default String getName() {
+    default String getType() {
         return Order.TRACING.getName();
     }
 

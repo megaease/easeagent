@@ -37,7 +37,7 @@ public abstract class BaseServiceNameInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return "addServiceNameHead";
     }
 }

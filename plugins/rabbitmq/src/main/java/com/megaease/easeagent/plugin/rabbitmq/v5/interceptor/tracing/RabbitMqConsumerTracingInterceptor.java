@@ -74,7 +74,7 @@ public class RabbitMqConsumerTracingInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.TRACING.getName();
     }
 

@@ -33,7 +33,7 @@ public class LettuceRedisClientConstructInterceptor implements NonReentrantInter
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.REDIRECT.getName();
     }
 }

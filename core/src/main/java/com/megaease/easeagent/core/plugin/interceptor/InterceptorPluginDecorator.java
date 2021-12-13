@@ -40,7 +40,7 @@ public class InterceptorPluginDecorator implements Interceptor {
     public InterceptorPluginDecorator(Interceptor interceptor, AgentPlugin plugin) {
         this.interceptor = interceptor;
         this.plugin = plugin;
-        this.config = AutoRefreshRegistry.getOrCreate(plugin.getDomain(), plugin.getNamespace(), interceptor.getName());
+        this.config = AutoRefreshRegistry.getOrCreate(plugin.getDomain(), plugin.getNamespace(), interceptor.getType());
     }
 
     public Config getConfig() {
@@ -77,8 +77,8 @@ public class InterceptorPluginDecorator implements Interceptor {
     }
 
     @Override
-    public String getName() {
-        return this.interceptor.getName();
+    public String getType() {
+        return this.interceptor.getType();
     }
 
     @Override

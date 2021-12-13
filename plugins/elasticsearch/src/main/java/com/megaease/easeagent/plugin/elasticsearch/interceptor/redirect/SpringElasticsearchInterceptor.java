@@ -49,7 +49,7 @@ public class SpringElasticsearchInterceptor implements NonReentrantInterceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.REDIRECT.getName();
     }
 

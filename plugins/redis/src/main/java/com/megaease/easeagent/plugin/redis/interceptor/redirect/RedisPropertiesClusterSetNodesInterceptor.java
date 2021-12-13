@@ -22,7 +22,7 @@ public class RedisPropertiesClusterSetNodesInterceptor implements Interceptor {
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.REDIRECT.getName();
     }
 }

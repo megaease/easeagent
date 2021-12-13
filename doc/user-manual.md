@@ -44,17 +44,17 @@ The EaseAgent configuration information can be divided into two categories, one 
 - Global configuration, which will be covered in the following sections.
 - Plugin configuration, the format of the plugin configuration is defined as follows.
 ```
-plugin.[domain].[namespace].[serviceId].[key] = [value]
+plugin.[domain].[namespace].[interceptorType].[key] = [value]
 ```
 Take the tracing switch of `httpclient` as an example.
 ```
 plugin.observability.httpclient.tracing.enabled=true
 
-domain      : observability
-namespace   : httpclient
-serviceId   : tracing
-key         : enabled
-value       : true
+domain          : observability
+namespace       : httpclient
+interceptorType : tracing
+key             : enabled
+value           : true
 ```
 
 ### Getting the configuration file

@@ -51,7 +51,7 @@ public abstract class CommonRedisMetricInterceptor implements NonReentrantInterc
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.METRIC.getName();
     }
 
