@@ -13,7 +13,7 @@
         - [Interceptor of Simple Plugin](#interceptor-of-simple-plugin)
         - [Test Result](#test-result)
 - [Tracing API](#Tracing-API)
-- [Metric API](#Metirc-API)
+- [Metric API](#Metric-API)
 - [Logging API](#logging-API)
 - [Configuration API](#Configuration-API)
 
@@ -33,7 +33,7 @@ All plugin-modules are locate in the `plugins` folder under the top-level direct
 ### AgentPlugin: Plugin definition
 Plugin definition, defines what `domain` and `namespace` of this plugin by implement the `AgentPlugin` interface.
 
-```
+```java
 public interface AgentPlugin extends Ordered {
     /**
      * define the plugin name, avoiding conflicts with others
@@ -54,7 +54,7 @@ The `AgentPlugin` interface also includes the `Order` interface that defines the
 ### Points
 `Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
 When there are multiple methods in a matched class that require enhancement with different interceptors, a qualifier needs to be assigned to each `MethodMatcher` as the keyword used by different interceptors to bind.
-```
+```java
 public interface Points {
     /**
      * return the defined class matcher matching a class or a group of classes
@@ -120,7 +120,7 @@ Both `before` and `after` methods have parameters `MethodInfo` and `Context`.
 - `MethodInfo` contains all method information, including class name, method name, parameters, return value and exception information.
 - `Context` contains the Interceptor configuration that is automatically injected and updated ant other interface that support `tracing`, for details, please refer to the [Tracing API](#tracing-api) section.
 
-```
+```java
 public interface Interceptor extends Ordered {
     /**
      * @param methodInfo instrumented method info
@@ -171,7 +171,7 @@ This can be specified through the `@AdviceTo` annotation, which is applied on th
 
 However, when there are multiple plugins within a plugin module, it is necessary to go a step further and specify the plugin to which the Interceptor is bound.
 
-```
+```java
 /**
  * use to annotate Interceptor implementation,
  * to link Interceptor to Points and AgentPlugin
@@ -233,7 +233,7 @@ This plugin contain only three interface implementations: `AgentPlugin`, `Points
   pom.xml
 ```
 #### AgentPlugin
-```
+```java
 public class SimplePlugin implements AgentPlugin {
     @Override
     public String getNamespace() {
@@ -248,7 +248,7 @@ public class SimplePlugin implements AgentPlugin {
 ```
 #### Points of Simple Plugin
 When there is only one methodmatcher, the qualifer value defaults to default, and there is no need to explicitly assign a value.
-```
+```java
 public class DoFilterPoints implements Points {
     @Override
     public IClassMatcher getClassMatcher() {
@@ -278,7 +278,7 @@ public class DoFilterPoints implements Points {
 
 #### Interceptor of Simple Plugin
 This `ResponseHeaderInterceptor` is bound to the enhancement point defined above via the `@AdviceTo` annotation, and does not need to be explicitly assigned a qualifier value when qualifier is the default value. 
-```
+```java
 @AdviceTo(value = DoFilterPoints.class, plugin = SimplePlugin.class)
 public class ResponseHeaderInterceptor implements Interceptor {
     @Override
@@ -334,10 +334,10 @@ easeagent-1639125480780* Closing connection 0
 ```
 
 ##  Tracing API
-* [Tracing-api](tracing-api.md)
+* [Tracing API](tracing-api.md)
 
 ##  Metric API
-* [Metric-api](metric-api.md)
+* [Metric API](metric-api.md)
 
 ##  Logging API
 
