@@ -6,7 +6,9 @@
     - [Getting the configuration file](#getting-the-configuration-file)
     - [Global Configuration](#global-configuration)
         - [Internal HTTP Server](#internal-http-server)
-        - [Output Data Server: Kafka](#Output-Data-Server:-Kafka)
+        - [Output Data Server: Kafka and Zipkin Server](#Output-Data-Server:-Kafka-and-zipkin-server)
+        - [Progress Configuration](#progress-configuration)
+        - [Integrability Configuration](#progress-configuration)
     - [Plugin Configuration](#plugin-configuration)
         - [Metric](#metric)
         - [Tracing](#tracing)
@@ -44,7 +46,7 @@ The EaseAgent configuration information can be divided into two categories, one 
 - Global configuration, which will be covered in the following sections.
 - Plugin configuration, the format of the plugin configuration is defined as follows.
 ```
-plugin.[domain].[namespace].[interceptorType].[key] = [value]
+plugin.[domain].[namespace].[type].[key] = [value]
 ```
 Take the tracing switch of `httpclient` as an example.
 ```
@@ -52,10 +54,12 @@ plugin.observability.httpclient.tracing.enabled=true
 
 domain          : observability
 namespace       : httpclient
-interceptorType : tracing
+type            : tracing
 key             : enabled
 value           : true
 ```
+
+`[domain]` and `[namespace]` and `[type]` are defined by plugins. 
 
 ### Getting the configuration file
 You may extract default configuration from the JAR file or create new properties from a blank file.
@@ -79,13 +83,36 @@ Key| Default Value | Description |
 `easeagent.server.enabled` | true | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override.|
 `easeagent.server.port` | 9900 | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override. |
 
-#### Output Data Server: Kafka
+#### Output Data Server: Kafka and Zipkin Server
 Tracing and metric data can be output to kafka server.
 
 Key| Default Value | Description |
 ---| ---| ---|
 `observability.outputServer.bootstrapServer` | 127.0.0.1:9092 | Kafka server host and port. Tracing and metric data will be output to kafka. |
 `observability.outputServer.timeout` | 10000 | Connect timeout. Time Unit: millisecond. |
+
+Global configuration for tracing output
+
+Key| Default Value | Description |
+---| ---| ---|
+`observability.tracings.output.enabled`             | true      | `true`: enable output tracing data;<br /> `false`: disable all tracing data output  |
+`observability.tracings.output.target`              | system    | `system` : output tracing to kafka output server; `zipkin`: send data to zipkin server |
+`observability.tracings.output.target.zipkinUrl`    | [http://localhost:9411/api/v2/spans]() | Zipkin server url, only aviable when `observability.tracings.output.target=zipkin` |
+
+
+Following tracing output configuration items are aviable when `observability.tracings.output.target=system`:
+
+Key| Default Value | Description |
+---| ---| ---|
+`observability.tracings.output.topic`               | log-tracing   | Kafka topic for tracing data output |
+`observability.tracings.output.messageMaxBytes`     | 999900        | Maximum bytes sendable per message including encoding overhead. |
+`observability.tracings.output.queuedMaxSpans`      | 1000          | Maximum backlog of spans reported before sent. |
+`observability.tracings.output.queuedMaxSize`       | 1000000       | Maximum backlog of span bytes reported before sent. |
+`observability.tracings.output.messageTimeout`      | 1000          | Spans are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent span is reported, which ensures that spans are not stuck in an incomplete message.|
+
+#### Progress Configuration
+
+#### Integrability Configuration
 
 ### Plugin Configuration
 For plugin level configuration, EaseAgent provides default configuration for all types of services(serviceId) with a **namespace** of `global`, and each type(namespace) of the service uses the default configuration when it does not create configuration with its own namespace.
@@ -132,25 +159,6 @@ kafka           | `kafka`           | Kafka Metric
 rabbitmq        | `rabbitmq`        | RabbitMQ Metirc
 jvmGc           | `jvmGc`           | JVM GC Metirc
 JVM Memory      | `jvmMemory`       | JVM Memory Metric
-
-#### Tracing
-Key| Default Value | Description |
----| ---| ---|
-`observability.tracings.enabled` | true | Enable all collection of tracing logs. `false`: Disable all collection of tracing logs. |
-`observability.tracings.output.enabled` | true | Enable output tracing logs to Kafka. |
-`observability.tracings.output.topic` | log-tracing | Send tracing logs to the specified kafka topic. |
-`observability.tracings.output.messageMaxBytes` | 999900 | Maximum size of a message. |
-`observability.tracings.output.reportThread` | 1 | The number of thread which will send  tracing logs to kafka. |
-`observability.tracings.output.queuedMaxSpans` | 1000 | The maximum number of spans to be processed in the queue. |
-`observability.tracings.output.queuedMaxSize` | 1000000 | The maximum bytes of spans to be processed in the queue. |
-`observability.tracings.output.messageTimeout` | 1000 |  |
-`observability.tracings.request.enabled` | true | Enable collection of tracing logs(`Servlet`、 `Filter`). `false`: Disable collecting. |
-`observability.tracings.remoteInvoke.enabled` | true | Enable collection of tracing logs(`RestTemplate`、 `FeignClient`、`WebClient`). `false`: Disable collecting. |
-`observability.tracings.kafka.enabled`| true | Enable collection of `kafka` tracing logs. `false`: Disable collecting. |
-`observability.tracings.jdbc.enabled` | true | Enable collection of `JDBC` tracing logs. `false`: Disable collecting. |
-`observability.tracings.redis.enabled` | true | Enable collection of tracing logs(`Jedis`、`Lettuce`). `false`: Disable collecting. |
-`observability.tracings.rabbit.enabled` | true | Enable collection of `RabbitMQ` tracing logs. `false`: Disable collecting. |
-
 
 #### Redirect
 Redirection feature combined with `Easeload` to direct traffic to shadow services to simulate real traffic for the whole site performance test in the production environment in an effective and safe way.
