@@ -17,10 +17,7 @@
 
 package com.megaease.easeagent.plugin.tools.metrics;
 
-import com.megaease.easeagent.plugin.api.metric.Counter;
-import com.megaease.easeagent.plugin.api.metric.Meter;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.Timer;
+import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.MetricField;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher;

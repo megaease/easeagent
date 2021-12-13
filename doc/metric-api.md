@@ -189,16 +189,39 @@ class ServerMetric{
 ### 4. Registry
  
 Inherit the ServiceMetric class in order to obtain the MetricRegistry.
-
-[com.megaease.easeagent.plugin.tools.metrics.ServerMetric](../plugin-api/src/main/java/com/megaease/easeagent/plugin/tools/metrics/ServerMetric.java)
+[com.megaease.easeagent.plugin.api.metric.ServiceMetric](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/ServiceMetric.java)
 
 Use the ServiceMetricRegistry interface to register and create a singleton.
 
-[com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry](../plugin-api/src/main/java/com/megaease/easeagent/plugin/tools/metrics/ServiceMetricRegistry.java)
+[com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/ServiceMetricRegistry.java)
 
-The Key of the singleton is: domain, namespace, id, tags and the type class. 
+##### Config
 
-And follow the plugin configuration rules [metric config](user-manual.md#metric)
+Metric configuration follows plug-in configuration rules [metric config](user-manual.md#metric)
+
+##### Tags
+
+Metrics have values as well as tags. EaseAgent supports custom tags, but these tags must be predictable and given in advance.
+
+To better support the business, three tags must be given: category，type and key
+
+So it is fixed in Tags and must provide three pieces of information: category，type and keyFieldName
+
+[com.megaease.easeagent.plugin.api.metric.name.Tags](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/Tags.java)
+Its tag is copied as follows:
+```
+output.put("category", tags.category)
+output.put("type", tags.type)
+output.put(tags.keyFieldName, {@link NameFactory}.key[?])
+tags.tags.forEach((k,v)->{
+    output.put(k,v)
+})
+```
+
+##### Singleton
+
+The Key of the singleton is: `domain`, `namespace`, `id`, `tags` and the `type` of class.
+
 
 #### demo:
 ```java
@@ -288,16 +311,50 @@ public class ServerMetric extends ServiceMetric {
 
 public class DoFilterMetricInterceptor extends Interceptor {
     private static volatile ServerMetric SERVER_METRIC = null;
+    private static final Object START_MACK = new Object();
     
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
         SERVER_METRIC = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "http-request", "url"),
             ServerMetric::nameFactory, ServerMetric::new);
     }
+    
+    @Override
+    public void before(MethodInfo methodInfo, Context context){
+        context.put(START_MACK, System.currentTimeMillis());
+    }
+    
+    @Override
+    public void after(MethodInfo methodInfo, Context context){
+        long start = context.remove(START_MACK);
+        long end = System.currentTimeMillis();
+        String key = "GET /demo";
+        int statusCode = 200;
+        SERVER_METRIC.collectMetric(key, statusCode, throwable, start, end);
+    }
 }
 ```
 
-### 5. customize
+### 5. Metric
+
+Even though EaseAgent's Metric is inspired by Dropwizard, it still hopes to decouple its implementation from Dropwizard.
+
+So EaseAgent has its own API, although the implementation scheme currently used is Dropwizard.
+
+[com.megaease.easeagent.plugin.api.metric.MetricRegistry](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/MetricRegistry.java)
+
+[com.megaease.easeagent.plugin.api.metric.Counter](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/Counter.java)
+
+[com.megaease.easeagent.plugin.api.metric.Histogram](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/Histogram.java)
+
+[com.megaease.easeagent.plugin.api.metric.Meter](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/Meter.java)
+
+[com.megaease.easeagent.plugin.api.metric.Snapshot](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/Snapshot.java)
+
+[com.megaease.easeagent.plugin.api.metric.Timer](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/Timer.java)
+
+
+### 6. customize
 
 When you are sure that you want to implement your own metric, then you only need a metric output class, and finally use this output class to output to Kafka or backend. 
 
@@ -310,6 +367,7 @@ The standard of EaseMonitor is to use json format, if unnecessary, please use js
 [com.megaease.easeagent.plugin.bridge.EaseAgent.metricReporter](../plugin-api/src/main/java/com/megaease/easeagent/plugin/bridge/EaseAgent.java)
 
 The obtained Reporter is a singleton, and the key of the singleton is `namespace`.
+
 Its output configuration complies with metric configuration rules: [metric config](user-manual.md#metric)
 
 #### demo:

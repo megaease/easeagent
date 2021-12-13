@@ -27,7 +27,7 @@ import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.AsyncCallback;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
-import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 @AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend", plugin = KafkaPlugin.class)

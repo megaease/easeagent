@@ -1,6 +1,5 @@
-package com.megaease.easeagent.plugin.tools.metrics;
+package com.megaease.easeagent.plugin.api.metric;
 
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 
 import java.lang.reflect.ParameterizedType;

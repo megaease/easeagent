@@ -30,7 +30,7 @@ import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
-import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
 public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {

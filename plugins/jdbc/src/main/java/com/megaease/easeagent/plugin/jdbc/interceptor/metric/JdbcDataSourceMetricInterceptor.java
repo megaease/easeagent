@@ -27,7 +27,7 @@ import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcConnectionMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
-import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 
 import java.sql.Connection;
 import java.sql.SQLException;

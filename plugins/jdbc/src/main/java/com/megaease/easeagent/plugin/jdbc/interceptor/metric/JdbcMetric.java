@@ -30,7 +30,7 @@ import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.tools.metrics.LastMinutesCounterGauge;
-import com.megaease.easeagent.plugin.tools.metrics.ServiceMetric;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
 import javax.annotation.Nonnull;

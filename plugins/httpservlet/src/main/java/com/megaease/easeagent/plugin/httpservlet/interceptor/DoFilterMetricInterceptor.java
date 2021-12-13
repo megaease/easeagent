@@ -24,7 +24,7 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
-import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

@@ -299,8 +299,6 @@ interface Context{
 
 ## Span
 
-In a Tracing, each node is a Span, here we also encapsulate Span.
-
 In a Tracing, each node is a Span, here we also encapsulate the Span.
 
 According to the agreement, we still abide by Dapper

@@ -24,7 +24,7 @@ import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.metrics.RedisMetric;
-import com.megaease.easeagent.plugin.tools.metrics.ServiceMetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 
 public abstract class CommonRedisMetricInterceptor implements NonReentrantInterceptor {
     private static volatile RedisMetric REDIS_METRIC = null;

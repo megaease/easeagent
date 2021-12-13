@@ -1,10 +1,13 @@
-package com.megaease.easeagent.plugin.tools.metrics;
+package com.megaease.easeagent.plugin.api.metric;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricSupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.tools.metrics.NameFactorySupplier;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
