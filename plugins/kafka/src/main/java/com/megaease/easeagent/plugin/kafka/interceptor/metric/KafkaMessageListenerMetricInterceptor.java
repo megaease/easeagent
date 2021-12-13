@@ -34,9 +34,7 @@ public class KafkaMessageListenerMetricInterceptor implements NonReentrantInterc
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        kafkaMetric = ServiceMetricRegistry.getOrCreate(config, KafkaMetric.newTags(),
-            KafkaMetric::nameFactory,
-            KafkaMetric::new);
+        kafkaMetric = ServiceMetricRegistry.getOrCreate(config, KafkaMetric.newTags(), KafkaMetric.KAFKA_METRIC_SUPPLIER);
     }
 
 

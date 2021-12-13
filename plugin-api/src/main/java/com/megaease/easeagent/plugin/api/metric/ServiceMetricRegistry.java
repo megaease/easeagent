@@ -1,13 +1,9 @@
 package com.megaease.easeagent.plugin.api.metric;
 
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetricSupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.tools.metrics.NameFactorySupplier;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
@@ -22,13 +18,12 @@ public class ServiceMetricRegistry {
      *
      * @param config              {@link Config} domain, namespace from id from
      * @param tags                {@link Tags} metric tags
-     * @param nameFactorySupplier {@link NameFactorySupplier} metric name factory Supplier
      * @param supplier            {@link ServiceMetric} Instance Supplier
      * @param <T>                 the type of ServiceMetric by the Supplier
      * @return the type of ServiceMetric by the Supplier
      */
-    public static <T extends ServiceMetric> T getOrCreate(Config config, Tags tags, NameFactorySupplier nameFactorySupplier, ServiceMetricSupplier<T> supplier) {
-        return getOrCreate(config.domain(), config.namespace(), config.id(), tags, nameFactorySupplier, supplier);
+    public static <T extends ServiceMetric> T getOrCreate(Config config, Tags tags, ServiceMetricSupplier<T> supplier) {
+        return getOrCreate(config.domain(), config.namespace(), config.id(), tags, supplier);
     }
 
     /**
@@ -39,13 +34,12 @@ public class ServiceMetricRegistry {
      * @param namespace           String
      * @param id                  String
      * @param tags                {@link Tags} metric tags
-     * @param nameFactorySupplier {@link NameFactorySupplier} metric name factory Supplier
      * @param supplier            {@link ServiceMetric} Instance Supplier
      * @param <T>                 the type of ServiceMetric by the Supplier
      * @return the type of ServiceMetric by the Supplier
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ServiceMetric> T getOrCreate(String domain, String namespace, String id, Tags tags, NameFactorySupplier nameFactorySupplier, ServiceMetricSupplier<T> supplier) {
+    public static <T extends ServiceMetric> T getOrCreate(String domain, String namespace, String id, Tags tags, ServiceMetricSupplier<T> supplier) {
         Key key = new Key(domain, namespace, id, tags, supplier.getType());
         ServiceMetric metric = INSTANCES.get(key);
         if (metric != null) {
@@ -57,7 +51,7 @@ public class ServiceMetricRegistry {
                 return (T) metric;
             }
             Config config = EaseAgent.getConfig(domain, namespace, id);
-            NameFactory nameFactory = nameFactorySupplier.newInstance();
+            NameFactory nameFactory = supplier.newNameFactory();
             MetricRegistry metricRegistry = EaseAgent.newMetricRegistry(config, nameFactory, tags);
             T newMetric = supplier.newInstance(metricRegistry, nameFactory);
             INSTANCES.put(key, newMetric);

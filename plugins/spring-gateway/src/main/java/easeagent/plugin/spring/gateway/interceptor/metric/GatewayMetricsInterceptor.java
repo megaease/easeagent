@@ -24,6 +24,9 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
+import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricSupplier;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
@@ -46,9 +49,7 @@ public class GatewayMetricsInterceptor implements Interceptor {
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
         SERVER_METRIC = ServiceMetricRegistry.getOrCreate(config,
-            new Tags("application", "http-request", "url"),
-            ServerMetric::nameFactory,
-            ServerMetric::new);
+            new Tags("application", "http-request", "url"), ServerMetric.SERVICE_METRIC_SUPPLIER);
     }
 
     @Override

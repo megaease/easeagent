@@ -9,18 +9,24 @@ import java.lang.reflect.Type;
  *
  * @param <T> the type of Config by this Supplier
  */
-public interface AutoRefreshConfigSupplier<T extends AutoRefreshConfig> {
+public abstract class AutoRefreshConfigSupplier<T extends AutoRefreshConfig> {
+    private final Type type;
+
+    public AutoRefreshConfigSupplier() {
+        Type superClass = getClass().getGenericSuperclass();
+        if (superClass instanceof Class<?>) { // sanity check, should never happen
+            throw new IllegalArgumentException("Internal error: TypeReference constructed without actual type information");
+        }
+        type = ((ParameterizedType) superClass).getActualTypeArguments()[0];
+    }
+
     /**
      * the type of AutoRefreshConfig
      *
      * @return {@link Type}
      */
-    default Type getType() {
-        Type superClass = getClass().getGenericSuperclass();
-        if (superClass instanceof Class<?>) { // sanity check, should never happen
-            throw new IllegalArgumentException("Internal error: TypeReference constructed without actual type information");
-        }
-        return ((ParameterizedType) superClass).getActualTypeArguments()[0];
+    public Type getType() {
+        return type;
     }
 
 
@@ -29,5 +35,5 @@ public interface AutoRefreshConfigSupplier<T extends AutoRefreshConfig> {
      *
      * @return AutoRefreshConfig
      */
-    T newInstance();
+    public abstract T newInstance();
 }
