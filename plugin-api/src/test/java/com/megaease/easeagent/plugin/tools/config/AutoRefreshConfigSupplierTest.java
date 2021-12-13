@@ -13,18 +13,40 @@ public class AutoRefreshConfigSupplierTest {
 
     @Test
     public void getType() {
-        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier = TestAutoRefreshConfig::new;
-        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier2 = TestAutoRefreshConfig::new;
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier = new AutoRefreshConfigSupplier<TestAutoRefreshConfig>() {
+            @Override
+            public TestAutoRefreshConfig newInstance() {
+                return new TestAutoRefreshConfig();
+            }
+        };
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier2 = new AutoRefreshConfigSupplier<TestAutoRefreshConfig>() {
+            @Override
+            public TestAutoRefreshConfig newInstance() {
+                return new TestAutoRefreshConfig();
+            }
+        };
         Assert.assertEquals(supplier.getType(), supplier2.getType());
         Type type1 = supplier.getType();
         Type type2 = supplier2.getType();
+        Assert.assertTrue(type1.getTypeName().equalsIgnoreCase(TestAutoRefreshConfig.class.getName()));
         System.out.println(type1.equals(type2));
     }
 
     @Test
     public void newInstance() {
-        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier = TestAutoRefreshConfig::new;
-        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier2 = TestAutoRefreshConfig::new;
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier = new AutoRefreshConfigSupplier<TestAutoRefreshConfig>() {
+            @Override
+            public TestAutoRefreshConfig newInstance() {
+                return new TestAutoRefreshConfig();
+            }
+        };
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier2 = new AutoRefreshConfigSupplier<TestAutoRefreshConfig>() {
+            @Override
+            public TestAutoRefreshConfig newInstance() {
+                return new TestAutoRefreshConfig();
+            }
+        };
+
         Assert.assertEquals(supplier.newInstance().getClass(), supplier2.newInstance().getClass());
     }
 

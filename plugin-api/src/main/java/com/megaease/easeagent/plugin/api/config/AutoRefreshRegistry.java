@@ -25,6 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class AutoRefreshRegistry {
+    private static final AutoRefreshConfigSupplier<AutoRefreshConfigImpl> AUTO_REFRESH_CONFIG_IMPL_SUPPLIER = new AutoRefreshConfigSupplier<AutoRefreshConfigImpl>() {
+        @Override
+        public AutoRefreshConfigImpl newInstance() {
+            return new AutoRefreshConfigImpl();
+        }
+    };
     private static final ConcurrentMap<Key, AutoRefreshConfig> configs = new ConcurrentHashMap<>();
 
     /**
@@ -37,7 +43,7 @@ public class AutoRefreshRegistry {
      * @return AutoRefreshConfigImpl
      */
     public static AutoRefreshConfigImpl getOrCreate(String domain, String namespace, String id) {
-        return getOrCreate(domain, namespace, id, AutoRefreshConfigImpl::new);
+        return getOrCreate(domain, namespace, id, AUTO_REFRESH_CONFIG_IMPL_SUPPLIER);
     }
 
     /**

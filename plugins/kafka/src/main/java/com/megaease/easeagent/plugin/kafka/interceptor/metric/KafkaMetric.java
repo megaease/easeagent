@@ -26,6 +26,17 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 public class KafkaMetric extends ServiceMetric {
+    public static final ServiceMetricSupplier<KafkaMetric> KAFKA_METRIC_SUPPLIER = new ServiceMetricSupplier<KafkaMetric>() {
+        @Override
+        public NameFactory newNameFactory() {
+            return nameFactory();
+        }
+
+        @Override
+        public KafkaMetric newInstance(MetricRegistry metricRegistry, NameFactory nameFactory) {
+            return new KafkaMetric(metricRegistry, nameFactory);
+        }
+    };
 
     public KafkaMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
         super(metricRegistry, nameFactory);

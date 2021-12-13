@@ -26,7 +26,12 @@ import static com.megaease.easeagent.plugin.servicename.Const.DEFAULT_PROPAGATE_
 import static com.megaease.easeagent.plugin.servicename.Const.PROPAGATE_HEAD_CONFIG;
 
 public class ServiceNameConfig implements AutoRefreshConfig {
-    public static final AutoRefreshConfigSupplier<ServiceNameConfig> SUPPLIER = ServiceNameConfig::new;
+    public static final AutoRefreshConfigSupplier<ServiceNameConfig> SUPPLIER = new AutoRefreshConfigSupplier<ServiceNameConfig>() {
+        @Override
+        public ServiceNameConfig newInstance() {
+            return new ServiceNameConfig();
+        }
+    };
 
     private volatile String propagateHead = DEFAULT_PROPAGATE_HEAD;
 

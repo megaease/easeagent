@@ -60,7 +60,7 @@ public class JdbConPrepareOrCreateStmInterceptor implements NonReentrantIntercep
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.TRACING.getName();
     }
 

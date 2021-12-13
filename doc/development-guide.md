@@ -423,7 +423,13 @@ public class ServiceNameInterceptor implements Interceptor {
 
     @Override
     public void init(Config pConfig, String className, String methodName, String methodDescriptor) {
-        config = AutoRefreshRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(), ServiceNameConfig::new);
+        config = AutoRefreshRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(), 
+            new AutoRefreshConfigSupplier<ServiceNameConfig>() {
+                @Override
+                public ServiceNameConfig newInstance() {
+                    return new ServiceNameConfig();
+                }
+            });
     }
 }
 ``` 

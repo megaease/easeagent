@@ -10,20 +10,28 @@ import java.lang.reflect.Type;
  *
  * @param <T> the type of ServiceMetric by this Supplier
  */
-public interface ServiceMetricSupplier<T extends ServiceMetric> {
+public abstract class ServiceMetricSupplier<T extends ServiceMetric> {
+
+    private final Type type;
+
+    public ServiceMetricSupplier() {
+        Type superClass = getClass().getGenericSuperclass();
+        if (superClass instanceof Class<?>) { // sanity check, should never happen
+            throw new IllegalArgumentException("Internal error: TypeReference constructed without actual type information");
+        }
+        type = ((ParameterizedType) superClass).getActualTypeArguments()[0];
+    }
 
     /**
      * the type of ServiceMetric
      *
      * @return {@link Type}
      */
-    default Type getType() {
-        Type superClass = getClass().getGenericSuperclass();
-        if (superClass instanceof Class<?>) { // sanity check, should never happen
-            throw new IllegalArgumentException("Internal error: TypeReference constructed without actual type information");
-        }
-        return ((ParameterizedType) superClass).getActualTypeArguments()[0];
+    public Type getType() {
+        return type;
     }
+
+    public abstract NameFactory newNameFactory();
 
     /**
      * new a ServiceMetric
@@ -32,5 +40,5 @@ public interface ServiceMetricSupplier<T extends ServiceMetric> {
      * @param nameFactory    {@link NameFactory}
      * @return a type of ServiceMetric
      */
-    T newInstance(MetricRegistry metricRegistry, NameFactory nameFactory);
+    public abstract T newInstance(MetricRegistry metricRegistry, NameFactory nameFactory);
 }

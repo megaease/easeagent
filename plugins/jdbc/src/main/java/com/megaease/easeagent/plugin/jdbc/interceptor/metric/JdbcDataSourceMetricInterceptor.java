@@ -21,13 +21,13 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcConnectionMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,9 +39,7 @@ public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor 
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        metric = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "jdbc-connection", "url"),
-            JdbcMetric::nameFactory,
-            JdbcMetric::new);
+        metric = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "jdbc-connection", "url"), JdbcMetric.METRIC_SUPPLIER);
     }
 
     @Override
@@ -73,7 +71,7 @@ public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor 
     }
 
     @Override
-    public String getName() {
+    public String getType() {
         return Order.METRIC.getName();
     }
 

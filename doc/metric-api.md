@@ -316,7 +316,17 @@ public class DoFilterMetricInterceptor extends Interceptor {
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
         SERVER_METRIC = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "http-request", "url"),
-            ServerMetric::nameFactory, ServerMetric::new);
+            new ServiceMetricSupplier<ServerMetric>() {
+                @Override
+                public NameFactory newNameFactory() {
+                    return ServerMetric.nameFactory();
+                }
+        
+                @Override
+                public ServerMetric newInstance(MetricRegistry metricRegistry, NameFactory nameFactory) {
+                    return new ServerMetric(metricRegistry, nameFactory);
+                }
+            });
     }
     
     @Override
@@ -373,7 +383,8 @@ Its output configuration complies with metric configuration rules: [metric confi
 #### demo:
 ```java
 public class MD5ReportConsumer {
-    private Reporter reporter;
+    private final Config config;
+    private final Reporter reporter;
     public MD5ReportConsumer() {
         this.config = AutoRefreshRegistry.getOrCreate("observability", "md5Dictionary", "metric");
         this.reporter = EaseAgent.metricReporter(config);

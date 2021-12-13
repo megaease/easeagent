@@ -30,6 +30,17 @@ import java.time.Duration;
 import java.util.HashMap;
 
 public class ServerMetric extends ServiceMetric {
+    public static final ServiceMetricSupplier<ServerMetric> SERVICE_METRIC_SUPPLIER = new ServiceMetricSupplier<ServerMetric>() {
+        @Override
+        public NameFactory newNameFactory() {
+            return ServerMetric.nameFactory();
+        }
+
+        @Override
+        public ServerMetric newInstance(MetricRegistry metricRegistry, NameFactory nameFactory) {
+            return new ServerMetric(metricRegistry, nameFactory);
+        }
+    };
 
     public ServerMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
         super(metricRegistry, nameFactory);
