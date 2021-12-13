@@ -26,7 +26,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.tools.config.AutoRefreshRegistry;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

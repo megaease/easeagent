@@ -1,7 +1,4 @@
-package com.megaease.easeagent.plugin.tools.config;
-
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+package com.megaease.easeagent.plugin.api.config;
 
 import java.util.List;
 import java.util.Set;
@@ -9,7 +6,7 @@ import java.util.Set;
 /**
  * a base AutoRefreshConfig
  */
-public class BaseAutoRefreshConfig implements Config, AutoRefreshConfig {
+public class AutoRefreshConfigImpl implements Config, AutoRefreshConfig {
     protected volatile Config config;
 
     @Override

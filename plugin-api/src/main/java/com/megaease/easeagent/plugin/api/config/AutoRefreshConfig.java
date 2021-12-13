@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.tools.config;
-
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+package com.megaease.easeagent.plugin.api.config;
 
 public interface AutoRefreshConfig extends ConfigChangeListener {
 

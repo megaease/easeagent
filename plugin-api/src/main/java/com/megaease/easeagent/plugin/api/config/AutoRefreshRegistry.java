@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.tools.config;
+package com.megaease.easeagent.plugin.api.config;
 
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
 import java.lang.reflect.Type;
@@ -29,16 +28,16 @@ public class AutoRefreshRegistry {
     private static final ConcurrentMap<Key, AutoRefreshConfig> configs = new ConcurrentHashMap<>();
 
     /**
-     * Obtain an BaseAutoRefreshConfig when it is already registered. If you have not registered, create one and return
+     * Obtain an AutoRefreshConfigImpl when it is already registered. If you have not registered, create one and return
      * The registered {@link Key} is domain, namespace, id.
      *
      * @param domain    String
      * @param namespace String
      * @param id        String
-     * @return BaseAutoRefreshConfig
+     * @return AutoRefreshConfigImpl
      */
-    public static BaseAutoRefreshConfig getOrCreate(String domain, String namespace, String id) {
-        return getOrCreate(domain, namespace, id, BaseAutoRefreshConfig::new);
+    public static AutoRefreshConfigImpl getOrCreate(String domain, String namespace, String id) {
+        return getOrCreate(domain, namespace, id, AutoRefreshConfigImpl::new);
     }
 
     /**
@@ -48,12 +47,12 @@ public class AutoRefreshRegistry {
      * @param domain    String
      * @param namespace String
      * @param id        String
-     * @param supplier  {@link ConfigSupplier} Instance Supplier
+     * @param supplier  {@link AutoRefreshConfigSupplier} Instance Supplier
      * @param <C>       the type of AutoRefreshConfig by the Supplier
      * @return the type of AutoRefreshConfig by the Supplier
      */
     @SuppressWarnings("unchecked")
-    public static <C extends AutoRefreshConfig> C getOrCreate(String domain, String namespace, String id, ConfigSupplier<C> supplier) {
+    public static <C extends AutoRefreshConfig> C getOrCreate(String domain, String namespace, String id, AutoRefreshConfigSupplier<C> supplier) {
         Key key = new Key(domain, namespace, id, supplier.getType());
         AutoRefreshConfig autoRefreshConfig = configs.get(key);
         if (autoRefreshConfig != null) {

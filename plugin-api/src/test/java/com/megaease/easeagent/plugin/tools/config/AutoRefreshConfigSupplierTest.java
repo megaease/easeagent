@@ -1,20 +1,20 @@
 package com.megaease.easeagent.plugin.tools.config;
 
+import com.megaease.easeagent.plugin.api.config.AutoRefreshConfig;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigSupplier;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
 
-import static org.junit.Assert.*;
-
-public class ConfigSupplierTest {
+public class AutoRefreshConfigSupplierTest {
 
 
     @Test
     public void getType() {
-        ConfigSupplier<TestAutoRefreshConfig> supplier = TestAutoRefreshConfig::new;
-        ConfigSupplier<TestAutoRefreshConfig> supplier2 = TestAutoRefreshConfig::new;
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier = TestAutoRefreshConfig::new;
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier2 = TestAutoRefreshConfig::new;
         Assert.assertEquals(supplier.getType(), supplier2.getType());
         Type type1 = supplier.getType();
         Type type2 = supplier2.getType();
@@ -23,8 +23,8 @@ public class ConfigSupplierTest {
 
     @Test
     public void newInstance() {
-        ConfigSupplier<TestAutoRefreshConfig> supplier = TestAutoRefreshConfig::new;
-        ConfigSupplier<TestAutoRefreshConfig> supplier2 = TestAutoRefreshConfig::new;
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier = TestAutoRefreshConfig::new;
+        AutoRefreshConfigSupplier<TestAutoRefreshConfig> supplier2 = TestAutoRefreshConfig::new;
         Assert.assertEquals(supplier.newInstance().getClass(), supplier2.newInstance().getClass());
     }
 

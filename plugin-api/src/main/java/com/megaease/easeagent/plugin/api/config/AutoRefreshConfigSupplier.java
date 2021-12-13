@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.tools.config;
+package com.megaease.easeagent.plugin.api.config;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
  *
  * @param <T> the type of Config by this Supplier
  */
-public interface ConfigSupplier<T extends AutoRefreshConfig> {
+public interface AutoRefreshConfigSupplier<T extends AutoRefreshConfig> {
     /**
      * the type of AutoRefreshConfig
      *

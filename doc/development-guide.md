@@ -339,7 +339,7 @@ class Interceptor{
 
 Regarding configuration, we have a set of rules to follow. For detailed rules, please see: [user-manual.md#configuration](user-manual.md#configuration)
 
-When you want to get your own configuration file in the plug-in, you only need to get it from the Context.
+When you want to get your own configuration file in the plugin, you only need to get it from the Context.
 The framework itself will automatically maintain Confic's changes and modifications.
 
 #### demo:
@@ -348,6 +348,9 @@ class InterceptorImpl  implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         Config config = context.getConfig();
+        // You don’t need to verify enabled here, because enabled is a reserved attribute. If it is false, the Interceptor will not be run.
+        // boolean enabled = config.enabled();
+        Integer outputSize = config.getInt("output.size"); //it will be get config key: plugin.[domain].[namespace].[id].output.size = [value]
     }
 
     @Override
@@ -358,19 +361,58 @@ class InterceptorImpl  implements Interceptor {
 ```
 
 When you want to get the configuration outside of the plugin, we provide tools to get it.
+
 This tool will automatically maintain configuration updates and modifications, and the configuration obtained each time will be the latest configuration.
+
 It is a singleton registration factory, which also means that the singleton acquisition is locked, so it is hoped that the user can acquire it as little as possible.
-for example: acquire it once during initialization, and then put it in a static variable. 
-The registered key is domain, namespace, id.
+
+for example: acquire it once during initialization, and then put it in a static variable.
+ 
+The registered key is `domain`, `namespace`, `id`.
 
 #### demo:
 ```java
-import com.megaease.easeagent.plugin.tools.config.AutoRefreshRegistry;
-import com.megaease.easeagent.plugin.tools.config.BaseAutoRefreshConfig;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigImpl;
 class Demo{
-  BaseAutoRefreshConfig config = AutoRefreshRegistry.getOrCreate("observability", "httpclient", "metric");
+  AutoRefreshConfigImpl config = AutoRefreshRegistry.getOrCreate("observability", "httpclient", "metric");
 }
 ```
+
+#### customize
+
+When you need to customize Config, implement the [com.megaease.easeagent.plugin.api.config.AutoRefreshConfig](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/config/AutoRefreshConfig.java) interface, and then register
+
+The registered key is `domain`, `namespace`, `id` and the `type` of Class.
+
+```java
+public class ServiceNameConfig implements AutoRefreshConfig {
+    private volatile String propagateHead = "X-Mesh-RPC-Service";
+
+    public String getPropagateHead() {
+        return propagateHead;
+    }
+
+    @Override
+    public void onChange(Config oldConfig, Config newConfig) {
+        String propagateHead = newConfig.getString("propagate.head");
+        if (StringUtils.isEmpty(propagateHead) || StringUtils.isEmpty(propagateHead.trim())) {
+            return;
+        }
+        this.propagateHead = propagateHead.trim();
+    }
+}
+
+public class ServiceNameInterceptor implements Interceptor {
+    protected static ServiceNameConfig config = null;
+
+    @Override
+    public void init(Config pConfig, String className, String methodName, String methodDescriptor) {
+        config = AutoRefreshRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(), ServiceNameConfig::new);
+    }
+}
+``` 
+
 
 
 Instrumenting the method base on [Byte buddy](https://github.com/raphw/byte-buddy) technology.

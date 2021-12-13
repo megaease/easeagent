@@ -18,15 +18,15 @@
 package com.megaease.easeagent.plugin.servicename;
 
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.tools.config.AutoRefreshConfig;
-import com.megaease.easeagent.plugin.tools.config.ConfigSupplier;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshConfig;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigSupplier;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import static com.megaease.easeagent.plugin.servicename.Const.DEFAULT_PROPAGATE_HEAD;
 import static com.megaease.easeagent.plugin.servicename.Const.PROPAGATE_HEAD_CONFIG;
 
 public class ServiceNameConfig implements AutoRefreshConfig {
-    public static final ConfigSupplier<ServiceNameConfig> SUPPLIER = ServiceNameConfig::new;
+    public static final AutoRefreshConfigSupplier<ServiceNameConfig> SUPPLIER = ServiceNameConfig::new;
 
     private volatile String propagateHead = DEFAULT_PROPAGATE_HEAD;
 
