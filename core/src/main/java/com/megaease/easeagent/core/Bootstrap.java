@@ -24,15 +24,15 @@ import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.core.context.ContextManager;
 import com.megaease.easeagent.core.plugin.BridgeDispatcher;
 import com.megaease.easeagent.core.plugin.PluginLoader;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import fi.iki.elonen.NanoHTTPD;
@@ -58,6 +58,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -274,6 +275,7 @@ public class Bootstrap {
         }
         AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new ServiceUpdateAgentHttpHandler());
         AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new CanaryUpdateAgentHttpHandler());
+        AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new CanaryListUpdateAgentHttpHandler());
         AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new PluginPropertyHttpHandler());
         AGENT_HTTP_HANDLER_LIST_ON_INIT.add(new PluginPropertiesHttpHandler());
         return configs;
@@ -289,6 +291,43 @@ public class Bootstrap {
         @Override
         public String getPath() {
             return "/config-canary";
+        }
+
+        @Override
+        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
+            wrappedConfigManager.updateCanary2(config, version);
+            return null;
+        }
+    }
+
+    public static class CanaryListUpdateAgentHttpHandler extends ConfigsUpdateAgentHttpHandler {
+        public static AtomicInteger lastCount = new AtomicInteger(0);
+
+
+        @Override
+        public String getPath() {
+            return "/config-global-transmission";
+        }
+
+        @Override
+        public NanoHTTPD.Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
+            LOGGER.info("call /config-global-transmission. configs: {}", map);
+            synchronized (lastCount) {
+                List<String> headers = (List<String>) map.get("headers");
+                Map<String, String> config = new HashMap<>();
+                for (int i = 0; i < headers.size(); i++) {
+                    config.put("easeagent.progress.forwarded.headers.global.transmission." + i, headers.get(i));
+                }
+                int last = lastCount.get();
+                if (headers.size() < last) {
+                    for (int i = headers.size(); i < last; i++) {
+                        config.put("easeagent.progress.forwarded.headers.global.transmission." + i, "");
+                    }
+                }
+                lastCount.set(headers.size());
+                wrappedConfigManager.updateConfigs(config);
+            }
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
         }
 
         @Override
@@ -413,6 +452,10 @@ public class Bootstrap {
             if (map == null) {
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
             }
+            return processJsonConfig(map, urlParams);
+        }
+
+        public NanoHTTPD.Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
             String version = (String) map.remove("version");
             if (version == null) {
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);

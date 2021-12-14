@@ -137,10 +137,8 @@ In the process of supporting sidecars (such as easemesh), the sidecars will hija
 
 In order to facilitate observation and drawing, sidecars should add header information in the response header and record the tag in Tracing.
 
-For example: easemesh adds the following header information: `X-EG-Circuit-Breaker`, `X-EG-Retryer`, `X-EG-Rate-Limiter`, `X-EG-Time-Limiter`
-
 example:
-Easemesh adds the following header information: X-EG-Circuit-Breaker, X-EG-Retryer, X-EG-Rate-Limiter, X-EG-Time-Limiter
+easemesh adds the following header information: `X-EG-Circuit-Breaker`, `X-EG-Retryer`, `X-EG-Rate-Limiter`, `X-EG-Time-Limiter`
 
 The tag will be added to the Tracing Span of the request client:
 
