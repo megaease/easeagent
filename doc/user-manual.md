@@ -182,7 +182,7 @@ All metric plugins will inherit default configuration, unless they have configur
 
 plugin.observability.rabbitmq.metric.appendType=console
 ```
-But the switch configuration item using `enable` as key cannot be overridden, for `boolean` type configuration is determined by a "logical AND" operation between the global and its own namespace configuration.
+But the switch configuration item using `enabled` as key cannot be overridden, for `boolean` type configuration is determined by a "logical AND" operation between the global and its own namespace configuration.
 
 The following sections describe the metirc and tracing configuration items,  as well as the currently supported plugins and their corresponding namespaces
 
@@ -212,8 +212,8 @@ jvmGc           | `jvmGc`           | JVM GC Metirc
 JVM Memory      | `jvmMemory`       | JVM Memory Metric
 
 #### Redirect
-Redirection feature combined with `Easeload` to direct traffic to shadow services to simulate real traffic for the whole site performance test in the production environment in an effective and safe way.
-For more detail, please reference [EaseLoad](https://megaease.com/docs/load/) documents.
+Redirection feature combined with `EaseMesh` to direct traffic to shadow services to simulate real traffic for the whole site performance test in the production environment in an effective and safe way.
+For more detail, please reference [EaseMesh](https://megaease.com/easemesh/) documents.
 
 The default configuration has only one item:
 
