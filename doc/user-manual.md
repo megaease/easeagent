@@ -6,12 +6,11 @@
     - [Getting the configuration file](#getting-the-configuration-file)
     - [Global Configuration](#global-configuration)
         - [Internal HTTP Server](#internal-http-server)
-        - [Output Data Server: Kafka and Zipkin Server](#Output-Data-Server:-Kafka-and-zipkin-server)
+        - [Output Data Server: Kafka and Zipkin Server](#Output-Data-Server-Kafka-and-zipkin-server)
         - [Progress Configuration](#progress-configuration)
         - [Integrability Configuration](#progress-configuration)
     - [Plugin Configuration](#plugin-configuration)
-        - [Metric](#metric)
-        - [Tracing](#tracing)
+        - [Tracing and Metric](#tracing-and-metric)
         - [Redirect](#redirect)
   - [Logging](#logging)
   - [Prometheus Support](#prometheus-support)
@@ -35,31 +34,16 @@
       - [RabbitMQ Consumer](#rabbitmq-consumer)
 
 ## Configuration
-EaseAgent provides dedicated parameters for controlling metrics and tracing collection behavior via **agent.properties**. These parameters include:
+The EaseAgent configuration information can be divided into two categories, one is the **global configuration** and the other is the **plugin configuration**.  
+Global configuration include dedicated parameters for controlling metrics and tracing collection behavior via **agent.properties**. These parameters include:
+
 * Data reporting frequency
 * Data reporting output type
 * Kafka topic of data reporting
 * Data collecting and reporting switch
 * Queue depth in process for high throughput
 
-The EaseAgent configuration information can be divided into two categories, one is the global configuration and the other is the plugin configuration. The mostly service capabilities, such as tracing and metirc are mostly provided through plugins.
-- Global configuration, which will be covered in the following sections.
-- Plugin configuration, the format of the plugin configuration is defined as follows.
-```
-plugin.[domain].[namespace].[type].[key] = [value]
-```
-Take the tracing switch of `httpclient` as an example.
-```
-plugin.observability.httpclient.tracing.enabled=true
-
-domain          : observability
-namespace       : httpclient
-type            : tracing
-key             : enabled
-value           : true
-```
-
-`[domain]` and `[namespace]` and `[type]` are defined by plugins. 
+Plugin level configuration provides more granular control and customizable configuration.
 
 ### Getting the configuration file
 You may extract default configuration from the JAR file or create new properties from a blank file.
@@ -72,7 +56,6 @@ $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar=${EASE_AGENT_PATH}/agent.properties" -jar user-app.jar
 ```
 
-Users can customize the following parameters
 
 ### Global Configuration
 #### Internal HTTP Server
@@ -115,7 +98,25 @@ Key| Default Value | Description |
 #### Integrability Configuration
 
 ### Plugin Configuration
-For plugin level configuration, EaseAgent provides default configuration for all types of services(serviceId) with a **namespace** of `global`, and each type(namespace) of the service uses the default configuration when it does not create configuration with its own namespace.
+Most capabilities of Easeagent, such as tracing and metirc, are provided through plugins.
+The format of the plugin configuration is defined as follows.
+```
+plugin.[domain].[namespace].[function].[key] = [value]
+```
+Take the tracing switch of `httpclient` as an example.
+```
+plugin.observability.httpclient.tracing.enabled=true
+
+domain          : observability
+namespace       : httpclient
+function        : tracing
+key             : enabled
+value           : true
+```
+
+`[domain]` and `[namespace]` and `[function]` are defined by plugins, and further details can be found in the [plugin development guide](./development-guide.md).
+
+For plugin level configuration, EaseAgent defines a spacial **namespace** of `global` in which user can define default configuration for any `function`, like `metric`, and each namespace plugin of this `function` will uses the default configuration when it does not create configuration with its own namespace.
 
 For example, Metric have a set of default plugin configuration as follow:
 ```
@@ -132,14 +133,15 @@ All metric plugins will inherit default configuration, unless they have configur
 
 plugin.observability.rabbitmq.metric.appendType=console
 ```
-But the switch configuration item using `enable` as key cannot be overridden.
+But the switch configuration item using `enable` as key cannot be overridden, for `boolean` type configuration is determined by a "logical AND" operation between the global and its own namespace configuration.
 
 The following sections describe the metirc and tracing configuration items,  as well as the currently supported plugins and their corresponding namespaces
 
-#### Metric
+#### Tracing and Metric
 
 Key| Default Value | Description |
 ---| ---| ---|
+`plugin.observability.global.tracing.enabled`   | true              | Enable all tracing collection. `false`: Disable all tracing collection. |
 `plugin.observability.global.metric.enabled`    | true              | Enable all metrics collection. `false`: Disable all metrics collection. |
 `plugin.observability.global.metric.interval`   | 30                | Time interval between two outputs. Time Unit: second. |
 `plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic. |
