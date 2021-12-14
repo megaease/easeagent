@@ -106,9 +106,16 @@ Config format:
 1. {key} indicates the unique key of the header configuration, used to identify the configuration modification
 2. {headerName} is the Header Name you need to pass through
 
-demo:
+Example:
 ```properties
 easeagent.progress.forwarded.headers.canary.0=X-Mesh-Canary
+```
+In the process of supporting easemesh traffic coloring, the request header `X-Mesh-Canary` needs to be deeply passed through.
+
+```
+(add header: X-Mesh-Canary=lv1) -> serviceA(X-Mesh-Canary=lv1) -> mesh(check  X-Mesh-Canary) --> servcieB
+                                                                                         |
+                                                                                         |_____> servcieB-canary(X-Mesh-Canary=lv1)
 ```
 
 ##### tracing config
@@ -121,9 +128,24 @@ Config format:
 1. {key} indicates the unique key of the header configuration, used to identify the configuration modification
 2. {headerName} is the Header Name you need to tag
 
-demo:
+Example:
 ```properties
 observability.tracings.tag.response.headers.eg.0=X-EG-Circuit-Breaker
+```
+
+In the process of supporting sidecars (such as easemesh), the sidecars will hijack or color traffic according to the situation.
+
+In order to facilitate observation and drawing, sidecars should add header information in the response header and record the tag in Tracing.
+
+For example: easemesh adds the following header information: `X-EG-Circuit-Breaker`, `X-EG-Retryer`, `X-EG-Rate-Limiter`, `X-EG-Time-Limiter`
+
+example:
+Easemesh adds the following header information: X-EG-Circuit-Breaker, X-EG-Retryer, X-EG-Rate-Limiter, X-EG-Time-Limiter
+
+The tag will be added to the Tracing Span of the request client:
+
+```json
+{"kind": "CLIENT", "tags": {"X-EG-Circuit-Breaker":"aaaa", "X-EG-Retryer":"bbbb", "X-EG-Rate-Limiter":"cccc", "X-EG-Time-Limiter":"dddd"}}
 ```
 
 ### Plugin Configuration
@@ -214,7 +236,7 @@ elasticsearch   | `elasticsearch`   | Elasticsearch Redirection
 
 #### Service Name Head
 
-To support easemesh, we have added a new plug-in called "servicename".
+To support easemesh, we have added a new plugin called "servicename".
 
 It will get the service name in advance, and then put the service name in the HTTP request header.
 

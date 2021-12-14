@@ -140,9 +140,9 @@ public enum MetricField {
 
 ### 3. [com.megaease.easeagent.plugin.api.metric.name.NameFactory](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/NameFactory.java)
 
-According to the value type and naming combination, we standardize a NameFacoy.
+According to the value type and naming combination, we standardize a NameFactory.
 
-#### demo:
+#### Example:
 
 ```java
 class ServerMetric{
@@ -197,7 +197,7 @@ Use the ServiceMetricRegistry interface to register and create a singleton.
 
 ##### Config
 
-Metric configuration follows plug-in configuration rules [metric config](user-manual.md#metric)
+Metric configuration follows plugin configuration rules [metric config](user-manual.md#metric)
 
 ##### Tags
 
@@ -208,6 +208,7 @@ To better support the business, three tags must be given: category，type and ke
 So it is fixed in Tags and must provide three pieces of information: category，type and keyFieldName
 
 [com.megaease.easeagent.plugin.api.metric.name.Tags](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/Tags.java)
+
 Its tag is copied as follows:
 ```
 output.put("category", tags.category)
@@ -223,7 +224,7 @@ tags.tags.forEach((k,v)->{
 The Key of the singleton is: `domain`, `namespace`, `id`, `tags` and the `type` of class.
 
 
-#### demo:
+#### Example:
 ```java
 public class ServerMetric extends ServiceMetric {
 
@@ -380,7 +381,7 @@ The obtained Reporter is a singleton, and the key of the singleton is `namespace
 
 Its output configuration complies with metric configuration rules: [metric config](user-manual.md#metric)
 
-#### demo:
+#### Example:
 ```java
 public class MD5ReportConsumer {
     private final Config config;

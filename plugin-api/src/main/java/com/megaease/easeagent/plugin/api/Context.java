@@ -243,6 +243,7 @@ public interface Context {
     }
 
 
+    //---------------------------------- 1. async ------------------------------------------
     /**
      * Export a {@link AsyncContext} for asynchronous program processing
      * It will copy all the key:value in the current Context
@@ -275,6 +276,8 @@ public interface Context {
      */
     boolean isWrapped(Runnable task);
 
+
+    //----------------------------------2. progress ------------------------------------------
     /**
      * Create a ProgressContext for Cross-process Trace link
      * It will pass multiple key:value values required by Trace and EaseAgent through
@@ -315,6 +318,7 @@ public interface Context {
     ProgressContext importProgress(Request request);
 
 
+    //---------------------------------- 3. data queue ------------------------------------------
     /**
      * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rabbitMq consumer
      * <p>
@@ -375,6 +379,8 @@ public interface Context {
      */
     void producerInject(Span span, MessagingRequest request);
 
+
+    //---------------------------------- 4. small Tracing ------------------------------------------
     /**
      * Returns a new child span if there's a {@link Tracing#currentSpan()} or a new trace if there isn't.
      *
@@ -386,7 +392,6 @@ public interface Context {
      * @return true if the key is necessary for EaseAgent
      */
     boolean isNecessaryKeys(String key);
-
 
     /**
      * Inject Forwarded Headers key:value to Setter {@link Setter#setHeader(String, String)}.
