@@ -184,12 +184,12 @@ elasticsearch   | `elasticsearch`   | Elasticsearch Redirection
 
 
 ## Logging
-EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `log4j2.xml` file.
+EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `easeagent-log4j2.xml` file.
 
 After modification, User can run the application with EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/log4j2.xml" -jar user-app.jar
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/easeagent-log4j2.xml" -jar user-app.jar
 ```
 
 ## Prometheus Support
