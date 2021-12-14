@@ -136,17 +136,20 @@ observability.tracings.output.target=zipkin
 observability.tracings.output.target.zipkinUrl=http://localhost:9411/api/v2/spans
 ```
 
-### 3. Building the demo application.
+### 3. Building the demo application and simple plugin.
 ```
 $ git clone https://github.com/megaease/easeagent-test-demo.git
 $ cd spring-web
+$ mvn clean package
+
+$ cd simple-plugin
 $ mvn clean package
 ```
 There is an agent.propertites configuration file in the demo directory, which is configured to print all information to the console.
 If you want to print all information to console, then you can use this configuration file.
 
-### 4. Copy extension plugin to `plugins` directory
-There is a [simple plugin](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin) only demonstrating the use of the plugin. 
+### 4. Copy simple plugin to `plugins` directory
+There is a [simple plugin](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin) which only for demonstrating the use of the plugin. 
 The compiled simple plugin JAR package should be copy to the `plugins` directory located in `EASE_AGENT_PATH`, and if the directory is not exsist, it need to be created.
 
 ```
@@ -177,7 +180,7 @@ Start Prometheus
 $ ./prometheus --config.file=prometheus.yml
 
 # Open another console, run curl to access the test url for serveral times.
-$ curl http://127.0.0.1:18888/web_client
+$ curl -v http://127.0.0.1:18888/web_client
 
 ```
 
