@@ -95,11 +95,11 @@ Key| Default Value | Description |
 
 #### Progress Configuration
 
-##### Forwarded headers page
+##### Forwarded headers config
 
 Easeagent provides a header pass-through tool.
 
-Page format: 
+Config format: 
 
 `easeagent.progress.forwarded.headers.{key}={headerName}`
 
@@ -111,7 +111,20 @@ demo:
 easeagent.progress.forwarded.headers.canary.0=X-Mesh-Canary
 ```
 
-#### Integrability Configuration
+##### Progress tracing config
+
+Easeagent will grab the header from the response of the process, and put the name and value of the header as a tag in the Span of Tracing.
+
+Config format:
+`observability.tracings.tag.response.headers.{key}={value}`
+
+1. {key} indicates the unique key of the header configuration, used to identify the configuration modification
+2. {headerName} is the Header Name you need to tag
+
+demo:
+```properties
+observability.tracings.tag.response.headers.eg.0=X-EG-Circuit-Breaker
+```
 
 ### Plugin Configuration
 Most capabilities of Easeagent, such as tracing and metirc, are provided through plugins.
@@ -197,6 +210,12 @@ redis           | `redis`           | Redis Redirection
 kafka           | `kafka`           | Kafka Redirection
 rabbitmq        | `rabbitmq`        | RabbitMQ Redirection
 elasticsearch   | `elasticsearch`   | Elasticsearch Redirection
+
+
+#### Service Name Head
+
+
+
 
 
 ## Logging

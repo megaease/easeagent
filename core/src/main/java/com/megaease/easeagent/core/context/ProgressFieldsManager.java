@@ -44,7 +44,7 @@ public class ProgressFieldsManager {
 
     static class Change {
         private final BiFunction<String, Map<String, String>, String> changeListener;
-        Map<String, String> penetration = new HashMap<>();
+        Map<String, String> forwardedHeaders = new HashMap<>();
         Map<String, String> responseHoldTag = new HashMap<>();
 
         public Change(BiFunction<String, Map<String, String>, String> changeListener) {
@@ -53,18 +53,18 @@ public class ProgressFieldsManager {
 
         public void put(String key, String value) {
             if (ProgressFields.isForwardedHeader(key)) {
-                penetration.put(key, value);
+                forwardedHeaders.put(key, value);
             } else if (ProgressFields.isResponseHoldTagKey(key)) {
                 responseHoldTag.put(key, value);
             }
         }
 
         public void flush() {
-            if (!penetration.isEmpty()) {
-                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, penetration);
+            if (!forwardedHeaders.isEmpty()) {
+                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, forwardedHeaders);
             }
             if (!responseHoldTag.isEmpty()) {
-                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG, responseHoldTag);
+                changeListener.apply(ProgressFields.OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG, responseHoldTag);
             }
         }
     }

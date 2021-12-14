@@ -67,6 +67,7 @@ public interface ConfigConst {
         String KEY_COMM_ENABLED = "enabled";
         String KEY_COMM_SAMPLED_BY_QPS = "sampledByQPS";
         String KEY_COMM_OUTPUT = "output";
+        String KEY_COMM_TAG = "tag";
         String KEY_COMM_SERVICE_PREFIX = "servicePrefix";
         String KEY_COMM_INTERVAL = "interval";
         String KEY_COMM_TOPIC = "topic";

@@ -49,6 +49,7 @@ public class CompatibilityConversion {
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_ENABLED);
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_SAMPLED_BY_QPS);
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_OUTPUT);
+        TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_TAG);
 
         METRIC_SKIP = new HashSet<>();
         METRIC_SKIP.add(ConfigConst.Observability.KEY_METRICS_JVM_GC);

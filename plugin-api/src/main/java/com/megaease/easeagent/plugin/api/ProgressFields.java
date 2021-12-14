@@ -25,7 +25,7 @@ import java.util.function.BiFunction;
 
 public class ProgressFields {
     public static final String EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG = "easeagent.progress.forwarded.headers";
-    public static final String EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG = "easeagent.progress.response.hold.tag.fields";
+    public static final String OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG = "observability.tracings.tag.response.headers";
     private static volatile Fields FORWARDED_HEADERS = build(Collections.emptyMap());
     private static volatile Fields RESPONSE_HOLD_TAG_FIELDS = build(Collections.emptyMap());
 
@@ -45,7 +45,7 @@ public class ProgressFields {
     }
 
     public static boolean isResponseHoldTagKey(String key) {
-        return key.startsWith(EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG);
+        return key.startsWith(OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG);
     }
 
     private static void setForwardedHeaders(Map<String, String> headers) {
