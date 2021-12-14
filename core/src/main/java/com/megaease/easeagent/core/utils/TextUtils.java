@@ -18,6 +18,7 @@
 package com.megaease.easeagent.core.utils;
 
 import com.google.common.base.Charsets;
+import com.megaease.easeagent.plugin.utils.common.DataSize;
 
 public class TextUtils {
 

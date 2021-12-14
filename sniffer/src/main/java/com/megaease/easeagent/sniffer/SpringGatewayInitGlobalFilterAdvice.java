@@ -34,8 +34,8 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-@Generate.Advice
-@Injection.Provider(Provider.class)
+//@Generate.Advice
+//@Injection.Provider(Provider.class)
 public abstract class SpringGatewayInitGlobalFilterAdvice implements Transformation {
 
     @Override

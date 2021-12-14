@@ -17,24 +17,22 @@
 
 package com.megaease.easeagent.sniffer;
 
-import brave.Tracing;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
-import com.megaease.easeagent.core.Injection;
 import com.megaease.easeagent.core.Transformation;
-import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
-import com.megaease.easeagent.gen.Generate;
+import com.megaease.easeagent.plugin.async.ThreadLocalCurrentContext;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Generate.Advice
-@Injection.Provider(Provider.class)
+// @Generate.Advice
+// @Injection.Provider(Provider.class)
 public abstract class CrossThreadPropagationAdvice implements Transformation {
     public static final String CLASS_THREAD_POOL_EXECUTOR = "java.util.concurrent.ThreadPoolExecutor";
     public static final String CLASS_REACTOR_SCHEDULERS = "reactor.core.scheduler.Schedulers";
@@ -42,17 +40,17 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
     @Override
     public <T extends Definition> T define(Definition<T> def) {
         return def
-                .type(named(CLASS_THREAD_POOL_EXECUTOR))
-                .transform(threadPoolExecutorExecute(named("execute")
-                        .and(takesArguments(1))
-                        .and(takesArgument(0, named("java.lang.Runnable")))
-                ))
-                .type(named(CLASS_REACTOR_SCHEDULERS))
-                .transform(reactorSchedulersOnSchedule(named("onSchedule")
-                        .and(takesArguments(1))
-                        .and(takesArgument(0, named("java.lang.Runnable")))
-                ))
-                .end();
+            .type(named(CLASS_THREAD_POOL_EXECUTOR))
+            .transform(threadPoolExecutorExecute(named("execute")
+                .and(takesArguments(1))
+                .and(takesArgument(0, named("java.lang.Runnable")))
+            ))
+            .type(named(CLASS_REACTOR_SCHEDULERS))
+            .transform(reactorSchedulersOnSchedule(named("onSchedule")
+                .and(takesArguments(1))
+                .and(takesArgument(0, named("java.lang.Runnable")))
+            ))
+            .end();
     }
 
     @AdviceTo(ThreadPoolExecutorExecute.class)
@@ -72,7 +70,7 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
 //            logger.debug("enter method [{}]", method);
                 Runnable task = (Runnable) args[0];
                 if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                    Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);
+                    Runnable firstWrap = EaseAgent.contextSupplier.get().wrap(task);
                     final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(firstWrap);
                     args[0] = wrap;
                 }
@@ -92,7 +90,7 @@ public abstract class CrossThreadPropagationAdvice implements Transformation {
 //            logger.debug("enter method [{}]", method);
                 Runnable task = (Runnable) args[0];
                 if (!ThreadLocalCurrentContext.isWrapped(task)) {
-                    Runnable firstWrap = Tracing.current().currentTraceContext().wrap(task);
+                    Runnable firstWrap = EaseAgent.contextSupplier.get().wrap(task);
                     final Runnable wrap = ThreadLocalCurrentContext.DEFAULT.wrap(firstWrap);
                     args[0] = wrap;
                 }

@@ -18,8 +18,9 @@
 package com.megaease.easeagent.report.util;
 
 import com.megaease.easeagent.config.ChangeItem;
-import com.megaease.easeagent.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.metric.MetricProps;
 import com.megaease.easeagent.report.trace.TraceProps;
@@ -52,6 +53,10 @@ public class Utils {
 
     public static MetricProps extractMetricProps(Configs configs, String key) {
         return MetricProps.newDefault(configs, key);
+    }
+
+    public static MetricProps extractMetricProps(Config config) {
+        return MetricProps.newDefault(config);
     }
 
 

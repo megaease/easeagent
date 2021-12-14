@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-@Injection.Provider(Provider.class)
+// @Injection.Provider(Provider.class)
 public abstract class RabbitMqConFactoryAdvice implements Transformation {
 
     @Override

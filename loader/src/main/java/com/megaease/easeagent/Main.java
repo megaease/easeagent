@@ -18,6 +18,7 @@
 package com.megaease.easeagent;
 
 import com.google.common.collect.Lists;
+import lombok.SneakyThrows;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.JarFileArchive;
@@ -25,40 +26,79 @@ import org.springframework.boot.loader.archive.JarFileArchive;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 
 public class Main {
     private static final ClassLoader BOOTSTRAP_CLASS_LOADER = null;
     private static final String LIB = "lib/";
+    private static final String BOOTSTRAP = "boot/";
+    private static final String SLf4J2 = "log4j2/";
+    private static final String PLUGINS = "plugins/";
     private static final String LOGGING_PROPERTY = "Logging-Property";
     private static final String EASEAGENT_LOG_CONF = "easeagent.log.conf";
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-        final JarFileArchive archive = new JarFileArchive(getArchiveFileContains());
+        File jar = getArchiveFileContains();
+        final JarFileArchive archive = new JarFileArchive(jar);
 
-        final URL[] urls = nestArchiveUrls(archive);
-        final ClassLoader loader = new CompoundableClassLoader(urls);
+        // custom classloader
+        ArrayList<URL> urls = nestArchiveUrls(archive, LIB);
+        urls.addAll(nestArchiveUrls(archive, PLUGINS));
+        File p = new File(jar.getParent() + File.separator + "plugins");
+        if (p.exists()) {
+            urls.addAll(directoryPluginUrls(p));
+        }
+
+        final ClassLoader loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
+
+        // install bootstrap jar
+        final ArrayList<URL> bootUrls = nestArchiveUrls(archive, BOOTSTRAP);
+        bootUrls.forEach(url -> installBootstrapJar(url, inst));
 
         final Attributes attributes = archive.getManifest().getMainAttributes();
         final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
         final String bootstrap = attributes.getValue("Bootstrap-Class");
+        initEaseAgentSlf4j2Dir(archive, loader);
 
         switchLoggingProperty(loader, loggingProperty, () -> {
             loader.loadClass(bootstrap)
-                    .getMethod("premain", String.class, Instrumentation.class)
-                    .invoke(null, args, inst);
+                .getMethod("premain", String.class, Instrumentation.class)
+                .invoke(null, args, inst);
             return null;
         });
+    }
+
+    private static void installBootstrapJar(URL url, Instrumentation inst) {
+        try {
+            JarFile file = JarUtils.getNestedJarFile(url);
+            inst.appendToBootstrapClassLoaderSearch(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void initEaseAgentSlf4j2Dir(JarFileArchive archive, final ClassLoader bootstrapLoader) throws Exception {
+        final URL[] slf4j2Urls = nestArchiveUrls(archive, SLf4J2).toArray(new URL[0]);
+        final ClassLoader slf4j2Loader = new URLClassLoader(slf4j2Urls, null);
+        Class<?> classLoaderSupplier = bootstrapLoader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
+        Field field = classLoaderSupplier.getDeclaredField("CLASSLOADER");
+        field.set(null, slf4j2Loader);
     }
 
     /**
@@ -66,7 +106,7 @@ public class Main {
      * when host used the same logging library as agent.
      */
     private static void switchLoggingProperty(ClassLoader loader, String hostKey, Callable<Void> callable)
-            throws Exception {
+        throws Exception {
         final Thread t = Thread.currentThread();
         final ClassLoader ccl = t.getContextClassLoader();
 
@@ -91,18 +131,48 @@ public class Main {
         }
     }
 
-    private static URL[] nestArchiveUrls(Archive archive) throws IOException {
+    private static ArrayList<URL> nestArchiveUrls(JarFileArchive archive, String prefix) throws IOException {
         ArrayList<Archive> archives = Lists.newArrayList(
-                archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(LIB),
-                        entry -> true
-                ));
+            archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(prefix),
+                entry -> true
+            ));
 
-        final URL[] urls = new URL[archives.size()];
+        final ArrayList<URL> urls = new ArrayList<>(archives.size());
 
-        for (int i = 0; i < urls.length; i++) {
-            urls[i] = archives.get(i).getUrl();
+        archives.forEach(item -> {
+            try {
+                urls.add(item.getUrl());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        });
+
+        return urls;
+    }
+
+    private static ArrayList<URL> directoryPluginUrls(File directory) {
+        if (!directory.isDirectory()) {
+            return new ArrayList<>();
         }
 
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return new ArrayList<>();
+        }
+
+        final ArrayList<URL> urls = new ArrayList<>(files.length);
+
+        Arrays.stream(files).forEach(item -> {
+            if (!item.getName().endsWith("jar")) {
+                return;
+            }
+            try {
+                URL pUrl = item.toURI().toURL();
+                urls.add(pUrl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        });
         return urls;
     }
 
@@ -124,16 +194,17 @@ public class Main {
     }
 
     public static class CompoundableClassLoader extends LaunchedURLClassLoader {
-        private final Set<ClassLoader> externals = new CopyOnWriteArraySet<>();
+        private final Set<WeakReference<ClassLoader>> externals = new CopyOnWriteArraySet<>();
 
         CompoundableClassLoader(URL[] urls) {
             // super(urls, ClassLoader.getSystemClassLoader());
             super(urls, Main.BOOTSTRAP_CLASS_LOADER);
         }
 
+        @SuppressWarnings("unused")
         public void add(ClassLoader cl) {
             if (cl != null && !Objects.equals(cl, this)) {
-                externals.add(cl);
+                externals.add(new WeakReference<>(cl));
             }
         }
 
@@ -142,9 +213,13 @@ public class Main {
             try {
                 return super.loadClass(name, resolve);
             } catch (ClassNotFoundException e) {
-                for (ClassLoader external : externals) {
+                for (WeakReference<ClassLoader> external : externals) {
                     try {
-                        final Class<?> aClass = external.loadClass(name);
+                        ClassLoader cl = external.get();
+                        if (cl == null) {
+                            continue;
+                        }
+                        final Class<?> aClass = cl.loadClass(name);
                         if (resolve) resolveClass(aClass);
                         return aClass;
                     } catch (ClassNotFoundException ignore) {
@@ -154,5 +229,10 @@ public class Main {
                 throw e;
             }
         }
+    }
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        System.out.println(void.class.getCanonicalName());
     }
 }

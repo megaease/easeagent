@@ -16,13 +16,72 @@
                 <include>log4j2.xml</include>
             </includes>
         </fileSet>
+
+        <!--
+        <fileSet>
+            <directory>${project.build.basedir}/plugins/</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <includes>
+                <include>pom.xml</include>
+                <include>**/*.jar</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${project.basedir}/target/plugins/</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <includes>
+                <include>pom.xml</include>
+                <include>**/*.jar</include>
+            </includes>
+        </fileSet>
+        -->
+
+        <fileSet>
+            <directory>${project.basedir}/target/inner-plugins/</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <excludes>
+                <exclude>original-*.jar</exclude>
+            </excludes>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/target/log4j2/</directory>
+            <outputDirectory>log4j2</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        
+        <fileSet>
+            <directory>${project.basedir}/target/boot/</directory>
+            <outputDirectory>boot</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
+            <outputDirectory>boot</outputDirectory>
+            <includes>
+                <include>com.megaease.easeagent:plugin-api</include>
+            </includes>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
             <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>**/com/megaease/easeagent/plugin/*</exclude>
+            </excludes>
             <includes>
                 <include>com.megaease.easeagent:build</include>
             </includes>
+            <!--
+            <unpack>false</unpack>
+            -->
         </dependencySet>
         <dependencySet>
             <outputDirectory/>

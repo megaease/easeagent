@@ -1,23 +1,18 @@
-  
+
 # User Manual
 
 - [User Manual](#user-manual)
-  - [Agent.properties](#agentproperties)
+  - [Configuration](#configuration)
     - [Getting the configuration file](#getting-the-configuration-file)
-    - [Internal HTTP Server](#internal-http-server)
-    - [Metric](#metric)
-    - [Kafka](#kafka)
-    - [HTTP Reqeust Metric](#http-reqeust-metric)
-    - [JDBC SQL Metric](#jdbc-sql-metric)
-    - [JDBC Connection Metric](#jdbc-connection-metric)
-    - [RabbitMQ Metric](#rabbitmq-metric)
-    - [Kafka Metric](#kafka-metric)
-    - [Redis Metric](#redis-metric)
-    - [JVM GC Metric](#jvm-gc-metric)
-    - [JVM Memory Metric](#jvm-memory-metric)
-    - [SQL MD5Dictionary](#sql-md5dictionary)
-    - [Tracing](#tracing)
-    - [Logging](#logging)
+    - [Global Configuration](#global-configuration)
+        - [Internal HTTP Server](#internal-http-server)
+        - [Output Data Server: Kafka and Zipkin Server](#Output-Data-Server-Kafka-and-zipkin-server)
+        - [Progress Configuration](#progress-configuration)
+        - [Integrability Configuration](#progress-configuration)
+    - [Plugin Configuration](#plugin-configuration)
+        - [Tracing and Metric](#tracing-and-metric)
+        - [Redirect](#redirect)
+  - [Logging](#logging)
   - [Prometheus Support](#prometheus-support)
   - [Health Check and Readiness Check Endpoint](#health-check-and-readiness-check-endpoint)
   - [Tracing](#tracing-1)
@@ -37,20 +32,23 @@
       - [Kafka Client](#kafka-client)
       - [RabbitMQ Producer](#rabbitmq-producer)
       - [RabbitMQ Consumer](#rabbitmq-consumer)
-  
-## Agent.properties
-EaseAgent provides dedicated parameters for controlling metrics and tracing collection behavior via agent.properties. These parameters include:
+
+## Configuration
+The EaseAgent configuration information can be divided into two categories, one is the **global configuration** and the other is the **plugin configuration**.  
+Global configuration include dedicated parameters for controlling metrics and tracing collection behavior via **agent.properties**. These parameters include:
+
 * Data reporting frequency
 * Data reporting output type
 * Kafka topic of data reporting
 * Data collecting and reporting switch
 * Queue depth in process for high throughput
 
+Plugin level configuration provides more granular control and customizable configuration.
 
 ### Getting the configuration file
 You may extract default configuration from the JAR file or create new properties from a blank file.
 ```
-$ jar xf easeagent.jar agent.properties log4j2.xml
+$ jar xf easeagent.jar agent.properties easeagent-log4j2.xml
 ```
 Run the user application with EaseAgent
 ```
@@ -58,9 +56,9 @@ $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar=${EASE_AGENT_PATH}/agent.properties" -jar user-app.jar
 ```
 
-Users can customize the following parameters
 
-### Internal HTTP Server
+### Global Configuration
+#### Internal HTTP Server
 EaseAgent opens port `9900` by default to receive configuration change notifications and Prometheus requests.
 
 Key| Default Value | Description |
@@ -68,118 +66,175 @@ Key| Default Value | Description |
 `easeagent.server.enabled` | true | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override.|
 `easeagent.server.port` | 9900 | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override. |
 
-### Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.enabled` | true | Enable all metrics collection. `false`: Disable all metrics collection |
-
-### Kafka
-Tracing and metric data will be output to kafka server.
-Key| Default Value | Description |
----| ---| ---|
-`observability.outputServer.bootstrapServer`| 127.0.0.1:9092 |Kafka server host and port. Tracing and metric data will be output to kafka. |
-`observability.outputServer.timeout`| 10000 | Connect timeout. Time Unit: millisecond. |
-
-### HTTP Reqeust Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.request.enabled` | true | Enable collecting `Servlet` or `Filter` metric data. `false`: Disable collecting. |
-`observability.metrics.request.interval`| 30 | Time interval between two outputs. Time Unit: second. | 
-`observability.metrics.request.topic` | application-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.request.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### JDBC SQL Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.jdbcStatement.enabled` | true | Enable collecting metric data of `JDBC SQL`. `false`: Disable collecting. |
-`observability.metrics.jdbcStatement.interval` | 30 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.jdbcStatement.topic` | application-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.jdbcStatement.appendType` | kafka  | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### JDBC Connection Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.jdbcConnection.enabled` | true | Enable collecting metric data of `JDBC Connection`. `false`: Disable collecting. |
-`observability.metrics.jdbcConnection.interval` | 30 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.jdbcConnection.topic` | application-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.jdbcConnection.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### RabbitMQ Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.rabbit.enabled` | true |  Enable collecting metric data of `RabbitMQ producer and consumer`. `false`: Disable collecting. |
-`observability.metrics.rabbit.interval` | 30 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.rabbit.topic` | platform-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.rabbit.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### Kafka Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.kafka.enabled` | true | Enable collection metric data of `Kafka producer and consumer`. `false`: Disable collecting. |
-`observability.metrics.kafka.interval` | 30 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.kafka.topic` | platform-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.kafka.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### Redis Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.redis.enabled` | true | Enable collection metric data of `Redis`.  `false`: Disable collecting. |
-`observability.metrics.redis.interval` | 30 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.redis.topic` | application-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.redis.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### JVM GC Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.jvmGc.enabled` | true | Enable collection metric data of `JVM GC`.  `false`: Disable collecting. |
-`observability.metrics.jvmGc.interval` | 30 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.jvmGc.topic` | application-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.jvmGc.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### JVM Memory Metric
-Key| Default Value | Description |
----| ---| ---|
-`observability.metrics.jvmMemory.enabled` | true | Enable collection metric data of `JVM GC`.  `false`: Disable collecting. |
-`observability.metrics.jvmMemory.interval` | 30 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.jvmMemory.topic` | application-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.jvmMemory.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
-
-### SQL MD5Dictionary 
-When EaseAgent is used with EaseMesh, tracing and metric data will be stored in Elasticsearch. In order to reduce the space occupied by SQL in Elasticsearch, EaseAgent uses md5 to reduce the length of SQL, and then periodically stores it in Kafka, and finally stores it in Elasticsearch. Only one copy of sql will be stored in Elasticsearch.
-
+#### Output Data Server: Kafka and Zipkin Server
+Tracing and metric data can be output to kafka server.
 
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.metrics.md5Dictionary.enabled` | true | Enable collection of `JVM GC` metric data.  `false`: Disable collecting.|
-`observability.metrics.md5Dictionary.interval` | 300 | Time interval between two outputs. Time Unit: second. |
-`observability.metrics.md5Dictionary.topic` | application-meter | Send metric data to the specified kafka topic. |
-`observability.metrics.md5Dictionary.appendType` | kafka | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
+`observability.outputServer.bootstrapServer` | 127.0.0.1:9092 | Kafka server host and port. Tracing and metric data will be output to kafka. |
+`observability.outputServer.timeout` | 10000 | Connect timeout. Time Unit: millisecond. |
 
-### Tracing
+Global configuration for tracing output
+
 Key| Default Value | Description |
 ---| ---| ---|
-`observability.tracings.enabled` | true | Enable all collection of tracing logs. `false`: Disable all collection of tracing logs. |
-`observability.tracings.output.enabled` | true | Enable output tracing logs to Kafka. |
-`observability.tracings.output.topic` | log-tracing | Send tracing logs to the specified kafka topic. |
-`observability.tracings.output.messageMaxBytes` | 999900 | Maximum size of a message. |
-`observability.tracings.output.reportThread` | 1 | The number of thread which will send  tracing logs to kafka. |
-`observability.tracings.output.queuedMaxSpans` | 1000 | The maximum number of spans to be processed in the queue. |
-`observability.tracings.output.queuedMaxSize` | 1000000 | The maximum bytes of spans to be processed in the queue. |
-`observability.tracings.output.messageTimeout` | 1000 |  |
-`observability.tracings.request.enabled` | true | Enable collection of tracing logs(`Servlet`、 `Filter`). `false`: Disable collecting. |
-`observability.tracings.remoteInvoke.enabled` | true | Enable collection of tracing logs(`RestTemplate`、 `FeignClient`、`WebClient`). `false`: Disable collecting. |
-`observability.tracings.kafka.enabled`| true | Enable collection of `kafka` tracing logs. `false`: Disable collecting. |
-`observability.tracings.jdbc.enabled` | true | Enable collection of `JDBC` tracing logs. `false`: Disable collecting. |
-`observability.tracings.redis.enabled` | true | Enable collection of tracing logs(`Jedis`、`Lettuce`). `false`: Disable collecting. |
-`observability.tracings.rabbit.enabled` | true | Enable collection of `RabbitMQ` tracing logs. `false`: Disable collecting. |
+`observability.tracings.output.enabled`             | true      | `true`: enable output tracing data;<br /> `false`: disable all tracing data output  |
+`observability.tracings.output.target`              | system    | `system` : output tracing to kafka output server; `zipkin`: send data to zipkin server |
+`observability.tracings.output.target.zipkinUrl`    | [http://localhost:9411/api/v2/spans]() | Zipkin server url, only aviable when `observability.tracings.output.target=zipkin` |
 
-### Logging
-EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `log4j2.xml` file.
- 
+
+Following tracing output configuration items are aviable when `observability.tracings.output.target=system`:
+
+Key| Default Value | Description |
+---| ---| ---|
+`observability.tracings.output.topic`               | log-tracing   | Kafka topic for tracing data output |
+`observability.tracings.output.messageMaxBytes`     | 999900        | Maximum bytes sendable per message including encoding overhead. |
+`observability.tracings.output.queuedMaxSpans`      | 1000          | Maximum backlog of spans reported before sent. |
+`observability.tracings.output.queuedMaxSize`       | 1000000       | Maximum backlog of span bytes reported before sent. |
+`observability.tracings.output.messageTimeout`      | 1000          | Spans are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent span is reported, which ensures that spans are not stuck in an incomplete message.|
+
+#### Progress Configuration
+
+##### Forwarded headers config
+
+Easeagent provides a header pass-through tool.
+
+Config format: 
+
+`easeagent.progress.forwarded.headers.{key}={headerName}`
+
+1. {key} indicates the unique key of the header configuration, used to identify the configuration modification
+2. {headerName} is the Header Name you need to pass through
+
+demo:
+```properties
+easeagent.progress.forwarded.headers.canary.0=X-Mesh-Canary
+```
+
+##### tracing config
+
+Easeagent will grab the header from the response of the process, and put the name and value of the header as a tag in the Span of Tracing.
+
+Config format:
+`observability.tracings.tag.response.headers.{key}={value}`
+
+1. {key} indicates the unique key of the header configuration, used to identify the configuration modification
+2. {headerName} is the Header Name you need to tag
+
+demo:
+```properties
+observability.tracings.tag.response.headers.eg.0=X-EG-Circuit-Breaker
+```
+
+### Plugin Configuration
+Most capabilities of Easeagent, such as tracing and metirc, are provided through plugins.
+The format of the plugin configuration is defined as follows.
+```
+plugin.[domain].[namespace].[function].[key] = [value]
+```
+Take the tracing switch of `httpclient` as an example.
+```
+plugin.observability.httpclient.tracing.enabled=true
+
+domain          : observability
+namespace       : httpclient
+function        : tracing
+key             : enabled
+value           : true
+```
+
+`[domain]` and `[namespace]` and `[function]` are defined by plugins, and further details can be found in the [plugin development guide](./development-guide.md).
+
+For plugin level configuration, EaseAgent defines a spacial **namespace** of `global` in which user can define default configuration for any `function`, like `metric`, and each namespace plugin of this `function` will uses the default configuration when it does not create configuration with its own namespace.
+
+For example, Metric have a set of default plugin configuration as follow:
+```
+plugin.observability.global.metric.enabled=true
+plugin.observability.global.metric.interval=30
+plugin.observability.global.metric.topic=application-meter
+plugin.observability.global.metric.appendType=kafka
+```
+
+All metric plugins will inherit default configuration, unless they have configured a configuration item with the same [key] and replaced the `global` namespace with its own namespace to override.
+
+```
+# this configuration item of rabbitmq indicate that rabbitmq's metirc data is printed to console instead of send to kafka server as configured by the default.
+
+plugin.observability.rabbitmq.metric.appendType=console
+```
+But the switch configuration item using `enable` as key cannot be overridden, for `boolean` type configuration is determined by a "logical AND" operation between the global and its own namespace configuration.
+
+The following sections describe the metirc and tracing configuration items,  as well as the currently supported plugins and their corresponding namespaces
+
+#### Tracing and Metric
+
+Key| Default Value | Description |
+---| ---| ---|
+`plugin.observability.global.tracing.enabled`   | true              | Enable all tracing collection. `false`: Disable all tracing collection. |
+`plugin.observability.global.metric.enabled`    | true              | Enable all metrics collection. `false`: Disable all metrics collection. |
+`plugin.observability.global.metric.interval`   | 30                | Time interval between two outputs. Time Unit: second. |
+`plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic. |
+`plugin.observability.global.metric.appendType` | kafka             | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
+
+Supported components and corresponding namespaces:
+
+Plugin/Components| Namespace         | Description |
+---             | ---               | --- |
+httpservlet     | `httpservlet`     | Http Request Metric
+spring-gateway  | `spring-gateway`  | Http Request Metric
+jdbcConnection  | `jdbcConnection`  | JDBC Connection Metric
+jdbcStatement   | `jdbcStatement`   | JDBC SQL Metric
+jdbcStatement   | `md5Dictionary`   | SQL-MD5Dictionary 
+redis           | `redis`           | Redis Metric
+kafka           | `kafka`           | Kafka Metric
+rabbitmq        | `rabbitmq`        | RabbitMQ Metirc
+jvmGc           | `jvmGc`           | JVM GC Metirc
+JVM Memory      | `jvmMemory`       | JVM Memory Metric
+
+#### Redirect
+Redirection feature combined with `Easeload` to direct traffic to shadow services to simulate real traffic for the whole site performance test in the production environment in an effective and safe way.
+For more detail, please reference [EaseLoad](https://megaease.com/docs/load/) documents.
+
+The default configuration has only one item:
+
+```
+plugin.integrability.global.redirect.enabled=true
+```
+
+Supported components/plugins and corresponding namespaces:
+
+Plugin/Components| Namespace         | Description |
+---             | ---               | --- |
+jdbc            | `jdbc`            | Database Redirection 
+redis           | `redis`           | Redis Redirection
+kafka           | `kafka`           | Kafka Redirection
+rabbitmq        | `rabbitmq`        | RabbitMQ Redirection
+elasticsearch   | `elasticsearch`   | Elasticsearch Redirection
+
+
+#### Service Name Head
+
+To support easemesh, we have added a new plug-in called "servicename".
+
+It will get the service name in advance, and then put the service name in the HTTP request header.
+
+header name config:
+```properties
+plugin.integrability.serviceName.addServiceNameHead.propagate.head=X-Mesh-RPC-Service
+```
+
+It is worth noting that: `It is worth noting that this plugin strongly relies on spring cloud`
+
+If you have other needs, you can customize the plugin yourself.
+
+
+## Logging
+EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `easeagent-log4j2.xml` file.
+
 After modification, User can run the application with EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/log4j2.xml" -jar user-app.jar
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/easeagent-log4j2.xml" -jar user-app.jar
 ```
 
 ## Prometheus Support
@@ -188,7 +243,7 @@ When Internal HTTP Server is enabled, User can use Prometheus to collect metrics
 ```
   - job_name: 'user-app'
     static_configs:
-    - targets: ['localhost:9900']
+      - targets: ['localhost:9900']
     metrics_path: "/prometheus/metrics"
 ```
 
@@ -212,7 +267,7 @@ The response status will be 200(OK)
 EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing logs.The data format stored in `Kafka`  is [Zipkin Data Model](https://zipkin.io/pages/data_model.html). User can send tracing logs to [Zipkin server](https://zipkin.io/pages/quickstart.html).
 
 ### Tracing Component
-Component Type | Component | Reference | 
+Component Type | Component | Reference |
 --- | ---| --- |
 HTTP Client | `RestTemplate`、 `WebClient`、 `FeignClient` | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)
 HTTP Server | `Servlet`、`Filter` | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)
@@ -304,8 +359,8 @@ HTTP Request schema describes key metrics of service APIs, which include:
 * Latency (p25, p50, p75, p95, p98, p99)
 * Execution duration (min, mean, max)
 
-| Field | Type | Description | 
-| :------------------ | :-----: | :----- | 
+| Field | Type | Description |
+| :------------------ | :-----: | :----- |
 | url                   |string|the URL of the request|
 | cnt       |integer| The total count of the request executed |
 | m1               |double| The HTTP request executions per second (exponentially-weighted moving average) in last 1 minute |
@@ -351,8 +406,8 @@ JDBC Statement schema describes key metrics of JDBC SQL Statement, which include
 | mean | double |  The JDBC method mean execution duration in milliseconds. |
 | p25 | double |  TP25: The JDBC method execution duration in milliseconds for 25% user. |
 | p50 | double |  TP50: The JDBC method execution duration in milliseconds for 50% user. |
-| p75 | double |  TP75: The JDBC method execution duration in milliseconds for 75% user. | 
-| p95 | double |  TP95: The JDBC method execution duration in milliseconds for 95% user. | 
+| p75 | double |  TP75: The JDBC method execution duration in milliseconds for 75% user. |
+| p95 | double |  TP95: The JDBC method execution duration in milliseconds for 95% user. |
 | p98 | double |  TP98: The JDBC method execution duration in milliseconds for 98% user. |
 | p99 | double |  TP99: The JDBC method execution duration in milliseconds for 99% user. |
 | p999 | double |  TP99.9: The JDBC method execution duration in milliseconds for 99.9% user. |
@@ -375,7 +430,7 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 | m1err         |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 1 minute |
 | m5err         |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 5 minute. |
 | m15err        |double| The JDBC connection error executions per second (exponentially-weighted moving average) in last 15 minute |
-| min  | double  |The JDBC connection minimal establishment duration in milliseconds. | 
+| min  | double  |The JDBC connection minimal establishment duration in milliseconds. |
 | max  | double  | The JDBC connection maximal establishment duration in milliseconds. |
 | mean | double  | The JDBC connection mean establishment duration in milliseconds. |
 | p25  | double  | TP25: The JDBC connection establishment duration in milliseconds for 25% user. |
@@ -389,8 +444,8 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 #### JVM Memory
 JVM Memory schema describes key metrics of Java memory usage, which include:
 * bytes-init
-* bytes-used 
-* bytes-committed 
+* bytes-used
+* bytes-committed
 * bytes-max
 
 
@@ -438,7 +493,7 @@ Kafka Client schema describes key metrics of Kafka client invoking, which includ
 |prodrm1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (producer)|
 |prodrm5err|double|The executions per second (exponentially-weighted moving average) in last 5 minute (producer)|
 |prodrm5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (producer)|
-|consrm1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (consumer)| 
+|consrm1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (consumer)|
 |consrm5err|double|The error executions per second (exponentially-weighted moving average) in last 5 minute (consumer)|
 |consrm5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (consumer)|
 |prodrmin|double|The minimal execution duration in milliseconds.|
@@ -453,7 +508,7 @@ Kafka Client schema describes key metrics of Kafka client invoking, which includ
 |prodrp999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
 |consrmin|double|The minimal execution duration in milliseconds.|
 |consrmax|double|The maximal execution duration in milliseconds.|
-|consrmean|double|The mean execution duration in milliseconds.| 
+|consrmean|double|The mean execution duration in milliseconds.|
 |consrp25|double|TP25: The execution duration in milliseconds for 25% user.|
 |consrp50|double|TP50: The execution duration in milliseconds for 50% user.|
 |consrp75|double|TP75: The execution duration in milliseconds for 75% user.|
@@ -480,12 +535,12 @@ RabbitMQ Producer schema describes key metrics of RabbitMQ client publishing mes
 |prodrm5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (producer)|
 |min|double|The http-request minimal execution duration in milliseconds.|
 |max|double|The http-request maximal execution duration in milliseconds.|
-|mean|double|The http-request mean execution duration in milliseconds.| 
+|mean|double|The http-request mean execution duration in milliseconds.|
 |p25|double|TP25: The http-request execution duration in milliseconds for 25% user.|
 |p50|double|TP50: The http-request execution duration in milliseconds for 50% user.|
 |p75|double|TP75: The http-request execution duration in milliseconds for 75% user.|
 |p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
-|p98|double|TP98: The http-request execution duration in milliseconds for 98% user.| 
+|p98|double|TP98: The http-request execution duration in milliseconds for 98% user.|
 |p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
 |p999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
 
