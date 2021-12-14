@@ -82,13 +82,12 @@ Key| Default Value | Description |
 
 ### Kafka
 
-Tracing and metric data will be output to kafka server. Key| Default Value | Description | ---| ---| ---|
-`observability.outputServer.bootstrapServer`| 127.0.0.1:9092 |Kafka server host and port. Tracing and metric data will
-be output to kafka. |
+Tracing and metric data will be output to kafka server. Key| Default Value | Description |
+---| ---| ---|
+`observability.outputServer.bootstrapServer`| 127.0.0.1:9092 |Kafka server host and port. Tracing and metric data will be output to kafka. |
 `observability.outputServer.timeout`| 10000 | Connect timeout. Time Unit: millisecond. |
-`observability.outputServer.security.protocol`| PLAINTEXT |Protocol used to communicate with brokers. Valid values are: "PLAINTEXT", "SSL", "SASL_PLAINTEXT","SASL_SSL"  |
-`observability.outputServer.ssl.keystore.type`| N/A |The file format of the key store file. This is optional for client.
-The value can only be `PEM` if set.|
+`observability.outputServer.security.protocol`| '' |Protocol used to communicate with brokers. Valid values are: "PLAINTEXT", "SSL", "SASL_PLAINTEXT","SASL_SSL"  |
+`observability.outputServer.ssl.keystore.type`| N/A |The file format of the key store file. This is optional for client. The value can only be `PEM` if set.|
 `observability.outputServer.ssl.ssl.keystore.key`| N/A |Private key in the format specified by 'ssl.keystore.type'. |
 `observability.outputServer.ssl.keystore.certificate.chain`| N/A | Certificate chain in the format specified by 'ssl.keystore.type' |
 `observability.outputServer.ssl.truststore.type`| N/A |The file format of the trust store file. This is optional for client. The value can only be `PEM` if set.|
