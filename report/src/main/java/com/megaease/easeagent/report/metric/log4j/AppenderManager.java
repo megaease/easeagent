@@ -21,7 +21,9 @@ import com.google.common.collect.ImmutableList;
 import com.megaease.easeagent.report.OutputProperties;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SslConfigs;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.mom.kafka.KafkaAppender;
@@ -30,9 +32,13 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Manage kafka's log4j appender according topics
@@ -94,23 +100,35 @@ public interface AppenderManager {
             }
             try {
                 String s = RandomStringUtils.randomAscii(8);
-                Property[] properties = {
-                        Property.createProperty("bootstrap.servers", outputProperties.getServers()),
-                        Property.createProperty("timeout.ms", outputProperties.getTimeout()),
-                        Property.createProperty("acks", "0"),
-                        Property.createProperty(ProducerConfig.CLIENT_ID_CONFIG, "producer_" + topic + s)
-                };
+
+                List<Property> propertyList = new ArrayList<>();
+                propertyList.add(Property.createProperty("bootstrap.servers", outputProperties.getServers()));
+                propertyList.add(Property.createProperty("timeout.ms", outputProperties.getTimeout()));
+                propertyList.add(Property.createProperty("acks", "0"));
+                Property.createProperty(ProducerConfig.CLIENT_ID_CONFIG, "producer_" + topic + s);
+                if (StringUtils.isNotEmpty(outputProperties.getSecurityProtocol())) {
+                    propertyList.add(Property.createProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, outputProperties.getSecurityProtocol()));
+                    propertyList.add(Property.createProperty(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, outputProperties.getSSLKeyStoreType()));
+                    propertyList.add(Property.createProperty(SslConfigs.SSL_KEYSTORE_KEY_CONFIG, outputProperties.getKeyStoreKey()));
+                    propertyList.add(Property.createProperty(SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG, outputProperties.getKeyStoreCertChain()));
+                    propertyList.add(Property.createProperty(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, outputProperties.getTrustCertificate()));
+                    propertyList.add(Property.createProperty(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, outputProperties.getTrustCertificateType()));
+                    propertyList.add(Property.createProperty(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, outputProperties.getEndpointAlgorithm()));
+                }
+
+                Property[] properties = new Property[propertyList.size()];
+                propertyList.toArray(properties);
                 Appender appender = KafkaAppender.newBuilder()
-                        .setTopic(topic)
-                        .setSyncSend(false)
-                        .setName(topic + "_kafka_" + s)
-                        .setPropertyArray(properties)
-                        .setLayout(PatternLayout.newBuilder()
-                                .withCharset(StandardCharsets.UTF_8)
-                                .withConfiguration(context.getConfiguration())
-                                .withPattern("%m%n").build())
-                        .setConfiguration(context.getConfiguration())
-                        .build();
+                    .setTopic(topic)
+                    .setSyncSend(false)
+                    .setName(topic + "_kafka_" + s)
+                    .setPropertyArray(properties)
+                    .setLayout(PatternLayout.newBuilder()
+                        .withCharset(StandardCharsets.UTF_8)
+                        .withConfiguration(context.getConfiguration())
+                        .withPattern("%m%n").build())
+                    .setConfiguration(context.getConfiguration())
+                    .build();
                 appender.start();
                 return appender;
             } catch (Exception e) {

@@ -368,6 +368,17 @@ public final class TracingConsumer<K, V> implements Consumer<K, V> {
         return delegate.endOffsets(partitions, timeout);
     }
 
+    @Override
+    public ConsumerGroupMetadata groupMetadata() {
+        return delegate.groupMetadata();
+    }
+
+    @Override
+    public void enforceRebalance() {
+        delegate.enforceRebalance();
+
+    }
+
 //  // Do not use @Override annotation to avoid compatibility issue version < 2.5
 //  public ConsumerGroupMetadata groupMetadata() {
 //    return delegate.groupMetadata();
