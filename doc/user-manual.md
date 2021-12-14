@@ -111,7 +111,7 @@ demo:
 easeagent.progress.forwarded.headers.canary.0=X-Mesh-Canary
 ```
 
-##### Progress tracing config
+##### tracing config
 
 Easeagent will grab the header from the response of the process, and put the name and value of the header as a tag in the Span of Tracing.
 
@@ -214,8 +214,18 @@ elasticsearch   | `elasticsearch`   | Elasticsearch Redirection
 
 #### Service Name Head
 
+To support easemesh, we have added a new plug-in called "servicename".
 
+It will get the service name in advance, and then put the service name in the HTTP request header.
 
+header name config:
+```properties
+plugin.integrability.serviceName.addServiceNameHead.propagate.head=X-Mesh-RPC-Service
+```
+
+It is worth noting that: `It is worth noting that this plugin strongly relies on spring cloud`
+
+If you have other needs, you can customize the plugin yourself.
 
 
 ## Logging
