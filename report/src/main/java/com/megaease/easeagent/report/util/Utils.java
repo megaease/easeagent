@@ -23,22 +23,33 @@ import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.metric.MetricProps;
 import com.megaease.easeagent.report.trace.TraceProps;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.common.config.SslConfigs;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class Utils {
     public static boolean isOutputPropertiesChange(List<ChangeItem> list) {
-        List<String> relatedNames = Arrays.asList(ConfigConst.Observability.OUTPUT_ENABLED,
-                ConfigConst.Observability.OUTPUT_SERVERS, ConfigConst.Observability.OUTPUT_TIMEOUT);
+        List<String> relatedNames = Arrays.asList(ConfigConst.Observability.OUTPUT_ENABLED
+            , ConfigConst.Observability.OUTPUT_SERVERS
+            , ConfigConst.Observability.OUTPUT_TIMEOUT
+            , ConfigConst.Observability.OUTPUT_CERT
+            , ConfigConst.Observability.OUTPUT_KEY
+            , ConfigConst.Observability.OUTPUT_SECURITY_PROTOCOL
+            , ConfigConst.Observability.OUTPUT_SSL_KEYSTORE_TYPE
+            , ConfigConst.Observability.OUTPUT_TRUST_CERT
+            , ConfigConst.Observability.OUTPUT_TRUST_CERT_TYPE
+            , ConfigConst.Observability.OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM
+        );
         boolean hasChange = list.stream().map(ChangeItem::getFullName)
-                .anyMatch(relatedNames::contains);
+            .anyMatch(relatedNames::contains);
         return hasChange;
     }
 
     public static boolean isTraceOutputPropertiesChange(List<ChangeItem> list) {
         boolean hasChange = list.stream().map(ChangeItem::getFullName)
-                .anyMatch(name -> name.startsWith(ConfigConst.Observability.TRACE_OUTPUT + ConfigConst.DELIMITER));
+            .anyMatch(name -> name.startsWith(ConfigConst.Observability.TRACE_OUTPUT + ConfigConst.DELIMITER));
         return hasChange;
     }
 

@@ -21,6 +21,11 @@ import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SslConfigs;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.logging.log4j.core.config.Property;
 import zipkin2.Span;
 import zipkin2.codec.Encoding;
 import zipkin2.internal.GlobalExtrasSupplier;
@@ -31,7 +36,10 @@ import zipkin2.reporter.kafka11.KafkaSender;
 import zipkin2.reporter.kafka11.SDKKafkaSender;
 import zipkin2.reporter.kafka11.SimpleSender;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class TraceReport {
@@ -46,17 +54,27 @@ public class TraceReport {
     private RefreshableReporter<Span> initSpanRefreshableReporter(Configs configs) {
         final RefreshableReporter<Span> spanRefreshableReporter;
         OutputProperties outputProperties = Utils.extractOutputProperties(configs);
+        Map<String, String> sslConfig = new HashMap<>();
+        sslConfig.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, outputProperties.getSecurityProtocol());
+        sslConfig.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, outputProperties.getSSLKeyStoreType());
+        sslConfig.put(SslConfigs.SSL_KEYSTORE_KEY_CONFIG, outputProperties.getKeyStoreKey());
+        sslConfig.put(SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG, outputProperties.getKeyStoreCertChain());
+        sslConfig.put(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, outputProperties.getTrustCertificate());
+        sslConfig.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, outputProperties.getTrustCertificateType());
+        sslConfig.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, outputProperties.getEndpointAlgorithm());
+
         Sender sender = new SimpleSender();
         TraceProps traceProperties = Utils.extractTraceProps(configs);
         if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()
-                && StringUtils.isNotEmpty(outputProperties.getServers())) {
+            && StringUtils.isNotEmpty(outputProperties.getServers())) {
             sender = SDKKafkaSender.wrap(traceProperties,
-                    KafkaSender.newBuilder()
-                            .bootstrapServers(outputProperties.getServers())
-                            .topic(traceProperties.getOutput().getTopic())
-                            .encoding(Encoding.JSON)
-                            .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes())
-                            .build());
+                KafkaSender.newBuilder()
+                    .bootstrapServers(outputProperties.getServers())
+                    .topic(traceProperties.getOutput().getTopic())
+                    .overrides(sslConfig)
+                    .encoding(Encoding.JSON)
+                    .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes())
+                    .build());
         }
 
         GlobalExtrasSupplier extrasSupplier = new GlobalExtrasSupplier() {
@@ -74,12 +92,12 @@ public class TraceReport {
             }
         };
         SDKAsyncReporter reporter = SDKAsyncReporter.
-                builderSDKAsyncReporter(AsyncReporter.builder(sender)
-                                .queuedMaxSpans(traceProperties.getOutput().getQueuedMaxSpans())
-                                .messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS)
-                                .queuedMaxBytes(traceProperties.getOutput().getQueuedMaxSize()),
-                        traceProperties,
-                        extrasSupplier);
+            builderSDKAsyncReporter(AsyncReporter.builder(sender)
+                    .queuedMaxSpans(traceProperties.getOutput().getQueuedMaxSpans())
+                    .messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS)
+                    .queuedMaxBytes(traceProperties.getOutput().getQueuedMaxSize()),
+                traceProperties,
+                extrasSupplier);
         reporter.startFlushThread();
         spanRefreshableReporter = new RefreshableReporter<Span>(reporter, traceProperties, outputProperties);
         return spanRefreshableReporter;

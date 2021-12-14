@@ -17,6 +17,9 @@
 
 package com.megaease.easeagent.config;
 
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.common.config.SslConfigs;
+
 public interface ConfigConst {
     String DELIMITER = ".";
     String SERVICE_NAME = "name";
@@ -52,6 +55,14 @@ public interface ConfigConst {
         String OUTPUT_SERVERS = join(OUTPUT, "bootstrapServer");
         String OUTPUT_TIMEOUT = join(OUTPUT, "timeout");
         String OUTPUT_ENABLED = join(OUTPUT, "enabled");
+
+        String OUTPUT_SECURITY_PROTOCOL = join(OUTPUT, CommonClientConfigs.SECURITY_PROTOCOL_CONFIG);
+        String OUTPUT_SSL_KEYSTORE_TYPE = join(OUTPUT, SslConfigs.SSL_KEYSTORE_TYPE_CONFIG);
+        String OUTPUT_KEY = join(OUTPUT, SslConfigs.SSL_KEYSTORE_KEY_CONFIG);
+        String OUTPUT_CERT = join(OUTPUT, SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG);
+        String OUTPUT_TRUST_CERT = join(OUTPUT, SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG);
+        String OUTPUT_TRUST_CERT_TYPE = join(OUTPUT, SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG);
+        String OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM = join(OUTPUT, SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG);
 
         String METRICS = join(OBSERVABILITY, "metrics");
         String TRACE = join(OBSERVABILITY, "tracings");

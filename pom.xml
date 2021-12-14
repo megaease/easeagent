@@ -66,7 +66,7 @@
         <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
         <version.log4j>2.15.0</version.log4j>
-        <version.kafka>2.4.1</version.kafka>
+        <version.kafka>2.7.2</version.kafka>
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
         <version.metrics>4.1.17</version.metrics>
         <version.jedis>3.5.2</version.jedis>
@@ -77,6 +77,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${version.kafka}</version>
+        </dependency>
         <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
@@ -212,12 +217,12 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-clients</artifactId>
+                <artifactId>kafka-log4j-appender</artifactId>
                 <version>${version.kafka}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-log4j-appender</artifactId>
+                <artifactId>kafka-clients</artifactId>
                 <version>${version.kafka}</version>
             </dependency>
             <dependency>
