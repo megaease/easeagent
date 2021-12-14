@@ -48,7 +48,7 @@ public class FeignBlockingLoadBalancerClientInterceptor extends BaseServiceNameI
             if (ReflectionTool.hasText(host)) {
                 final HashMap<String, Collection<String>> newHeaders = new HashMap<>(request.headers());
                 newHeaders.put(config.getPropagateHead(), Collections.singleton(host));
-                context.injectPenetrationFields((name, value) -> newHeaders.put(name, Collections.singleton(value)));
+                context.injectForwardedHeaders((name, value) -> newHeaders.put(name, Collections.singleton(value)));
                 final Request newRequest = Request.create(request.httpMethod(), request.url(), newHeaders, request.body(), request.charset(), request.requestTemplate());
                 methodInfo.changeArg(0, newRequest);
             }

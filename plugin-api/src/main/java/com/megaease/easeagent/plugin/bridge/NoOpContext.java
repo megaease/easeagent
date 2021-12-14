@@ -172,7 +172,7 @@ public class NoOpContext {
         }
 
         @Override
-        public void injectPenetrationFields(Setter setter) {
+        public void injectForwardedHeaders(Setter setter) {
 
         }
 

@@ -52,7 +52,7 @@ public class ProgressFieldsManager {
         }
 
         public void put(String key, String value) {
-            if (ProgressFields.isPenetrationKey(key)) {
+            if (ProgressFields.isForwardedHeader(key)) {
                 penetration.put(key, value);
             } else if (ProgressFields.isResponseHoldTagKey(key)) {
                 responseHoldTag.put(key, value);
@@ -61,7 +61,7 @@ public class ProgressFieldsManager {
 
         public void flush() {
             if (!penetration.isEmpty()) {
-                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG, penetration);
+                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, penetration);
             }
             if (!responseHoldTag.isEmpty()) {
                 changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG, responseHoldTag);

@@ -26,7 +26,7 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import java.util.Map;
 
 /**
- * A cross-process data context, including tracing and penetration fields
+ * A cross-process data context, including tracing and Forwarded Headers
  */
 public interface ProgressContext extends Setter {
     /**

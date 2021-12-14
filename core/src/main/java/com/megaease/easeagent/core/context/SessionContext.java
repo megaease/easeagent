@@ -148,14 +148,14 @@ public class SessionContext implements InitializeContext {
     @Override
     public ProgressContext nextProgress(Request request) {
         ProgressContext progressContext = tracing.nextProgress(request);
-        injectPenetrationFields(progressContext);
+        injectForwardedHeaders(progressContext);
         return progressContext;
     }
 
     @Override
     public ProgressContext importProgress(Request request) {
         ProgressContext progressContext = tracing.importProgress(request);
-        Set<String> fields = ProgressFields.getPenetrationFields();
+        Set<String> fields = ProgressFields.getForwardedHeaders();
         if (fields.isEmpty()) {
             return progressContext;
         }
@@ -185,7 +185,7 @@ public class SessionContext implements InitializeContext {
     @Override
     public Span producerSpan(MessagingRequest request) {
         Span span = tracing.producerSpan(request);
-        injectPenetrationFields(request);
+        injectForwardedHeaders(request);
         return span;
     }
 
@@ -265,26 +265,26 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public boolean isNecessaryKeys(String key) {
-        return tracing.propagationKeys().contains(key) || ProgressFields.getPenetrationFields().contains(key);
+        return tracing.propagationKeys().contains(key) || ProgressFields.getForwardedHeaders().contains(key);
     }
 
     @Override
     public void consumerInject(Span span, MessagingRequest request) {
         Injector injector = tracing.messagingTracing().consumerInjector();
         injector.inject(span, request);
-        injectPenetrationFields(request);
+        injectForwardedHeaders(request);
     }
 
     @Override
     public void producerInject(Span span, MessagingRequest request) {
         Injector injector = tracing.messagingTracing().producerInjector();
         injector.inject(span, request);
-        injectPenetrationFields(request);
+        injectForwardedHeaders(request);
     }
 
     @Override
-    public void injectPenetrationFields(Setter setter) {
-        Set<String> fields = ProgressFields.getPenetrationFields();
+    public void injectForwardedHeaders(Setter setter) {
+        Set<String> fields = ProgressFields.getForwardedHeaders();
         if (fields.isEmpty()) {
             return;
         }

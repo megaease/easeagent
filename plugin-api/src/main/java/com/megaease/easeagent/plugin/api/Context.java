@@ -301,7 +301,7 @@ public interface Context {
      * <p>
      * It will not only obtain the key:value required by Trace from the {@link Request#header(String)},
      * but also other necessary key:value of EaseAgent, such as the key configured in the configuration file:
-     * {@link ProgressFields#EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG}
+     * {@link ProgressFields#EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG}
      * <p>
      * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
      * and {@link Request#cacheScope()}.
@@ -346,7 +346,7 @@ public interface Context {
      * <p>
      * It will not only pass multiple key:value values required by Trace through {@link Request#setHeader(String, String)},
      * but also other necessary key:value of EaseAgent, such as the key configured in the configuration file:
-     * {@link ProgressFields#EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG}
+     * {@link ProgressFields#EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG}
      * <p>
      * <p>
      * It is usually called on the producer.
@@ -358,7 +358,7 @@ public interface Context {
     Span producerSpan(MessagingRequest request);
 
     /**
-     * Inject Consumer's Span key:value and Penetration Fields to Request {@link MessagingRequest#setHeader(String, String)}.
+     * Inject Consumer's Span key:value and Forwarded Headers to Request {@link MessagingRequest#setHeader(String, String)}.
      *
      * @param span    key:value from
      * @param request key:value to
@@ -367,7 +367,7 @@ public interface Context {
     void consumerInject(Span span, MessagingRequest request);
 
     /**
-     * Inject Producer's Span and Penetration Fields key:value to Request {@link MessagingRequest#setHeader(String, String)}.
+     * Inject Producer's Span and Forwarded Headers key:value to Request {@link MessagingRequest#setHeader(String, String)}.
      *
      * @param span    key:value from
      * @param request key:value to
@@ -389,10 +389,10 @@ public interface Context {
 
 
     /**
-     * Inject  Penetration Fields key:value to Setter {@link Setter#setHeader(String, String)}.
+     * Inject Forwarded Headers key:value to Setter {@link Setter#setHeader(String, String)}.
      *
      * @param setter key:value to
      * @see Request#setHeader(String, String)
      */
-    void injectPenetrationFields(Setter setter);
+    void injectForwardedHeaders(Setter setter);
 }

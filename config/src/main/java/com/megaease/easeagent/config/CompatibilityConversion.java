@@ -83,7 +83,7 @@ public class CompatibilityConversion {
         } else if (key.startsWith("observability.tracings.")) {
             return tracingConversion(key);
         } else if (key.startsWith(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".")) {
-            return penetrationFieldsConversion(key);
+            return forwardedHeadersConversion(key);
         }
         return new FinalConversion(key, false);
     }
@@ -104,8 +104,8 @@ public class CompatibilityConversion {
         return conversion(key, TRACING_SKIP, ConfigConst.PluginID.TRACING);
     }
 
-    private static Conversion penetrationFieldsConversion(String key) {
-        return new FinalConversion(key.replace(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".", ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + "."), true);
+    private static Conversion forwardedHeadersConversion(String key) {
+        return new FinalConversion(key.replace(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".", ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + "."), true);
     }
 
     private static Conversion conversion(String key, Set<String> skipSet, String pluginId) {

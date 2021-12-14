@@ -22,19 +22,17 @@ import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ProgressFields {
-    public static final String EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG = "easeagent.progress.penetration.fields";
+    public static final String EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG = "easeagent.progress.forwarded.headers";
     public static final String EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG = "easeagent.progress.response.hold.tag.fields";
-    private static volatile Fields TRANSPARENT_TRANSMISSION_FIELDS = build(Collections.emptyMap());
+    private static volatile Fields FORWARDED_HEADERS = build(Collections.emptyMap());
     private static volatile Fields RESPONSE_HOLD_TAG_FIELDS = build(Collections.emptyMap());
 
     public static BiFunction<String, Map<String, String>, String> changeListener() {
         return (key, values) -> {
-            if (isPenetrationKey(key)) {
-                setPenetrationFields(values);
+            if (isForwardedHeader(key)) {
+                setForwardedHeaders(values);
             } else if (isResponseHoldTagKey(key)) {
                 setResponseHoldTagFields(values);
             }
@@ -42,16 +40,16 @@ public class ProgressFields {
         };
     }
 
-    public static boolean isPenetrationKey(String key) {
-        return key.startsWith(EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG);
+    public static boolean isForwardedHeader(String key) {
+        return key.startsWith(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG);
     }
 
     public static boolean isResponseHoldTagKey(String key) {
         return key.startsWith(EASEAGENT_PROGRESS_RESPONSE_HOLD_TAG_FIELDS_CONFIG);
     }
 
-    private static void setPenetrationFields(Map<String, String> fields) {
-        TRANSPARENT_TRANSMISSION_FIELDS = TRANSPARENT_TRANSMISSION_FIELDS.rebuild(fields);
+    private static void setForwardedHeaders(Map<String, String> headers) {
+        FORWARDED_HEADERS = FORWARDED_HEADERS.rebuild(headers);
     }
 
     private static void setResponseHoldTagFields(Map<String, String> fields) {
@@ -62,8 +60,8 @@ public class ProgressFields {
         return fields == null || fields.length == 0;
     }
 
-    public static Set<String> getPenetrationFields() {
-        return TRANSPARENT_TRANSMISSION_FIELDS.fieldSet;
+    public static Set<String> getForwardedHeaders() {
+        return FORWARDED_HEADERS.fieldSet;
     }
 
     public static String[] getResponseHoldTagFields() {

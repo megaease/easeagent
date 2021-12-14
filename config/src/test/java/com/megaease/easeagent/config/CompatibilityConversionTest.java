@@ -22,7 +22,7 @@ public class CompatibilityConversionTest {
         assertTrue(newMap.containsKey(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_TRACING_ENABLED));
         newMap = CompatibilityConversion.transform(Collections.singletonMap("globalCanaryHeaders.serviceHeaders.mesh-app-backend.0", "X-canary"));
         assertEquals(newMap.size(), 1);
-        assertTrue(newMap.containsKey(ProgressFields.EASEAGENT_PROGRESS_PENETRATION_FIELDS_CONFIG + ".mesh-app-backend.0"));
+        assertTrue(newMap.containsKey(ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + ".mesh-app-backend.0"));
 
         newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.outputServer.bootstrapServer", "tstatssta"));
         assertEquals(newMap.size(), 1);

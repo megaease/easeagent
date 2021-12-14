@@ -46,7 +46,7 @@ public class RestTemplateInterceptInterceptor  extends BaseServiceNameIntercepto
                 Object fakeHeaders = ReflectionTool.invokeMethod(request, "getHeaders");//org.springframework.http.HttpHeaders
                 MultiValueMap<String, String> headers = (MultiValueMap<String, String>) ReflectionTool.extractField(fakeHeaders, "headers");
                 headers.add(config.getPropagateHead(), host);
-                context.injectPenetrationFields(headers::add);
+                context.injectForwardedHeaders(headers::add);
             }
         } catch (Throwable e) {
             LOGGER.warn("intercept method [{}] failure", method, e);

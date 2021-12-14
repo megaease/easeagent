@@ -95,6 +95,22 @@ Key| Default Value | Description |
 
 #### Progress Configuration
 
+##### Forwarded headers page
+
+Easeagent provides a header pass-through tool.
+
+Page format: 
+
+`easeagent.progress.forwarded.headers.{key}={headerName}`
+
+1. {key} indicates the unique key of the header configuration, used to identify the configuration modification
+2. {headerName} is the Header Name you need to pass through
+
+demo:
+```properties
+easeagent.progress.forwarded.headers.canary.0=X-Mesh-Canary
+```
+
 #### Integrability Configuration
 
 ### Plugin Configuration

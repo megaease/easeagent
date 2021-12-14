@@ -47,7 +47,7 @@ public class FeignLoadBalancerInterceptor extends BaseServiceNameInterceptor {
             Object realRequest = ReflectionTool.invokeMethod(request, "getRequest");
             Map<String, Collection<String>> headers = (Map<String, Collection<String>>) ReflectionTool.extractField(realRequest, "headers");
             headers.put(config.getPropagateHead(), Collections.singleton(serviceName));
-            context.injectPenetrationFields((name, value) -> headers.put(name, Collections.singleton(value)));
+            context.injectForwardedHeaders((name, value) -> headers.put(name, Collections.singleton(value)));
         } catch (Throwable e) {
             LOGGER.warn("intercept method [{}] failure", methodInfo.getMethod(), e);
         }

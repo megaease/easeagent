@@ -152,7 +152,7 @@ interface Context{
     ProgressContext importProgress(Request request);
 }
 /**
- * A cross-process data context, including tracing and penetration fields
+ * A cross-process data context, including tracing and Forwarded Headers
  */
 public interface ProgressContext extends Setter {
     /**
@@ -253,7 +253,7 @@ interface Context{
     Span producerSpan(MessagingRequest request);
  
     /**
-     * Inject Consumer's Span key:value and Penetration Fields to Request {@link MessagingRequest#setHeader(String, String)}.
+     * Inject Consumer's Span key:value and Forwarded Headers to Request {@link MessagingRequest#setHeader(String, String)}.
      *
      * @param span    key:value from
      * @param request key:value to
@@ -262,7 +262,7 @@ interface Context{
     void consumerInject(Span span, MessagingRequest request);
 
     /**
-     * Inject Producer's Span and Penetration Fields key:value to Request {@link MessagingRequest#setHeader(String, String)}.
+     * Inject Producer's Span and Forwarded Headers key:value to Request {@link MessagingRequest#setHeader(String, String)}.
      *
      * @param span    key:value from
      * @param request key:value to
@@ -288,12 +288,12 @@ interface Context{
 
 
     /**
-     * Inject  Penetration Fields key:value to Setter {@link Setter#setHeader(String, String)}.
+     * Inject Forwarded Headers key:value to Setter {@link Setter#setHeader(String, String)}.
      *
      * @param setter key:value to
      * @see Request#setHeader(String, String)
      */
-    void injectPenetrationFields(Setter setter);
+    void injectForwardedHeaders(Setter setter);
 }
 ```
 
