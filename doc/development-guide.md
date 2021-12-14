@@ -1,9 +1,9 @@
 # Plugin Development Guide
 - [Overview](#Overview)
 - [Plugin Structure](#Plugin-structure)
-    - [Who: AgentPlugin, Definiton](#AgentPlugin-plugin-definition)
-    - [Where: Points](#points)
-    - [What: Interceptor](#interceptor)
+    - [AgentPlugin, Definiton](#AgentPlugin-plugin-definition)
+    - [Points](#points)
+    - [Interceptor](#interceptor)
     - [AdviceTo Annotation](#adviceto-annotation)
     - [Plugin Orchestration](#plugin-orchestration)
     - [Plugin Configuration](#plugin-configuration)
@@ -19,10 +19,10 @@
 
 ## Overview
 Most of the Easeagent's functions are supported by plugins.   
-This document describes how to develop plugins for Easeagent, and it will be divided into following sections to introduce plugin development.
+This document describes how to develop plugins for Easeagent, and it will be divided into the following sections to introduce plugin development.
 1. Plugin structure, the plugin contains four components, which are the **AgentPlugin definition**, **Points**, **Interceptor** and **@AdviceTo Annotation** used to bind the three.
 2. Tracing API, which helps users complete the transaction tracing task.
-3. Metirc API, helps users to complete metrics data collection.
+3. Metric API, helps users to complete metrics data collection.
 4. Logging API
 5. Configuration API
 
@@ -199,7 +199,7 @@ The `after` method will be invoked in the opposite order as the before method wa
 
 The format of the plugin configuration is defined as follows.
 ```
-plugin.[domain].[namespace].[type].[key] = [value]
+plugin.[domain].[namespace].[function].[key] = [value]
 ```
 Take the tracing switch of `httpclient` as an example.
 ```
@@ -207,14 +207,16 @@ plugin.observability.httpclient.tracing.enabled=true
 
 domain          : observability
 namespace       : httpclient
-type            : tracing
+function        : tracing
 key             : enabled
 value           : true
 ```
 
 `[domain]` and `[namespace]` are defined by `AgentPlugin` interface implementations. 
-The `type` is provided by `Interceptor` interface implemention's `getType()` method, and this method need return a String value like 'tracing', 'metirc', and 'redirect' which are already defined by Easeagent, or another user-defined keyword. 
 
+The `function` is provided by `Interceptor` interface implemention's `getType()` method, and this method need return a String value like 'tracing', 'metirc', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword. 
+
+This prefix `plugin.[domain].[namespace].[function]` is used to maintained configuration for this `Interceptor`, and in this `Interceptor` developer can get its configuration by the `getConfig()` method of the `Context` param.
 
 
 ### A Simple Plugin Example
@@ -354,10 +356,10 @@ class Interceptor{
 
 ## Configuration API
 
-Regarding configuration, we have a set of rules to follow. For detailed rules, please see: [user-manual.md#configuration](user-manual.md#configuration)
+Regarding configuration, we have a set of rules to follow. For detailed rules, please see: [Plugin Configuration](#plugin-configuration)
 
 When you want to get your own configuration file in the plugin, you only need to get it from the Context.
-The framework itself will automatically maintain Confic's changes and modifications.
+The framework itself will automatically maintain configuration's changes and modifications.
 
 ```java
 class InterceptorImpl  implements Interceptor {
@@ -366,7 +368,7 @@ class InterceptorImpl  implements Interceptor {
         Config config = context.getConfig();
         // You don’t need to verify enabled here, because enabled is a reserved attribute. If it is false, the Interceptor will not be run.
         // boolean enabled = config.enabled();
-        Integer outputSize = config.getInt("output.size"); //it will be get config key: plugin.[domain].[namespace].[id].output.size = [value]
+        Integer outputSize = config.getInt("output.size"); //it will be get config key: plugin.[domain].[namespace].[function].output.size = [value]
     }
 
     @Override
