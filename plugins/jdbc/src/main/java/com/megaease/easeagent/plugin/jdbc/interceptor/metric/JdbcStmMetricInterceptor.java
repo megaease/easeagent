@@ -45,7 +45,8 @@ public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
                     metric = ServiceMetricRegistry.getOrCreate(config,
-                        new Tags("application", "jdbc-statement", "signature"), JdbcMetric.METRIC_SUPPLIER);
+                        new Tags("application", "jdbc-statement", "signature"),
+                        JdbcMetric.METRIC_SUPPLIER);
                     sqlCompression = MD5SQLCompression.getInstance();
                     cache = CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize).removalListener(metric).build();

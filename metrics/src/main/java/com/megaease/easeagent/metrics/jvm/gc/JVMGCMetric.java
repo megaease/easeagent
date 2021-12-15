@@ -42,7 +42,7 @@ import java.util.function.Supplier;
 import static com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION;
 
 public class JVMGCMetric extends AbstractMetric {
-    public static final String ENABLE_KEY = "observability.metrics.jvmGc.enabled";
+    public static final String ENABLE_KEY = "plugin.observability.jvmGc.metric.enabled";
     private static final String NO_GC = "No GC";
     private final Config config;
 

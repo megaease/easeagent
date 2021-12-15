@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
-    public static final String ENABLE_KEY = "observability.metrics.jvmMemory.enabled";
+    public static final String ENABLE_KEY = "plugin.observability.jvmMemory.metric.enabled";
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
     private static final String POOLS = "pools";
     private final Config config;
