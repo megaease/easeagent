@@ -176,6 +176,11 @@ public class NoOpContext {
 
         }
 
+        @Override
+        public void importForwardedHeaders(Getter getter) {
+
+        }
+
         public void setCurrentTracing(ITracing tracing) {
         }
 

@@ -22,10 +22,12 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
 import com.megaease.easeagent.plugin.kafka.interceptor.KafkaUtils;
-import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.Map;
@@ -36,10 +38,26 @@ public class KafkaProducerConstructInterceptor implements NonReentrantIntercepto
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         Object invoker = methodInfo.getInvoker();
-        Map<String, Object> configs = (Map<String, Object>) methodInfo.getArgs()[0];
-        Object bootstrapServers = configs.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
-        String uri = KafkaUtils.getUri(bootstrapServers);
+        String uri = getUri(methodInfo);
         AgentDynamicFieldAccessor.setDynamicFieldValue(invoker, uri);
+    }
+
+    private String getUri(MethodInfo methodInfo) {
+        Object arg0 = methodInfo.getArgs()[0];
+        ProducerConfig producerConfig = AgentFieldReflectAccessor.getFieldValue(methodInfo.getInvoker(), "producerConfig");
+        if (producerConfig == null && arg0 instanceof ProducerConfig) {
+            producerConfig = (ProducerConfig) arg0;
+        }
+        Object bootstrapServers = null;
+        if (producerConfig != null) {
+            bootstrapServers = producerConfig.getList(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
+        } else if (arg0 instanceof Map) {
+            bootstrapServers = ((Map) arg0).get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
+        }
+        if (bootstrapServers != null) {
+            return KafkaUtils.getUri(bootstrapServers);
+        }
+        return null;
     }
 
     @Override

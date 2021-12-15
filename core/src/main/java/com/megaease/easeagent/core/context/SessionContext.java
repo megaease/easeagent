@@ -35,6 +35,8 @@ import java.util.*;
 @SuppressWarnings("unused, unchecked")
 public class SessionContext implements InitializeContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionContext.class);
+    private static final Setter NOOP_SETTER = (name, value) -> {
+    };
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
 
     private final Deque<Config> configs = new ArrayDeque<>();
@@ -155,18 +157,7 @@ public class SessionContext implements InitializeContext {
     @Override
     public ProgressContext importProgress(Request request) {
         ProgressContext progressContext = tracing.importProgress(request);
-        Set<String> fields = ProgressFields.getForwardedHeaders();
-        if (fields.isEmpty()) {
-            return progressContext;
-        }
-        for (String field : fields) {
-            String value = request.header(field);
-            if (value == null) {
-                continue;
-            }
-            progressContext.setHeader(field, value);
-            context.put(field, value);
-        }
+        importForwardedHeaders(request, progressContext);
         return progressContext;
     }
 
@@ -295,6 +286,27 @@ public class SessionContext implements InitializeContext {
             }
         }
     }
+
+    @Override
+    public void importForwardedHeaders(Getter getter) {
+        importForwardedHeaders(getter, NOOP_SETTER);
+    }
+
+    private void importForwardedHeaders(Getter getter, Setter setter) {
+        Set<String> fields = ProgressFields.getForwardedHeaders();
+        if (fields.isEmpty()) {
+            return;
+        }
+        for (String field : fields) {
+            String o = getter.header(field);
+            if (o == null) {
+                continue;
+            }
+            this.context.put(field, o);
+            setter.setHeader(field, o);
+        }
+    }
+
 
     public ITracing getTracing() {
         return tracing;

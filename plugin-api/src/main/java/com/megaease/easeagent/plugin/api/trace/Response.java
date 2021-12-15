@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * @see ProgressContext#finish(Response)
  */
-public interface Response {
+public interface Response extends Getter {
 
 
     /**

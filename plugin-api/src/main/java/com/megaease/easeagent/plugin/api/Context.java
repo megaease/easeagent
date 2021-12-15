@@ -400,4 +400,12 @@ public interface Context {
      * @see Request#setHeader(String, String)
      */
     void injectForwardedHeaders(Setter setter);
+
+    /**
+     * Import Forwarded Headers key:value to Context {@link Getter#header(String)}.
+     *
+     * @param getter name from
+     * @see Request#header(String)
+     */
+    void importForwardedHeaders(Getter getter);
 }

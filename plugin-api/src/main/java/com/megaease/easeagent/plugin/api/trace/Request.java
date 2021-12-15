@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.api.Context;
 /**
  * Interface request type used for parsing and sampling.
  */
-public interface Request extends Setter {
+public interface Request extends Setter, Getter {
     /**
      * The remote {@link Span.Kind} describing the direction and type of the request.
      * {@code span.kind(request.kind())}

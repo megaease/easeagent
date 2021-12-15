@@ -18,5 +18,10 @@
 package com.megaease.easeagent.plugin.api.trace;
 
 public interface Setter {
+    /**
+     * @param name  header name
+     * @param value header value
+     * @see Request#setHeader(String name, String value)
+     */
     void setHeader(String name, String value);
 }

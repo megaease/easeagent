@@ -30,10 +30,11 @@ import java.util.Map;
 
 public class KafkaUtils {
     public static String getUri(Object bootstrapServers) {
-        String uri;
+        String uri = null;
         if (bootstrapServers instanceof String) {
             uri = (String) bootstrapServers;
-        } else {
+        } else if (bootstrapServers instanceof List) {
+            @SuppressWarnings("unchecked")
             List<String> serverConfig = (List<String>) bootstrapServers;
             uri = String.join(",", serverConfig);
         }
