@@ -18,6 +18,7 @@
 package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.config.*;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;
 import org.apache.commons.lang3.StringUtils;

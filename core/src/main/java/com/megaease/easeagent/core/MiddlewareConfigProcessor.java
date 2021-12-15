@@ -63,4 +63,5 @@ public class MiddlewareConfigProcessor {
     public ResourceConfig getData(String key) {
         return map.get(key);
     }
+
 }

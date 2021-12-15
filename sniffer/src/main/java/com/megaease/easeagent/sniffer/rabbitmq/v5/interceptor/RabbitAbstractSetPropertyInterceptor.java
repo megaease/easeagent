@@ -21,7 +21,7 @@ import com.megaease.easeagent.core.MiddlewareConfigProcessor;
 import com.megaease.easeagent.core.ResourceConfig;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 

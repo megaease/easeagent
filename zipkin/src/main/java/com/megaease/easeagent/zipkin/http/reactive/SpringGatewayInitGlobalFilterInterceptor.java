@@ -20,7 +20,7 @@ package com.megaease.easeagent.zipkin.http.reactive;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 
 import java.util.List;

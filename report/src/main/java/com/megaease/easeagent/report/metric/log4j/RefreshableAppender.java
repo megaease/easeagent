@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.report.metric.log4j;
 
+import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.report.metric.MetricProps;
 import com.megaease.easeagent.report.util.TextUtils;
 import org.apache.logging.log4j.Level;
@@ -26,7 +27,6 @@ import org.apache.logging.log4j.core.async.AsyncLoggerConfig;
 import org.apache.logging.log4j.core.async.AsyncLoggerConfigDisruptor;
 import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.slf4j.Logger;
 
 import java.util.function.Consumer;
 
@@ -60,7 +60,7 @@ public interface RefreshableAppender extends TestableAppender {
 
     class DefaultRefreshableAppender implements RefreshableAppender {
 
-        private final static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DefaultRefreshableAppender.class);
+        private final static Logger LOGGER = com.megaease.easeagent.log4j2.LoggerFactory.getLogger(DefaultRefreshableAppender.class);
 
         private final String loggerName;
         private final String appenderName;
@@ -68,10 +68,10 @@ public interface RefreshableAppender extends TestableAppender {
         private final AppenderManager appenderManager;
 
         DefaultRefreshableAppender(
-                String appender,
-                String loggerName,
-                AppenderManager appenderManager,
-                MetricProps metricProps) {
+            String appender,
+            String loggerName,
+            AppenderManager appenderManager,
+            MetricProps metricProps) {
             this.loggerName = loggerName;
             this.appenderName = appender;
             this.appenderManager = appenderManager;
@@ -80,7 +80,7 @@ public interface RefreshableAppender extends TestableAppender {
             startAsyncDisruptor(context);
             AppenderRef[] appenderRefs = forAppenderRefs();
             LoggerConfig logger = createLogger(loggerName, context, appenderRefs);
-            delegate = newDelegate(context,metricProps);
+            delegate = newDelegate(context, metricProps);
             if (delegate != null) {
                 //shouldn't be null always
                 logger.addAppender(delegate, Level.INFO, null);
@@ -102,15 +102,15 @@ public interface RefreshableAppender extends TestableAppender {
 
         private LoggerConfig createLogger(String loggerName, LoggerContext ctx, AppenderRef[] refs) {
             return AsyncLoggerConfig.createLogger(false, Level.INFO, loggerName,
-                    "true", refs, null, ctx.getConfiguration(), null);
+                "true", refs, null, ctx.getConfiguration(), null);
         }
 
-        private MetricRefreshableAppender newDelegate(LoggerContext context,MetricProps metricProps) {
+        private MetricRefreshableAppender newDelegate(LoggerContext context, MetricProps metricProps) {
             try {
                 MetricRefreshableAppender metricRefreshableAppender = new MetricRefreshableAppender(this.appenderName,
-                        metricProps,
-                        context.getConfiguration(),
-                        appenderManager);
+                    metricProps,
+                    context.getConfiguration(),
+                    appenderManager);
                 metricRefreshableAppender.start();
                 return metricRefreshableAppender;
             } catch (Exception e) {
@@ -162,9 +162,9 @@ public interface RefreshableAppender extends TestableAppender {
                 throw new IllegalArgumentException("appender, loggerName must be a unique name, kafkaAppenderManager can't be null");
             }
             return new DefaultRefreshableAppender(
-                    appender,
-                    loggerName,
-                    appenderManager,metricProps);
+                appender,
+                loggerName,
+                appenderManager, metricProps);
         }
     }
 

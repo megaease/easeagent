@@ -17,14 +17,14 @@
 
 package com.megaease.easeagent.zipkin.http.reactive;
 
-import brave.Span;
-import com.megaease.easeagent.common.ContextCons;
+import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
-import com.megaease.easeagent.core.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.zipkin.http.AccessLogServerInfo;
 import com.megaease.easeagent.zipkin.http.HttpLog;
 import com.megaease.easeagent.zipkin.http.RequestInfo;
@@ -60,8 +60,13 @@ public class SpringGatewayLogInterceptor implements AgentInterceptor {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         Long beginTime = ContextUtils.getBeginTime(context);
-        Span span = (Span) context.get(ContextCons.SPAN);
-        RequestInfo requestInfo = this.httpLog.prepare(config.getString("system"), config.getString("name"), beginTime, span, serverInfo);
+        Object span = context.get(ContextCons.SPAN);
+        RequestInfo requestInfo;
+        if (span instanceof Span) {
+            requestInfo = this.httpLog.prepare(config.getString("system"), config.getString("name"), beginTime, (Span) span, serverInfo);
+        } else {
+            requestInfo = this.httpLog.prepare(config.getString("system"), config.getString("name"), beginTime, (brave.Span) span, serverInfo);
+        }
         exchange.getAttributes().put(RequestInfo.class.getName(), requestInfo);
         chain.doBefore(methodInfo, context);
     }

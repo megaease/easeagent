@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.common;
 
-import com.megaease.easeagent.core.utils.ThreadLocalCurrentContext;
+import com.megaease.easeagent.plugin.async.ThreadLocalCurrentContext;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;

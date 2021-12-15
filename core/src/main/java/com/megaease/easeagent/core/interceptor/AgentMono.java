@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.core.interceptor;
 
+import com.megaease.easeagent.plugin.MethodInfo;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 

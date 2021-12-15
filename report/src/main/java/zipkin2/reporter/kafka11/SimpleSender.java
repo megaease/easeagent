@@ -17,8 +17,8 @@
 
 package zipkin2.reporter.kafka11;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import zipkin2.Call;
 import zipkin2.codec.Encoding;
 import zipkin2.reporter.BytesMessageEncoder;

@@ -30,7 +30,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.mom.kafka.KafkaAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.slf4j.Logger;
+import com.megaease.easeagent.log4j2.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public interface AppenderManager {
 
     final class DefaultKafkaAppenderManager implements AppenderManager {
 
-        public static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DefaultKafkaAppenderManager.class);
+        public static final Logger LOGGER = com.megaease.easeagent.log4j2.LoggerFactory.getLogger(DefaultKafkaAppenderManager.class);
 
         private Map<String, Appender> appenderMap = new ConcurrentHashMap<>();
         private final OutputProperties outputProperties;

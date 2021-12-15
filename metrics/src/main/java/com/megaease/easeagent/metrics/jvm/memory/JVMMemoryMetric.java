@@ -26,6 +26,10 @@ import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.model.JVMMemoryGaugeMetricModel;
+import com.megaease.easeagent.plugin.api.metric.name.MetricName;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
+import com.megaease.easeagent.plugin.async.ScheduleRunner;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
@@ -36,7 +40,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
-    public static final String ENABLE_KEY = "observability.metrics.jvmMemory.enabled";
+    public static final String ENABLE_KEY = "plugin.observability.jvmMemory.metric.enabled";
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
     private static final String POOLS = "pools";
     private final Config config;
@@ -48,7 +52,7 @@ public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
     public JVMMemoryMetric(MetricRegistry metricRegistry, Config config, boolean enableSchedule) {
         super(metricRegistry, enableSchedule);
         this.config = config;
-        this.metricNameFactory = MetricNameFactory.createBuilder().gaugeType(MetricSubType.DEFAULT, new HashMap<>())
+        this.nameFactory = NameFactory.createBuilder().gaugeType(MetricSubType.DEFAULT, new HashMap<>())
                 .build();
     }
 
@@ -66,7 +70,7 @@ public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
         for (MemoryPoolMXBean memoryPoolMXBean : memoryPoolMXBeans) {
             String memoryPoolMXBeanName = memoryPoolMXBean.getName();
             final String poolName = MetricRegistry.name(POOLS, WHITESPACE.matcher(memoryPoolMXBeanName).replaceAll("-"));
-            Map<MetricSubType, MetricName> map = this.metricNameFactory.gaugeNames(poolName);
+            Map<MetricSubType, MetricName> map = this.nameFactory.gaugeNames(poolName);
             for (Map.Entry<MetricSubType, MetricName> entry : map.entrySet()) {
                 MetricName metricName = entry.getValue();
                 Gauge<JVMMemoryGaugeMetricModel> gauge = () -> new JVMMemoryGaugeMetricModel(
@@ -81,7 +85,7 @@ public class JVMMemoryMetric extends AbstractMetric implements ScheduleRunner {
 
     class JVMMemoryMetricConverter extends ConverterAdapter {
         JVMMemoryMetricConverter(Supplier<Map<String, Object>> attributes) {
-            super("application", "jvm-memory", metricNameFactory, KeyType.Gauge, attributes, "resource");
+            super("application", "jvm-memory", nameFactory, KeyType.Gauge, attributes, "resource");
         }
     }
 }
