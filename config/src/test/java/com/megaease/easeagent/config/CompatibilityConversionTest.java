@@ -15,8 +15,9 @@ public class CompatibilityConversionTest {
     @Test
     public void transform() {
         Map<String, String> newMap = CompatibilityConversion.transform(Collections.singletonMap(ConfigConst.Observability.METRICS_ENABLED, "false"));
-        assertEquals(newMap.size(), 1);
+        assertEquals(newMap.size(), 2);
         assertTrue(newMap.containsKey(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_METRIC_ENABLED));
+        assertTrue(newMap.containsKey(ConfigConst.Observability.METRICS_ENABLED));
         newMap = CompatibilityConversion.transform(Collections.singletonMap(ConfigConst.Observability.TRACE_ENABLED, "false"));
         assertEquals(newMap.size(), 1);
         assertTrue(newMap.containsKey(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_TRACING_ENABLED));
