@@ -1,17 +1,17 @@
 # Plugin Development Guide
 - [Overview](#Overview)
 - [Plugin Structure](#Plugin-structure)
-    - [AgentPlugin, Definiton](#AgentPlugin-plugin-definition)
-    - [Points](#points)
-    - [Interceptor](#interceptor)
-    - [AdviceTo Annotation](#adviceto-annotation)
-    - [Plugin Orchestration](#plugin-orchestration)
-    - [Plugin Configuration](#plugin-configuration)
     - [A Simple Plugin Example](#a-simple-plugin-example)
         - [AgentPlugin](#AgentPlugin)
         - [Points of Simple Plugin](#points-of-simple-plugin)
         - [Interceptor of Simple Plugin](#interceptor-of-simple-plugin)
         - [Test Result](#test-result)
+    - [AgentPlugin](#AgentPlugin-plugin-definition)
+    - [Points](#points)
+    - [Interceptor](#interceptor)
+    - [AdviceTo Annotation](#adviceto-annotation)
+    - [Plugin Orchestration](#plugin-orchestration)
+    - [Plugin Configuration](#plugin-configuration)
 - [Tracing API](#Tracing-API)
 - [Metric API](#Metric-API)
 - [Logging API](#logging-API)
@@ -27,8 +27,128 @@ This document describes how to develop plugins for Easeagent, and it will be div
 5. Configuration API
 
 ##  Plugin Structure
-All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains serveral plugins, eg. a "Tracking Plugin" and a "Metirc Plugin". But, we will focus on a single plugin first.
+All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains serveral plugins, eg. a "Tracking Plugin" and a "Metirc Plugin". 
 ![image](./images/plugin-structure.png)
+
+Let's start with a simple plugin.
+
+### A Simple Plugin Example
+Suppose this plugin is to help complete the Tracing function, the name of the current microservice needs to be added to the Response header. So we can define the domain of the plugin as "observability", and then we will give the simple plugin a namespace "simple". The full source code is available [here](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin).
+
+This plugin contain only three interface implementations: `AgentPlugin`, `Points` and `Interceptor`, corresponding to the classes `SimplePlugin`, `DoFilterPoints` and `ResponseHeaderInterceptor` respectively.
+
+```
+# Full code structure
+▾ src/main/java/com/megaease/easeagent/plugin/simple/
+  ▾ points/
+      DoFilterPoints.java
+  ▾ interceptor/
+      ResponseHeaderInterceptor.java
+    SimplePlugin.java
+  pom.xml
+```
+#### AgentPlugin
+```java
+public class SimplePlugin implements AgentPlugin {
+    @Override
+    public String getNamespace() {
+        return "simple";
+    }
+
+    @Override
+    public String getDomain() {
+        return ConfigConst.OBSERVABILITY;
+    }
+}
+```
+#### Points of Simple Plugin
+To decouple from ByteBuddy, `ClassMatcher` and `Methodmatcher` are wrapped with reference to the DSL of **ByteBuddy**.
+When there is only one methodmatcher in the return set of `getMethodMather()`, the qualifer value defaults to 'default', and there is no need to explicitly assign a value.
+```java
+public class DoFilterPoints implements Points {
+    @Override
+    public IClassMatcher getClassMatcher() {
+        return ClassMatcher.builder()
+            .hasInterface("javax.servlet.Filter")
+            .or()
+            .hasSuperClass("javax.servlet.http.HttpServlet")
+            .build();
+    }
+
+    @Override
+    public Set<IMethodMatcher> getMethodMatcher() {
+        return MethodMatcher.builder().named("doFilter")
+                .isPublic()
+                .argsLength(3)
+                .arg(0, "javax.servlet.ServletRequest")
+                .arg(1, "javax.servlet.ServletResponse")
+                .returnType("void")
+                .or()
+                .named("service")
+                .arg(0, "javax.servlet.ServletRequest")
+                .arg(1, "javax.servlet.ServletResponse")
+                .build().toSet();
+    }
+}
+```
+
+#### Interceptor of Simple Plugin
+This `ResponseHeaderInterceptor` is bound to the enhancement point defined above via the `@AdviceTo` annotation, and does not need to be explicitly assigned a qualifier value when qualifier is the default value. 
+```java
+@AdviceTo(value = DoFilterPoints.class, plugin = SimplePlugin.class)
+public class ResponseHeaderInterceptor implements Interceptor {
+    @Override
+    public void before(MethodInfo methodInfo, Context context) {
+    }
+
+    @Override
+    public void after(MethodInfo methodInfo, Context context) {
+        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
+        String serviceName = EaseAgent.getConfig(ConfigConst.SERVICE_NAME);
+        httpServletResponse.setHeader("easeagent-srv-name", serviceName);
+    }
+
+    @Override
+    public String getName() {
+        return Order.TRACING.getName();
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
+    }
+}
+```
+
+#### Test Result
+When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package. But this simple plugin is compiled independently of easeagent, so the compiled output plugin jar package `simple-plugin-1.0.0.jar` need to be copied to the **plugins** directory which is at the same level directory as easeagent.jar (create if not existing), to allow easeagent to detect it.
+
+
+Using the spring-web module under ease-test-demo as a test project, execute the following test and the header information added can be seen in the HTTP Response.
+```
+easeagent-srv-name: demo-service
+```
+```
+# curl -v http://127.0.0.1:18888/web_client
+
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to 127.0.0.1 (127.0.0.1) port 18888 (#0)
+> GET /web_client HTTP/1.1
+> Host: 127.0.0.1:18888
+> User-Agent: curl/7.64.1
+> Accept: */*
+>
+< HTTP/1.1 200
+< easeagent-srv-name: demo-service
+< Content-Type: text/plain
+< Transfer-Encoding: chunked
+< Date: Fri, 10 Dec 2021 08:38:09 GMT
+<
+* Connection #0 to host 127.0.0.1 left intact
+easeagent-1639125480780* Closing connection 0
+
+```
 
 ### AgentPlugin: Plugin definition
 Plugin definition, defines what `domain` and `namespace` of this plugin by implement the `AgentPlugin` interface.
@@ -54,6 +174,8 @@ The `AgentPlugin` interface also includes the `Order` interface that defines the
 ### Points
 `Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
 When there are multiple methods in a matched class that require enhancement with different interceptors, a qualifier needs to be assigned to each `MethodMatcher` as the keyword used by different interceptors to bind.
+
+To decouple from ByteBuddy, `ClassMatcher` and `Methodmatcher` are wrapped with reference to the DSL of **ByteBuddy**.
 ```java
 public interface Points {
     /**
@@ -218,122 +340,6 @@ The `function` is provided by `Interceptor` interface implemention's `getType()`
 
 This prefix `plugin.[domain].[namespace].[function]` is used to maintained configuration for this `Interceptor`, and in this `Interceptor` developer can get its configuration by the `getConfig()` method of the `Context` param.
 
-
-### A Simple Plugin Example
-This plugin only implements the functions of adding a header to the HTTP response, the full source code is available [here](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin).
-
-This plugin contain only three interface implementations: `AgentPlugin`, `Points` and `Interceptor`, corresponding to the classes `SimplePlugin`, `DoFilterPoints` and `ResponseHeaderInterceptor` respectively.
-
-```
-# Full code structure
-▾ src/main/java/com/megaease/easeagent/plugin/simple/
-  ▾ points/
-      DoFilterPoints.java
-  ▾ interceptor/
-      ResponseHeaderInterceptor.java
-    SimplePlugin.java
-  pom.xml
-```
-#### AgentPlugin
-```java
-public class SimplePlugin implements AgentPlugin {
-    @Override
-    public String getNamespace() {
-        return "simple";
-    }
-
-    @Override
-    public String getDomain() {
-        return ConfigConst.OBSERVABILITY;
-    }
-}
-```
-#### Points of Simple Plugin
-When there is only one methodmatcher, the qualifer value defaults to default, and there is no need to explicitly assign a value.
-```java
-public class DoFilterPoints implements Points {
-    @Override
-    public IClassMatcher getClassMatcher() {
-        return ClassMatcher.builder()
-            .hasInterface("javax.servlet.Filter")
-            .or()
-            .hasSuperClass("javax.servlet.http.HttpServlet")
-            .build();
-    }
-
-    @Override
-    public Set<IMethodMatcher> getMethodMatcher() {
-        return MethodMatcher.builder().named("doFilter")
-                .isPublic()
-                .argsLength(3)
-                .arg(0, "javax.servlet.ServletRequest")
-                .arg(1, "javax.servlet.ServletResponse")
-                .returnType("void")
-                .or()
-                .named("service")
-                .arg(0, "javax.servlet.ServletRequest")
-                .arg(1, "javax.servlet.ServletResponse")
-                .build().toSet();
-    }
-}
-```
-
-#### Interceptor of Simple Plugin
-This `ResponseHeaderInterceptor` is bound to the enhancement point defined above via the `@AdviceTo` annotation, and does not need to be explicitly assigned a qualifier value when qualifier is the default value. 
-```java
-@AdviceTo(value = DoFilterPoints.class, plugin = SimplePlugin.class)
-public class ResponseHeaderInterceptor implements Interceptor {
-    @Override
-    public void before(MethodInfo methodInfo, Context context) {
-    }
-
-    @Override
-    public void after(MethodInfo methodInfo, Context context) {
-        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-        httpServletResponse.setHeader("easeagent", "added by simple-plugin");
-    }
-
-    @Override
-    public String getName() {
-        return Order.TRACING.getName();
-    }
-
-    @Override
-    public int order() {
-        return Order.TRACING.getOrder();
-    }
-}
-```
-
-#### Test Result
-When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package. But this simple plugin is compiled independently of easeagent, so the compiled output plugin jar package `simple-plugin-1.0.0.jar` need to be copied to the **plugins** directory which is at the same level directory as easeagent.jar (create if not existing), to allow easeagent to detect it.
-
-
-Using the spring-web module under ease-test-demo as a test project, execute the following test and the header information added can be seen in the HTTP Response.
-```
-easeagent: add by simple-plugin
-```
-```
-# curl -v http://127.0.0.1:18888/web_client
-
-*   Trying 127.0.0.1...
-* TCP_NODELAY set
-* Connected to 127.0.0.1 (127.0.0.1) port 18888 (#0)
-> GET /web_client HTTP/1.1
-> Host: 127.0.0.1:18888
-> User-Agent: curl/7.64.1
-> Accept: */*
->
-< HTTP/1.1 200
-< easeagent: add by simple-plugin
-< Content-Type: text/plain
-< Transfer-Encoding: chunked
-< Date: Fri, 10 Dec 2021 08:38:09 GMT
-<
-* Connection #0 to host 127.0.0.1 left intact
-easeagent-1639125480780* Closing connection 0
-
-```
 
 ##  Tracing API
 * [Tracing API](tracing-api.md)

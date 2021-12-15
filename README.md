@@ -185,7 +185,7 @@ $ curl -v http://127.0.0.1:18888/web_client
 ```
 
 ### 7. Test Data
-* Tracing
+* Tracing  
 If the tracing data is send to console, there would be some tracing log in console like this:
 ```
 [{"traceId":"5a8800b902703307","parentId":"84c4cba42fb92788","id":"fd00a1705c88cbb2","kind":"SERVER","name":"get","timestamp":1639493283759877,"duration":217545,"shared":true,"localEndpoint":{"serviceName":"demo-service","ipv4":"192.168.0.102"},"remoteEndpoint":{"ipv4":"127.0.0.1","port":55809},"tags":{"http.method":"GET","http.path":"/hello","http.route":"/hello","i":"ServerName.local"},"type":"log-tracing","service":"demo-service","system":"demo-system"},{"traceId":"5a8800b902703307","id":"5a8800b902703307","kind":"SERVER","name":"get","timestamp":1639493283753466,"duration":228827,"localEndpoint":{"serviceName":"demo-service","ipv4":"192.168.0.102"},"remoteEndpoint":{"ipv4":"127.0.0.1","port":55851},"tags":{"http.method":"GET","http.path":"/web_client","i":"ServerName.local"},"type":"log-tracing","service":"demo-service","system":"demo-system"}]
@@ -193,7 +193,7 @@ If the tracing data is send to console, there would be some tracing log in conso
 ...
 
 ```
-* Metric
+* Metric  
 Open Browser to visit [http://localhost:9090](http://localhost:9090).
 
 After visit more pages, open Prometheus manager [http://localhost:9090](http://localhost:9090), and search `_00GET__web_client`. You will see as following.
