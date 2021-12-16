@@ -40,7 +40,7 @@ public class JarUtils {
         new PrivilegedAction<String>() {
             @Override
             public String run() {
-                return System.getProperty("java.io.tmpdir") + "easeagent" + File.separatorChar;}
+                return System.getProperty("java.io.tmpdir")  + File.separatorChar + "easeagent" + File.separatorChar;}
         })
     );
 
