@@ -30,16 +30,20 @@ public class MetricsAdditionalAttributes implements Supplier<Map<String, Object>
     private volatile Map<String, Object> additionalAttributes;
     private volatile String serviceName = "";
     private volatile String systemName = "";
+    private volatile String tenantId = "";
 
     public MetricsAdditionalAttributes(Config config) {
         ConfigUtils.bindProp(ConfigConst.SERVICE_NAME, config, Config::getString, v -> {
             this.serviceName = v;
-            this.additionalAttributes = new AdditionalAttributes(this.serviceName, this.systemName).getAdditionalAttributes();
         });
         ConfigUtils.bindProp(ConfigConst.SYSTEM_NAME, config, Config::getString, v -> {
             this.systemName = v;
-            this.additionalAttributes = new AdditionalAttributes(this.serviceName, this.systemName).getAdditionalAttributes();
         });
+
+        ConfigUtils.bindProp(ConfigConst.TENANT_ID, config, Config::getString, v -> {
+            this.tenantId = v;
+        });
+        this.additionalAttributes = new AdditionalAttributes(this.serviceName, this.systemName, this.tenantId).getAdditionalAttributes();
     }
 
     @Override

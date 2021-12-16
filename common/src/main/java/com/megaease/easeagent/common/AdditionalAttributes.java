@@ -40,16 +40,17 @@ public class AdditionalAttributes {
     private final static Logger LOGGER = LoggerFactory.getLogger(AdditionalAttributes.class);
     public final Map<String, Object> attributes;
 
-    public AdditionalAttributes(String serviceName, String systemName) {
+    public AdditionalAttributes(String serviceName, String systemName, String tenantId) {
         attributes = new HashMap<>();
         attributes.put("host_ipv4", getHostIpv4());
         attributes.put("service", serviceName);
         attributes.put("system", systemName);
         attributes.put("host_name", getHostName());
+        attributes.put("tenant_id", tenantId);
     }
 
     public AdditionalAttributes(String serviceName) {
-        this(serviceName, "none");
+        this(serviceName, "none", "99999999");
     }
 
     static String getHostIpV4(Enumeration<NetworkInterface> networkInterfaces) throws Exception {

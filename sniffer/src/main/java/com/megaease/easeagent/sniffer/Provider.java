@@ -131,6 +131,8 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     private Config config;
     private Supplier<Map<String, Object>> additionalAttributes;
     private AutoRefreshConfigItem<String> serviceName;
+    private AutoRefreshConfigItem<String> systemName;
+    private AutoRefreshConfigItem<String> tenantId;
 
     @Override
     public void setConfig(Config config) {
@@ -160,6 +162,8 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .addScopeDecorator(AgentMDCScopeDecorator.get())
             .build();
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
+        systemName = new AutoRefreshConfigItem<>(config, ConfigConst.SYSTEM_NAME, Config::getString);
+        tenantId = new AutoRefreshConfigItem<>(config, ConfigConst.TENANT_ID, Config::getString);
         String target = config.getString("observability.tracings.output.target");
         String zipkinUrl = config.getString("observability.tracings.output.target.zipkinUrl");
         boolean toZipkin = false;
@@ -181,7 +185,8 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .localServiceName(serviceName.getValue())
             .traceId128Bit(false)
             .sampler(CountingSampler.create(1))
-            .addSpanHandler(new CustomTagsSpanHandler(serviceName::getValue, AdditionalAttributes.getHostName()))
+            .addSpanHandler(new CustomTagsSpanHandler(serviceName::getValue, systemName::getValue, tenantId::getValue
+                , AdditionalAttributes.getHostName()))
             .addSpanHandler(AsyncZipkinSpanHandler
                 .newBuilder(reporter)
                 .alwaysReportSpans(true)
@@ -637,8 +642,9 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
                     .hostName(HostAddress.localhost())
                     .hostIpv4(HostAddress.getHostIpv4())
                     .gid("")
-                    .system(config.getString("system"))
+                    .system(systemName.getValue())
                     .service(serviceName.getValue())
+                    .tenantId(tenantId.getValue())
                     .tags("")
                     .type("md5-dictionary")
                     .id("")

@@ -83,6 +83,7 @@ public class TraceReport {
         GlobalExtrasSupplier extrasSupplier = new GlobalExtrasSupplier() {
             final AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(configs, ConfigConst.SERVICE_NAME, Config::getString);
             final AutoRefreshConfigItem<String> systemName = new AutoRefreshConfigItem<>(configs, ConfigConst.SYSTEM_NAME, Config::getString);
+            final AutoRefreshConfigItem<String> tenantId = new AutoRefreshConfigItem<>(configs, ConfigConst.TENANT_ID, Config::getString);
 
             @Override
             public String service() {
@@ -92,6 +93,11 @@ public class TraceReport {
             @Override
             public String system() {
                 return systemName.getValue();
+            }
+
+            @Override
+            public String tenantId() {
+                return tenantId.getValue();
             }
         };
         SDKAsyncReporter reporter = SDKAsyncReporter.

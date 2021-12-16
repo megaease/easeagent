@@ -42,6 +42,8 @@ public class MD5DictionaryItem {
 
     private String system;
 
+    private String tenantId;
+
     private String type;
 
     private String tags;

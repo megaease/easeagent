@@ -26,6 +26,7 @@ public interface ConfigConst {
     String SYSTEM_NAME = "system";
     String OBSERVABILITY = "observability";
     String GLOBAL_CANARY_LABELS = "globalCanaryHeaders";
+    String TENANT_ID = "tenant_id";
 
     static String join(String... texts) {
         return String.join(DELIMITER, texts);

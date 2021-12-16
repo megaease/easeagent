@@ -27,9 +27,13 @@ public class CustomTagsSpanHandler extends SpanHandler {
     public static final String TAG_INSTANCE = "i";
     private final String instance;
     private final Supplier<String> serviceName;
+    private final Supplier<String> systemName;
+    private final Supplier<String> tenantId;
 
-    public CustomTagsSpanHandler(Supplier<String> serviceName, String instance) {
+    public CustomTagsSpanHandler(Supplier<String> serviceName, Supplier<String> systemName, Supplier<String> tenantId, String instance) {
         this.serviceName = serviceName;
+        this.systemName = systemName;
+        this.tenantId = tenantId;
         this.instance = instance;
     }
 

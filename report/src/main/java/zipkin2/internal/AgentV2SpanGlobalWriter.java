@@ -34,6 +34,7 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
     final String typeFieldName = ",\"type\":\"";
     final String serviceFieldName = ",\"service\":\"";
     final String systemFieldName = ",\"system\":\"";
+    final String tenantIdFieldName = ",\"tenant_id\":\"";
 
     public AgentV2SpanGlobalWriter(String type, GlobalExtrasSupplier extras, TraceProps tp) {
         this.type = type;
@@ -61,6 +62,13 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
                 mutableInt.add(systemFieldName.length() + 1);
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpSystem));
             }
+
+            String tmpTenantId = this.extras.tenantId();
+            if (TextUtils.hasText(tmpTenantId)) {
+                mutableInt.add(tenantIdFieldName.length() + 1);
+                mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpTenantId));
+            }
+
         });
         return mutableInt.intValue();
     }
@@ -83,6 +91,13 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
             if (TextUtils.hasText(tmpSystem)) {
                 buffer.writeAscii(systemFieldName);
                 buffer.writeUtf8(JsonEscaper.jsonEscape(tmpSystem));
+                buffer.writeByte(34);
+            }
+
+            String tmpTenantId = this.extras.tenantId();
+            if (TextUtils.hasText(tmpTenantId)) {
+                buffer.writeAscii(tenantIdFieldName);
+                buffer.writeUtf8(JsonEscaper.jsonEscape(tmpTenantId));
                 buffer.writeByte(34);
             }
         });

@@ -40,6 +40,11 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
             public String system() {
                 return "";
             }
+
+            @Override
+            public String tenantId() {
+                return "";
+            }
         }, null);
     }
 

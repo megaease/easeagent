@@ -21,4 +21,6 @@ public interface GlobalExtrasSupplier {
     String service();
 
     String system();
+
+    String tenantId();
 }
