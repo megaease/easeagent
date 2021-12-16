@@ -149,7 +149,7 @@ $ cp target/simple-plugin-1.0.0.jar $EASE_AGENT_PATH/plugins
 ```
 
 3. Run
-Taking the `spring-web` module under [ease-test-demo](https://github.com/megaease/easeagent-test-demo) as a test project, run the demo application with EaseAgent.
+Taking the `spring-web` module under [ease-test-demo](https://github.com/megaease/easeagent-test-demo) as test demo project, run the demo application with the EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ cd ../spring-web 
