@@ -62,13 +62,21 @@
                             <pattern>com.fasterxml</pattern>
                             <shadedPattern>com.megaease.easeagent.plugin.utils</shadedPattern>
                         </relocation>
+                        <!--
+                        <relocation>
+                            <pattern>com.squareup.javapoet</pattern>
+                            <shadedPattern>easeagent.plugin.javapoet</shadedPattern>
+                        </relocation>
+                        -->
                     </relocations>
 
+                    <!--
                     <artifactSet>
                         <excludes>
                             <exclude>com.squareup:javapoet</exclude>
                         </excludes>
                     </artifactSet>
+                    -->
                 </configuration>
                 <executions>
                     <execution>

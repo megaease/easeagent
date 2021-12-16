@@ -3,9 +3,9 @@
 - [Plugin Structure](#Plugin-structure)
     - [A Simple Plugin Example](#a-simple-plugin-example)
         - [AgentPlugin](#AgentPlugin)
-        - [Points of Simple Plugin](#points-of-simple-plugin)
-        - [Interceptor of Simple Plugin](#interceptor-of-simple-plugin)
-        - [Test Result](#test-result)
+        - [Points](#points-of-simple-plugin)
+        - [Interceptor](#interceptor-of-simple-plugin)
+        - [Test](#test-result)
     - [AgentPlugin](#AgentPlugin-plugin-definition)
     - [Points](#points)
     - [Interceptor](#interceptor)
@@ -55,15 +55,16 @@ public class SimplePlugin implements AgentPlugin {
         return "simple";
     }
 
+    // ConfigConst.OBSERVABILITY;
     @Override
     public String getDomain() {
-        return ConfigConst.OBSERVABILITY;
+        return "observability";
     }
 }
 ```
 #### Points of Simple Plugin
 To decouple from ByteBuddy, `ClassMatcher` and `Methodmatcher` are wrapped with reference to the DSL of **ByteBuddy**.
-When there is only one methodmatcher in the return set of `getMethodMather()`, the qualifer value defaults to 'default', and there is no need to explicitly assign a value.
+
 ```java
 public class DoFilterPoints implements Points {
     @Override
@@ -97,39 +98,74 @@ This `ResponseHeaderInterceptor` is bound to the enhancement point defined above
 ```java
 @AdviceTo(value = DoFilterPoints.class, plugin = SimplePlugin.class)
 public class ResponseHeaderInterceptor implements Interceptor {
+    private Object START_KEY = new Object();
+
     @Override
     public void before(MethodInfo methodInfo, Context context) {
+        context.put(START_KEY, System.currentTimeMillis());
     }
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
+        Long start = context.get(START_KEY);
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
         String serviceName = EaseAgent.getConfig(ConfigConst.SERVICE_NAME);
         httpServletResponse.setHeader("easeagent-srv-name", serviceName);
+        httpServletResponse.setHeader("easeagent-start-timestamp", start.toString());
     }
 
+    // Order.TRACING.getName();
     @Override
     public String getName() {
-        return Order.TRACING.getName();
+        return "tracing";
     }
 
+    // TRACING.getOrder();
     @Override
     public int order() {
-        return Order.TRACING.getOrder();
+        return 100;
     }
 }
 ```
 
-#### Test Result
-When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package. But this simple plugin is compiled independently of easeagent, so the compiled output plugin jar package `simple-plugin-1.0.0.jar` need to be copied to the **plugins** directory which is at the same level directory as easeagent.jar (create if not existing), to allow easeagent to detect it.
+#### Test 
+1. Compile
+As mention above, the source code is available [here](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin).
 
+```
+$ git clone git@github.com:megaease/easeagent-test-demo.git
+$ cd easeagent-test-demo/simple-plugin
+$ mvn clean package
+$
+```
 
-Using the spring-web module under ease-test-demo as a test project, execute the following test and the header information added can be seen in the HTTP Response.
+2. Install Plugin
+This simple plugin is compiled independently of easeagent, so the compiled output plugin jar package `simple-plugin-1.0.0.jar` need to be copied to the **plugins** directory which is at the same level directory as easeagent.jar (create if not existing), to allow easeagent to detect it.
+```
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ mkdir $EASE_AGENT_PATH/plugins 
+$ cp target/simple-plugin-1.0.0.jar $EASE_AGENT_PATH/plugins
+
+```
+
+3. Run
+Taking the `spring-web` module under [ease-test-demo](https://github.com/megaease/easeagent-test-demo) as a test project, run the demo application with EaseAgent.
+```
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ cd ../spring-web 
+$ mvn clean package
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
+```
+4. Test
+Execute the following test and the header information added can be seen in the HTTP Response.
 ```
 easeagent-srv-name: demo-service
+easeagent-start-timestamp: 1639648239700
 ```
+
 ```
 # curl -v http://127.0.0.1:18888/web_client
+
 
 *   Trying 127.0.0.1...
 * TCP_NODELAY set
@@ -141,12 +177,24 @@ easeagent-srv-name: demo-service
 >
 < HTTP/1.1 200
 < easeagent-srv-name: demo-service
+< easeagent-start-timestamp: 1639648239700
 < Content-Type: text/plain
 < Transfer-Encoding: chunked
-< Date: Fri, 10 Dec 2021 08:38:09 GMT
+< Date: Thu, 16 Dec 2021 09:50:41 GMT
 <
 * Connection #0 to host 127.0.0.1 left intact
-easeagent-1639125480780* Closing connection 0
+easeagent-1639648241639* Closing connection 0
+
+```
+
+When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package. 
+
+In this simple plugin project, the `com.megaease.easeagent:plugin-api` dependency is wraped in local maven repository which local in `simple-plugin/lib` directory, user can also download Easeagent source tree then install `plugin-api` module.
+
+```
+$ git clone https://github.com/megaease/easeagent.git
+$ cd easeagent/plugin-api
+$ mvn clean install
 
 ```
 
@@ -173,6 +221,7 @@ The `AgentPlugin` interface also includes the `Order` interface that defines the
 
 ### Points
 `Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
+When there is only one methodmatcher in the return set of `getMethodMather()`, the qualifer value defaults to 'default', and there is no need to explicitly assign a value.
 When there are multiple methods in a matched class that require enhancement with different interceptors, a qualifier needs to be assigned to each `MethodMatcher` as the keyword used by different interceptors to bind.
 
 To decouple from ByteBuddy, `ClassMatcher` and `Methodmatcher` are wrapped with reference to the DSL of **ByteBuddy**.
@@ -235,7 +284,7 @@ public interface Points {
 ### Interceptor
 Interceptors is the core of implementing specific enhancements. 
 
-`Interceptor` interface has a name method `getName` and a initialization method `init`. 
+`Interceptor` interface has a name method `getType` and a initialization method `init`. 
 - The name will be used as `serviceId` in combination with the `domain` and `namespace` of the binding plugin to get the plugin configuration which will be automatically injected into the `Context`. The description of the plugin configuration can be found in the user manual.
 - The `init` method is invoked during transfrom, allowing users to initialize staic resources of interceptor, and also allowing to load third party classes which can't load by running time classloader.
 
@@ -267,7 +316,7 @@ public interface Interceptor extends Ordered {
      *
      * @return name, eg. tracing, metric, etc.
      */
-    default String getName() {
+    default String getType() {
         return Order.TRACING.getName();
     }
 
@@ -393,7 +442,7 @@ This tool will automatically maintain configuration updates and modifications, a
 It is a singleton registration factory, which also means that the singleton acquisition is locked, so it is hoped that the user can acquire it as little as possible.
 
 for example: acquire it once during initialization, and then put it in a static variable.
- 
+
 The registered key is `domain`, `namespace`, `id`.
 
 ```java
@@ -442,6 +491,5 @@ public class ServiceNameInterceptor implements Interceptor {
             });
     }
 }
-``` 
-
+```
 
