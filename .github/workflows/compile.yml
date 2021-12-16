@@ -27,6 +27,15 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
+
+      - name: Install xmllint
+        run: sudo apt-get install -y git
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.8.2
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
