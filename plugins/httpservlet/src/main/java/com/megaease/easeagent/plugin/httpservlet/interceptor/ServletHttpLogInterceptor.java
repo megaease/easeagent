@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -60,9 +60,9 @@ public class ServletHttpLogInterceptor extends BaseServletInterceptor {
     }
 
     private Span getSpan(HttpServletRequest httpServletRequest, Context context) {
-        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
-        if (progressContext != null) {
-            return progressContext.span();
+        RequestContext requestContext = (RequestContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
+        if (requestContext != null) {
+            return requestContext.span();
         }
         return context.currentTracing().currentSpan();
     }

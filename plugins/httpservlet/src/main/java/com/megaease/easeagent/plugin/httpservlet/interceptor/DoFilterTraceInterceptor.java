@@ -21,7 +21,7 @@ package com.megaease.easeagent.plugin.httpservlet.interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
@@ -47,14 +47,14 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
-        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
-        if (progressContext != null) {
+        RequestContext requestContext = (RequestContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
+        if (requestContext != null) {
             return;
         }
         HttpRequest httpRequest = new HttpServerRequest(httpServletRequest);
-        progressContext = context.importProgress(httpRequest);
-        httpServletRequest.setAttribute(ServletUtils.PROGRESS_CONTEXT, progressContext);
-        HttpUtils.handleReceive(progressContext.span().start(), httpRequest);
+        requestContext = context.serverReceive(httpRequest);
+        httpServletRequest.setAttribute(ServletUtils.PROGRESS_CONTEXT, requestContext);
+        HttpUtils.handleReceive(requestContext.span().start(), httpRequest);
     }
 
     @Override
@@ -64,9 +64,9 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
             return;
         }
         HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
-        ProgressContext progressContext = (ProgressContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
+        RequestContext requestContext = (RequestContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
         try {
-            Span span = progressContext.span();
+            Span span = requestContext.span();
             if (!httpServletRequest.isAsyncStarted()) {
                 span.tag(TraceConst.HTTP_TAG_ROUTE, ServletUtils.getHttpRouteAttributeFromRequest(httpServletRequest));
                 HttpUtils.finish(span, new Response(methodInfo.getThrowable(), httpServletRequest, httpServletResponse));
@@ -75,11 +75,11 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
                 span.finish();
                 return;
             } else {
-                httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener(progressContext), httpServletRequest, httpServletResponse);
+                httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener(requestContext), httpServletRequest, httpServletResponse);
             }
             return;
         } finally {
-            progressContext.scope().close();
+            requestContext.scope().close();
         }
     }
 
@@ -144,11 +144,11 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
     }
 
     public static final class TracingAsyncListener implements AsyncListener {
-        final ProgressContext progressContext;
+        final RequestContext requestContext;
         final AtomicBoolean sendHandled = new AtomicBoolean();
 
-        TracingAsyncListener(ProgressContext progressContext) {
-            this.progressContext = progressContext;
+        TracingAsyncListener(RequestContext requestContext) {
+            this.requestContext = requestContext;
         }
 
         public void onComplete(AsyncEvent e) {
@@ -156,8 +156,8 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
             if (sendHandled.compareAndSet(false, true)) {
                 HttpServletResponse res = (HttpServletResponse) e.getSuppliedResponse();
                 Response response = new Response(e.getThrowable(), req, res);
-                HttpUtils.save(progressContext.span(), response);
-                progressContext.finish(response);
+                HttpUtils.save(requestContext.span(), response);
+                requestContext.finish(response);
             }
 
         }
@@ -187,7 +187,7 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
         }
 
         public String toString() {
-            return "TracingAsyncListener{" + this.progressContext + "}";
+            return "TracingAsyncListener{" + this.requestContext + "}";
         }
     }
 }

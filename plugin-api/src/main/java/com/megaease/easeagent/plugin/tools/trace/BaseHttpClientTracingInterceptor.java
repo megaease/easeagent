@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.tools.trace;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
 public abstract class BaseHttpClientTracingInterceptor implements NonReentrantInterceptor {
@@ -27,22 +27,22 @@ public abstract class BaseHttpClientTracingInterceptor implements NonReentrantIn
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         HttpRequest request = getRequest(methodInfo, context);
-        ProgressContext progressContext = context.nextProgress(request);
-        HttpUtils.handleReceive(progressContext.span().start(), request);
-        context.put(getProgressKey(), progressContext);
-        // context.push(progressContext);
+        RequestContext requestContext = context.clientRequest(request);
+        HttpUtils.handleReceive(requestContext.span().start(), request);
+        context.put(getProgressKey(), requestContext);
+        // context.push(requestContext);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        ProgressContext progressContext = context.remove(getProgressKey());
-        // ProgressContext progressContext = context.pop();
+        RequestContext requestContext = context.remove(getProgressKey());
+        // RequestContext requestContext = context.pop();
         try {
             HttpResponse responseWrapper = getResponse(methodInfo, context);
-            HttpUtils.save(progressContext.span(), responseWrapper);
-            progressContext.finish(responseWrapper);
+            HttpUtils.save(requestContext.span(), responseWrapper);
+            requestContext.finish(responseWrapper);
         } finally {
-            progressContext.scope().close();
+            requestContext.scope().close();
         }
     }
 

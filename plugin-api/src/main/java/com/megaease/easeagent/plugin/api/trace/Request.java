@@ -54,7 +54,7 @@ public interface Request extends Setter, Getter {
      *  }
      * }</pre>
      *
-     * @see Context#importProgress(Request)
+     * @see Context#serverReceive(Request)
      */
     String header(String name);
 
@@ -100,7 +100,7 @@ public interface Request extends Setter, Getter {
      *  }
      * }</pre>
      *
-     * @see Context#nextProgress(Request)
+     * @see Context#clientRequest(Request)
      */
     void setHeader(String name, String value);
 }

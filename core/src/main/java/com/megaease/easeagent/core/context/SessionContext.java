@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
@@ -148,17 +148,17 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public ProgressContext nextProgress(Request request) {
-        ProgressContext progressContext = tracing.nextProgress(request);
-        injectForwardedHeaders(progressContext);
-        return progressContext;
+    public RequestContext clientRequest(Request request) {
+        RequestContext requestContext = tracing.nextServer(request);
+        injectForwardedHeaders(requestContext);
+        return requestContext;
     }
 
     @Override
-    public ProgressContext importProgress(Request request) {
-        ProgressContext progressContext = tracing.importProgress(request);
-        importForwardedHeaders(request, progressContext);
-        return progressContext;
+    public RequestContext serverReceive(Request request) {
+        RequestContext requestContext = tracing.serverImport(request);
+        importForwardedHeaders(request, requestContext);
+        return requestContext;
     }
 
     @Override

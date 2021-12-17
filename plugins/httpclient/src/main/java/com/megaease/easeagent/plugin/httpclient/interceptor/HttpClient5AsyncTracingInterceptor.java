@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.httpclient.interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
@@ -47,23 +47,23 @@ public class HttpClient5AsyncTracingInterceptor implements NonReentrantIntercept
             return;
         }
         InternalRequest internalRequest = new InternalRequest(request);
-        ProgressContext progressContext = context.nextProgress(internalRequest);
-        HttpUtils.handleReceive(progressContext.span().start(), internalRequest);
-        context.put(HttpClient5AsyncTracingInterceptor.class, progressContext);
+        RequestContext requestContext = context.clientRequest(internalRequest);
+        HttpUtils.handleReceive(requestContext.span().start(), internalRequest);
+        context.put(HttpClient5AsyncTracingInterceptor.class, requestContext);
 
         FutureCallback<HttpResponse> callback = (FutureCallback<HttpResponse>) methodInfo.getArgs()[4];
-        InternalFutureCallback internalFutureCallback = new InternalFutureCallback(callback, request, progressContext);
+        InternalFutureCallback internalFutureCallback = new InternalFutureCallback(callback, request, requestContext);
         methodInfo.changeArg(4, internalFutureCallback);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        ProgressContext progressContext = context.remove(HttpClient5AsyncTracingInterceptor.class);
-        try (Scope scope = progressContext.scope()) {
+        RequestContext requestContext = context.remove(HttpClient5AsyncTracingInterceptor.class);
+        try (Scope scope = requestContext.scope()) {
             if (methodInfo.isSuccess()) {
                 return;
             }
-            progressContext.span().error(methodInfo.getThrowable()).finish();
+            requestContext.span().error(methodInfo.getThrowable()).finish();
         }
     }
 
@@ -71,37 +71,37 @@ public class HttpClient5AsyncTracingInterceptor implements NonReentrantIntercept
 
         private final FutureCallback<HttpResponse> delegate;
         private final HttpRequest request;
-        private final ProgressContext progressContext;
+        private final RequestContext requestContext;
 
-        public InternalFutureCallback(FutureCallback<HttpResponse> delegate, HttpRequest request, ProgressContext progressContext) {
+        public InternalFutureCallback(FutureCallback<HttpResponse> delegate, HttpRequest request, RequestContext requestContext) {
             this.delegate = delegate;
             this.request = request;
-            this.progressContext = progressContext;
+            this.requestContext = requestContext;
         }
 
         @Override
         public void completed(HttpResponse result) {
             this.delegate.completed(result);
-            if (this.progressContext != null) {
+            if (this.requestContext != null) {
                 InternalResponse internalResponse = new InternalResponse(null, request, result);
-                HttpUtils.save(progressContext.span(), internalResponse);
-                progressContext.finish(internalResponse);
+                HttpUtils.save(requestContext.span(), internalResponse);
+                requestContext.finish(internalResponse);
             }
         }
 
         @Override
         public void failed(Exception ex) {
             this.delegate.failed(ex);
-            if (this.progressContext != null) {
-                this.progressContext.span().abandon();
+            if (this.requestContext != null) {
+                this.requestContext.span().abandon();
             }
         }
 
         @Override
         public void cancelled() {
             this.delegate.cancelled();
-            if (this.progressContext != null) {
-                this.progressContext.span().abandon();
+            if (this.requestContext != null) {
+                this.requestContext.span().abandon();
             }
         }
     }

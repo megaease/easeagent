@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 
 import java.util.Collections;
@@ -31,7 +31,7 @@ import java.util.Map;
 public class NoOpContext {
     public static final NoopContext NO_OP_CONTEXT = NoopContext.INSTANCE;
     public static final EmptyAsyncContext NO_OP_ASYNC_CONTEXT = EmptyAsyncContext.INSTANCE;
-    public static final NoopProgressContext NO_OP_PROGRESS_CONTEXT = NoopProgressContext.INSTANCE;
+    public static final NoopRequestContext NO_OP_PROGRESS_CONTEXT = NoopRequestContext.INSTANCE;
 
     public static class NoopContext implements InitializeContext {
         private static final NoopContext INSTANCE = new NoopContext();
@@ -108,13 +108,13 @@ public class NoOpContext {
         }
 
         @Override
-        public ProgressContext nextProgress(Request request) {
-            return NoopProgressContext.INSTANCE;
+        public RequestContext clientRequest(Request request) {
+            return NoopRequestContext.INSTANCE;
         }
 
         @Override
-        public ProgressContext importProgress(Request request) {
-            return NoopProgressContext.INSTANCE;
+        public RequestContext serverReceive(Request request) {
+            return NoopRequestContext.INSTANCE;
         }
 
         @Override
@@ -246,8 +246,8 @@ public class NoOpContext {
         }
     }
 
-    public static class NoopProgressContext implements ProgressContext {
-        private static final NoopProgressContext INSTANCE = new NoopProgressContext();
+    public static class NoopRequestContext implements RequestContext {
+        private static final NoopRequestContext INSTANCE = new NoopRequestContext();
 
         @Override
         public boolean isNoop() {

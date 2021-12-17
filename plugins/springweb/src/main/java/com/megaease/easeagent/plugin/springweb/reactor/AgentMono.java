@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.springweb.reactor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
@@ -28,9 +28,9 @@ import javax.annotation.Nonnull;
 public class AgentMono extends Mono<ClientResponse> {
     private final Mono<ClientResponse> source;
     private final MethodInfo methodInfo;
-    private final ProgressContext context;
+    private final RequestContext context;
 
-    public AgentMono(Mono<ClientResponse> source, MethodInfo methodInfo, ProgressContext context) {
+    public AgentMono(Mono<ClientResponse> source, MethodInfo methodInfo, RequestContext context) {
         this.source = source;
         this.methodInfo = methodInfo;
         this.context = context;

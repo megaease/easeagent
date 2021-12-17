@@ -20,7 +20,7 @@ package easeagent.plugin.spring.gateway.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
@@ -44,13 +44,13 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
     public void doAfter(MethodInfo methodInfo, Context context) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[1];
         HttpHeaders retHttpHeaders = (HttpHeaders) methodInfo.getRetValue();
-        ProgressContext pCtx = exchange.getAttribute(GatewayCons.SPAN_KEY);
+        RequestContext pCtx = exchange.getAttribute(GatewayCons.SPAN_KEY);
         if (pCtx == null) {
             return;
         }
         FluxHttpServerRequest request = new HeaderFilterRequest(exchange.getRequest());
 
-        ProgressContext pnCtx = pCtx.getContext().nextProgress(request);
+        RequestContext pnCtx = pCtx.getContext().clientRequest(request);
         pnCtx.span().start();
         exchange.getAttributes().put(GatewayCons.CHILD_SPAN_KEY, pnCtx);
         Map<String, String> map = getHeadersFromExchange(exchange);
@@ -60,7 +60,7 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
         methodInfo.setRetValue(httpHeaders);
 
         Consumer<ServerWebExchange> consumer = serverWebExchange -> {
-            ProgressContext p = serverWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
+            RequestContext p = serverWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
             if (p == null) {
                 return;
             }

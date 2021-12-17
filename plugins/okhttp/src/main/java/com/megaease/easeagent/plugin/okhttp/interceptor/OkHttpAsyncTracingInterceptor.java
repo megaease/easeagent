@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.okhttp.interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
@@ -45,55 +45,55 @@ public class OkHttpAsyncTracingInterceptor implements NonReentrantInterceptor {
         }
         Request.Builder requestBuilder = originalRequest.newBuilder();
         InternalRequest request = new InternalRequest(originalRequest, requestBuilder);
-        ProgressContext progressContext = context.nextProgress(request);
-        HttpUtils.handleReceive(progressContext.span().start(), request);
-        context.put(OkHttpAsyncTracingInterceptor.class, progressContext);
+        RequestContext requestContext = context.clientRequest(request);
+        HttpUtils.handleReceive(requestContext.span().start(), request);
+        context.put(OkHttpAsyncTracingInterceptor.class, requestContext);
         Callback callback = (Callback) methodInfo.getArgs()[0];
-        InternalCallback internalCallback = new InternalCallback(callback, request.method(), progressContext);
+        InternalCallback internalCallback = new InternalCallback(callback, request.method(), requestContext);
         methodInfo.changeArg(0, internalCallback);
         AgentFieldReflectAccessor.setFieldValue(realCall, "originalRequest", requestBuilder.build());
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        ProgressContext progressContext = context.remove(OkHttpAsyncTracingInterceptor.class);
-        if (progressContext == null) {
+        RequestContext requestContext = context.remove(OkHttpAsyncTracingInterceptor.class);
+        if (requestContext == null) {
             return;
         }
-        try (Scope scope = progressContext.scope()) {
+        try (Scope scope = requestContext.scope()) {
             if (methodInfo.isSuccess()) {
                 return;
             }
-            progressContext.span().error(methodInfo.getThrowable()).finish();
+            requestContext.span().error(methodInfo.getThrowable()).finish();
         }
     }
 
     public static class InternalCallback implements Callback {
         private final Callback delegate;
         private final String method;
-        private final ProgressContext progressContext;
+        private final RequestContext requestContext;
 
-        public InternalCallback(Callback delegate, String method, ProgressContext progressContext) {
+        public InternalCallback(Callback delegate, String method, RequestContext requestContext) {
             this.delegate = delegate;
             this.method = method;
-            this.progressContext = progressContext;
+            this.requestContext = requestContext;
         }
 
         @Override
         public void onFailure(@NotNull Call call, @NotNull IOException e) {
             this.delegate.onFailure(call, e);
-            if (this.progressContext != null) {
-                this.progressContext.span().abandon();
+            if (this.requestContext != null) {
+                this.requestContext.span().abandon();
             }
         }
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
             this.delegate.onResponse(call, response);
-            if (this.progressContext != null) {
+            if (this.requestContext != null) {
                 InternalResponse internalResponse = new InternalResponse(null, method, response);
-                HttpUtils.save(progressContext.span(), internalResponse);
-                progressContext.finish(internalResponse);
+                HttpUtils.save(requestContext.span(), internalResponse);
+                requestContext.finish(internalResponse);
             }
         }
     }

@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.springweb.WebClientPlugin;
@@ -52,15 +52,15 @@ public class WebClientFilterTracingInterceptor implements NonReentrantIntercepto
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         HttpRequest request = getRequest(methodInfo);
-        ProgressContext progressContext = context.nextProgress(request);
-        Span span = progressContext.span();
+        RequestContext requestContext = context.clientRequest(request);
+        Span span = requestContext.span();
         HttpUtils.handleReceive(span.start(), request);
-        context.put(getProgressKey(), progressContext);
+        context.put(getProgressKey(), requestContext);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        ProgressContext pCtx = context.get(getProgressKey());
+        RequestContext pCtx = context.get(getProgressKey());
 
         @SuppressWarnings("unchecked")
         Mono<ClientResponse> mono = (Mono<ClientResponse>) methodInfo.getRetValue();

@@ -102,7 +102,7 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
         String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
         MessageProperties messageProperties = message.getMessageProperties();
         RabbitConsumerRequest request = new RabbitConsumerRequest(message);
-        // ProgressContext progressContext = context.importProgress(request);
+        // RequestContext progressContext = context.serverReceive(request);
         // TraceContextOrSamplingFlags samplingFlags = this.extractor.extract(request);
         // Span span = Tracing.currentTracer().nextSpan(samplingFlags);
         Span span = context.consumerSpan(request);

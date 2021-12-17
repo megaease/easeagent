@@ -17,16 +17,14 @@
 
 package com.megaease.easeagent.plugin.api.trace;
 
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
-
-import java.util.Set;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 
 /**
  * Interface Response type used for parsing and sampling.
  * Used when multi-process collaboration is needed, information is extracted from the response and recorded in the {@link Span#tag(String, String)}
  * Usually used to support "ease mesh".
  *
- * @see ProgressContext#finish(Response)
+ * @see RequestContext#finish(Response)
  */
 public interface Response extends Getter {
 

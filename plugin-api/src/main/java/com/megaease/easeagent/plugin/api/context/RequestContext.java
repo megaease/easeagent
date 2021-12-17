@@ -28,9 +28,9 @@ import java.util.Map;
 /**
  * A cross-process data context, including tracing and Forwarded Headers
  */
-public interface ProgressContext extends Setter {
+public interface RequestContext extends Setter {
     /**
-     * When true, do nothing and nothing is reported . However, this ProgressContext should
+     * When true, do nothing and nothing is reported . However, this RequestContext should
      * still be injected into outgoing requests. Use this flag to avoid performing expensive
      * computation.
      */
@@ -60,7 +60,7 @@ public interface ProgressContext extends Setter {
     Map<String, String> getHeaders();
 
     /**
-     * Convert ProgressContext into AsyncContext and return
+     * Convert RequestContext into AsyncContext and return
      *
      * @return {@link AsyncContext} for async
      */

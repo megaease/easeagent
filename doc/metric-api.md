@@ -16,7 +16,9 @@ These interfaces are related to business.
 ![image](./images/Metric-Class-UML.png)
 
 
-### 1. [com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricValueFetcher.java)
+### 1. MetricValueFetcher
+
+[com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricValueFetcher.java)
 
 Metric has different types, and each type can calculate different data.
 
@@ -47,7 +49,9 @@ public enum MetricValueFetcher {
 }
 ```
 
-### 2. [com.megaease.easeagent.plugin.api.metric.name.MetricField](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricField.java)
+### 2. MetricField
+
+[com.megaease.easeagent.plugin.api.metric.name.MetricField](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricField.java)
 
 Different types will use different names depending on the business.
 
@@ -143,7 +147,9 @@ public enum MetricField {
 }
 ```
 
-### 3. [com.megaease.easeagent.plugin.api.metric.name.NameFactory](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/NameFactory.java)
+### 3. NameFactory
+
+[com.megaease.easeagent.plugin.api.metric.name.NameFactory](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/NameFactory.java)
 
 According to the value type and naming combination, we standardize a NameFactory.
 
@@ -370,7 +376,7 @@ So EaseAgent has its own API, although the implementation scheme currently used 
 [com.megaease.easeagent.plugin.api.metric.Timer](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/Timer.java)
 
 
-### 6. customize
+### 6. Customize
 
 When you are sure that you want to implement your own metric, then you only need a metric output class, and finally use this output class to output to Kafka or backend. 
 
@@ -387,6 +393,7 @@ The obtained Reporter is a singleton, and the key of the singleton is `namespace
 Its output configuration complies with metric configuration rules: [metric config](user-manual.md#metric)
 
 #### Example:
+
 ```java
 public class MD5ReportConsumer {
     private final Config config;

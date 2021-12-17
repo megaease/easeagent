@@ -19,19 +19,19 @@ package com.megaease.easeagent.plugin.api.trace;
 
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 
 import java.util.List;
 
 /**
- * Subtype of {@link Tracing} which can exportAsync,importAsync,nextProgress and importProgress.
+ * Subtype of {@link Tracing} which can exportAsync,importAsync,clientRequest and serverReceive.
  *
  * <p>This type can be extended so that the object graph can be built differently or overridden,
  * for example via zipkin or when mocking.
  */
 public interface ITracing extends Tracing {
     /**
-     * Export a {@link AsyncContext} for asynchronous program processing
+     * Export a {@link AsyncContext} for async
      * It will only export the information about the current Span.
      * If you need AsyncContext, generate result use {@link Context#exportAsync()}.
      *
@@ -41,7 +41,7 @@ public interface ITracing extends Tracing {
     AsyncContext exportAsync();
 
     /**
-     * Import a {@link AsyncContext} for asynchronous program processing
+     * Import a {@link AsyncContext} for async
      * It will only import the information about the async TraceContext.
      * If you need import AsyncContext and get Scope, generate result use {@link Context#importAsync(AsyncContext)}.
      *
@@ -53,34 +53,34 @@ public interface ITracing extends Tracing {
 
 
     /**
-     * Create a ProgressContext for Cross-process Trace link
+     * Create a RequestContext for Cross-server Trace link
      * <p>
      * It just only pass multiple key:value values required by Trace through
      * {@link Request#setHeader(String, String)}, And set the Span's kind, name and
      * cached scope through {@link Request#kind()}, {@link Request#name()} and {@link Request#cacheScope()}.
-     * If you need Cross-process and get ProgressContext, generate result use {@link Context#nextProgress(Request)}.
+     * If you need Cross-process and get RequestContext, generate result use {@link Context#clientRequest(Request)}.
      *
      * @param request {@link Request}
-     * @return {@link ProgressContext}
-     * @see Context#nextProgress(Request)
+     * @return {@link RequestContext}
+     * @see Context#clientRequest(Request)
      */
-    ProgressContext nextProgress(Request request);
+    RequestContext nextServer(Request request);
 
     /**
-     * Obtain key:value from the request passed by a parent program and create a ProgressContext
+     * Obtain key:value from the request passed by a parent server and create a RequestContext
      * <p>
      * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
      * and {@link Request#cacheScope()}.
      * <p>
      * It just only obtain the key:value required by Trace from the {@link Request#header(String)},
-     * If you need and get ProgressContext, generate result use {@link Context#importProgress(Request)} }.
+     * If you need and get RequestContext, generate result use {@link Context#serverReceive(Request)} }.
      * <p>
      *
      * @param request {@link Request}
-     * @return {@link ProgressContext}
-     * @see Context#importProgress(Request)
+     * @return {@link RequestContext}
+     * @see Context#serverReceive(Request)
      */
-    ProgressContext importProgress(Request request);
+    RequestContext serverImport(Request request);
 
     /**
      * @return the keys necessary for Span

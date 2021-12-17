@@ -21,17 +21,16 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
-public class ProgressContextImpl implements ProgressContext {
+public class RequestContextImpl implements RequestContext {
     private final Tracing tracing;
     private final brave.Span braveSpan;
     private final Span span;
@@ -39,7 +38,7 @@ public class ProgressContextImpl implements ProgressContext {
     private final AsyncRequest asyncRequest;
     private final Supplier<InitializeContext> supplier;
 
-    public ProgressContextImpl(Tracing tracing, brave.Span braveSpan, Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
+    public RequestContextImpl(Tracing tracing, brave.Span braveSpan, Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
         this.tracing = tracing;
         this.braveSpan = braveSpan;
         this.span = span;

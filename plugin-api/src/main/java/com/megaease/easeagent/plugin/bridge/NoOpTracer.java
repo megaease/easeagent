@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
@@ -208,12 +208,12 @@ public class NoOpTracer {
         }
 
         @Override
-        public ProgressContext nextProgress(Request request) {
+        public RequestContext nextServer(Request request) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
 
         @Override
-        public ProgressContext importProgress(Request request) {
+        public RequestContext serverImport(Request request) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
 

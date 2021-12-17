@@ -25,7 +25,7 @@ import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
@@ -171,12 +171,12 @@ public class TracingImpl implements ITracing {
     }
 
     @Override
-    public ProgressContext nextProgress(Request request) {
+    public RequestContext nextServer(Request request) {
         brave.Span span = nextBraveSpan(defaultExtractor, request);
         AsyncRequest asyncRequest = new AsyncRequest(request);
         clientInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new RequestContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     private brave.Span nextBraveSpan(TraceContext.Extractor<Request> extractor, Request request) {
@@ -199,7 +199,7 @@ public class TracingImpl implements ITracing {
     }
 
     @Override
-    public ProgressContext importProgress(Request request) {
+    public RequestContext serverImport(Request request) {
         TraceContextOrSamplingFlags extracted = defaultExtractor.extract(request);
         brave.Span span = extracted.context() != null
             ? tracer().joinSpan(extracted.context())
@@ -211,7 +211,7 @@ public class TracingImpl implements ITracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new ProgressContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new RequestContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     @Override

@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.enums.Order;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
@@ -46,7 +46,7 @@ public class GatewayServerTracingInterceptor implements Interceptor {
     public void before(MethodInfo methodInfo, Context context) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
-        ProgressContext pCtx = context.nextProgress(httpServerRequest);
+        RequestContext pCtx = context.clientRequest(httpServerRequest);
         HttpUtils.handleReceive(pCtx.span(), httpServerRequest);
         context.put(SPAN_CONTEXT_KEY, pCtx);
         context.put(FluxHttpServerRequest.class, httpServerRequest);
@@ -56,7 +56,7 @@ public class GatewayServerTracingInterceptor implements Interceptor {
     @Override
     @SuppressWarnings("unchecked")
     public void after(MethodInfo methodInfo, Context context) {
-        ProgressContext pCtx = context.get(SPAN_CONTEXT_KEY);
+        RequestContext pCtx = context.get(SPAN_CONTEXT_KEY);
         if (pCtx == null) {
             return;
         }
@@ -73,7 +73,7 @@ public class GatewayServerTracingInterceptor implements Interceptor {
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
         ctx.importToCurrent();
-        ProgressContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
+        RequestContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
         if (consumer != null) {

@@ -10,27 +10,28 @@ These interfaces are related to the context, so we put all the newly defined int
 
 According to the information transmission method, the Tracing interface is divided into four types:
 
-1. Async: Thread asynchronous tracing interface
+1. Cross-thread Tracing: async
 
-    ![image](./images/AsyncContext-UML.png)
+    ![image](images/Cross-thread-tracing-UML.png)
 
-2. Progress: Tracing interface of the process
+2. Cross-server Tracing: Server And Client
 
-    ![image](./images/ProgressContext-UML.png)
+    ![image](images/Cross-server-tracing-UML.png)
 
-3. Data Queue: Tracing interface of data queue
+3. Message Tracing: Producer and Consumer
 
-    ![image](./images/DataQueue-UML.png)
+    ![image](images/MessageTracing-UML.png)
 
-4. Small Tracing
+4. Span
 
-    ![image](./images/SmallTracing-UML.png)
+    ![image](images/Span-tracing-UML.png)
+
 
 [com.megaease.easeagent.plugin.api.Context](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/Context.java)
 
 ```java
 interface Context{
-    //---------------------------------- 1. Async ------------------------------------------
+    //---------------------------------- 1. Cross-thread ------------------------------------------
     /**
      * Export a {@link AsyncContext} for asynchronous program processing
      * It will copy all the key:value in the current Context
@@ -64,48 +65,50 @@ interface Context{
     boolean isWrapped(Runnable task);
 
 
-    //----------------------------------2. Progress ------------------------------------------
+    //----------------------------------2. Cross-server ------------------------------------------
     /**
-     * Create a ProgressContext for Cross-process Trace link
+     * Create a RequestContext for the next Server
      * It will pass multiple key:value values required by Trace and EaseAgent through
      * {@link Request#setHeader(String, String)}, And set the Span's kind, name and
      * cached scope through {@link Request#kind()}, {@link Request#name()} and {@link Request#cacheScope()}.
      * <p>
-     * When you want to call the next program, you can pass the necessary key:value to the next program
-     * by implementing {@link Request#setHeader(String, String)}, or you can get the {@link ProgressContext} of return,
-     * call {@link ProgressContext#getHeaders()} to get it and pass it on.
+     * When you want to call the next Server, you can pass the necessary key:value to the next Server
+     * by implementing {@link Request#setHeader(String, String)}, or you can get the {@link RequestContext} of return,
+     * call {@link RequestContext#getHeaders()} to get it and pass it on.
      * <p>
-     * It is usually called on the client when collaboration between multiple processes is required.
-     * {@code client.nextProgress(Request.setHeader<spanId,root-source...>) --> server }
+     * It is usually called on the client request when collaboration between multiple server is required.
+     * {@code client.clientRequest(Request.setHeader<spanId,root-source...>) --> server }
      * or
-     * {@code client.nextProgress(Request).getHeaders<spanId,root-source...> --> server }
+     * {@code client.clientRequest(Request).getHeaders<spanId,root-source...> --> server }
      *
      * @param request {@link Request}
-     * @return {@link ProgressContext}
+     * @return {@link RequestContext}
      */
-    ProgressContext nextProgress(Request request);
+    RequestContext clientRequest(Request request);
 
 
     /**
-     * Obtain key:value from the context passed by a parent program and create a ProgressContext
+     * Obtain key:value from the request passed by a parent Server and create a RequestContext
      * <p>
      * It will not only obtain the key:value required by Trace from the {@link Request#header(String)},
      * but also other necessary key:value of EaseAgent, such as the key configured in the configuration file:
      * {@link ProgressFields#EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG}
      * <p>
+     * If there is no Tracing Header, it will create a Root Span
+     * <p>
      * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
      * and {@link Request#cacheScope()}.
      * <p>
-     * It is usually called on the server side when collaboration between multiple processes is required.
-     * {@code client --> server.importProgress(Request<spanId,root-source...>) }
+     * It is usually called on the server receives a request when collaboration between multiple server is required.
+     * {@code client --> server.serverReceive(Request<spanId,root-source...>) }
      *
      * @param request {@link Request}
-     * @return {@link ProgressContext}
+     * @return {@link RequestContext}
      */
-    ProgressContext importProgress(Request request);
+    RequestContext serverReceive(Request request);
 
 
-    //---------------------------------- 3. Data Queue ------------------------------------------
+    //---------------------------------- 3. Message Tracing ------------------------------------------
     /**
      * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rabbitMq consumer
      * <p>
@@ -236,14 +239,22 @@ public interface AsyncContext {
 }
 ```
 
-[com.megaease.easeagent.plugin.api.context.ProgressContext](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/context/ProgressContext.java)
+[com.megaease.easeagent.plugin.api.context.RequestContext](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/context/RequestContext.java)
 ```java
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.trace.Response;
+import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.api.trace.Setter;
+import com.megaease.easeagent.plugin.api.trace.Span;
+
+import java.util.Map;
+
 /**
  * A cross-process data context, including tracing and Forwarded Headers
  */
-public interface ProgressContext extends Setter {
+public interface RequestContext extends Setter {
     /**
-     * When true, do nothing and nothing is reported . However, this ProgressContext should
+     * When true, do nothing and nothing is reported . However, this RequestContext should
      * still be injected into outgoing requests. Use this flag to avoid performing expensive
      * computation.
      */
@@ -273,7 +284,7 @@ public interface ProgressContext extends Setter {
     Map<String, String> getHeaders();
 
     /**
-     * Convert ProgressContext into AsyncContext and return
+     * Convert RequestContext into AsyncContext and return
      *
      * @return {@link AsyncContext} for async
      */
@@ -291,6 +302,7 @@ public interface ProgressContext extends Setter {
      */
     void finish(Response response);
 }
+
 
 ```
 

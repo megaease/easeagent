@@ -33,7 +33,7 @@ import java.util.Map;
 public class ServletUtils {
     public static final Logger LOGGER = EaseAgent.getLogger(ServletUtils.class);
     public static final String START_TIME = ServletUtils.class.getName() + "$StartTime";
-    public static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".ProgressContext";
+    public static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".RequestContext";
     public static final String HANDLER_MAPPING_CLASS = "org.springframework.web.servlet.HandlerMapping";
     public static final String BEST_MATCHING_PATTERN_ATTRIBUTE;
 

@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.api;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 
 /**
@@ -243,9 +243,10 @@ public interface Context {
     }
 
 
-    //---------------------------------- 1. async ------------------------------------------
+    //---------------------------------- 1. Cross-thread ------------------------------------------
+
     /**
-     * Export a {@link AsyncContext} for asynchronous program processing
+     * Export a {@link AsyncContext} for async
      * It will copy all the key:value in the current Context
      *
      * @return {@link AsyncContext}
@@ -253,7 +254,7 @@ public interface Context {
     AsyncContext exportAsync();
 
     /**
-     * Import a {@link AsyncContext} for asynchronous program processing
+     * Import a {@link AsyncContext} for async
      * It will copy all the key: value to the current Context
      * <p>
      * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurrent()} proxy call
@@ -277,48 +278,52 @@ public interface Context {
     boolean isWrapped(Runnable task);
 
 
-    //----------------------------------2. progress ------------------------------------------
+    //----------------------------------2. Cross-server ------------------------------------------
+
     /**
-     * Create a ProgressContext for Cross-process Trace link
+     * Create a RequestContext for the next Server
      * It will pass multiple key:value values required by Trace and EaseAgent through
      * {@link Request#setHeader(String, String)}, And set the Span's kind, name and
      * cached scope through {@link Request#kind()}, {@link Request#name()} and {@link Request#cacheScope()}.
      * <p>
-     * When you want to call the next program, you can pass the necessary key:value to the next program
-     * by implementing {@link Request#setHeader(String, String)}, or you can get the {@link ProgressContext} of return,
-     * call {@link ProgressContext#getHeaders()} to get it and pass it on.
+     * When you want to call the next Server, you can pass the necessary key:value to the next Server
+     * by implementing {@link Request#setHeader(String, String)}, or you can get the {@link RequestContext} of return,
+     * call {@link RequestContext#getHeaders()} to get it and pass it on.
      * <p>
-     * It is usually called on the client when collaboration between multiple processes is required.
-     * {@code client.nextProgress(Request.setHeader<spanId,root-source...>) --> server }
+     * It is usually called on the client request when collaboration between multiple server is required.
+     * {@code client.clientRequest(Request.setHeader<spanId,root-source...>) --> server }
      * or
-     * {@code client.nextProgress(Request).getHeaders<spanId,root-source...> --> server }
+     * {@code client.clientRequest(Request).getHeaders<spanId,root-source...> --> server }
      *
      * @param request {@link Request}
-     * @return {@link ProgressContext}
+     * @return {@link RequestContext}
      */
-    ProgressContext nextProgress(Request request);
+    RequestContext clientRequest(Request request);
 
 
     /**
-     * Obtain key:value from the context passed by a parent program and create a ProgressContext
+     * Obtain key:value from the request passed by a parent Server and create a RequestContext
      * <p>
      * It will not only obtain the key:value required by Trace from the {@link Request#header(String)},
      * but also other necessary key:value of EaseAgent, such as the key configured in the configuration file:
      * {@link ProgressFields#EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG}
      * <p>
+     * If there is no Tracing Header, it will create a Root Span
+     * <p>
      * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
      * and {@link Request#cacheScope()}.
      * <p>
-     * It is usually called on the server side when collaboration between multiple processes is required.
-     * {@code client --> server.importProgress(Request<spanId,root-source...>) }
+     * It is usually called on the server receives a request when collaboration between multiple server is required.
+     * {@code client --> server.serverReceive(Request<spanId,root-source...>) }
      *
      * @param request {@link Request}
-     * @return {@link ProgressContext}
+     * @return {@link RequestContext}
      */
-    ProgressContext importProgress(Request request);
+    RequestContext serverReceive(Request request);
 
 
-    //---------------------------------- 3. data queue ------------------------------------------
+    //---------------------------------- 3. Message Tracing ------------------------------------------
+
     /**
      * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rabbitMq consumer
      * <p>
@@ -380,7 +385,8 @@ public interface Context {
     void producerInject(Span span, MessagingRequest request);
 
 
-    //---------------------------------- 4. small Tracing ------------------------------------------
+    //---------------------------------- 4. Span ------------------------------------------
+
     /**
      * Returns a new child span if there's a {@link Tracing#currentSpan()} or a new trace if there isn't.
      *

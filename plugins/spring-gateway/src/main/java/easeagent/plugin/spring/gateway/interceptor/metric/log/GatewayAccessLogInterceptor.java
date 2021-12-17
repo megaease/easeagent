@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
@@ -53,7 +53,7 @@ public class GatewayAccessLogInterceptor implements Interceptor {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         Long beginTime = ContextUtils.getBeginTime(context);
-        ProgressContext pCtx = exchange.getAttribute(GatewayCons.SPAN_KEY);
+        RequestContext pCtx = exchange.getAttribute(GatewayCons.SPAN_KEY);
         if (pCtx == null) {
             return;
         }

@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.springweb.reactor;
 
 import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.springweb.interceptor.tracing.WebClientFilterTracingInterceptor.WebClientResponse;
 import org.reactivestreams.Subscription;
@@ -34,16 +34,16 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
     private final CoreSubscriber<ClientResponse> actual;
     private final MethodInfo methodInfo;
     // private final Integer chain;
-    private final ProgressContext progressContext;
+    private final RequestContext requestContext;
     private final List<ClientResponse> results = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     public AgentCoreSubscriber(CoreSubscriber<? super ClientResponse> actual, MethodInfo methodInfo,
-                               ProgressContext context) {
+                               RequestContext context) {
         this.actual = (CoreSubscriber<ClientResponse>)actual;
         this.methodInfo = methodInfo;
         // this.chain = chain;
-        this.progressContext = context;
+        this.requestContext = context;
     }
 
     @Nonnull
@@ -84,10 +84,10 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
             if (results.size() > 0) {
                 ClientResponse resp = results.get(0);
                 webClientResponse = new WebClientResponse(null, resp);
-                this.progressContext.finish(webClientResponse);
+                this.requestContext.finish(webClientResponse);
             }
         } else {
-            Span span = progressContext.span();
+            Span span = requestContext.span();
             span.error(methodInfo.getThrowable());
             span.finish();
         }

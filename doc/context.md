@@ -14,6 +14,7 @@ In the case of cross-threading, from a request to the request thread resource op
 ![image](./images/SessionContext.png)
 
 ### Session-level Context features:
+
 1. The same session, data sharing between different plugins
 2. When the session has a cross-thread request, a "plugin" is required to ensure effective data transfer
 
@@ -37,7 +38,6 @@ package com.megaease.easeagent.plugin.api;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ProgressContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 
 /**
