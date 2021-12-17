@@ -12,7 +12,8 @@
     - [AdviceTo Annotation](#adviceto-annotation)
     - [Plugin Orchestration](#plugin-orchestration)
     - [Plugin Configuration](#plugin-configuration)
-- [Tracing API](#Tracing-API)
+- [Context](#Context)
+- [Tracing API](#Tracing-API) 
 - [Metric API](#Metric-API)
 - [Logging API](#logging-API)
 - [Configuration API](#Configuration-API)
@@ -391,6 +392,8 @@ The `function` is provided by `Interceptor` interface implemention's `getType()`
 
 This prefix `plugin.[domain].[namespace].[function]` is used to maintained configuration for this `Interceptor`, and in this `Interceptor` developer can get its configuration by the `getConfig()` method of the `Context` param.
 
+##  Context
+* [Context](context.md)
 
 ##  Tracing API
 * [Tracing API](tracing-api.md)
