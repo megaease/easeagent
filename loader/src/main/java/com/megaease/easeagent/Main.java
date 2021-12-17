@@ -229,6 +229,24 @@ public class Main {
                 throw e;
             }
         }
+
+        @Override
+        public URL findResource(String name) {
+            URL url = super.findResource(name);
+            if (url == null) {
+                for (WeakReference<ClassLoader> external : externals) {
+                    try {
+                        ClassLoader cl = external.get();
+                        url = cl.getResource(name);
+                        if (url != null) {
+                            return url;
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+            }
+            return url;
+        }
     }
 
     @SneakyThrows

@@ -29,10 +29,15 @@ public class OrMethodMatcher implements IMethodMatcher {
     public OrMethodMatcher(IMethodMatcher left, IMethodMatcher right) {
         this.left = left;
         this.right = right;
+
+        this.qualifier(left.getQualifier());
+        this.qualifier(right.getQualifier());
     }
 
     public IMethodMatcher qualifier(String q) {
-        this.qualifier = q;
+        if (this.qualifier.equals(DEFAULT_QUALIFIER)) {
+            this.qualifier = q;
+        }
         return this;
     }
 }

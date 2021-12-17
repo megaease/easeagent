@@ -65,6 +65,10 @@ public class MethodMatcher implements IMethodMatcher {
         this.overriddenFrom = overriddenFrom;
     }
 
+    public boolean isDefaultQualifier() {
+        return this.qualifier.equals(IMethodMatcher.DEFAULT_QUALIFIER);
+    }
+
     public static MethodMatcherBuilder builder() {
         return new MethodMatcherBuilder();
     }
@@ -79,7 +83,7 @@ public class MethodMatcher implements IMethodMatcher {
         private int notModifier;
 
         private IClassMatcher isOverriddenFrom;
-        private String qualifier = "default";
+        private String qualifier = IMethodMatcher.DEFAULT_QUALIFIER;
 
         private Operator operator = Operator.AND;
         private IMethodMatcher left;
@@ -214,6 +218,10 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcherBuilder qualifier(String qualifier) {
+            // each builder can only assigned a qualifier
+            if (!this.qualifier.equals(IMethodMatcher.DEFAULT_QUALIFIER)) {
+                throw new RuntimeException("Qualifier has already been assigned");
+            }
             this.qualifier = qualifier;
             return this;
         }
@@ -246,6 +254,10 @@ public class MethodMatcher implements IMethodMatcher {
             MethodMatcherBuilder builder = new MethodMatcherBuilder();
             builder.left = this.build();
             builder.operator = opt;
+
+            if (!builder.left.isDefaultQualifier()) {
+                builder.qualifier(builder.left.getQualifier());
+            }
             return builder;
         }
 

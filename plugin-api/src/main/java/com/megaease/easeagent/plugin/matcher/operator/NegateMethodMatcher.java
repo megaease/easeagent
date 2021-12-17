@@ -27,6 +27,7 @@ public class NegateMethodMatcher implements IMethodMatcher {
 
     public NegateMethodMatcher(IMethodMatcher matcher) {
         this.matcher = matcher;
+        this.qualifier(matcher.getQualifier());
     }
 
     public IMethodMatcher qualifier(String q) {

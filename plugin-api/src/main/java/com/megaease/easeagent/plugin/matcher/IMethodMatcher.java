@@ -42,6 +42,10 @@ public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
 
     String getQualifier();
 
+    default boolean isDefaultQualifier() {
+        return this.getQualifier().equals(DEFAULT_QUALIFIER);
+    }
+
     default Set<IMethodMatcher> toSet() {
         Set<IMethodMatcher> set = new HashSet<>();
         set.add(this);
