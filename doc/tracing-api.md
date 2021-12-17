@@ -11,9 +11,16 @@ These interfaces are related to the context, so we put all the newly defined int
 According to the information transmission method, the Tracing interface is divided into four types:
 
 1. Async: Thread asynchronous tracing interface
+    ![image](./images/AsyncContext-UML.png)
+
 2. Progress: Tracing interface of the process
+    ![image](./images/ProgressContext-UML.png)
+
 3. Data Queue: Tracing interface of data queue
+    ![image](./images/DataQueue-UML.png)
+
 4. Small Tracing
+    ![image](./images/SmallTracing-UML.png)
 
 [com.megaease.easeagent.plugin.api.Context](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/Context.java)
 ```java
@@ -134,7 +141,7 @@ interface Context{
      * @param request {@link MessagingRequest}
      * @return {@link Span}
      */
-    Span producerSpan(MessagingRequest request);
+        Span producerSpan(MessagingRequest request);
 
     /**
      * Inject Consumer's Span key:value and Forwarded Headers to Request {@link MessagingRequest#setHeader(String, String)}.
@@ -162,19 +169,6 @@ interface Context{
      * @return {@link Span}
      */
     Span nextSpan();
-
-    /**
-     * @return true if the key is necessary for EaseAgent
-     */
-    boolean isNecessaryKeys(String key);
-
-    /**
-     * Inject Forwarded Headers key:value to Setter {@link Setter#setHeader(String, String)}.
-     *
-     * @param setter key:value to
-     * @see Request#setHeader(String, String)
-     */
-    void injectForwardedHeaders(Setter setter);
 }
 ```
 

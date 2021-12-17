@@ -11,6 +11,11 @@ In order to be applicable to the business, we additionally encapsulate and defin
 These interfaces are related to business.
 
 
+![image](./images/Metric-SequenceDiagram-UML.png)
+
+![image](./images/Metric-Class-UML.png)
+
+
 ### 1. [com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricValueFetcher.java)
 
 Metric has different types, and each type can calculate different data.

@@ -251,9 +251,8 @@ header name config:
 plugin.integrability.serviceName.addServiceNameHead.propagate.head=X-Mesh-RPC-Service
 ```
 
-It is worth noting that: `It is worth noting that this plugin strongly relies on spring cloud`
+The current way to obtain ServcieName only supports service discovery using Spring Cloud.
 
-If you have other needs, you can customize the plugin yourself.
 
 
 ## Logging

@@ -47,12 +47,12 @@ public class ServerMetric extends ServiceMetric {
     }
 
     public void collectMetric(String key, int statusCode, Throwable throwable, long startMillis, long endMillis) {
-        Timer timer = metricRegistry.timer(nameFactory.timerName(key, MetricSubType.DEFAULT));
+        Timer timer = timer(key, MetricSubType.DEFAULT);
         timer.update(Duration.ofMillis(endMillis - startMillis));
-        final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
-        final Meter meter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.DEFAULT));
-        Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
-        Counter counter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT));
+        final Meter errorMeter = meter(key, MetricSubType.ERROR);
+        final Meter meter = meter(key, MetricSubType.DEFAULT);
+        Counter errorCounter = counter(key, MetricSubType.ERROR);
+        Counter counter = counter(key, MetricSubType.DEFAULT);
         boolean hasException = throwable != null;
         if (statusCode >= 400 || hasException) {
             errorMeter.mark();
@@ -61,7 +61,7 @@ public class ServerMetric extends ServiceMetric {
         counter.inc();
         meter.mark();
 
-        metricRegistry.gauge(nameFactory.gaugeName(key, MetricSubType.DEFAULT), () -> () -> {
+        gauge(key, MetricSubType.DEFAULT, () -> () -> {
             BigDecimal m1ErrorPercent = BigDecimal.ZERO;
             BigDecimal m5ErrorPercent = BigDecimal.ZERO;
             BigDecimal m15ErrorPercent = BigDecimal.ZERO;
