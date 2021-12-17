@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 /**
  * Priority definition, lower value with higher priority
- * eg. higher priority interceptor run enter before lower ones
+ * Higher priority interceptor run enter before lower ones
  * but exit after lower priority interceptors.
  */
 public enum Order {
