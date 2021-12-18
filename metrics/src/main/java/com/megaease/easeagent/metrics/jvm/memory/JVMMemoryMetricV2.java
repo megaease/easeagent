@@ -8,6 +8,7 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricName;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.async.ScheduleHelper;
 import com.megaease.easeagent.plugin.async.ScheduleRunner;
 
 import javax.annotation.Nonnull;
@@ -44,6 +45,7 @@ public class JVMMemoryMetricV2 extends ServiceMetric implements ScheduleRunner {
         Tags tags = new Tags("application", "jvm-memory", "resource");
 
         JVMMemoryMetricV2 v2 = ServiceMetricRegistry.getOrCreate(config, tags, SUPPLIER);
+        ScheduleHelper.DEFAULT.nonStopExecute(10, 10, v2::doJob);
 
         return v2;
     }

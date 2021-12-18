@@ -233,6 +233,19 @@ public class Bootstrap {
     private static Iterable<QualifiedBean> beans(Class<?> provider, Configs conf, AgentReport agentReport) {
         final ImmutableList.Builder<QualifiedBean> builder = ImmutableList.builder();
         final Object instance = newInstance(provider, conf, agentReport);
+
+        if (instance instanceof IProvider) {
+            ((IProvider) instance).afterPropertiesSet();
+        }
+
+        if (instance instanceof TracingProvider) {
+            TracingProvider tracingProvider = (TracingProvider) instance;
+            contextManager.setTracing(tracingProvider);
+        }
+
+        if (instance instanceof MetricProvider) {
+            contextManager.setMetric((MetricProvider) instance);
+        }
         for (Method method : provider.getMethods()) {
             final Injection.Bean bean = method.getAnnotation(Injection.Bean.class);
             if (bean == null) continue;
@@ -246,16 +259,7 @@ public class Bootstrap {
                 throw new IllegalStateException(e);
             }
         }
-        if (instance instanceof IProvider) {
-            ((IProvider) instance).afterPropertiesSet();
-        }
-        if (instance instanceof TracingProvider) {
-            TracingProvider tracingProvider = (TracingProvider) instance;
-            contextManager.setTracing(tracingProvider);
-        }
-        if (instance instanceof MetricProvider) {
-            contextManager.setMetric((MetricProvider) instance);
-        }
+
         return builder.build();
     }
 
