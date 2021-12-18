@@ -25,12 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class AutoRefreshRegistry {
-    private static final AutoRefreshConfigSupplier<AutoRefreshConfigImpl> AUTO_REFRESH_CONFIG_IMPL_SUPPLIER = new AutoRefreshConfigSupplier<AutoRefreshConfigImpl>() {
+    private static final AutoRefreshConfigSupplier<AutoRefreshConfigImpl> AUTO_REFRESH_CONFIG_IMPL_SUPPLIER
+        = new AutoRefreshConfigSupplier<AutoRefreshConfigImpl>() {
         @Override
         public AutoRefreshConfigImpl newInstance() {
             return new AutoRefreshConfigImpl();
         }
     };
+
     private static final ConcurrentMap<Key, AutoRefreshConfig> configs = new ConcurrentHashMap<>();
 
     /**
@@ -58,7 +60,8 @@ public class AutoRefreshRegistry {
      * @return the type of AutoRefreshConfig by the Supplier
      */
     @SuppressWarnings("unchecked")
-    public static <C extends AutoRefreshConfig> C getOrCreate(String domain, String namespace, String id, AutoRefreshConfigSupplier<C> supplier) {
+    public static <C extends AutoRefreshConfig> C getOrCreate(String domain, String namespace,
+                                                              String id, AutoRefreshConfigSupplier<C> supplier) {
         Key key = new Key(domain, namespace, id, supplier.getType());
         AutoRefreshConfig autoRefreshConfig = configs.get(key);
         if (autoRefreshConfig != null) {

@@ -22,8 +22,6 @@ import brave.propagation.ThreadLocalCurrentTraceContext;
 import brave.sampler.CountingSampler;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.common.AdditionalAttributes;
-import com.megaease.easeagent.common.config.SwitchUtil;
-import com.megaease.easeagent.common.jdbc.MD5DictionaryItem;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
@@ -34,7 +32,6 @@ import com.megaease.easeagent.core.TracingProvider;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
 import com.megaease.easeagent.core.interceptor.ChainBuilderFactory;
-import com.megaease.easeagent.core.interceptor.DefaultAgentInterceptorChain;
 import com.megaease.easeagent.httpserver.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
@@ -44,31 +41,21 @@ import com.megaease.easeagent.metrics.PrometheusAgentHttpHandler;
 import com.megaease.easeagent.metrics.config.MetricsCollectorConfig;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetric;
+import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetricV2;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetric;
-import com.megaease.easeagent.metrics.servlet.GatewayMetricsInterceptor;
+import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetricV2;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
-import com.megaease.easeagent.plugin.utils.common.HostAddress;
-import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.metric.MetricItem;
 import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
-import com.megaease.easeagent.sniffer.jdbc.interceptor.HikariSetPropertyInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqSetPropertyInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitPropertiesSetPropertyInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
-import com.megaease.easeagent.sniffer.webclient.WebClientBuildInterceptor;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
 import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
-import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayHttpHeadersInterceptor;
-import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayInitGlobalFilterInterceptor;
-import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayLogInterceptor;
-import com.megaease.easeagent.zipkin.http.reactive.SpringGatewayServerTracingInterceptor;
-import com.megaease.easeagent.zipkin.http.webclient.WebClientTracingInterceptor;
 import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
 import org.apache.commons.lang3.StringUtils;
@@ -81,24 +68,8 @@ import zipkin2.reporter.urlconnection.URLConnectionSender;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.KEY_METRICS_MD5_DICTIONARY;
-
-// import com.megaease.easeagent.metrics.rabbitmq.*;
-/*
-import com.megaease.easeagent.sniffer.rabbitmq.spring.RabbitMqMessageListenerOnMessageInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelConsumeInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqChannelPublishInterceptor;
-import com.megaease.easeagent.sniffer.rabbitmq.v5.interceptor.RabbitMqConsumerHandleDeliveryInterceptor;
-*/
-/*
-import com.megaease.easeagent.zipkin.rabbitmq.spring.RabbitMqMessageListenerTracingInterceptor;
-import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqConsumerTracingInterceptor;
-import com.megaease.easeagent.zipkin.rabbitmq.v5.RabbitMqProducerTracingInterceptor;
-*/
 
 public abstract class Provider implements AgentReportAware, ConfigAware, IProvider, AgentHttpHandlerProvider, TracingProvider, MetricProvider {
 
@@ -144,10 +115,12 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         ThreadLocalCurrentTraceContext traceContext = ThreadLocalCurrentTraceContext.newBuilder()
             .addScopeDecorator(AgentMDCScopeDecorator.get())
             .build();
+
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
         String target = config.getString("observability.tracings.output.target");
         String zipkinUrl = config.getString("observability.tracings.output.target.zipkinUrl");
         Boolean compressionEnabled = config.getBoolean("observability.tracings.output.target.zipkin.compressionEnabled");
+
         boolean toZipkin = false;
         if (target.equalsIgnoreCase("zipkin") && StringUtils.isNotEmpty(zipkinUrl)) {
             toZipkin = true;
@@ -159,7 +132,9 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         }
         Reporter<Span> reporter;
         if (toZipkin) {
-            reporter = AsyncReporter.create(URLConnectionSender.newBuilder().endpoint(zipkinUrl).compressionEnabled(compressionEnabled == null ? true : compressionEnabled).build());
+            reporter = AsyncReporter.create(URLConnectionSender.newBuilder()
+                .endpoint(zipkinUrl)
+                .compressionEnabled(compressionEnabled == null ? true : compressionEnabled).build());
         } else {
             reporter = span -> agentReport.report(span);
         }
@@ -220,6 +195,16 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     }
 
     @Injection.Bean
+    public JVMGCMetricV2 jvmGcMetricV2() {
+        return JVMGCMetricV2.getMetric();
+    }
+
+    @Injection.Bean
+    public JVMMemoryMetricV2 jvmMemoryMetricV2() {
+        return JVMMemoryMetricV2.getMetric();
+    }
+
+    // @Injection.Bean
     public JVMMemoryMetric jvmMemoryMetric() {
         MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
         JVMMemoryMetric jvmMemoryMetric = new JVMMemoryMetric(metricRegistry, config);
@@ -230,7 +215,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         return jvmMemoryMetric;
     }
 
-    @Injection.Bean
+    // @Injection.Bean
     public JVMGCMetric jvmgcMetric() {
         MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
         JVMGCMetric jvmgcMetric = new JVMGCMetric(metricRegistry, config);
@@ -241,170 +226,14 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         return jvmgcMetric;
     }
 
-    @Injection.Bean
-    public AgentInterceptorChainInvoker agentInterceptorChainInvoker() {
-        return chainInvoker;
-    }
-
-    @Injection.Bean("supplier4HikariSetJdbcUrl")
-    public Supplier<AgentInterceptorChain.Builder> supplier4HikariSetJdbcUrl() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new HikariSetPropertyInterceptor());
-
-    }
-
-    @Injection.Bean("supplier4Gateway")
-    public Supplier<AgentInterceptorChain.Builder> supplier4Gateway() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(this.config, ConfigConst.Observability.KEY_METRICS_REQUEST);
-            GatewayMetricsInterceptor gatewayMetricsInterceptor = new GatewayMetricsInterceptor(metricRegistry, config);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                gatewayMetricsInterceptor.newConverter(this.additionalAttributes),
-                s -> this.agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_REQUEST, s))).run();
-            AgentInterceptorChain.Builder headersFilterChainBuilder = ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(gatewayMetricsInterceptor)
-                .addInterceptor(new SpringGatewayServerTracingInterceptor(tracing, config))
-                .addInterceptor(new SpringGatewayLogInterceptor(config, s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_ACCESS, s))));
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new SpringGatewayInitGlobalFilterInterceptor(headersFilterChainBuilder, chainInvoker));
-        };
-    }
-
-    @Injection.Bean("supplier4GatewayHeaders")
-    public Supplier<AgentInterceptorChain.Builder> supplier4GatewayHeaders() {
-        return () -> new DefaultAgentInterceptorChain.Builder()
-            .addInterceptor(new SpringGatewayHttpHeadersInterceptor(this.tracing));
-    }
-
-
-    /*
-    @Injection.Bean("supplier4RabbitMqBasicPublish")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicPublish() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            RabbitMqProducerMetric metric = new RabbitMqProducerMetric(metricRegistry);
-            RabbitMqProducerMetricInterceptor metricInterceptor = new RabbitMqProducerMetricInterceptor(metric, config);
-
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_RABBIT);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                metric.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new RabbitMqChannelPublishInterceptor())
-                .addInterceptor(metricInterceptor)
-                .addInterceptor(new RabbitMqProducerTracingInterceptor(tracing, config))
-                ;
-        };
-    }
-
-    @Injection.Bean("supplier4RabbitMqBasicConsume")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqBasicConsume() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new RabbitMqChannelConsumeInterceptor());
-    }
-
-    @Injection.Bean("supplier4RabbitMqHandleDelivery")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqHandleDelivery() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
-            RabbitMqConsumerMetricInterceptor metricInterceptor = new RabbitMqConsumerMetricInterceptor(metric, config);
-
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_RABBIT);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                metric.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new RabbitMqConsumerHandleDeliveryInterceptor())
-                .addInterceptor(metricInterceptor)
-                .addInterceptor(new RabbitMqConsumerTracingInterceptor(tracing, config))
-                ;
-        };
-    }
-
-    @Injection.Bean("supplier4SpringRabbitMqMessageListenerOnMessage")
-    public Supplier<AgentInterceptorChain.Builder> supplier4SpringRabbitMqMessageListenerOnMessage() {
-        return () -> {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
-            RabbitMqConsumerMetric metric = new RabbitMqConsumerMetric(metricRegistry);
-
-            MetricsCollectorConfig collectorConfig = new MetricsCollectorConfig(config, ConfigConst.Observability.KEY_METRICS_RABBIT);
-            new AutoRefreshReporter(metricRegistry, collectorConfig,
-                metric.newConverter(additionalAttributes),
-                s -> agentReport.report(new MetricItem(ConfigConst.Observability.KEY_METRICS_RABBIT, s))).run();
-
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new RabbitMqMessageListenerOnMessageInterceptor())
-                .addInterceptor(new RabbitMqMessageListenerMetricInterceptor(metric, config))
-                .addInterceptor(new RabbitMqMessageListenerTracingInterceptor(tracing, config))
-                ;
-        };
-    }
-    */
-
-    @Injection.Bean("supplier4RabbitMqSetProperty")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitMqSetProperty() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new RabbitMqSetPropertyInterceptor());
-    }
-
-    @Injection.Bean("supplier4RabbitPropertiesSetProperty")
-    public Supplier<AgentInterceptorChain.Builder> supplier4RabbitPropertiesSetProperty() {
-        return () -> ChainBuilderFactory.DEFAULT.createBuilder()
-            .addInterceptor(new RabbitPropertiesSetPropertyInterceptor());
-    }
-
-    @Injection.Bean("supplier4WebClientBuild")
-    public Supplier<AgentInterceptorChain.Builder> supplier4WebClientBuild() {
-        return () -> {
-            AgentInterceptorChain.Builder chainBuilder = ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new WebClientTracingInterceptor(tracing, config));
-            return ChainBuilderFactory.DEFAULT.createBuilder()
-                .addInterceptor(new WebClientBuildInterceptor(chainBuilder, chainInvoker))
-                ;
-        };
-    }
-
     @Injection.Bean("supplier4OnApplicationEvent")
     public Supplier<AgentInterceptorChain.Builder> supplier4OnApplicationEvent() {
         return () -> ChainBuilderFactory.DEFAULT.createBuilder()
             .addInterceptor(new OnApplicationEventInterceptor());
     }
 
-    class Md5ReportConsumer implements Consumer<Map<String, String>> {
-        private final Config config;
-        private static final String ENABLE_KEY = "observability.metrics.md5Dictionary.enabled";
-
-        public Md5ReportConsumer(Config config) {
-            this.config = config;
-        }
-
-        @Override
-        public void accept(Map<String, String> map) {
-            if (!SwitchUtil.enableMetric(config, ENABLE_KEY)) {
-                return;
-            }
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                MD5DictionaryItem item = MD5DictionaryItem.builder()
-                    .timestamp(System.currentTimeMillis())
-                    .category("application")
-                    .hostName(HostAddress.localhost())
-                    .hostIpv4(HostAddress.getHostIpv4())
-                    .gid("")
-                    .system(config.getString("system"))
-                    .service(serviceName.getValue())
-                    .tags("")
-                    .type("md5-dictionary")
-                    .id("")
-                    .md5(entry.getKey())
-                    .sql(entry.getValue())
-                    .build();
-                String json = JsonUtil.toJson(item);
-                agentReport.report(new MetricItem(KEY_METRICS_MD5_DICTIONARY, json));
-            }
-        }
+    @Injection.Bean
+    public AgentInterceptorChainInvoker agentInterceptorChainInvoker() {
+        return chainInvoker;
     }
 }

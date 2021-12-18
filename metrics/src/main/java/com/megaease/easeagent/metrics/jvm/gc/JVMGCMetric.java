@@ -67,12 +67,12 @@ public class JVMGCMetric extends AbstractMetric {
     }
 
     public void collect() {
-        for (GarbageCollectorMXBean mbean : ManagementFactory.getGarbageCollectorMXBeans()) {
-            if (!(mbean instanceof NotificationEmitter)) {
+        for (GarbageCollectorMXBean mBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+            if (!(mBean instanceof NotificationEmitter)) {
                 continue;
             }
             NotificationListener listener = getListener();
-            NotificationEmitter notificationEmitter = (NotificationEmitter) mbean;
+            NotificationEmitter notificationEmitter = (NotificationEmitter) mBean;
             notificationEmitter.addNotificationListener(listener, null, null);
         }
     }

@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;

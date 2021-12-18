@@ -41,7 +41,7 @@ public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
 
     @Override
     public void init(Config config, String className, String methodName, String methodDescriptor) {
-        if (metric == null && config.enabled()) {
+        if (metric == null) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
                     metric = ServiceMetricRegistry.getOrCreate(config,

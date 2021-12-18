@@ -30,6 +30,7 @@ import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -67,7 +68,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @SuppressWarnings("unused")
 public class Bootstrap {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 
     private static final List<AgentHttpHandler> AGENT_HTTP_HANDLER_LIST_ON_INIT = new ArrayList<>();
@@ -89,10 +89,14 @@ public class Bootstrap {
     public static void start(String args, Instrumentation inst, Iterable<Class<?>> providers,
                              Iterable<Class<? extends Transformation>> transformations) throws Exception {
         long begin = System.nanoTime();
+
+        // add bootstrap classes
         Set<String> bootstrapClassSet = AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Injected class: {}", bootstrapClassSet);
         }
+
+        // initiate configuration
         final Configs conf = load(args);
         if (LOGGER.isDebugEnabled()) {
             final String display = conf.toPrettyDisplay();
@@ -100,8 +104,10 @@ public class Bootstrap {
         }
         registerMBeans(conf);
         contextManager = ContextManager.build(conf);
+
         EaseAgent.dispatcher = new BridgeDispatcher();
 
+        // inner httpserver
         Integer port = conf.getInt(AGENT_SERVER_PORT_KEY);
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
@@ -117,8 +123,11 @@ public class Bootstrap {
             agentHttpServer.startServer();
             LOGGER.info("start agent http server on port:{}", port);
         }
+
+        // redirection
         MiddlewareConfigProcessor.INSTANCE.init();
-        com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor.INSTANCE.init();
+
+        //
         AgentBuilder builder = getAgentBuilder(conf, false);
 
         // load plugins
@@ -126,8 +135,10 @@ public class Bootstrap {
 
         final AgentReport agentReport = AgentReport.create(conf);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
+
         long installBegin = System.currentTimeMillis();
         builder.installOn(inst);
+
         LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
         agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
@@ -172,11 +183,12 @@ public class Bootstrap {
     static void registerMBeans(ConfigManagerMXBean conf) throws Exception {
         long begin = System.currentTimeMillis();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName mxbeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
+        ObjectName mxBeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
         ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
         wrappedConfigManager = new WrappedConfigManager(customClassLoader, conf);
-        mbs.registerMBean(wrappedConfigManager, mxbeanName);
-        LOGGER.info("Register {} as MBean {}, use time: {}", conf.getClass().getName(), mxbeanName, (System.currentTimeMillis() - begin));
+        mbs.registerMBean(wrappedConfigManager, mxBeanName);
+        LOGGER.info("Register {} as MBean {}, use time: {}",
+            conf.getClass().getName(), mxBeanName, (System.currentTimeMillis() - begin));
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
@@ -301,8 +313,7 @@ public class Bootstrap {
     }
 
     public static class CanaryListUpdateAgentHttpHandler extends ConfigsUpdateAgentHttpHandler {
-        public static AtomicInteger lastCount = new AtomicInteger(0);
-
+        public final static AtomicInteger lastCount = new AtomicInteger(0);
 
         @Override
         public String getPath() {
@@ -310,6 +321,7 @@ public class Bootstrap {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public NanoHTTPD.Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
             LOGGER.info("call /config-global-transmission. configs: {}", map);
             synchronized (lastCount) {
@@ -413,32 +425,7 @@ public class Bootstrap {
         }
     }
 
-//    public static class MiddlewareConfigChangeAgentHttpHandler extends AgentHttpHandler {
-//        @Override
-//        public String getPath() {
-//            return "/middleware-config";
-//        }
-//
-//        @Override
-//        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-//            String body = this.buildRequestBody(session);
-//            if (StringUtils.isEmpty(body)) {
-//                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
-//            }
-//            Map<String, Object> map = JsonUtil.toMap(body);
-//            if (map == null) {
-//                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
-//            }
-//            MiddlewareConfigProcessor.INSTANCE.addAll(map);
-//            countDownLatch.countDown();
-//            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
-//        }
-//
-//    }
-
-
     public static abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
-
         public abstract NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version);
 
         @SneakyThrows

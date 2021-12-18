@@ -35,9 +35,9 @@ public class MD5ReportConsumer implements Consumer<Map<String, String>> {
     private Reporter reporter;
 
     public MD5ReportConsumer() {
-        this.config = AutoRefreshRegistry.getOrCreate(ConfigConst.OBSERVABILITY, ConfigConst.Namespace.MD5_DICTIONARY, ConfigConst.PluginID.METRIC);
+        this.config = AutoRefreshRegistry.getOrCreate(ConfigConst.OBSERVABILITY,
+            ConfigConst.Namespace.MD5_DICTIONARY, ConfigConst.PluginID.METRIC);
         this.reporter = EaseAgent.metricReporter(config);
-
     }
 
     @Override
@@ -64,5 +64,4 @@ public class MD5ReportConsumer implements Consumer<Map<String, String>> {
             this.reporter.report(json);
         }
     }
-
 }

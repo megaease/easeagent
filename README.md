@@ -10,7 +10,7 @@ An agent component for Java system.
   - [Download](#Download)
   - [Build From Source](#Build-From-Source)
 - [User Manual](#User-Manual)
-- [Development Guide](#Development-Guide)
+- [Development Guide](#Plugin-Development-Guide)
 - [Licenses](#Licenses)
 
 ## Overview
@@ -204,7 +204,7 @@ After visit more pages, open Prometheus manager [http://localhost:9090](http://l
 For more information, please refer to the [User Manual](./doc/user-manual.md).
 
 ## Plugin Development Guide
-Refer to [Plugin-Development-Guide](./doc/development-guide.md).
+Refer to [Plugin Development Guide](./doc/development-guide.md).
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
