@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,6 +48,26 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
     public boolean remove(String name) {
         gauges.remove(name);
         return metricRegistry.remove(name);
+    }
+
+    @Override
+    public Map<String, Metric> getMetrics() {
+        Map<String, com.codahale.metrics.Metric> metricMap = metricRegistry.getMetrics();
+        Map<String, Metric> result = new HashMap<>();
+        for (Map.Entry<String, com.codahale.metrics.Metric> entry : metricMap.entrySet()) {
+            com.codahale.metrics.Metric oleMetric = entry.getValue();
+            if (oleMetric instanceof com.codahale.metrics.Meter) {
+                result.put(entry.getKey(), MeterImpl.build((com.codahale.metrics.Meter) oleMetric));
+            } else if (oleMetric instanceof com.codahale.metrics.Counter) {
+                result.put(entry.getKey(), CounterImpl.build((com.codahale.metrics.Counter) oleMetric));
+            } else if (oleMetric instanceof com.codahale.metrics.Histogram) {
+                result.put(entry.getKey(), HistogramImpl.build((com.codahale.metrics.Histogram) oleMetric));
+            } else if (oleMetric instanceof com.codahale.metrics.Timer) {
+                result.put(entry.getKey(), TimerImpl.build((com.codahale.metrics.Timer) oleMetric));
+            }
+        }
+        result.putAll(this.gauges);
+        return Collections.unmodifiableMap(result);
     }
 
     @Override

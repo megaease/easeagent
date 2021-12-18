@@ -25,6 +25,8 @@ import com.megaease.easeagent.plugin.api.metric.name.Tags;
 
 import java.io.OutputStream;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -402,6 +404,11 @@ public final class NoOpMetrics {
         @Override
         public boolean remove(String name) {
             return true;
+        }
+
+        @Override
+        public Map<String, Metric> getMetrics() {
+            return Collections.emptyMap();
         }
 
         @Override

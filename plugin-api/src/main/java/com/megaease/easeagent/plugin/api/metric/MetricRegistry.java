@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.api.metric;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -31,6 +32,13 @@ public interface MetricRegistry {
      * @return whether or not the metric was removed
      */
     boolean remove(String name);
+
+    /**
+     * get all metrics
+     *
+     * @return Map<String, Metric>
+     */
+    Map<String, Metric> getMetrics();
 
     /**
      * Return the {@link Meter} registered under this name; or create and register
