@@ -15,7 +15,7 @@
  *   limitations under the License.
  */
 
-package com.megaease.easeagent.httpserver;
+package com.megaease.easeagent.httpserver.nano;
 
 import java.util.List;
 

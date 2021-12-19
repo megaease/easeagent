@@ -42,6 +42,14 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>plugin-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!--
         <dependency>
             <groupId>org.nanohttpd</groupId>
             <artifactId>nanohttpd</artifactId>
@@ -50,5 +58,6 @@
             <groupId>org.nanohttpd</groupId>
             <artifactId>nanohttpd-nanolets</artifactId>
         </dependency>
+        -->
     </dependencies>
 </project>

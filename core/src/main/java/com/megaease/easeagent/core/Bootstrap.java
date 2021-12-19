@@ -25,9 +25,13 @@ import com.megaease.easeagent.core.context.ContextManager;
 import com.megaease.easeagent.core.plugin.BridgeDispatcher;
 import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
-import com.megaease.easeagent.httpserver.AgentHttpHandler;
-import com.megaease.easeagent.httpserver.AgentHttpHandlerProvider;
-import com.megaease.easeagent.httpserver.AgentHttpServer;
+import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
+import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
+import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.IHTTPSession;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
+import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
@@ -36,8 +40,6 @@ import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.router.RouterNanoHTTPD;
 import lombok.SneakyThrows;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -310,7 +312,7 @@ public class Bootstrap {
         }
 
         @Override
-        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
+        public Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
             wrappedConfigManager.updateCanary2(config, version);
             return null;
         }
@@ -326,7 +328,7 @@ public class Bootstrap {
 
         @Override
         @SuppressWarnings("unchecked")
-        public NanoHTTPD.Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
+        public Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
             LOGGER.info("call /config-global-transmission. configs: {}", map);
             synchronized (lastCount) {
                 List<String> headers = (List<String>) map.get("headers");
@@ -343,11 +345,11 @@ public class Bootstrap {
                 lastCount.set(headers.size());
                 wrappedConfigManager.updateConfigs(config);
             }
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
+            return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, (String) null);
         }
 
         @Override
-        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
+        public Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
             wrappedConfigManager.updateCanary2(config, version);
             return null;
         }
@@ -360,16 +362,16 @@ public class Bootstrap {
         }
 
         @Override
-        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
+        public Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
             wrappedConfigManager.updateService2(CompatibilityConversion.transform(config), version);
             return null;
         }
     }
 
     public static class PluginPropertyHttpHandler extends AgentHttpHandler {
-
         public PluginPropertyHttpHandler() {
-            methods = Collections.singleton(NanoHTTPD.Method.GET);
+            methods = Collections.singleton(
+                com.megaease.easeagent.httpserver.nanohttpd.protocols.http.request.Method.GET);
         }
 
         @Override
@@ -379,10 +381,10 @@ public class Bootstrap {
 
         @SneakyThrows
         @Override
-        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+        public Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
             String version = urlParams.get("version");
             if (version == null) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
+                return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, (String) null);
             }
             try {
                 String property = ConfigUtils.buildPluginProperty(
@@ -392,9 +394,9 @@ public class Bootstrap {
                     ConfigUtils.requireNonEmpty(urlParams.get("property"), "urlParams.property must not be null and empty."));
                 String value = Objects.requireNonNull(urlParams.get("value"), "urlParams.value must not be null.");
                 wrappedConfigManager.updateService2(Collections.singletonMap(property, value), version);
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
+                return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, (String) null);
             } catch (Exception e) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, e.getMessage());
+                return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, e.getMessage());
             }
 
         }
@@ -407,7 +409,7 @@ public class Bootstrap {
         }
 
         @Override
-        public NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
+        public Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version) {
             try {
                 String domain = ConfigUtils.requireNonEmpty(urlParams.get("domain"), "urlParams.domain must not be null and empty.");
                 String namespace = ConfigUtils.requireNonEmpty(urlParams.get("namespace"), "urlParams.namespace must not be null and empty.");
@@ -424,39 +426,39 @@ public class Bootstrap {
                 wrappedConfigManager.updateService2(changeConfig, version);
                 return null;
             } catch (Exception e) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, e.getMessage());
+                return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, e.getMessage());
             }
         }
     }
 
     public static abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
-        public abstract NanoHTTPD.Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version);
+        public abstract Response processConfig(Map<String, String> config, Map<String, String> urlParams, String version);
 
         @SneakyThrows
         @Override
-        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+        public Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
             String body = this.buildRequestBody(session);
             if (StringUtils.isEmpty(body)) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
+                return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, (String) null);
             }
             Map<String, Object> map = JsonUtil.toMap(body);
             if (map == null) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
+                return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, (String) null);
             }
             return processJsonConfig(map, urlParams);
         }
 
-        public NanoHTTPD.Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
+        public Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
             String version = (String) map.remove("version");
             if (version == null) {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, null);
+                return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, (String) null);
             }
             Map<String, String> config = toConfigMap(map);
-            NanoHTTPD.Response response = processConfig(config, urlParams, version);
+            Response response = processConfig(config, urlParams, version);
             if (response != null) {
                 return response;
             }
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
+            return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, (String) null);
         }
     }
 

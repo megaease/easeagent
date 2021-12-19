@@ -15,9 +15,9 @@
  *   limitations under the License.
  */
 
-package com.megaease.easeagent.httpserver;
+package com.megaease.easeagent.httpserver.nano;
 
-import fi.iki.elonen.router.RouterNanoHTTPD;
+import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
 import lombok.SneakyThrows;
 
 import java.util.List;
@@ -45,27 +45,4 @@ public class AgentHttpServer extends RouterNanoHTTPD {
     public void startServer() {
         this.start(5000, true);
     }
-
-//    public static void main(String[] args) {
-//        AgentHttpServer agentHttpServer = new AgentHttpServer(9900);
-//        agentHttpServer.startServer();
-//        System.out.println("after start");
-//        List<AgentHttpHandler> list = new ArrayList<>();
-//        list.add(new TestHandler());
-//        agentHttpServer.addHttpRoutes(list);
-//    }
-//
-//    public static class TestHandler extends AgentHttpHandler {
-//
-//        @Override
-//        public String getPath() {
-//            return "/hello";
-//        }
-//
-//        @Override
-//        public Response process(UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
-//            String requestBody = this.buildRequestBody(session);
-//            return NanoHTTPD.newFixedLengthResponse(requestBody);
-//        }
-//    }
 }

@@ -15,10 +15,14 @@
  *   limitations under the License.
  */
 
-package com.megaease.easeagent.httpserver;
+package com.megaease.easeagent.httpserver.nano;
 
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.router.RouterNanoHTTPD;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.IHTTPSession;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.request.Method;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.IStatus;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
+import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
 import lombok.SneakyThrows;
 
 import java.nio.charset.StandardCharsets;
@@ -32,7 +36,7 @@ public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
     public abstract String getPath();
 
     protected String text;
-    protected Set<NanoHTTPD.Method> methods = new HashSet<>(Arrays.asList(NanoHTTPD.Method.PUT, NanoHTTPD.Method.POST));
+    protected Set<Method> methods = new HashSet<>(Arrays.asList(Method.PUT, Method.POST));
 
     @Override
     public String getText() {
@@ -40,9 +44,9 @@ public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
     }
 
     @SneakyThrows
-    protected String buildRequestBody(NanoHTTPD.IHTTPSession session) {
+    protected String buildRequestBody(IHTTPSession session) {
         Map<String, String> files = new HashMap<>();
-        NanoHTTPD.Method method = session.getMethod();
+        Method method = session.getMethod();
         if (!methods.contains(method)) {
             return null;
         }
@@ -57,8 +61,8 @@ public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
     }
 
     @Override
-    public NanoHTTPD.Response.IStatus getStatus() {
-        return NanoHTTPD.Response.Status.OK;
+    public IStatus getStatus() {
+        return Status.OK;
     }
 
     @Override
@@ -66,10 +70,10 @@ public abstract class AgentHttpHandler extends RouterNanoHTTPD.DefaultHandler {
         return null;
     }
 
-    public abstract NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session);
+    public abstract Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session);
 
     @Override
-    public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+    public Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
         return this.process(uriResource, urlParams, session);
     }
 }
