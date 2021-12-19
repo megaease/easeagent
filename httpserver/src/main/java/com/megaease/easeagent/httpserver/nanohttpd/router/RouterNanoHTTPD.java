@@ -8,18 +8,18 @@ package com.megaease.easeagent.httpserver.nanohttpd.router;
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the nanohttpd nor the names of its contributors
  *    may be used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -154,16 +154,41 @@ public class RouterNanoHTTPD extends NanoHTTPD {
             return Status.OK;
         }
 
+
+        /**
+         * Clean XSS.
+         *
+         * @param value the value to be cleaned
+         * @return the cleaned value
+         */
+        private String cleanXSS(String value) {
+		    // You'll need to remove the spaces from the html entities below
+		    value = value.replaceAll("<", "& lt;").replaceAll(">", "& gt;");
+            value = value.replaceAll("\\(", "& #40;").replaceAll("\\)", "& #41;");
+            value = value.replaceAll("'", "& #39;");
+            value = value.replaceAll("eval\\((.*)\\)", "");
+            value = value.replaceAll("[\\\"\\\'][\\s]*javascript:(.*)[\\\"\\\']", "\"\"");
+            value = value.replaceAll("script", "");
+
+            return value;
+	    }
+
         public Response get(UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
             StringBuilder text = new StringBuilder("<html><body>");
+
             text.append("<h1>Url: ");
-            text.append(session.getUri());
+            text.append(cleanXSS(session.getUri()));
             text.append("</h1><br>");
+
             Map<String, String> queryParams = session.getParms();
             if (queryParams.size() > 0) {
                 for (Map.Entry<String, String> entry : queryParams.entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue();
+
+                    key = cleanXSS(key);
+                    value = cleanXSS(value);
+
                     text.append("<p>Param '");
                     text.append(key);
                     text.append("' = ");
@@ -173,6 +198,7 @@ public class RouterNanoHTTPD extends NanoHTTPD {
             } else {
                 text.append("<p>no params in url</p><br>");
             }
+
             return Response.newFixedLengthResponse(getStatus(), getMimeType(), text.toString());
         }
     }
@@ -579,9 +605,6 @@ public class RouterNanoHTTPD extends NanoHTTPD {
          * e.g. mapping 1 = /user/:id mapping 2 = /user/help if the incoming uri
          * is www.example.com/user/help - mapping 2 is returned if the incoming
          * uri is www.example.com/user/3232 - mapping 1 is returned
-         * 
-         * @param url
-         * @return
          */
         public Response process(IHTTPSession session) {
             String work = normalizeUri(session.getUri());
@@ -633,7 +656,7 @@ public class RouterNanoHTTPD extends NanoHTTPD {
 
     /**
      * default routings, they are over writable.
-     * 
+     *
      * <pre>
      * router.setNotFoundHandler(GeneralHandler.class);
      * </pre>
