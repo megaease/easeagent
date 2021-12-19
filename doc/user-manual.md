@@ -253,6 +253,28 @@ plugin.integrability.serviceName.addServiceNameHead.propagate.head=X-Mesh-RPC-Se
 
 The current way to obtain ServcieName only supports service discovery using Spring Cloud.
 
+#### Plugin Http configuration modification api
+
+After the EaseAgent enabled the http port, the http api can be used to modify the configuration of the plugin.
+
+1. The plugin configuration items can be modified directly from the configuration information mapping:
+    ```
+    GET /plugins/domains/{domain}/namespaces/{namespace}/{id}/properties/{property}/{value}/{version}
+    ```
+
+2. API supports passing json one-time "modification/addition" content instead of setting them one by one. For example:
+    ```
+    POST /plugins/domains/{domain}/namespaces/{namespace}/{id}/properties
+    
+    {
+         "version": "1",
+         "property1": "value1",
+         "property2": "value2"
+    }
+    ```
+
+the {version} can be any information
+
 
 
 ## Logging
