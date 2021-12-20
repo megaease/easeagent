@@ -51,6 +51,7 @@ public class ConfigUtils {
         });
     }
 
+    @SafeVarargs
     private static <R> R firstNotNull(R... ars) {
         for (R one : ars) {
             if (one != null) {

@@ -76,7 +76,7 @@ public class PluginConfigManager implements IConfigFactory {
     private Map<String, String> getConfigSource(String domain, String namespace, String id) {
         PluginSourceConfig sourceConfig = pluginSourceConfigs.get(new Key(domain, namespace, id));
         if (sourceConfig == null) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
         return sourceConfig.getProperties();
     }

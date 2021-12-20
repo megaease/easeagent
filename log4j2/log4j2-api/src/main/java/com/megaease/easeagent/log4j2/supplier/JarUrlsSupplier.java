@@ -31,6 +31,7 @@ public class JarUrlsSupplier implements Supplier<URL[]> {
         this.suppliers = suppliers;
     }
 
+    @SafeVarargs
     public static JarUrlsSupplier build(Supplier<URL[]>... suppliers) {
         return new JarUrlsSupplier(suppliers);
     }

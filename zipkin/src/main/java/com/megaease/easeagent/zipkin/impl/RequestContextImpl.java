@@ -74,7 +74,9 @@ public class RequestContextImpl implements RequestContext {
 
     @Override
     public AsyncContext async() {
-        return AsyncContextImpl.build(tracing, braveSpan.context(), supplier, (Map) asyncRequest.getHeaders());
+        @SuppressWarnings("unchecked")
+        Map<Object, Object> headers = (Map) asyncRequest.getHeaders();
+        return AsyncContextImpl.build(tracing, braveSpan.context(), supplier, headers);
     }
 
     @Override

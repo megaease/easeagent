@@ -55,7 +55,6 @@ import com.megaease.easeagent.sniffer.healthy.AgentHealth;
 import com.megaease.easeagent.sniffer.healthy.interceptor.OnApplicationEventInterceptor;
 import com.megaease.easeagent.sniffer.thread.CrossThreadPropagationConfig;
 import com.megaease.easeagent.zipkin.CustomTagsSpanHandler;
-import com.megaease.easeagent.zipkin.RootSpanFinishHandler;
 import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +67,6 @@ import zipkin2.reporter.urlconnection.URLConnectionSender;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class Provider implements AgentReportAware, ConfigAware, IProvider, AgentHttpHandlerProvider, TracingProvider, MetricProvider {
@@ -82,7 +80,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
     private Config config;
     private Supplier<Map<String, Object>> additionalAttributes;
     private AutoRefreshConfigItem<String> serviceName;
-    private Function rootSpanFinish;
     private MetricProviderImpl metricProvider = new MetricProviderImpl();
 
 
@@ -143,12 +140,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             .traceId128Bit(false)
             .sampler(CountingSampler.create(1))
             .addSpanHandler(new CustomTagsSpanHandler(serviceName::getValue, AdditionalAttributes.getHostName()))
-            .addSpanHandler(new RootSpanFinishHandler((context) -> {
-                if (rootSpanFinish != null) {
-                    rootSpanFinish.apply(context);
-                }
-                return null;
-            }))
             .addSpanHandler(AsyncZipkinSpanHandler
                 .newBuilder(reporter)
                 .alwaysReportSpans(true)
@@ -177,11 +168,6 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
             }
             return iTracing;
         };
-    }
-
-    @Override
-    public void setRootSpanFinishCall(Function rootSpanFinish) {
-        this.rootSpanFinish = rootSpanFinish;
     }
 
     @Override

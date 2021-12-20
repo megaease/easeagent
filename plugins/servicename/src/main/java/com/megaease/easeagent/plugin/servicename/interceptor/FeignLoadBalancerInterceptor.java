@@ -45,6 +45,7 @@ public class FeignLoadBalancerInterceptor extends BaseServiceNameInterceptor {
             IClientConfig iClientConfig = (IClientConfig) methodInfo.getArgs()[1];
             String serviceName = iClientConfig.getClientName();
             Object realRequest = ReflectionTool.invokeMethod(request, "getRequest");
+            @SuppressWarnings("unchecked")
             Map<String, Collection<String>> headers = (Map<String, Collection<String>>) ReflectionTool.extractField(realRequest, "headers");
             headers.put(config.getPropagateHead(), Collections.singleton(serviceName));
             context.injectForwardedHeaders((name, value) -> headers.put(name, Collections.singleton(value)));

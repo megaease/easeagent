@@ -58,14 +58,17 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public <V> V get(Object key) {
-        Object v = context.get(key);
-        return v == null ? null : (V) v;
+        return change(context.get(key));
     }
 
     @Override
     public <V> V remove(Object key) {
-        Object v = context.remove(key);
-        return v == null ? null : (V) v;
+        return change(context.remove(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V> V change(Object o) {
+        return o == null ? null : (V) o;
     }
 
     @Override
@@ -84,7 +87,7 @@ public class SessionContext implements InitializeContext {
     @Override
     public <V> V getLocal(String key) {
         assert this.retBound.peek() != null;
-        return (V) this.retBound.peek().get(key);
+        return change(this.retBound.peek().get(key));
     }
 
     @Override
@@ -229,7 +232,7 @@ public class SessionContext implements InitializeContext {
         if (o == NullObject.NULL) {
             return null;
         }
-        return (T) o;
+        return change(o);
     }
 
     @Override
@@ -241,7 +244,7 @@ public class SessionContext implements InitializeContext {
         if (o == NullObject.NULL) {
             return null;
         }
-        return (T) o;
+        return change(o);
     }
 
     @Override
@@ -261,14 +264,16 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public void consumerInject(Span span, MessagingRequest request) {
-        Injector injector = tracing.messagingTracing().consumerInjector();
+        @SuppressWarnings("unchecked")
+        Injector<MessagingRequest> injector = tracing.messagingTracing().consumerInjector();
         injector.inject(span, request);
         injectForwardedHeaders(request);
     }
 
     @Override
     public void producerInject(Span span, MessagingRequest request) {
-        Injector injector = tracing.messagingTracing().producerInjector();
+        @SuppressWarnings("unchecked")
+        Injector<MessagingRequest> injector = tracing.messagingTracing().producerInjector();
         injector.inject(span, request);
         injectForwardedHeaders(request);
     }

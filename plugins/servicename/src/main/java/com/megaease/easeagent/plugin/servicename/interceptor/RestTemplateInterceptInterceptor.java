@@ -44,6 +44,7 @@ public class RestTemplateInterceptInterceptor  extends BaseServiceNameIntercepto
             String host = uri.getHost();
             if (ReflectionTool.hasText(host)) {
                 Object fakeHeaders = ReflectionTool.invokeMethod(request, "getHeaders");//org.springframework.http.HttpHeaders
+                @SuppressWarnings("unchecked")
                 MultiValueMap<String, String> headers = (MultiValueMap<String, String>) ReflectionTool.extractField(fakeHeaders, "headers");
                 headers.add(config.getPropagateHead(), host);
                 context.injectForwardedHeaders(headers::add);

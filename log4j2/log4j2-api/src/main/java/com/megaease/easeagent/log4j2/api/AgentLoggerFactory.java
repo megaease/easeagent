@@ -118,6 +118,7 @@ public class AgentLoggerFactory<T extends AgentLogger> {
         }
 
 
+        @SuppressWarnings("unchecked")
         private Mdc buildMdc() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
             Class<?> mdcClazz = classLoader.loadClass("com.megaease.easeagent.log4j2.impl.MdcProxy");
             Field putField = mdcClazz.getDeclaredField("PUT_INSTANCE");

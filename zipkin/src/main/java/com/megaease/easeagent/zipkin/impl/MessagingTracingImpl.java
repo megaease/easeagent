@@ -28,7 +28,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import javax.annotation.Nonnull;
 import java.util.function.Function;
 
-public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.trace.MessagingRequest> implements MessagingTracing {
+public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.trace.MessagingRequest> implements MessagingTracing<R> {
     private final brave.messaging.MessagingTracing messagingTracing;
     private final Extractor<R> extractor;
     private final Injector<R> producerInjector;
@@ -39,13 +39,13 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
     private MessagingTracingImpl(brave.messaging.MessagingTracing messagingTracing) {
         this.messagingTracing = messagingTracing;
         this.extractor = new ExtractorImpl(messagingTracing.propagation().extractor(com.megaease.easeagent.plugin.api.trace.MessagingRequest::header));
-        this.producerInjector = new InjectorImpl(messagingTracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.PRODUCER)));
-        this.consumerInjector = new InjectorImpl(messagingTracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.CONSUMER)));
-        this.consumerSampler = new SamplerFunction(ZipkinConsumerRequest.BUILDER, messagingTracing.consumerSampler());
-        this.producerSampler = new SamplerFunction(ZipkinProducerRequest.BUILDER, messagingTracing.producerSampler());
+        this.producerInjector = new InjectorImpl(messagingTracing.propagation().injector(new RemoteSetterImpl<>(brave.Span.Kind.PRODUCER)));
+        this.consumerInjector = new InjectorImpl(messagingTracing.propagation().injector(new RemoteSetterImpl<>(brave.Span.Kind.CONSUMER)));
+        this.consumerSampler = new SamplerFunction(ZipkinConsumerRequest::new, messagingTracing.consumerSampler());
+        this.producerSampler = new SamplerFunction(ZipkinProducerRequest::new, messagingTracing.producerSampler());
     }
 
-    public static MessagingTracing<? extends Request> build(brave.Tracing tracing) {
+    public static  MessagingTracing build(brave.Tracing tracing) {
         if (tracing == null) {
             return NoOpTracer.NO_OP_MESSAGING_TRACING;
         }
@@ -64,7 +64,7 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
     }
 
     @Override
-    public Injector consumerInjector() {
+    public Injector<R> consumerInjector() {
         return consumerInjector;
     }
 
@@ -79,17 +79,17 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
     }
 
     @Override
-    public boolean consumerSampler(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
+    public boolean consumerSampler(R request) {
         return messagingTracing.consumerSampler().trySample(new ZipkinConsumerRequest(request));
     }
 
     @Override
-    public boolean producerSampler(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
+    public boolean producerSampler(R request) {
         return messagingTracing.producerSampler().trySample(new ZipkinProducerRequest(request));
     }
 
 
-    public class ExtractorImpl implements Extractor {
+    public class ExtractorImpl implements Extractor<R> {
         private final TraceContext.Extractor<com.megaease.easeagent.plugin.api.trace.MessagingRequest> extractor;
 
         public ExtractorImpl(TraceContext.Extractor<com.megaease.easeagent.plugin.api.trace.MessagingRequest> extractor) {
@@ -102,7 +102,7 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
         }
     }
 
-    public class InjectorImpl implements Injector {
+    public class InjectorImpl implements Injector<R> {
         private final TraceContext.Injector<com.megaease.easeagent.plugin.api.trace.MessagingRequest> injector;
 
         public InjectorImpl(TraceContext.Injector<com.megaease.easeagent.plugin.api.trace.MessagingRequest> injector) {
@@ -117,26 +117,25 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
         }
     }
 
-    public static class SamplerFunction<R extends Request> implements Function<R, Boolean> {
-        private final Function<Request, MessagingRequest> builder;
+    public class SamplerFunction implements Function<R, Boolean> {
+        private final Function<R, MessagingRequest> builder;
         private final brave.sampler.SamplerFunction<MessagingRequest> function;
 
-        public SamplerFunction(@Nonnull Function<Request, MessagingRequest> builder, @Nonnull brave.sampler.SamplerFunction<MessagingRequest> function) {
+        public SamplerFunction(@Nonnull Function<R, MessagingRequest> builder, @Nonnull brave.sampler.SamplerFunction<MessagingRequest> function) {
             this.builder = builder;
             this.function = function;
         }
 
         @Override
-        public Boolean apply(Request request) {
+        public Boolean apply(R request) {
             return function.trySample(builder.apply(request));
         }
     }
 
-    public static class ZipkinProducerRequest extends ProducerRequest {
-        public static Function<com.megaease.easeagent.plugin.api.trace.MessagingRequest, MessagingRequest> BUILDER = request -> new ZipkinProducerRequest(request);
-        private final com.megaease.easeagent.plugin.api.trace.MessagingRequest request;
+    public class ZipkinProducerRequest extends ProducerRequest {
+        private final R request;
 
-        public ZipkinProducerRequest(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
+        public ZipkinProducerRequest(R request) {
             this.request = request;
         }
 
@@ -161,11 +160,11 @@ public class MessagingTracingImpl<R extends com.megaease.easeagent.plugin.api.tr
         }
     }
 
-    public static class ZipkinConsumerRequest extends ConsumerRequest {
-        public static Function<com.megaease.easeagent.plugin.api.trace.MessagingRequest, MessagingRequest> BUILDER = request -> new ZipkinConsumerRequest(request);
-        private final com.megaease.easeagent.plugin.api.trace.MessagingRequest request;
+    public class ZipkinConsumerRequest extends ConsumerRequest {
 
-        public ZipkinConsumerRequest(com.megaease.easeagent.plugin.api.trace.MessagingRequest request) {
+        private final R request;
+
+        public ZipkinConsumerRequest(R request) {
             this.request = request;
         }
 

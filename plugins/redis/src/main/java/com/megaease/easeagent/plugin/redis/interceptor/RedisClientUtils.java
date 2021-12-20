@@ -67,9 +67,12 @@ public class RedisClientUtils {
         if (arg0 instanceof RedisCommand) {
             RedisCommand<?, ?, ?> redisCommand = (RedisCommand<?, ?, ?>) arg0;
             cmd = redisCommand.getType().name();
-        } else {
+        } else if (arg0 instanceof Collection) {
+            @SuppressWarnings("unchecked")
             Collection<RedisCommand<?, ?, ?>> redisCommands = (Collection<RedisCommand<?, ?, ?>>) arg0;
             cmd = "[" + String.join(",", redisCommands.stream().map(input -> input.getType().name()).collect(Collectors.toList())) + "]";
+        } else {
+            cmd = null;
         }
         return cmd;
     }

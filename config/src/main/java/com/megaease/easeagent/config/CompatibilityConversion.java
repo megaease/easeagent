@@ -77,6 +77,7 @@ public class CompatibilityConversion {
         Map<String, String> newConfigs = new HashMap<>();
         for (Map.Entry<String, String> entry : oldConfigs.entrySet()) {
             Conversion conversion = transformConversion(entry.getKey());
+            @SuppressWarnings("unchecked")
             Object changed = conversion.transform(newConfigs, entry.getValue());
             if (conversion.isChange()) {
                 changedKeys.put(entry.getKey(), changed);

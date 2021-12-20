@@ -233,7 +233,7 @@ public class NoOpTracer {
         }
 
         @Override
-        public MessagingTracing<? extends Request> messagingTracing() {
+        public MessagingTracing messagingTracing() {
             return EmptyMessagingTracing.INSTANCE;
         }
 
@@ -253,32 +253,32 @@ public class NoOpTracer {
         }
     }
 
-    public static class EmptyMessagingTracing<R extends MessagingRequest> implements MessagingTracing {
+    public static class EmptyMessagingTracing implements MessagingTracing<MessagingRequest> {
         private static final EmptyMessagingTracing INSTANCE = new EmptyMessagingTracing();
-        private static final Function NOOP_SAMPLER = r -> false;
+        private static final Function<MessagingRequest, Boolean> NOOP_SAMPLER = r -> false;
 
         @Override
-        public Extractor extractor() {
+        public Extractor<MessagingRequest> extractor() {
             return EmptyExtractor.INSTANCE;
         }
 
         @Override
-        public Injector producerInjector() {
+        public Injector<MessagingRequest> producerInjector() {
             return EmptyInjector.INSTANCE;
         }
 
         @Override
-        public Injector consumerInjector() {
+        public Injector<MessagingRequest> consumerInjector() {
             return EmptyInjector.INSTANCE;
         }
 
         @Override
-        public Function<R, Boolean> consumerSampler() {
+        public Function<MessagingRequest, Boolean> consumerSampler() {
             return NOOP_SAMPLER;
         }
 
         @Override
-        public Function<R, Boolean> producerSampler() {
+        public Function<MessagingRequest, Boolean> producerSampler() {
             return NOOP_SAMPLER;
         }
 
@@ -303,7 +303,7 @@ public class NoOpTracer {
         }
     }
 
-    public static class EmptyExtractor implements Extractor {
+    public static class EmptyExtractor implements Extractor<MessagingRequest> {
         private static final EmptyExtractor INSTANCE = new EmptyExtractor();
 
 
@@ -313,7 +313,7 @@ public class NoOpTracer {
         }
     }
 
-    public static class EmptyInjector implements Injector {
+    public static class EmptyInjector implements Injector<MessagingRequest> {
         private static final EmptyInjector INSTANCE = new EmptyInjector();
 
         @Override

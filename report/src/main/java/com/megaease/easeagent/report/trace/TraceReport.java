@@ -23,11 +23,8 @@ import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
-import org.apache.kafka.common.serialization.ByteArraySerializer;
-import org.apache.logging.log4j.core.config.Property;
 import zipkin2.Span;
 import zipkin2.codec.Encoding;
 import zipkin2.internal.GlobalExtrasSupplier;
@@ -41,7 +38,6 @@ import zipkin2.reporter.kafka11.SimpleSender;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class TraceReport {
@@ -95,7 +91,7 @@ public class TraceReport {
                 return systemName.getValue();
             }
         };
-        SDKAsyncReporter reporter = SDKAsyncReporter.
+        SDKAsyncReporter<Span> reporter = SDKAsyncReporter.
             builderSDKAsyncReporter(AsyncReporter.builder(sender)
                     .queuedMaxSpans(traceProperties.getOutput().getQueuedMaxSpans())
                     .messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS)
@@ -103,7 +99,7 @@ public class TraceReport {
                 traceProperties,
                 extrasSupplier);
         reporter.startFlushThread();
-        spanRefreshableReporter = new RefreshableReporter<Span>(reporter, traceProperties, outputProperties);
+        spanRefreshableReporter = new RefreshableReporter<>(reporter, traceProperties, outputProperties);
         return spanRefreshableReporter;
     }
 

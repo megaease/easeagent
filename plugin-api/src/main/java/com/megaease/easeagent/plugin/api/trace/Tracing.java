@@ -85,5 +85,5 @@ public interface Tracing {
      *
      * @return {@link MessagingRequest}
      */
-    MessagingTracing<? extends MessagingRequest> messagingTracing();
+    MessagingTracing messagingTracing();
 }

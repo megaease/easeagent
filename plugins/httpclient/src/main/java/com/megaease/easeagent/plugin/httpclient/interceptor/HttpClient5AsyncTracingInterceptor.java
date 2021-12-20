@@ -50,7 +50,7 @@ public class HttpClient5AsyncTracingInterceptor implements NonReentrantIntercept
         RequestContext requestContext = context.clientRequest(internalRequest);
         HttpUtils.handleReceive(requestContext.span().start(), internalRequest);
         context.put(HttpClient5AsyncTracingInterceptor.class, requestContext);
-
+        @SuppressWarnings("unchecked")
         FutureCallback<HttpResponse> callback = (FutureCallback<HttpResponse>) methodInfo.getArgs()[4];
         InternalFutureCallback internalFutureCallback = new InternalFutureCallback(callback, request, requestContext);
         methodInfo.changeArg(4, internalFutureCallback);

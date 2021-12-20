@@ -46,7 +46,7 @@ public class TracingImpl implements ITracing {
     private final TraceContext.Extractor<Request> defaultExtractor;
     private final TraceContext.Extractor<Request> producerExtractor;
     private final TraceContext.Extractor<Request> consumerExtractor;
-    private final MessagingTracing<? extends Request> messagingTracing;
+    private final MessagingTracing messagingTracing;
     private final List<String> propagationKeys;
 
     private TracingImpl(@Nonnull Supplier<InitializeContext> supplier,
@@ -59,7 +59,7 @@ public class TracingImpl implements ITracing {
                         @Nonnull TraceContext.Extractor<Request> defaultExtractor,
                         TraceContext.Extractor<Request> producerExtractor,
                         TraceContext.Extractor<Request> consumerExtractor,
-                        @Nonnull MessagingTracing<? extends Request> messagingTracing, List<String> propagationKeys) {
+                        @Nonnull MessagingTracing messagingTracing, List<String> propagationKeys) {
         this.supplier = supplier;
         this.tracing = tracing;
         this.tracer = tracer;
@@ -79,12 +79,12 @@ public class TracingImpl implements ITracing {
             new TracingImpl(supplier, tracing,
                 tracing.tracer(),
                 tracing.propagation().injector(Request::setHeader),
-                tracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.CLIENT)),
-                tracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.PRODUCER)),
-                tracing.propagation().injector(new RemoteSetterImpl(brave.Span.Kind.CONSUMER)),
+                tracing.propagation().injector(new RemoteSetterImpl<>(brave.Span.Kind.CLIENT)),
+                tracing.propagation().injector(new RemoteSetterImpl<>(brave.Span.Kind.PRODUCER)),
+                tracing.propagation().injector(new RemoteSetterImpl<>(brave.Span.Kind.CONSUMER)),
                 tracing.propagation().extractor(Request::header),
-                tracing.propagation().extractor(new RemoteGetterImpl(brave.Span.Kind.PRODUCER)),
-                tracing.propagation().extractor(new RemoteGetterImpl(brave.Span.Kind.CONSUMER)),
+                tracing.propagation().extractor(new RemoteGetterImpl<>(brave.Span.Kind.PRODUCER)),
+                tracing.propagation().extractor(new RemoteGetterImpl<>(brave.Span.Kind.CONSUMER)),
                 MessagingTracingImpl.build(tracing),
                 tracing.propagation().keys());
     }
@@ -238,7 +238,7 @@ public class TracingImpl implements ITracing {
     }
 
     @Override
-    public MessagingTracing<? extends Request> messagingTracing() {
+    public MessagingTracing messagingTracing() {
         return messagingTracing;
     }
 
