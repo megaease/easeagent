@@ -17,7 +17,7 @@ The design of this DSL is borrowed from bytebuddy's class and method matching DS
 As defined by the JVM Specification for the class structure and the status of the annotations commonly used in Java, the optional elements used for class matching contain:
 - Class name.
 - Implementing Interface name.
-- Inherited classes.
+- Super class name.
 - Modifier, access flags, public/private/abstract/final/synthetic, and so on.
 - Annotation.
 
@@ -92,7 +92,7 @@ As defined by the JVM Specification for the method structure , the optional elem
 
 - Method name.
 - Modifer, public/private, and so on.
-- Argument type.
+- Argument type, the full qualified class name of argument.
 - ReturnType, the return type of a method.
 
 ### Implemention
@@ -170,10 +170,21 @@ For example, the following MethodMatcher will match the method which named `getC
 ```
 
 In additon, `MethodMatcherBuilder` provides `and()` method which will finish current builder and start a new `MethodMatcherBuilder`.
-
 The provious builder will generete a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
-
 The `Left matcher` and `Right matcher` will be combined into one `AndMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.
+
+For example, the following matcher will match public methods that named `write` and exclude that with `void` return type.
+```
+    MethodMatcher.builder()
+        .named("write")
+        .argsLength(1)
+        .isPublic()
+        .and()
+        .returnType("void")
+        .negate()
+        .build()
+```
+
 
 - Logical OR
 `MethodMatcherBuilder` provides `or()` method which will finish current builder and start a new `MethodMatcherBuilder`.
