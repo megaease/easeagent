@@ -24,7 +24,7 @@ As defined by the JVM Specification for the class structure and the status of th
 ### Implemention
 ClassMatcher definition is provided by `com.megaease.easeagent.plugin.matcher.ClassMatcher`.
 Each condition in a matcher is a combination of `logical AND`.
-```
+```java
     private String name;
     // setup the match type of name: className, super className, Interface Name or Annotation name.
     private ClassMatch matchType;
@@ -35,7 +35,7 @@ Each condition in a matcher is a combination of `logical AND`.
 
 There is a `MethodMatcherBuilder` class in `com.megaease.easeagent.plugin.matcher.MethodMatcher`, providing interface to build a `ClassMatcher`.
 The following methods are common condition settings in class matching, 
-```
+```java
     ClassMatcherBuilder hasSuperClass(String className)
     ClassMatcherBuilder hasClassName(String className)
     ClassMatcherBuilder hasAnnotation(String className)
@@ -55,7 +55,7 @@ The following methods are common condition settings in class matching,
 - Logical AND  
 As mention above, each condition in a matcher is a combination of `logical AND`.
 For example, the following ClassMatcher will match non-interface classes which inherit the `java.lang.String` **and** implements the `java.lang.Comparable` interface.
-```
+```java
 ClassMethod.builder()
     .hasSuperClass("java.lang.String")
     .hasInterface("java.lang.Comparable")
@@ -70,7 +70,7 @@ The provious builder will generete a `Left ClassMatcher` and the new builder wil
 The `Left matcher` and `Right matcher` will be combined into one `OrClasssMatcher`, and a class will match as long as the `Left` or `Right` matcher is a match.
 For example, the following ClassMatcher will match classes that implement the `javax.servlet.Filter` interface **or** inherit the "javax.servlet.http.HttpServlet" class.
 
-```
+```java
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
             .hasInterface("javax.servlet.Filter")
@@ -99,7 +99,7 @@ As defined by the JVM Specification for the method structure , the optional elem
 
 MethodMatcher definition is provided by `com.megaease.easeagent.plugin.matcher.MethodMatcher`.
 Each condition in a matcher is a combination of `logical AND`.
-```
+```java
     // method name
     private String name;
 
@@ -123,7 +123,7 @@ Each condition in a matcher is a combination of `logical AND`.
 
 There is a `MethodMatcherBuilder` class in `com.megaease.easeagent.plugin.matcher.MethodMatcher`, providing interface to build a `MethodMatcher`.
 The following methods are common condition settings in method matching, 
-```
+```java
     // method name condition
     MethodMatcherBuilder named(String methodName);
     MethodMatcherBuilder isConstruct();
@@ -161,7 +161,7 @@ The following methods are common condition settings in method matching,
 - Logical AND  
 As mention above, each condition in a matcher is a combination of `logical AND`.
 For example, the following MethodMatcher will match the method which named `getConnection` and with a return type of `java.sql.Connection`.
-```
+```java
     MethodMatcher.builder()
         .named("getConnection")
         .returnType("java.sql.Connection")
@@ -174,7 +174,7 @@ The provious builder will generete a `Left MethodMatcher` and the new builder wi
 The `Left matcher` and `Right matcher` will be combined into one `AndMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.
 
 For example, the following matcher will match public methods that named `write` and exclude that with `void` return type.
-```
+```java
     MethodMatcher.builder()
         .named("write")
         .argsLength(1)
@@ -193,7 +193,7 @@ The provious builder will generete a `Left MethodMatcher` and the new builder wi
 The `Left matcher` and `Right matcher` will be combined into one `OrMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.
 For example, the following MethodMatcher will match method that named `addBatch`  **or** named "clearBatch" and then give this `OrClasssMatcher` matcher a name `batch`.
 
-```
+```java
     MethodMatcher.builder()
         .named("addBatch")
         .or()
@@ -208,7 +208,7 @@ The `negate()` method of `MethodMatcherBuilder` uses `NegateMethodMatcher` to wr
 When a method matches the orignal matcher, it is unmatched by the wrap matcher; conversely, it is matched.
 For example, the following matcher will match public methods that named `write` and exclude that with `void` return type.
 
-```
+```java
     MethodMatcher.builder()
         .named("write")
         .argsLength(1)
