@@ -56,11 +56,11 @@ The following methods are common condition settings in class matching,
 As mention above, each condition in a matcher is a combination of `logical AND`.
 For example, the following ClassMatcher will match non-interface classes which inherit the `java.lang.String` **and** implements the `java.lang.Comparable` interface.
 ```java
-ClassMethod.builder()
-    .hasSuperClass("java.lang.String")
-    .hasInterface("java.lang.Comparable")
-    .notInterface()
-    .bilder()
+    ClassMatcher.builder()
+        .hasSuperClass("java.lang.String")
+        .hasInterface("java.lang.Comparable")
+        .notInterface()
+        .bilder()
 
 ```
 
