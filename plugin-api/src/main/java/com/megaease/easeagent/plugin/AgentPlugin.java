@@ -20,13 +20,13 @@ package com.megaease.easeagent.plugin;
 public interface AgentPlugin extends Ordered {
     /**
      * define the plugin name, avoiding conflicts with others
-     * it will be use as namespace when get configuration.
+     * it will be used as namespace when get configuration.
      */
     String getNamespace();
 
     /**
      * define the plugin domain,
-     * it will be use to get configuration when loaded:
+     * it will be used to get configuration when loaded:
      */
     String getDomain();
 }

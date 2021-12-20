@@ -23,12 +23,9 @@ import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class CompoundClassloader {
     private final static Logger log = LoggerFactory.getLogger(MethodTransformation.class);
-    private static Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
+    private static final Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
 
 
     public static boolean checkClassloaderExist(ClassLoader loader) {
