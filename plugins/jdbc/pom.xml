@@ -40,11 +40,7 @@
             <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <scope>provided</scope>
-        </dependency>
+        
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>

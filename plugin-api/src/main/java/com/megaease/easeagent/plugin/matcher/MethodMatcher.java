@@ -31,11 +31,15 @@ import java.util.Set;
 @Data
 @SuppressWarnings("unused")
 public class MethodMatcher implements IMethodMatcher {
+    // method name
     private String name;
+
+    // the match type of method name: equals, startWith...
     private StringMatch nameMatchType;
 
     // ignored when with default value
     private String returnType = null;
+    // types of method arguments
     private String[] args;
     private int argsLength = -1;
     private int modifier = Modifier.ACC_NONE;
@@ -86,6 +90,8 @@ public class MethodMatcher implements IMethodMatcher {
         private String qualifier = IMethodMatcher.DEFAULT_QUALIFIER;
 
         private Operator operator = Operator.AND;
+        private boolean  isNegate = false;
+
         private IMethodMatcher left;
 
         MethodMatcherBuilder() {
@@ -100,7 +106,7 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcherBuilder negate() {
-            this.operator = Operator.NEGATE;
+            this.isNegate = false;
             return this;
         }
 
@@ -235,6 +241,10 @@ public class MethodMatcher implements IMethodMatcher {
             IMethodMatcher matcher = new MethodMatcher(name, nameMatchType, returnType,
                 args, argsLength, modifier, notModifier, qualifier, isOverriddenFrom);
 
+            if (this.isNegate) {
+                matcher = matcher.negate();
+            }
+
             if (this.left == null || this.operator == null) {
                 return matcher;
             }
@@ -243,8 +253,6 @@ public class MethodMatcher implements IMethodMatcher {
                     return new OrMethodMatcher(this.left, matcher);
                 case AND:
                     return new AndMethodMatcher(this.left, matcher);
-                case NEGATE:
-                    return matcher.negate();
                 default:
                     return matcher;
             }
