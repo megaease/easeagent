@@ -24,7 +24,6 @@ import com.megaease.easeagent.log4j2.supplier.DirUrlsSupplier;
 import com.megaease.easeagent.log4j2.supplier.JarUrlsSupplier;
 import com.megaease.easeagent.log4j2.supplier.URLClassLoaderSupplier;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;

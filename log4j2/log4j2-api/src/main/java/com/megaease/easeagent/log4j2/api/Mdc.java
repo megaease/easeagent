@@ -22,25 +22,25 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Mdc {
-    private BiFunction<String, String, Void> putFuntion;
-    private Function<String, Void> removeFuntion;
-    private Function<String, String> getFuntion;
+    private final BiFunction<String, String, Void> putFunction;
+    private final Function<String, Void> removeFunction;
+    private final Function<String, String> getFunction;
 
-    public Mdc(@Nonnull BiFunction<String, String, Void> putFuntion, @Nonnull Function<String, Void> removeFuntion, @Nonnull Function<String, String> getFuntion) {
-        this.putFuntion = putFuntion;
-        this.removeFuntion = removeFuntion;
-        this.getFuntion = getFuntion;
+    public Mdc(@Nonnull BiFunction<String, String, Void> putFunction, @Nonnull Function<String, Void> removeFunction, @Nonnull Function<String, String> getFunction) {
+        this.putFunction = putFunction;
+        this.removeFunction = removeFunction;
+        this.getFunction = getFunction;
     }
 
     public void put(String key, String value) {
-        putFuntion.apply(key, value);
+        putFunction.apply(key, value);
     }
 
     public void remove(String key) {
-        removeFuntion.apply(key);
+        removeFunction.apply(key);
     }
 
     public String get(String key) {
-        return getFuntion.apply(key);
+        return getFunction.apply(key);
     }
 }

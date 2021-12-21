@@ -47,23 +47,13 @@ public class AgentLoggerFactory<T extends AgentLogger> {
 
     public static <T extends AgentLogger> Builder<T> builder(Supplier<ClassLoader> classLoaderSupplier, Function<Logger, T> loggerSupplier, Class<T> tClass) {
         ClassLoader classLoader = Objects.requireNonNull(classLoaderSupplier.get(), "classLoader must not be null.");
-        return new Builder<T>(classLoader, loggerSupplier, tClass);
+        return new Builder<>(classLoader, loggerSupplier, tClass);
     }
 
     public <N extends AgentLogger> AgentLoggerFactory<N> newFactory(Function<Logger, N> loggerSupplier, Class<N> tClass) {
         try {
             return new Builder<N>(classLoader, loggerSupplier, tClass).build();
-        } catch (ClassNotFoundException e) {
-            agentLogger.error("new factory fail: {}", e);
-        } catch (NoSuchMethodException e) {
-            agentLogger.error("new factory fail: {}", e);
-        } catch (IllegalAccessException e) {
-            agentLogger.error("new factory fail: {}", e);
-        } catch (InvocationTargetException e) {
-            agentLogger.error("new factory fail: {}", e);
-        } catch (InstantiationException e) {
-            agentLogger.error("new factory fail: {}", e);
-        } catch (NoSuchFieldException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | InstantiationException | InvocationTargetException | IllegalAccessException e) {
             agentLogger.error("new factory fail: {}", e);
         }
         return null;
@@ -78,9 +68,7 @@ public class AgentLoggerFactory<T extends AgentLogger> {
             java.util.logging.Logger logger = (java.util.logging.Logger) o;
             // 还原为之前的 ClassLoader
             return loggerSupplier.apply(logger);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
@@ -108,7 +96,7 @@ public class AgentLoggerFactory<T extends AgentLogger> {
                 Thread.currentThread().setContextClassLoader(classLoader);
                 Class<?> clazz = classLoader.loadClass("com.megaease.easeagent.log4j2.impl.LoggerProxyFactory");
                 Class<?> parameterTypes = classLoader.loadClass(String.class.getName());
-                Constructor constructor = clazz.getDeclaredConstructor(String.class);
+                Constructor<?> constructor = clazz.getDeclaredConstructor(String.class);
                 Object factory = constructor.newInstance(tClass.getName());
                 Method method = clazz.getDeclaredMethod("getAgentLogger", parameterTypes);
                 return new AgentLoggerFactory<>(classLoader, factory, method, loggerSupplier, buildMdc());

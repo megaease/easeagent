@@ -20,7 +20,7 @@ package com.megaease.easeagent.log4j2;
 import com.megaease.easeagent.log4j2.api.Mdc;
 
 public class MDC {
-    private static Mdc MDC = LoggerFactory.FACTORY.mdc();
+    private static final Mdc MDC = LoggerFactory.FACTORY.mdc();
 
     public static void put(String key, String value) {
         MDC.put(key, value);

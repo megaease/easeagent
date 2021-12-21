@@ -39,6 +39,9 @@ public class DirUrlsSupplier implements Supplier<URL[]> {
             return null;
         }
         File[] files = file.listFiles();
+        if (files == null) {
+            return null;
+        }
         URL[] urls = new URL[files.length];
         for (int i = 0; i < files.length; i++) {
             try {
