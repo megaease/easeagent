@@ -60,19 +60,29 @@ public class ClassMatcher implements IClassMatcher {
 
         private IClassMatcher left;
         private Operator operator = Operator.AND;
+        private boolean  isNegate = false;
 
         ClassMatcherBuilder() {
         }
 
         public ClassMatcherBuilder or() {
+            return operate(Operator.OR);
+        }
+
+        public ClassMatcherBuilder and() {
+            return operate(Operator.AND);
+        }
+
+        private ClassMatcherBuilder operate(Operator opt) {
             ClassMatcherBuilder builder = new ClassMatcherBuilder();
             builder.left = this.build();
-            builder.operator = Operator.OR;
+            builder.operator = opt;
+
             return builder;
         }
 
         public ClassMatcherBuilder negate() {
-            this.operator = Operator.NEGATE;
+            this.isNegate = true;
             return this;
         }
 
@@ -121,10 +131,6 @@ public class ClassMatcher implements IClassMatcher {
             return this.name(className).matchType(ClassMatch.INTERFACE);
         }
 
-        protected ClassMatcherBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
 
         public ClassMatcherBuilder matchType(ClassMatch matchType) {
             this.matchType = matchType;
@@ -181,33 +187,41 @@ public class ClassMatcher implements IClassMatcher {
             return this;
         }
 
-        public void setLeft(IClassMatcher matcher) {
-            this.left = matcher;
-        }
-
-        public void setOperator(Operator opt) {
-            this.operator = opt;
+        protected ClassMatcherBuilder name(String name) {
+            this.name = name;
+            return this;
         }
 
         public IClassMatcher build() {
             IClassMatcher matcher = new ClassMatcher(name, matchType, modifier, notModifier, classLoader);
+
+            if (this.isNegate) {
+                matcher = matcher.negate();
+            }
+
             if (this.left == null || this.operator == null) {
                 return matcher;
             }
+
             switch (this.operator) {
                 case OR:
                     return new OrClassMatcher(this.left, matcher);
                 case AND:
                     return new AndClassMatcher(this.left, matcher);
-                case NEGATE:
-                    return matcher.negate();
                 default:
                     return matcher;
             }
         }
 
         public String toString() {
-            return "ClassMatcher.ClassMatcherBuilder(name=" + this.name + ", matchType=" + this.matchType + ", modifier=" + this.modifier + ", notModifier=" + this.notModifier + ", classLoader=" + this.classLoader + ")";
+            return "ClassMatcher.ClassMatcherBuilder(name=" + this.name
+                + ", matchType=" + this.matchType
+                + ", modifier=" + this.modifier
+                + ", notModifier=" + this.notModifier
+                + ", isNegate=" + this.isNegate
+                + ", operate=" + this.operator
+                + ", left=" + this.left
+                + ", classLoader=" + this.classLoader + ")";
         }
     }
 }

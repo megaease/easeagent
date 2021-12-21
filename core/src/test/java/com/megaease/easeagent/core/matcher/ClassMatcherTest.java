@@ -40,6 +40,9 @@ public class ClassMatcherTest {
     public static class TestClass extends TestBaseClass implements TestInterface {
     }
 
+    public static class TestClass2 extends TestBaseClass implements TestInterface2 {
+    }
+
     @Test
     public void testMatch() {
         // super class matcher
@@ -69,5 +72,18 @@ public class ClassMatcherTest {
         Assert.assertFalse(eMatcher.matches(type));
         type = TypeDescription.ForLoadedType.of(TestClass.class);
         Assert.assertTrue(eMatcher.matches(type));
+
+        // negate test
+        matcher = ClassMatcher.builder()
+            .hasSuperClass(TestBaseClass.class.getName())
+            .and()
+            .hasInterface(TestInterface2.class.getName())
+            .negate()
+            .build();
+        eMatcher = ClassMatcherConvert.INSTANCE.convert(matcher);
+        type = TypeDescription.ForLoadedType.of(TestClass.class);
+        Assert.assertTrue(eMatcher.matches(type));
+        type = TypeDescription.ForLoadedType.of(TestClass2.class);
+        Assert.assertFalse(eMatcher.matches(type));
     }
 }

@@ -106,7 +106,7 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcherBuilder negate() {
-            this.isNegate = false;
+            this.isNegate = true;
             return this;
         }
 
@@ -274,7 +274,11 @@ public class MethodMatcher implements IMethodMatcher {
                 + ", nameMatchType=" + this.nameMatchType + ", returnType=" + this.returnType
                 + ", args=" + Arrays.deepToString(this.args) + ", argsLength=" + this.argsLength
                 + ", modifier=" + this.modifier
-                + ", notModifier=" + this.notModifier + ")";
+                + ", notModifier=" + this.notModifier
+                + ", operator=" + this.operator
+                + ", isNegate=" + this.isNegate
+                + ", left=" + this.left
+                + ")";
         }
     }
 

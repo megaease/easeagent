@@ -43,8 +43,17 @@ public class MethodMatcherTest {
             System.out.println("sum:" + a1 + a2 + a3 + a4);
         }
 
+        public String basicPublish(int a2, int a3, int a4) {
+            return "";
+        }
+
         void basicConsume(int a1, int a2, int a3, int a4) {
             System.out.println("sum:" + a1 + a2 + a3 + a4);
+        }
+
+        int basicConsume(char a1, int a2, int a3, int a4) {
+            System.out.println("sum:" + a1 + a2 + a3 + a4);
+            return 0;
         }
     }
 
@@ -58,6 +67,7 @@ public class MethodMatcherTest {
         IClassMatcher o = named(FooInterface.class.getName())
             .or(named(Statement.class.getName()));
 
+        // overridden from test
         IMethodMatcher m = MethodMatcher.builder()
             .isOverriddenFrom(o)
             .build();
@@ -78,6 +88,7 @@ public class MethodMatcherTest {
 
     @Test
     public void testMatcher() {
+        // modifier | argsLength | returnType test
         IMethodMatcher matcher = MethodMatcher.builder().named("basicPublish")
             .isPublic()
             .argsLength(4)
@@ -95,7 +106,6 @@ public class MethodMatcherTest {
         }
         Assert.assertNotNull(reflectMethod);
         MethodDescription method = new MethodDescription.ForLoadedMethod(reflectMethod);
-
         Assert.assertTrue(eMatcher.matches(method));
 
         matcher = MethodMatcher.builder().named("basicConsume")
@@ -103,9 +113,26 @@ public class MethodMatcherTest {
             .argsLength(4)
             .qualifier("basicConsume")
             .build();
-
         eMatcher = MethodMatcherConvert.INSTANCE.convert(matcher);
-
         Assert.assertFalse(eMatcher.matches(method));
+
+        // negate test
+        matcher = MethodMatcher.builder().named("basicPublish")
+            .isPublic()
+            .and()
+            .returnType("void")
+            .negate()
+            .build();
+        eMatcher = MethodMatcherConvert.INSTANCE.convert(matcher);
+        Assert.assertFalse(eMatcher.matches(method));
+        try {
+            reflectMethod = Foo.class.getDeclaredMethod("basicPublish",
+                int.class, int.class, int.class);
+        } catch (Exception e) {
+            reflectMethod = null;
+        }
+        Assert.assertNotNull(reflectMethod);
+        method = new MethodDescription.ForLoadedMethod(reflectMethod);
+        Assert.assertTrue(eMatcher.matches(method));
     }
 }

@@ -10,5 +10,6 @@ dependency-reduced-pom.xml
 .project
 .settings
 .DS_Store
+.vscode
 logs/
 tmp/
