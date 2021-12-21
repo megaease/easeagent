@@ -7,7 +7,7 @@
 EaseAgent provides a Matcher DSL (Domain Specific Language) to define a `Points` implementation which is used to defined classes and their methods to be enhanced. 
 
 The design of this DSL is borrowed from bytebuddy's class and method matching DSL design. Why not use bytebuddy's DSL interface directly?
-- Decopule from bytebuddy, which is an excellent bytecode editing framework, but we still want to decouple the API interface from it.
+- Decouple from the ByteBuddy, Although the byteBuddy is an excellent bytecode framework, we provide dedicated DSL to developers via abstracting it, can easily migrate to a more excellent framework in the future.
 - Provide a cleaner and easier to use API for Agent scenarios.
 
 
