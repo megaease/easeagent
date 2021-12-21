@@ -66,7 +66,7 @@ For example, the following ClassMatcher will match non-interface classes which i
 
 - Logical OR  
 `ClassMatcherBuilder` provides `or()` method which will finish current builder and start a new `ClassMatcherBuilder`.
-The provious builder will generete a `Left ClassMatcher` and the new builder will generate a 'Right ClassMatcher'.
+The previous builder will generate a `Left ClassMatcher` and the new builder will generate a 'Right ClassMatcher'.
 The `Left matcher` and `Right matcher` will be combined into one `OrClasssMatcher`, and a class will match as long as the `Left` or `Right` matcher is a match.
 For example, the following ClassMatcher will match classes that implement the `javax.servlet.Filter` interface **or** inherit the "javax.servlet.http.HttpServlet" class.
 
