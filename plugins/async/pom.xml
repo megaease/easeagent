@@ -37,7 +37,6 @@
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>plugin-api</artifactId>
-            <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

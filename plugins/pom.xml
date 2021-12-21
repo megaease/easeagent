@@ -28,8 +28,8 @@
     </parent>
 
     <artifactId>plugins</artifactId>
-    <packaging>pom</packaging>
     <version>1.0.0</version>
+    <packaging>pom</packaging>
     <name>easeagent-plugins</name>
 
     <modules>
@@ -46,6 +46,22 @@
         <module>okhttp</module>
         <module>elasticsearch</module>
     </modules>
+
+    <properties>
+        <version.easeagent>2.0.0</version.easeagent>
+    </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.megaease.easeagent</groupId>
+                <artifactId>plugin-api</artifactId>
+                <version>${version.easeagent}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <!--
+    -->
 
     <build>
         <pluginManagement>
