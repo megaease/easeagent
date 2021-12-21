@@ -170,7 +170,7 @@ For example, the following MethodMatcher will match the method which named `getC
 ```
 
 In additon, `MethodMatcherBuilder` provides `and()` method which will finish current builder and start a new `MethodMatcherBuilder`.
-The provious builder will generete a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
+The previous builder will generate a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
 The `Left matcher` and `Right matcher` will be combined into one `AndMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.
 
 For example, the following matcher will match public methods that named `write` and exclude that with `void` return type.
