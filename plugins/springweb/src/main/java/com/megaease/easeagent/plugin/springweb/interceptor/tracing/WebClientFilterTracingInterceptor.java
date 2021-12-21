@@ -22,7 +22,9 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.springweb.WebClientPlugin;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientFilterAdvice;
@@ -39,6 +41,7 @@ import java.util.Collection;
 
 @AdviceTo(value = WebClientFilterAdvice.class, plugin = WebClientPlugin.class)
 public class WebClientFilterTracingInterceptor implements NonReentrantInterceptor {
+    static Logger log = EaseAgent.getLogger(WebClientFilterTracingInterceptor.class);
     private static final Object PROGRESS_CONTEXT = new Object();
 
     @Override
@@ -51,6 +54,7 @@ public class WebClientFilterTracingInterceptor implements NonReentrantIntercepto
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
+        log.info("test log");
         HttpRequest request = getRequest(methodInfo);
         RequestContext requestContext = context.clientRequest(request);
         Span span = requestContext.span();

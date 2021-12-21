@@ -75,6 +75,8 @@
             <outputDirectory>lib</outputDirectory>
             <excludes>
                 <exclude>**/com/megaease/easeagent/plugin/*</exclude>
+                <exclude>**/com/megaease/easeagent/boot/*</exclude>
+                <exclude>**/com/megaease/easeagent/log4j2/*</exclude>
             </excludes>
             <includes>
                 <include>com.megaease.easeagent:build</include>

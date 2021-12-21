@@ -46,7 +46,6 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
         this.requestContext = context;
     }
 
-    @Nonnull
     @Override
     public reactor.util.context.Context currentContext() {
         return actual.currentContext();

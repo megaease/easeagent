@@ -47,6 +47,7 @@ import javax.annotation.Nullable;
 // Design note: this does not require a builder as the span is mutable anyway. Having a single
 // mutation interface is less code to maintain. Those looking to prepare a span before starting it
 // can simply call start when they are ready.
+@SuppressWarnings("unused")
 public interface Span {
     enum Kind {
         CLIENT,
@@ -144,7 +145,7 @@ public interface Span {
     Span error(Throwable throwable);
 
     /**
-     * Lower-case label of the remote node in the service graph, such as "favstar". Do not set if
+     * Lower-case label of the remote node in the service graph, such as "fav-star". Do not set if
      * unknown. Avoid names with variables or unique identifiers embedded.
      *
      * <p>This is a primary label for trace lookup and aggregation, so it should be intuitive and
@@ -253,7 +254,7 @@ public interface Span {
     /**
      * Unique 8-byte identifier of this span within a trace.
      *
-     * <p>A span is uniquely identified in storage by ({@linkplain #traceId}, {@linkplain #spanId}).
+     * <p>A span is uniquely identified in storage by ({@linkplain #traceId}).
      */
     Long spanId();
 

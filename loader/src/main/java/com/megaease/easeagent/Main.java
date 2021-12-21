@@ -99,6 +99,7 @@ public class Main {
         Class<?> classLoaderSupplier = bootstrapLoader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
         Field field = classLoaderSupplier.getDeclaredField("CLASSLOADER");
         field.set(null, slf4j2Loader);
+        // field.set(null, bootstrapLoader);
     }
 
     /**
