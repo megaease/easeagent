@@ -189,7 +189,7 @@ For example, the following matcher will match public methods that named `write` 
 - Logical OR  
 `MethodMatcherBuilder` provides `or()` method which will finish current builder and start a new `MethodMatcherBuilder`.
 
-The provious builder will generete a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
+The previous builder will generate a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
 The `Left matcher` and `Right matcher` will be combined into one `OrMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.
 For example, the following MethodMatcher will match method that named `addBatch`  **or** named "clearBatch" and then give this `OrClasssMatcher` matcher a name `batch`.
 
