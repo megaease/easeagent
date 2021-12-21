@@ -55,8 +55,9 @@ The following methods are common condition settings in class matching,
 
 ### Logical Operation
 - Logical AND  
-As mention above, each condition in a matcher is a combination of `logical AND`.
-For example, the following ClassMatcher will match non-interface classes which inherit the `java.lang.String` **and** implements the `java.lang.Comparable` interface.
+  As mention above, each condition in a matcher is a combination of `logical AND`.
+
+  For example, the following ClassMatcher will match non-interface classes which inherit the `java.lang.String` **and** implements the `java.lang.Comparable` interface.
 ```java
     ClassMatcher.builder()
         .hasSuperClass("java.lang.String")
@@ -68,7 +69,9 @@ For example, the following ClassMatcher will match non-interface classes which i
 In addition, `ClassMatcherBuilder` provides `and()` method which will finish current builder and start a new `ClassMatcherBuilder`.
 The previous builder will generate a `Left ClassMatcher` and the new builder will generate a 'Right ClassMatcher'.
 The `Left matcher` and `Right matcher` will be combined into one `AndClassMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.  
-For example, the following matcher will will match classes that inherit the `easeagent.test.TestBaseClass` class **and** exclude classes implementing "easeagent.test.InterfaceB" class.
+
+For example, the following matcher will will match classes that inherit the `easeagent.test.TestBaseClass` class **and** exclude classes implementing "easeagent.test.InterfaceB" interface.
+
 ```
     matcher = ClassMatcher.builder()
         .hasSuperClass("easeagent.test.TestBaseClass")
@@ -79,10 +82,11 @@ For example, the following matcher will will match classes that inherit the `eas
 ```
 
 - Logical OR  
-`ClassMatcherBuilder` provides `or()` method which will finish current builder and start a new `ClassMatcherBuilder`.
-The previous builder will generate a `Left ClassMatcher` and the new builder will generate a 'Right ClassMatcher'.
-The `Left matcher` and `Right matcher` will be combined into one `OrClassMatcher`, and a class will match as long as the `Left` or `Right` matcher is a match.
-For example, the following ClassMatcher will match classes that implement the `javax.servlet.Filter` interface **or** inherit the "javax.servlet.http.HttpServlet" class.
+  `ClassMatcherBuilder` provides `or()` method which will finish current builder and start a new `ClassMatcherBuilder`.
+  The previous builder will generate a `Left ClassMatcher` and the new builder will generate a 'Right ClassMatcher'.
+  The `Left matcher` and `Right matcher` will be combined into one `OrClassMatcher`, and a class will match as long as the `Left` or `Right` matcher is a match.
+
+  For example, the following ClassMatcher will match classes that implement the `javax.servlet.Filter` interface **or** inherit the "javax.servlet.http.HttpServlet" class.
 
 ```java
     public IClassMatcher getClassMatcher() {
@@ -193,7 +197,9 @@ For example, the following MethodMatcher will match the method which named `getC
 In addition, `MethodMatcherBuilder` provides `and()` method which will finish current builder and start a new `MethodMatcherBuilder`.
 The previous builder will generate a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
 The `Left matcher` and `Right matcher` will be combined into one `AndMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.  
+
 For example, the following matcher will match public methods that named `write` and exclude that with `void` return type.
+
 ```java
     MethodMatcher.builder()
         .named("write")
@@ -207,10 +213,11 @@ For example, the following matcher will match public methods that named `write` 
 
 
 - Logical OR  
-`MethodMatcherBuilder` provides `or()` method which will finish current builder and start a new `MethodMatcherBuilder`.  
-The previous builder will generate a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
-The `Left matcher` and `Right matcher` will be combined into one `OrMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.  
-For example, the following MethodMatcher will match method that named `addBatch`  **or** named "clearBatch" and then give this `OrClassMatcher` matcher a name `batch`.
+  `MethodMatcherBuilder` provides `or()` method which will finish current builder and start a new `MethodMatcherBuilder`.  
+  The previous builder will generate a `Left MethodMatcher` and the new builder will generate a 'Right MethodMatcher'.
+  The `Left matcher` and `Right matcher` will be combined into one `OrMethodMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.  
+
+  For example, the following MethodMatcher will match method that named `addBatch`  **or** named "clearBatch" and then give this `OrClassMatcher` matcher a name `batch`.
 
 ```java
     MethodMatcher.builder()
@@ -222,9 +229,10 @@ For example, the following MethodMatcher will match method that named `addBatch`
 ```
 
 - Logical NOT  
-The `negate()` method of `MethodMatcherBuilder` uses `NegateMethodMatcher` to wrap the original matcher generated by builder when no such method is applied.  
-When a method matches the original matcher, it is unmatched by the wrap matcher; conversely, it is matched.
-For example, the following matcher will match public methods that named `write` and exclude that with `void` return type.
+  The `negate()` method of `MethodMatcherBuilder` uses `NegateMethodMatcher` to wrap the original matcher generated by builder when no such method is applied.  
+  When a method matches the original matcher, it is unmatched by the wrap matcher; conversely, it is matched.
+
+  For example, the following matcher will match public methods that named `write` and exclude that with `void` return type.
 
 ```java
     MethodMatcher.builder()
