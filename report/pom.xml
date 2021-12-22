@@ -39,6 +39,9 @@
             <artifactId>plugin-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!--
+        -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -47,6 +50,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -71,6 +75,7 @@
             </exclusions>
             <!--            <optional>true</optional>-->
         </dependency>
+
         <dependency>
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-sender-kafka11</artifactId>

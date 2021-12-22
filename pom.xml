@@ -110,6 +110,18 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.megaease.easeagent</groupId>
+                <artifactId>plugin-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.megaease.easeagent</groupId>
+                <artifactId>log4j2-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.google.auto.service</groupId>
                 <artifactId>auto-service</artifactId>
                 <version>${version.auto-service}</version>

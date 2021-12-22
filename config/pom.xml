@@ -32,7 +32,6 @@
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>plugin-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -43,29 +42,6 @@
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>log4j2-api</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.megaease.easeagent</groupId>
-            <artifactId>log4j2-impl</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
