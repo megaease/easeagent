@@ -1,29 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <EaseHttp name="http" uri="http://localhost:8080/requests" contentType="text/plain; charset=utf-8"
-                  userAgent="iOS/x.x.x"/>
-        <EaseHttp name="https" uri="https://localhost:8443/requests" contentType="text/plain; charset=utf-8"
-                  userAgent="iOS/x.x.x"/>
         <Console name="Console" target="SYSTEM_OUT">
             <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} [%10.10t] %-p %10.10c{1} - %msg%n"/>-->
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36}:%L (%X{testMdc}) - %msg%xEx%n"/>
         </Console>
-        <Failover name="failover" primary="http" retryIntervalSeconds="1">
-            <Failovers>
-                <AppenderRef ref="Console"/>
-            </Failovers>
-        </Failover>
     </Appenders>
     <Loggers>
-        <Root level="debug">
+        <Root level="INFO">
             <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="http" level="info" additivity="false">
-            <AppenderRef ref="failover"/>
-        </Logger>
-        <Logger name="https" level="info" additivity="false">
-            <AppenderRef ref="https"/>
-        </Logger>
     </Loggers>
 </Configuration>

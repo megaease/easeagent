@@ -111,6 +111,7 @@ public abstract class Provider implements AgentReportAware, ConfigAware, IProvid
         AgentHealth.instance.setReadinessEnabled(this.config.getBoolean(EASEAGENT_HEALTH_READINESS_ENABLED));
         ThreadLocalCurrentTraceContext traceContext = ThreadLocalCurrentTraceContext.newBuilder()
             .addScopeDecorator(AgentMDCScopeDecorator.get())
+            .addScopeDecorator(AgentMDCScopeDecorator.getV2())
             .build();
 
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
