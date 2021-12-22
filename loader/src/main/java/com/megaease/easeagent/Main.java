@@ -60,6 +60,7 @@ public class Main {
         // custom classloader
         ArrayList<URL> urls = nestArchiveUrls(archive, LIB);
         urls.addAll(nestArchiveUrls(archive, PLUGINS));
+        urls.addAll(nestArchiveUrls(archive, SLf4J2));
         File p = new File(jar.getParent() + File.separator + "plugins");
         if (p.exists()) {
             urls.addAll(directoryPluginUrls(p));
