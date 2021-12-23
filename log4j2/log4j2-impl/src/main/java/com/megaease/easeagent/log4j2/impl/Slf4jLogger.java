@@ -55,6 +55,7 @@ public class Slf4jLogger extends java.util.logging.Logger {
                 return logger.isDebugEnabled();
             case TRACE_VALUE:
                 return logger.isTraceEnabled();
+            default:
         }
         return false;
     }
@@ -77,6 +78,7 @@ public class Slf4jLogger extends java.util.logging.Logger {
             case TRACE_VALUE:
                 logger.trace(msg);
                 break;
+            default:
         }
     }
 
@@ -98,6 +100,7 @@ public class Slf4jLogger extends java.util.logging.Logger {
             case TRACE_VALUE:
                 logger.trace(msg, param1);
                 break;
+            default:
         }
     }
 
@@ -120,6 +123,7 @@ public class Slf4jLogger extends java.util.logging.Logger {
             case TRACE_VALUE:
                 logger.trace(msg, params);
                 break;
+            default:
         }
     }
 
@@ -141,6 +145,7 @@ public class Slf4jLogger extends java.util.logging.Logger {
             case TRACE_VALUE:
                 logger.trace(msg, thrown);
                 break;
+            default:
         }
     }
 }

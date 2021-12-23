@@ -42,13 +42,14 @@ public class ThreadLocalCurrentContext {
     public Scope newScope(@Nullable Context current) {
         final Context previous = local.get();
         local.set(current);
-        Scope result = previous != null ? new RevertToPreviousScope(local, previous) : revertToNull;
-        return result;
+        return previous != null ? new RevertToPreviousScope(local, previous) : revertToNull;
     }
 
     public Scope maybeScope(@Nullable Context context) {
         Context current = get();
-        if (Objects.equals(current, context)) return Scope.NOOP;
+        if (Objects.equals(current, context)) {
+            return Scope.NOOP;
+        }
         return newScope(context);
     }
 

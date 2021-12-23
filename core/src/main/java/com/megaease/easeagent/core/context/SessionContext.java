@@ -237,7 +237,7 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public <T> T peek() {
-        if (this.retStack.size() <= 0) {
+        if (this.retStack.isEmpty()) {
             return null;
         }
         Object o = this.retStack.pop();

@@ -26,20 +26,23 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 public class RabbitMqConsumerAdvice implements Points {
+    @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
-                .hasSuperClass("com.rabbitmq.client.Consumer")
-                .notAbstract()
-                .notInterface()
-                .build();
+            .hasSuperClass("com.rabbitmq.client.Consumer")
+            .notAbstract()
+            .notInterface()
+            .build();
     }
 
+    @Override
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.builder().named("handleDelivery")
-                .build()
-                .toSet();
+            .build()
+            .toSet();
     }
 
+    @Override
     public boolean isAddDynamicField() {
         return true;
     }

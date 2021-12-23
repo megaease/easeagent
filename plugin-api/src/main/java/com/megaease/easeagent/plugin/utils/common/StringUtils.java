@@ -21,6 +21,10 @@ import java.nio.charset.StandardCharsets;
 
 @SuppressWarnings("unused")
 public class StringUtils {
+
+    private StringUtils() {
+    }
+
     /**
      * <p>Checks if a CharSequence is empty ("") or null.</p>
      *
@@ -36,7 +40,7 @@ public class StringUtils {
      * It no longer trims the CharSequence.
      * That functionality is available in isBlank().</p>
      *
-     * @param cs  the CharSequence to check, may be null
+     * @param cs the CharSequence to check, may be null
      * @return {@code true} if the CharSequence is empty or null
      * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
      */
@@ -55,7 +59,7 @@ public class StringUtils {
      * StringUtils.isNotEmpty("  bob  ") = true
      * </pre>
      *
-     * @param cs  the CharSequence to check, may be null
+     * @param cs the CharSequence to check, may be null
      * @return {@code true} if the CharSequence is not empty and not null
      * @since 3.0 Changed signature from isNotEmpty(String) to isNotEmpty(CharSequence)
      */
@@ -89,7 +93,7 @@ public class StringUtils {
      * StringUtils.isNumeric("+123") = false
      * </pre>
      *
-     * @param cs  the CharSequence to check, may be null
+     * @param cs the CharSequence to check, may be null
      * @return {@code true} if only contains digits, and is non-null
      * @since 3.0 Changed signature from isNumeric(String) to isNumeric(CharSequence)
      * @since 3.0 Changed "" to return false and not true
@@ -128,9 +132,9 @@ public class StringUtils {
      * StringUtils.isNumericSpace("12.3") = false
      * </pre>
      *
-     * @param cs  the CharSequence to check, may be null
+     * @param cs the CharSequence to check, may be null
      * @return {@code true} if only contains digits or space,
-     *  and is non-null
+     * and is non-null
      * @since 3.0 Changed signature from isNumericSpace(String) to isNumericSpace(CharSequence)
      */
     public static boolean isNumericSpace(final CharSequence cs) {
@@ -163,7 +167,7 @@ public class StringUtils {
      * StringUtils.isWhitespace("ab-c") = false
      * </pre>
      *
-     * @param cs  the CharSequence to check, may be null
+     * @param cs the CharSequence to check, may be null
      * @return {@code true} if only contains whitespace, and is non-null
      * @since 2.0
      * @since 3.0 Changed signature from isWhitespace(String) to isWhitespace(CharSequence)
