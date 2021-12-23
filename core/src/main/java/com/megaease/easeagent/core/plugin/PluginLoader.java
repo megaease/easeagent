@@ -54,10 +54,10 @@ public class PluginLoader {
 
     public static void providerLoad() {
         for (Provider provider : BaseLoader.load(Provider.class)) {
-            log.info("loading provider:{}", provider.getClass().getName());
+            log.debug("loading provider:{}", provider.getClass().getName());
 
             try {
-                log.info("provider for:{} at {}",
+                log.debug("provider for:{} at {}",
                     provider.getPluginClassName(), provider.getAdviceTo());
 
                 PluginRegistry.register(provider);
