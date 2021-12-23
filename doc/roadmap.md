@@ -17,3 +17,4 @@ Join OpenAPM Landscape            | | [OpenAPM landscape](https://openapm.io/lan
 Plugin UnitTest Framework | | Unit Test
 Integrate Test Framework | | CI/CD can verify the EaseAgent for each pull request
 Support loading and unloading plugin dynamiclly| | The application does not need to restart to update plugins.
+Dynamic field added by plugins isolating | | When multiple plugins add dynamic field to the same class, they do not need to be aware of each other.
