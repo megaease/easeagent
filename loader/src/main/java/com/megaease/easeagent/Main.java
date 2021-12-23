@@ -68,6 +68,7 @@ public class Main {
 
         final ClassLoader loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
 
+
         // install bootstrap jar
         final ArrayList<URL> bootUrls = nestArchiveUrls(archive, BOOTSTRAP);
         bootUrls.forEach(url -> installBootstrapJar(url, inst));
@@ -78,11 +79,24 @@ public class Main {
         initEaseAgentSlf4j2Dir(archive, loader);
 
         switchLoggingProperty(loader, loggingProperty, () -> {
+            initAgentSlf4jMDC(loader);
             loader.loadClass(bootstrap)
                 .getMethod("premain", String.class, Instrumentation.class)
                 .invoke(null, args, inst);
             return null;
         });
+    }
+
+    private static void initAgentSlf4jMDC(ClassLoader loader) {
+        // init sfl4j MDC for inner agent
+        Class mdcClass;
+        try {
+            mdcClass = loader.loadClass("org.slf4j.MDC");
+            // just make a reference to mdcClass avoiding JIT remove
+            mdcClass.getMethod("remove", String.class)
+                .invoke(null, "EaseAgent");
+        } catch (Exception ignored) {
+        }
     }
 
     private static void installBootstrapJar(URL url, Instrumentation inst) {

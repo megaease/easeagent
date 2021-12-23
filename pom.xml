@@ -26,13 +26,13 @@
     <version>2.0.0</version>
     <modules>
         <module>plugin-api</module>
+        <module>log4j2</module>
         <module>plugins</module>
         <module>core</module>
         <module>gen</module>
         <module>common</module>
         <module>metrics</module>
         <module>zipkin</module>
-        <module>log4j2</module>
         <module>loader</module>
         <module>sniffer</module>
         <module>config</module>
