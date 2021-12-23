@@ -17,10 +17,12 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.megaease.easeagent.httpserver.AgentHttpHandler;
-import com.megaease.easeagent.httpserver.AgentHttpServer;
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.router.RouterNanoHTTPD;
+import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
+import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.IHTTPSession;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
+import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
@@ -43,7 +45,7 @@ public class PrometheusAgentHttpHandler extends AgentHttpHandler {
     }
 
     @Override
-    public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+    public Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
         Map<String, String> headers = session.getHeaders();
         String contentType = TextFormat.chooseContentType(headers.get("Accept"));
         Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
@@ -55,6 +57,6 @@ public class PrometheusAgentHttpHandler extends AgentHttpHandler {
             log.warn("write data error. {}", e.getMessage());
         }
         String data = stringWriter.toString();
-        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, data);
+        return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, data);
     }
 }

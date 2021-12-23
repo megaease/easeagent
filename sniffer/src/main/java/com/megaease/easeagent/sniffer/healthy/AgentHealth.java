@@ -17,10 +17,13 @@
 
 package com.megaease.easeagent.sniffer.healthy;
 
-import com.megaease.easeagent.httpserver.AgentHttpHandler;
-import com.megaease.easeagent.httpserver.AgentHttpServer;
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.router.RouterNanoHTTPD;
+import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
+import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.IHTTPSession;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.IStatus;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
+import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
 import lombok.Data;
 
 import java.util.Map;
@@ -41,8 +44,8 @@ public class AgentHealth {
         }
 
         @Override
-        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
+        public Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
+            return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, (String)null);
         }
     }
 
@@ -63,18 +66,20 @@ public class AgentHealth {
         }
 
         @Override
-        public NanoHTTPD.Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+        public Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
             if (instance.isReadinessEnabled()) {
                 if (instance.isReady()) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, AgentHttpServer.JSON_TYPE, null);
+                    return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, (String) null);
                 }
-                return NanoHTTPD.newFixedLengthResponse(Status.SERVICE_UNAVAILABLE, AgentHttpServer.JSON_TYPE, null);
+
+                return Response.newFixedLengthResponse(HStatus.SERVICE_UNAVAILABLE,
+                    AgentHttpServer.JSON_TYPE, (String) null);
             }
             return super.process(uriResource, urlParams, session);
         }
     }
 
-    enum Status implements NanoHTTPD.Response.IStatus {
+    enum HStatus implements IStatus {
 
         SERVICE_UNAVAILABLE(503, "Service Unavailable"),
         ;
@@ -82,7 +87,7 @@ public class AgentHealth {
 
         private final String description;
 
-        Status(int requestStatus, String description) {
+        HStatus(int requestStatus, String description) {
             this.requestStatus = requestStatus;
             this.description = description;
         }

@@ -23,20 +23,22 @@
     <groupId>com.megaease.easeagent</groupId>
     <artifactId>easeagent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <modules>
+        <module>plugin-api</module>
+        <module>log4j2</module>
+        <module>plugins</module>
         <module>core</module>
         <module>gen</module>
-        <module>build</module>
         <module>common</module>
         <module>metrics</module>
         <module>zipkin</module>
-        <module>log4j2</module>
         <module>loader</module>
         <module>sniffer</module>
         <module>config</module>
         <module>report</module>
         <module>httpserver</module>
+        <module>build</module>
     </modules>
 
     <properties>
@@ -46,8 +48,9 @@
         <version.mockito>1.10.19</version.mockito>
         <version.guava>30.1-jre</version.guava>
         <version.slf4j>1.7.21</version.slf4j>
-        <version.byte-buddy>1.10.19</version.byte-buddy>
+        <version.byte-buddy>1.11.21</version.byte-buddy>
         <version.auto-service>1.0-rc2</version.auto-service>
+        <version.jsr305>3.0.2</version.jsr305>
         <version.lombok>1.18.20</version.lombok>
         <version.config>1.2.1</version.config>
         <version.jackson>2.12.1</version.jackson>
@@ -58,6 +61,8 @@
         <version.moco>1.1.0</version.moco>
         <version.okhttp3>4.9.0</version.okhttp3>
         <version.disruptor>3.4.2</version.disruptor>
+        <version.commons-lang3>3.11</version.commons-lang3>
+        <version.commons-codec>1.15</version.commons-codec>
         <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
         <version.spring>5.2.6.RELEASE</version.spring>
         <version.spring-kafka>2.3.13.RELEASE</version.spring-kafka>
@@ -65,7 +70,7 @@
         <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
         <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
-        <version.log4j>2.15.0</version.log4j>
+        <version.log4j>2.17.0</version.log4j>
         <version.kafka>2.7.2</version.kafka>
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
         <version.metrics>4.1.17</version.metrics>
@@ -78,15 +83,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>${version.kafka}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service</artifactId>
-            <version>${version.auto-service}</version>
-            <scope>provided</scope>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -111,6 +110,39 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.megaease.easeagent</groupId>
+                <artifactId>plugin-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.megaease.easeagent</groupId>
+                <artifactId>log4j2-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>${version.auto-service}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${version.jsr305}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${version.kafka}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${version.junit}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
                 <version>2020.0.4</version>
@@ -130,15 +162,15 @@
                 <version>${version.byte-buddy}</version>
             </dependency>
             <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>${version.byte-buddy}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${version.guava}</version>
             </dependency>
-            <!--            <dependency>-->
-            <!--                <groupId>com.typesafe</groupId>-->
-            <!--                <artifactId>config</artifactId>-->
-            <!--                <version>${version.config}</version>-->
-            <!--            </dependency>-->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -213,8 +245,15 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.11</version>
+                <version>${version.commons-lang3}</version>
             </dependency>
+            
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${version.commons-codec}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-log4j-appender</artifactId>
@@ -277,11 +316,13 @@
                 <artifactId>brave-instrumentation-messaging</artifactId>
                 <version>${version.brave}</version>
             </dependency>
+            <!--
             <dependency>
                 <groupId>com.rabbitmq</groupId>
                 <artifactId>amqp-client</artifactId>
                 <version>${version.amqp-client}</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
@@ -293,11 +334,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!--
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-amqp</artifactId>
                 <version>${version.spring-boot}</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webflux</artifactId>
@@ -323,16 +366,7 @@
                 <artifactId>simpleclient_common</artifactId>
                 <version>${version.prometheus}</version>
             </dependency>
-            <dependency>
-                <groupId>org.nanohttpd</groupId>
-                <artifactId>nanohttpd</artifactId>
-                <version>2.3.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.nanohttpd</groupId>
-                <artifactId>nanohttpd-nanolets</artifactId>
-                <version>2.3.1</version>
-            </dependency>
+            
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
@@ -360,6 +394,25 @@
                         <arg>-Xlint:unchecked</arg>
                     </compilerArgs>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <compilerArgument>-proc:none</compilerArgument>
+                            <includes>
+                                <!-- Fully qualified name of custom annotation processor-->
+                                <include>com.megaease.easeagent.plugin.processor.PluginProcessor</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-project</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -394,6 +447,17 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <EASEAGENT-SLF4J2-USE-CURRENT>true</EASEAGENT-SLF4J2-USE-CURRENT>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

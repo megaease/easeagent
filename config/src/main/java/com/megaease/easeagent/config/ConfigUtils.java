@@ -19,12 +19,15 @@ package com.megaease.easeagent.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.*;
 
 public class ConfigUtils {
     public static String extractServiceName(Configs configs) {
@@ -48,6 +51,7 @@ public class ConfigUtils {
         });
     }
 
+    @SafeVarargs
     private static <R> R firstNotNull(R... ars) {
         for (R one : ars) {
             if (one != null) {
@@ -89,5 +93,50 @@ public class ConfigUtils {
 
     private static String join(String prefix, String current) {
         return prefix == null ? current : ConfigConst.join(prefix, current);
+    }
+
+    public static boolean isGlobal(String namespace) {
+        return namespace != null && PLUGIN_GLOBAL.equals(namespace);
+    }
+
+    public static boolean isPluginConfig(String key) {
+        if (key.startsWith(PLUGIN_PREFIX)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isPluginConfig(String key, String domain, String namespace, String id) {
+        if (key.startsWith(ConfigConst.join(PLUGIN, domain, namespace, id))) {
+            return true;
+        }
+        return false;
+    }
+
+    public static PluginProperty pluginProperty(String path) {
+        String[] configs = path.split("\\" + DELIMITER);
+        if (configs.length < 5) {
+            throw new ValidateUtils.ValidException(String.format("Property[%s] must be format: %s", path, ConfigConst.join(PLUGIN, "<Domain>", "<Namespace>", "<Id>", "<Properties>")));
+        }
+
+        for (int idOffsetEnd = 3; idOffsetEnd < configs.length - 1; idOffsetEnd++) {
+            new PluginProperty(configs[1], configs[2],
+                ConfigConst.join(Arrays.copyOfRange(configs, 3, idOffsetEnd)),
+                ConfigConst.join(Arrays.copyOfRange(configs, idOffsetEnd + 1, configs.length)));
+        }
+
+        return new PluginProperty(configs[1], configs[2], configs[3], ConfigConst.join(Arrays.copyOfRange(configs, 4, configs.length)));
+    }
+
+
+    public static String requireNonEmpty(String obj, String message) {
+        if (obj == null || obj.trim().isEmpty()) {
+            throw new ValidateUtils.ValidException(message);
+        }
+        return obj.trim();
+    }
+
+    public static String buildPluginProperty(String domain, String namespace, String id, String property) {
+        return String.format(PLUGIN_FORMAT, domain, namespace, id, property);
     }
 }

@@ -22,12 +22,17 @@ import com.megaease.easeagent.config.Config;
 public class SwitchUtil {
 
     public static final String GLOBAL_METRICS_ENABLE_KEY = "observability.metrics.enabled";
+    public static final String GLOBAL_METRICS_ENABLE_KEY_V2 = "plugin.observability.global.metric.enabled";
     public static final String GLOBAL_TRACING_ENABLE_KEY = "observability.tracings.enabled";
+    public static final String GLOBAL_TRACING_ENABLE_KEY_V2 = "plugin.observability.global.tracing.enabled";
 
     public static boolean enableMetric(Config config, String key) {
         Boolean globalEnabled = config.getBoolean(GLOBAL_METRICS_ENABLE_KEY);
         if (!globalEnabled) {
-            return false;
+            globalEnabled = config.getBoolean(GLOBAL_METRICS_ENABLE_KEY_V2);
+            if (!globalEnabled) {
+                return false;
+            }
         }
         return config.getBoolean(key);
     }
@@ -35,7 +40,10 @@ public class SwitchUtil {
     public static boolean enableTracing(Config config, String key) {
         Boolean globalEnabled = config.getBoolean(GLOBAL_TRACING_ENABLE_KEY);
         if (!globalEnabled) {
-            return false;
+            globalEnabled = config.getBoolean(GLOBAL_TRACING_ENABLE_KEY_V2);
+            if (!globalEnabled) {
+                return false;
+            }
         }
         return config.getBoolean(key);
     }

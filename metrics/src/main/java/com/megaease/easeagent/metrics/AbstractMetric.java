@@ -18,17 +18,17 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.common.concurrent.ScheduleHelper;
+import com.megaease.easeagent.plugin.async.ScheduleHelper;
 import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.async.ScheduleRunner;
 
 import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract class AbstractMetric {
-
     protected MetricRegistry metricRegistry;
-
-    protected MetricNameFactory metricNameFactory;
+    protected NameFactory nameFactory;
 
     protected boolean enableSchedule;
 
@@ -38,10 +38,11 @@ public abstract class AbstractMetric {
 
     public AbstractMetric(MetricRegistry metricRegistry, boolean enableSchedule) {
         this.metricRegistry = metricRegistry;
+
         this.enableSchedule = enableSchedule;
         if (this.enableSchedule && this instanceof ScheduleRunner) {
             ScheduleRunner obj = (ScheduleRunner) this;
-            ScheduleHelper.DEFAULT.execute(5, 10, obj::doJob);
+            ScheduleHelper.DEFAULT.nonStopExecute(5, 10, obj::doJob);
         }
     }
 

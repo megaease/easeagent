@@ -20,7 +20,7 @@ package com.megaease.easeagent.sniffer.thread;
 import com.megaease.easeagent.config.ChangeItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigChangeListener;
-import com.megaease.easeagent.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import java.util.List;
 import java.util.Objects;

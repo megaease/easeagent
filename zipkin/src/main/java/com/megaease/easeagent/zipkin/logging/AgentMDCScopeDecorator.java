@@ -21,12 +21,18 @@ import brave.baggage.CorrelationScopeDecorator;
 import brave.internal.CorrelationContext;
 import brave.internal.Nullable;
 import brave.propagation.CurrentTraceContext;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
 public class AgentMDCScopeDecorator {
     static final CurrentTraceContext.ScopeDecorator INSTANCE = new AgentMDCScopeDecorator.Builder().build();
+    static final CurrentTraceContext.ScopeDecorator INSTANCE_V2 = new AgentMDCScopeDecorator.BuilderV2().build();
 
     public static CurrentTraceContext.ScopeDecorator get() {
         return INSTANCE;
+    }
+
+    public static CurrentTraceContext.ScopeDecorator getV2() {
+        return INSTANCE_V2;
     }
 
     public static CorrelationScopeDecorator.Builder newBuilder() {
@@ -36,6 +42,12 @@ public class AgentMDCScopeDecorator {
     static final class Builder extends CorrelationScopeDecorator.Builder {
         Builder() {
             super(AgentMDCScopeDecorator.MDCContext.INSTANCE);
+        }
+    }
+
+    static final class BuilderV2 extends CorrelationScopeDecorator.Builder {
+        BuilderV2() {
+            super(AgentMDCScopeDecorator.MDCContextV2.INSTANCE);
         }
     }
 
@@ -72,6 +84,25 @@ public class AgentMDCScopeDecorator {
             return classLoader;
 //            if (classLoader==null){
 //            }
+        }
+    }
+
+    enum MDCContextV2 implements CorrelationContext {
+        INSTANCE;
+
+        @Override
+        public String getValue(String name) {
+            return EaseAgent.loggerMdc.get(name);
+        }
+
+        @Override
+        public boolean update(String name, @Nullable String value) {
+            if (value != null) {
+                EaseAgent.loggerMdc.put(name, value);
+            } else {
+                EaseAgent.loggerMdc.remove(name);
+            }
+            return true;
         }
     }
 }

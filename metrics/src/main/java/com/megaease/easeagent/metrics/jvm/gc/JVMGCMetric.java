@@ -27,7 +27,7 @@ import com.megaease.easeagent.metrics.*;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;
-import com.megaease.easeagent.metrics.converter.MetricValueFetcher;
+import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
 
@@ -42,14 +42,14 @@ import java.util.function.Supplier;
 import static com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION;
 
 public class JVMGCMetric extends AbstractMetric {
-    public static final String ENABLE_KEY = "observability.metrics.jvmGc.enabled";
+    public static final String ENABLE_KEY = "plugin.observability.jvmGc.metric.enabled";
     private static final String NO_GC = "No GC";
     private final Config config;
 
     public JVMGCMetric(MetricRegistry metricRegistry, Config config) {
         super(metricRegistry, true);
         this.config = config;
-        this.metricNameFactory = MetricNameFactory.createBuilder()
+        this.nameFactory = NameFactory.createBuilder()
                 .meterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
                         .put(MetricField.TIMES, MetricValueFetcher.MeteredCount)
                         .put(MetricField.TIMES_RATE, MetricValueFetcher.MeteredMeanRate)
@@ -67,12 +67,12 @@ public class JVMGCMetric extends AbstractMetric {
     }
 
     public void collect() {
-        for (GarbageCollectorMXBean mbean : ManagementFactory.getGarbageCollectorMXBeans()) {
-            if (!(mbean instanceof NotificationEmitter)) {
+        for (GarbageCollectorMXBean mBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+            if (!(mBean instanceof NotificationEmitter)) {
                 continue;
             }
             NotificationListener listener = getListener();
-            NotificationEmitter notificationEmitter = (NotificationEmitter) mbean;
+            NotificationEmitter notificationEmitter = (NotificationEmitter) mBean;
             notificationEmitter.addNotificationListener(listener, null, null);
         }
     }
@@ -93,7 +93,7 @@ public class JVMGCMetric extends AbstractMetric {
             long duration = gcInfo.getDuration();
 
             String gcName = notificationInfo.getGcName();
-            Map<MetricSubType, MetricName> meterNames = metricNameFactory.meterNames(gcName);
+            Map<MetricSubType, MetricName> meterNames = nameFactory.meterNames(gcName);
             meterNames.forEach((type, name) -> {
                 Meter meter = metricRegistry.meter(name.name());
                 if (!NO_GC.equals(gcCause)) {
@@ -101,7 +101,7 @@ public class JVMGCMetric extends AbstractMetric {
                 }
             });
 
-            Map<MetricSubType, MetricName> counterNames = metricNameFactory.counterNames(gcName);
+            Map<MetricSubType, MetricName> counterNames = nameFactory.counterNames(gcName);
             counterNames.forEach((type, name) -> {
                 Counter count = metricRegistry.counter(name.name());
                 if (!NO_GC.equals(gcCause)) {
@@ -114,7 +114,7 @@ public class JVMGCMetric extends AbstractMetric {
 
     class JVMGCMetricConverter extends ConverterAdapter {
         JVMGCMetricConverter(Supplier<Map<String, Object>> attributes) {
-            super("application", "jvm-gc", metricNameFactory, KeyType.Meter, attributes, "resource");
+            super("application", "jvm-gc", nameFactory, KeyType.Meter, attributes, "resource");
         }
     }
 }
