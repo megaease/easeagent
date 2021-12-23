@@ -49,9 +49,9 @@ public class PluginRegistry {
     static ConcurrentHashMap<String, AgentPlugin> pointsToPlugin = new ConcurrentHashMap<>();
     static ConcurrentHashMap<String, AgentPlugin> pluginClassnameToPlugin = new ConcurrentHashMap<>();
 
-    static final ConcurrentHashMap<String, Integer> qualifierToIndex = new ConcurrentHashMap<>();
-    static final ConcurrentHashMap<Integer, MethodTransformation> indexToMethodTransformation = new ConcurrentHashMap<>();
-    static final AgentArray<Builder> interceptorProviders = new AgentArray<>();
+    static final ConcurrentHashMap<String, Integer> QUALIFIER_TO_INDEX = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<Integer, MethodTransformation> INDEX_TO_METHOD_TRANSFORMATION = new ConcurrentHashMap<>();
+    static final AgentArray<Builder> INTERCEPTOR_PROVIDERS = new AgentArray<>();
 
     public static void register(AgentPlugin plugin) {
         pluginClassnameToPlugin.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
@@ -72,17 +72,17 @@ public class PluginRegistry {
         Set<MethodTransformation> mInfo = methodMatchers.stream().map(matcher -> {
             Junction<MethodDescription> bMethodMatcher = MethodMatcherConvert.INSTANCE.convert(matcher);
             String qualifier = getMethodQualifier(pointsClassName, matcher.getQualifier());
-            Integer index = qualifierToIndex.get(qualifier);
+            Integer index = QUALIFIER_TO_INDEX.get(qualifier);
             if (index == null) {
                 // it is unusual for this is a pointcut without interceptor.
                 // maybe there is some error in plugin providers configuration
                 return null;
             }
-            Builder providerBuilder = interceptorProviders.get(index);
+            Builder providerBuilder = INTERCEPTOR_PROVIDERS.get(index);
             MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, providerBuilder);
-            if (indexToMethodTransformation.putIfAbsent(index, mt) != null) {
+            if (INDEX_TO_METHOD_TRANSFORMATION.putIfAbsent(index, mt) != null) {
                 log.error("There are duplicate qualifier in Points:{}!", qualifier);
-            };
+            }
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
         AgentPlugin plugin = pointsToPlugin.get(pointsClassName);
@@ -108,17 +108,17 @@ public class PluginRegistry {
         pointsToPlugin.putIfAbsent(getPointsClassName(qualifier), plugin);
 
         // generate index and supplier chain
-        Integer index = qualifierToIndex.get(provider.getAdviceTo());
+        Integer index = QUALIFIER_TO_INDEX.get(provider.getAdviceTo());
         if (index == null) {
-            synchronized (qualifierToIndex) {
-                index = qualifierToIndex.get(provider.getAdviceTo());
+            synchronized (QUALIFIER_TO_INDEX) {
+                index = QUALIFIER_TO_INDEX.get(provider.getAdviceTo());
                 if (index == null) {
-                    index = interceptorProviders.add(ProviderChain.builder());
-                    qualifierToIndex.putIfAbsent(provider.getAdviceTo(), index);
+                    index = INTERCEPTOR_PROVIDERS.add(ProviderChain.builder());
+                    QUALIFIER_TO_INDEX.putIfAbsent(provider.getAdviceTo(), index);
                 }
             }
         }
-        interceptorProviders.get(index)
+        INTERCEPTOR_PROVIDERS.get(index)
             .addProvider(new ProviderPluginDecorator(plugin, provider));
 
         return index;
@@ -137,10 +137,10 @@ public class PluginRegistry {
     }
 
     public static MethodTransformation getMethodTransformation(int pointcutIndex) {
-        return indexToMethodTransformation.get(pointcutIndex);
+        return INDEX_TO_METHOD_TRANSFORMATION.get(pointcutIndex);
     }
 
     public static void addMethodTransformation(int pointcutIndex, MethodTransformation info) {
-        indexToMethodTransformation.putIfAbsent(pointcutIndex, info);
+        INDEX_TO_METHOD_TRANSFORMATION.putIfAbsent(pointcutIndex, info);
     }
 }
