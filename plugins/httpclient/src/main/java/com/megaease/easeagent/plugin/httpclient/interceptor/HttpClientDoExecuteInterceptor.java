@@ -41,8 +41,6 @@ public class HttpClientDoExecuteInterceptor extends BaseHttpClientTracingInterce
 
     @Override
     protected HttpRequest getRequest(MethodInfo methodInfo, Context context) {
-        org.slf4j.MDC.put("testMDC", "aaa");
-        clog.info("-----------clog------");
         return new InternalRequest(getHttpRequestBase(methodInfo.getArgs()));
     }
 
