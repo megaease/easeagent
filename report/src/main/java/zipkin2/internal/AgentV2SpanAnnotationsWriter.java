@@ -19,9 +19,6 @@ package zipkin2.internal;
 
 import zipkin2.Annotation;
 import zipkin2.Span;
-import zipkin2.internal.JsonEscaper;
-import zipkin2.internal.Nullable;
-import zipkin2.internal.WriteBuffer;
 
 public class AgentV2SpanAnnotationsWriter implements WriteBuffer.Writer<Span> {
     final String annotationFieldName = ",\"annotations\":[";

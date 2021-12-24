@@ -19,17 +19,17 @@ package com.megaease.easeagent.core.plugin.registry;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.Dispatcher;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.OffsetMapping;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentJavaConstantValue;
 import com.megaease.easeagent.core.plugin.transformer.advice.MethodIdentityJavaConstant;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
-import com.megaease.easeagent.log4j2.Logger;
-import com.megaease.easeagent.log4j2.LoggerFactory;
 
 import java.lang.ref.WeakReference;
 import java.util.Map;

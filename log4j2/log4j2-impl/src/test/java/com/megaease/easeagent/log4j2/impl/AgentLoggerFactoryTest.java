@@ -30,7 +30,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class AgentLoggerFactoryTest {
 

@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.report.trace;
 
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import org.junit.Test;
 import zipkin2.Span;
 

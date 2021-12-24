@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.plugin.servicename;
 
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshConfig;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigSupplier;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import static com.megaease.easeagent.plugin.servicename.Const.DEFAULT_PROPAGATE_HEAD;

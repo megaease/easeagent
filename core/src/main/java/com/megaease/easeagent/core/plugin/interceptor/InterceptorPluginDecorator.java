@@ -25,9 +25,9 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigImpl;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.bridge.NoOpConfig;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 
 import java.util.function.Supplier;
 

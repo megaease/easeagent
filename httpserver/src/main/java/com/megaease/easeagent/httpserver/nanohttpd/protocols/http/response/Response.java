@@ -25,18 +25,18 @@ package com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response;
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the nanohttpd nor the names of its contributors
  *    may be used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -50,32 +50,18 @@ package com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response;
  * #L%
  */
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TimeZone;
-import java.util.logging.Level;
-import java.util.zip.GZIPOutputStream;
-
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.NanoHTTPD;
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.content.ContentType;
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.request.Method;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * HTTP response. Return one of these from serve().
@@ -179,7 +165,7 @@ public class Response implements Closeable {
     /**
      * Should not be called manually. This is an internally utility for JUnit
      * test purposes.
-     * 
+     *
      * @return All unloaded cookie headers.
      */
     public List<String> getCookieHeaders() {
@@ -195,7 +181,7 @@ public class Response implements Closeable {
 
     /**
      * Indicate to close the connection after the Response has been sent.
-     * 
+     *
      * @param close
      *            {@code true} to hint connection closing, {@code false} to let
      *            connection be closed by client.
@@ -349,7 +335,7 @@ public class Response implements Closeable {
      * Sends the body to the specified OutputStream. The pending parameter
      * limits the maximum amounts of bytes sent unless it is -1, in which case
      * everything is sent.
-     * 
+     *
      * @param outputStream
      *            the OutputStream to send data to
      * @param pending

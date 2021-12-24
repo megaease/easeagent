@@ -18,6 +18,7 @@
 package com.megaease.easeagent.report.metric.log4j;
 
 import com.google.common.collect.ImmutableList;
+import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.report.OutputProperties;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,16 +31,13 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.mom.kafka.KafkaAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import com.megaease.easeagent.log4j2.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Manage kafka's log4j appender according topics

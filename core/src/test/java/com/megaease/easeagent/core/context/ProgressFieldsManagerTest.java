@@ -26,7 +26,8 @@ import java.util.HashMap;
 import java.util.Set;
 
 import static com.megaease.easeagent.plugin.api.ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ProgressFieldsManagerTest {
 

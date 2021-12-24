@@ -21,10 +21,10 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaMessageListenerAdvice;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 @AdviceTo(value = KafkaMessageListenerAdvice.class, plugin = KafkaPlugin.class)

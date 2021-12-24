@@ -20,7 +20,10 @@ package com.megaease.easeagent.core.utils;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 

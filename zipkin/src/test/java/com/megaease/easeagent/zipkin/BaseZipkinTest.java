@@ -23,7 +23,6 @@ import brave.propagation.StrictCurrentTraceContext;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.Configs;
-import com.megaease.easeagent.core.interceptor.AgentInterceptor;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import org.junit.After;
 import zipkin2.Span;

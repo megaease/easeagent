@@ -20,7 +20,6 @@ package com.megaease.easeagent.report;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
-import org.apache.kafka.common.config.SslConfigs;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
 

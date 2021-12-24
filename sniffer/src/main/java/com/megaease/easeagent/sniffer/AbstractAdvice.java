@@ -20,8 +20,8 @@ package com.megaease.easeagent.sniffer;
 import com.megaease.easeagent.common.ForwardLock;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChain;
 import com.megaease.easeagent.core.interceptor.AgentInterceptorChainInvoker;
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.plugin.MethodInfo;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;

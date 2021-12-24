@@ -20,7 +20,6 @@ package com.megaease.easeagent.report.trace;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshConfig;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigImpl;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;

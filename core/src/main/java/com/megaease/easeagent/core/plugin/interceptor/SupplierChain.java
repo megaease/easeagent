@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.core.plugin.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Ordered;
 
 import java.util.ArrayList;
