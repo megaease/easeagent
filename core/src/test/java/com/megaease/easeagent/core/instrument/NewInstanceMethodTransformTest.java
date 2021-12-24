@@ -101,7 +101,7 @@ public class NewInstanceMethodTransformTest extends TransformTestBase {
             Class<?> type = classLoader.loadClass(Foo.class.getName());
             // check
             Constructor<?> c = type.getDeclaredConstructor(String.class);
-            Object instance = c.newInstance("kkk");
+            Object instance = c.newInstance(QUX);
             assertThat(type.getDeclaredMethod("getInstanceT")
                     .invoke(instance),
                 is(QUX));
