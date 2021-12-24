@@ -17,8 +17,9 @@
 
 package com.megaease.easeagent.log4j2.supplier;
 
+import com.megaease.easeagent.log4j2.ClassLoaderUtils;
+
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.function.Supplier;
 
 public class AllUrlsSupplier implements Supplier<URL[]> {
@@ -31,10 +32,7 @@ public class AllUrlsSupplier implements Supplier<URL[]> {
             return new URL[0];
         }
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (!(classLoader instanceof URLClassLoader)) {
-            return null;
-        }
-        return ((URLClassLoader) classLoader).getURLs();
+        return ClassLoaderUtils.getAllUrls(classLoader);
     }
 
     private boolean enabled() {
