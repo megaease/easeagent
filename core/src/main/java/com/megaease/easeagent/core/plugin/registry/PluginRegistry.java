@@ -45,9 +45,9 @@ import java.util.stream.Collectors;
 public class PluginRegistry {
     static Logger log = EaseAgent.getLogger(PluginRegistry.class);
 
-    static ConcurrentHashMap<String, AgentPlugin> QUALIFIER_TO_PLUGIN = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, AgentPlugin> POINTS_TO_PLUGIN = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, AgentPlugin> PLUGIN_CLASSNAME_TO_PLUGIN = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, AgentPlugin> QUALIFIER_TO_PLUGIN = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, AgentPlugin> POINTS_TO_PLUGIN = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, AgentPlugin> PLUGIN_CLASSNAME_TO_PLUGIN = new ConcurrentHashMap<>();
 
     static final ConcurrentHashMap<String, Integer> QUALIFIER_TO_INDEX = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<Integer, MethodTransformation> INDEX_TO_METHOD_TRANSFORMATION = new ConcurrentHashMap<>();

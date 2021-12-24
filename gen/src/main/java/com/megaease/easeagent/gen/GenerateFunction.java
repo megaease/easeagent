@@ -51,8 +51,9 @@ class GenerateFunction implements Function<TypeElement, JavaFile> {
         final String packageName = utils.packageNameOf(e);
         final String simpleName = Generate.PREFIX + utils.simpleNameOf(e);
         final TypeSpec.Builder builder = classBuilder(simpleName)
-                .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
-                .addModifiers(PUBLIC).superclass(utils.typeNameOf(e.asType()));
+            .addAnnotations(utils.asAnnotationSpecs(e.getAnnotationMirrors()))
+            .addModifiers(PUBLIC)
+            .superclass(utils.typeNameOf(e.asType()));
 
         for (AssemblyProcessor.GenerateSpecFactory factory : factories)
             e.accept(factory.create(builder, packageName + '.' + simpleName), utils);

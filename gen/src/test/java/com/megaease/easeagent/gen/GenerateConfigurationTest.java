@@ -22,9 +22,7 @@ import com.squareup.javapoet.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Matchers;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.mockito.ArgumentMatchers;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
@@ -72,9 +70,10 @@ public class GenerateConfigurationTest extends GenerateSpecTestBase {
         @Override
         public String given(TypeElement te, ProcessUtils utils, ExpectedException thrown) {
             doGiven(te, utils, thrown);
-            return new GenerateConfiguration(TypeSpec.classBuilder("GenFoo")).visitTypeAsClass(te, utils)
-                                                                             .build()
-                                                                             .toString();
+            return new GenerateConfiguration(TypeSpec.classBuilder("GenFoo"))
+                .visitTypeAsClass(te, utils)
+                .build()
+                .toString();
         }
 
         abstract void doGiven(TypeElement te, ProcessUtils utils, ExpectedException thrown);
@@ -98,20 +97,20 @@ public class GenerateConfigurationTest extends GenerateSpecTestBase {
             when(name.toString()).thenReturn("bar");
 
             when(returnType.getKind()).thenReturn(returnTypeKind());
-            when(returnType.accept(any(TypeVisitor.class), Matchers.any())).thenReturn(returnTypeName());
+            when(returnType.accept(any(TypeVisitor.class), ArgumentMatchers.any())).thenReturn(returnTypeName());
 
             when(ee.getAnnotation(Configurable.Item.class)).thenReturn(mock(Configurable.Item.class));
             when(ee.getSimpleName()).thenReturn(name);
             when(ee.getReturnType()).thenReturn(returnType);
-            when(ee.accept(any(ElementKindVisitor6.class), Matchers.any())).thenAnswer(new Answer<Object>() {
-                @Override
-                public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                    final ElementKindVisitor6 visitor = invocationOnMock.getArgumentAt(0, ElementKindVisitor6.class);
+            when(ee.accept(any(ElementKindVisitor6.class), ArgumentMatchers.any()))
+                .thenAnswer(invocationOnMock -> {
+                    final ElementKindVisitor6 visitor = invocationOnMock.getArgument(0, ElementKindVisitor6.class);
                     return visitor.visitExecutableAsMethod(ee, utils);
-                }
             });
+
             when(utils.simpleNameOf(ee)).thenReturn("bar");
 
+            doReturn(te).when(ee).getEnclosingElement();
             doReturn(singletonList(ee)).when(te).getEnclosedElements();
             when(te.getAnnotation(Configurable.class)).thenReturn(mock(Configurable.class));
 

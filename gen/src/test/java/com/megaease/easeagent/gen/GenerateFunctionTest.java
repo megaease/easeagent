@@ -32,9 +32,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @RunWith(Parameterized.class)
 public class GenerateFunctionTest extends GenerateSpecTestBase {
@@ -107,6 +109,8 @@ public class GenerateFunctionTest extends GenerateSpecTestBase {
             when(te.getModifiers()).thenReturn(Sets.newHashSet(Modifier.PUBLIC, Modifier.ABSTRACT));
             when(te.getNestingKind()).thenReturn(NestingKind.TOP_LEVEL);
 
+            when(te.asType()).thenReturn(mock(TypeMirror.class));
+            
             when(utils.simpleNameOf(te)).thenReturn("Bar");
             when(utils.typeNameOf(any(TypeMirror.class))).thenReturn(ClassName.get(Bar.class));
             when(utils.packageNameOf(te)).thenReturn("com.megaease.easeagent.gen");

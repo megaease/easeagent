@@ -27,14 +27,14 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementKindVisitor6;
+import javax.lang.model.util.ElementKindVisitor8;
 import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.overriding;
 import static javax.lang.model.element.Modifier.*;
 
-class GenerateConfiguration extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
+class GenerateConfiguration extends ElementKindVisitor8<TypeSpec.Builder, ProcessUtils> {
     GenerateConfiguration(TypeSpec.Builder builder) {
         super(builder);
     }
@@ -70,6 +70,7 @@ class GenerateConfiguration extends ElementKindVisitor6<TypeSpec.Builder, Proces
                 if (utils.isSameType(type, List.class, Long.class)) return "LongList";
                 if (utils.isSameType(type, List.class, Double.class)) return "DoubleList";
                 if (utils.isSameType(type, List.class, String.class)) return "StringList";
+                return null;
             default:
                 return null;
 
@@ -82,17 +83,22 @@ class GenerateConfiguration extends ElementKindVisitor6<TypeSpec.Builder, Proces
             .addModifiers(PUBLIC).addStatement("this.conf = conf").build();
     }
 
-    private static class GenerateMethods extends ElementKindVisitor6<TypeSpec.Builder, ProcessUtils> {
-        GenerateMethods(TypeSpec.Builder builder) { super(builder); }
+    private static class GenerateMethods extends ElementKindVisitor8<TypeSpec.Builder, ProcessUtils> {
+        GenerateMethods(TypeSpec.Builder builder) {
+            super(builder);
+        }
 
         @Override
         public TypeSpec.Builder visitExecutableAsMethod(ExecutableElement e, ProcessUtils utils) {
-            if (e.getAnnotation(Item.class) == null) return super.visitExecutableAsMethod(e, utils);
+            if (e.getAnnotation(Item.class) == null) {
+                return super.visitExecutableAsMethod(e, utils);
+            }
 
             final String method = methodNameOf(e.getReturnType(), utils);
 
-            if (method == null)
+            if (method == null) {
                 throw new ElementException(e, "should be one type or list of those [boolean|int|long|double|String]");
+            }
 
             final String name = utils.simpleNameOf(e);
 
@@ -105,7 +111,8 @@ class GenerateConfiguration extends ElementKindVisitor6<TypeSpec.Builder, Proces
                 format = "return conf.hasPath($S) ? conf.get$L($S) : super.$L()";
                 args = new Object[]{name, method, name, name};
             }
-            return super.visitExecutableAsMethod(e, utils).addMethod(overriding(e).addStatement(format, args).build());
+            return super.visitExecutableAsMethod(e, utils)
+                .addMethod(overriding(e).addStatement(format, args).build());
         }
     }
 }

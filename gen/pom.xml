@@ -31,7 +31,6 @@
         <dependency>
             <groupId>com.squareup</groupId>
             <artifactId>javapoet</artifactId>
-            <version>1.8.0</version>
         </dependency>
 
         <dependency>
