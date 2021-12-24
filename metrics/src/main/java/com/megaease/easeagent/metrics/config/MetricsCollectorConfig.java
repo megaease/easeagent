@@ -18,8 +18,8 @@
 package com.megaease.easeagent.metrics.config;
 
 import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.ConfigUtils;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability;
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.join;

@@ -17,7 +17,10 @@
 
 package com.megaease.easeagent.plugin.matcher;
 
-import com.megaease.easeagent.plugin.matcher.operator.*;
+import com.megaease.easeagent.plugin.matcher.operator.AndClassMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.NegateClassMatcher;
+import com.megaease.easeagent.plugin.matcher.operator.Operator;
+import com.megaease.easeagent.plugin.matcher.operator.OrClassMatcher;
 
 public interface IClassMatcher extends Operator<IClassMatcher>, Matcher {
     default IClassMatcher and(IClassMatcher m) {

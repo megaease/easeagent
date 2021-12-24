@@ -25,18 +25,18 @@ package com.megaease.easeagent.httpserver.nanohttpd.protocols.http.content;
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the nanohttpd nor the names of its contributors
  *    may be used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -50,18 +50,18 @@ package com.megaease.easeagent.httpserver.nanohttpd.protocols.http.content;
  * #L%
  */
 
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
-
 /**
  * Provides rudimentary support for cookies. Doesn't support 'path', 'secure'
  * nor 'httpOnly'. Feel free to improve it and/or add unsupported features. This
  * is old code and it's flawed in many ways.
- * 
+ *
  * @author LordFokas
  */
 public class CookieHandler implements Iterable<String> {
@@ -86,7 +86,7 @@ public class CookieHandler implements Iterable<String> {
     /**
      * Set a cookie with an expiration date from a month ago, effectively
      * deleting it on the client side.
-     * 
+     *
      * @param name
      *            The cookie name.
      */
@@ -101,7 +101,7 @@ public class CookieHandler implements Iterable<String> {
 
     /**
      * Read a cookie from the HTTP Headers.
-     * 
+     *
      * @param name
      *            The cookie's name.
      * @return The cookie's value if it exists, null otherwise.
@@ -116,7 +116,7 @@ public class CookieHandler implements Iterable<String> {
 
     /**
      * Sets a cookie.
-     * 
+     *
      * @param name
      *            The cookie's name.
      * @param value
@@ -131,7 +131,7 @@ public class CookieHandler implements Iterable<String> {
     /**
      * Internally used by the webserver to add all queued cookies into the
      * Response's HTTP Headers.
-     * 
+     *
      * @param response
      *            The Response object to which headers the queued cookies will
      *            be added.

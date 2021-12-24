@@ -18,10 +18,10 @@
 package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;

@@ -20,14 +20,11 @@ package com.megaease.easeagent.plugin.redis.interceptor.metric;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetricSupplier;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.metrics.RedisMetric;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 
 public abstract class CommonRedisMetricInterceptor implements NonReentrantInterceptor {
     private static volatile RedisMetric REDIS_METRIC = null;

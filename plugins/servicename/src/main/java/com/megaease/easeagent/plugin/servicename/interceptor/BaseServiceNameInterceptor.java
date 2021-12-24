@@ -18,10 +18,10 @@
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.servicename.ServiceNameConfig;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 
 public abstract class BaseServiceNameInterceptor implements Interceptor {
     protected static ServiceNameConfig config = null;

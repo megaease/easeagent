@@ -18,7 +18,10 @@
 package com.megaease.easeagent.plugin.utils;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class ImmutableMap<K, V> implements Map<K, V> {
     Map<K, V> delegate;

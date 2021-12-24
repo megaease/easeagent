@@ -17,10 +17,10 @@
 
 package com.megaease.easeagent.report.trace;
 
-import com.megaease.easeagent.report.OutputProperties;
-import org.apache.commons.lang3.StringUtils;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.report.OutputProperties;
+import org.apache.commons.lang3.StringUtils;
 import zipkin2.codec.Encoding;
 import zipkin2.reporter.Reporter;
 import zipkin2.reporter.SDKAsyncReporter;

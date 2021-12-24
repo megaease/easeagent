@@ -51,7 +51,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class NewInstanceMethodTransformTest  extends TransformTestBase {
+public class NewInstanceMethodTransformTest extends TransformTestBase {
     private static ClassLoader classLoader;
     private static String dumpFolder;
     private static final AtomicInteger globalIndex = new AtomicInteger(1000);
@@ -72,7 +72,7 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
         File file = new File(path);
         dumpFolder = file.getAbsolutePath();
         System.out.println(dumpFolder);
-        assertTrue(dumpFolder.endsWith("target/test-classes"));
+        assertTrue(dumpFolder.endsWith("target" + File.separator + "test-classes"));
     }
 
     @Test
@@ -128,6 +128,7 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
         public String instanceT;
 
         static String clazzInitString = FOO;
+
         public static String fooStatic(String a) {
             return a;
         }
@@ -156,7 +157,7 @@ public class NewInstanceMethodTransformTest  extends TransformTestBase {
         }
 
         public int baz() {
-            return (int)System.currentTimeMillis();
+            return (int) System.currentTimeMillis();
         }
     }
 

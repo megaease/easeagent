@@ -133,11 +133,6 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-clients</artifactId>
-                <version>${version.kafka}</version>
-            </dependency>
-            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${version.junit}</version>
@@ -247,7 +242,7 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${version.commons-lang3}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
@@ -366,7 +361,7 @@
                 <artifactId>simpleclient_common</artifactId>
                 <version>${version.prometheus}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>

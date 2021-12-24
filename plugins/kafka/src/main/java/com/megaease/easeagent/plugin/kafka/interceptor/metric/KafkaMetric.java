@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;

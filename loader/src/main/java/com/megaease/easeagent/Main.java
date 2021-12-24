@@ -28,11 +28,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
@@ -236,7 +232,9 @@ public class Main {
                             continue;
                         }
                         final Class<?> aClass = cl.loadClass(name);
-                        if (resolve) resolveClass(aClass);
+                        if (resolve) {
+                            resolveClass(aClass);
+                        }
                         return aClass;
                     } catch (ClassNotFoundException ignore) {
                     }
@@ -257,7 +255,7 @@ public class Main {
                         if (url != null) {
                             return url;
                         }
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                     }
                 }
             }

@@ -17,7 +17,9 @@
 
 package com.megaease.easeagent.config;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class PluginSourceConfig {
     private final String domain;

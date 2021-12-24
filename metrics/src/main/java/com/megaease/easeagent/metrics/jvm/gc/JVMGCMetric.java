@@ -23,7 +23,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.metrics.*;
+import com.megaease.easeagent.metrics.AbstractMetric;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
 import com.megaease.easeagent.metrics.converter.KeyType;

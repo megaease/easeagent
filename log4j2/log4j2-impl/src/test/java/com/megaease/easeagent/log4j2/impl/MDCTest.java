@@ -21,7 +21,8 @@ import com.megaease.easeagent.log4j2.MDC;
 import com.megaease.easeagent.log4j2.supplier.AllUrlsSupplier;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class MDCTest {
     static {

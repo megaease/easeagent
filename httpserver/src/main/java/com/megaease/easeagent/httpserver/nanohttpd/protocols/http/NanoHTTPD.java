@@ -25,18 +25,18 @@ package com.megaease.easeagent.httpserver.nanohttpd.protocols.http;
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the nanohttpd nor the names of its contributors
  *    may be used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -50,6 +50,19 @@ package com.megaease.easeagent.httpserver.nanohttpd.protocols.http;
  * #L%
  */
 
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.sockets.DefaultServerSocketFactory;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.sockets.SecureServerSocketFactory;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.tempfiles.DefaultTempFileManagerFactory;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.tempfiles.ITempFileManager;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.threading.DefaultAsyncRunner;
+import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.threading.IAsyncRunner;
+import com.megaease.easeagent.httpserver.nanohttpd.util.IFactory;
+import com.megaease.easeagent.httpserver.nanohttpd.util.IFactoryThrowing;
+import com.megaease.easeagent.httpserver.nanohttpd.util.IHandler;
+
+import javax.net.ssl.*;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,34 +72,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.sockets.DefaultServerSocketFactory;
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.sockets.SecureServerSocketFactory;
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.tempfiles.DefaultTempFileManagerFactory;
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.tempfiles.ITempFileManager;
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.threading.DefaultAsyncRunner;
-import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.threading.IAsyncRunner;
-import com.megaease.easeagent.httpserver.nanohttpd.util.IFactory;
-import com.megaease.easeagent.httpserver.nanohttpd.util.IFactoryThrowing;
-import com.megaease.easeagent.httpserver.nanohttpd.util.IHandler;
 
 /**
  * A simple, tiny, nicely embeddable HTTP server in Java
@@ -301,7 +290,7 @@ public abstract class NanoHTTPD {
 
     /**
      * Get MIME type from file name extension, if possible
-     * 
+     *
      * @param uri
      *            the string representing a file
      * @return the connected mime/type
@@ -413,7 +402,7 @@ public abstract class NanoHTTPD {
     /**
      * create a instance of the client handler, subclasses can return a subclass
      * of the ClientHandler.
-     * 
+     *
      * @param finalAccept
      *            the socket the cleint is connected to
      * @param inputStream
@@ -427,7 +416,7 @@ public abstract class NanoHTTPD {
     /**
      * Instantiate the server runnable, can be overwritten by subclasses to
      * provide a subclass of the ServerRunnable.
-     * 
+     *
      * @param timeout
      *            the socet timeout to use.
      * @return the server runnable.
@@ -440,7 +429,7 @@ public abstract class NanoHTTPD {
      * Decode parameters from a URL, handing the case where a single parameter
      * name might have been supplied several times, by return lists of values.
      * In general these lists will contain a single element.
-     * 
+     *
      * @param parms
      *            original <b>NanoHTTPD</b> parameters values, as passed to the
      *            <code>serve()</code> method.
@@ -458,7 +447,7 @@ public abstract class NanoHTTPD {
      * Decode parameters from a URL, handing the case where a single parameter
      * name might have been supplied several times, by return lists of values.
      * In general these lists will contain a single element.
-     * 
+     *
      * @param queryString
      *            a query string pulled from the URL.
      * @return a map of <code>String</code> (parameter name) to
@@ -486,7 +475,7 @@ public abstract class NanoHTTPD {
 
     /**
      * Decode percent encoded <code>String</code> values.
-     * 
+     *
      * @param str
      *            the percent encoded <code>String</code>
      * @return expanded form of the input, for example "foo%20bar" becomes
@@ -538,7 +527,7 @@ public abstract class NanoHTTPD {
      * sure there is a response to every request. You are not supposed to call
      * or override this method in any circumstances. But no one will stop you if
      * you do. I'm a Javadoc, not Code Police.
-     * 
+     *
      * @param session
      *            the incoming session
      * @return a response to the incoming session
@@ -557,7 +546,7 @@ public abstract class NanoHTTPD {
      * <p/>
      * <p/>
      * (By default, this returns a 404 "Not Found" plain text error response.)
-     * 
+     *
      * @param session
      *            The HTTP session
      * @return HTTP response, see class Response for details
@@ -569,7 +558,7 @@ public abstract class NanoHTTPD {
 
     /**
      * Pluggable strategy for asynchronously executing requests.
-     * 
+     *
      * @param asyncRunner
      *            new strategy for handling threads.
      */
@@ -579,7 +568,7 @@ public abstract class NanoHTTPD {
 
     /**
      * Pluggable strategy for creating and cleaning up temporary files.
-     * 
+     *
      * @param tempFileManagerFactory
      *            new strategy for handling temp files.
      */
@@ -589,7 +578,7 @@ public abstract class NanoHTTPD {
 
     /**
      * Start the server.
-     * 
+     *
      * @throws IOException
      *             if the socket is in use.
      */
@@ -606,7 +595,7 @@ public abstract class NanoHTTPD {
 
     /**
      * Start the server.
-     * 
+     *
      * @param timeout
      *            timeout to use for socket connections.
      * @param daemon

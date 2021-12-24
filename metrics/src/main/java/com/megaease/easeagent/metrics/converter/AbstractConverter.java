@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.metrics.converter;
 
-import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
+import com.codahale.metrics.*;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;

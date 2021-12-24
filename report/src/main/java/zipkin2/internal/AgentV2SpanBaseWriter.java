@@ -18,8 +18,6 @@
 package zipkin2.internal;
 
 import zipkin2.Span;
-import zipkin2.internal.JsonEscaper;
-import zipkin2.internal.WriteBuffer;
 
 public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
 

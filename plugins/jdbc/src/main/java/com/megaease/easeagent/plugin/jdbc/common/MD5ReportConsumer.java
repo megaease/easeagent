@@ -18,11 +18,11 @@
 package com.megaease.easeagent.plugin.jdbc.common;
 
 import com.megaease.easeagent.plugin.api.Reporter;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 

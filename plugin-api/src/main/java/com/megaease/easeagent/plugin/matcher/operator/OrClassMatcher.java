@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.matcher.operator;
 
-import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import lombok.Getter;
 

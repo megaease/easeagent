@@ -26,13 +26,13 @@ import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
+import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.DatabaseInfo;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
-import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
-import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.utils.common.ExceptionUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 

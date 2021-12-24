@@ -18,14 +18,12 @@
 package com.megaease.easeagent.report.util;
 
 import com.megaease.easeagent.config.ChangeItem;
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.metric.MetricProps;
 import com.megaease.easeagent.report.trace.TraceProps;
-import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.common.config.SslConfigs;
 
 import java.util.Arrays;
 import java.util.List;

@@ -26,7 +26,6 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
-import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqConsumerAdvice;
 import com.rabbitmq.client.AMQP;
 

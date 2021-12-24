@@ -26,11 +26,14 @@ import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.Meter;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.Timer;
-import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.api.metric.name.MetricName;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
+import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.rabbitmq.spring.RabbitMqMessageListenerAdvice;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqConsumerMetric;
+import com.megaease.easeagent.plugin.rabbitmq.spring.RabbitMqMessageListenerAdvice;
 import org.springframework.amqp.core.Message;
 
 import java.util.List;

@@ -25,10 +25,10 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
+import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcConnectionAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
-import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
 import java.sql.Connection;
 import java.sql.Statement;

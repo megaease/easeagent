@@ -24,14 +24,14 @@ import com.megaease.easeagent.core.plugin.registry.PluginRegistry;
 import com.megaease.easeagent.core.plugin.transformer.CompoundPluginTransformer;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldTransformer;
 import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import com.megaease.easeagent.log4j2.Logger;
-import com.megaease.easeagent.log4j2.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;

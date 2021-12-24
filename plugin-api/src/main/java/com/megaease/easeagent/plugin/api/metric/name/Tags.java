@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.plugin.api.metric.name;
 
-import com.megaease.easeagent.plugin.api.trace.Span;
-
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;

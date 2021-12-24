@@ -18,8 +18,8 @@
 package com.megaease.easeagent.plugin.tools.config;
 
 import com.megaease.easeagent.plugin.api.config.AutoRefreshConfig;
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigSupplier;
+import com.megaease.easeagent.plugin.api.config.Config;
 import org.junit.Assert;
 import org.junit.Test;
 
