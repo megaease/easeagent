@@ -70,7 +70,7 @@ public class OrchestrationTransformTest extends TransformTestBase {
         File file = new File(path);
         dumpFolder = file.getAbsolutePath();
         System.out.println(dumpFolder);
-        assertTrue(dumpFolder.endsWith("target/test-classes"));
+        assertTrue(dumpFolder.endsWith("target" + File.separator + "test-classes"));
     }
 
     @Test
@@ -111,15 +111,17 @@ public class OrchestrationTransformTest extends TransformTestBase {
     @SuppressWarnings("unused")
     public static class Foo extends FooBase {
         static String clazzInitString = FOO;
+
         public static String fooStatic(String a) {
             return a;
         }
+
         public String foo(String a) {
             return a;
         }
 
         public int baz() {
-            return (int)System.currentTimeMillis();
+            return (int) System.currentTimeMillis();
         }
     }
 

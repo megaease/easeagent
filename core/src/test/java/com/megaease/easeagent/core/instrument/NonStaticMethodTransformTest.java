@@ -70,7 +70,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
         File file = new File(path);
         dumpFolder = file.getAbsolutePath();
         System.out.println(dumpFolder);
-        assertTrue(dumpFolder.endsWith("target/test-classes"));
+        assertTrue(dumpFolder.endsWith("target" + File.separator + "test-classes"));
     }
 
     @Test
@@ -108,6 +108,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
         public String instanceT;
 
         static String clazzInitString = FOO;
+
         public static String fooStatic(String a) {
             return a;
         }
@@ -126,7 +127,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
         }
 
         public int baz() {
-            return (int)System.currentTimeMillis();
+            return (int) System.currentTimeMillis();
         }
     }
 
