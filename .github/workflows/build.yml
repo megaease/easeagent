@@ -29,6 +29,12 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Codebase
+        uses: actions/checkout@v2
+
       - name: Setup Java Version
         uses: actions/setup-java@v2
         with:
@@ -36,10 +42,6 @@ jobs:
           distribution: ${{ matrix.java-distribution }}
           architecture: x64
           cache: 'maven'
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout Codebase
-        uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
       - name: Build with Maven
