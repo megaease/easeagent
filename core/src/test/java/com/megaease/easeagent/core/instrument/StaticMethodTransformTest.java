@@ -67,11 +67,11 @@ public class StaticMethodTransformTest extends TransformTestBase {
             ClassFileLocator.ForClassLoader.readToNames(Foo.class, CommonInlineAdvice.class),
             ByteArrayClassLoader.PersistenceHandler.MANIFEST);
 
-        String path = "target/test-classes";
+        String path = "target" + File.separator + "test-classes";
         File file = new File(path);
         dumpFolder = file.getAbsolutePath();
         System.out.println(dumpFolder);
-        assertTrue(dumpFolder.endsWith("target/test-classes"));
+        assertTrue(dumpFolder.endsWith("target" + File.separator + "test-classes"));
     }
 
     @Test
