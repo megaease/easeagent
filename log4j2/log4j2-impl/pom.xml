@@ -101,6 +101,13 @@
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached><!-- optional -->
                             <shadedClassifierName>agent-lib</shadedClassifierName>
+
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.kafka</pattern>
+                                    <shadedPattern>com.megaease.easeagent.org.apache.kafka</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
