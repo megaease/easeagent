@@ -97,14 +97,14 @@ public class MetricRegistryImplTest {
         timer.update(100, TimeUnit.MILLISECONDS);
         Assert.assertEquals(2, timer.getCount());
         Timer.Context context = timer.time();
-        Thread.sleep(15);
+        Thread.sleep(50);
         context.stop();
         Assert.assertEquals(3, timer.getCount());
         Snapshot snapshot = timer.getSnapshot();
         Assert.assertEquals(3, snapshot.size());
         Assert.assertEquals(TimeUnit.MILLISECONDS.toNanos(10), snapshot.getMin());
-        Assert.assertTrue(snapshot.getMedian() > TimeUnit.MILLISECONDS.toNanos(14));
-        Assert.assertTrue(snapshot.getMedian() < TimeUnit.MILLISECONDS.toNanos(20));
+        Assert.assertTrue(snapshot.getMedian() > TimeUnit.MILLISECONDS.toNanos(30));
+        Assert.assertTrue(snapshot.getMedian() < TimeUnit.MILLISECONDS.toNanos(70));
         Assert.assertEquals(TimeUnit.MILLISECONDS.toNanos(100), snapshot.getMax());
     }
 

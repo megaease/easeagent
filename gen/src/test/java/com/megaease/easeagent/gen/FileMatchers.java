@@ -27,7 +27,7 @@ import java.io.InputStream;
 public class FileMatchers {
     static BaseMatcher<String> be(String generated) throws IOException {
         final InputStream in = FileMatchers.class.getClassLoader().getResourceAsStream(generated);
-        final String expected = new String(ByteStreams.toByteArray(in));
+        final String expected = new String(ByteStreams.toByteArray(in)).replace("\r\n", "\n");
         return new BaseMatcher<String>() {
             @Override
             public boolean matches(Object item) {
