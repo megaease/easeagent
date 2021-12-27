@@ -45,16 +45,16 @@ import java.util.stream.Collectors;
 public class PluginRegistry {
     static Logger log = EaseAgent.getLogger(PluginRegistry.class);
 
-    static ConcurrentHashMap<String, AgentPlugin> qualifierToPlugin = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, AgentPlugin> pointsToPlugin = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, AgentPlugin> pluginClassnameToPlugin = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, AgentPlugin> QUALIFIER_TO_PLUGIN = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, AgentPlugin> POINTS_TO_PLUGIN = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, AgentPlugin> PLUGIN_CLASSNAME_TO_PLUGIN = new ConcurrentHashMap<>();
 
     static final ConcurrentHashMap<String, Integer> QUALIFIER_TO_INDEX = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<Integer, MethodTransformation> INDEX_TO_METHOD_TRANSFORMATION = new ConcurrentHashMap<>();
     static final AgentArray<Builder> INTERCEPTOR_PROVIDERS = new AgentArray<>();
 
     public static void register(AgentPlugin plugin) {
-        pluginClassnameToPlugin.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
+        PLUGIN_CLASSNAME_TO_PLUGIN.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
     }
 
     private static String getMethodQualifier(String classname, String qualifier) {
@@ -85,7 +85,7 @@ public class PluginRegistry {
             }
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
-        AgentPlugin plugin = pointsToPlugin.get(pointsClassName);
+        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
         int order = plugin.order();
 
         return ClassTransformation.builder().classMatcher(innerClassMatcher)
@@ -98,14 +98,14 @@ public class PluginRegistry {
         String qualifier = provider.getAdviceTo();
         // map interceptor/pointcut to plugin
 
-        AgentPlugin plugin = pluginClassnameToPlugin.get(provider.getPluginClassName());
+        AgentPlugin plugin = PLUGIN_CLASSNAME_TO_PLUGIN.get(provider.getPluginClassName());
         if (plugin == null) {
             // code autogenerate issues that are unlikely to occur!
             throw new RuntimeException();
         }
 
-        qualifierToPlugin.putIfAbsent(qualifier, plugin);
-        pointsToPlugin.putIfAbsent(getPointsClassName(qualifier), plugin);
+        QUALIFIER_TO_PLUGIN.putIfAbsent(qualifier, plugin);
+        POINTS_TO_PLUGIN.putIfAbsent(getPointsClassName(qualifier), plugin);
 
         // generate index and supplier chain
         Integer index = QUALIFIER_TO_INDEX.get(provider.getAdviceTo());

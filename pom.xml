@@ -27,7 +27,6 @@
     <modules>
         <module>plugin-api</module>
         <module>log4j2</module>
-        <module>plugins</module>
         <module>core</module>
         <module>gen</module>
         <module>common</module>
@@ -38,6 +37,7 @@
         <module>config</module>
         <module>report</module>
         <module>httpserver</module>
+        <module>plugins</module>
         <module>build</module>
     </modules>
 
@@ -45,11 +45,15 @@
         <encoding.file>UTF-8</encoding.file>
         <version.java>8</version.java>
         <version.junit>4.13.1</version.junit>
+        <!--
         <version.mockito>1.10.19</version.mockito>
+        -->
+        <version.mockito>4.2.0</version.mockito>
         <version.guava>30.1-jre</version.guava>
         <version.slf4j>1.7.21</version.slf4j>
         <version.byte-buddy>1.11.21</version.byte-buddy>
-        <version.auto-service>1.0-rc2</version.auto-service>
+        <version.auto-service>1.0.1</version.auto-service>
+        <version.javapoet>1.13.0</version.javapoet>
         <version.jsr305>3.0.2</version.jsr305>
         <version.lombok>1.18.20</version.lombok>
         <version.config>1.2.1</version.config>
@@ -119,6 +123,12 @@
                 <groupId>com.megaease.easeagent</groupId>
                 <artifactId>log4j2-api</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>com.squareup</groupId>
+                <artifactId>javapoet</artifactId>
+                <version>${version.javapoet}</version>
             </dependency>
 
             <dependency>
