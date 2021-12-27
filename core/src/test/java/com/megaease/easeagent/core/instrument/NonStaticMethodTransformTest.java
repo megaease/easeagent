@@ -66,7 +66,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
             ClassFileLocator.ForClassLoader.readToNames(Foo.class, CommonInlineAdvice.class),
             ByteArrayClassLoader.PersistenceHandler.MANIFEST);
 
-        String path = "target/test-classes";
+        String path = "target" + File.separator + "test-classes";
         File file = new File(path);
         dumpFolder = file.getAbsolutePath();
         System.out.println(dumpFolder);
