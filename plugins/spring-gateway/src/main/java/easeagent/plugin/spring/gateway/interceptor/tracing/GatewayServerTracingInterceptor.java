@@ -24,6 +24,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
@@ -46,7 +47,7 @@ public class GatewayServerTracingInterceptor implements Interceptor {
     public void before(MethodInfo methodInfo, Context context) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
-        RequestContext pCtx = context.clientRequest(httpServerRequest);
+        RequestContext pCtx = context.serverReceive(httpServerRequest);
         HttpUtils.handleReceive(pCtx.span(), httpServerRequest);
         context.put(SPAN_CONTEXT_KEY, pCtx);
         context.put(FluxHttpServerRequest.class, httpServerRequest);
@@ -60,37 +61,44 @@ public class GatewayServerTracingInterceptor implements Interceptor {
         if (pCtx == null) {
             return;
         }
-        if (!methodInfo.isSuccess()) {
-            pCtx.span().error(methodInfo.getThrowable());
-            pCtx.span().finish();
-            return;
+        try {
+            if (!methodInfo.isSuccess()) {
+                pCtx.span().error(methodInfo.getThrowable());
+                pCtx.span().finish();
+                return;
+            }
+
+            // async
+            Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
+            methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
+        } finally {
+            context.remove(SPAN_CONTEXT_KEY);
+            pCtx.scope().close();
         }
 
-        // async
-        Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
-        methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
     }
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        ctx.importToCurrent();
-        RequestContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
-        ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-        Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
-        if (consumer != null) {
-            consumer.accept(exchange);
-        }
+        try (Scope scope = ctx.importToCurrent()) {
+            RequestContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
+            ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
+            Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
+            if (consumer != null) {
+                consumer.accept(exchange);
+            }
 
-        FluxHttpServerRequest httpServerRequest = pCtx.getContext().get(FluxHttpServerRequest.class);
-        PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-        String route = null;
-        if (bestPattern != null) {
-            route = bestPattern.getPatternString();
+            FluxHttpServerRequest httpServerRequest = pCtx.getContext().get(FluxHttpServerRequest.class);
+            PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+            String route = null;
+            if (bestPattern != null) {
+                route = bestPattern.getPatternString();
+            }
+            HttpResponse response = new FluxHttpServerResponse(httpServerRequest,
+                exchange.getResponse(), route, methodInfo.getThrowable());
+            HttpUtils.finish(pCtx.span(), response);
+            // this.httpServerHandler.handleSend(response, span);
+            exchange.getAttributes().remove(GatewayCons.SPAN_KEY);
         }
-        HttpResponse response = new FluxHttpServerResponse(httpServerRequest,
-            exchange.getResponse(), route, methodInfo.getThrowable());
-        HttpUtils.finish(pCtx.span(), response);
-        // this.httpServerHandler.handleSend(response, span);
-        exchange.getAttributes().remove(GatewayCons.SPAN_KEY);
     }
 
     @Override

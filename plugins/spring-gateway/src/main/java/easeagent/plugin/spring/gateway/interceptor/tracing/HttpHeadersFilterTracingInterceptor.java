@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
@@ -51,24 +52,27 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
         FluxHttpServerRequest request = new HeaderFilterRequest(exchange.getRequest());
 
         RequestContext pnCtx = pCtx.getContext().clientRequest(request);
-        pnCtx.span().start();
-        exchange.getAttributes().put(GatewayCons.CHILD_SPAN_KEY, pnCtx);
-        Map<String, String> map = getHeadersFromExchange(exchange);
-        map.putAll(retHttpHeaders.toSingleValueMap());
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setAll(map);
-        methodInfo.setRetValue(httpHeaders);
+        try (Scope scope = pnCtx.scope()) {
+            pnCtx.span().start();
+            exchange.getAttributes().put(GatewayCons.CHILD_SPAN_KEY, pnCtx);
+            Map<String, String> map = getHeadersFromExchange(exchange);
+            map.putAll(retHttpHeaders.toSingleValueMap());
+            map.putAll(pnCtx.getHeaders());
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setAll(map);
+            methodInfo.setRetValue(httpHeaders);
 
-        Consumer<ServerWebExchange> consumer = serverWebExchange -> {
-            RequestContext p = serverWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
-            if (p == null) {
-                return;
-            }
-            FluxHttpServerResponse response = new FluxHttpServerResponse(serverWebExchange, null);
-            p.finish(response);
-            HttpUtils.finish(p.span(), response);
-        };
-        exchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, consumer);
+            Consumer<ServerWebExchange> consumer = serverWebExchange -> {
+                RequestContext p = serverWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
+                if (p == null) {
+                    return;
+                }
+                FluxHttpServerResponse response = new FluxHttpServerResponse(serverWebExchange, null);
+                p.finish(response);
+                HttpUtils.finish(p.span(), response);
+            };
+            exchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, consumer);
+        }
     }
 
 
@@ -85,6 +89,7 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
         public HeaderFilterRequest(ServerHttpRequest request) {
             super(request);
         }
+
 
         @Override
         public Span.Kind kind() {

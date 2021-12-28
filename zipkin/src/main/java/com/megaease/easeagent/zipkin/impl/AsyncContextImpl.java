@@ -81,6 +81,6 @@ public class AsyncContextImpl implements AsyncContext {
 
     @Override
     public void putAll(Map<Object, Object> context) {
-        context.putAll(context);
+        this.context.putAll(context);
     }
 }
