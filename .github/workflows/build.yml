@@ -23,12 +23,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         java-version: [ 8, 11, 16 ]
         java-distribution: [ adopt, adopt-openj9 ]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Codebase
+        uses: actions/checkout@v2
 
       - name: Setup Java Version
         uses: actions/setup-java@v2
@@ -36,10 +41,7 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: ${{ matrix.java-distribution }}
           architecture: x64
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout Codebase
-        uses: actions/checkout@v2
+          cache: 'maven'
 
       # Runs a single command using the runners shell
       - name: Build with Maven

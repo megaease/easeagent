@@ -18,60 +18,115 @@
 package com.megaease.easeagent.core;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.j256.simplejmx.client.JmxClient;
+import com.j256.simplejmx.common.IoUtils;
+import com.j256.simplejmx.server.JmxServer;
 import com.megaease.easeagent.config.Configs;
+import lombok.SneakyThrows;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.jolokia.jvmagent.JvmAgent;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
-import java.lang.instrument.Instrumentation;
+import javax.management.MBeanOperationInfo;
+import javax.management.ObjectName;
+import javax.management.openmbean.*;
+import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class BootstrapTest {
-    ObjectMapper json = new ObjectMapper();
+    private final static Integer DEFAULT_PORT = 8778;
+    private static JmxServer server;
+    private static InetAddress serverAddress;
+
+    private static ObjectName objectName;
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        serverAddress = InetAddress.getByName("127.0.0.1");
+        objectName = new ObjectName(Bootstrap.MX_BEAN_OBJECT_NAME);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        IoUtils.closeQuietly(server);
+        System.gc();
+    }
 
     @Test
     public void should_work() throws Exception {
         HashMap<String, String> source = new HashMap<>();
+
         String text = UUID.randomUUID().toString();
+        String text2 = UUID.randomUUID().toString();
         source.put("key", text);
+        source.put("key2", text2);
         Configs configs = new Configs(source);
-        final Instrumentation inst = Mockito.mock(Instrumentation.class);
+
         Bootstrap.registerMBeans(configs);
-        JvmAgent.premain("", inst);
-        String baseUrl = "http://localhost:8778/jolokia/";
-        RestTemplate client = new RestTemplate();
+        server = new JmxServer(serverAddress, DEFAULT_PORT);
+        server.start();
+        JmxClient jmxClient = new JmxClient(serverAddress, DEFAULT_PORT);
 
-        {
-            String actual = getConfigValue(baseUrl, client, "key");
-            MatcherAssert.assertThat(actual, CoreMatchers.equalTo(text));
-        }
+        Map<String, String> cfg = mxBeanGetConfigs(jmxClient);
+        MatcherAssert.assertThat(cfg.get("key"), CoreMatchers.equalTo(text));
 
-        {
-            String helloValue = UUID.randomUUID().toString();
-            ResponseEntity<String> resp = client.postForEntity(baseUrl, "{\n" +
-                    "\t\"type\":\"exec\",\n" +
-                    "\t\"mbean\":\"com.megaease.easeagent:type=ConfigManager\",\n" +
-                    "\t\"operation\":\"updateConfigs\",\n" +
-                    "\t\"arguments\":[{\"hello\":\"" + helloValue + "\"}]\n" +
-                    "}", String.class);
-            MatcherAssert.assertThat(resp.getStatusCodeValue(), CoreMatchers.equalTo(200));
-            MatcherAssert.assertThat(getConfigValue(baseUrl, client, "hello"), CoreMatchers.equalTo(helloValue));
-            MatcherAssert.assertThat(getConfigValue(baseUrl, client, "key"), CoreMatchers.equalTo(text));
-        }
+        source = new HashMap<>();
+        String helloValue = "helloValue";
+        source.put("hello", helloValue);
+        mxBeanSetConfigs(jmxClient, source);
+        cfg = mxBeanGetConfigs(jmxClient);
 
+        MatcherAssert.assertThat(cfg.get("key"), CoreMatchers.equalTo(text));
+        MatcherAssert.assertThat(cfg.get("hello"), CoreMatchers.equalTo(helloValue));
+
+        jmxClient.close();
     }
 
-    private String getConfigValue(String baseUrl, RestTemplate client, String name) throws JsonProcessingException {
-        String resp = client.getForObject(baseUrl + "read/com.megaease.easeagent:type=ConfigManager/Configs/" + name, String.class);
-        String actual = json.readTree(resp).path("value").asText();
-        return actual;
+    @SneakyThrows
+    private TabularData getUpdateConfigsOperationInfo(MBeanOperationInfo operationInfo,
+                                                             Map<String, String> source) {
+        OpenMBeanParameterInfoSupport p = (OpenMBeanParameterInfoSupport)operationInfo.getSignature()[0];
+
+        TabularType pType = (TabularType)p.getOpenType();
+        CompositeType rowType = pType.getRowType();
+
+        TabularDataSupport tabularData = new TabularDataSupport(pType);
+        for(Map.Entry<String, String> entry : source.entrySet()) {
+            Map<String, Object> imap = new HashMap<>();
+            imap.put("key",  entry.getKey());
+            imap.put("value", entry.getValue());
+            try {
+                CompositeData compositeData = new CompositeDataSupport(rowType, imap);
+                tabularData.put(compositeData);
+            } catch (OpenDataException e) {
+                throw new IllegalArgumentException(e.getMessage(),e);
+            }
+        }
+        return tabularData;
     }
 
+    @SneakyThrows
+    private void mxBeanSetConfigs(JmxClient client, Map<String, String> source) {
+        MBeanOperationInfo operationInfo = client.getOperationInfo(objectName, "updateConfigs");
+        TabularData data = getUpdateConfigsOperationInfo(operationInfo, source);
+        client.invokeOperation(objectName, "updateConfigs", data);
+    }
+
+    @SneakyThrows
+    private Map<String, String> mxBeanGetConfigs(JmxClient client) {
+        Object a = client.getAttribute(objectName, "Configs");
+
+        TabularDataSupport d = (TabularDataSupport)  a;
+        HashMap<String, String> map = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : d.entrySet()) {
+            CompositeDataSupport dd = (CompositeDataSupport)entry.getValue();
+            map.put(dd.get("key").toString(), dd.get("value").toString());
+        }
+
+        return map;
+    }
 }

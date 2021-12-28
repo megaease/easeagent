@@ -27,10 +27,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,23 +44,27 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpServerTest {
-    WrappedConfigManager oldWrappedConfigManager;
+    static WrappedConfigManager oldWrappedConfigManager;
+    static IConfigFactory originConfigFactory;
 
-    @Before
-    public void before() throws NoSuchFieldException, IllegalAccessException {
+    @BeforeClass
+    public static void before() throws NoSuchFieldException, IllegalAccessException {
         Field field = Bootstrap.class.getDeclaredField("wrappedConfigManager");
         field.setAccessible(true);
         oldWrappedConfigManager = (WrappedConfigManager) field.get(null);
         field.setAccessible(false);
+
+        originConfigFactory = EaseAgent.configFactory;
     }
 
-    @After
-    public void after() throws NoSuchFieldException, IllegalAccessException {
+    @AfterClass
+    public static void after() throws NoSuchFieldException, IllegalAccessException {
         setWrappedConfigManager(oldWrappedConfigManager);
+        EaseAgent.configFactory = originConfigFactory;
     }
 
 
-    private void setWrappedConfigManager(WrappedConfigManager wrappedConfigManager) throws NoSuchFieldException, IllegalAccessException {
+    private static void setWrappedConfigManager(WrappedConfigManager wrappedConfigManager) throws NoSuchFieldException, IllegalAccessException {
         Field field = Bootstrap.class.getDeclaredField("wrappedConfigManager");
         field.setAccessible(true);
         field.set(null, wrappedConfigManager);

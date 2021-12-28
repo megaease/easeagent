@@ -84,6 +84,8 @@ public class Bootstrap {
 
     private static final int DEF_AGENT_SERVER_PORT = 9900;
 
+    static final String MX_BEAN_OBJECT_NAME = "com.megaease.easeagent:type=ConfigManager";
+
     private static WrappedConfigManager wrappedConfigManager;
 
     private static ContextManager contextManager;
@@ -182,15 +184,16 @@ public class Bootstrap {
         return builder;
     }
 
-    static void registerMBeans(ConfigManagerMXBean conf) throws Exception {
+    static MBeanServer registerMBeans(ConfigManagerMXBean conf) throws Exception {
         long begin = System.currentTimeMillis();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName mxBeanName = new ObjectName("com.megaease.easeagent:type=ConfigManager");
+        ObjectName mxBeanName = new ObjectName(MX_BEAN_OBJECT_NAME);
         ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
         wrappedConfigManager = new WrappedConfigManager(customClassLoader, conf);
         mbs.registerMBean(wrappedConfigManager, mxBeanName);
         LOGGER.info("Register {} as MBean {}, use time: {}",
             conf.getClass().getName(), mxBeanName, (System.currentTimeMillis() - begin));
+        return mbs;
     }
 
     private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
