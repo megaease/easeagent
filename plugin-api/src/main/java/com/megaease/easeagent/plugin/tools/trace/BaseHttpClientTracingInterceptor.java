@@ -36,6 +36,9 @@ public abstract class BaseHttpClientTracingInterceptor implements NonReentrantIn
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         RequestContext requestContext = context.remove(getProgressKey());
+        if (requestContext == null) {
+            return;
+        }
         // RequestContext requestContext = context.pop();
         try {
             HttpResponse responseWrapper = getResponse(methodInfo, context);

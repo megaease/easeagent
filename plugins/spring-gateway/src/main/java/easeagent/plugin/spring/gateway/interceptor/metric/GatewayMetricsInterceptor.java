@@ -23,7 +23,6 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -39,8 +38,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import static easeagent.plugin.spring.gateway.interceptor.metric.TimeUtils.removeStartTime;
+import static easeagent.plugin.spring.gateway.interceptor.metric.TimeUtils.startTime;
+
 @AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = SpringGatewayPlugin.class)
 public class GatewayMetricsInterceptor implements Interceptor {
+    private static Object START_TIME = new Object();
     private static volatile ServerMetric SERVER_METRIC = null;
 
     @Override
@@ -51,27 +54,31 @@ public class GatewayMetricsInterceptor implements Interceptor {
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
+        startTime(context, START_TIME);
         // context.put(START, SystemClock.now());
     }
+
 
     @Override
     @SuppressWarnings("unchecked")
     public void after(MethodInfo methodInfo, Context context) {
-        ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-        if (!methodInfo.isSuccess()) {
-            String key = getKey(exchange);
-            Long start = ContextUtils.getBeginTime(context);
-            long end = System.currentTimeMillis();
-            SERVER_METRIC.collectMetric(key, 500, methodInfo.getThrowable(), start, end);
+        try {
+            ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
+            if (!methodInfo.isSuccess()) {
+                String key = getKey(exchange);
+                Long start = startTime(context, START_TIME);
+                long end = System.currentTimeMillis();
+                SERVER_METRIC.collectMetric(key, 500, methodInfo.getThrowable(), start, end);
+            }
+            // async
+            Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
+            methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
+        } finally {
+            removeStartTime(context, START_TIME);
         }
-        // async
-        Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
-        methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
     }
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        ctx.importToCurrent();
-        Context context = ctx.getContext();
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         String key = getKey(exchange);
         HttpStatus statusCode = exchange.getResponse().getStatusCode();
@@ -80,7 +87,7 @@ public class GatewayMetricsInterceptor implements Interceptor {
             code = statusCode.value();
         }
         SERVER_METRIC.collectMetric(key, code, methodInfo.getThrowable(),
-            ContextUtils.getBeginTime(context), SystemClock.now());
+            (Long) ctx.getAll().get(START_TIME), SystemClock.now());
     }
 
     public static String getKey(ServerWebExchange exchange) {

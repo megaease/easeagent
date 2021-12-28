@@ -24,7 +24,6 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -38,8 +37,12 @@ import easeagent.plugin.spring.gateway.reactor.AgentMono;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import static easeagent.plugin.spring.gateway.interceptor.metric.TimeUtils.removeStartTime;
+import static easeagent.plugin.spring.gateway.interceptor.metric.TimeUtils.startTime;
+
 @AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = AccessPlugin.class)
 public class GatewayAccessLogInterceptor implements Interceptor {
+    private static Object START_TIME = new Object();
     private static Reporter reportConsumer;
     private final HttpLog httpLog = new HttpLog();
 
@@ -52,7 +55,7 @@ public class GatewayAccessLogInterceptor implements Interceptor {
     public void before(MethodInfo methodInfo, Context context) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
-        Long beginTime = ContextUtils.getBeginTime(context);
+        Long beginTime = startTime(context, START_TIME);
         RequestContext pCtx = exchange.getAttribute(GatewayCons.SPAN_KEY);
         if (pCtx == null) {
             return;
@@ -65,20 +68,22 @@ public class GatewayAccessLogInterceptor implements Interceptor {
     @Override
     @SuppressWarnings("unchecked")
     public void after(MethodInfo methodInfo, Context context) {
-        // async
-        Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
-        methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
+        try {
+            // async
+            Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
+            methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
+        } finally {
+            removeStartTime(context, START_TIME);
+        }
     }
 
     private void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        ctx.importToCurrent();
-        Context context = ctx.getContext();
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         RequestInfo requestInfo = exchange.getAttribute(RequestInfo.class.getName());
         if (requestInfo == null) {
             return;
         }
-        Long beginTime = ContextUtils.getBeginTime(context);
+        Long beginTime = (Long) ctx.getAll().get(START_TIME);
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         String logString = this.httpLog.getLogString(requestInfo, methodInfo.isSuccess(), beginTime, serverInfo);
         reportConsumer.report(logString);
