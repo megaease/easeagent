@@ -40,7 +40,7 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
     @SuppressWarnings("unchecked")
     public AgentCoreSubscriber(CoreSubscriber<? super ClientResponse> actual, MethodInfo methodInfo,
                                RequestContext context) {
-        this.actual = (CoreSubscriber<ClientResponse>)actual;
+        this.actual = (CoreSubscriber<ClientResponse>) actual;
         this.methodInfo = methodInfo;
         // this.chain = chain;
         this.requestContext = context;
@@ -84,6 +84,8 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
                 ClientResponse resp = results.get(0);
                 webClientResponse = new WebClientResponse(null, resp);
                 this.requestContext.finish(webClientResponse);
+            } else {
+                requestContext.span().finish();
             }
         } else {
             Span span = requestContext.span();

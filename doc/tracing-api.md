@@ -32,8 +32,9 @@ According to the information transmission method, the Tracing interface is divid
 ```java
 interface Context{
     //---------------------------------- 1. Cross-thread ------------------------------------------
+
     /**
-     * Export a {@link AsyncContext} for asynchronous program processing
+     * Export a {@link AsyncContext} for async
      * It will copy all the key:value in the current Context
      *
      * @return {@link AsyncContext}
@@ -41,10 +42,21 @@ interface Context{
     AsyncContext exportAsync();
 
     /**
-     * Import a {@link AsyncContext} for asynchronous program processing
+     * Import a {@link AsyncContext} for async
      * It will copy all the key: value to the current Context
      * <p>
      * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurrent()} proxy call
+     * <p>
+     * The Scope must be close after business:
+     * <p>
+     * example:
+     * <pre>{@code
+     *    void callback(Context context, AsyncContext ac){
+     *       try (Scope scope = context.importAsync(ac)) {
+     *          //do business
+     *       }
+     *    }
+     * }</pre>
      *
      * @param snapshot the AsyncContext from {@link #exportAsync()} called
      * @return {@link Scope} for tracing
@@ -66,6 +78,7 @@ interface Context{
 
 
     //----------------------------------2. Cross-server ------------------------------------------
+
     /**
      * Create a RequestContext for the next Server
      * It will pass multiple key:value values required by Trace and EaseAgent through
@@ -80,6 +93,19 @@ interface Context{
      * {@code client.clientRequest(Request.setHeader<spanId,root-source...>) --> server }
      * or
      * {@code client.clientRequest(Request).getHeaders<spanId,root-source...> --> server }
+     * <p>
+     * The Scope must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       RequestContext rc = context.get(...)
+     *       try{
+     *
+     *       }finally{
+     *           rc.scope().close();
+     *       }
+     *    }
+     * }</pre>
      *
      * @param request {@link Request}
      * @return {@link RequestContext}
@@ -102,11 +128,23 @@ interface Context{
      * It is usually called on the server receives a request when collaboration between multiple server is required.
      * {@code client --> server.serverReceive(Request<spanId,root-source...>) }
      *
+     * The Scope must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       RequestContext rc = context.get(...)
+     *       try{
+     *
+     *       }finally{
+     *           rc.scope().close();
+     *       }
+     *    }
+     * }</pre>
+     *
      * @param request {@link Request}
      * @return {@link RequestContext}
      */
     RequestContext serverReceive(Request request);
-
 
     //---------------------------------- 3. Message Tracing ------------------------------------------
     /**
@@ -251,6 +289,20 @@ import java.util.Map;
 
 /**
  * A cross-process data context, including tracing and Forwarded Headers
+ *
+ * The Scope must be close after plugin:
+ *
+ * <pre>{@code
+ *    void after(...){
+ *       RequestContext rc = context.get(...)
+ *       try{
+ *
+ *       }finally{
+ *           rc.scope().close();
+ *       }
+ *    }
+ * }</pre>
+ *
  */
 public interface RequestContext extends Setter {
     /**
@@ -266,6 +318,20 @@ public interface RequestContext extends Setter {
     Span span();
 
     /**
+     *
+     * The Scope must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       RequestContext rc = context.get(...)
+     *       try{
+     *
+     *       }finally{
+     *           rc.scope().close();
+     *       }
+     *    }
+     * }</pre>
+     * 
      * @return {@link Scope} for current Span
      */
     Scope scope();
