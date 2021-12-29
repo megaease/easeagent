@@ -18,15 +18,16 @@
 package com.megaease.easeagent.core.interceptor;
 
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.MethodInfo;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.Date;
 import java.util.Map;
 
-@Slf4j
 public class AgentInterceptorChainInvoker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AgentInterceptorChainInvoker.class);
 
     private static final String BEFORE_ELAPSED_TIME_KEY = AgentInterceptorChainInvoker.class.getName() + "-BEFORE_ELAPSED_TIME_KEY";
     private static final String BEFORE_BEGIN_TIME_KEY = AgentInterceptorChainInvoker.class.getName() + "-BEFORE_BEGIN_TIME_KEY";
@@ -54,7 +55,7 @@ public class AgentInterceptorChainInvoker {
             context.put(BEFORE_ELAPSED_TIME_KEY, elapsed);
             context.put(BEFORE_BEGIN_TIME_KEY, beginTime);
         } catch (Throwable e) {
-            log.warn("interceptorChain doBefore error.", e);
+            LOGGER.warn("interceptorChain doBefore error.", e);
         }
     }
 
@@ -80,7 +81,7 @@ public class AgentInterceptorChainInvoker {
             this.logTime(methodInfo, context, beginTime4After);
             return result;
         } catch (Throwable e) {
-            log.warn("interceptorChain doAfter error.", e);
+            LOGGER.warn("interceptorChain doAfter error.", e);
             return methodInfo.getRetValue();
         }
     }
@@ -114,8 +115,8 @@ public class AgentInterceptorChainInvoker {
         if (beginTime != null) {
             elapsedAll = endTime - beginTime;
         }
-        log.info("== agent-method:{} before-beginTime:{} elapsed:{}ms, after-beginTime:{} elapsed:{}ms, all-time:{}ms ==",
-                sb, beginTime4BeforeStr, elapsed4Before, beginTime4AfterStr, elapsed4After, elapsedAll);
+        LOGGER.info("== agent-method:{} before-beginTime:{} elapsed:{}ms, after-beginTime:{} elapsed:{}ms, all-time:{}ms ==",
+            sb, beginTime4BeforeStr, elapsed4Before, beginTime4AfterStr, elapsed4After, elapsedAll);
     }
 
     private AgentInterceptorChain prepare(AgentInterceptorChain.Builder builder, Map<Object, Object> context) {

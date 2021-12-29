@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.megaease.easeagent.common.config.SwitchUtil;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.Configs;
 
@@ -26,11 +25,11 @@ import java.util.Map;
 
 public class BaseMetricsTest {
 
-    public Config createConfig(String key, String value) {
-        Map<String, String> map = new HashMap<>();
-        map.put(key, value);
-        map.put(SwitchUtil.GLOBAL_METRICS_ENABLE_KEY, "true");
-        map.put(SwitchUtil.GLOBAL_TRACING_ENABLE_KEY, "true");
-        return new Configs(map);
-    }
+//    public Config createConfig(String key, String value) {
+//        Map<String, String> map = new HashMap<>();
+//        map.put(key, value);
+//        map.put(SwitchUtil.GLOBAL_METRICS_ENABLE_KEY, "true");
+//        map.put(SwitchUtil.GLOBAL_TRACING_ENABLE_KEY, "true");
+//        return new Configs(map);
+//    }
 }

@@ -20,7 +20,7 @@ package com.megaease.easeagent.gen;
 import com.megaease.easeagent.core.AdviceTo;
 import com.megaease.easeagent.core.Definition;
 import com.megaease.easeagent.core.Dispatcher;
-import com.megaease.easeagent.core.Injection;
+import com.megaease.easeagent.plugin.annotation.Injection;
 import com.squareup.javapoet.*;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;

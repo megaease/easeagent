@@ -19,10 +19,6 @@ package com.megaease.easeagent.log4j2;
 
 import com.megaease.easeagent.log4j2.api.AgentLogger;
 import com.megaease.easeagent.log4j2.api.AgentLoggerFactory;
-import com.megaease.easeagent.log4j2.supplier.AllUrlsSupplier;
-import com.megaease.easeagent.log4j2.supplier.DirUrlsSupplier;
-import com.megaease.easeagent.log4j2.supplier.JarUrlsSupplier;
-import com.megaease.easeagent.log4j2.supplier.URLClassLoaderSupplier;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -46,12 +42,8 @@ public class LoggerFactory {
         FACTORY = factory;
     }
 
-    private static Supplier<ClassLoader> classLoaderSupplier() {
-        FinalClassloaderSupplier supplier = new FinalClassloaderSupplier();
-        if (supplier.get() != null) {
-            return supplier;
-        }
-        return new URLClassLoaderSupplier(JarUrlsSupplier.build(new AllUrlsSupplier(), new DirUrlsSupplier()));
+    private static ClassloaderSupplier classLoaderSupplier() {
+        return new ClassloaderSupplier.ClassloaderSupplierImpl();
     }
 
     public static <N extends AgentLogger> AgentLoggerFactory<N> newFactory(Function<java.util.logging.Logger, N> loggerSupplier, Class<N> tClass) {

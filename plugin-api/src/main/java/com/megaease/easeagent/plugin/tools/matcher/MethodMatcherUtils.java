@@ -27,4 +27,9 @@ public class MethodMatcherUtils {
             .qualifier("constructor")
             .build();
     }
+
+    public static IMethodMatcher name(String name) {
+        return MethodMatcher.builder().named(name)
+            .build();
+    }
 }

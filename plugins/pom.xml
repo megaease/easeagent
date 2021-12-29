@@ -28,7 +28,7 @@
     </parent>
 
     <artifactId>plugins</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
     <name>easeagent-plugins</name>
 
@@ -45,12 +45,13 @@
         <module>httpclient</module>
         <module>okhttp</module>
         <module>elasticsearch</module>
+        <module>healthy</module>
     </modules>
 
     <properties>
         <version.easeagent>2.0.0</version.easeagent>
     </properties>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>

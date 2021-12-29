@@ -21,7 +21,7 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.Configurable;
 import com.megaease.easeagent.core.Dispatcher;
-import com.megaease.easeagent.core.Injection;
+import com.megaease.easeagent.plugin.annotation.Injection;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;

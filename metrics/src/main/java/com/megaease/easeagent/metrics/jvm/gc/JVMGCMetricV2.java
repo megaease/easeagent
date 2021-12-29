@@ -17,11 +17,11 @@
  */
 package com.megaease.easeagent.metrics.jvm.gc;
 
-import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.utils.ImmutableMap;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
 

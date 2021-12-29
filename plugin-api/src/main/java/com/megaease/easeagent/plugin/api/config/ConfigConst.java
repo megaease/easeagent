@@ -139,6 +139,7 @@ public interface ConfigConst {
         String RABBITMQ = "rabbitmq";
         String REDIS = "redis";
         String SERVICE_NAME = "serviceName";
+        String HEALTH = "health";
         String ACCESS = "access";
         String SPRING_GATEWAY = "springGateway";
         String MD5_DICTIONARY = "md5Dictionary";

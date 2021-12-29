@@ -213,13 +213,5 @@
             <artifactId>zipkin-sender-urlconnection</artifactId>
         </dependency>
 
-        <!--
-        <dependency>
-            <groupId>com.megaease.easeagent</groupId>
-            <artifactId>log4j2-impl</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        -->
     </dependencies>
 </project>

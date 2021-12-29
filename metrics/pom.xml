@@ -33,9 +33,14 @@
             <artifactId>config</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.megaease.easeagent</groupId>-->
+            <!--<artifactId>common</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>report</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

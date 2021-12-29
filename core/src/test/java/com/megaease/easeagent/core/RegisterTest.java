@@ -17,6 +17,7 @@
 
  package com.megaease.easeagent.core;
 
+import com.megaease.easeagent.plugin.annotation.Injection;
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;

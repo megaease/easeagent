@@ -17,7 +17,7 @@
 
  package com.megaease.easeagent.gen;
 
-import com.megaease.easeagent.core.Injection;
+import com.megaease.easeagent.plugin.annotation.Injection;
 
 public abstract class Qux {
 

@@ -18,7 +18,7 @@
 package com.megaease.easeagent.gen;
 
 import com.google.auto.service.AutoService;
-import com.megaease.easeagent.core.Injection;
+import com.megaease.easeagent.plugin.annotation.Injection;
 import com.megaease.easeagent.core.Transformation;
 import com.megaease.easeagent.gen.Generate.Assembly;
 import com.squareup.javapoet.JavaFile;
