@@ -27,6 +27,20 @@ import java.util.Map;
 
 /**
  * A cross-process data context, including tracing and Forwarded Headers
+ *
+ * The Scope must be close after plugin:
+ *
+ * <pre>{@code
+ *    void after(...){
+ *       RequestContext rc = context.get(...)
+ *       try{
+ *
+ *       }finally{
+ *           rc.scope().close();
+ *       }
+ *    }
+ * }</pre>
+ *
  */
 public interface RequestContext extends Setter {
     /**
@@ -42,6 +56,20 @@ public interface RequestContext extends Setter {
     Span span();
 
     /**
+     *
+     * The Scope must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       RequestContext rc = context.get(...)
+     *       try{
+     *
+     *       }finally{
+     *           rc.scope().close();
+     *       }
+     *    }
+     * }</pre>
+     *
      * @return {@link Scope} for current Span
      */
     Scope scope();

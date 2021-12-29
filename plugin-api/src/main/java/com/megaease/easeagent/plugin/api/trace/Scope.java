@@ -24,6 +24,39 @@ import java.io.Closeable;
  *
  * <p>This type can be extended so that the object graph can be built differently or overridden,
  * for example via zipkin or when mocking.
+ * <p>
+ * The Scope must be close after plugin:
+ * <p>
+ * example 1:
+ * <pre>{@code
+ *    void after(...){
+ *       RequestContext pCtx = context.get(...)
+ *       try{
+ *          //do business
+ *       }finally{
+ *           pCtx.scope().close();
+ *       }
+ *    }
+ * }</pre>
+ * <p>
+ * example 2:
+ * <pre>{@code
+ *    void after(...){
+ *       RequestContext pCtx = context.get(...)
+ *       try (Scope scope = pCtx.scope()) {
+ *          //do business
+ *       }
+ *    }
+ * }</pre>
+ * <p>
+ * example 3:
+ * <pre>{@code
+ *    void callback(AsyncContext ac){
+ *       try (Scope scope = ac.importToCurrent()) {
+ *          //do business
+ *       }
+ *    }
+ * }</pre>
  */
 public interface Scope extends Closeable {
     /**

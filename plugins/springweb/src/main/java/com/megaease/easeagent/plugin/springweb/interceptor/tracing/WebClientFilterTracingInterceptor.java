@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
@@ -54,7 +55,6 @@ public class WebClientFilterTracingInterceptor implements NonReentrantIntercepto
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
-        log.info("test log");
         HttpRequest request = getRequest(methodInfo);
         RequestContext requestContext = context.clientRequest(request);
         Span span = requestContext.span();
@@ -65,15 +65,16 @@ public class WebClientFilterTracingInterceptor implements NonReentrantIntercepto
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         RequestContext pCtx = context.get(getProgressKey());
+        try (Scope scope = pCtx.scope()) {
+            @SuppressWarnings("unchecked")
+            Mono<ClientResponse> mono = (Mono<ClientResponse>) methodInfo.getRetValue();
+            methodInfo.setRetValue(new AgentMono(mono, methodInfo, pCtx));
 
-        @SuppressWarnings("unchecked")
-        Mono<ClientResponse> mono = (Mono<ClientResponse>) methodInfo.getRetValue();
-        methodInfo.setRetValue(new AgentMono(mono, methodInfo, pCtx));
-
-        if (!methodInfo.isSuccess()) {
-            Span span = pCtx.span();
-            span.error(methodInfo.getThrowable());
-            span.finish();
+            if (!methodInfo.isSuccess()) {
+                Span span = pCtx.span();
+                span.error(methodInfo.getThrowable());
+                span.finish();
+            }
         }
     }
 

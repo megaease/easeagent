@@ -59,6 +59,17 @@ public interface AsyncContext {
 
     /**
      * Import this AsyncContext to current {@link Context} and return a {@link Scope}
+     * <p>
+     * The Scope must be close after business:
+     * <p>
+     * example:
+     * <pre>{@code
+     *    void callback(AsyncContext ac){
+     *       try (Scope scope = ac.importAsync()) {
+     *          //do business
+     *       }
+     *    }
+     * }</pre>
      *
      * @return {@link Scope}
      */

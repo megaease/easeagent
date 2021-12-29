@@ -258,6 +258,17 @@ public interface Context {
      * It will copy all the key: value to the current Context
      * <p>
      * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurrent()} proxy call
+     * <p>
+     * The Scope must be close after business:
+     * <p>
+     * example:
+     * <pre>{@code
+     *    void callback(Context context, AsyncContext ac){
+     *       try (Scope scope = context.importAsync(ac)) {
+     *          //do business
+     *       }
+     *    }
+     * }</pre>
      *
      * @param snapshot the AsyncContext from {@link #exportAsync()} called
      * @return {@link Scope} for tracing
@@ -294,6 +305,19 @@ public interface Context {
      * {@code client.clientRequest(Request.setHeader<spanId,root-source...>) --> server }
      * or
      * {@code client.clientRequest(Request).getHeaders<spanId,root-source...> --> server }
+     * <p>
+     * The Scope must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       RequestContext rc = context.get(...)
+     *       try{
+     *
+     *       }finally{
+     *           rc.scope().close();
+     *       }
+     *    }
+     * }</pre>
      *
      * @param request {@link Request}
      * @return {@link RequestContext}
@@ -315,6 +339,19 @@ public interface Context {
      * <p>
      * It is usually called on the server receives a request when collaboration between multiple server is required.
      * {@code client --> server.serverReceive(Request<spanId,root-source...>) }
+     *
+     * The Scope must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       RequestContext rc = context.get(...)
+     *       try{
+     *
+     *       }finally{
+     *           rc.scope().close();
+     *       }
+     *    }
+     * }</pre>
      *
      * @param request {@link Request}
      * @return {@link RequestContext}
