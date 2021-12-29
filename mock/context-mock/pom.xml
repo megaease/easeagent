@@ -20,24 +20,30 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>easeagent</artifactId>
+        <artifactId>mock</artifactId>
         <groupId>com.megaease.easeagent</groupId>
         <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mock</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>log4j2-mock</module>
-        <module>config-mock</module>
-        <module>context-mock</module>
-        <module>report-mock</module>
-        <module>metrics-mock</module>
-        <module>utils-mock</module>
-        <module>zipkin-mock</module>
-        <module>plugin-api-mock</module>
-    </modules>
+    <artifactId>context-mock</artifactId>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>context</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>config-mock</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>utils-mock</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
