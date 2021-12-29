@@ -43,5 +43,12 @@
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>log4j2-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>log4j2-mock</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -17,11 +17,12 @@
 
 package com.megaease.easeagent.core;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.megaease.easeagent.config.*;
-import com.megaease.easeagent.core.context.ContextManager;
+import com.megaease.easeagent.context.ContextManager;
 import com.megaease.easeagent.core.plugin.BridgeDispatcher;
 import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.utils.WrappedConfigManager;
@@ -34,7 +35,12 @@ import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Statu
 import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.BeanProvider;
+import com.megaease.easeagent.plugin.IProvider;
+import com.megaease.easeagent.plugin.annotation.Injection;
+import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -138,6 +144,7 @@ public class Bootstrap {
         builder = PluginLoader.load(builder, conf);
 
         final AgentReport agentReport = AgentReport.create(conf);
+        builder = define(transformations, loadProvider(conf, agentReport), builder, conf, agentReport);
         builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
 
         long installBegin = System.currentTimeMillis();
@@ -146,6 +153,60 @@ public class Bootstrap {
         LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
         agentHttpServer.addHttpRoutes(AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER);
         LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
+    }
+
+    private static Map<Class<?>, Iterable<QualifiedBean>> loadProvider(final Configs conf, final AgentReport agentReport) {
+        ServiceLoader<BeanProvider> loader = ServiceLoader.load(BeanProvider.class);
+        Iterator<BeanProvider> iterator = loader.iterator();
+        return ImmutableMap.copyOf(
+            Maps.transformValues(from(loader).uniqueIndex((Function<BeanProvider, Class<?>>) BeanProvider::getClass),
+                input -> {
+                    provider(input, conf, agentReport);
+                    return beans(input);
+                }));
+
+    }
+
+    private static void provider(final BeanProvider beanProvider, final Configs conf, final AgentReport agentReport) {
+        if (beanProvider instanceof ConfigAware) {
+            ((ConfigAware) beanProvider).setConfig(conf);
+        }
+        if (beanProvider instanceof AgentReportAware) {
+            ((AgentReportAware) beanProvider).setAgentReport(agentReport);
+        }
+        if (beanProvider instanceof AgentHttpHandlerProvider) {
+            AGENT_HTTP_HANDLER_LIST_AFTER_PROVIDER.addAll(((AgentHttpHandlerProvider) beanProvider).getAgentHttpHandlers());
+        }
+        if (beanProvider instanceof IProvider) {
+            ((IProvider) beanProvider).afterPropertiesSet();
+        }
+
+        if (beanProvider instanceof TracingProvider) {
+            TracingProvider tracingProvider = (TracingProvider) beanProvider;
+            contextManager.setTracing(tracingProvider);
+        }
+
+        if (beanProvider instanceof MetricProvider) {
+            contextManager.setMetric((MetricProvider) beanProvider);
+        }
+    }
+
+    private static Iterable<QualifiedBean> beans(final BeanProvider beanProvider) {
+        final ImmutableList.Builder<QualifiedBean> builder = ImmutableList.builder();
+        for (Method method : beanProvider.getClass().getMethods()) {
+            final Injection.Bean bean = method.getAnnotation(Injection.Bean.class);
+            if (bean == null) continue;
+            try {
+                final QualifiedBean qb = new QualifiedBean(bean.value(), method.invoke(beanProvider));
+                builder.add(qb);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Provided {} ", qb);
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return builder.build();
     }
 
     public static AgentBuilder getAgentBuilder(Configs config, boolean test) {

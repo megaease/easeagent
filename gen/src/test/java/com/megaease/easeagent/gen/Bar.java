@@ -18,6 +18,7 @@
 package com.megaease.easeagent.gen;
 
 import com.megaease.easeagent.core.*;
+import com.megaease.easeagent.plugin.annotation.Injection;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 

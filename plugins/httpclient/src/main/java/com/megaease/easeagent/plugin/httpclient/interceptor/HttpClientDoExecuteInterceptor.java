@@ -27,12 +27,9 @@ import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @AdviceTo(value = HttpClientDoExecuteAdvice.class, qualifier = "default")
 public class HttpClientDoExecuteInterceptor extends BaseHttpClientTracingInterceptor {
-    Logger clog = LoggerFactory.getLogger("test");
     @Override
     public Object getProgressKey() {
         return HttpClientDoExecuteInterceptor.class;

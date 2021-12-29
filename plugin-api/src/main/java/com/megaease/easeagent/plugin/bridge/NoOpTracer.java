@@ -189,7 +189,7 @@ public class NoOpTracer {
 
         @Override
         public Span nextSpan() {
-            return null;
+            return NoopSpan.INSTANCE;
         }
 
         @Override

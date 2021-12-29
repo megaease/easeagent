@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.log4j2.api;
 
+import com.megaease.easeagent.log4j2.ClassloaderSupplier;
+
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -25,7 +27,6 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public class AgentLoggerFactory<T extends AgentLogger> {
@@ -45,7 +46,7 @@ public class AgentLoggerFactory<T extends AgentLogger> {
         this.agentLogger = this.getLogger(AgentLoggerFactory.class.getName());
     }
 
-    public static <T extends AgentLogger> Builder<T> builder(Supplier<ClassLoader> classLoaderSupplier, Function<Logger, T> loggerSupplier, Class<T> tClass) {
+    public static <T extends AgentLogger> Builder<T> builder(ClassloaderSupplier classLoaderSupplier, Function<Logger, T> loggerSupplier, Class<T> tClass) {
         ClassLoader classLoader = Objects.requireNonNull(classLoaderSupplier.get(), "classLoader must not be null.");
         return new Builder<>(classLoader, loggerSupplier, tClass);
     }

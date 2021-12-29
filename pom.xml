@@ -39,6 +39,8 @@
         <module>httpserver</module>
         <module>plugins</module>
         <module>build</module>
+        <module>context</module>
+        <module>mock</module>
     </modules>
 
     <properties>
@@ -118,13 +120,18 @@
                 <artifactId>plugin-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.megaease.easeagent</groupId>
+                <artifactId>plugins</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.megaease.easeagent</groupId>
                 <artifactId>log4j2-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>com.squareup</groupId>
                 <artifactId>javapoet</artifactId>

@@ -40,22 +40,27 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!--
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <scope>provided</scope>
         </dependency>
-        -->
-        
+
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
-            <artifactId>log4j2-impl</artifactId>
+            <artifactId>log4j2-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>log4j2-mock</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

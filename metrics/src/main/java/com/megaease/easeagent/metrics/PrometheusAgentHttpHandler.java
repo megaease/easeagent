@@ -23,10 +23,11 @@ import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.IHTTPSession;
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
 import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -36,8 +37,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 
-@Slf4j
 public class PrometheusAgentHttpHandler extends AgentHttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrometheusAgentHttpHandler.class);
 
     @Override
     public String getPath() {
@@ -54,7 +55,7 @@ public class PrometheusAgentHttpHandler extends AgentHttpHandler {
             TextFormat.writeFormat(contentType, writer, samples);
             writer.flush();
         } catch (IOException e) {
-            log.warn("write data error. {}", e.getMessage());
+            LOGGER.warn("write data error. {}", e.getMessage());
         }
         String data = stringWriter.toString();
         return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, data);

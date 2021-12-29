@@ -4,6 +4,7 @@ target/
 dependency-reduced-pom.xml
 *.class
 *.swp
+**/*.versionsBackup
 
 .classpath
 .factorypath

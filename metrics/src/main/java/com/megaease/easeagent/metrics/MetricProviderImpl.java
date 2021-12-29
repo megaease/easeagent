@@ -20,7 +20,7 @@ package com.megaease.easeagent.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
-import com.megaease.easeagent.core.MetricProvider;
+import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.metrics.config.MetricsConfig;
 import com.megaease.easeagent.metrics.config.PluginMetricsConfig;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;

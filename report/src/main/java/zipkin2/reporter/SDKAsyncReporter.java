@@ -18,6 +18,7 @@
 package zipkin2.reporter;
 
 import com.megaease.easeagent.report.trace.TraceProps;
+import com.megaease.easeagent.report.util.SpanUtils;
 import lombok.SneakyThrows;
 import zipkin2.Call;
 import zipkin2.CheckResult;
@@ -84,8 +85,8 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
                                                                  TraceProps traceProperties,
                                                                  GlobalExtrasSupplier extrasSupplier) {
         final SDKAsyncReporter<Span> reporter = new Builder(builder
-                .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes()))  //设置队列的最大count和最大的size
-                .build(traceProperties, extrasSupplier);
+            .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes()))  //Set the maximum count and maximum size of the queue
+            .build(traceProperties, extrasSupplier);
         reporter.setTraceProperties(traceProperties);
         return reporter;
     }
@@ -94,12 +95,12 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         this.flushThreads = flushThreads;
     }
 
-    //修改sender
+    //modify sender
     public Sender getSender() {
         return this.sender;
     }
 
-    //修改sender
+    //modify sender
     public void setSender(Sender sender) {
         this.sender = sender;
     }
@@ -142,7 +143,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
             return;
         }
 
-        if (!isValidSpan(next)) {
+        if (!SpanUtils.isValidSpan(next)) {
             return;
         }
 
@@ -151,19 +152,11 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         int messageSizeOfNextSpan = sender.messageSizeInBytes(nextSizeInBytes);
         metrics.incrementSpanBytes(nextSizeInBytes);
         if (closed.get() ||
-                // don't enqueue something larger than we can drain
-                messageSizeOfNextSpan > messageMaxBytes ||
-                !pending.offer(next, nextSizeInBytes)) {
+            // don't enqueue something larger than we can drain
+            messageSizeOfNextSpan > messageMaxBytes ||
+            !pending.offer(next, nextSizeInBytes)) {
             metrics.incrementSpansDropped(1);
         }
-    }
-
-    private boolean isValidSpan(S next) {
-        if (!(next instanceof Span)) {
-            return false;
-        }
-        Span s = (Span) next;
-        return s.timestamp() != null && s.timestamp() > 0;
     }
 
     @Override
@@ -224,15 +217,15 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
             if (shouldWarnException) {
                 logger.log(WARNING, "Spans were dropped due to exceptions. "
-                        + "All subsequent errors will be logged at FINE level.");
+                    + "All subsequent errors will be logged at FINE level.");
                 logLevel = WARNING;
                 shouldWarnException = false;
             }
 
             if (logger.isLoggable(logLevel)) {
                 logger.log(logLevel,
-                        format("Dropped %s spans due to %s(%s)", count, t.getClass().getSimpleName(),
-                                t.getMessage() == null ? "" : t.getMessage()), t);
+                    format("Dropped %s spans due to %s(%s)", count, t.getClass().getSimpleName(),
+                        t.getMessage() == null ? "" : t.getMessage()), t);
             }
 
             // Raise in case the sender was closed out-of-band.
@@ -278,7 +271,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
             List<Thread> flushThreads = new CopyOnWriteArrayList<>();
             for (int i = 0; i < traceProperties.getOutput().getReportThread(); i++) { // Multiple consumer consumption
                 final BufferNextMessage<S> consumer =
-                        BufferNextMessage.create(encoder.encoding(), this.messageMaxBytes, this.messageTimeoutNanos);
+                    BufferNextMessage.create(encoder.encoding(), this.messageMaxBytes, this.messageTimeoutNanos);
                 Thread flushThread = this.threadFactory.newThread(new Flusher<S>(this, consumer, this.sender, traceProperties));
                 flushThread.setName("AsyncReporter{" + this.sender + "}");
                 flushThread.setDaemon(true);
@@ -382,7 +375,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
             this.traceProperties = traceProperties;
             switch (builder.sender.encoding()) {
                 case JSON:
-                    return build(getAgentEncoder(traceProperties,  extrasSupplier));
+                    return build(getAgentEncoder(traceProperties, extrasSupplier));
                 case PROTO3:
                     return build(SpanBytesEncoder.PROTO3);
                 case THRIFT:
@@ -393,7 +386,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         }
 
         private BytesEncoder<Span> getAgentEncoder(TraceProps tp, GlobalExtrasSupplier extrasSupplier) {
-            return new AgentJSONByteEncoder( extrasSupplier, tp);
+            return new AgentJSONByteEncoder(extrasSupplier, tp);
         }
 
         /**
@@ -412,7 +405,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
             if (encoder.encoding() != builder.sender.encoding()) {
                 throw new IllegalArgumentException(String.format(
-                        "Encoder doesn't match Sender: %s %s", encoder.encoding(), builder.sender.encoding()));
+                    "Encoder doesn't match Sender: %s %s", encoder.encoding(), builder.sender.encoding()));
             }
 
             final SDKAsyncReporter<S> result = new SDKAsyncReporter<S>(this, encoder, traceProperties);
@@ -421,7 +414,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
                 List<Thread> flushThreads = new CopyOnWriteArrayList<>();
                 for (int i = 0; i < traceProperties.getOutput().getReportThread(); i++) { // Multiple consumer consumption
                     final BufferNextMessage<S> consumer =
-                            BufferNextMessage.create(encoder.encoding(), builder.messageMaxBytes, builder.messageTimeoutNanos);
+                        BufferNextMessage.create(encoder.encoding(), builder.messageMaxBytes, builder.messageTimeoutNanos);
                     Thread flushThread = builder.threadFactory.newThread(new Flusher<S>(result, consumer, builder.sender, traceProperties));
                     flushThread.setName("AsyncReporter{" + builder.sender + "}");
                     flushThread.setDaemon(true);
@@ -445,7 +438,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
             final AgentV2SpanWriter writer;
 
             AgentJSONByteEncoder(GlobalExtrasSupplier extrasSupplier, TraceProps traceProperties) {
-                writer = new AgentV2SpanWriter( extrasSupplier, traceProperties);
+                writer = new AgentV2SpanWriter(extrasSupplier, traceProperties);
             }
 
             @Override
