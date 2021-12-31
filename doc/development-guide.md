@@ -366,7 +366,6 @@ Effective Order = Interceptor Order << 8 + Plugin Order
 The `before` method of the interceptor will be invoked in descending order of the `Effective Order`, that is, the smaller order will have higher priority.
 The `after` method will be invoked in the opposite order as the before method was invoked.
 
-
 ### Plugin Configuration
 
 The format of the plugin configuration is defined as follows.
@@ -386,7 +385,7 @@ value           : true
 
 `[domain]` and `[namespace]` are defined by `AgentPlugin` interface implementations.
 
-The `function` is provided by `Interceptor` interface implemention's `getType()` method, and this method need return a String value like 'tracing', 'metirc', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword.
+The `function` is provided by `Interceptor` interface implementation's `getType()` method, and this method need return a String value like 'tracing', 'metric', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword.
 
 This prefix `plugin.[domain].[namespace].[function]` is used to maintained configuration for this `Interceptor`, and in this `Interceptor` developer can get its configuration by the `getConfig()` method of the `Context` param.
 
@@ -424,7 +423,8 @@ class InterceptorImpl  implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         Config config = context.getConfig();
-        // You don’t need to verify enabled here, because enabled is a reserved attribute. If it is false, the Interceptor will not be run.
+        // You don’t need to verify enabled here, because enabled is a reserved attribute.
+        // If it is false, the Interceptor will not be run.
         // boolean enabled = config.enabled();
         Integer outputSize = config.getInt("output.size"); //it will be get config key: plugin.[domain].[namespace].[function].output.size = [value]
     }
@@ -436,7 +436,7 @@ class InterceptorImpl  implements Interceptor {
 }
 ```
 
-When you want to get the configuration outside of the plugin, we provide tools to get it.
+When you want to get the configuration outside the plugin, we provide tools to get it.
 
 This tool will automatically maintain configuration updates and modifications, and the configuration obtained each time will be the latest configuration.
 
@@ -449,6 +449,7 @@ The registered key is `domain`, `namespace`, `id`.
 ```java
 import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigImpl;
+
 class Demo{
   AutoRefreshConfigImpl config = AutoRefreshRegistry.getOrCreate("observability", "httpclient", "metric");
 }
@@ -456,7 +457,7 @@ class Demo{
 
 ### Customize
 
-When you need to customize Config, implement the [com.megaease.easeagent.plugin.api.config.AutoRefreshConfig](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/config/AutoRefreshConfig.java) interface, and then register
+When you need to customize Config, implement the [com.megaease.easeagent.plugin.api.config.AutoRefreshConfig](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/config/AutoRefreshConfig.java) interface, and then register.
 
 The registered key is `domain`, `namespace`, `id` and the `type` of Class.
 
