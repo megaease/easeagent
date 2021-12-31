@@ -23,9 +23,9 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public class ErrorPercentModelGauge implements GaugeMetricModel {
-    private BigDecimal m1ErrorPercent;
-    private BigDecimal m5ErrorPercent;
-    private BigDecimal m15ErrorPercent;
+    private final BigDecimal m1ErrorPercent;
+    private final BigDecimal m5ErrorPercent;
+    private final BigDecimal m15ErrorPercent;
 
     public ErrorPercentModelGauge(BigDecimal m1ErrorPercent, BigDecimal m5ErrorPercent, BigDecimal m15ErrorPercent) {
         this.m1ErrorPercent = m1ErrorPercent;

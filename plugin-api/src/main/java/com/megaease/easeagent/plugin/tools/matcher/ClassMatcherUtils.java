@@ -21,6 +21,10 @@ import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 
 public class ClassMatcherUtils {
+
+    private ClassMatcherUtils() {
+    }
+
     public static IClassMatcher name(String name) {
         return ClassMatcher.builder().hasClassName(name)
             .build();

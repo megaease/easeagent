@@ -65,7 +65,6 @@ public class HttpLog {
         requestInfo.setTimestamp(System.currentTimeMillis());
         List<RequestInfo> list = new ArrayList<>(1);
         list.add(requestInfo);
-        String logString = JsonUtil.toJson(list);
-        return logString;
+        return JsonUtil.toJson(list);
     }
 }

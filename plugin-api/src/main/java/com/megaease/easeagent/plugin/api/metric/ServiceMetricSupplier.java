@@ -33,7 +33,8 @@ public abstract class ServiceMetricSupplier<T extends ServiceMetric> {
 
     public ServiceMetricSupplier() {
         Type superClass = getClass().getGenericSuperclass();
-        if (superClass instanceof Class<?>) { // sanity check, should never happen
+        // sanity check, should never happen
+        if (superClass instanceof Class<?>) {
             throw new IllegalArgumentException("Internal error: TypeReference constructed without actual type information");
         }
         type = ((ParameterizedType) superClass).getActualTypeArguments()[0];

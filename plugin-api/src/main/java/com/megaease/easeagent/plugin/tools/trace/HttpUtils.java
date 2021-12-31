@@ -22,6 +22,9 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import static com.megaease.easeagent.plugin.tools.trace.TraceConst.HTTP_HEADER_X_FORWARDED_FOR;
 
 public class HttpUtils {
+    private HttpUtils() {
+    }
+
     public static void handleReceive(Span span, HttpRequest httpRequest) {
         span.name(httpRequest.name());
         span.tag(TraceConst.HTTP_TAG_ROUTE, httpRequest.route());
@@ -35,9 +38,13 @@ public class HttpUtils {
 
     private static boolean parseHttpClientIpFromXForwardedFor(Span span, HttpRequest httpRequest) {
         String forwardedFor = httpRequest.header(HTTP_HEADER_X_FORWARDED_FOR);
-        if (forwardedFor == null) return false;
+        if (forwardedFor == null) {
+            return false;
+        }
         int indexOfComma = forwardedFor.indexOf(',');
-        if (indexOfComma != -1) forwardedFor = forwardedFor.substring(0, indexOfComma);
+        if (indexOfComma != -1) {
+            forwardedFor = forwardedFor.substring(0, indexOfComma);
+        }
         return span.remoteIpAndPort(forwardedFor, 0);
     }
 
@@ -49,13 +56,16 @@ public class HttpUtils {
     public static void save(Span span, HttpResponse httpResponse) {
         Throwable error = httpResponse.maybeError();
         if (error != null) {
-            span.error(error); // Ensures MutableSpan.error() for SpanHandler
+            // Ensures MutableSpan.error() for SpanHandler
+            span.error(error);
         }
         int statusCode = httpResponse.statusCode();
         if (statusCode != 0) {
             String nameFromRoute = spanNameFromRoute(httpResponse, statusCode);
-            if (nameFromRoute != null) span.name(nameFromRoute);
-            if (statusCode < 200 || statusCode > 299) { // not success code
+            if (nameFromRoute != null) {
+                span.name(nameFromRoute);
+            }
+            if (statusCode < 200 || statusCode > 299) {
                 span.tag(TraceConst.HTTP_TAG_STATUS_CODE, String.valueOf(statusCode));
             }
         }
@@ -66,10 +76,16 @@ public class HttpUtils {
 
     static String spanNameFromRoute(HttpResponse httpRequest, int statusCode) {
         String method = httpRequest.method();
-        if (method == null) return null; // don't undo a valid name elsewhere
+        if (method == null) {
+            return null; // don't undo a valid name elsewhere
+        }
         String route = httpRequest.route();
-        if (route == null) return null; // don't undo a valid name elsewhere
-        if (!"".equals(route)) return method + " " + route;
+        if (route == null) {
+            return null; // don't undo a valid name elsewhere
+        }
+        if (!"".equals(route)) {
+            return method + " " + route;
+        }
         return catchAllName(method, statusCode);
     }
 

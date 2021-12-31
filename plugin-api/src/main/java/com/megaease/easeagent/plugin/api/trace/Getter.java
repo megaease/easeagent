@@ -19,8 +19,8 @@ package com.megaease.easeagent.plugin.api.trace;
 
 public interface Getter {
     /**
-     * @param name
-     * @return
+     * @param name key of header
+     * @return header for specific key
      * @see Request#header(String)
      */
     String header(String name);

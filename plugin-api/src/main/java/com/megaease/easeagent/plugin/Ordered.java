@@ -22,7 +22,9 @@ import com.megaease.easeagent.plugin.enums.Order;
 public interface Ordered {
     /**
      * Higher values are operated later
-     * For example: a interceptor with order=1 will called after an interceptor with order=0.
+     * For example: an interceptor with order=1 will called after an interceptor with order=0.
+     *
+     * @return order
      */
     default int order() {
         return Order.HIGH.getOrder();

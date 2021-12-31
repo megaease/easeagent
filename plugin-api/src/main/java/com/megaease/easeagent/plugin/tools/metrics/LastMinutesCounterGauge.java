@@ -35,9 +35,9 @@ public class LastMinutesCounterGauge implements GaugeMetricModel {
     public Map<String, Object> toHashMap() {
         String px = this.prefix == null ? "" : this.prefix;
         return ImmutableMap.<String, Object>builder()
-                .put(px + "m1cnt", m1Count)
-                .put(px + "m5cnt", m5Count)
-                .put(px + "m15cnt", m15Count)
-                .build();
+            .put(px + "m1cnt", m1Count)
+            .put(px + "m5cnt", m5Count)
+            .put(px + "m15cnt", m15Count)
+            .build();
     }
 }

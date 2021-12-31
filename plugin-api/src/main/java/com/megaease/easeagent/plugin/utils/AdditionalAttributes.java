@@ -38,7 +38,7 @@ import java.util.Map;
  * <b>serviceName</b> service name
  */
 public class AdditionalAttributes {
-    private final static Logger LOGGER = EaseAgent.getLogger(AdditionalAttributes.class);
+    private static final Logger LOGGER = EaseAgent.getLogger(AdditionalAttributes.class);
     public final Map<String, Object> attributes;
 
     public AdditionalAttributes(String serviceName, String systemName) {

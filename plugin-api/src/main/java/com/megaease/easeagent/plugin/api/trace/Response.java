@@ -32,5 +32,6 @@ public interface Response extends Getter {
     /**
      * The method of extracting information from the response
      */
+    @Override
     String header(String name);
 }

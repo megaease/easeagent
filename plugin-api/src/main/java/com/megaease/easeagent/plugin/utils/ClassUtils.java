@@ -18,6 +18,10 @@
 package com.megaease.easeagent.plugin.utils;
 
 public class ClassUtils {
+
+    private ClassUtils() {
+    }
+
     public static boolean hasClass(String className) {
         try {
             Thread.currentThread().getContextClassLoader().loadClass(className);
@@ -27,7 +31,7 @@ public class ClassUtils {
         }
     }
 
-    public static abstract class TypeChecker {
+    public abstract static class TypeChecker {
         protected final String className;
         private final boolean hasClass;
 

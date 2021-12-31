@@ -21,12 +21,16 @@ public interface AgentPlugin extends Ordered {
     /**
      * define the plugin name, avoiding conflicts with others
      * it will be used as namespace when get configuration.
+     *
+     * @return namespace
      */
     String getNamespace();
 
     /**
      * define the plugin domain,
-     * it will be used to get configuration when loaded:
+     * it will be used to get configuration when loaded.
+     *
+     * @return domain
      */
     String getDomain();
 }

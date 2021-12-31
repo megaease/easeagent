@@ -34,9 +34,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * </p>
  */
 public class SystemClock {
-    // update frequency
+    /**
+     * update frequency
+     */
     private final long period;
-    // currentTimeMillis
+    /**
+     * currentTimeMillis
+     */
     private final AtomicLong now;
 
     private SystemClock(long period) {
