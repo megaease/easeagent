@@ -13,13 +13,13 @@
     - [Plugin Orchestration](#plugin-orchestration)
     - [Plugin Configuration](#plugin-configuration)
 - [Context](#Context)
-- [Tracing API](#Tracing-API) 
+- [Tracing API](#Tracing-API)
 - [Metric API](#Metric-API)
 - [Logging API](#logging-API)
 - [Configuration API](#Configuration-API)
 
 ## Overview
-Most of the Easeagent's functions are supported by plugins.   
+Most of the Easeagent's functions are supported by plugins.
 This document describes how to develop plugins for Easeagent, and it will be divided into the following sections to introduce plugin development.
 1. Plugin structure, the plugin contains four components, which are the **AgentPlugin definition**, **Points**, **Interceptor** and **@AdviceTo Annotation** used to bind the three.
 2. Tracing API, which helps users complete the transaction tracing task.
@@ -28,7 +28,7 @@ This document describes how to develop plugins for Easeagent, and it will be div
 5. Configuration API
 
 ##  Plugin Structure
-All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains serveral plugins, eg. a "Tracking Plugin" and a "Metirc Plugin". 
+All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains serveral plugins, eg. a "Tracking Plugin" and a "Metirc Plugin".
 ![image](./images/plugin-structure.png)
 
 Let's start with a simple plugin.
@@ -95,7 +95,7 @@ public class DoFilterPoints implements Points {
 ```
 
 #### Interceptor of Simple Plugin
-This `ResponseHeaderInterceptor` is bound to the enhancement point defined above via the `@AdviceTo` annotation, and does not need to be explicitly assigned a qualifier value when qualifier is the default value. 
+This `ResponseHeaderInterceptor` is bound to the enhancement point defined above via the `@AdviceTo` annotation, and does not need to be explicitly assigned a qualifier value when qualifier is the default value.
 ```java
 @AdviceTo(value = DoFilterPoints.class, plugin = SimplePlugin.class)
 public class ResponseHeaderInterceptor implements Interceptor {
@@ -129,7 +129,7 @@ public class ResponseHeaderInterceptor implements Interceptor {
 }
 ```
 
-#### Test 
+#### Test
 1. Compile
 As mention above, the source code is available [here](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin).
 
@@ -137,26 +137,25 @@ As mention above, the source code is available [here](https://github.com/megaeas
 $ git clone git@github.com:megaease/easeagent-test-demo.git
 $ cd easeagent-test-demo/simple-plugin
 $ mvn clean package
-$
 ```
 
 2. Install Plugin
 This simple plugin is compiled independently of easeagent, so the compiled output plugin jar package `simple-plugin-1.0.0.jar` need to be copied to the **plugins** directory which is at the same level directory as easeagent.jar (create if not existing), to allow easeagent to detect it.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
-$ mkdir $EASE_AGENT_PATH/plugins 
+$ mkdir $EASE_AGENT_PATH/plugins
 $ cp target/simple-plugin-1.0.0.jar $EASE_AGENT_PATH/plugins
-
 ```
 
 3. Run
 Taking the `spring-web` module under [ease-test-demo](https://github.com/megaease/easeagent-test-demo) as test demo project, run the demo application with the EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
-$ cd ../spring-web 
+$ cd ../spring-web
 $ mvn clean package
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
 ```
+
 4. Test
 Execute the following test and the header information added can be seen in the HTTP Response.
 ```
@@ -188,15 +187,14 @@ easeagent-1639648241639* Closing connection 0
 
 ```
 
-When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package. 
+When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package.
 
-In this simple plugin project, the `com.megaease.easeagent:plugin-api` dependency is wraped in local maven repository which local in `simple-plugin/lib` directory, user can also download Easeagent source tree then install `plugin-api` module.
+In this simple plugin project, the `com.megaease.easeagent:plugin-api` dependency is wrapped in local maven repository which local in `simple-plugin/lib` directory, user can also download Easeagent source tree then install `plugin-api` module.
 
 ```
 $ git clone https://github.com/megaease/easeagent.git
 $ cd easeagent/plugin-api
 $ mvn clean install
-
 ```
 
 ### AgentPlugin: Plugin definition
@@ -206,7 +204,7 @@ Plugin definition, defines what `domain` and `namespace` of this plugin by imple
 public interface AgentPlugin extends Ordered {
     /**
      * define the plugin name, avoiding conflicts with others
-     * it will be use as namespace when get configuration.
+     * it will be used as namespace when get configuration.
      */
     String getNamespace();
 
@@ -222,7 +220,7 @@ The `AgentPlugin` interface also includes the `Order` interface that defines the
 
 ### Points
 `Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
-When there is only one methodmatcher in the return set of `getMethodMather()`, the qualifer value defaults to 'default', and there is no need to explicitly assign a value.
+When there is only one methodmatcher in the return set of `getMethodMather()`, the qualifier value defaults to 'default', and there is no need to explicitly assign a value.
 When there are multiple methods in a matched class that require enhancement with different interceptors, a qualifier needs to be assigned to each `MethodMatcher` as the keyword used by different interceptors to bind.
 
 To decouple from ByteBuddy, `ClassMatcher` and `Methodmatcher` are wrapped with reference to the DSL of **ByteBuddy**.
@@ -270,7 +268,7 @@ public interface Points {
     Set<IMethodMatcher> getMethodMatcher();
 
     /**
-     * when return true, the transformer will add a Object field and a accessor
+     * when return true, the transformer will add a Object field and an accessor
      * The dynamically added member can be accessed by AgentDynamicFieldAccessor:
      *
      * AgentDynamicFieldAccessor.setDynamicFieldValue(instance, value)
@@ -283,14 +281,14 @@ public interface Points {
 ```
 
 ### Interceptor
-Interceptors is the core of implementing specific enhancements. 
+Interceptors is the core of implementing specific enhancements.
 
-`Interceptor` interface has a name method `getType` and a initialization method `init`. 
+`Interceptor` interface has a name method `getType` and an initialization method `init`.
 - The name will be used as `serviceId` in combination with the `domain` and `namespace` of the binding plugin to get the plugin configuration which will be automatically injected into the `Context`. The description of the plugin configuration can be found in the user manual.
-- The `init` method is invoked during transfrom, allowing users to initialize staic resources of interceptor, and also allowing to load third party classes which can't load by running time classloader.
+- The `init` method is invoked during transform, allowing users to initialize static resources of interceptor, and also allowing to load third party classes which can't load by runtime classloader.
 
 The `before` and `after` methods of the interceptor are invoked when the method being enhanced enters and returns, respectively.
-Both `before` and `after` methods have parameters `MethodInfo` and `Context`. 
+Both `before` and `after` methods have parameters `MethodInfo` and `Context`.
 - `MethodInfo` contains all method information, including class name, method name, parameters, return value and exception information.
 - `Context` contains the Interceptor configuration that is automatically injected and updated ant other interface that support `tracing`, for details, please refer to the [Tracing API](#tracing-api) section.
 
@@ -341,7 +339,7 @@ The `Interceptor` interface also includes the `Order` interface that defines the
 ### AdviceTo Annotation
 Within a plugin, there may be multiple interceptors, and multiple enhancement points, so which enhancement point is a particular interceptor used for?
 
-This can be specified through the `@AdviceTo` annotation, which is applied on the Interceptor's implemention to specify the enhancement point binding with the Interceptor.
+This can be specified through the `@AdviceTo` annotation, which is applied on the Interceptor's implementation to specify the enhancement point binding with the Interceptor.
 
 However, when there are multiple plugins within a plugin module, it is necessary to go a step further and specify the plugin to which the Interceptor is bound.
 
@@ -386,9 +384,9 @@ key             : enabled
 value           : true
 ```
 
-`[domain]` and `[namespace]` are defined by `AgentPlugin` interface implementations. 
+`[domain]` and `[namespace]` are defined by `AgentPlugin` interface implementations.
 
-The `function` is provided by `Interceptor` interface implemention's `getType()` method, and this method need return a String value like 'tracing', 'metirc', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword. 
+The `function` is provided by `Interceptor` interface implemention's `getType()` method, and this method need return a String value like 'tracing', 'metirc', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword.
 
 This prefix `plugin.[domain].[namespace].[function]` is used to maintained configuration for this `Interceptor`, and in this `Interceptor` developer can get its configuration by the `getConfig()` method of the `Context` param.
 
@@ -410,7 +408,7 @@ If you need to use log output, please use the API we provide to get Logger
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 class Interceptor{
-    private static final Logger LOGGER = EaseAgent.getLogger(Interceptor.class);   
+    private static final Logger LOGGER = EaseAgent.getLogger(Interceptor.class);
 }
 ```
 
@@ -485,7 +483,7 @@ public class ServiceNameInterceptor implements Interceptor {
 
     @Override
     public void init(Config pConfig, String className, String methodName, String methodDescriptor) {
-        config = AutoRefreshRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(), 
+        config = AutoRefreshRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(),
             new AutoRefreshConfigSupplier<ServiceNameConfig>() {
                 @Override
                 public ServiceNameConfig newInstance() {
