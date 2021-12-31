@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.common;
+package com.megaease.easeagent.plugin.async;
 
-import com.megaease.easeagent.plugin.async.ThreadLocalCurrentContext;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -25,9 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("unused")
 public class ThreadLocalCurrentContextTest {
     @Test
-    public void should_work() throws Exception {
+    public void should_work() {
         final ThreadLocalCurrentContext currentContext = ThreadLocalCurrentContext.DEFAULT;
         try (final ThreadLocalCurrentContext.Scope scope1 = currentContext.newScope(ThreadLocalCurrentContext.createContext("hello", "world"))) {
             try (final ThreadLocalCurrentContext.Scope scope2 = currentContext.newScope(ThreadLocalCurrentContext.createContext("hello", "internal"))) {
@@ -43,12 +43,9 @@ public class ThreadLocalCurrentContextTest {
         CountDownLatch countDownLatch = new CountDownLatch(size);
         final ThreadLocalCurrentContext currentContext = ThreadLocalCurrentContext.DEFAULT;
         try (final ThreadLocalCurrentContext.Scope scope1 = currentContext.newScope(ThreadLocalCurrentContext.createContext("hello", "world"))) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    assertEquals("world", currentContext.get().get("hello"));
-                    countDownLatch.countDown();
-                }
+            new Thread(() -> {
+                assertEquals("world", currentContext.get().get("hello"));
+                countDownLatch.countDown();
             }).start();
             assertEquals("world", currentContext.get().get("hello"));
         }
@@ -63,20 +60,17 @@ public class ThreadLocalCurrentContextTest {
         try (final ThreadLocalCurrentContext.Scope scope1 = currentContext.newScope(ThreadLocalCurrentContext.createContext("hello", "world"))) {
             for (int i = 0; i < size; i++) {
                 int finalI = i;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final String value = "internal" + finalI;
-                        try (final ThreadLocalCurrentContext.Scope scope2 = currentContext.newScope(ThreadLocalCurrentContext.createContext("hello", value))) {
-                            assertEquals(value, currentContext.get().get("hello"));
-                        }
-                        try {
-                            TimeUnit.MILLISECONDS.sleep(100);
-                        } catch (InterruptedException e) {
-
-                        }
-                        countDownLatch.countDown();
+                new Thread(() -> {
+                    final String value = "internal" + finalI;
+                    try (final ThreadLocalCurrentContext.Scope scope2 = currentContext.newScope(ThreadLocalCurrentContext.createContext("hello", value))) {
+                        assertEquals(value, currentContext.get().get("hello"));
                     }
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(100);
+                    } catch (InterruptedException ignored) {
+
+                    }
+                    countDownLatch.countDown();
                 }).start();
             }
             assertEquals("world", currentContext.get().get("hello"));

@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.megaease.easeagent.plugin.api.health.AgentHealth.INSTANCE;
+import com.megaease.easeagent.plugin.api.health.AgentHealth;
 
 public class HealthProvider implements AgentHttpHandlerProvider, ConfigAware, IProvider, BeanProvider {
     private static final String EASEAGENT_HEALTH_READINESS_ENABLED = "easeagent.health.readiness.enabled";
@@ -57,7 +57,7 @@ public class HealthProvider implements AgentHttpHandlerProvider, ConfigAware, IP
 
     @Override
     public void afterPropertiesSet() {
-        INSTANCE.setReadinessEnabled(this.config.getBoolean(EASEAGENT_HEALTH_READINESS_ENABLED));
+        AgentHealth.setReadinessEnabled(this.config.getBoolean(EASEAGENT_HEALTH_READINESS_ENABLED));
     }
 
 
@@ -92,8 +92,8 @@ public class HealthProvider implements AgentHttpHandlerProvider, ConfigAware, IP
 
         @Override
         public Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
-            if (INSTANCE.isReadinessEnabled()) {
-                if (INSTANCE.isReady()) {
+            if (AgentHealth.INSTANCE.isReadinessEnabled()) {
+                if (AgentHealth.INSTANCE.isReady()) {
                     return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, (String) null);
                 }
 

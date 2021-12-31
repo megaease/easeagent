@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.utils;
+package com.megaease.easeagent.core.config;
 
 import com.megaease.easeagent.config.ConfigManagerMXBean;
+import com.megaease.easeagent.core.utils.ThreadUtils;
 
 import java.io.IOException;
 import java.util.List;
