@@ -49,7 +49,7 @@ public class MethodMatcher implements IMethodMatcher {
 
     private String qualifier;
 
-    public static int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_STATIC
+    public static final int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_STATIC
         | Modifier.ACC_PRIVATE | Modifier.ACC_PUBLIC | Modifier.ACC_PROTECTED;
 
     protected MethodMatcher() {
@@ -69,6 +69,7 @@ public class MethodMatcher implements IMethodMatcher {
         this.overriddenFrom = overriddenFrom;
     }
 
+    @Override
     public boolean isDefaultQualifier() {
         return this.qualifier.equals(IMethodMatcher.DEFAULT_QUALIFIER);
     }
@@ -90,7 +91,7 @@ public class MethodMatcher implements IMethodMatcher {
         private String qualifier = IMethodMatcher.DEFAULT_QUALIFIER;
 
         private Operator operator = Operator.AND;
-        private boolean  isNegate = false;
+        private boolean isNegate = false;
 
         private IMethodMatcher left;
 
@@ -169,7 +170,7 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcherBuilder notStatic() {
-            this.notModifier|= Modifier.ACC_STATIC;
+            this.notModifier |= Modifier.ACC_STATIC;
             return this;
         }
 
@@ -224,7 +225,7 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcherBuilder qualifier(String qualifier) {
-            // each builder can only assigned a qualifier
+            // each builder can only assign a qualifier
             if (!this.qualifier.equals(IMethodMatcher.DEFAULT_QUALIFIER)) {
                 throw new RuntimeException("Qualifier has already been assigned");
             }
@@ -269,6 +270,7 @@ public class MethodMatcher implements IMethodMatcher {
             return builder;
         }
 
+        @Override
         public String toString() {
             return "MethodMatcher.MethodMatcherBuilder(name=" + this.name
                 + ", nameMatchType=" + this.nameMatchType + ", returnType=" + this.returnType
@@ -312,6 +314,7 @@ public class MethodMatcher implements IMethodMatcher {
             return this.methodMatchers;
         }
 
+        @Override
         public String toString() {
             return "MethodMatchers.MethodMatchersBuilder(methodMatchers=" + this.methodMatchers + ")";
         }

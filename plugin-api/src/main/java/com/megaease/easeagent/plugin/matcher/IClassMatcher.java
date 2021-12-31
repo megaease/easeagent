@@ -23,14 +23,17 @@ import com.megaease.easeagent.plugin.matcher.operator.Operator;
 import com.megaease.easeagent.plugin.matcher.operator.OrClassMatcher;
 
 public interface IClassMatcher extends Operator<IClassMatcher>, Matcher {
+    @Override
     default IClassMatcher and(IClassMatcher m) {
         return new AndClassMatcher(this, m);
     }
 
+    @Override
     default IClassMatcher or(IClassMatcher m) {
         return new OrClassMatcher(this, m);
     }
 
+    @Override
     default IClassMatcher negate() {
         return new NegateClassMatcher(this);
     }

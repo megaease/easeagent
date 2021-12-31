@@ -28,14 +28,17 @@ import java.util.Set;
 public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
     String DEFAULT_QUALIFIER = "default";
 
+    @Override
     default IMethodMatcher and(IMethodMatcher other) {
         return new AndMethodMatcher(this, other);
     }
 
+    @Override
     default IMethodMatcher or(IMethodMatcher other) {
         return new OrMethodMatcher(this, other);
     }
 
+    @Override
     default IMethodMatcher negate() {
         return new NegateMethodMatcher(this);
     }
