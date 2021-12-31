@@ -28,6 +28,10 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import java.util.Map;
 
 public class JsonUtil {
+
+    private JsonUtil() {
+    }
+
     static final ObjectMapper mapper = new ObjectMapper();
     private static final Logger logger = EaseAgent.loggerFactory.getLogger(JsonUtil.class);
 

@@ -93,8 +93,9 @@ public abstract class HostAddress {
             return addr == null ? UNKNOWN_LOCALHOST : addr.getHostName();
         } catch (final UnknownHostException uhe) {
             try {
+                // NetworkInterface.getNetworkInterfaces impl is different in different jdk
                 final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-                if (interfaces != null) {   // NetworkInterface.getNetworkInterfaces impl is different in different jdk
+                if (interfaces != null) {
                     while (interfaces.hasMoreElements()) {
                         final NetworkInterface nic = interfaces.nextElement();
                         final Enumeration<InetAddress> addresses = nic.getInetAddresses();

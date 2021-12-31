@@ -112,7 +112,7 @@ public class MethodMatcher implements IMethodMatcher {
         }
 
         public MethodMatcherBuilder named(String methodName) {
-            if (methodName.equals("<init>")) {
+            if ("<init>".equals(methodName)) {
                 return isConstruct();
             }
             return this.name(methodName).nameMatchType(StringMatch.EQUALS);

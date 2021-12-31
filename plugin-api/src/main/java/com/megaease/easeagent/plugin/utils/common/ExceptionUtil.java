@@ -22,6 +22,10 @@ import java.io.StringWriter;
 
 @SuppressWarnings("unused")
 public class ExceptionUtil {
+
+    private ExceptionUtil() {
+    }
+
     public static String getExceptionMessage(Throwable throwable) {
         return throwable.getMessage() != null ? throwable.getMessage() : throwable.toString();
     }
