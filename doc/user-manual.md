@@ -80,7 +80,7 @@ Global configuration for tracing output
 |--------------------------------------------------------------------|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `observability.tracings.output.enabled`                            | true                                   | `true`: enable output tracing data;<br /> `false`: disable all tracing data output                                                                        |
 | `observability.tracings.output.target`                             | system                                 | `system` : output tracing to kafka output server; `zipkin`: send data to zipkin server                                                                    |
-| `observability.tracings.output.target.zipkinUrl`                   | [http://localhost:9411/api/v2/spans]() | Zipkin server url, only aviable when `observability.tracings.output.target=zipkin`                                                                        |
+| `observability.tracings.output.target.zipkinUrl`                   | [http://localhost:9411/api/v2/spans]() | Zipkin server url, only available when `observability.tracings.output.target=zipkin`                                                                      |
 | `observability.outputServer.security.protocol`                     | ''                                     | Protocol used to communicate with brokers. Valid values are: "PLAINTEXT", "SSL", "SASL_PLAINTEXT","SASL_SSL"                                              |
 | `observability.outputServer.ssl.keystore.type`                     | N/A                                    | The file format of the key store file. This is optional for client. The value can only be `PEM` if set.                                                   |
 | `observability.outputServer.ssl.ssl.keystore.key`                  | N/A                                    | Private key in the format specified by 'ssl.keystore.type'.                                                                                               |
@@ -155,7 +155,7 @@ The tag will be added to the Tracing Span of the request client:
 ```
 
 ### Plugin Configuration
-Most capabilities of Easeagent, such as tracing and metirc, are provided through plugins.
+Most capabilities of Easeagent, such as tracing and metric, are provided through plugins.
 The format of the plugin configuration is defined as follows.
 ```
 plugin.[domain].[namespace].[function].[key] = [value]
@@ -175,7 +175,7 @@ value           : true
 
 For plugin level configuration, EaseAgent defines a spacial **namespace** of `global` in which user can define default configuration for any `function`, like `metric`, and each namespace plugin of this `function` will uses the default configuration when it does not create configuration with its own namespace.
 
-For example, Metric have a set of default plugin configuration as follow:
+For example, Metric have a set of default plugin configuration as follows:
 ```
 plugin.observability.global.metric.enabled=true
 plugin.observability.global.metric.interval=30
@@ -192,7 +192,7 @@ plugin.observability.rabbitmq.metric.appendType=console
 ```
 But the switch configuration item using `enabled` as key cannot be overridden, for `boolean` type configuration is determined by a "logical AND" operation between the global and its own namespace configuration.
 
-The following sections describe the metirc and tracing configuration items,  as well as the currently supported plugins and their corresponding namespaces
+The following sections describe the metric and tracing configuration items,  as well as the currently supported plugins and their corresponding namespaces
 
 #### Tracing and Metric
 
@@ -215,8 +215,8 @@ Supported components and corresponding namespaces:
 | jdbcStatement     | `md5Dictionary`  | SQL-MD5Dictionary. `When EaseAgent is used with EaseMesh, tracing and metric data will be stored in Elasticsearch. In order to reduce the space occupied by SQL in Elasticsearch, EaseAgent uses md5 to reduce the length of SQL, and then periodically stores it in Kafka, and finally stores it in Elasticsearch. Only one copy of sql will be stored in Elasticsearch.` |
 | redis             | `redis`          | Redis Metric                                                                                                                                                                                                                                                                                                                                                               |
 | kafka             | `kafka`          | Kafka Metric                                                                                                                                                                                                                                                                                                                                                               |
-| rabbitmq          | `rabbitmq`       | RabbitMQ Metirc                                                                                                                                                                                                                                                                                                                                                            |
-| jvmGc             | `jvmGc`          | JVM GC Metirc                                                                                                                                                                                                                                                                                                                                                              |
+| rabbitmq          | `rabbitmq`       | RabbitMQ Metric                                                                                                                                                                                                                                                                                                                                                            |
+| jvmGc             | `jvmGc`          | JVM GC Metric                                                                                                                                                                                                                                                                                                                                                              |
 | JVM Memory        | `jvmMemory`      | JVM Memory Metric                                                                                                                                                                                                                                                                                                                                                          |
 
 #### Redirect
@@ -250,7 +250,7 @@ header name config:
 plugin.integrability.serviceName.addServiceNameHead.propagate.head=X-Mesh-RPC-Service
 ```
 
-The current way to obtain ServcieName only supports service discovery using Spring Cloud.
+The current way to obtain ServiceName only supports service discovery using Spring Cloud.
 
 #### Plugin Http configuration modification api
 
