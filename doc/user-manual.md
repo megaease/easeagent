@@ -61,45 +61,45 @@ $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar=${EASE_AGENT_PATH}/agent.pro
 #### Internal HTTP Server
 EaseAgent opens port `9900` by default to receive configuration change notifications and Prometheus requests.
 
-Key| Default Value | Description |
----| ---| ---|
-`easeagent.server.enabled` | true | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override.|
-`easeagent.server.port` | 9900 | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override. |
+| Key                        | Default Value | Description                                                                                                                                                                                                                                                                           |
+|----------------------------|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `easeagent.server.enabled` | true          | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override. |
+| `easeagent.server.port`    | 9900          | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override.                                                                                                                                                                                |
 
 #### Output Data Server: Kafka and Zipkin Server
 Tracing and metric data can be output to kafka server.
 
-Key| Default Value | Description |
----| ---| ---|
-`observability.outputServer.bootstrapServer` | 127.0.0.1:9092 | Kafka server host and port. Tracing and metric data will be output to kafka. |
-`observability.outputServer.timeout` | 10000 | Connect timeout. Time Unit: millisecond. |
+| Key                                          | Default Value  | Description                                                                  |
+|----------------------------------------------|----------------|------------------------------------------------------------------------------|
+| `observability.outputServer.bootstrapServer` | 127.0.0.1:9092 | Kafka server host and port. Tracing and metric data will be output to kafka. |
+| `observability.outputServer.timeout`         | 10000          | Connect timeout. Time Unit: millisecond.                                     |
 
 Global configuration for tracing output
 
-Key| Default Value | Description |
----| ---| ---|
-`observability.tracings.output.enabled`             | true      | `true`: enable output tracing data;<br /> `false`: disable all tracing data output  |
-`observability.tracings.output.target`              | system    | `system` : output tracing to kafka output server; `zipkin`: send data to zipkin server |
-`observability.tracings.output.target.zipkinUrl`    | [http://localhost:9411/api/v2/spans]() | Zipkin server url, only aviable when `observability.tracings.output.target=zipkin` |
-`observability.outputServer.security.protocol`| '' |Protocol used to communicate with brokers. Valid values are: "PLAINTEXT", "SSL", "SASL_PLAINTEXT","SASL_SSL"  |
-`observability.outputServer.ssl.keystore.type`| N/A |The file format of the key store file. This is optional for client. The value can only be `PEM` if set.|
-`observability.outputServer.ssl.ssl.keystore.key`| N/A |Private key in the format specified by 'ssl.keystore.type'. |
-`observability.outputServer.ssl.keystore.certificate.chain`| N/A | Certificate chain in the format specified by 'ssl.keystore.type' |
-`observability.outputServer.ssl.truststore.type`| N/A |The file format of the trust store file. This is optional for client. The value can only be `PEM` if set.|
-`observability.outputServer.ssl.truststore.certificates`| N/A |Trusted certificates in the format specified by 'ssl.truststore.type'. |
-`observability.outputServer.ssl.endpoint.identification.algorithm`| N/A |The endpoint identification algorithm to validate server hostname using server certificate. set to '' to disable domain name checking in mTLS connection. |
+| Key                                                                | Default Value                          | Description                                                                                                                                               |
+|--------------------------------------------------------------------|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `observability.tracings.output.enabled`                            | true                                   | `true`: enable output tracing data;<br /> `false`: disable all tracing data output                                                                        |
+| `observability.tracings.output.target`                             | system                                 | `system` : output tracing to kafka output server; `zipkin`: send data to zipkin server                                                                    |
+| `observability.tracings.output.target.zipkinUrl`                   | [http://localhost:9411/api/v2/spans]() | Zipkin server url, only aviable when `observability.tracings.output.target=zipkin`                                                                        |
+| `observability.outputServer.security.protocol`                     | ''                                     | Protocol used to communicate with brokers. Valid values are: "PLAINTEXT", "SSL", "SASL_PLAINTEXT","SASL_SSL"                                              |
+| `observability.outputServer.ssl.keystore.type`                     | N/A                                    | The file format of the key store file. This is optional for client. The value can only be `PEM` if set.                                                   |
+| `observability.outputServer.ssl.ssl.keystore.key`                  | N/A                                    | Private key in the format specified by 'ssl.keystore.type'.                                                                                               |
+| `observability.outputServer.ssl.keystore.certificate.chain`        | N/A                                    | Certificate chain in the format specified by 'ssl.keystore.type'                                                                                          |
+| `observability.outputServer.ssl.truststore.type`                   | N/A                                    | The file format of the trust store file. This is optional for client. The value can only be `PEM` if set.                                                 |
+| `observability.outputServer.ssl.truststore.certificates`           | N/A                                    | Trusted certificates in the format specified by 'ssl.truststore.type'.                                                                                    |
+| `observability.outputServer.ssl.endpoint.identification.algorithm` | N/A                                    | The endpoint identification algorithm to validate server hostname using server certificate. set to '' to disable domain name checking in mTLS connection. |
 
 
 
 Following tracing output configuration items are aviable when `observability.tracings.output.target=system`:
 
-Key| Default Value | Description |
----| ---| ---|
-`observability.tracings.output.topic`               | log-tracing   | Kafka topic for tracing data output |
-`observability.tracings.output.messageMaxBytes`     | 999900        | Maximum bytes sendable per message including encoding overhead. |
-`observability.tracings.output.queuedMaxSpans`      | 1000          | Maximum backlog of spans reported before sent. |
-`observability.tracings.output.queuedMaxSize`       | 1000000       | Maximum backlog of span bytes reported before sent. |
-`observability.tracings.output.messageTimeout`      | 1000          | Spans are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent span is reported, which ensures that spans are not stuck in an incomplete message.|
+| Key                                             | Default Value | Description                                                                                                                                                                            |
+|-------------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `observability.tracings.output.topic`           | log-tracing   | Kafka topic for tracing data output                                                                                                                                                    |
+| `observability.tracings.output.messageMaxBytes` | 999900        | Maximum bytes sendable per message including encoding overhead.                                                                                                                        |
+| `observability.tracings.output.queuedMaxSpans`  | 1000          | Maximum backlog of spans reported before sent.                                                                                                                                         |
+| `observability.tracings.output.queuedMaxSize`   | 1000000       | Maximum backlog of span bytes reported before sent.                                                                                                                                    |
+| `observability.tracings.output.messageTimeout`  | 1000          | Spans are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent span is reported, which ensures that spans are not stuck in an incomplete message. |
 
 #### Progress Configuration
 
@@ -196,28 +196,28 @@ The following sections describe the metirc and tracing configuration items,  as 
 
 #### Tracing and Metric
 
-Key| Default Value | Description |
----| ---| ---|
-`plugin.observability.global.tracing.enabled`   | true              | Enable all tracing collection. `false`: Disable all tracing collection. |
-`plugin.observability.global.metric.enabled`    | true              | Enable all metrics collection. `false`: Disable all metrics collection. |
-`plugin.observability.global.metric.interval`   | 30                | Time interval between two outputs. Time Unit: second. |
-`plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic. |
-`plugin.observability.global.metric.appendType` | kafka             | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
+| Key                                             | Default Value     | Description                                                                                                                                                    |
+|-------------------------------------------------|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `plugin.observability.global.tracing.enabled`   | true              | Enable all tracing collection. `false`: Disable all tracing collection.                                                                                        |
+| `plugin.observability.global.metric.enabled`    | true              | Enable all metrics collection. `false`: Disable all metrics collection.                                                                                        |
+| `plugin.observability.global.metric.interval`   | 30                | Time interval between two outputs. Time Unit: second.                                                                                                          |
+| `plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic.                                                                                                                 |
+| `plugin.observability.global.metric.appendType` | kafka             | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
 
 Supported components and corresponding namespaces:
 
-Plugin/Components| Namespace         | Description |
----             | ---               | --- |
-httpservlet     | `httpservlet`     | Http Request Metric
-spring-gateway  | `spring-gateway`  | Http Request Metric
-jdbcConnection  | `jdbcConnection`  | JDBC Connection Metric
-jdbcStatement   | `jdbcStatement`   | JDBC SQL Metric
-jdbcStatement   | `md5Dictionary`   | SQL-MD5Dictionary. `When EaseAgent is used with EaseMesh, tracing and metric data will be stored in Elasticsearch. In order to reduce the space occupied by SQL in Elasticsearch, EaseAgent uses md5 to reduce the length of SQL, and then periodically stores it in Kafka, and finally stores it in Elasticsearch. Only one copy of sql will be stored in Elasticsearch.`
-redis           | `redis`           | Redis Metric
-kafka           | `kafka`           | Kafka Metric
-rabbitmq        | `rabbitmq`        | RabbitMQ Metirc
-jvmGc           | `jvmGc`           | JVM GC Metirc
-JVM Memory      | `jvmMemory`       | JVM Memory Metric
+| Plugin/Components | Namespace        | Description                                                                                                                                                                                                                                                                                                                                                                |
+|-------------------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| httpservlet       | `httpservlet`    | Http Request Metric                                                                                                                                                                                                                                                                                                                                                        |
+| spring-gateway    | `spring-gateway` | Http Request Metric                                                                                                                                                                                                                                                                                                                                                        |
+| jdbcConnection    | `jdbcConnection` | JDBC Connection Metric                                                                                                                                                                                                                                                                                                                                                     |
+| jdbcStatement     | `jdbcStatement`  | JDBC SQL Metric                                                                                                                                                                                                                                                                                                                                                            |
+| jdbcStatement     | `md5Dictionary`  | SQL-MD5Dictionary. `When EaseAgent is used with EaseMesh, tracing and metric data will be stored in Elasticsearch. In order to reduce the space occupied by SQL in Elasticsearch, EaseAgent uses md5 to reduce the length of SQL, and then periodically stores it in Kafka, and finally stores it in Elasticsearch. Only one copy of sql will be stored in Elasticsearch.` |
+| redis             | `redis`          | Redis Metric                                                                                                                                                                                                                                                                                                                                                               |
+| kafka             | `kafka`          | Kafka Metric                                                                                                                                                                                                                                                                                                                                                               |
+| rabbitmq          | `rabbitmq`       | RabbitMQ Metirc                                                                                                                                                                                                                                                                                                                                                            |
+| jvmGc             | `jvmGc`          | JVM GC Metirc                                                                                                                                                                                                                                                                                                                                                              |
+| JVM Memory        | `jvmMemory`      | JVM Memory Metric                                                                                                                                                                                                                                                                                                                                                          |
 
 #### Redirect
 Redirection feature combined with `EaseMesh` to direct traffic to shadow services to simulate real traffic for the whole site performance test in the production environment in an effective and safe way.
@@ -231,14 +231,13 @@ plugin.integrability.global.redirect.enabled=true
 
 Supported components/plugins and corresponding namespaces:
 
-Plugin/Components| Namespace         | Description |
----             | ---               | --- |
-jdbc            | `jdbc`            | Database Redirection 
-redis           | `redis`           | Redis Redirection
-kafka           | `kafka`           | Kafka Redirection
-rabbitmq        | `rabbitmq`        | RabbitMQ Redirection
-elasticsearch   | `elasticsearch`   | Elasticsearch Redirection
-
+| Plugin/Components | Namespace       | Description               |
+|-------------------|-----------------|---------------------------|
+| jdbc              | `jdbc`          | Database Redirection      |
+| redis             | `redis`         | Redis Redirection         |
+| kafka             | `kafka`         | Kafka Redirection         |
+| rabbitmq          | `rabbitmq`      | RabbitMQ Redirection      |
+| elasticsearch     | `elasticsearch` | Elasticsearch Redirection |
 
 #### Service Name Head
 
@@ -316,43 +315,43 @@ The response status will be 200(OK)
 EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing logs.The data format stored in `Kafka`  is [Zipkin Data Model](https://zipkin.io/pages/data_model.html). User can send tracing logs to [Zipkin server](https://zipkin.io/pages/quickstart.html).
 
 ### Tracing Component
-Component Type | Component | Reference |
---- | ---| --- |
-HTTP Client | `RestTemplate`、 `WebClient`、 `FeignClient` | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)
-HTTP Server | `Servlet`、`Filter` | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)
-DataBase | `JDBC` | [Brave](https://github.com/openzipkin/brave/tree/master/brave)
-Cache | `Jedis`、`Lettuce` | [Brave](https://github.com/openzipkin/brave/tree/master/brave)
-Message | `RabbitMQ`、`Kafka` | [brave-instrumentation-messaging](https://github.com/openzipkin/brave/tree/master/instrumentation/messaging) 、[Brave Kafka instrumentation](https://github.com/openzipkin/brave/tree/master/instrumentation/kafka-clients)
-Logging | `Log4j2`、`Logback` | [brave-context-log4j2](https://github.com/openzipkin/brave/tree/master/context/log4j2) 、[brave-context-slf4j](https://github.com/openzipkin/brave/tree/master/context/slf4j)
+| Component Type | Component                                  | Reference                                                                                                                                                                                                                  |
+|----------------|--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| HTTP Client    | `RestTemplate`、 `WebClient`、 `FeignClient` | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                                                                                         |
+| HTTP Server    | `Servlet`、`Filter`                         | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                                                                                         |
+| DataBase       | `JDBC`                                     | [Brave](https://github.com/openzipkin/brave/tree/master/brave)                                                                                                                                                             |
+| Cache          | `Jedis`、`Lettuce`                          | [Brave](https://github.com/openzipkin/brave/tree/master/brave)                                                                                                                                                             |
+| Message        | `RabbitMQ`、`Kafka`                         | [brave-instrumentation-messaging](https://github.com/openzipkin/brave/tree/master/instrumentation/messaging) 、[Brave Kafka instrumentation](https://github.com/openzipkin/brave/tree/master/instrumentation/kafka-clients) |
+| Logging        | `Log4j2`、`Logback`                         | [brave-context-log4j2](https://github.com/openzipkin/brave/tree/master/context/log4j2) 、[brave-context-slf4j](https://github.com/openzipkin/brave/tree/master/context/slf4j)                                               |
 
 ### Custom Span Tag
 
 #### JDBC
-Tag | Description |
---- | ---|
-sql | Sql text in user application |
-local-component | Default value = 'database' |
-url | Connection information. Example: `jdbc:mysql://localhost:3306/db_demo` |
-error | SQLException information |
+| Tag             | Description                                                            |
+|-----------------|------------------------------------------------------------------------|
+| sql             | Sql text in user application                                           |
+| local-component | Default value = 'database'                                             |
+| url             | Connection information. Example: `jdbc:mysql://localhost:3306/db_demo` |
+| error           | SQLException information                                               |
 
 #### Cache
-Tag | Description |
---- | ---|
-redis.method | Redis command. Example: `MGET`、`GET` |
+| Tag          | Description                          |
+|--------------|--------------------------------------|
+| redis.method | Redis command. Example: `MGET`、`GET` |
 
 #### RabbitMQ Producer And Consumer
-Tag | Description |
---- | ---|
-rabbit.exchange | RabbitMQ exchange |
-rabbit.routing_key | RabbitMQ routingKey |
-rabbit.queue | RabbitMQ routingKey |
+| Tag                | Description         |
+|--------------------|---------------------|
+| rabbit.exchange    | RabbitMQ exchange   |
+| rabbit.routing_key | RabbitMQ routingKey |
+| rabbit.queue       | RabbitMQ routingKey |
 
 #### Kafka Producer And Consumer
-Tag | Description |
---- | ---|
-kafka.key | Kafka consumer record Key |
-kafka.topic | Kafka topic |
-kafka.broker | Kafka url |
+| Tag          | Description               |
+|--------------|---------------------------|
+| kafka.key    | Kafka consumer record Key |
+| kafka.topic  | Kafka topic               |
+| kafka.broker | Kafka url                 |
 
 ## Metric
 EaseAgent use [io.dropwizard.metrics](https://github.com/dropwizard/metrics) to collect metric information.
