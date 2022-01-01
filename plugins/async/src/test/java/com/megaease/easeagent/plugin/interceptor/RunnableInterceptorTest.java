@@ -19,11 +19,9 @@ package com.megaease.easeagent.plugin.interceptor;
 
 import com.megaease.easeagent.mock.context.ContextManagerMock;
 import com.megaease.easeagent.mock.report.ReportMock;
-import com.megaease.easeagent.mock.report.SpanReportMock;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;

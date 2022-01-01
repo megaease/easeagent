@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin;
 
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 
 public class AsyncPlugin implements AgentPlugin {
     @Override
@@ -28,5 +29,10 @@ public class AsyncPlugin implements AgentPlugin {
     @Override
     public String getDomain() {
         return ConfigConst.OBSERVABILITY;
+    }
+
+    @Override
+    public int order() {
+        return Order.FOUNDATION.getOrder();
     }
 }

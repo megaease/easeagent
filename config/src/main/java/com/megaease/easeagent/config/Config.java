@@ -17,11 +17,13 @@
 
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 public interface Config {
-
     boolean hasPath(String path);
 
     String getString(String name);

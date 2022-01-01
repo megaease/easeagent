@@ -18,17 +18,17 @@
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
 import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.servicename.ServiceNameConfig;
+import com.megaease.easeagent.plugin.servicename.ServiceNamePluginConfig;
 
 public abstract class BaseServiceNameInterceptor implements Interceptor {
-    protected static ServiceNameConfig config = null;
+    protected static ServiceNamePluginConfig config = null;
 
     @Override
-    public void init(Config pConfig, String className, String methodName, String methodDescriptor) {
-        config = AutoRefreshRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(), ServiceNameConfig.SUPPLIER);
+    public void init(IPluginConfig pConfig, String className, String methodName, String methodDescriptor) {
+        config = AutoRefreshPluginConfigRegistry.getOrCreate(pConfig.domain(), pConfig.namespace(), pConfig.id(), ServiceNamePluginConfig.SUPPLIER);
     }
 
     @Override

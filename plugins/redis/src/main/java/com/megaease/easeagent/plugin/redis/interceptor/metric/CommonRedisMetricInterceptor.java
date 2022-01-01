@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.redis.interceptor.metric;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -32,7 +32,7 @@ public abstract class CommonRedisMetricInterceptor implements NonReentrantInterc
     private static final Object START = new Object();
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         REDIS_METRIC = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "cache-redis", "signature"), RedisMetric.REDIS_METRIC_SUPPLIER);
     }
 

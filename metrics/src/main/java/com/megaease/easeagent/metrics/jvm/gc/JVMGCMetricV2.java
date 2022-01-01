@@ -17,8 +17,8 @@
  */
 package com.megaease.easeagent.metrics.jvm.gc;
 
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
@@ -50,10 +50,10 @@ public class JVMGCMetricV2 extends ServiceMetric {
         }
     };
 
-    private static Config config;
+    private static IPluginConfig config;
 
     public static JVMGCMetricV2 getMetric() {
-        config = AutoRefreshRegistry.getOrCreate("observability", "jvmGc", "metric");
+        config = AutoRefreshPluginConfigRegistry.getOrCreate("observability", "jvmGc", "metric");
         Tags tags = new Tags("application", "jvm-gc", "resource");
 
         JVMGCMetricV2 v2 = ServiceMetricRegistry.getOrCreate(config, tags, METRIC_SUPPLIER);

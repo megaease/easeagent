@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.rabbitmq;
 
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.Meter;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.Timer;
@@ -32,7 +32,7 @@ public class RabbitMqProducerMetric {
     final NameFactory nameFactory;
     final MetricRegistry metric;
 
-    public RabbitMqProducerMetric(Config config) {
+    public RabbitMqProducerMetric(IPluginConfig config) {
         this.nameFactory = getNameFactory();
         Tags tags = new Tags("application", "rabbitmq-ex-ro", "resource");
         this.metric = EaseAgent.newMetricRegistry(config, this.nameFactory, tags);

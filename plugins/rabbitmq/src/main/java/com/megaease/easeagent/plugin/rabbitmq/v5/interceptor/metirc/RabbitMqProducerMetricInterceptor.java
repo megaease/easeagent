@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
@@ -35,7 +35,7 @@ public class RabbitMqProducerMetricInterceptor implements Interceptor {
     private static volatile RabbitMqProducerMetric METRIC = null;
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         if (METRIC != null) {
             return;
         }

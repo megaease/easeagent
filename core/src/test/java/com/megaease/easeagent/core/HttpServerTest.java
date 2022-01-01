@@ -25,18 +25,20 @@ import com.megaease.easeagent.core.config.ServiceUpdateAgentHttpHandler;
 import com.megaease.easeagent.core.config.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -52,11 +54,7 @@ public class HttpServerTest {
 
     @BeforeClass
     public static void before() throws NoSuchFieldException, IllegalAccessException {
-        Field field = Bootstrap.class.getDeclaredField("wrappedConfigManager");
-        field.setAccessible(true);
-        oldWrappedConfigManager = (WrappedConfigManager) field.get(null);
-        field.setAccessible(false);
-
+        oldWrappedConfigManager = GlobalAgentHolder.getWrappedConfigManager();
         originConfigFactory = EaseAgent.configFactory;
     }
 
@@ -68,10 +66,7 @@ public class HttpServerTest {
 
 
     private static void setWrappedConfigManager(WrappedConfigManager wrappedConfigManager) throws NoSuchFieldException, IllegalAccessException {
-        Field field = Bootstrap.class.getDeclaredField("wrappedConfigManager");
-        field.setAccessible(true);
-        field.set(null, wrappedConfigManager);
-        field.setAccessible(false);
+        GlobalAgentHolder.setWrappedConfigManager(wrappedConfigManager);
     }
 
 
@@ -98,18 +93,17 @@ public class HttpServerTest {
         AtomicInteger count = new AtomicInteger(0);
 
         iConfigFactory.getConfig("observability", "kafka", "kafka-tracings")
-            .addChangeListener(new ConfigChange(count, "kafka.kafka-tracings"));
+            .addChangeListener(new PluginConfigChange(count, "kafka.kafka-tracings"));
         iConfigFactory.getConfig("observability", "kafka", "tracings")
-            .addChangeListener(new ConfigChange(count, "kafka.tracings"));
+            .addChangeListener(new PluginConfigChange(count, "kafka.tracings"));
         iConfigFactory.getConfig("observability", "kafka", "metric")
-            .addChangeListener(new ConfigChange(count, "kafka.metric"));
+            .addChangeListener(new PluginConfigChange(count, "kafka.metric"));
 
         WrappedConfigManager cfgMng = null;
         try {
             ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
              cfgMng = new WrappedConfigManager(customClassLoader, configs);
             setWrappedConfigManager(cfgMng);
-            GlobalAgentHolder.setWrappedConfigManager(cfgMng);
         } catch (Exception e) {
             System.out.println("" + e.getMessage());
         }
@@ -147,7 +141,7 @@ public class HttpServerTest {
         post(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties", "{\"enabled\":\"true\",\"interval\": 13, \"version\": \"1\"}");
         Assert.assertEquals(11, count.get());
 
-        Config config = AutoRefreshRegistry.getOrCreate("observability", "kafka", "metric");
+        IPluginConfig config = AutoRefreshPluginConfigRegistry.getOrCreate("observability", "kafka", "metric");
         Assert.assertTrue(config.enabled());
 
         get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/enabled/false/1");
@@ -202,17 +196,17 @@ public class HttpServerTest {
         return result.toString();
     }
 
-    static class ConfigChange implements ConfigChangeListener {
+    static class PluginConfigChange implements PluginConfigChangeListener {
         final AtomicInteger count;
         final String name;
 
-        public ConfigChange(AtomicInteger count, String name) {
+        public PluginConfigChange(AtomicInteger count, String name) {
             this.count = count;
             this.name = name;
         }
 
         @Override
-        public void onChange(Config oldConfig, Config newConfig) {
+        public void onChange(IPluginConfig oldConfig, IPluginConfig newConfig) {
             count.incrementAndGet();
             System.out.printf("----------------------- on change %s begin ----------------------%n", name);
             System.out.println("old config:");
@@ -223,7 +217,7 @@ public class HttpServerTest {
             System.out.printf("----------------------- on change %s end ---------------------- \n\n%n", name);
         }
 
-        public void printConfig(Config config) {
+        public void printConfig(IPluginConfig config) {
             for (String s : config.keySet()) {
                 String value = config.getString(s);
                 if ("TRUE".equalsIgnoreCase(value)) {

@@ -34,13 +34,10 @@ public class ProviderPluginDecorator implements Provider {
 
     @Override
     public Supplier<Interceptor> getInterceptorProvider() {
-        return new Supplier<Interceptor>() {
-            @Override
-            public Interceptor get() {
-                Supplier<Interceptor> origin = ProviderPluginDecorator.this.provider.getInterceptorProvider();
-                AgentPlugin plugin = ProviderPluginDecorator.this.plugin;
-                return new InterceptorPluginDecorator(origin.get(), plugin);
-            }
+        return () -> {
+            Supplier<Interceptor> origin = ProviderPluginDecorator.this.provider.getInterceptorProvider();
+            AgentPlugin plugin = ProviderPluginDecorator.this.plugin;
+            return new InterceptorPluginDecorator(origin.get(), plugin);
         };
     }
 

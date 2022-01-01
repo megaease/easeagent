@@ -22,7 +22,7 @@ import com.google.common.cache.CacheBuilder;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -40,7 +40,7 @@ public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
     private static Cache<String, String> cache;
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         if (metric == null) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {

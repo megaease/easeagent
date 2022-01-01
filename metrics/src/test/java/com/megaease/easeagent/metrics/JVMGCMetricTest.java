@@ -17,28 +17,6 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.codahale.metrics.*;
-import com.github.dreamhead.moco.HttpServer;
-import com.github.dreamhead.moco.MocoConfig;
-import com.github.dreamhead.moco.ResponseHandler;
-import com.github.dreamhead.moco.internal.SessionContext;
-import com.megaease.easeagent.config.Config;
-import lombok.SneakyThrows;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
-import static com.github.dreamhead.moco.Moco.httpServer;
-import static com.github.dreamhead.moco.Runner.running;
-
 public class JVMGCMetricTest extends BaseMetricsTest {
 //
 //    @Test

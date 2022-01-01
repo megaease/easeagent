@@ -31,7 +31,10 @@ public class AutoRefreshReporter implements Runnable {
     private final MetricRegistry metricRegistry;
     private AgentScheduledReporter reporter;
 
-    public AutoRefreshReporter(MetricRegistry metricRegistry, MetricsConfig config, Converter converter, Consumer<String> consumer) {
+    public AutoRefreshReporter(MetricRegistry metricRegistry,
+                               MetricsConfig config,
+                               Converter converter,
+                               Consumer<String> consumer) {
         this.metricRegistry = metricRegistry;
         this.config = config;
         this.consumer = consumer;

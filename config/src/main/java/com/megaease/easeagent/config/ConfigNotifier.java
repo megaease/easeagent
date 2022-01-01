@@ -19,6 +19,8 @@ package com.megaease.easeagent.config;
 
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

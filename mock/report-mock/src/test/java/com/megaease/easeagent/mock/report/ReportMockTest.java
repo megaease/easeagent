@@ -19,11 +19,6 @@ package com.megaease.easeagent.mock.report;
 
 import com.megaease.easeagent.report.AgentReport;
 import org.junit.Test;
-import zipkin2.Span;
-
-import java.util.Random;
-
-import static org.junit.Assert.*;
 
 public class ReportMockTest {
 

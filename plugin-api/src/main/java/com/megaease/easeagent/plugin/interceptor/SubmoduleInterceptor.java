@@ -21,16 +21,16 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 
 public abstract class SubmoduleInterceptor implements Interceptor {
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
     }
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        Config config = context.getConfig();
+        IPluginConfig config = context.getConfig();
         if (!config.enabled()) {
             return;
         }
@@ -41,7 +41,7 @@ public abstract class SubmoduleInterceptor implements Interceptor {
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        Config config = context.getConfig();
+        IPluginConfig config = context.getConfig();
         if (!config.enabled()) {
             return;
         }
@@ -53,7 +53,7 @@ public abstract class SubmoduleInterceptor implements Interceptor {
         }
     }
 
-    public abstract void doInit(Config config, String className, String methodName, String methodDescriptor);
+    public abstract void doInit(IPluginConfig config, String className, String methodName, String methodDescriptor);
     public abstract void doBefore(MethodInfo methodInfo, Context context);
     public abstract void doAfter(MethodInfo methodInfo, Context context);
 

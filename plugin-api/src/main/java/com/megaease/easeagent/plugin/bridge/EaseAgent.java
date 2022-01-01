@@ -20,8 +20,8 @@ package com.megaease.easeagent.plugin.bridge;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.dispatcher.IDispatcher;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.logging.Logger;
@@ -54,16 +54,16 @@ public final class EaseAgent {
     }
 
     /**
-     * @see MetricRegistrySupplier#newMetricRegistry(Config, NameFactory, Tags)
+     * @see MetricRegistrySupplier#newMetricRegistry(IPluginConfig, NameFactory, Tags)
      */
-    public static MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
+    public static MetricRegistry newMetricRegistry(IPluginConfig config, NameFactory nameFactory, Tags tags) {
         return metricRegistrySupplier.newMetricRegistry(config, nameFactory, tags);
     }
 
     /**
-     * @see MetricRegistrySupplier#reporter(Config)
+     * @see MetricRegistrySupplier#reporter(IPluginConfig)
      */
-    public static Reporter metricReporter(Config config) {
+    public static Reporter metricReporter(IPluginConfig config) {
         return metricRegistrySupplier.reporter(config);
     }
 
@@ -82,9 +82,9 @@ public final class EaseAgent {
      * @param domain
      * @param namespace
      * @param name
-     * @return {@link Config}
+     * @return {@link IPluginConfig}
      */
-    public static Config getConfig(String domain, String namespace, String name) {
+    public static IPluginConfig getConfig(String domain, String namespace, String name) {
         return configFactory.getConfig(domain, namespace, name);
     }
 }

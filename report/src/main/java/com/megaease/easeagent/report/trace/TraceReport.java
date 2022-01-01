@@ -17,7 +17,11 @@
 
 package com.megaease.easeagent.report.trace;
 
-import com.megaease.easeagent.config.*;
+import com.megaease.easeagent.config.AutoRefreshConfigItem;
+import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.util.Utils;

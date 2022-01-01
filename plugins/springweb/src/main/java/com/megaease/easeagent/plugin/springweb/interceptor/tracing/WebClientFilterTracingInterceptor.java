@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -46,7 +46,7 @@ public class WebClientFilterTracingInterceptor implements NonReentrantIntercepto
     private static final Object PROGRESS_CONTEXT = new Object();
 
     @Override
-    public void init(Config config, int index) {
+    public void init(IPluginConfig config, int index) {
     }
 
     public Object getProgressKey() {

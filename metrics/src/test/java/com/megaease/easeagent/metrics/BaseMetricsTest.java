@@ -17,12 +17,6 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.config.Configs;
-
-import java.util.HashMap;
-import java.util.Map;
-
 public class BaseMetricsTest {
 
 //    public Config createConfig(String key, String value) {

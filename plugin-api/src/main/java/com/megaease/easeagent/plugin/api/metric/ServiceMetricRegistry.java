@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.api.metric;
 
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -33,13 +33,13 @@ public class ServiceMetricRegistry {
      * Obtain an ServiceMetric when it is already registered. If you have not registered, create one and return
      * The registered {@link Key} is domain, namespace, id, tags and the type by the supplier.
      *
-     * @param config              {@link Config} domain, namespace from id from
+     * @param config              {@link IPluginConfig} domain, namespace from id from
      * @param tags                {@link Tags} metric tags
      * @param supplier            {@link ServiceMetric} Instance Supplier
      * @param <T>                 the type of ServiceMetric by the Supplier
      * @return the type of ServiceMetric by the Supplier
      */
-    public static <T extends ServiceMetric> T getOrCreate(Config config, Tags tags, ServiceMetricSupplier<T> supplier) {
+    public static <T extends ServiceMetric> T getOrCreate(IPluginConfig config, Tags tags, ServiceMetricSupplier<T> supplier) {
         return getOrCreate(config.domain(), config.namespace(), config.id(), tags, supplier);
     }
 
@@ -67,7 +67,7 @@ public class ServiceMetricRegistry {
             if (metric != null) {
                 return (T) metric;
             }
-            Config config = EaseAgent.getConfig(domain, namespace, id);
+            IPluginConfig config = EaseAgent.getConfig(domain, namespace, id);
             NameFactory nameFactory = supplier.newNameFactory();
             MetricRegistry metricRegistry = EaseAgent.newMetricRegistry(config, nameFactory, tags);
             T newMetric = supplier.newInstance(metricRegistry, nameFactory);

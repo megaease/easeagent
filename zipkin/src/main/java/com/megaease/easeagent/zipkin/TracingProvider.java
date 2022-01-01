@@ -23,9 +23,9 @@ import brave.sampler.CountingSampler;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
+import com.megaease.easeagent.plugin.BeanProvider;
 import com.megaease.easeagent.plugin.IProvider;
 import com.megaease.easeagent.plugin.annotation.Injection;
-import com.megaease.easeagent.plugin.BeanProvider;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
@@ -86,7 +86,7 @@ public class TracingProvider implements BeanProvider, AgentReportAware, ConfigAw
         if (toZipkin) {
             reporter = AsyncReporter.create(URLConnectionSender.newBuilder()
                 .endpoint(zipkinUrl)
-                .compressionEnabled(compressionEnabled == null ? true : compressionEnabled).build());
+                .compressionEnabled(compressionEnabled == null || compressionEnabled).build());
         } else {
             reporter = span -> agentReport.report(span);
         }

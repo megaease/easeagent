@@ -30,5 +30,5 @@ public interface IConfigFactory {
      *
      * @return The configuration of a special plugin of Java agent.
      */
-    Config getConfig(String domain, String namespace, String name);
+    IPluginConfig getConfig(String domain, String namespace, String name);
 }

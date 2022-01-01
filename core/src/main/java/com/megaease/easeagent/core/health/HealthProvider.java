@@ -19,7 +19,6 @@ package com.megaease.easeagent.core.health;
 
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
-import com.megaease.easeagent.plugin.IProvider;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
@@ -29,12 +28,12 @@ import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Respo
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
 import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
 import com.megaease.easeagent.plugin.BeanProvider;
+import com.megaease.easeagent.plugin.IProvider;
+import com.megaease.easeagent.plugin.api.health.AgentHealth;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.megaease.easeagent.plugin.api.health.AgentHealth;
 
 public class HealthProvider implements AgentHttpHandlerProvider, ConfigAware, IProvider, BeanProvider {
     private static final String EASEAGENT_HEALTH_READINESS_ENABLED = "easeagent.health.readiness.enabled";

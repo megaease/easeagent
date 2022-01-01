@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.context;
 
-import com.megaease.easeagent.config.ChangeItem;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.ProgressFields;
+import com.megaease.easeagent.plugin.api.config.ChangeItem;
 
 import java.util.HashMap;
 import java.util.Map;

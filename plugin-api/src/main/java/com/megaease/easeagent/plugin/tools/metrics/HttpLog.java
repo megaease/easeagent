@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.tools.metrics;
 
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.utils.SystemClock;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 
@@ -58,11 +59,12 @@ public class HttpLog {
         if (!success) {
             requestInfo.setStatusCode("500");
         }
-        requestInfo.setRequestTime(System.currentTimeMillis() - beginTime);
+        Long now = SystemClock.now();
+        requestInfo.setTimestamp(now);
+        requestInfo.setRequestTime(now - beginTime);
         requestInfo.setCpuElapsedTime(System.nanoTime() - requestInfo.getBeginCpuTime());
         requestInfo.setResponseSize(serverInfo.getResponseBufferSize());
         requestInfo.setMatchUrl(serverInfo.getMatchURL());
-        requestInfo.setTimestamp(System.currentTimeMillis());
         List<RequestInfo> list = new ArrayList<>(1);
         list.add(requestInfo);
         String logString = JsonUtil.toJson(list);

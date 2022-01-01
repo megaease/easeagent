@@ -17,13 +17,13 @@
 
 package com.megaease.easeagent.core;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.megaease.easeagent.config.*;
+import com.megaease.easeagent.config.ConfigAware;
+import com.megaease.easeagent.config.ConfigFactory;
+import com.megaease.easeagent.config.ConfigManagerMXBean;
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.context.ContextManager;
 import com.megaease.easeagent.core.config.*;
+import com.megaease.easeagent.core.plugin.BaseLoader;
 import com.megaease.easeagent.core.plugin.BridgeDispatcher;
 import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
@@ -32,23 +32,19 @@ import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.BeanProvider;
 import com.megaease.easeagent.plugin.IProvider;
-import com.megaease.easeagent.plugin.annotation.Injection;
 import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.field.DynamicFieldAccessor;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
+import com.megaease.easeagent.report.DefaultAgentReport;
 import lombok.SneakyThrows;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.dynamic.loading.ClassInjector;
-import net.bytebuddy.implementation.FieldAccessor;
-import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.commons.lang3.StringUtils;
@@ -58,13 +54,10 @@ import javax.management.ObjectName;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static com.google.common.collect.FluentIterable.from;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @SuppressWarnings("unused")
@@ -81,19 +74,13 @@ public class Bootstrap {
 
     static final String MX_BEAN_OBJECT_NAME = "com.megaease.easeagent:type=ConfigManager";
 
-    private static WrappedConfigManager wrappedConfigManager;
-
     private static ContextManager contextManager;
-
-    private static AgentHttpServer agentHttpServer;
 
     private Bootstrap() {
     }
 
     @SneakyThrows
-    public static void start(String args, Instrumentation inst,
-                             Iterable<Class<?>> providers,
-                             Iterable<Class<? extends Transformation>> transformations) {
+    public static void start(String args, Instrumentation inst) {
         long begin = System.nanoTime();
 
         // add bootstrap classes
@@ -103,7 +90,7 @@ public class Bootstrap {
         }
 
         // initiate configuration
-        final Configs conf = load(args);
+        final Configs conf = loadConfigs(args);
 
         // init Context/API
         contextManager = ContextManager.build(conf);
@@ -116,16 +103,15 @@ public class Bootstrap {
         MiddlewareConfigProcessor.INSTANCE.init();
 
         // reporter
-        final AgentReport agentReport = AgentReport.create(conf);
+        final AgentReport agentReport = DefaultAgentReport.create(conf);
         GlobalAgentHolder.setAgentReport(agentReport);
 
         // load plugins
         AgentBuilder builder = getAgentBuilder(conf, false);
         builder = PluginLoader.load(builder, conf);
 
-        // beans
-        builder = define(transformations, loadProvider(conf, agentReport), builder, conf, agentReport);
-        builder = define(transformations, scoped(providers, conf, agentReport), builder, conf, agentReport);
+        // provider & beans
+        loadProvider(conf, agentReport);
 
         long installBegin = System.currentTimeMillis();
         builder.installOn(inst);
@@ -143,7 +129,7 @@ public class Bootstrap {
         String portStr = System.getProperty(AGENT_SERVER_PORT_KEY, String.valueOf(port));
         port = Integer.parseInt(portStr);
 
-        agentHttpServer = new AgentHttpServer(port);
+        AgentHttpServer agentHttpServer = new AgentHttpServer(port);
 
         boolean httpServerEnabled = conf.getBoolean(AGENT_SERVER_ENABLED_KEY);
         String httpServerEnabledInProp = System.getProperty(AGENT_SERVER_ENABLED_KEY, String.valueOf(httpServerEnabled));
@@ -162,16 +148,9 @@ public class Bootstrap {
         agentHttpServer.addHttpRoute(new PluginPropertiesHttpHandler());
     }
 
-    private static Map<Class<?>, Iterable<QualifiedBean>> loadProvider(final Configs conf, final AgentReport agentReport) {
-        ServiceLoader<BeanProvider> loader = ServiceLoader.load(BeanProvider.class);
-        Iterator<BeanProvider> iterator = loader.iterator();
-        return ImmutableMap.copyOf(
-            Maps.transformValues(from(loader).uniqueIndex((Function<BeanProvider, Class<?>>) BeanProvider::getClass),
-                input -> {
-                    provider(input, conf, agentReport);
-                    return beans(input);
-                }));
-
+    private static void loadProvider(final Configs conf, final AgentReport agentReport) {
+        List<BeanProvider> providers = BaseLoader.loadOrdered(BeanProvider.class);
+        providers.forEach(input -> provider(input, conf, agentReport));
     }
 
     private static void provider(final BeanProvider beanProvider, final Configs conf, final AgentReport agentReport) {
@@ -196,24 +175,6 @@ public class Bootstrap {
         if (beanProvider instanceof MetricProvider) {
             contextManager.setMetric((MetricProvider) beanProvider);
         }
-    }
-
-    private static Iterable<QualifiedBean> beans(final BeanProvider beanProvider) {
-        final ImmutableList.Builder<QualifiedBean> builder = ImmutableList.builder();
-        for (Method method : beanProvider.getClass().getMethods()) {
-            final Injection.Bean bean = method.getAnnotation(Injection.Bean.class);
-            if (bean == null) continue;
-            try {
-                final QualifiedBean qb = new QualifiedBean(bean.value(), method.invoke(beanProvider));
-                builder.add(qb);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Provided {} ", qb);
-                }
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
-        return builder.build();
     }
 
     public static AgentBuilder getAgentBuilder(Configs config, boolean test) {
@@ -264,101 +225,11 @@ public class Bootstrap {
             conf.getClass().getName(), mxBeanName, (System.currentTimeMillis() - begin));
     }
 
-    private static Map<Class<?>, Iterable<QualifiedBean>> scoped(Iterable<Class<?>> providers, final Configs conf, final AgentReport agentReport) {
-        return ImmutableMap.copyOf(
-            Maps.transformValues(from(providers).uniqueIndex(Class::getSuperclass),
-                input -> beans(input, conf, agentReport)));
-    }
-
     private static ElementMatcher<ClassLoader> protectedLoaders() {
         return isBootstrapClassLoader().or(is(Bootstrap.class.getClassLoader()));
     }
 
-    private static AgentBuilder define(Iterable<Class<? extends Transformation>> transformations,
-                                       Map<Class<?>, Iterable<QualifiedBean>> scopedBeans, AgentBuilder ab, Configs conf, AgentReport report) {
-        long begin = System.currentTimeMillis();
-        for (Class<? extends Transformation> tc : transformations) {
-            final Injection.Provider ann = tc.getAnnotation(Injection.Provider.class);
-            final Iterable<QualifiedBean> beans = ann == null ? Collections.emptySet() : scopedBeans.get(ann.value());
-            final Register register = new Register(beans);
-
-            for (Map.Entry<ElementMatcher<? super TypeDescription>, Iterable<Definition.Transformer>> entry :
-                newInstance(tc, conf, report).define(Definition.Default.EMPTY).asMap().entrySet()) {
-                ab = ab.type(entry.getKey()).transform(compound(entry.getValue(), register));
-            }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Defined {}", tc);
-            }
-        }
-        LOGGER.info("define use time: {}", (System.currentTimeMillis() - begin));
-        return ab;
-    }
-
-    private static AgentBuilder.Transformer compound(Iterable<Definition.Transformer> transformers,
-                                                     final Register register) {
-        List<AgentBuilder.Transformer> agentTransformers = StreamSupport.stream(transformers.spliterator(), false)
-            .map(transformation -> new ForRegisterAdvice(register, transformation))
-            .collect(Collectors.toList());
-
-        return new CompoundTransformer(agentTransformers);
-    }
-
-    private static Iterable<QualifiedBean> beans(Class<?> provider, Configs conf, AgentReport agentReport) {
-        final ImmutableList.Builder<QualifiedBean> builder = ImmutableList.builder();
-        final Object instance = newInstance(provider, conf, agentReport);
-
-        if (instance instanceof IProvider) {
-            ((IProvider) instance).afterPropertiesSet();
-        }
-
-        if (instance instanceof TracingProvider) {
-            TracingProvider tracingProvider = (TracingProvider) instance;
-            contextManager.setTracing(tracingProvider);
-        }
-
-        if (instance instanceof MetricProvider) {
-            contextManager.setMetric((MetricProvider) instance);
-        }
-        for (Method method : provider.getMethods()) {
-            final Injection.Bean bean = method.getAnnotation(Injection.Bean.class);
-            if (bean == null) continue;
-            try {
-                final QualifiedBean qb = new QualifiedBean(bean.value(), method.invoke(instance));
-                builder.add(qb);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Provided {} ", qb);
-                }
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        return builder.build();
-    }
-
-    private static <T> T newInstance(Class<T> aClass, Configs conf, AgentReport agentReport) {
-        final Configurable configurable = aClass.getAnnotation(Configurable.class);
-        try {
-            final T t = configurable == null ? aClass.getDeclaredConstructor().newInstance()
-                : aClass.getConstructor(Config.class).newInstance(conf);
-            if (t instanceof ConfigAware) {
-                ((ConfigAware) t).setConfig(conf);
-            }
-
-            if (t instanceof AgentReportAware) {
-                ((AgentReportAware) t).setAgentReport(agentReport);
-            }
-
-            if (t instanceof AgentHttpHandlerProvider) {
-                agentHttpServer.addHttpRoutes(((AgentHttpHandlerProvider) t).getAgentHttpHandlers());
-            }
-            return t;
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static Configs load(String pathname) {
+    private static Configs loadConfigs(String pathname) {
         Configs configs = ConfigFactory.loadFromClasspath(Bootstrap.class.getClassLoader());
         if (StringUtils.isNotEmpty(pathname)) {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
@@ -370,7 +241,7 @@ public class Bootstrap {
             LOGGER.debug("Loaded conf:\n{}", display);
         }
 
-        wrappedConfigManager = new WrappedConfigManager(Bootstrap.class.getClassLoader(), configs);
+        WrappedConfigManager wrappedConfigManager = new WrappedConfigManager(Bootstrap.class.getClassLoader(), configs);
         registerMBeans(wrappedConfigManager);
         GlobalAgentHolder.setWrappedConfigManager(wrappedConfigManager);
 
@@ -404,33 +275,4 @@ public class Bootstrap {
             // ignored
         }
     };
-
-    private static class ForRegisterAdvice implements AgentBuilder.Transformer {
-        private final Register register;
-        private final String adviceFactoryClassName;
-        private final ForAdvice transformer;
-        private final Definition.Transformer agentTransformer;
-
-        ForRegisterAdvice(Register register, Definition.Transformer transformer) {
-            this.register = register;
-            this.agentTransformer = transformer;
-            this.adviceFactoryClassName = transformer.adviceFactoryClassName;
-            this.transformer = new ForAdvice().include(getClass().getClassLoader())
-                .advice(transformer.matcher, transformer.inlineAdviceClassName);
-
-        }
-
-        @Override
-        public Builder<?> transform(Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
-            register.apply(adviceFactoryClassName, cl);
-            if (td.isAssignableTo(DynamicFieldAccessor.class) || this.agentTransformer.fieldName == null) {
-                return transformer.transform(b, td, cl, m);
-            } else {
-                b = b.defineField(this.agentTransformer.fieldName, this.agentTransformer.fieldClass, Opcodes.ACC_PRIVATE)
-                    .implement(DynamicFieldAccessor.class)
-                    .intercept(FieldAccessor.ofField(this.agentTransformer.fieldName));
-            }
-            return transformer.transform(b, td, cl, m);
-        }
-    }
 }

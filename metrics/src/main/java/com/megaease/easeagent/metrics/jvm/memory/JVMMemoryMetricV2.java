@@ -18,8 +18,8 @@
 package com.megaease.easeagent.metrics.jvm.memory;
 
 import com.megaease.easeagent.metrics.model.JVMMemoryGaugeMetricModel;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.MetricName;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
@@ -51,14 +51,14 @@ public class JVMMemoryMetricV2 extends ServiceMetric implements ScheduleRunner {
 
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
     private static final String POOLS = "pools";
-    private static Config config;
+    private static IPluginConfig config;
 
     public JVMMemoryMetricV2(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
         super(metricRegistry, nameFactory);
     }
 
     public static JVMMemoryMetricV2 getMetric() {
-        config = AutoRefreshRegistry.getOrCreate("observability", "jvmMemory", "metric");
+        config = AutoRefreshPluginConfigRegistry.getOrCreate("observability", "jvmMemory", "metric");
         Tags tags = new Tags("application", "jvm-memory", "resource");
 
         JVMMemoryMetricV2 v2 = ServiceMetricRegistry.getOrCreate(config, tags, SUPPLIER);

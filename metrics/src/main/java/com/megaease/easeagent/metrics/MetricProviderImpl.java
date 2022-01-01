@@ -20,7 +20,6 @@ package com.megaease.easeagent.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
-import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.metrics.config.MetricsConfig;
 import com.megaease.easeagent.metrics.config.PluginMetricsConfig;
 import com.megaease.easeagent.metrics.converter.ConverterAdapter;
@@ -28,6 +27,8 @@ import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.impl.MetricRegistryImpl;
 import com.megaease.easeagent.plugin.api.Reporter;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.MetricType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
@@ -67,7 +68,7 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
 
         @Override
         public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(
-            com.megaease.easeagent.plugin.api.config.Config config,
+            IPluginConfig config,
             NameFactory nameFactory, Tags tags) {
             MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
             MetricsConfig metricsConfig = new PluginMetricsConfig(config);
@@ -95,16 +96,18 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
             }
             ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes,
                 MetricProviderImpl.this.additionalAttributes, tags);
-            Reporter reporter = agentReport.pluginMetricReporter().reporter(config);
-            new AutoRefreshReporter(metricRegistry, metricsConfig,
+            Reporter reporter = agentReport.metricReporter().reporter(config);
+            AutoRefreshReporter autoRefreshReporter = new AutoRefreshReporter(metricRegistry, metricsConfig,
                 converterAdapter,
-                s -> reporter.report(s)).run();
+                s -> reporter.report(s));
+            autoRefreshReporter.run();
+
             return MetricRegistryImpl.build(metricRegistry);
         }
 
         @Override
-        public Reporter reporter(com.megaease.easeagent.plugin.api.config.Config config) {
-            return agentReport.pluginMetricReporter().reporter(config);
+        public Reporter reporter(IPluginConfig config) {
+            return agentReport.metricReporter().reporter(config);
         }
     }
 }
