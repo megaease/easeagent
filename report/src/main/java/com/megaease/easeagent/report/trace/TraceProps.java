@@ -20,8 +20,8 @@ package com.megaease.easeagent.report.trace;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigImpl;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
@@ -55,10 +55,10 @@ public interface TraceProps {
 
     class Default implements TraceProps {
         private final KafkaOutputProps output;
-        private final AutoRefreshConfigImpl autoRefreshConfig;
+        private final AutoRefreshPluginConfigImpl autoRefreshConfig;
 
         public Default(Configs configs) {
-            this.autoRefreshConfig = AutoRefreshRegistry.getOrCreate(ConfigConst.OBSERVABILITY, ConfigConst.PLUGIN_GLOBAL, ConfigConst.TRACING_SERVICE_ID);
+            this.autoRefreshConfig = AutoRefreshPluginConfigRegistry.getOrCreate(ConfigConst.OBSERVABILITY, ConfigConst.PLUGIN_GLOBAL, ConfigConst.TRACING_SERVICE_ID);
             this.output = new KafkaOutputPropsImpl(configs);
         }
 

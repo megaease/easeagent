@@ -24,10 +24,10 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshConfigImpl;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.bridge.NoOpConfig;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.bridge.NoOpIPluginConfig;
 
 import java.util.function.Supplier;
 
@@ -35,24 +35,24 @@ public class InterceptorPluginDecorator implements Interceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(InterceptorPluginDecorator.class);
     private final Interceptor interceptor;
     private final AgentPlugin plugin;
-    private final AutoRefreshConfigImpl config;
+    private final AutoRefreshPluginConfigImpl config;
 
     public InterceptorPluginDecorator(Interceptor interceptor, AgentPlugin plugin) {
         this.interceptor = interceptor;
         this.plugin = plugin;
-        this.config = AutoRefreshRegistry.getOrCreate(plugin.getDomain(), plugin.getNamespace(), interceptor.getType());
+        this.config = AutoRefreshPluginConfigRegistry.getOrCreate(plugin.getDomain(), plugin.getNamespace(), interceptor.getType());
     }
 
-    public Config getConfig() {
+    public IPluginConfig getConfig() {
         return this.config.getConfig();
     }
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        Config cfg = this.config.getConfig();
+        IPluginConfig cfg = this.config.getConfig();
         InitializeContext innerContext = (InitializeContext) context;
         innerContext.pushConfig(cfg);
-        if (cfg == null || cfg.enabled() || cfg instanceof NoOpConfig) {
+        if (cfg == null || cfg.enabled() || cfg instanceof NoOpIPluginConfig) {
             innerContext.pushRetBound();
             this.interceptor.before(methodInfo, context);
         } else if (LOGGER.isDebugEnabled()) {
@@ -62,10 +62,10 @@ public class InterceptorPluginDecorator implements Interceptor {
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        Config cfg = context.getConfig();
+        IPluginConfig cfg = context.getConfig();
         InitializeContext innerContext = (InitializeContext) context;
 
-        if (cfg == null || cfg.enabled() || cfg instanceof NoOpConfig) {
+        if (cfg == null || cfg.enabled() || cfg instanceof NoOpIPluginConfig) {
             try {
                 this.interceptor.after(methodInfo, context);
             } finally {
@@ -82,12 +82,12 @@ public class InterceptorPluginDecorator implements Interceptor {
     }
 
     @Override
-    public void init(Config config, String type, String method, String methodDescriptor) {
+    public void init(IPluginConfig config, String type, String method, String methodDescriptor) {
         this.interceptor.init(config, type, method, methodDescriptor);
     }
 
     @Override
-    public void init(Config config, int uniqueIndex) {
+    public void init(IPluginConfig config, int uniqueIndex) {
         this.interceptor.init(config, uniqueIndex);
     }
 

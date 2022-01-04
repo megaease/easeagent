@@ -38,13 +38,6 @@
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -61,12 +54,7 @@
             <artifactId>spring-cloud-starter-gateway</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.megaease.easeagent</groupId>
-            <artifactId>gen</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>metrics</artifactId>
@@ -84,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
-            <artifactId>sniffer</artifactId>
+            <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -129,7 +117,7 @@
                                     <fileset dir="${project.basedir}/../log4j2/log4j2-api" includes="**/log4j2-api*.jar"/>
                                 </copy>
                                 -->
-                                
+
                                 <mkdir dir="target/log4j2"/>
                                 <copy todir="target/log4j2" flatten="true">
                                     <fileset dir="${project.basedir}/../log4j2/log4j2-impl" includes="**/*agent-lib.jar"/>

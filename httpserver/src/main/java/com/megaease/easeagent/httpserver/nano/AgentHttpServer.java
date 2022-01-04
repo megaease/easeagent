@@ -37,8 +37,8 @@ public class AgentHttpServer extends RouterNanoHTTPD {
         }
     }
 
-    public void addHttpRoute(String path, Class<?> handler, Object... initParameter) {
-        this.addRoute(path, handler, initParameter);
+    public void addHttpRoute(AgentHttpHandler handler) {
+        this.addRoute(handler.getPath(), handler.getClass());
     }
 
     @SneakyThrows

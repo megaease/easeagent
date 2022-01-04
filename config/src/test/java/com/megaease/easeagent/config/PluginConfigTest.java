@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.config;
 
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -173,9 +173,9 @@ public class PluginConfigTest {
         config.addChangeListener((oldConfig, newConfig) -> {
         });
         AtomicInteger count = new AtomicInteger(0);
-        config.foreachConfigChangeListener(new Consumer<ConfigChangeListener>() {
+        config.foreachConfigChangeListener(new Consumer<PluginConfigChangeListener>() {
             @Override
-            public void accept(ConfigChangeListener listener) {
+            public void accept(PluginConfigChangeListener listener) {
                 count.incrementAndGet();
             }
         });

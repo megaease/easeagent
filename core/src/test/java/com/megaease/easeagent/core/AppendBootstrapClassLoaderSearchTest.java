@@ -31,8 +31,6 @@ public class AppendBootstrapClassLoaderSearchTest {
     @Test
     public void should_inject_classes() throws Exception {
         final Set<String> strings = Sets.newHashSet(
-                "com.megaease.easeagent.core.Dispatcher",
-                "com.megaease.easeagent.core.Dispatcher$Advice",
                 "com.megaease.easeagent.core.utils.AgentArray",
                 "com.megaease.easeagent.core.utils.ContextUtils",
                 "com.megaease.easeagent.core.plugin.Dispatcher",

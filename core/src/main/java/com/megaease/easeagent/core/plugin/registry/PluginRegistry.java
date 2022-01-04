@@ -53,6 +53,8 @@ public class PluginRegistry {
     static final ConcurrentHashMap<Integer, MethodTransformation> INDEX_TO_METHOD_TRANSFORMATION = new ConcurrentHashMap<>();
     static final AgentArray<Builder> INTERCEPTOR_PROVIDERS = new AgentArray<>();
 
+    private PluginRegistry() {}
+
     public static void register(AgentPlugin plugin) {
         PLUGIN_CLASSNAME_TO_PLUGIN.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
     }

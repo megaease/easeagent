@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -47,12 +47,12 @@ public final class NoOpMetrics {
         private static final NoopMetricsRegistrySupplier INSTANCE = new NoopMetricsRegistrySupplier();
 
         @Override
-        public MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
+        public MetricRegistry newMetricRegistry(IPluginConfig config, NameFactory nameFactory, Tags tags) {
             return NoopMetricRegistry.INSTANCE;
         }
 
         @Override
-        public Reporter reporter(Config config) {
+        public Reporter reporter(IPluginConfig config) {
             return NO_OP_REPORTER;
         }
     }

@@ -23,17 +23,12 @@ import com.megaease.easeagent.metrics.converter.Converter;
 import lombok.SneakyThrows;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-
 public class AgentScheduledReporter extends ScheduledReporter {
-    public static final Map<String, Map<String, String>> METRIC_MAP = new ConcurrentHashMap<>();
-    public static final Map<String, Long> METRIC_TIMESTAMP = new ConcurrentHashMap<>();
-
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Converter converter;
     private final Consumer<String> dataConsumer;

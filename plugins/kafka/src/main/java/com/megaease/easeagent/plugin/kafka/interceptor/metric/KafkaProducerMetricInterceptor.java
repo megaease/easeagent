@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
@@ -36,7 +36,7 @@ public class KafkaProducerMetricInterceptor implements NonReentrantInterceptor {
 
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         kafkaMetric = ServiceMetricRegistry.getOrCreate(config, KafkaMetric.newTags(), KafkaMetric.KAFKA_METRIC_SUPPLIER);
     }
 

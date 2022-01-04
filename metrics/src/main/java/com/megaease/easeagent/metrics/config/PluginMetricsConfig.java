@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.metrics.config;
 
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import static com.megaease.easeagent.plugin.Const.METRIC_DEFAULT_INTERVAL;
@@ -29,9 +29,9 @@ public class PluginMetricsConfig implements MetricsConfig {
     private volatile int interval;
     private Runnable callback;
 
-    public PluginMetricsConfig(Config config) {
+    public PluginMetricsConfig(IPluginConfig config) {
         set(config);
-        config.addChangeListener(new ConfigChange());
+        config.addChangeListener(new PluginConfigChange());
     }
 
 
@@ -50,15 +50,15 @@ public class PluginMetricsConfig implements MetricsConfig {
         this.callback = runnable;
     }
 
-    private void set(Config config) {
+    private void set(IPluginConfig config) {
         this.enabled = config.enabled();
         this.interval = NoNull.of(config.getInt(KEY_COMM_INTERVAL), METRIC_DEFAULT_INTERVAL);
     }
 
-    class ConfigChange implements ConfigChangeListener {
+    class PluginConfigChange implements PluginConfigChangeListener {
 
         @Override
-        public void onChange(Config oldConfig, Config newConfig) {
+        public void onChange(IPluginConfig oldConfig, IPluginConfig newConfig) {
             int oldInterval = PluginMetricsConfig.this.interval;
             set(newConfig);
             if (oldInterval != PluginMetricsConfig.this.interval) {

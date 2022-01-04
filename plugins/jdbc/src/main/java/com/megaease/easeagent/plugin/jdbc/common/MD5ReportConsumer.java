@@ -18,9 +18,9 @@
 package com.megaease.easeagent.plugin.jdbc.common;
 
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.AutoRefreshRegistry;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
@@ -31,11 +31,11 @@ import java.util.function.Consumer;
 
 public class MD5ReportConsumer implements Consumer<Map<String, String>> {
     public static final Logger LOGGER = EaseAgent.getLogger(MD5ReportConsumer.class);
-    private final Config config;
+    private final IPluginConfig config;
     private Reporter reporter;
 
     public MD5ReportConsumer() {
-        this.config = AutoRefreshRegistry.getOrCreate(ConfigConst.OBSERVABILITY,
+        this.config = AutoRefreshPluginConfigRegistry.getOrCreate(ConfigConst.OBSERVABILITY,
             ConfigConst.Namespace.MD5_DICTIONARY, ConfigConst.PluginID.METRIC);
         this.reporter = EaseAgent.metricReporter(config);
     }

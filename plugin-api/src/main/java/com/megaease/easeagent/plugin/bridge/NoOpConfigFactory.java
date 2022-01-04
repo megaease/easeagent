@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.bridge;
 
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 
 public class NoOpConfigFactory implements IConfigFactory {
 
@@ -28,7 +28,7 @@ public class NoOpConfigFactory implements IConfigFactory {
     }
 
     @Override
-    public Config getConfig(String domain, String namespace, String id) {
-        return new NoOpConfig(domain, namespace, id);
+    public IPluginConfig getConfig(String domain, String namespace, String id) {
+        return new NoOpIPluginConfig(domain, namespace, id);
     }
 }

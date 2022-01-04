@@ -19,6 +19,8 @@ package com.megaease.easeagent.config;
 
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 
 import java.util.*;
@@ -27,7 +29,7 @@ import static com.megaease.easeagent.plugin.api.config.ConfigConst.PLUGIN_GLOBAL
 
 public class PluginConfigManager implements IConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginConfigManager.class);
-    private volatile Runnable shutdownRunnable;
+    private Runnable shutdownRunnable;
     private final Configs configs;
     private final Map<Key, PluginSourceConfig> pluginSourceConfigs;
     private final Map<Key, PluginConfig> pluginConfigs;
@@ -205,7 +207,7 @@ public class PluginConfigManager implements IConfigFactory {
         }
     }
 
-    class ChangeListener implements com.megaease.easeagent.config.ConfigChangeListener {
+    class ChangeListener implements ConfigChangeListener {
 
         @Override
         public void onChange(List<ChangeItem> list) {

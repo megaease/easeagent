@@ -21,6 +21,7 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.Const;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
@@ -38,7 +39,7 @@ public interface MetricProps {
         return new Default(configs, key);
     }
 
-    static MetricProps newDefault(com.megaease.easeagent.plugin.api.config.Config config) {
+    static MetricProps newDefault(IPluginConfig config) {
         return new Default(
             config.enabled(),
             NoNull.of(config.getString(KEY_COMM_APPEND_TYPE), Const.METRIC_DEFAULT_APPEND_TYPE),

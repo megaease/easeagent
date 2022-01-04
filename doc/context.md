@@ -2,7 +2,7 @@
 
 Between plugin and plugin, there is data transfer, such as jdbc uri, span and key, etc.
 
-In order to solve the problem of data transmission, EaseAgent provides a session-level Context. 
+In order to solve the problem of data transmission, EaseAgent provides a session-level Context.
 
 ### What is a session-level context?
 Context shared in the same session in the same process
@@ -36,7 +36,7 @@ interface Interceptor{
 ```java
 package com.megaease.easeagent.plugin.api;
 
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 
@@ -131,7 +131,7 @@ public interface Context {
      * from the stack.
      *
      * @return The config at the top of this stack (the last config of the <tt>Config</tt> object).
-     * return {@link com.megaease.easeagent.plugin.bridge.NoOpConfig#INSTANCE} if this stack is empty.
+     * return {@link com.megaease.easeagent.plugin.bridge.NoOpIPluginConfig#INSTANCE} if this stack is empty.
      */
     Config getConfig();
 

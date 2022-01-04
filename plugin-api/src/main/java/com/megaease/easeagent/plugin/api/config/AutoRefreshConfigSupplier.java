@@ -26,7 +26,7 @@ import java.lang.reflect.Type;
  *
  * @param <T> the type of Config by this Supplier
  */
-public abstract class AutoRefreshConfigSupplier<T extends AutoRefreshConfig> {
+public abstract class AutoRefreshConfigSupplier<T extends AutoRefreshPluginConfig> {
     private final Type type;
 
     public AutoRefreshConfigSupplier() {
@@ -45,7 +45,6 @@ public abstract class AutoRefreshConfigSupplier<T extends AutoRefreshConfig> {
     public Type getType() {
         return type;
     }
-
 
     /**
      * new a AutoRefreshConfig

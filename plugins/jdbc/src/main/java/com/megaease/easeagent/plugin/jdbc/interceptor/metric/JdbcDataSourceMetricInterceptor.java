@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -38,7 +38,7 @@ public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor 
     public static final String ERR_CON_METRIC_KEY = "err-con";
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         metric = ServiceMetricRegistry.getOrCreate(config,
             new Tags("application", "jdbc-connection", "url"), JdbcMetric.METRIC_SUPPLIER);
     }

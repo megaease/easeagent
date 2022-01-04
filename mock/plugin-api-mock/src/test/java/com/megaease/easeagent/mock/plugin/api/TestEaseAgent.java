@@ -18,17 +18,14 @@
 package com.megaease.easeagent.mock.plugin.api;
 
 import com.megaease.easeagent.mock.report.ReportMock;
-import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @MockEaseagent
 public class TestEaseAgent {
@@ -39,7 +36,7 @@ public class TestEaseAgent {
         assertFalse(EaseAgent.contextSupplier.get().isNoop());
         assertNotNull(EaseAgent.configFactory);
         assertNotNull(EaseAgent.configFactory.getConfig("name"));
-        Config config = EaseAgent.configFactory.getConfig("test1", "test2", "test3");
+        IPluginConfig config = EaseAgent.configFactory.getConfig("test1", "test2", "test3");
         assertNotNull(config);
         assertNotNull(EaseAgent.metricRegistrySupplier);
         assertNotNull(EaseAgent.metricRegistrySupplier.reporter(config));

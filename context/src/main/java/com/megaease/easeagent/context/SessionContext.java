@@ -21,11 +21,11 @@ import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
-import com.megaease.easeagent.plugin.bridge.NoOpConfig;
+import com.megaease.easeagent.plugin.bridge.NoOpIPluginConfig;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
@@ -39,7 +39,7 @@ public class SessionContext implements InitializeContext {
     };
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
 
-    private final Deque<Config> configs = new ArrayDeque<>();
+    private final Deque<IPluginConfig> configs = new ArrayDeque<>();
     private final Deque<Object> retStack = new ArrayDeque<>();
     private final Deque<RetBound> retBound = new ArrayDeque<>();
 
@@ -91,24 +91,24 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public Config getConfig() {
+    public IPluginConfig getConfig() {
         if (configs.isEmpty()) {
             LOGGER.warn("context.configs was empty.");
-            return NoOpConfig.INSTANCE;
+            return NoOpIPluginConfig.INSTANCE;
         }
         return configs.peek();
     }
 
     @Override
-    public void pushConfig(Config config) {
+    public void pushConfig(IPluginConfig config) {
         configs.push(config);
     }
 
     @Override
-    public Config popConfig() {
+    public IPluginConfig popConfig() {
         if (configs.isEmpty()) {
             LOGGER.warn("context.configs was empty.");
-            return NoOpConfig.INSTANCE;
+            return NoOpIPluginConfig.INSTANCE;
         }
         return configs.pop();
     }

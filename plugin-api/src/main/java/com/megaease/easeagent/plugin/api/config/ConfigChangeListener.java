@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin.api.config;
 
+import java.util.List;
+
 public interface ConfigChangeListener {
-    void onChange(Config oldConfig, Config newConfig);
+    void onChange(List<ChangeItem> list);
 }

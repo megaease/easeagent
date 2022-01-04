@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.jdbc.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -50,7 +50,7 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
     private static volatile MD5SQLCompression md5SQLCompression;
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         /*
          * make reference to third-part lib,
          * make it loaded during init, so these classes can be found

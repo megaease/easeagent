@@ -21,17 +21,20 @@ import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.mock.config.ConfigMock;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.report.AgentReport;
-import com.megaease.easeagent.report.PluginMetricReporter;
+import com.megaease.easeagent.report.DefaultAgentReport;
+import com.megaease.easeagent.report.metric.MetricReporter;
 import com.megaease.easeagent.report.util.SpanUtils;
 import zipkin2.Span;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class ReportMock {
     public static final Logger LOGGER = LoggerFactory.getLogger(ReportMock.class);
-    public static final AgentReport AGENT_REPORT = new MockAgentReport(AgentReport.create(ConfigMock.getCONFIGS()));
+    public static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(ConfigMock.getCONFIGS()));
     public static volatile SpanReportMock SPAN_REPORT_MOCK = null;
     public static volatile Reporter METRIC_REPORT_MOCK = null;
 
@@ -49,11 +52,11 @@ public class ReportMock {
 
     static class MockAgentReport implements AgentReport {
         private final AgentReport agentReport;
-        private final MockPluginMetricReporter pluginMetricReporter;
+        private final MockMetricReporter pluginMetricReporter;
 
         MockAgentReport(AgentReport agentReport) {
             this.agentReport = agentReport;
-            this.pluginMetricReporter = new MockPluginMetricReporter(agentReport.pluginMetricReporter());
+            this.pluginMetricReporter = new MockMetricReporter(agentReport.metricReporter());
         }
 
         @Override
@@ -73,22 +76,25 @@ public class ReportMock {
         }
 
         @Override
-        public PluginMetricReporter pluginMetricReporter() {
+        public MetricReporter metricReporter() {
             return pluginMetricReporter;
         }
     }
 
+    static class MockMetricReporter implements MetricReporter {
+        private final MetricReporter metricReporter;
 
-    static class MockPluginMetricReporter implements PluginMetricReporter {
-        private final PluginMetricReporter pluginMetricReporter;
-
-        MockPluginMetricReporter(@Nonnull PluginMetricReporter pluginMetricReporter) {
-            this.pluginMetricReporter = pluginMetricReporter;
+        MockMetricReporter(@Nonnull MetricReporter metricReporter) {
+            this.metricReporter = metricReporter;
         }
 
         @Override
-        public Reporter reporter(Config config) {
-            return new MockReporter(pluginMetricReporter.reporter(config));
+        public Reporter reporter(IPluginConfig config) {
+            return new MockReporter(metricReporter.reporter(config));
+        }
+
+        @Override
+        public void onChange(List<ChangeItem> list) {
         }
     }
 

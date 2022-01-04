@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.config;
 
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -103,8 +103,8 @@ public class PluginConfigManagerTest {
         Configs configs = new Configs(buildSource());
         pluginConfigManager = PluginConfigManager.builder(configs).build();
         final PluginConfig pluginConfig1 = pluginConfigManager.getConfig(DOMAIN, NAMESPACE, TEST_TRACE_ID);
-        final AtomicReference<Config> oldPluginConfig = new AtomicReference<>();
-        final AtomicReference<Config> newPluginConfig = new AtomicReference<>();
+        final AtomicReference<IPluginConfig> oldPluginConfig = new AtomicReference<>();
+        final AtomicReference<IPluginConfig> newPluginConfig = new AtomicReference<>();
         PluginConfigTest.checkAllType(pluginConfig1);
         pluginConfig1.addChangeListener((oldConfig, newConfig) -> {
             oldPluginConfig.set(oldConfig);
@@ -115,8 +115,8 @@ public class PluginConfigManagerTest {
         assertNotNull(oldPluginConfig.get());
         assertNotNull(newPluginConfig.get());
         assertTrue(oldPluginConfig.get() == pluginConfig1);
-        final AtomicReference<com.megaease.easeagent.plugin.api.config.ConfigChangeListener> oldPluginConfigListener = new AtomicReference<>();
-        final AtomicReference<ConfigChangeListener> newPluginConfigListener = new AtomicReference<>();
+        final AtomicReference<PluginConfigChangeListener> oldPluginConfigListener = new AtomicReference<>();
+        final AtomicReference<PluginConfigChangeListener> newPluginConfigListener = new AtomicReference<>();
         ((PluginConfig) oldPluginConfig.get()).foreachConfigChangeListener(listener -> oldPluginConfigListener.set(listener));
         ((PluginConfig) newPluginConfig.get()).foreachConfigChangeListener(listener -> newPluginConfigListener.set(listener));
         assertTrue(oldPluginConfigListener.get() == newPluginConfigListener.get());
@@ -134,7 +134,7 @@ public class PluginConfigManagerTest {
         assertFalse(newPluginConfig.get().getBoolean("enabled"));
 
 
-        Config newConfig = newPluginConfig.get();
+        IPluginConfig newConfig = newPluginConfig.get();
         configs.updateConfigs(Collections.singletonMap(String.format("plugin.%s.global.%s.enabled", DOMAIN, TEST_AAA_ID), "false"));
         assertTrue(newPluginConfig.get() == newConfig);
 

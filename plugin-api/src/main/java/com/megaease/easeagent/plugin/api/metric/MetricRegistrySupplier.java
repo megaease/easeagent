@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.api.metric;
 
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.name.MetricField;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -70,12 +70,12 @@ public interface MetricRegistrySupplier {
      *     }
      * }</pre>
      *
-     * @param config      {@link Config} metric config
+     * @param config      {@link IPluginConfig} metric config
      * @param nameFactory {@link NameFactory} Calculation description and name description of the value of the metric.
      * @param tags        {@link Tags} tags of metric
      * @return {@link MetricRegistry}
      */
-    MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags);
+    MetricRegistry newMetricRegistry(IPluginConfig config, NameFactory nameFactory, Tags tags);
 
     /**
      * get plugin metric reporter
@@ -84,8 +84,8 @@ public interface MetricRegistrySupplier {
      *     Reporter reporter = supplier.reporter(config);
      *     reporter.report("{'url': 'http://127.0.0.1:8080', 'cnt': 1}");
      * }
-     * @param config {@link Config} metric config
+     * @param config {@link IPluginConfig} metric config
      * @return {@link Reporter}
      */
-    Reporter reporter(Config config);
+    Reporter reporter(IPluginConfig config);
 }

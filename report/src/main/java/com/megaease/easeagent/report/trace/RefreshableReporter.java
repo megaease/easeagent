@@ -66,8 +66,7 @@ public class RefreshableReporter<S> implements Reporter<S> {
             try {
                 asyncReporter.getSender().close();
                 asyncReporter.closeFlushThread();
-            } catch (Exception e) {
-//                LOGGER.warn("close sender error, ignore", e);
+            } catch (Exception ignored) {
             }
         }
 

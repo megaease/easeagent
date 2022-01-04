@@ -21,7 +21,6 @@ import com.megaease.easeagent.log4j2.api.AgentLogger;
 import com.megaease.easeagent.log4j2.api.AgentLoggerFactory;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class LoggerFactory {

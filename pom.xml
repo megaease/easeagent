@@ -28,12 +28,9 @@
         <module>plugin-api</module>
         <module>log4j2</module>
         <module>core</module>
-        <module>gen</module>
-        <module>common</module>
         <module>metrics</module>
         <module>zipkin</module>
         <module>loader</module>
-        <module>sniffer</module>
         <module>config</module>
         <module>report</module>
         <module>httpserver</module>

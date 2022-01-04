@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -47,7 +47,7 @@ public class GatewayMetricsInterceptor implements Interceptor {
     private static volatile ServerMetric SERVER_METRIC = null;
 
     @Override
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         SERVER_METRIC = ServiceMetricRegistry.getOrCreate(config,
             new Tags("application", "http-request", "url"), ServerMetric.SERVICE_METRIC_SUPPLIER);
     }

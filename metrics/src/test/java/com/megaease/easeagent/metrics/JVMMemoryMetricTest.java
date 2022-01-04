@@ -17,11 +17,6 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.config.Config;
-import org.junit.Assert;
-import org.junit.Test;
-
 public class JVMMemoryMetricTest extends BaseMetricsTest {
 
 //    @Test

@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.Meter;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
@@ -51,7 +51,7 @@ public class RabbitMqOnMessageMetricInterceptor implements Interceptor {
 
     @Override
     @SuppressWarnings("all")
-    public void init(Config config, String className, String methodName, String methodDescriptor) {
+    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         if (METRIC != null) {
             return;
         }

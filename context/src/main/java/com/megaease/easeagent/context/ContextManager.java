@@ -19,22 +19,22 @@ package com.megaease.easeagent.context;
 
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.PluginConfigManager;
-import com.megaease.easeagent.plugin.api.metric.MetricProvider;
-import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.context.log.LoggerFactoryImpl;
 import com.megaease.easeagent.context.log.LoggerMdc;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.logging.Mdc;
+import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
+import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.bridge.*;
 import com.megaease.easeagent.plugin.utils.NoNull;
@@ -110,12 +110,12 @@ public class ContextManager {
     public class MetricRegistrySupplierImpl implements MetricRegistrySupplier {
 
         @Override
-        public MetricRegistry newMetricRegistry(Config config, NameFactory nameFactory, Tags tags) {
+        public MetricRegistry newMetricRegistry(IPluginConfig config, NameFactory nameFactory, Tags tags) {
             return NoNull.of(metric.newMetricRegistry(config, nameFactory, tags), NoOpMetrics.NO_OP_METRIC);
         }
 
         @Override
-        public Reporter reporter(Config config) {
+        public Reporter reporter(IPluginConfig config) {
             return NoNull.of(metric.reporter(config), NoOpReporter.NO_OP_REPORTER);
         }
     }

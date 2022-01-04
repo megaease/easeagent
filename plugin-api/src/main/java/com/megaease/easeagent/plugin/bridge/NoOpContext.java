@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
@@ -83,8 +83,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Config getConfig() {
-            return NoOpConfig.INSTANCE;
+        public IPluginConfig getConfig() {
+            return NoOpIPluginConfig.INSTANCE;
         }
 
         @Override
@@ -185,12 +185,12 @@ public class NoOpContext {
         }
 
         @Override
-        public void pushConfig(Config config) {
+        public void pushConfig(IPluginConfig config) {
         }
 
         @Override
-        public Config popConfig() {
-            return NoOpConfig.INSTANCE;
+        public IPluginConfig popConfig() {
+            return NoOpIPluginConfig.INSTANCE;
         }
 
         @Override

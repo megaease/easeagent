@@ -48,6 +48,7 @@ public class Main {
     private static final String PLUGINS = "plugins/";
     private static final String LOGGING_PROPERTY = "Logging-Property";
     private static final String EASEAGENT_LOG_CONF = "easeagent.log.conf";
+    private static ClassLoader loader;
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
         File jar = getArchiveFileContains();
@@ -62,8 +63,7 @@ public class Main {
             urls.addAll(directoryPluginUrls(p));
         }
 
-        final ClassLoader loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
-
+        loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
 
         // install bootstrap jar
         final ArrayList<URL> bootUrls = nestArchiveUrls(archive, BOOTSTRAP);
@@ -85,13 +85,14 @@ public class Main {
 
     private static void initAgentSlf4jMDC(ClassLoader loader) {
         // init sfl4j MDC for inner agent
-        Class mdcClass;
+        Class<?> mdcClass;
         try {
             mdcClass = loader.loadClass("org.slf4j.MDC");
             // just make a reference to mdcClass avoiding JIT remove
             mdcClass.getMethod("remove", String.class)
                 .invoke(null, "EaseAgent");
         } catch (Exception ignored) {
+            // ignored
         }
     }
 
@@ -110,7 +111,6 @@ public class Main {
         Class<?> classLoaderSupplier = bootstrapLoader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
         Field field = classLoaderSupplier.getDeclaredField("CLASSLOADER");
         field.set(null, slf4j2Loader);
-        // field.set(null, bootstrapLoader);
     }
 
     /**
@@ -209,7 +209,6 @@ public class Main {
         private final Set<WeakReference<ClassLoader>> externals = new CopyOnWriteArraySet<>();
 
         CompoundableClassLoader(URL[] urls) {
-            // super(urls, ClassLoader.getSystemClassLoader());
             super(urls, Main.BOOTSTRAP_CLASS_LOADER);
         }
 
@@ -236,7 +235,8 @@ public class Main {
                             resolveClass(aClass);
                         }
                         return aClass;
-                    } catch (ClassNotFoundException ignore) {
+                    } catch (ClassNotFoundException ignored) {
+                        // ignored
                     }
                 }
 
@@ -256,6 +256,7 @@ public class Main {
                             return url;
                         }
                     } catch (Exception ignored) {
+                        // ignored
                     }
                 }
             }
@@ -265,6 +266,6 @@ public class Main {
 
     @SneakyThrows
     public static void main(String[] args) {
-        System.out.println(void.class.getCanonicalName());
+        // ignored
     }
 }

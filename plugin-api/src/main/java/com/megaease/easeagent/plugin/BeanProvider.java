@@ -17,5 +17,5 @@
 
 package com.megaease.easeagent.plugin;
 
-public interface BeanProvider {
+public interface BeanProvider extends Ordered {
 }

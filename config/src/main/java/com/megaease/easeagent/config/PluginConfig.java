@@ -18,16 +18,16 @@
 package com.megaease.easeagent.config;
 
 import com.megaease.easeagent.plugin.Const;
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class PluginConfig implements Config {
-    private final Set<ConfigChangeListener> listeners;
+public class PluginConfig implements IPluginConfig {
+    private final Set<PluginConfigChangeListener> listeners;
     private final String domain;
     private final String namespace;
     private final String id;
@@ -35,7 +35,7 @@ public class PluginConfig implements Config {
     private final Map<String, String> cover;
     private final boolean enabled;
 
-    protected PluginConfig(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, @Nonnull Set<ConfigChangeListener> listeners) {
+    protected PluginConfig(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, @Nonnull Set<PluginConfigChangeListener> listeners) {
         this.domain = domain;
         this.namespace = namespace;
         this.id = id;
@@ -51,7 +51,7 @@ public class PluginConfig implements Config {
     }
 
     public static PluginConfig build(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, PluginConfig oldConfig) {
-        Set<ConfigChangeListener> listeners;
+        Set<PluginConfigChangeListener> listeners;
         if (oldConfig == null) {
             listeners = new HashSet<>();
         } else {
@@ -164,7 +164,7 @@ public class PluginConfig implements Config {
     }
 
     @Override
-    public Config getGlobal() {
+    public IPluginConfig getGlobal() {
         return new Global(domain, id, global, namespace);
     }
 
@@ -176,33 +176,33 @@ public class PluginConfig implements Config {
     }
 
     @Override
-    public void addChangeListener(ConfigChangeListener listener) {
+    public void addChangeListener(PluginConfigChangeListener listener) {
         synchronized (listeners) {
             listeners.add(listener);
         }
     }
 
-    public void foreachConfigChangeListener(Consumer<ConfigChangeListener> action) {
-        Set<ConfigChangeListener> oldListeners;
+    public void foreachConfigChangeListener(Consumer<PluginConfigChangeListener> action) {
+        Set<PluginConfigChangeListener> oldListeners;
         synchronized (listeners) {
             oldListeners = new HashSet<>(listeners);
         }
         oldListeners.forEach(action);
     }
 
-    public class Global extends PluginConfig implements Config {
+    public class Global extends PluginConfig implements IPluginConfig {
 
         public Global(String domain, String id, Map<String, String> global, String namespace) {
             super(domain, id, global, namespace, Collections.emptyMap(), Collections.emptySet());
         }
 
         @Override
-        public void addChangeListener(ConfigChangeListener listener) {
+        public void addChangeListener(PluginConfigChangeListener listener) {
             PluginConfig.this.addChangeListener(listener);
         }
 
         @Override
-        public void foreachConfigChangeListener(Consumer<ConfigChangeListener> action) {
+        public void foreachConfigChangeListener(Consumer<PluginConfigChangeListener> action) {
             PluginConfig.this.foreachConfigChangeListener(action);
         }
     }

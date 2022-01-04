@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -107,7 +107,7 @@ public class GatewayServerTracingInterceptor implements Interceptor {
     }
 
     @Override
-    public void init(Config config, int uniqueIndex) {
+    public void init(IPluginConfig config, int uniqueIndex) {
     }
 
     @Override

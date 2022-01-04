@@ -17,37 +17,11 @@
 
 package com.megaease.easeagent.report;
 
-import com.megaease.easeagent.config.Configs;
-import com.megaease.easeagent.report.metric.PluginMetricReporterImpl;
-import com.megaease.easeagent.report.trace.TraceReport;
+import com.megaease.easeagent.report.metric.MetricReporter;
 import zipkin2.Span;
 
 public interface AgentReport {
     void report(Span span);
 
-    PluginMetricReporter pluginMetricReporter();
-
-    static AgentReport create(Configs config) {
-        return new Default(new TraceReport(config), PluginMetricReporterImpl.create(config));
-    }
-
-    class Default implements AgentReport {
-        private TraceReport traceReport;
-        private PluginMetricReporter pluginMetricReporter;
-
-        public Default(TraceReport traceReport, PluginMetricReporter pluginMetricReporter) {
-            this.traceReport = traceReport;
-            this.pluginMetricReporter = pluginMetricReporter;
-        }
-
-        @Override
-        public void report(Span span) {
-            this.traceReport.report(span);
-        }
-
-        @Override
-        public PluginMetricReporter pluginMetricReporter() {
-            return this.pluginMetricReporter;
-        }
-    }
+    MetricReporter metricReporter();
 }

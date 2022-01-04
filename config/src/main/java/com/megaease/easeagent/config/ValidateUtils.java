@@ -18,8 +18,6 @@
 package com.megaease.easeagent.config;
 
 public class ValidateUtils {
-
-
     public static class ValidException extends RuntimeException {
         public ValidException(String message) {
             super(message);
