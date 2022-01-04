@@ -70,7 +70,7 @@ In addition, `ClassMatcherBuilder` provides `and()` method which will finish cur
 The previous builder will generate a `Left ClassMatcher` and the new builder will generate a 'Right ClassMatcher'.
 The `Left matcher` and `Right matcher` will be combined into one `AndClassMatcher`, and a method will match as long as the `Left` or `Right` matcher is a match.  
 
-For example, the following matcher will will match classes that inherit the `easeagent.test.TestBaseClass` class **and** exclude classes implementing "easeagent.test.InterfaceB" interface.
+For example, the following matcher will match classes that inherit the `easeagent.test.TestBaseClass` class **and** exclude classes implementing "easeagent.test.InterfaceB" interface.
 
 ```
     matcher = ClassMatcher.builder()
@@ -120,7 +120,7 @@ As defined by the JVM Specification for the method structure , the optional elem
 - Method name.
 - Modifier, public/private, and so on.
 - Argument type, the full qualified class name of argument.
-- ReturnType, the return type of a method.
+- ReturnType, the return type of method.
 
 ### Implementation
 
@@ -157,7 +157,7 @@ The following methods are common condition settings in method matching,
     MethodMatcherBuilder nameStartWith(String methodName);
     MethodMatcherBuilder nameEndWith(String methodName);
     MethodMatcherBuilder nameContains(String methodName);
-    
+
     // modifier condition
     MethodMatcherBuilder isPublic();
     MethodMatcherBuilder isPrivate();

@@ -72,7 +72,7 @@ interface Context{
      * Check task is wrapped.
      *
      * @param task Runnable
-     * @return true if task is warpped.
+     * @return true if task is wrapped.
      */
     boolean isWrapped(Runnable task);
 
