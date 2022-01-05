@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CanaryListUpdateAgentHttpHandler extends ConfigsUpdateAgentHttpHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(CanaryListUpdateAgentHttpHandler.class);
-    public static final AtomicInteger lastCount = new AtomicInteger(0);
+    public static final AtomicInteger LAST_COUNT = new AtomicInteger(0);
 
     public CanaryListUpdateAgentHttpHandler() {
         this.mxBeanConfig = GlobalAgentHolder.getWrappedConfigManager();
@@ -46,19 +46,19 @@ public class CanaryListUpdateAgentHttpHandler extends ConfigsUpdateAgentHttpHand
     @SuppressWarnings("unchecked")
     public Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
         LOGGER.info("call /config-global-transmission. configs: {}", map);
-        synchronized (lastCount) {
+        synchronized (LAST_COUNT) {
             List<String> headers = (List<String>) map.get("headers");
             Map<String, String> config = new HashMap<>();
             for (int i = 0; i < headers.size(); i++) {
                 config.put("easeagent.progress.forwarded.headers.global.transmission." + i, headers.get(i));
             }
-            int last = lastCount.get();
+            int last = LAST_COUNT.get();
             if (headers.size() < last) {
                 for (int i = headers.size(); i < last; i++) {
                     config.put("easeagent.progress.forwarded.headers.global.transmission." + i, "");
                 }
             }
-            lastCount.set(headers.size());
+            LAST_COUNT.set(headers.size());
             this.mxBeanConfig.updateConfigs(config);
         }
         return Response.newFixedLengthResponse(Status.OK, AgentHttpServer.JSON_TYPE, (String) null);

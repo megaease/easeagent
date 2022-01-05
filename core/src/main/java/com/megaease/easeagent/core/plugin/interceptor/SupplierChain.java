@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.function.Supplier;
 
 public class SupplierChain<T extends Ordered> {
+
     private final ArrayList<Supplier<T>> suppliers;
+
     public SupplierChain(ArrayList<Supplier<T>> suppliers) {
         this.suppliers = suppliers;
     }
@@ -56,6 +58,7 @@ public class SupplierChain<T extends Ordered> {
             return new SupplierChain<>(suppliers);
         }
 
+        @Override
         public String toString() {
             return "SupplierChain.SupplierChainBuilder(suppliers=" + this.suppliers + ")";
         }

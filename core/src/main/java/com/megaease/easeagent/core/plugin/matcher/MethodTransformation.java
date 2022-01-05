@@ -28,7 +28,6 @@ import lombok.Data;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 @Data
 @SuppressWarnings("unused")
 public class MethodTransformation {
-    private final static Logger log = LoggerFactory.getLogger(MethodTransformation.class);
+    private static final Logger log = LoggerFactory.getLogger(MethodTransformation.class);
 
     private int index;
     private Junction<? super MethodDescription> matcher;
@@ -55,7 +54,7 @@ public class MethodTransformation {
                                                           final String type,
                                                           final String method,
                                                           final String methodDescription) {
-        ArrayList<Supplier<Interceptor>> suppliers = this.providerBuilder.build()
+        List<Supplier<Interceptor>> suppliers = this.providerBuilder.build()
             .getSupplierChain();
 
         List<Interceptor> interceptors = suppliers.stream()
@@ -66,7 +65,7 @@ public class MethodTransformation {
         interceptors.forEach(i -> {
             InterceptorPluginDecorator interceptor;
             if (i instanceof InterceptorPluginDecorator) {
-                interceptor = (InterceptorPluginDecorator)i;
+                interceptor = (InterceptorPluginDecorator) i;
                 interceptor.init(interceptor.getConfig(), type, method, methodDescription);
                 interceptor.init(interceptor.getConfig(), uniqueIndex);
             }

@@ -36,8 +36,8 @@ public class ProviderPluginDecorator implements Provider {
     public Supplier<Interceptor> getInterceptorProvider() {
         return () -> {
             Supplier<Interceptor> origin = ProviderPluginDecorator.this.provider.getInterceptorProvider();
-            AgentPlugin plugin = ProviderPluginDecorator.this.plugin;
-            return new InterceptorPluginDecorator(origin.get(), plugin);
+            AgentPlugin agentPlugin = ProviderPluginDecorator.this.plugin;
+            return new InterceptorPluginDecorator(origin.get(), agentPlugin);
         };
     }
 

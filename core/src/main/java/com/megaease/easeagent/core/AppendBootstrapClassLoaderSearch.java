@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
- package com.megaease.easeagent.core;
+package com.megaease.easeagent.core;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
@@ -34,6 +33,7 @@ import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
@@ -45,10 +45,12 @@ import static java.util.Collections.list;
 
 public final class AppendBootstrapClassLoaderSearch {
     private static final File TMP_FILE = new File(AccessController.doPrivileged(
-            new PrivilegedAction<String>() {
-                @Override
-                public String run() {return System.getProperty("java.io.tmpdir");}
-            })
+        new PrivilegedAction<String>() {
+            @Override
+            public String run() {
+                return System.getProperty("java.io.tmpdir");
+            }
+        })
     );
 
     static Set<String> by(Instrumentation inst, ClassInjector.UsingInstrumentation.Target target) throws IOException {
@@ -86,33 +88,34 @@ public final class AppendBootstrapClassLoaderSearch {
     private static Set<String> findClassAnnotatedAutoService(Class<?> cls) throws IOException {
         final ClassLoader loader = cls.getClassLoader();
         return from(list(loader.getResources("META-INF/services/" + cls.getName())))
-                .transform(new Function<URL, InputStreamReader>() {
-                    @Override
-                    public InputStreamReader apply(URL input) {
-                        try {
-                            final URLConnection connection = input.openConnection();
-                            final InputStream stream = connection.getInputStream();
-                            return new InputStreamReader(stream, Charsets.UTF_8);
-                        } catch (IOException e) {
-                            throw new IllegalStateException(e);
-                        }
+            .transform(new Function<URL, InputStreamReader>() {
+                @Override
+                public InputStreamReader apply(URL input) {
+                    try {
+                        final URLConnection connection = input.openConnection();
+                        final InputStream stream = connection.getInputStream();
+                        return new InputStreamReader(stream, StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
                     }
-                })
-                .transformAndConcat(new Function<InputStreamReader, Iterable<String>>() {
-                    @Override
-                    public Iterable<String> apply(InputStreamReader input) {
-                        try {
-                            return CharStreams.readLines(input);
-                        } catch (IOException e) {
-                            throw new IllegalStateException(e);
-                        } finally {
-                            Closeables.closeQuietly(input);
-                        }
+                }
+            })
+            .transformAndConcat(new Function<InputStreamReader, Iterable<String>>() {
+                @Override
+                public Iterable<String> apply(InputStreamReader input) {
+                    try {
+                        return CharStreams.readLines(input);
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    } finally {
+                        Closeables.closeQuietly(input);
+                    }
 
-                    }
-                })
-                .toSet();
+                }
+            })
+            .toSet();
     }
 
-    private AppendBootstrapClassLoaderSearch() { }
+    private AppendBootstrapClassLoaderSearch() {
+    }
 }

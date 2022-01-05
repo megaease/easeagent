@@ -69,11 +69,11 @@ public class AgentArray<E> {
         if (index >= size()) {
             return null;
         }
-        return (E)a[index];
+        return (E) a[index];
     }
 
     public E getUncheck(int index) {
-        return (E)a[index];
+        return (E) a[index];
     }
 
     /**
@@ -86,7 +86,7 @@ public class AgentArray<E> {
         E oldValue;
 
         synchronized (lock) {
-            oldValue = (E)a[index];
+            oldValue = (E) a[index];
             if (oldValue == null) {
                 a[index] = element;
             } else {
@@ -96,7 +96,7 @@ public class AgentArray<E> {
 
         int currentSize = size.get();
         if (currentSize < index + 1) {
-            while(!size.compareAndSet(currentSize, index + 1)) {
+            while (!size.compareAndSet(currentSize, index + 1)) {
                 currentSize = size.get();
                 if (currentSize > index + 1) {
                     break;
@@ -118,7 +118,7 @@ public class AgentArray<E> {
         E oldValue;
 
         synchronized (lock) {
-            oldValue = (E)a[index];
+            oldValue = (E) a[index];
             if (oldValue == null) {
                 return null;
             } else {
@@ -161,13 +161,14 @@ public class AgentArray<E> {
     public void forEach(Consumer<? super E> action) {
         Objects.requireNonNull(action);
         E e;
-        for (int idx = 0; idx < size.get(); idx ++) {
-            e = (E)a[idx];
+        for (int idx = 0; idx < size.get(); idx++) {
+            e = (E) a[idx];
             action.accept(e);
         }
     }
 
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
     /**
      * Increases the capacity to ensure that it can hold at least the
      * number of elements specified by the minimum capacity argument.
@@ -178,17 +179,21 @@ public class AgentArray<E> {
         // overflow-conscious code
         int oldCapacity = a.length;
         int newCapacity = oldCapacity + (oldCapacity >> 1);
-        if (newCapacity - minCapacity < 0)
+        if (newCapacity - minCapacity < 0) {
             newCapacity = minCapacity;
-        if (newCapacity - MAX_ARRAY_SIZE > 0)
+        }
+        if (newCapacity - MAX_ARRAY_SIZE > 0) {
             newCapacity = hugeCapacity(minCapacity);
+        }
         // minCapacity is usually close to size, so this is a win:
         this.a = Arrays.copyOf(a, newCapacity);
     }
 
     private static int hugeCapacity(int minCapacity) {
-        if (minCapacity < 0) // overflow
+        // overflow
+        if (minCapacity < 0) {
             throw new OutOfMemoryError();
+        }
         return (minCapacity > MAX_ARRAY_SIZE) ?
             Integer.MAX_VALUE :
             MAX_ARRAY_SIZE;
@@ -199,7 +204,7 @@ public class AgentArray<E> {
      * necessary, to ensure that it can hold at least the number of elements
      * specified by the minimum capacity argument.
      *
-     * @param   minCapacity   the desired minimum capacity
+     * @param minCapacity the desired minimum capacity
      */
     private void ensureCapacity(int minCapacity) {
         if (minCapacity - a.length > 0) {
@@ -208,6 +213,6 @@ public class AgentArray<E> {
     }
 
     private String outOfBoundsMsg(int index) {
-        return "Index: "+index+", Size: "+size;
+        return "Index: " + index + ", Size: " + size;
     }
 }

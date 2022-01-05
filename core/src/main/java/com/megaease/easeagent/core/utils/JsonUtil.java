@@ -29,17 +29,20 @@ import java.util.Map;
 
 public class JsonUtil {
 
-    static final ObjectMapper mapper = new ObjectMapper();
+    private JsonUtil() {
+    }
+
+    static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);
 
     static {
-        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        MAPPER.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public static String toJson(Object obj) {
         try {
-            return mapper.writeValueAsString(obj);
+            return MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             logger.warn("data to json error: {}", e.getMessage());
             return null;
@@ -49,7 +52,7 @@ public class JsonUtil {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> toMap(String json) {
         try {
-            return mapper.readValue(json, Map.class);
+            return MAPPER.readValue(json, Map.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -57,7 +60,7 @@ public class JsonUtil {
 
     public static <T> T toObject(String json, TypeReference<T> valueTypeRef) {
         try {
-            return mapper.readValue(json, valueTypeRef);
+            return MAPPER.readValue(json, valueTypeRef);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

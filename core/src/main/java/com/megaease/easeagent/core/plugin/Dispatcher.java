@@ -27,11 +27,17 @@ import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public final class Dispatcher {
+
+    private Dispatcher() {
+    }
+
     static AgentArray<AgentInterceptorChain> chains = new AgentArray<>();
 
-    // for chains only modified during related class loading process,
-    // so it don't need to consider updating process
-    // otherwise, chain should store in context, avoiding changed during enter and exit
+    /**
+     * for chains only modified during related class loading process,
+     * so it doesn't need to consider updating process
+     * otherwise, chain should store in context, avoiding changed during enter and exit
+     */
     public static void enter(int index, MethodInfo info, InitializeContext ctx) {
         AgentInterceptorChain chain = chains.getUncheck(index);
         int pos = 0;

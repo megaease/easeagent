@@ -38,6 +38,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class PluginLoader {
+
+    private PluginLoader() {
+    }
+
     static Logger log = LoggerFactory.getLogger(PluginLoader.class);
 
     public static AgentBuilder load(AgentBuilder ab, Configs conf) {
@@ -47,7 +51,7 @@ public class PluginLoader {
 
         for (ClassTransformation transformation : sortedTransformations) {
             ab = ab.type(transformation.getClassMatcher())
-                .transform(compound(transformation.isHasDynamicField(),transformation.getMethodTransformations()));
+                .transform(compound(transformation.isHasDynamicField(), transformation.getMethodTransformations()));
         }
         return ab;
     }
@@ -59,7 +63,6 @@ public class PluginLoader {
             try {
                 log.debug("provider for:{} at {}",
                     provider.getPluginClassName(), provider.getAdviceTo());
-
                 PluginRegistry.register(provider);
             } catch (Exception | LinkageError e) {
                 log.error(
@@ -73,16 +76,16 @@ public class PluginLoader {
     public static Set<ClassTransformation> pointsLoad() {
         List<Points> points = BaseLoader.load(Points.class);
         return points.stream().map(point -> {
-            try {
-                return PluginRegistry.register(point);
-            } catch (Exception e) {
-                log.error(
-                    "Unable to load points in [class {}]",
-                    point.getClass().getName(),
-                    e);
-                return null;
-            }
-        }).filter(Objects::nonNull)
+                try {
+                    return PluginRegistry.register(point);
+                } catch (Exception e) {
+                    log.error(
+                        "Unable to load points in [class {}]",
+                        point.getClass().getName(),
+                        e);
+                    return null;
+                }
+            }).filter(Objects::nonNull)
             .sorted(Comparator.comparing(Ordered::order))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
@@ -97,8 +100,6 @@ public class PluginLoader {
 
             try {
                 PluginRegistry.register(plugin);
-                // Config cfg = EaseAgent.configFactory.getConfig(plugin.getDomain(), plugin.getName());
-                // plugin.load(cfg);
             } catch (Exception | LinkageError e) {
                 log.error(
                     "Unable to load extension {}:{} [class {}]",
@@ -115,7 +116,7 @@ public class PluginLoader {
      * @return transform
      */
     public static AgentBuilder.Transformer compound(boolean hasDynamicField,
-                                                     Iterable<MethodTransformation> methodTransformations) {
+                                                    Iterable<MethodTransformation> methodTransformations) {
         List<AgentBuilder.Transformer> agentTransformers = StreamSupport
             .stream(methodTransformations.spliterator(), false)
             .map(ForAdviceTransformer::new)

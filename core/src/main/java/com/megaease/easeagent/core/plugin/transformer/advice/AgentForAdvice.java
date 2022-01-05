@@ -87,12 +87,12 @@ public class AgentForAdvice extends Transformer.ForAdvice {
     }
 
     protected AgentForAdvice(AgentAdvice.WithCustomMapping advice,
-                        Advice.ExceptionHandler exceptionHandler,
-                        Assigner assigner,
-                        ClassFileLocator classFileLocator,
-                        PoolStrategy poolStrategy,
-                        LocationStrategy locationStrategy,
-                        List<Entry> entries) {
+                             Advice.ExceptionHandler exceptionHandler,
+                             Assigner assigner,
+                             ClassFileLocator classFileLocator,
+                             PoolStrategy poolStrategy,
+                             LocationStrategy locationStrategy,
+                             List<Entry> entries) {
         this.advice = advice;
         this.exceptionHandler = exceptionHandler;
         this.assigner = assigner;
@@ -109,6 +109,7 @@ public class AgentForAdvice extends Transformer.ForAdvice {
      * @param classLoader The class loaders to include when looking up classes in their order. Duplicates are filtered.
      * @return A new instance of this advice transformer that considers the supplied class loaders as a lookup source.
      */
+    @Override
     public AgentForAdvice include(ClassLoader... classLoader) {
         Set<ClassFileLocator> classFileLocators = new LinkedHashSet<>();
         for (ClassLoader aClassLoader : classLoader) {
@@ -124,6 +125,7 @@ public class AgentForAdvice extends Transformer.ForAdvice {
      * @param classFileLocator The class file locators to include when looking up classes in their order. Duplicates are filtered.
      * @return A new instance of this advice transformer that considers the supplied class file locators as a lookup source.
      */
+    @Override
     public AgentForAdvice include(ClassFileLocator... classFileLocator) {
         return include(Arrays.asList(classFileLocator));
     }
@@ -135,6 +137,7 @@ public class AgentForAdvice extends Transformer.ForAdvice {
      * @param classFileLocators The class file locators to include when looking up classes in their order. Duplicates are filtered.
      * @return A new instance of this advice transformer that considers the supplied class file locators as a lookup source.
      */
+    @Override
     public AgentForAdvice include(List<? extends ClassFileLocator> classFileLocators) {
         return new AgentForAdvice(advice,
             exceptionHandler,
@@ -152,6 +155,7 @@ public class AgentForAdvice extends Transformer.ForAdvice {
      * @param name    The fully-qualified, binary name of the advice class.
      * @return A new instance of this advice transformer that applies the given advice to all matched methods of an instrumented type.
      */
+    @Override
     public AgentForAdvice advice(ElementMatcher<? super MethodDescription> matcher, String name) {
         return advice(new LatentMatcher.Resolved<>(matcher), name);
     }
@@ -163,6 +167,7 @@ public class AgentForAdvice extends Transformer.ForAdvice {
      * @param name    The fully-qualified, binary name of the advice class.
      * @return A new instance of this advice transformer that applies the given advice to all matched methods of an instrumented type.
      */
+    @Override
     public AgentForAdvice advice(LatentMatcher<? super MethodDescription> matcher, String name) {
         return new AgentForAdvice(advice,
             exceptionHandler,
