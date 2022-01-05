@@ -15,18 +15,10 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.report;
+package com.megaease.easeagent.log4j2.exception;
 
-import com.megaease.easeagent.report.AgentReport;
-import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
-
-public class ReportMockTest {
-
-    @Test
-    public void getAgentReport() {
-        AgentReport agentReport = ReportMock.getAgentReport();
-        assertNotNull(agentReport);
+public class Log4j2Exception extends RuntimeException {
+    public Log4j2Exception(Throwable cause) {
+        super(cause);
     }
 }

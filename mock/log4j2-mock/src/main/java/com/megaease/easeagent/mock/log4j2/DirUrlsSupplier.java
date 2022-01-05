@@ -24,9 +24,6 @@ import java.net.URL;
 public class DirUrlsSupplier implements UrlSupplier {
     public static final String LIB_DIR_ENV = "EASEAGENT-SLF4J2-LIB-DIR";
 
-    public DirUrlsSupplier() {
-    }
-
     @Override
     public URL[] get() {
         String dir = System.getProperty(LIB_DIR_ENV);
@@ -35,18 +32,18 @@ public class DirUrlsSupplier implements UrlSupplier {
         }
         File file = new File(dir);
         if (!file.isDirectory()) {
-            return null;
+            return new URL[0];
         }
         File[] files = file.listFiles();
         if (files == null) {
-            return null;
+            return new URL[0];
         }
         URL[] urls = new URL[files.length];
         for (int i = 0; i < files.length; i++) {
             try {
                 urls[i] = files[i].toURI().toURL();
             } catch (MalformedURLException e) {
-                return null;
+                return new URL[0];
             }
         }
         return urls;

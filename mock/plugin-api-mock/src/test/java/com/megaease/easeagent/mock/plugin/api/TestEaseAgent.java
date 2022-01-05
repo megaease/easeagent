@@ -43,7 +43,7 @@ public class TestEaseAgent {
         AtomicReference<String> message = new AtomicReference<>("");
         ReportMock.setMetricReportMock(msg -> message.set(msg));
         EaseAgent.metricRegistrySupplier.reporter(config).report("test");
-        assertEquals(message.get(), "test");
+        assertEquals("test",message.get());
         Logger logger = EaseAgent.getLogger(TestEaseAgent.class);
         logger.info("-------------------- easeagent test");
     }

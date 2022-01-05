@@ -26,7 +26,7 @@ public class ConfigMockTest {
     @Test
     public void getCONFIGS() {
         assertTrue(ConfigMock.getCONFIGS().getBoolean("test.mock.key"));
-        assertEquals(ConfigMock.getCONFIGS().getString("test.mock.keyStr"), "testValue");
+        assertEquals("testValue", ConfigMock.getCONFIGS().getString("test.mock.keyStr"));
         assertNull(ConfigMock.getCONFIGS().getString("test.mock.keyStrAAAAAAAAAA"));
     }
 }

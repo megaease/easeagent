@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class PluginSourceConfigTest {
 
@@ -72,15 +73,17 @@ public class PluginSourceConfigTest {
 
     @Test
     public void build() {
-        buildImpl(NAMESPACE, TEST_TRACE_ID);
+        PluginSourceConfig config = buildImpl(NAMESPACE, TEST_TRACE_ID);
+        assertNotNull(config);
+
     }
 
     @Test
     public void getSource() {
         assertEquals(buildImpl("global", GLOBAL_ID).getSource(), getGlobal());
-        assertEquals(buildImpl(NAMESPACE, TEST_AAA_ID).getSource(), Collections.emptyMap());
-        assertEquals(buildImpl(NAMESPACE, TEST_TRACE_ID).getSource(), getSource(TEST_TRACE_ID));
-        assertEquals(buildImpl(NAMESPACE, TEST_METRIC_ID).getSource(), getSource(TEST_METRIC_ID));
+        assertEquals(Collections.emptyMap(), buildImpl(NAMESPACE, TEST_AAA_ID).getSource());
+        assertEquals(getSource(TEST_TRACE_ID), buildImpl(NAMESPACE, TEST_TRACE_ID).getSource());
+        assertEquals(getSource(TEST_METRIC_ID), buildImpl(NAMESPACE, TEST_METRIC_ID).getSource());
     }
 
     @Test

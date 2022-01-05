@@ -17,8 +17,15 @@
 
 package com.megaease.easeagent.metrics;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 public class BaseMetricsTest {
 
+    @Test
+    public void t(){
+        Assert.assertTrue(true);
+    }
 //    public Config createConfig(String key, String value) {
 //        Map<String, String> map = new HashMap<>();
 //        map.put(key, value);

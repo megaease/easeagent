@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class MetricProviderImpl implements AgentReportAware, ConfigAware, MetricProvider {
+    @SuppressWarnings("unused")
     private Config config;
     private AgentReport agentReport;
     private Supplier<Map<String, Object>> additionalAttributes;
@@ -99,7 +100,7 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
             Reporter reporter = agentReport.metricReporter().reporter(config);
             AutoRefreshReporter autoRefreshReporter = new AutoRefreshReporter(metricRegistry, metricsConfig,
                 converterAdapter,
-                s -> reporter.report(s));
+                reporter::report);
             autoRefreshReporter.run();
 
             return MetricRegistryImpl.build(metricRegistry);

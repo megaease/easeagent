@@ -25,10 +25,10 @@ public class ValidateUtils {
     }
 
     public interface Validator {
-        void validate(String name, String value) throws ValidException;
+        void validate(String name, String value);
     }
 
-    public static void validate(Configs configs, String name, Validator... vs) throws ValidException {
+    public static void validate(Configs configs, String name, Validator... vs){
         String value = configs.getString(name);
         for (Validator one : vs) {
             one.validate(name, value);
@@ -51,7 +51,7 @@ public class ValidateUtils {
 
     public static final Validator NumberInt = (name, value) -> {
         try {
-            int rst = Integer.parseInt(value.trim());
+            Integer.parseInt(value.trim());
         } catch (Exception e) {
             throw new ValidException(String.format("Property[%s] has no integer value", name));
         }

@@ -67,8 +67,8 @@ public class ConfigUtils {
     }
 
     public static Map<String, String> json2KVMap(String json) throws IOException {
-        ObjectMapper JSON = new ObjectMapper();
-        JsonNode node = JSON.readTree(json);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(json);
         List<Map.Entry<String, String>> list = extractKVs(null, node);
         return list.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -101,17 +101,19 @@ public class ConfigUtils {
     }
 
     public static boolean isPluginConfig(String key) {
-        if (key.startsWith(PLUGIN_PREFIX)) {
-            return true;
+        boolean r = false;
+        if (key != null && key.startsWith(PLUGIN_PREFIX)) {
+            r = true;
         }
-        return false;
+        return r;
     }
 
     public static boolean isPluginConfig(String key, String domain, String namespace, String id) {
-        if (key.startsWith(ConfigConst.join(PLUGIN, domain, namespace, id))) {
-            return true;
+        boolean r = false;
+        if (key != null && key.startsWith(ConfigConst.join(PLUGIN, domain, namespace, id))) {
+            r = true;
         }
-        return false;
+        return r;
     }
 
     public static PluginProperty pluginProperty(String path) {

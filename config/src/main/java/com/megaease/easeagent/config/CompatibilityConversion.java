@@ -34,12 +34,12 @@ public class CompatibilityConversion {
         ConfigConst.Namespace.FEIGN_CLIENT,
         ConfigConst.Namespace.REST_TEMPLATE,
     };
-    private static final Map<String, BiFunction<String, String, Conversion>> KEY_TO_NAMESPACE;
+    private static final Map<String, BiFunction<String, String, Conversion<?>>> KEY_TO_NAMESPACE;
     private static final Set<String> METRIC_SKIP;
     private static final Set<String> TRACING_SKIP;
 
     static {
-        Map<String, BiFunction<String, String, Conversion>> map = new HashMap<>();
+        Map<String, BiFunction<String, String, Conversion<?>>> map = new HashMap<>();
         map.put(ConfigConst.Observability.KEY_METRICS_ACCESS, SingleBuilder.observability(ConfigConst.Namespace.ACCESS));
 
         map.put(ConfigConst.Observability.KEY_METRICS_REQUEST, MultipleBuilder.observability(Arrays.asList(REQUEST_NAMESPACE)));
@@ -76,7 +76,7 @@ public class CompatibilityConversion {
         Map<String, Object> changedKeys = new HashMap<>();
         Map<String, String> newConfigs = new HashMap<>();
         for (Map.Entry<String, String> entry : oldConfigs.entrySet()) {
-            Conversion conversion = transformConversion(entry.getKey());
+            Conversion<?> conversion = transformConversion(entry.getKey());
             @SuppressWarnings("unchecked")
             Object changed = conversion.transform(newConfigs, entry.getValue());
             if (conversion.isChange()) {
@@ -95,7 +95,7 @@ public class CompatibilityConversion {
         return newConfigs;
     }
 
-    private static Conversion transformConversion(String key) {
+    private static Conversion<?> transformConversion(String key) {
         if (key.startsWith("observability.metrics.")) {
             return metricConversion(key);
         } else if (key.startsWith("observability.tracings.")) {
@@ -106,7 +106,7 @@ public class CompatibilityConversion {
         return new FinalConversion(key, false);
     }
 
-    private static Conversion metricConversion(String key) {
+    private static Conversion<?> metricConversion(String key) {
         if (key.equals(ConfigConst.Observability.METRICS_ENABLED)) {
             return new MultipleFinalConversion(Arrays.asList(new FinalConversion(ConfigConst.Observability.METRICS_ENABLED, true),
                 new FinalConversion(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_METRIC_ENABLED, true)), true);
@@ -115,18 +115,18 @@ public class CompatibilityConversion {
     }
 
 
-    private static Conversion tracingConversion(String key) {
+    private static Conversion<?> tracingConversion(String key) {
         if (key.equals(ConfigConst.Observability.TRACE_ENABLED)) {
             return new FinalConversion(ConfigConst.Plugin.OBSERVABILITY_GLOBAL_TRACING_ENABLED, true);
         }
         return conversion(key, TRACING_SKIP, ConfigConst.PluginID.TRACING);
     }
 
-    private static Conversion forwardedHeadersConversion(String key) {
+    private static Conversion<?> forwardedHeadersConversion(String key) {
         return new FinalConversion(key.replace(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".", ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + "."), true);
     }
 
-    private static Conversion conversion(String key, Set<String> skipSet, String pluginId) {
+    private static Conversion<?> conversion(String key, Set<String> skipSet, String pluginId) {
         String[] keys = ConfigConst.split(key);
         if (keys.length < 4) {
             return new FinalConversion(key, false);
@@ -135,7 +135,7 @@ public class CompatibilityConversion {
         if (skipSet.contains(key2)) {
             return new FinalConversion(key, false);
         }
-        BiFunction<String, String, Conversion> builder = KEY_TO_NAMESPACE.get(key2);
+        BiFunction<String, String, Conversion<?>> builder = KEY_TO_NAMESPACE.get(key2);
         if (builder == null) {
             builder = SingleBuilder.observability(key2);
         }
@@ -253,7 +253,7 @@ public class CompatibilityConversion {
         }
     }
 
-    static class SingleBuilder implements BiFunction<String, String, Conversion> {
+    static class SingleBuilder implements BiFunction<String, String, Conversion<?>> {
         private final String domain;
         private final String namespace;
 
@@ -272,7 +272,7 @@ public class CompatibilityConversion {
         }
     }
 
-    static class MultipleBuilder implements BiFunction<String, String, Conversion> {
+    static class MultipleBuilder implements BiFunction<String, String, Conversion<?>> {
         private final String domain;
         private final List<String> namespaces;
 

@@ -27,7 +27,7 @@ public class IPluginConfigConstTest {
     @Test
     public void testExtractHeaderName() {
         String prefix = "globalCanaryHeaders.serviceHeaders";
-        assertEquals(prefix, ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS);
+        assertEquals(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS, prefix);
         assertEquals("hello", ConfigConst.GlobalCanaryLabels.extractHeaderName(prefix + ".test-aaa.0.hello"));
         assertEquals("world", ConfigConst.GlobalCanaryLabels.extractHeaderName(prefix + ".test-aaa.1.world"));
         assertNull(ConfigConst.GlobalCanaryLabels.extractHeaderName(prefix + ".test-bbb"));

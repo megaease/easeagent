@@ -29,7 +29,7 @@ import org.slf4j.Logger;
  * Log4j implementation of SLF4J ILoggerFactory interface.
  */
 public class LoggerProxyFactory extends AbstractLoggerAdapter<AgentLoggerProxy> {
-    public static LoggerProxyFactory loggerFactory = new LoggerProxyFactory();
+    private static final LoggerProxyFactory LOGGER_FACTORY = new LoggerProxyFactory();
 
     private static final String FQCN = LoggerProxyFactory.class.getName();
     private static final String PACKAGE = "org.slf4j";
@@ -46,7 +46,7 @@ public class LoggerProxyFactory extends AbstractLoggerAdapter<AgentLoggerProxy> 
     }
 
     public static Slf4jLogger getAgentLogger(String name) {
-        return new Slf4jLogger(loggerFactory.getLogger(name));
+        return new Slf4jLogger(LOGGER_FACTORY.getLogger(name));
     }
 
     @Override

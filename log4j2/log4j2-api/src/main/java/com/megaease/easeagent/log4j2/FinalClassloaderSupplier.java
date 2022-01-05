@@ -19,6 +19,7 @@ package com.megaease.easeagent.log4j2;
 
 import java.util.function.Supplier;
 
+@SuppressWarnings("all")
 public class FinalClassloaderSupplier implements Supplier<ClassLoader> {
     public static volatile ClassLoader CLASSLOADER = null;
 
