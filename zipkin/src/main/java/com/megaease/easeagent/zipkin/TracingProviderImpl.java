@@ -28,6 +28,7 @@ import com.megaease.easeagent.plugin.IProvider;
 import com.megaease.easeagent.plugin.annotation.Injection;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
+import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.utils.AdditionalAttributes;
 import com.megaease.easeagent.report.AgentReport;
@@ -41,7 +42,7 @@ import zipkin2.reporter.Reporter;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 import zipkin2.reporter.urlconnection.URLConnectionSender;
 
-public class TracingProvider implements BeanProvider, AgentReportAware, ConfigAware, IProvider, com.megaease.easeagent.plugin.api.trace.TracingProvider {
+public class TracingProviderImpl implements BeanProvider, AgentReportAware, ConfigAware, IProvider, TracingProvider {
     private static final String ENV_ZIPKIN_SERVER_URL = "ZIPKIN_SERVER_URL";
     private Tracing tracing;
     private ITracing iTracing;
@@ -59,7 +60,6 @@ public class TracingProvider implements BeanProvider, AgentReportAware, ConfigAw
     public void setAgentReport(AgentReport report) {
         this.agentReport = report;
     }
-
 
     @Override
     public void afterPropertiesSet() {
@@ -91,10 +91,10 @@ public class TracingProvider implements BeanProvider, AgentReportAware, ConfigAw
             reporter = span -> agentReport.report(span);
         }
         this.tracing = Tracing.newBuilder()
-            .localServiceName(serviceName.getValue())
+            .localServiceName(getServiceName())
             .traceId128Bit(false)
             .sampler(CountingSampler.create(1))
-            .addSpanHandler(new CustomTagsSpanHandler(serviceName::getValue, AdditionalAttributes.getHostName()))
+            .addSpanHandler(new CustomTagsSpanHandler(this::getServiceName, AdditionalAttributes.getHostName()))
             .addSpanHandler(AsyncZipkinSpanHandler
                 .newBuilder(reporter)
                 .alwaysReportSpans(true)
@@ -111,11 +111,11 @@ public class TracingProvider implements BeanProvider, AgentReportAware, ConfigAw
 
     @Override
     public TracingSupplier tracingSupplier() {
-        return (supplier) -> {
+        return supplier -> {
             if (iTracing != null) {
                 return iTracing;
             }
-            synchronized (TracingProvider.class) {
+            synchronized (TracingProviderImpl.class) {
                 if (iTracing != null) {
                     return iTracing;
                 }
@@ -123,5 +123,9 @@ public class TracingProvider implements BeanProvider, AgentReportAware, ConfigAw
             }
             return iTracing;
         };
+    }
+
+    private String getServiceName() {
+        return this.serviceName.getValue();
     }
 }

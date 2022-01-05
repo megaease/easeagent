@@ -27,6 +27,7 @@ import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -74,8 +75,7 @@ public class RequestContextImpl implements RequestContext {
 
     @Override
     public AsyncContext async() {
-        @SuppressWarnings("unchecked")
-        Map<Object, Object> headers = (Map) asyncRequest.getHeaders();
+        Map<Object, Object> headers = new HashMap<>(asyncRequest.getHeaders());
         return AsyncContextImpl.build(tracing, braveSpan.context(), supplier, headers);
     }
 
