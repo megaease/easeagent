@@ -34,8 +34,8 @@ public class ClassLoaderUtils {
             Enumeration<URL> enumeration2 = classLoader.getResources("");
             fillUrls(list, enumeration2);
 
-        } catch (IOException e) {
-            return null;
+        } catch (IOException ignore) {
+            //ignore
         }
         return list.toArray(new URL[0]);
     }

@@ -19,10 +19,13 @@ package com.megaease.easeagent.metrics.impl;
 
 import com.megaease.easeagent.metrics.MetricRegistryService;
 import com.megaease.easeagent.plugin.api.metric.*;
+import org.awaitility.Duration;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.awaitility.Awaitility.await;
 
 public class MetricRegistryImplTest {
     String countName = "countName";
@@ -90,6 +93,7 @@ public class MetricRegistryImplTest {
     }
 
     @Test
+    @SuppressWarnings("all")
     public void timer() throws InterruptedException {
         Timer timer = metricRegistry.timer(timerName);
         timer.update(10, TimeUnit.MILLISECONDS);

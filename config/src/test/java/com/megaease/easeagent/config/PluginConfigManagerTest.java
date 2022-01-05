@@ -47,8 +47,9 @@ public class PluginConfigManagerTest {
     }
 
     @Test
-    public void builder() {
+    public void testBuild() {
         build();
+        assertTrue(true);
     }
 
     @Test
@@ -141,7 +142,4 @@ public class PluginConfigManagerTest {
         configs.updateConfigs(Collections.singletonMap(String.format("ssss.%s.global.%s.enabled", DOMAIN, TEST_AAA_ID), "false"));
     }
 
-    @Test
-    public void shutdown() {
-    }
 }

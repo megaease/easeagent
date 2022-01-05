@@ -436,7 +436,8 @@ public class AgentLoggerProxy implements LocationAwareLogger, Serializable {
                 return Level.WARN;
             case ERROR_INT:
                 return Level.ERROR;
+            default:
+                return Level.ERROR;
         }
-        return Level.ERROR;
     }
 }

@@ -51,6 +51,7 @@ public class AgentLoggerFactoryTest {
         logger.info("aaaa");
         MDC.put("testMdc", "testMdc_value");
         logger.info("bbbb");
+        assertNotNull(MDC.get("testMdc"));
     }
 
 

@@ -21,10 +21,6 @@ package com.megaease.easeagent.log4j2;
  * By warping log4j2, Logger is compatible with slf4j interface.
  */
 public interface Logger {
-    /**
-     * Case insensitive String constant used to retrieve the name of the root logger.
-     */
-    final public String ROOT_LOGGER_NAME = "ROOT";
 
     /**
      * Return the name of this <code>Logger</code> instance.

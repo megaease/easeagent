@@ -32,22 +32,22 @@ public class PluginPropertyTest {
 
     @Test
     public void getDomain() {
-        assertEquals(build().getDomain(), "testdomain");
+        assertEquals("testdomain", build().getDomain());
     }
 
     @Test
     public void getNamespace() {
-        assertEquals(build().getNamespace(), "testnamespace");
+        assertEquals("testnamespace", build().getNamespace());
     }
 
     @Test
     public void getId() {
-        assertEquals(build().getId(), "testId");
+        assertEquals("testId", build().getId());
     }
 
     @Test
     public void getProperty() {
-        assertEquals(build().getProperty(), "testproperty");
+        assertEquals("testproperty", build().getProperty());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class PluginPropertyTest {
         Map<PluginProperty, String> pluginPropertyStringMap = new HashMap<>();
         pluginPropertyStringMap.put(build(), "testValue");
         assertTrue(pluginPropertyStringMap.containsKey(build()));
-        assertEquals(pluginPropertyStringMap.get(build()), "testValue");
+        assertEquals("testValue", pluginPropertyStringMap.get(build()));
         assertFalse(pluginPropertyStringMap.containsKey(property));
     }
 

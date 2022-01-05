@@ -31,7 +31,9 @@ import java.util.function.Supplier;
 public abstract class AbstractConverter implements Converter {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConverter.class);
 
+    @SuppressWarnings("unused")
     private final String rateUnit;
+    @SuppressWarnings("unused")
     private final String durationUnit;
     final Long durationFactor;
     final Long rateFactor;
@@ -104,11 +106,12 @@ public abstract class AbstractConverter implements Converter {
     }
 
     @SuppressWarnings("rawtypes")
-    protected abstract List<String> keysFromMetrics(SortedMap<String, Gauge> gauges,
-                                                    SortedMap<String, Counter> counters,
-                                                    SortedMap<String, Histogram> histograms,
-                                                    SortedMap<String, Meter> meters,
-                                                    SortedMap<String, Timer> timers);
+    protected abstract List<String> keysFromMetrics(
+        SortedMap<String, Gauge> gauges,
+        SortedMap<String, Counter> counters,
+        SortedMap<String, Histogram> histograms,
+        SortedMap<String, Meter> meters,
+        SortedMap<String, Timer> timers);
 
 
     @SuppressWarnings("rawtypes")

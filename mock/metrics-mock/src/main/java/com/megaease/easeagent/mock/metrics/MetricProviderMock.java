@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.mock.metrics;
 
-import com.megaease.easeagent.metrics.MetricProvider;
+import com.megaease.easeagent.metrics.MetricBeanProvider;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetricV2;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetricV2;
 import com.megaease.easeagent.mock.config.ConfigMock;
@@ -25,7 +25,7 @@ import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.utils.MockProvider;
 
 public class MetricProviderMock implements MockProvider {
-    private static final MetricProvider METRIC_PROVIDER = new MetricProvider();
+    private static final MetricBeanProvider METRIC_PROVIDER = new MetricBeanProvider();
     private static final JVMGCMetricV2 JVMGC_METRIC_V_2;
     private static final JVMMemoryMetricV2 JVM_MEMORY_METRIC_V_2;
 
@@ -37,7 +37,7 @@ public class MetricProviderMock implements MockProvider {
     }
 
 
-    public static MetricProvider getMetricProvider() {
+    public static MetricBeanProvider getMetricProvider() {
         return METRIC_PROVIDER;
     }
 
@@ -51,6 +51,6 @@ public class MetricProviderMock implements MockProvider {
 
     @Override
     public Object get() {
-        return METRIC_PROVIDER;
+        return getMetricProvider();
     }
 }

@@ -65,10 +65,10 @@ public class ConfigsTest {
         List<ChangeItem> rst = addListener(configs);
         configs.updateConfigs(Collections.singletonMap("hello", "test"));
         ChangeItem first = rst.get(0);
-        Assert.assertEquals(first.getFullName(), "hello");
-        Assert.assertEquals(first.getName(), "hello");
-        Assert.assertEquals(first.getOldValue(), "world");
-        Assert.assertEquals(first.getNewValue(), "test");
+        Assert.assertEquals("hello", first.getFullName());
+        Assert.assertEquals("hello", first.getName());
+        Assert.assertEquals("world", first.getOldValue());
+        Assert.assertEquals("test", first.getNewValue());
     }
 
 
@@ -78,10 +78,10 @@ public class ConfigsTest {
         List<ChangeItem> rst = addListener(configs);
         configs.updateConfigs(Collections.singletonMap("name", "666"));
         ChangeItem first = rst.get(0);
-        Assert.assertEquals(first.getFullName(), "name");
-        Assert.assertEquals(first.getName(), "name");
+        Assert.assertEquals("name", first.getFullName());
+        Assert.assertEquals("name", first.getName());
         Assert.assertNull(first.getOldValue());
-        Assert.assertEquals(first.getNewValue(), "666");
+        Assert.assertEquals("666", first.getNewValue());
     }
 
 

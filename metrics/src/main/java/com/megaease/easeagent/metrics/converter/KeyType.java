@@ -24,6 +24,7 @@ package com.megaease.easeagent.metrics.converter;
  * In <b>http-request</b>, we think the url is key, other metrics' value describe a special url properties, in
  * <b>jvm-memory</b> resource is key.
  */
+@SuppressWarnings("all")
 public enum KeyType {
     Timer,
     Gauge,

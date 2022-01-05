@@ -33,21 +33,21 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public class ReportMock {
-    public static final Logger LOGGER = LoggerFactory.getLogger(ReportMock.class);
-    public static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(ConfigMock.getCONFIGS()));
-    public static volatile SpanReportMock SPAN_REPORT_MOCK = null;
-    public static volatile Reporter METRIC_REPORT_MOCK = null;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportMock.class);
+    private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(ConfigMock.getCONFIGS()));
+    private static volatile SpanReportMock spanReportMock = null;
+    private static volatile Reporter metricReportMock = null;
 
     public static AgentReport getAgentReport() {
         return AGENT_REPORT;
     }
 
     public static void setSpanReportMock(SpanReportMock spanReportMock) {
-        SPAN_REPORT_MOCK = spanReportMock;
+        ReportMock.spanReportMock = spanReportMock;
     }
 
     public static void setMetricReportMock(Reporter metricReportMock) {
-        METRIC_REPORT_MOCK = metricReportMock;
+        ReportMock.metricReportMock = metricReportMock;
     }
 
     static class MockAgentReport implements AgentReport {
@@ -66,7 +66,7 @@ public class ReportMock {
             }
             agentReport.report(span);
             try {
-                SpanReportMock spanReportMock = SPAN_REPORT_MOCK;
+                SpanReportMock spanReportMock = ReportMock.spanReportMock;
                 if (spanReportMock != null) {
                     spanReportMock.report(span);
                 }
@@ -95,6 +95,7 @@ public class ReportMock {
 
         @Override
         public void onChange(List<ChangeItem> list) {
+            //ignored
         }
     }
 
@@ -109,9 +110,9 @@ public class ReportMock {
         public void report(String msg) {
             reporter.report(msg);
             try {
-                Reporter reporter = METRIC_REPORT_MOCK;
-                if (reporter != null) {
-                    reporter.report(msg);
+                Reporter reportMock = metricReportMock;
+                if (reportMock != null) {
+                    reportMock.report(msg);
                 }
             } catch (Exception e) {
                 LOGGER.error("mock metric report fail: {}", e);

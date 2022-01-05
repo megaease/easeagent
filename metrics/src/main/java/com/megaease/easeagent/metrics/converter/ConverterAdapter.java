@@ -57,6 +57,7 @@ public class ConverterAdapter extends AbstractConverter {
 
 
     @Override
+    @SuppressWarnings("rawtypes")
     protected List<String> keysFromMetrics(SortedMap<String, Gauge> gauges,
                                            SortedMap<String, Counter> counters,
                                            SortedMap<String, Histogram> histograms,
@@ -81,6 +82,8 @@ public class ConverterAdapter extends AbstractConverter {
                     case Meter:
                         keys(meters.keySet(), results);
                         break;
+                    default:
+                        //ignore
                 }
             }
         }
@@ -105,7 +108,7 @@ public class ConverterAdapter extends AbstractConverter {
     }
 
     private double convertRate(Long rate) {
-        return rate * rateFactor;
+        return rate == null ? 0 : rate * rateFactor;
     }
 
     private void appendRate(Map<String, Object> output, String key, Object value, int scale) {
@@ -151,16 +154,15 @@ public class ConverterAdapter extends AbstractConverter {
         Map<MetricSubType, MetricName> map = nameFactory.counterNames(key);
         map.values().forEach(v -> Optional
             .ofNullable(counters.get(v.name()))
-            .ifPresent(c -> v.getValueFetcher().forEach((fieldName, fetcher) -> {
-                // for test
-                appendField(output, fieldName, fetcher, CounterImpl.build(c));
-            })));
+            .ifPresent(c -> v.getValueFetcher().forEach((fieldName, fetcher) -> appendField(output, fieldName, fetcher, CounterImpl.build(c)))));
 
     }
 
     @Override
+    @SuppressWarnings("all")
     protected void writeHistograms(String key, SortedMap<String, Histogram> histograms, Map<String, Object> output) {
-
+        // TODO
+        //write histograms, Temporarily unsupported
     }
 
     @Override
@@ -169,10 +171,7 @@ public class ConverterAdapter extends AbstractConverter {
         map.values().forEach(v -> Optional
             .ofNullable(meters.get(v.name()))
             .ifPresent(m -> v.getValueFetcher().forEach(
-                (fieldName, fetcher) -> {
-                    // for test
-                    appendField(output, fieldName, fetcher, MeterImpl.build(m));
-                }))
+                (fieldName, fetcher) -> appendField(output, fieldName, fetcher, MeterImpl.build(m))))
         );
     }
 

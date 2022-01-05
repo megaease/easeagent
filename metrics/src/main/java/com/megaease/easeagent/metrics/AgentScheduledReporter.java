@@ -34,6 +34,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
     private final Consumer<String> dataConsumer;
     private final Supplier<Boolean> enabled;
 
+    @SuppressWarnings("all")
     private AgentScheduledReporter(MetricRegistry registry,
                                    Consumer<String> dataConsumer,
                                    TimeUnit rateUnit,
@@ -45,7 +46,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
                                    Supplier<Boolean> enabled,
                                    Converter converter) {
         super(registry, "logger-reporter", filter, rateUnit, durationUnit, executor, shutdownExecutorOnStop,
-                disabledMetricAttributes);
+            disabledMetricAttributes);
         this.converter = converter;
         this.dataConsumer = dataConsumer;
         this.enabled = enabled;
@@ -66,8 +67,8 @@ public class AgentScheduledReporter extends ScheduledReporter {
     @Override
     @SuppressWarnings("rawtypes")
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters, SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters, SortedMap<String, com.codahale.metrics.Timer> timers) {
-
-        if (!this.enabled.get()) {
+        Boolean e = this.enabled.get();
+        if (e != null && e.booleanValue()) {
             return;
         }
 
@@ -223,8 +224,8 @@ public class AgentScheduledReporter extends ScheduledReporter {
         public AgentScheduledReporter build() {
 
             return new AgentScheduledReporter(registry, dataConsumer, rateUnit,
-                    durationUnit, filter, executor, shutdownExecutorOnStop,
-                    disabledMetricAttributes, enabled, converter);
+                durationUnit, filter, executor, shutdownExecutorOnStop,
+                disabledMetricAttributes, enabled, converter);
         }
 
     }

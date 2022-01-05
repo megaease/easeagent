@@ -40,6 +40,7 @@ public class JarPathUrlsSupplier implements UrlSupplier {
             try {
                 urls.add(new URL(path));
             } catch (MalformedURLException ignored) {
+                //ignored
             }
         }
         URL[] result = new URL[urls.size()];

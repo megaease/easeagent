@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.log4j2.api;
 
-public class Level extends java.util.logging.Level {
+public class ILevel extends java.util.logging.Level {
     public static final int OFF_VALUE = 1;
     public static final int FATAL_VALUE = 2;
     public static final int ERROR_VALUE = 3;
@@ -28,17 +28,17 @@ public class Level extends java.util.logging.Level {
     public static final int ALL_VALUE = 8;
 
 
-    public static final Level OFF = new Level("OFF", OFF_VALUE);
-    public static final Level FATAL = new Level("FATAL", FATAL_VALUE);
-    public static final Level ERROR = new Level("ERROR", ERROR_VALUE);
-    public static final Level WARN = new Level("WARN", WARN_VALUE);
-    public static final Level INFO = new Level("INFO", INFO_VALUE);
-    public static final Level DEBUG = new Level("DEBUG", DEBUG_VALUE);
-    public static final Level TRACE = new Level("TRACE", TRACE_VALUE);
-    public static final Level ALL = new Level("ALL", ALL_VALUE);
+    public static final ILevel OFF = new ILevel("OFF", OFF_VALUE);
+    public static final ILevel FATAL = new ILevel("FATAL", FATAL_VALUE);
+    public static final ILevel ERROR = new ILevel("ERROR", ERROR_VALUE);
+    public static final ILevel WARN = new ILevel("WARN", WARN_VALUE);
+    public static final ILevel INFO = new ILevel("INFO", INFO_VALUE);
+    public static final ILevel DEBUG = new ILevel("DEBUG", DEBUG_VALUE);
+    public static final ILevel TRACE = new ILevel("TRACE", TRACE_VALUE);
+    public static final ILevel ALL = new ILevel("ALL", ALL_VALUE);
 
 
-    protected Level(String name, int value) {
+    protected ILevel(String name, int value) {
         super(name, value);
     }
 }

@@ -23,7 +23,11 @@ import java.net.URL;
 
 public class AllUrlsSupplier implements UrlSupplier {
     public static final String USE_ENV = "EASEAGENT-SLF4J2-USE-CURRENT";
-    public static volatile boolean ENABLED = false;
+    private static volatile boolean enabled = false;
+
+    public static void setEnabled(boolean enabled) {
+        AllUrlsSupplier.enabled = enabled;
+    }
 
     @Override
     public URL[] get() {
@@ -35,7 +39,7 @@ public class AllUrlsSupplier implements UrlSupplier {
     }
 
     private boolean enabled() {
-        if (ENABLED) {
+        if (enabled) {
             return true;
         }
         String enabledStr = System.getProperty(USE_ENV);

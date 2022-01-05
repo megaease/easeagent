@@ -102,31 +102,14 @@ public class PluginConfigManager implements IConfigFactory {
         shutdownRunnable.run();
     }
 
-    private synchronized void onChange(Map<String, String> sources) {
+    protected synchronized void onChange(Map<String, String> sources) {
         Set<Key> sourceKeys = keys(sources.keySet());
-        Map<String, String> newSources = new HashMap<>();
-        for (Key sourceKey : sourceKeys) {
-            PluginSourceConfig pluginSourceConfig = pluginSourceConfigs.get(sourceKey);
-            if (pluginSourceConfig == null) {
-                continue;
-            }
-            newSources.putAll(pluginSourceConfig.getSource());
-        }
-        newSources.putAll(sources);
+        Map<String, String> newSources = buildNewSources(sourceKeys, sources);
         for (Key sourceKey : sourceKeys) {
             pluginSourceConfigs.put(sourceKey, PluginSourceConfig.build(sourceKey.getDomain(), sourceKey.getNamespace(), sourceKey.getId(), newSources));
         }
-        Set<Key> changeKeys = new HashSet<>(sourceKeys);
-        for (Key key : sourceKeys) {
-            if (!ConfigUtils.isGlobal(key.getNamespace())) {
-                continue;
-            }
-            for (Key oldKey : pluginConfigs.keySet()) {
-                if (key.id.equals(oldKey.id)) {
-                    changeKeys.add(oldKey);
-                }
-            }
-        }
+        Set<Key> changeKeys = buildChangeKeys(sourceKeys);
+
         for (Key changeKey : changeKeys) {
             final PluginConfig oldConfig = pluginConfigs.remove(changeKey);
             final PluginConfig newConfig = getConfig(changeKey.getDomain(), changeKey.getNamespace(), changeKey.id, oldConfig);
@@ -139,6 +122,35 @@ public class PluginConfigManager implements IConfigFactory {
                 LOGGER.warn("change config<{}> fail: {}", changeKey.toString(), e.getMessage());
             }
         }
+    }
+
+    private Map<String, String> buildNewSources(Set<Key> sourceKeys, Map<String, String> sources) {
+        Map<String, String> newSources = new HashMap<>();
+        for (Key sourceKey : sourceKeys) {
+            PluginSourceConfig pluginSourceConfig = pluginSourceConfigs.get(sourceKey);
+            if (pluginSourceConfig == null) {
+                continue;
+            }
+            newSources.putAll(pluginSourceConfig.getSource());
+        }
+        newSources.putAll(sources);
+        return newSources;
+    }
+
+    private Set<Key> buildChangeKeys(Set<Key> sourceKeys) {
+        Set<Key> changeKeys = new HashSet<>(sourceKeys);
+        for (Key key : sourceKeys) {
+            if (!ConfigUtils.isGlobal(key.getNamespace())) {
+                continue;
+            }
+            for (Key oldKey : pluginConfigs.keySet()) {
+                if (!key.id.equals(oldKey.id)) {
+                    continue;
+                }
+                changeKeys.add(oldKey);
+            }
+        }
+        return changeKeys;
     }
 
     class Key {

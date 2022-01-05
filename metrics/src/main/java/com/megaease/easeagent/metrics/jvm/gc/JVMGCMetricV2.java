@@ -22,8 +22,6 @@ import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
-import com.sun.management.GarbageCollectionNotificationInfo;
-import com.sun.management.GcInfo;
 
 import javax.annotation.Nonnull;
 import javax.management.NotificationEmitter;
@@ -33,7 +31,6 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
 
-import static com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION;
 
 public class JVMGCMetricV2 extends ServiceMetric {
     private static final String NO_GC = "No GC";
@@ -90,9 +87,10 @@ public class JVMGCMetricV2 extends ServiceMetric {
         }
     }
 
+    @SuppressWarnings("all")
     private NotificationListener getListener() {
         return (notification, ref) -> {
-            if (!notification.getType().equals(GARBAGE_COLLECTION_NOTIFICATION)) {
+            if (!notification.getType().equals(com.sun.management.GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
                 return;
             }
 
@@ -101,9 +99,9 @@ public class JVMGCMetricV2 extends ServiceMetric {
             }
 
             CompositeData cd = (CompositeData) notification.getUserData();
-            GarbageCollectionNotificationInfo notificationInfo = GarbageCollectionNotificationInfo.from(cd);
+            com.sun.management.GarbageCollectionNotificationInfo notificationInfo = com.sun.management.GarbageCollectionNotificationInfo.from(cd);
             String gcCause = notificationInfo.getGcCause();
-            GcInfo gcInfo = notificationInfo.getGcInfo();
+            com.sun.management.GcInfo gcInfo = notificationInfo.getGcInfo();
             long duration = gcInfo.getDuration();
 
             String gcName = notificationInfo.getGcName();
