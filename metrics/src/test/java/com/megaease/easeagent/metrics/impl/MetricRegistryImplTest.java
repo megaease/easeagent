@@ -23,6 +23,7 @@ import org.awaitility.Duration;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -98,7 +99,7 @@ public class MetricRegistryImplTest {
         Timer timer = metricRegistry.timer(timerName);
         timer.update(10, TimeUnit.MILLISECONDS);
         Assert.assertEquals(1, timer.getCount());
-        timer.update(100, TimeUnit.MILLISECONDS);
+        timer.update(200, TimeUnit.MILLISECONDS);
         Assert.assertEquals(2, timer.getCount());
         Timer.Context context = timer.time();
         Thread.sleep(50);
@@ -107,9 +108,9 @@ public class MetricRegistryImplTest {
         Snapshot snapshot = timer.getSnapshot();
         Assert.assertEquals(3, snapshot.size());
         Assert.assertEquals(TimeUnit.MILLISECONDS.toNanos(10), snapshot.getMin());
-        Assert.assertTrue(snapshot.getMedian() > TimeUnit.MILLISECONDS.toNanos(30));
-        Assert.assertTrue(snapshot.getMedian() < TimeUnit.MILLISECONDS.toNanos(70));
-        Assert.assertEquals(TimeUnit.MILLISECONDS.toNanos(100), snapshot.getMax());
+        Assert.assertTrue(snapshot.getMedian() > TimeUnit.MILLISECONDS.toNanos(20));
+        Assert.assertTrue(snapshot.getMedian() < TimeUnit.MILLISECONDS.toNanos(80));
+        Assert.assertEquals(TimeUnit.MILLISECONDS.toNanos(200), snapshot.getMax());
     }
 
     class TestGauge implements Gauge<String> {
