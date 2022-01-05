@@ -32,7 +32,6 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 
 import java.lang.ref.WeakReference;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -123,8 +122,7 @@ public class AdviceRegistry {
     static Integer getPointcutIndex(Dispatcher.Resolved resolved) {
         int index = 0;
         Map<Integer, OffsetMapping> enterMap = resolved.getOffsetMapping();
-        for (Iterator<Integer> iterator = enterMap.keySet().iterator(); iterator.hasNext(); ) {
-            Integer offset = iterator.next();
+        for (Integer offset : enterMap.keySet()) {
             OffsetMapping om = enterMap.get(offset);
             if (!(om instanceof OffsetMapping.ForStackManipulation)) {
                 continue;
@@ -144,8 +142,7 @@ public class AdviceRegistry {
     static Integer updateStackManipulation(Dispatcher.Resolved resolved, Integer value) {
         int index = 0;
         Map<Integer, OffsetMapping> enterMap = resolved.getOffsetMapping();
-        for (Iterator<Integer> iterator = enterMap.keySet().iterator(); iterator.hasNext(); ) {
-            Integer offset = iterator.next();
+        for (Integer offset : enterMap.keySet()) {
             OffsetMapping om = enterMap.get(offset);
             if (!(om instanceof OffsetMapping.ForStackManipulation)) {
                 continue;

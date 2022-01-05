@@ -23,7 +23,6 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -31,9 +30,9 @@ import java.util.stream.Collectors;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public class AgentSupplierChain {
-    public final ArrayList<Supplier<Interceptor>> suppliers;
+    public final List<Supplier<Interceptor>> suppliers;
 
-    public AgentSupplierChain(ArrayList<Supplier<Interceptor>> suppliers) {
+    public AgentSupplierChain(List<Supplier<Interceptor>> suppliers) {
         this.suppliers = suppliers;
     }
 

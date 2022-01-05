@@ -62,6 +62,7 @@ public class ProviderChain {
             return new ProviderChain(providers);
         }
 
+        @Override
         public String toString() {
             return "ProviderChain.Builder(providers=" + this.providers + ")";
         }

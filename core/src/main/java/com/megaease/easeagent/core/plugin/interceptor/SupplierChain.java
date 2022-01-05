@@ -20,17 +20,18 @@ package com.megaease.easeagent.core.plugin.interceptor;
 import com.megaease.easeagent.plugin.Ordered;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class SupplierChain<T extends Ordered> {
 
-    private final ArrayList<Supplier<T>> suppliers;
+    private final List<Supplier<T>> suppliers;
 
-    public SupplierChain(ArrayList<Supplier<T>> suppliers) {
+    public SupplierChain(List<Supplier<T>> suppliers) {
         this.suppliers = suppliers;
     }
 
-    public ArrayList<Supplier<T>> getSuppliers() {
+    public List<Supplier<T>> getSuppliers() {
         return this.suppliers;
     }
 
@@ -39,12 +40,12 @@ public class SupplierChain<T extends Ordered> {
     }
 
     public static class Builder<T extends Ordered> {
-        private ArrayList<Supplier<T>> suppliers = new ArrayList<>();
+        private List<Supplier<T>> suppliers = new ArrayList<>();
 
         Builder() {
         }
 
-        public Builder<T> suppliers(ArrayList<Supplier<T>> suppliers) {
+        public Builder<T> suppliers(List<Supplier<T>> suppliers) {
             this.suppliers = suppliers;
             return this;
         }
