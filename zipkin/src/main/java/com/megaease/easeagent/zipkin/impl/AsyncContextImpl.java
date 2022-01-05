@@ -34,7 +34,9 @@ public class AsyncContextImpl implements AsyncContext {
     private final Map<Object, Object> context;
     private final Supplier<InitializeContext> supplier;
 
-    private AsyncContextImpl(Tracing tracing, TraceContext traceContext, Supplier<InitializeContext> supplier, Map<Object, Object> context) {
+    private AsyncContextImpl(Tracing tracing, TraceContext traceContext,
+                             Supplier<InitializeContext> supplier,
+                             Map<Object, Object> context) {
         this.tracing = tracing;
         this.traceContext = traceContext;
         this.supplier = supplier;
@@ -45,7 +47,9 @@ public class AsyncContextImpl implements AsyncContext {
         return build(tracing, traceContext, supplier, null);
     }
 
-    public static AsyncContextImpl build(Tracing tracing, TraceContext traceContext, Supplier<InitializeContext> supplier, Map<Object, Object> context) {
+    public static AsyncContextImpl build(Tracing tracing, TraceContext traceContext,
+                                         Supplier<InitializeContext> supplier,
+                                         Map<Object, Object> context) {
         Map<Object, Object> contextMap = context == null ? new HashMap<>() : new HashMap<>(context);
         return new AsyncContextImpl(tracing, traceContext, supplier, contextMap);
     }
