@@ -26,6 +26,10 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 public class ProgressFieldsManager {
+
+    private ProgressFieldsManager() {
+    }
+
     public static void init(Configs configs) {
         BiFunction<String, Map<String, String>, String> changeListener = ProgressFields.changeListener();
         Change change = new Change(changeListener);
@@ -44,8 +48,8 @@ public class ProgressFieldsManager {
 
     static class Change {
         private final BiFunction<String, Map<String, String>, String> changeListener;
-        Map<String, String> forwardedHeaders = new HashMap<>();
-        Map<String, String> responseHoldTag = new HashMap<>();
+        private final Map<String, String> forwardedHeaders = new HashMap<>();
+        private final Map<String, String> responseHoldTag = new HashMap<>();
 
         public Change(BiFunction<String, Map<String, String>, String> changeListener) {
             this.changeListener = changeListener;

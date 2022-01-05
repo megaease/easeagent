@@ -37,7 +37,7 @@ public abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
     protected ConfigManagerMXBean mxBeanConfig;
 
     static Map<String, String> toConfigMap(Map<String, Object> map) {
-        Map<String, String> config = new HashMap<>();
+        Map<String, String> config = new HashMap<>(Math.max(map.size(), 8));
         map.forEach((s, o) -> config.put(s, o.toString()));
         return config;
     }

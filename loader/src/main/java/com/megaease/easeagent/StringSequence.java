@@ -71,6 +71,7 @@ public class StringSequence implements CharSequence {
 
     /**
      * Returns {@code true} if the sequence is empty. Public to be compatible with JDK 15.
+     *
      * @return {@code true} if {@link #length()} is {@code 0}, otherwise {@code false}
      */
     public boolean isEmpty() {
@@ -137,14 +138,14 @@ public class StringSequence implements CharSequence {
 
     @Override
     public int hashCode() {
-        int hash = this.hash;
-        if (hash == 0 && length() > 0) {
+        int hashVal = this.hash;
+        if (hashVal == 0 && length() > 0) {
             for (int i = this.start; i < this.end; i++) {
-                hash = 31 * hash + this.source.charAt(i);
+                hashVal = 31 * hashVal + this.source.charAt(i);
             }
-            this.hash = hash;
+            this.hash = hashVal;
         }
-        return hash;
+        return hashVal;
     }
 
     @Override

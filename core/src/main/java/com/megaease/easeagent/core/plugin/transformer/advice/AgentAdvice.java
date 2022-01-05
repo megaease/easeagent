@@ -128,7 +128,6 @@ public class AgentAdvice extends Advice {
     }
 
 
-
     /**
      * The dispatcher for instrumenting the instrumented method upon entering.
      */
@@ -220,10 +219,10 @@ public class AgentAdvice extends Advice {
      * @return A method visitor wrapper representing the supplied advice.
      */
     protected static AgentAdvice tto(TypeDescription advice,
-                                    PostProcessor.Factory postProcessorFactory,
-                                    ClassFileLocator classFileLocator,
-                                    List<? extends OffsetMapping.Factory<?>> userFactories,
-                                    Delegator delegator) {
+                                     PostProcessor.Factory postProcessorFactory,
+                                     ClassFileLocator classFileLocator,
+                                     List<? extends OffsetMapping.Factory<?>> userFactories,
+                                     Delegator delegator) {
         Dispatcher.Unresolved methodEnter = Dispatcher.Inactive.INSTANCE,
             methodExit = Dispatcher.Inactive.INSTANCE,
             methodExitNoException = Dispatcher.Inactive.INSTANCE;
@@ -260,6 +259,7 @@ public class AgentAdvice extends Advice {
     public static AgentAdvice.WithCustomMapping withCustomMapping() {
         return new WithCustomMapping();
     }
+
     private static Dispatcher.Unresolved locate(Class<? extends Annotation> type,
                                                 MethodDescription.InDefinedShape property,
                                                 Dispatcher.Unresolved dispatcher,
@@ -283,6 +283,7 @@ public class AgentAdvice extends Advice {
      * @param assigner The assigner to use,
      * @return A version of this advice that uses the specified assigner.
      */
+    @Override
     public AgentAdvice withAssigner(Assigner assigner) {
         return new AgentAdvice(methodEnter, methodExitNonThrowable,
             methodExit, assigner, exceptionHandler, delegate);
@@ -295,6 +296,7 @@ public class AgentAdvice extends Advice {
      * @param exceptionHandler The exception handler to apply.
      * @return A version of this advice that applies the supplied exception handler.
      */
+    @Override
     public AgentAdvice withExceptionHandler(ExceptionHandler exceptionHandler) {
         return new AgentAdvice(methodEnter, methodExitNonThrowable,
             methodExit, assigner, exceptionHandler, delegate);
@@ -352,10 +354,10 @@ public class AgentAdvice extends Advice {
          * @param <T>   The annotation type.
          * @return A new builder for an advice that considers the supplied annotation type during binding.
          */
+        @Override
         public <T extends Annotation> WithCustomMapping bind(Class<T> type, Object value) {
             return bind(OffsetMapping.ForStackManipulation.Factory.of(type, value));
         }
-
 
         /**
          * Binds an annotation to a dynamically computed value. Whenever the {@link Advice} component discovers the given annotation on
@@ -382,9 +384,10 @@ public class AgentAdvice extends Advice {
          * @param classFileLocator The class file locator for locating the advisory class's class file.
          * @return A method visitor wrapper representing the supplied advice.
          */
+        @Override
         public AgentAdvice to(TypeDescription advice, ClassFileLocator classFileLocator) {
             return AgentAdvice.tto(advice, postProcessorFactory, classFileLocator,
-                  new ArrayList<>(offsetMappings.values()), delegator);
+                new ArrayList<>(offsetMappings.values()), delegator);
         }
     }
 
@@ -398,6 +401,7 @@ public class AgentAdvice extends Advice {
      * @param writerFlags           The ASM writer flags to use.
      * @param readerFlags           The, plies this advice.
      */
+    @Override
     protected MethodVisitor doWrap(TypeDescription instrumentedType,
                                    MethodDescription instrumentedMethod,
                                    MethodVisitor methodVisitor,
@@ -740,7 +744,7 @@ public class AgentAdvice extends Advice {
         }
     }
 
-     /**
+    /**
      * An advice visitor that applies exit advice.
      */
     protected abstract static class WithExitAdvice extends AdviceVisitor {
@@ -1177,7 +1181,6 @@ public class AgentAdvice extends Advice {
                                                 Unresolved methodEnter,
                                                 PostProcessor.Factory postProcessorFactory);
         }
-
 
 
         /**
@@ -2942,6 +2945,7 @@ public class AgentAdvice extends Advice {
                         /**
                          * {@inheritDoc}
                          */
+                        @Override
                         protected MethodVisitor doApply(MethodVisitor methodVisitor,
                                                         Context implementationContext,
                                                         Assigner assigner,
@@ -3053,12 +3057,12 @@ public class AgentAdvice extends Advice {
                     }
 
                     protected static Resolved.ForMethodExit ofNonThrowable(MethodDescription.InDefinedShape adviceMethod,
-                                                               PostProcessor postProcessor,
-                                                               Map<String, TypeDefinition> namedTypes,
-                                                               Map<String, TypeDefinition> uninitializedNamedTypes,
-                                                               List<? extends OffsetMapping.Factory<?>> userFactories,
-                                                               ClassReader classReader,
-                                                               TypeDefinition enterType) {
+                                                                           PostProcessor postProcessor,
+                                                                           Map<String, TypeDefinition> namedTypes,
+                                                                           Map<String, TypeDefinition> uninitializedNamedTypes,
+                                                                           List<? extends OffsetMapping.Factory<?>> userFactories,
+                                                                           ClassReader classReader,
+                                                                           TypeDefinition enterType) {
                         return new WithoutExceptionHandler(adviceMethod, postProcessor, namedTypes,
                             uninitializedNamedTypes, userFactories, classReader, enterType);
                     }
@@ -3936,7 +3940,7 @@ public class AgentAdvice extends Advice {
                             methodVisitor.visitVarInsn(Opcodes.ASTORE, isExitAdvice() ? argumentHandler.exit() : argumentHandler.enter());
                         }
                         methodSizeHandler.requireStackSize(postProcessor.resolve(instrumentedType,
-                            instrumentedMethod, assigner, argumentHandler, stackMapFrameHandler, exceptionHandler)
+                                instrumentedMethod, assigner, argumentHandler, stackMapFrameHandler, exceptionHandler)
                             .apply(methodVisitor, implementationContext).getMaximalSize());
                         methodSizeHandler.requireStackSize(relocationHandler.apply(methodVisitor, isExitAdvice() ? argumentHandler.exit() : argumentHandler.enter()));
                         stackMapFrameHandler.injectCompletionFrame(methodVisitor);
@@ -4329,6 +4333,7 @@ public class AgentAdvice extends Advice {
                         /**
                          * {@inheritDoc}
                          */
+                        @Override
                         protected Bound doResolve(TypeDescription instrumentedType,
                                                   MethodDescription instrumentedMethod,
                                                   MethodVisitor methodVisitor,
@@ -4879,9 +4884,9 @@ public class AgentAdvice extends Advice {
              */
             public int compoundLocalVariableLength(int localVariableLength) {
                 return Math.max(this.localVariableLength, localVariableLength
-                        + StackSize.of(postMethodTypes)
-                        + StackSize.of(initialTypes)
-                        + StackSize.of(preMethodTypes));
+                    + StackSize.of(postMethodTypes)
+                    + StackSize.of(initialTypes)
+                    + StackSize.of(preMethodTypes));
             }
 
             /**
@@ -4909,19 +4914,20 @@ public class AgentAdvice extends Advice {
                  */
                 public MethodSizeHandler.ForAdvice bindExit(MethodDescription.InDefinedShape adviceMethod) {
                     return new ForAdvice(adviceMethod, instrumentedMethod.getStackSize()
-                            + StackSize.of(postMethodTypes)
-                            + StackSize.of(initialTypes)
-                            + StackSize.of(preMethodTypes));
+                        + StackSize.of(postMethodTypes)
+                        + StackSize.of(initialTypes)
+                        + StackSize.of(preMethodTypes));
                 }
 
                 /**
                  * {@inheritDoc}
                  */
+                @Override
                 public int compoundLocalVariableLength(int localVariableLength) {
                     return Math.max(this.localVariableLength, localVariableLength
-                            + StackSize.of(postMethodTypes)
-                            + StackSize.of(initialTypes)
-                            + StackSize.of(preMethodTypes));
+                        + StackSize.of(postMethodTypes)
+                        + StackSize.of(initialTypes)
+                        + StackSize.of(preMethodTypes));
                 }
             }
 
@@ -4948,22 +4954,24 @@ public class AgentAdvice extends Advice {
                 /**
                  * {@inheritDoc}
                  */
+                @Override
                 public MethodSizeHandler.ForAdvice bindExit(MethodDescription.InDefinedShape adviceMethod) {
                     return new ForAdvice(adviceMethod, 2 * instrumentedMethod.getStackSize()
-                            + StackSize.of(initialTypes)
-                            + StackSize.of(preMethodTypes)
-                            + StackSize.of(postMethodTypes));
+                        + StackSize.of(initialTypes)
+                        + StackSize.of(preMethodTypes)
+                        + StackSize.of(postMethodTypes));
                 }
 
                 /**
                  * {@inheritDoc}
                  */
+                @Override
                 public int compoundLocalVariableLength(int localVariableLength) {
                     return Math.max(this.localVariableLength, localVariableLength
-                            + instrumentedMethod.getStackSize()
-                            + StackSize.of(postMethodTypes)
-                            + StackSize.of(initialTypes)
-                            + StackSize.of(preMethodTypes));
+                        + instrumentedMethod.getStackSize()
+                        + StackSize.of(postMethodTypes)
+                        + StackSize.of(initialTypes)
+                        + StackSize.of(preMethodTypes));
                 }
             }
 
@@ -5038,9 +5046,9 @@ public class AgentAdvice extends Advice {
                 public void recordMaxima(int stackSize, int localVariableLength) {
                     Default.this.requireStackSize(stackSize + stackSizePadding);
                     Default.this.requireLocalVariableLength(localVariableLength
-                            - adviceMethod.getStackSize()
-                            + baseLocalVariableLength
-                            + localVariableLengthPadding);
+                        - adviceMethod.getStackSize()
+                        + baseLocalVariableLength
+                        + localVariableLengthPadding);
                 }
             }
         }
@@ -5358,26 +5366,26 @@ public class AgentAdvice extends Advice {
                     return NoOp.INSTANCE;
                 } else if (!exitAdvice && initialTypes.isEmpty()) {
                     return new Trivial(instrumentedType,
-                            instrumentedMethod,
-                            latentTypes,
-                            (readerFlags & ClassReader.EXPAND_FRAMES) != 0);
+                        instrumentedMethod,
+                        latentTypes,
+                        (readerFlags & ClassReader.EXPAND_FRAMES) != 0);
                 } else if (copyArguments) {
                     return new WithPreservedArguments.WithArgumentCopy(instrumentedType,
-                            instrumentedMethod,
-                            initialTypes,
-                            latentTypes,
-                            preMethodTypes,
-                            postMethodTypes,
-                            (readerFlags & ClassReader.EXPAND_FRAMES) != 0);
+                        instrumentedMethod,
+                        initialTypes,
+                        latentTypes,
+                        preMethodTypes,
+                        postMethodTypes,
+                        (readerFlags & ClassReader.EXPAND_FRAMES) != 0);
                 } else {
                     return new WithPreservedArguments.WithoutArgumentCopy(instrumentedType,
-                            instrumentedMethod,
-                            initialTypes,
-                            latentTypes,
-                            preMethodTypes,
-                            postMethodTypes,
-                            (readerFlags & ClassReader.EXPAND_FRAMES) != 0,
-                            !instrumentedMethod.isConstructor());
+                        instrumentedMethod,
+                        initialTypes,
+                        latentTypes,
+                        preMethodTypes,
+                        postMethodTypes,
+                        (readerFlags & ClassReader.EXPAND_FRAMES) != 0,
+                        !instrumentedMethod.isConstructor());
                 }
             }
 
@@ -5386,8 +5394,8 @@ public class AgentAdvice extends Advice {
              */
             public StackMapFrameHandler.ForAdvice bindEnter(MethodDescription.InDefinedShape adviceMethod) {
                 return new ForAdvice(adviceMethod, initialTypes, latentTypes, preMethodTypes, TranslationMode.ENTER, instrumentedMethod.isConstructor()
-                        ? Initialization.UNITIALIZED
-                        : Initialization.INITIALIZED);
+                    ? Initialization.UNITIALIZED
+                    : Initialization.INITIALIZED);
             }
 
             /**
@@ -5395,8 +5403,8 @@ public class AgentAdvice extends Advice {
              */
             public int getReaderHint() {
                 return expandFrames
-                        ? ClassReader.EXPAND_FRAMES
-                        : AsmVisitorWrapper.NO_FLAGS;
+                    ? ClassReader.EXPAND_FRAMES
+                    : AsmVisitorWrapper.NO_FLAGS;
             }
 
             /**
@@ -5454,20 +5462,20 @@ public class AgentAdvice extends Advice {
                             }
                         }
                         Object[] translated = new Object[localVariableLength
-                                - (methodDescription.isStatic() ? 0 : 1)
-                                - methodDescription.getParameters().size()
-                                + (instrumentedMethod.isStatic() ? 0 : 1)
-                                + instrumentedMethod.getParameters().size()
-                                + additionalTypes.size()];
+                            - (methodDescription.isStatic() ? 0 : 1)
+                            - methodDescription.getParameters().size()
+                            + (instrumentedMethod.isStatic() ? 0 : 1)
+                            + instrumentedMethod.getParameters().size()
+                            + additionalTypes.size()];
                         int index = translationMode.copy(instrumentedType, instrumentedMethod, methodDescription, localVariable, translated);
                         for (TypeDescription typeDescription : additionalTypes) {
                             translated[index++] = Initialization.INITIALIZED.toFrame(typeDescription);
                         }
                         System.arraycopy(localVariable,
-                                methodDescription.getParameters().size() + (methodDescription.isStatic() ? 0 : 1),
-                                translated,
-                                index,
-                                translated.length - index);
+                            methodDescription.getParameters().size() + (methodDescription.isStatic() ? 0 : 1),
+                            translated,
+                            index,
+                            translated.length - index);
                         localVariableLength = translated.length;
                         localVariable = translated;
                         currentFrameDivergence = translated.length - index;
@@ -5491,8 +5499,8 @@ public class AgentAdvice extends Advice {
                                            List<? extends TypeDescription> typesInArray,
                                            List<? extends TypeDescription> typesOnStack) {
                 Object[] localVariable = new Object[instrumentedMethod.getParameters().size()
-                        + (instrumentedMethod.isStatic() ? 0 : 1)
-                        + typesInArray.size()];
+                    + (instrumentedMethod.isStatic() ? 0 : 1)
+                    + typesInArray.size()];
                 int index = 0;
                 if (!instrumentedMethod.isStatic()) {
                     localVariable[index++] = initialization.toFrame(instrumentedType);
@@ -5551,8 +5559,8 @@ public class AgentAdvice extends Advice {
                         int index = 0;
                         if (!instrumentedMethod.isStatic()) {
                             translated[index++] = instrumentedMethod.isConstructor()
-                                    ? Opcodes.UNINITIALIZED_THIS
-                                    : Initialization.INITIALIZED.toFrame(instrumentedType);
+                                ? Opcodes.UNINITIALIZED_THIS
+                                : Initialization.INITIALIZED.toFrame(instrumentedType);
                         }
                         for (TypeDescription typeDescription : instrumentedMethod.getParameters().asTypeList().asErasures()) {
                             translated[index++] = Initialization.INITIALIZED.toFrame(typeDescription);
@@ -5563,8 +5571,8 @@ public class AgentAdvice extends Advice {
                     @Override
                     protected boolean isPossibleThisFrameValue(TypeDescription instrumentedType, MethodDescription instrumentedMethod, Object frame) {
                         return instrumentedMethod.isConstructor()
-                                ? Opcodes.UNINITIALIZED_THIS.equals(frame)
-                                : Initialization.INITIALIZED.toFrame(instrumentedType).equals(frame);
+                            ? Opcodes.UNINITIALIZED_THIS.equals(frame)
+                            : Initialization.INITIALIZED.toFrame(instrumentedType).equals(frame);
                     }
                 },
 
@@ -5650,10 +5658,10 @@ public class AgentAdvice extends Advice {
                      */
                     protected Object toFrame(TypeDescription typeDescription) {
                         if (typeDescription.represents(boolean.class)
-                                || typeDescription.represents(byte.class)
-                                || typeDescription.represents(short.class)
-                                || typeDescription.represents(char.class)
-                                || typeDescription.represents(int.class)) {
+                            || typeDescription.represents(byte.class)
+                            || typeDescription.represents(short.class)
+                            || typeDescription.represents(char.class)
+                            || typeDescription.represents(int.class)) {
                             return Opcodes.INTEGER;
                         } else if (typeDescription.represents(long.class)) {
                             return Opcodes.LONG;
@@ -5691,12 +5699,12 @@ public class AgentAdvice extends Advice {
                  */
                 protected Trivial(TypeDescription instrumentedType, MethodDescription instrumentedMethod, List<? extends TypeDescription> latentTypes, boolean expandFrames) {
                     super(instrumentedType,
-                            instrumentedMethod,
-                            Collections.emptyList(),
-                            latentTypes,
-                            Collections.emptyList(),
-                            Collections.emptyList(),
-                            expandFrames);
+                        instrumentedMethod,
+                        Collections.emptyList(),
+                        latentTypes,
+                        Collections.emptyList(),
+                        Collections.emptyList(),
+                        expandFrames);
                 }
 
                 /**
@@ -5817,11 +5825,11 @@ public class AgentAdvice extends Advice {
                  */
                 public StackMapFrameHandler.ForAdvice bindExit(MethodDescription.InDefinedShape adviceMethod) {
                     return new ForAdvice(adviceMethod,
-                            CompoundList.of(initialTypes, preMethodTypes, postMethodTypes),
-                            Collections.emptyList(),
-                            Collections.emptyList(),
-                            TranslationMode.EXIT,
-                            Initialization.INITIALIZED);
+                        CompoundList.of(initialTypes, preMethodTypes, postMethodTypes),
+                        Collections.emptyList(),
+                        Collections.emptyList(),
+                        TranslationMode.EXIT,
+                        Initialization.INITIALIZED);
                 }
 
                 /**
@@ -5833,15 +5841,15 @@ public class AgentAdvice extends Advice {
                             methodVisitor.visitFrame(Opcodes.F_SAME, EMPTY.length, EMPTY, EMPTY.length, EMPTY);
                         } else {
                             methodVisitor.visitFrame(Opcodes.F_SAME1,
-                                    EMPTY.length,
-                                    EMPTY,
-                                    1,
-                                    new Object[]{Initialization.INITIALIZED.toFrame(instrumentedMethod.getReturnType().asErasure())});
+                                EMPTY.length,
+                                EMPTY,
+                                1,
+                                new Object[]{Initialization.INITIALIZED.toFrame(instrumentedMethod.getReturnType().asErasure())});
                         }
                     } else {
                         injectFullFrame(methodVisitor, Initialization.INITIALIZED, CompoundList.of(initialTypes, preMethodTypes), instrumentedMethod.getReturnType().represents(void.class)
-                                ? Collections.emptyList()
-                                : Collections.singletonList(instrumentedMethod.getReturnType().asErasure()));
+                            ? Collections.emptyList()
+                            : Collections.singletonList(instrumentedMethod.getReturnType().asErasure()));
                     }
                 }
 
@@ -5903,8 +5911,8 @@ public class AgentAdvice extends Advice {
                             methodVisitor.visitFrame(Opcodes.F_APPEND, localVariable.length, localVariable, EMPTY.length, EMPTY);
                         } else {
                             Object[] localVariable = new Object[(instrumentedMethod.isStatic() ? 0 : 1)
-                                    + instrumentedMethod.getParameters().size()
-                                    + initialTypes.size()];
+                                + instrumentedMethod.getParameters().size()
+                                + initialTypes.size()];
                             int index = 0;
                             if (instrumentedMethod.isConstructor()) {
                                 localVariable[index++] = Opcodes.UNINITIALIZED_THIS;
@@ -5967,14 +5975,14 @@ public class AgentAdvice extends Advice {
                                                int stackSize,
                                                Object[] stack) {
                         translateFrame(methodVisitor,
-                                TranslationMode.COPY,
-                                instrumentedMethod,
-                                CompoundList.of(initialTypes, preMethodTypes),
-                                type,
-                                localVariableLength,
-                                localVariable,
-                                stackSize,
-                                stack);
+                            TranslationMode.COPY,
+                            instrumentedMethod,
+                            CompoundList.of(initialTypes, preMethodTypes),
+                            type,
+                            localVariableLength,
+                            localVariable,
+                            stackSize,
+                            stack);
                     }
                 }
 
@@ -6023,9 +6031,9 @@ public class AgentAdvice extends Advice {
                                 methodVisitor.visitFrame(Opcodes.F_APPEND, localVariable.length, localVariable, EMPTY.length, EMPTY);
                             } else {
                                 Object[] localVariable = new Object[(instrumentedMethod.isStatic() ? 0 : 2)
-                                        + instrumentedMethod.getParameters().size() * 2
-                                        + initialTypes.size()
-                                        + preMethodTypes.size()];
+                                    + instrumentedMethod.getParameters().size() * 2
+                                    + initialTypes.size()
+                                    + preMethodTypes.size()];
                                 int index = 0;
                                 if (instrumentedMethod.isConstructor()) {
                                     localVariable[index++] = Opcodes.UNINITIALIZED_THIS;
@@ -6079,10 +6087,10 @@ public class AgentAdvice extends Advice {
                             case Opcodes.F_FULL:
                             case Opcodes.F_NEW:
                                 Object[] translated = new Object[localVariableLength
-                                        + (instrumentedMethod.isStatic() ? 0 : 1)
-                                        + instrumentedMethod.getParameters().size()
-                                        + initialTypes.size()
-                                        + preMethodTypes.size()];
+                                    + (instrumentedMethod.isStatic() ? 0 : 1)
+                                    + instrumentedMethod.getParameters().size()
+                                    + initialTypes.size()
+                                    + preMethodTypes.size()];
                                 int index = 0;
                                 if (instrumentedMethod.isConstructor()) {
                                     Initialization initialization = Initialization.INITIALIZED;
@@ -6196,14 +6204,14 @@ public class AgentAdvice extends Advice {
                                            int stackSize,
                                            Object[] stack) {
                     Default.this.translateFrame(methodVisitor,
-                            translationMode,
-                            adviceMethod,
-                            startTypes,
-                            type,
-                            localVariableLength,
-                            localVariable,
-                            stackSize,
-                            stack);
+                        translationMode,
+                        adviceMethod,
+                        startTypes,
+                        type,
+                        localVariableLength,
+                        localVariable,
+                        stackSize,
+                        stack);
                 }
 
                 /**
@@ -6215,15 +6223,15 @@ public class AgentAdvice extends Advice {
                             methodVisitor.visitFrame(Opcodes.F_SAME, EMPTY.length, EMPTY, EMPTY.length, EMPTY);
                         } else {
                             methodVisitor.visitFrame(Opcodes.F_SAME1,
-                                    EMPTY.length,
-                                    EMPTY,
-                                    1,
-                                    new Object[]{Initialization.INITIALIZED.toFrame(adviceMethod.getReturnType().asErasure())});
+                                EMPTY.length,
+                                EMPTY,
+                                1,
+                                new Object[]{Initialization.INITIALIZED.toFrame(adviceMethod.getReturnType().asErasure())});
                         }
                     } else {
                         injectFullFrame(methodVisitor, initialization, startTypes, adviceMethod.getReturnType().represents(void.class)
-                                ? Collections.emptyList()
-                                : Collections.singletonList(adviceMethod.getReturnType().asErasure()));
+                            ? Collections.emptyList()
+                            : Collections.singletonList(adviceMethod.getReturnType().asErasure()));
                     }
                 }
 
@@ -6278,8 +6286,8 @@ public class AgentAdvice extends Advice {
                             methodVisitor.visitFrame(Opcodes.F_SAME1, EMPTY.length, EMPTY, 1, new Object[]{Initialization.INITIALIZED.toFrame(stack.get(0))});
                         }
                     } else if (currentFrameDivergence == 0
-                            && intermediateTypes.size() < 4
-                            && (stack.isEmpty() || stack.size() < 2 && intermediateTypes.isEmpty())) {
+                        && intermediateTypes.size() < 4
+                        && (stack.isEmpty() || stack.size() < 2 && intermediateTypes.isEmpty())) {
                         if (intermediateTypes.isEmpty()) {
                             if (stack.isEmpty()) {
                                 methodVisitor.visitFrame(Opcodes.F_SAME, EMPTY.length, EMPTY, EMPTY.length, EMPTY);
@@ -6468,8 +6476,8 @@ public class AgentAdvice extends Advice {
                  */
                 public int named(String name) {
                     return instrumentedMethod.getStackSize()
-                            + exitType.getStackSize().getSize()
-                            + StackSize.of(namedTypes.headMap(name).values());
+                        + exitType.getStackSize().getSize()
+                        + StackSize.of(namedTypes.headMap(name).values());
                 }
 
                 /**
@@ -6477,8 +6485,8 @@ public class AgentAdvice extends Advice {
                  */
                 public int enter() {
                     return instrumentedMethod.getStackSize()
-                            + exitType.getStackSize().getSize()
-                            + StackSize.of(namedTypes.values());
+                        + exitType.getStackSize().getSize()
+                        + StackSize.of(namedTypes.values());
                 }
 
                 /**
@@ -6486,9 +6494,9 @@ public class AgentAdvice extends Advice {
                  */
                 public int returned() {
                     return instrumentedMethod.getStackSize()
-                            + exitType.getStackSize().getSize()
-                            + StackSize.of(namedTypes.values())
-                            + enterType.getStackSize().getSize();
+                        + exitType.getStackSize().getSize()
+                        + StackSize.of(namedTypes.values())
+                        + enterType.getStackSize().getSize();
                 }
 
                 /**
@@ -6496,10 +6504,10 @@ public class AgentAdvice extends Advice {
                  */
                 public int thrown() {
                     return instrumentedMethod.getStackSize()
-                            + exitType.getStackSize().getSize()
-                            + StackSize.of(namedTypes.values())
-                            + enterType.getStackSize().getSize()
-                            + instrumentedMethod.getReturnType().getStackSize().getSize();
+                        + exitType.getStackSize().getSize()
+                        + StackSize.of(namedTypes.values())
+                        + enterType.getStackSize().getSize()
+                        + instrumentedMethod.getReturnType().getStackSize().getSize();
                 }
 
                 /**
@@ -6514,11 +6522,11 @@ public class AgentAdvice extends Advice {
                  */
                 public ForAdvice bindExit(MethodDescription adviceMethod, boolean skipThrowable) {
                     return new ForAdvice.Default.ForMethodExit(instrumentedMethod,
-                            adviceMethod,
-                            exitType,
-                            namedTypes,
-                            enterType,
-                            skipThrowable ? StackSize.ZERO : StackSize.SINGLE);
+                        adviceMethod,
+                        exitType,
+                        namedTypes,
+                        enterType,
+                        skipThrowable ? StackSize.ZERO : StackSize.SINGLE);
                 }
 
                 /**
@@ -6558,8 +6566,8 @@ public class AgentAdvice extends Advice {
                      */
                     public int argument(int offset) {
                         return offset < instrumentedMethod.getStackSize()
-                                ? offset
-                                : offset + exitType.getStackSize().getSize() + StackSize.of(namedTypes.values()) + enterType.getStackSize().getSize();
+                            ? offset
+                            : offset + exitType.getStackSize().getSize() + StackSize.of(namedTypes.values()) + enterType.getStackSize().getSize();
                     }
 
                     /**
@@ -6567,8 +6575,8 @@ public class AgentAdvice extends Advice {
                      */
                     public int variable(int index) {
                         return index < (instrumentedMethod.isStatic() ? 0 : 1) + instrumentedMethod.getParameters().size()
-                                ? index
-                                : index + (exitType.represents(void.class) ? 0 : 1) + namedTypes.size() + (enterType.represents(void.class) ? 0 : 1);
+                            ? index
+                            : index + (exitType.represents(void.class) ? 0 : 1) + namedTypes.size() + (enterType.represents(void.class) ? 0 : 1);
                     }
 
                     /**
@@ -6612,10 +6620,10 @@ public class AgentAdvice extends Advice {
                      */
                     public int argument(int offset) {
                         return instrumentedMethod.getStackSize()
-                                + exitType.getStackSize().getSize()
-                                + StackSize.of(namedTypes.values())
-                                + enterType.getStackSize().getSize()
-                                + offset;
+                            + exitType.getStackSize().getSize()
+                            + StackSize.of(namedTypes.values())
+                            + enterType.getStackSize().getSize()
+                            + offset;
                     }
 
                     /**
@@ -6623,11 +6631,11 @@ public class AgentAdvice extends Advice {
                      */
                     public int variable(int index) {
                         return (instrumentedMethod.isStatic() ? 0 : 1)
-                                + instrumentedMethod.getParameters().size()
-                                + (exitType.represents(void.class) ? 0 : 1)
-                                + namedTypes.size()
-                                + (enterType.represents(void.class) ? 0 : 1)
-                                + index;
+                            + instrumentedMethod.getParameters().size()
+                            + (exitType.represents(void.class) ? 0 : 1)
+                            + namedTypes.size()
+                            + (enterType.represents(void.class) ? 0 : 1)
+                            + index;
                     }
 
                     /**
@@ -6645,9 +6653,9 @@ public class AgentAdvice extends Advice {
                         if (!instrumentedMethod.isStatic()) {
                             methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                             methodVisitor.visitVarInsn(Opcodes.ASTORE, instrumentedMethod.getStackSize()
-                                    + exitType.getStackSize().getSize()
-                                    + StackSize.of(namedTypes.values())
-                                    + enterType.getStackSize().getSize());
+                                + exitType.getStackSize().getSize()
+                                + StackSize.of(namedTypes.values())
+                                + enterType.getStackSize().getSize());
                             stackSize = StackSize.SINGLE;
                         } else {
                             stackSize = StackSize.ZERO;
@@ -6656,10 +6664,10 @@ public class AgentAdvice extends Advice {
                             Type type = Type.getType(parameterDescription.getType().asErasure().getDescriptor());
                             methodVisitor.visitVarInsn(type.getOpcode(Opcodes.ILOAD), parameterDescription.getOffset());
                             methodVisitor.visitVarInsn(type.getOpcode(Opcodes.ISTORE), instrumentedMethod.getStackSize()
-                                    + exitType.getStackSize().getSize()
-                                    + StackSize.of(namedTypes.values())
-                                    + enterType.getStackSize().getSize()
-                                    + parameterDescription.getOffset());
+                                + exitType.getStackSize().getSize()
+                                + StackSize.of(namedTypes.values())
+                                + enterType.getStackSize().getSize()
+                                + parameterDescription.getOffset());
                             stackSize = stackSize.maximum(parameterDescription.getType().getStackSize());
                         }
                         return stackSize.getSize();
@@ -6743,8 +6751,8 @@ public class AgentAdvice extends Advice {
                  */
                 public int named(String name) {
                     return instrumentedMethod.getStackSize()
-                            + exitType.getStackSize().getSize()
-                            + StackSize.of(namedTypes.headMap(name).values());
+                        + exitType.getStackSize().getSize()
+                        + StackSize.of(namedTypes.headMap(name).values());
                 }
 
                 /**
@@ -6752,8 +6760,8 @@ public class AgentAdvice extends Advice {
                  */
                 public int enter() {
                     return instrumentedMethod.getStackSize()
-                            + exitType.getStackSize().getSize()
-                            + StackSize.of(namedTypes.values());
+                        + exitType.getStackSize().getSize()
+                        + StackSize.of(namedTypes.values());
                 }
 
                 /**
@@ -6796,9 +6804,9 @@ public class AgentAdvice extends Advice {
                      */
                     public int mapped(int offset) {
                         return instrumentedMethod.getStackSize()
-                                + exitType.getStackSize().getSize()
-                                + StackSize.of(namedTypes.values())
-                                - adviceMethod.getStackSize() + offset;
+                            + exitType.getStackSize().getSize()
+                            + StackSize.of(namedTypes.values())
+                            - adviceMethod.getStackSize() + offset;
                     }
                 }
 
@@ -6844,9 +6852,9 @@ public class AgentAdvice extends Advice {
                      */
                     public int returned() {
                         return instrumentedMethod.getStackSize()
-                                + exitType.getStackSize().getSize()
-                                + StackSize.of(namedTypes.values())
-                                + enterType.getStackSize().getSize();
+                            + exitType.getStackSize().getSize()
+                            + StackSize.of(namedTypes.values())
+                            + enterType.getStackSize().getSize();
                     }
 
                     /**
@@ -6854,10 +6862,10 @@ public class AgentAdvice extends Advice {
                      */
                     public int thrown() {
                         return instrumentedMethod.getStackSize()
-                                + exitType.getStackSize().getSize()
-                                + StackSize.of(namedTypes.values())
-                                + enterType.getStackSize().getSize()
-                                + instrumentedMethod.getReturnType().getStackSize().getSize();
+                            + exitType.getStackSize().getSize()
+                            + StackSize.of(namedTypes.values())
+                            + enterType.getStackSize().getSize()
+                            + instrumentedMethod.getReturnType().getStackSize().getSize();
                     }
 
                     /**
@@ -6865,13 +6873,13 @@ public class AgentAdvice extends Advice {
                      */
                     public int mapped(int offset) {
                         return instrumentedMethod.getStackSize()
-                                + exitType.getStackSize().getSize()
-                                + StackSize.of(namedTypes.values())
-                                + enterType.getStackSize().getSize()
-                                + instrumentedMethod.getReturnType().getStackSize().getSize()
-                                + throwableSize.getSize()
-                                - adviceMethod.getStackSize()
-                                + offset;
+                            + exitType.getStackSize().getSize()
+                            + StackSize.of(namedTypes.values())
+                            + enterType.getStackSize().getSize()
+                            + instrumentedMethod.getReturnType().getStackSize().getSize()
+                            + throwableSize.getSize()
+                            - adviceMethod.getStackSize()
+                            + offset;
                     }
                 }
             }
@@ -6892,9 +6900,9 @@ public class AgentAdvice extends Advice {
                                                         TypeDefinition exitType,
                                                         SortedMap<String, TypeDefinition> namedTypes) {
                     return new ForInstrumentedMethod.Default.Simple(instrumentedMethod,
-                            exitType,
-                            namedTypes,
-                            enterType);
+                        exitType,
+                        namedTypes,
+                        enterType);
                 }
             },
 
@@ -6908,9 +6916,9 @@ public class AgentAdvice extends Advice {
                                                         TypeDefinition exitType,
                                                         SortedMap<String, TypeDefinition> namedTypes) {
                     return new ForInstrumentedMethod.Default.Copying(instrumentedMethod,
-                            exitType,
-                            namedTypes,
-                            enterType);
+                        exitType,
+                        namedTypes,
+                        enterType);
                 }
             };
 
@@ -7241,8 +7249,8 @@ public class AgentAdvice extends Advice {
                      */
                     public StackManipulation resolveIncrement(int value) {
                         return typeDefinition.represents(int.class)
-                                ? MethodVariableAccess.of(typeDefinition).increment(offset, value)
-                                : new StackManipulation.Compound(resolveRead(), IntegerConstant.forValue(1), Addition.INTEGER, resolveWrite());
+                            ? MethodVariableAccess.of(typeDefinition).increment(offset, value)
+                            : new StackManipulation.Compound(resolveRead(), IntegerConstant.forValue(1), Addition.INTEGER, resolveWrite());
                     }
                 }
             }
@@ -7377,8 +7385,8 @@ public class AgentAdvice extends Advice {
                  */
                 public StackManipulation resolveRead() {
                     return new StackManipulation.Compound(fieldDescription.isStatic()
-                            ? StackManipulation.Trivial.INSTANCE
-                            : MethodVariableAccess.loadThis(), FieldAccess.forField(fieldDescription).read(), readAssignment);
+                        ? StackManipulation.Trivial.INSTANCE
+                        : MethodVariableAccess.loadThis(), FieldAccess.forField(fieldDescription).read(), readAssignment);
                 }
 
                 /**
@@ -7462,9 +7470,9 @@ public class AgentAdvice extends Advice {
                             preparation = StackManipulation.Trivial.INSTANCE;
                         } else {
                             preparation = new StackManipulation.Compound(
-                                    MethodVariableAccess.loadThis(),
-                                    Duplication.SINGLE.flipOver(fieldDescription.getType()),
-                                    Removal.SINGLE
+                                MethodVariableAccess.loadThis(),
+                                Duplication.SINGLE.flipOver(fieldDescription.getType()),
+                                Removal.SINGLE
                             );
                         }
                         return new StackManipulation.Compound(writeAssignment, preparation, FieldAccess.forField(fieldDescription).write());
@@ -7475,10 +7483,10 @@ public class AgentAdvice extends Advice {
                      */
                     public StackManipulation resolveIncrement(int value) {
                         return new StackManipulation.Compound(
-                                resolveRead(),
-                                IntegerConstant.forValue(value),
-                                Addition.INTEGER,
-                                resolveWrite()
+                            resolveRead(),
+                            IntegerConstant.forValue(value),
+                            Addition.INTEGER,
+                            resolveWrite()
                         );
                     }
                 }
@@ -7914,10 +7922,10 @@ public class AgentAdvice extends Advice {
                  */
                 protected Unresolved(TypeDescription.Generic target, AnnotationDescription.Loadable<Argument> annotation) {
                     this(target, annotation.getValue(Factory.ARGUMENT_READ_ONLY).resolve(Boolean.class),
-                            annotation.getValue(Factory.ARGUMENT_TYPING)
-                                .load(Argument.class.getClassLoader()).resolve(Assigner.Typing.class),
-                            annotation.getValue(Factory.ARGUMENT_VALUE).resolve(Integer.class),
-                            annotation.getValue(Factory.ARGUMENT_OPTIONAL).resolve(Boolean.class));
+                        annotation.getValue(Factory.ARGUMENT_TYPING)
+                            .load(Argument.class.getClassLoader()).resolve(Assigner.Typing.class),
+                        annotation.getValue(Factory.ARGUMENT_VALUE).resolve(Integer.class),
+                        annotation.getValue(Factory.ARGUMENT_OPTIONAL).resolve(Boolean.class));
                 }
 
                 /**
@@ -7972,6 +7980,7 @@ public class AgentAdvice extends Advice {
                 /**
                  * {@inheritDoc}
                  */
+                @Override
                 public Target resolve(TypeDescription instrumentedType,
                                       MethodDescription instrumentedMethod,
                                       Assigner assigner,
@@ -7979,8 +7988,8 @@ public class AgentAdvice extends Advice {
                                       Sort sort) {
                     if (optional && instrumentedMethod.getParameters().size() <= index) {
                         return readOnly
-                                ? new Target.ForDefaultValue.ReadOnly(target)
-                                : new Target.ForDefaultValue.ReadWrite(target);
+                            ? new Target.ForDefaultValue.ReadOnly(target)
+                            : new Target.ForDefaultValue.ReadWrite(target);
                     }
                     return super.resolve(instrumentedType, instrumentedMethod, assigner, argumentHandler, sort);
                 }
@@ -8190,9 +8199,9 @@ public class AgentAdvice extends Advice {
              */
             protected ForThisReference(TypeDescription.Generic target, AnnotationDescription.Loadable<This> annotation) {
                 this(target,
-                        annotation.getValue(Factory.THIS_READ_ONLY).resolve(Boolean.class),
-                        annotation.getValue(Factory.THIS_TYPING).load(This.class.getClassLoader()).resolve(Assigner.Typing.class),
-                        annotation.getValue(Factory.THIS_OPTIONAL).resolve(Boolean.class));
+                    annotation.getValue(Factory.THIS_READ_ONLY).resolve(Boolean.class),
+                    annotation.getValue(Factory.THIS_TYPING).load(This.class.getClassLoader()).resolve(Assigner.Typing.class),
+                    annotation.getValue(Factory.THIS_OPTIONAL).resolve(Boolean.class));
             }
 
             /**
@@ -8222,8 +8231,8 @@ public class AgentAdvice extends Advice {
                 if (instrumentedMethod.isStatic() || sort.isPremature(instrumentedMethod)) {
                     if (optional) {
                         return readOnly
-                                ? new Target.ForDefaultValue.ReadOnly(instrumentedType)
-                                : new Target.ForDefaultValue.ReadWrite(instrumentedType);
+                            ? new Target.ForDefaultValue.ReadOnly(instrumentedType)
+                            : new Target.ForDefaultValue.ReadWrite(instrumentedType);
                     } else {
                         throw new IllegalStateException(
                             "Cannot map this reference for static method or constructor start: " + instrumentedMethod);
@@ -8338,9 +8347,9 @@ public class AgentAdvice extends Advice {
             protected ForAllArguments(TypeDescription.Generic target,
                                       AnnotationDescription.Loadable<AllArguments> annotation) {
                 this(target, annotation.getValue(Factory.ALL_ARGUMENTS_READ_ONLY).resolve(Boolean.class),
-                        annotation.getValue(Factory.ALL_ARGUMENTS_TYPING)
-                            .load(AllArguments.class.getClassLoader()).resolve(Assigner.Typing.class),
-                        annotation.getValue(Factory.ALL_ARGUMENTS_NULL_IF_EMPTY).resolve(Boolean.class));
+                    annotation.getValue(Factory.ALL_ARGUMENTS_TYPING)
+                        .load(AllArguments.class.getClassLoader()).resolve(Assigner.Typing.class),
+                    annotation.getValue(Factory.ALL_ARGUMENTS_NULL_IF_EMPTY).resolve(Boolean.class));
             }
 
             /**
@@ -8369,8 +8378,8 @@ public class AgentAdvice extends Advice {
                                   Sort sort) {
                 if (nullIfEmpty && instrumentedMethod.getParameters().isEmpty()) {
                     return readOnly
-                            ? new Target.ForStackManipulation(NullConstant.INSTANCE)
-                            : new Target.ForStackManipulation.Writable(NullConstant.INSTANCE, Removal.SINGLE);
+                        ? new Target.ForStackManipulation(NullConstant.INSTANCE)
+                        : new Target.ForStackManipulation.Writable(NullConstant.INSTANCE, Removal.SINGLE);
                 }
                 List<StackManipulation> valueReads = new ArrayList(instrumentedMethod.getParameters().size());
                 for (ParameterDescription parameterDescription : instrumentedMethod.getParameters()) {
@@ -8379,7 +8388,7 @@ public class AgentAdvice extends Advice {
                         throw new IllegalStateException("Cannot assign " + parameterDescription + " to " + target);
                     }
                     valueReads.add(new StackManipulation.Compound(MethodVariableAccess.of(parameterDescription.getType())
-                            .loadFrom(argumentHandler.argument(parameterDescription.getOffset())), readAssignment));
+                        .loadFrom(argumentHandler.argument(parameterDescription.getOffset())), readAssignment));
                 }
                 if (readOnly) {
                     return new Target.ForArray.ReadOnly(target, valueReads);
@@ -8452,8 +8461,8 @@ public class AgentAdvice extends Advice {
                         throw new IllegalStateException("Cannot define writable field access for " + target);
                     } else {
                         return new ForAllArguments(target.getType().represents(Object.class)
-                                ? TypeDescription.Generic.OBJECT
-                                : target.getType().getComponentType(), annotation);
+                            ? TypeDescription.Generic.OBJECT
+                            : target.getType().getComponentType(), annotation);
                     }
                 }
             }
@@ -8675,8 +8684,8 @@ public class AgentAdvice extends Advice {
                 protected FieldDescription resolve(TypeDescription instrumentedType, MethodDescription instrumentedMethod) {
                     FieldLocator locator = fieldLocator(instrumentedType);
                     FieldLocator.Resolution resolution = name.equals(BEAN_PROPERTY)
-                            ? resolveAccessor(locator, instrumentedMethod)
-                            : locator.locate(name);
+                        ? resolveAccessor(locator, instrumentedMethod)
+                        : locator.locate(name);
                     if (!resolution.isResolved()) {
                         throw new IllegalStateException("Cannot locate field named " + name + " for " + instrumentedType);
                     } else {
@@ -8724,9 +8733,9 @@ public class AgentAdvice extends Advice {
                      */
                     protected WithImplicitType(TypeDescription.Generic target, AnnotationDescription.Loadable<FieldValue> annotation) {
                         this(target,
-                                annotation.getValue(READ_ONLY).resolve(Boolean.class),
-                                annotation.getValue(TYPING).load(Assigner.Typing.class.getClassLoader()).resolve(Assigner.Typing.class),
-                                annotation.getValue(VALUE).resolve(String.class));
+                            annotation.getValue(READ_ONLY).resolve(Boolean.class),
+                            annotation.getValue(TYPING).load(Assigner.Typing.class.getClassLoader()).resolve(Assigner.Typing.class),
+                            annotation.getValue(VALUE).resolve(String.class));
                     }
 
                     /**
@@ -8769,10 +8778,10 @@ public class AgentAdvice extends Advice {
                                                AnnotationDescription.Loadable<FieldValue> annotation,
                                                TypeDescription declaringType) {
                         this(target,
-                                annotation.getValue(READ_ONLY).resolve(Boolean.class),
-                                annotation.getValue(TYPING).load(Assigner.Typing.class.getClassLoader()).resolve(Assigner.Typing.class),
-                                annotation.getValue(VALUE).resolve(String.class),
-                                declaringType);
+                            annotation.getValue(READ_ONLY).resolve(Boolean.class),
+                            annotation.getValue(TYPING).load(Assigner.Typing.class.getClassLoader()).resolve(Assigner.Typing.class),
+                            annotation.getValue(VALUE).resolve(String.class),
+                            declaringType);
                     }
 
                     /**
@@ -8830,8 +8839,8 @@ public class AgentAdvice extends Advice {
                         } else {
                             TypeDescription declaringType = annotation.getValue(DECLARING_TYPE).resolve(TypeDescription.class);
                             return declaringType.represents(void.class)
-                                    ? new WithImplicitType(target.getType(), annotation)
-                                    : new WithExplicitType(target.getType(), annotation, declaringType);
+                                ? new WithImplicitType(target.getType(), annotation)
+                                : new WithExplicitType(target.getType(), annotation, declaringType);
                         }
                     }
                 }
@@ -9261,9 +9270,9 @@ public class AgentAdvice extends Advice {
                  * A description of the {@link Origin#value()} method.
                  */
                 private static final MethodDescription.InDefinedShape ORIGIN_VALUE = TypeDescription.ForLoadedType.of(Origin.class)
-                        .getDeclaredMethods()
-                        .filter(named("value"))
-                        .getOnly();
+                    .getDeclaredMethods()
+                    .filter(named("value"))
+                    .getOnly();
 
                 /**
                  * {@inheritDoc}
@@ -9374,8 +9383,8 @@ public class AgentAdvice extends Advice {
                                   ArgumentHandler argumentHandler,
                                   Sort sort) {
                 return new Target.ForDefaultValue.ReadOnly(instrumentedMethod.getReturnType(), assigner.assign(instrumentedMethod.getReturnType(),
-                        TypeDescription.Generic.OBJECT,
-                        Assigner.Typing.DYNAMIC));
+                    TypeDescription.Generic.OBJECT,
+                    Assigner.Typing.DYNAMIC));
             }
 
             /**
@@ -9434,9 +9443,9 @@ public class AgentAdvice extends Advice {
              */
             protected ForEnterValue(TypeDescription.Generic target, TypeDescription.Generic enterType, AnnotationDescription.Loadable<Enter> annotation) {
                 this(target,
-                        enterType,
-                        annotation.getValue(Factory.ENTER_READ_ONLY).resolve(Boolean.class),
-                        annotation.getValue(Factory.ENTER_TYPING).load(Enter.class.getClassLoader()).resolve(Assigner.Typing.class));
+                    enterType,
+                    annotation.getValue(Factory.ENTER_READ_ONLY).resolve(Boolean.class),
+                    annotation.getValue(Factory.ENTER_TYPING).load(Enter.class.getClassLoader()).resolve(Assigner.Typing.class));
             }
 
             /**
@@ -9523,8 +9532,8 @@ public class AgentAdvice extends Advice {
                  */
                 protected static OffsetMapping.Factory<Enter> of(TypeDefinition typeDefinition) {
                     return typeDefinition.represents(void.class)
-                            ? new Illegal(Enter.class)
-                            : new Factory(typeDefinition);
+                        ? new Illegal(Enter.class)
+                        : new Factory(typeDefinition);
                 }
 
                 /**
@@ -9584,9 +9593,9 @@ public class AgentAdvice extends Advice {
              */
             protected ForExitValue(TypeDescription.Generic target, TypeDescription.Generic exitType, AnnotationDescription.Loadable<Exit> annotation) {
                 this(target,
-                        exitType,
-                        annotation.getValue(Factory.EXIT_READ_ONLY).resolve(Boolean.class),
-                        annotation.getValue(Factory.EXIT_TYPING).load(Exit.class.getClassLoader()).resolve(Assigner.Typing.class));
+                    exitType,
+                    annotation.getValue(Factory.EXIT_READ_ONLY).resolve(Boolean.class),
+                    annotation.getValue(Factory.EXIT_TYPING).load(Exit.class.getClassLoader()).resolve(Assigner.Typing.class));
             }
 
             /**
@@ -9673,8 +9682,8 @@ public class AgentAdvice extends Advice {
                  */
                 protected static OffsetMapping.Factory<Exit> of(TypeDefinition typeDefinition) {
                     return typeDefinition.represents(void.class)
-                            ? new Illegal(Exit.class)
-                            : new Factory(typeDefinition);
+                        ? new Illegal(Exit.class)
+                        : new Factory(typeDefinition);
                 }
 
                 /**
@@ -9760,9 +9769,9 @@ public class AgentAdvice extends Advice {
                  * A description of the {@link Local#value()} method.
                  */
                 protected static final MethodDescription.InDefinedShape LOCAL_VALUE = TypeDescription.ForLoadedType.of(Local.class)
-                        .getDeclaredMethods()
-                        .filter(named("value"))
-                        .getOnly();
+                    .getDeclaredMethods()
+                    .filter(named("value"))
+                    .getOnly();
 
                 /**
                  * The mapping of type names to their type that are available.
@@ -9830,8 +9839,8 @@ public class AgentAdvice extends Advice {
              */
             protected ForReturnValue(TypeDescription.Generic target, AnnotationDescription.Loadable<Return> annotation) {
                 this(target,
-                        annotation.getValue(Factory.RETURN_READ_ONLY).resolve(Boolean.class),
-                        annotation.getValue(Factory.RETURN_TYPING).load(Return.class.getClassLoader()).resolve(Assigner.Typing.class));
+                    annotation.getValue(Factory.RETURN_READ_ONLY).resolve(Boolean.class),
+                    annotation.getValue(Factory.RETURN_TYPING).load(Return.class.getClassLoader()).resolve(Assigner.Typing.class));
             }
 
             /**
@@ -9860,16 +9869,16 @@ public class AgentAdvice extends Advice {
                     throw new IllegalStateException("Cannot assign " + instrumentedMethod.getReturnType() + " to " + target);
                 } else if (readOnly) {
                     return instrumentedMethod.getReturnType().represents(void.class)
-                            ? new Target.ForDefaultValue.ReadOnly(target)
-                            : new Target.ForVariable.ReadOnly(instrumentedMethod.getReturnType(), argumentHandler.returned(), readAssignment);
+                        ? new Target.ForDefaultValue.ReadOnly(target)
+                        : new Target.ForVariable.ReadOnly(instrumentedMethod.getReturnType(), argumentHandler.returned(), readAssignment);
                 } else {
                     StackManipulation writeAssignment = assigner.assign(target, instrumentedMethod.getReturnType(), typing);
                     if (!writeAssignment.isValid()) {
                         throw new IllegalStateException("Cannot assign " + target + " to " + instrumentedMethod.getReturnType());
                     }
                     return instrumentedMethod.getReturnType().represents(void.class)
-                            ? new Target.ForDefaultValue.ReadWrite(target)
-                            : new Target.ForVariable.ReadWrite(instrumentedMethod.getReturnType(), argumentHandler.returned(), readAssignment, writeAssignment);
+                        ? new Target.ForDefaultValue.ReadWrite(target)
+                        : new Target.ForVariable.ReadWrite(instrumentedMethod.getReturnType(), argumentHandler.returned(), readAssignment, writeAssignment);
                 }
             }
 
@@ -9953,8 +9962,8 @@ public class AgentAdvice extends Advice {
              */
             protected ForThrowable(TypeDescription.Generic target, AnnotationDescription.Loadable<Thrown> annotation) {
                 this(target,
-                        annotation.getValue(Factory.THROWN_READ_ONLY).resolve(Boolean.class),
-                        annotation.getValue(Factory.THROWN_TYPING).load(Thrown.class.getClassLoader()).resolve(Assigner.Typing.class));
+                    annotation.getValue(Factory.THROWN_READ_ONLY).resolve(Boolean.class),
+                    annotation.getValue(Factory.THROWN_TYPING).load(Thrown.class.getClassLoader()).resolve(Assigner.Typing.class));
             }
 
             /**
@@ -10030,9 +10039,9 @@ public class AgentAdvice extends Advice {
                 @SuppressWarnings("unchecked") // In absence of @SafeVarargs
                 protected static OffsetMapping.Factory<?> of(MethodDescription.InDefinedShape adviceMethod) {
                     return isNoExceptionHandler(adviceMethod.getDeclaredAnnotations()
-                            .ofType(OnMethodExit.class)
-                            .getValue(ON_THROWABLE)
-                            .resolve(TypeDescription.class))
+                        .ofType(OnMethodExit.class)
+                        .getValue(ON_THROWABLE)
+                        .resolve(TypeDescription.class))
                         ? new OffsetMapping.Factory.Illegal(Thrown.class) : Factory.INSTANCE;
                 }
 
@@ -10439,9 +10448,9 @@ public class AgentAdvice extends Advice {
                         throw new IllegalArgumentException(target.getType() + " must declare exactly one abstract method");
                     }
                     return new ForStackManipulation(MethodInvocation.invoke(bootstrapMethod).dynamic(methodCandidates.getOnly().getInternalName(),
-                            target.getType().asErasure(),
-                            methodCandidates.getOnly().getParameters().asTypeList().asErasures(),
-                            arguments), target.getType(), target.getType(), Assigner.Typing.STATIC);
+                        target.getType().asErasure(),
+                        methodCandidates.getOnly().getParameters().asTypeList().asErasures(),
+                        arguments), target.getType(), target.getType(), Assigner.Typing.STATIC);
                 }
             }
         }

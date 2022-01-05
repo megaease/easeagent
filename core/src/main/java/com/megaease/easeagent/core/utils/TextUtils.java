@@ -17,17 +17,21 @@
 
 package com.megaease.easeagent.core.utils;
 
-import com.google.common.base.Charsets;
 import com.megaease.easeagent.plugin.utils.common.DataSize;
+
+import java.nio.charset.StandardCharsets;
 
 public class TextUtils {
 
+    private TextUtils() {
+    }
+
     public static String cutStrByDataSize(String str, DataSize size) {
-        byte[] now = str.getBytes(Charsets.UTF_8);
+        byte[] now = str.getBytes(StandardCharsets.UTF_8);
         if (now.length <= size.toBytes()) {
             return str;
         }
-        String tmp = new String(now, 0, (int) size.toBytes(), Charsets.UTF_8);
+        String tmp = new String(now, 0, (int) size.toBytes(), StandardCharsets.UTF_8);
         char unstable = tmp.charAt(tmp.length() - 1);
         char old = str.charAt(tmp.length() - 1);
         if (unstable == old) {

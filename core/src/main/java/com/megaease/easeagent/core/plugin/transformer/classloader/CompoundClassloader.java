@@ -24,13 +24,13 @@ import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 
 public class CompoundClassloader {
-    private final static Logger log = LoggerFactory.getLogger(MethodTransformation.class);
-    private static final Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
+    private static final Logger log = LoggerFactory.getLogger(MethodTransformation.class);
+    private static final Cache<ClassLoader, Boolean> CACHE = CacheBuilder.newBuilder().weakKeys().build();
 
 
     public static boolean checkClassloaderExist(ClassLoader loader) {
-        if (cache.getIfPresent(loader) == null) {
-            cache.put(loader, true);
+        if (CACHE.getIfPresent(loader) == null) {
+            CACHE.put(loader, true);
             return false;
         }
         return true;

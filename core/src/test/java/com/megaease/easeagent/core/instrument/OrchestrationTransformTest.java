@@ -97,7 +97,7 @@ public class OrchestrationTransformTest extends TransformTestBase {
             // check
             Object instance = type.getDeclaredConstructor().newInstance();
             AgentDynamicFieldAccessor.setDynamicFieldValue(instance, BAR);
-            assertEquals(AgentDynamicFieldAccessor.getDynamicFieldValue(instance), BAR);
+            assertEquals(BAR, AgentDynamicFieldAccessor.getDynamicFieldValue(instance));
             assertThat(type.getDeclaredMethod(FOO, String.class)
                     .invoke(instance, "kkk"),
                 is(BAR + QUX + BAR));

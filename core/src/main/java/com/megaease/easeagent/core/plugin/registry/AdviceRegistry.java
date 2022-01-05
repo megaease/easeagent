@@ -38,8 +38,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AdviceRegistry {
-    private final static ThreadLocal<WeakReference<ClassLoader>> currentClassLoader = new ThreadLocal<>();
-    private final static Logger log = LoggerFactory.getLogger(AdviceRegistry.class);
+
+    private AdviceRegistry() {
+    }
+
+    private static final ThreadLocal<WeakReference<ClassLoader>> CURRENT_CLASS_LOADER = new ThreadLocal<>();
+    private static final Logger log = LoggerFactory.getLogger(AdviceRegistry.class);
     static Map<String, IdentityPointcuts> methodsSet = new ConcurrentHashMap<>();
 
     public static Integer check(TypeDescription instrumentedType,
@@ -123,7 +127,7 @@ public class AdviceRegistry {
             if (!(om instanceof OffsetMapping.ForStackManipulation)) {
                 continue;
             }
-            OffsetMapping.ForStackManipulation forStackManipulation = (OffsetMapping.ForStackManipulation)om;
+            OffsetMapping.ForStackManipulation forStackManipulation = (OffsetMapping.ForStackManipulation) om;
             if (!(forStackManipulation.getStackManipulation() instanceof AgentJavaConstantValue)) {
                 continue;
             }
@@ -143,7 +147,7 @@ public class AdviceRegistry {
             if (!(om instanceof OffsetMapping.ForStackManipulation)) {
                 continue;
             }
-            OffsetMapping.ForStackManipulation forStackManipulation = (OffsetMapping.ForStackManipulation)om;
+            OffsetMapping.ForStackManipulation forStackManipulation = (OffsetMapping.ForStackManipulation) om;
             if (!(forStackManipulation.getStackManipulation() instanceof AgentJavaConstantValue)) {
                 continue;
             }
@@ -160,11 +164,11 @@ public class AdviceRegistry {
     }
 
     public static void setCurrentClassLoader(ClassLoader loader) {
-        currentClassLoader.set(new WeakReference<>(loader));
+        CURRENT_CLASS_LOADER.set(new WeakReference<>(loader));
     }
 
     public static ClassLoader getCurrentClassLoader() {
-        return currentClassLoader.get().get();
+        return CURRENT_CLASS_LOADER.get().get();
     }
 
     public static class IdentityPointcuts {

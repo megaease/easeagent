@@ -33,6 +33,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class JarUtils {
+
+    private JarUtils() {
+    }
+
     private static final int EOF = -1;
     private static final int BUFFER_SIZE = 4096;
 
@@ -40,11 +44,13 @@ public class JarUtils {
         new PrivilegedAction<String>() {
             @Override
             public String run() {
-                return System.getProperty("java.io.tmpdir")  + File.separatorChar + "easeagent" + File.separatorChar;}
+                return System.getProperty("java.io.tmpdir") + File.separatorChar + "easeagent" + File.separatorChar;
+            }
         })
     );
 
     private static SoftReference<Map<String, JarFile>> fileCache;
+
     static {
         fileCache = new SoftReference<>(new ConcurrentHashMap<>());
     }
@@ -156,13 +162,14 @@ public class JarUtils {
 
     /**
      * Add the given {@link JarFile} to the root file cache.
+     *
      * @param fileName the source file to add
-     * @param jarFile the jar file.
+     * @param jarFile  the jar file.
      */
     static void addToRootFileCache(String fileName, JarFile jarFile) {
         Map<String, JarFile> cache = fileCache.get();
         if (cache == null) {
-            cache = new ConcurrentHashMap<>();
+            cache = new ConcurrentHashMap<>(8);
             fileCache = new SoftReference<>(cache);
         }
         cache.put(fileName, jarFile);

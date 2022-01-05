@@ -24,13 +24,21 @@ import com.megaease.easeagent.plugin.field.NullObject;
 import net.bytebuddy.asm.Advice;
 
 public class DynamicFieldAdvice {
-    public static Logger log = LoggerFactory.getLogger(DynamicFieldAdvice.class);
+
+    private DynamicFieldAdvice() {
+    }
+
+    public static final Logger log = LoggerFactory.getLogger(DynamicFieldAdvice.class);
 
     public static class DynamicInstanceInit {
+
+        private DynamicInstanceInit() {
+        }
+
         @Advice.OnMethodExit
         public static void exit(@Advice.This(optional = true) Object target) {
             if (target instanceof DynamicFieldAccessor) {
-                DynamicFieldAccessor accessor = (DynamicFieldAccessor)target;
+                DynamicFieldAccessor accessor = (DynamicFieldAccessor) target;
                 if (accessor.getEaseAgent$$DynamicField$$Data() == null) {
                     accessor.setEaseAgent$$DynamicField$$Data(NullObject.NULL);
                 }
@@ -39,6 +47,10 @@ public class DynamicFieldAdvice {
     }
 
     public static class DynamicClassInit {
+
+        private DynamicClassInit() {
+        }
+
         @Advice.OnMethodExit
         public static void exit(@Advice.Origin("#m") String method) {
         }
