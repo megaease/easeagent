@@ -28,21 +28,6 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
 
     public final Collection<WriteBuffer.Writer<Span>> writerList;
 
-    @Deprecated
-    public AgentV2SpanWriter() {
-        this(new GlobalExtrasSupplier() {
-            @Override
-            public String service() {
-                return "";
-            }
-
-            @Override
-            public String system() {
-                return "";
-            }
-        }, null);
-    }
-
     public AgentV2SpanWriter(GlobalExtrasSupplier extrasSupplier, TraceProps properties) {
         writerList = ImmutableList.<WriteBuffer.Writer<Span>>builder()
                 .add(new AgentV2SpanBaseWriter())
@@ -56,21 +41,17 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
 
 
     public int sizeInBytes(Span value) {
-        final MutableInt size = new MutableInt(1); // 1 byte for first {
-        writerList.forEach(w -> {
-            size.add(w.sizeInBytes(value));
-        });
-        size.add(1); // 1 byte for last }
+        final MutableInt size = new MutableInt(1);
+        writerList.forEach(w -> size.add(w.sizeInBytes(value)));
+        size.add(1);
         return size.intValue();
     }
 
     @Override
     public void write(Span value, WriteBuffer buffer) {
-        buffer.writeByte(123); //write '{'
-        writerList.forEach(w -> {
-            w.write(value, buffer);
-        });
-        buffer.writeByte(125); // write last '}'
+        buffer.writeByte(123);
+        writerList.forEach(w -> w.write(value, buffer));
+        buffer.writeByte(125);
     }
 
     public String toString() {

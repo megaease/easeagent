@@ -1,1 +1,1 @@
-com.megaease.easeagent.zipkin.TracingProvider
+com.megaease.easeagent.zipkin.TracingProviderImpl

@@ -27,13 +27,12 @@ import java.util.Optional;
 public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
 
     final String type;
-    final GlobalExtrasSupplier extras;//= ApplicationUtils.getBean(Environment.class).getProperty(MetricNameBuilder
-    // .SPRING_APPLICATION_NAME, "");
-    final TraceProps traceProperties;//= ApplicationUtils.getBean(TraceProperties.class);
+    final GlobalExtrasSupplier extras;
+    final TraceProps traceProperties;
 
-    final String typeFieldName = ",\"type\":\"";
-    final String serviceFieldName = ",\"service\":\"";
-    final String systemFieldName = ",\"system\":\"";
+    static final String TYPE_FIELD_NAME = ",\"type\":\"";
+    static final String SERVICE_FIELD_NAME = ",\"service\":\"";
+    static final String SYSTEM_FIELD_NAME = ",\"system\":\"";
 
     public AgentV2SpanGlobalWriter(String type, GlobalExtrasSupplier extras, TraceProps tp) {
         this.type = type;
@@ -46,19 +45,19 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
         final MutableInt mutableInt = new MutableInt(0);
         Optional.ofNullable(traceProperties).ifPresent(t -> {
             if (TextUtils.hasText(type)) {
-                mutableInt.add(typeFieldName.length() + 1);
+                mutableInt.add(TYPE_FIELD_NAME.length() + 1);
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(type));
             }
 
             String tmpService = this.extras.service();
             if (TextUtils.hasText(tmpService)) {
-                mutableInt.add(serviceFieldName.length() + 1);
+                mutableInt.add(SERVICE_FIELD_NAME.length() + 1);
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpService));
             }
 
             String tmpSystem = this.extras.system();
             if (TextUtils.hasText(tmpSystem)) {
-                mutableInt.add(systemFieldName.length() + 1);
+                mutableInt.add(SYSTEM_FIELD_NAME.length() + 1);
                 mutableInt.add(JsonEscaper.jsonEscapedSizeInBytes(tmpSystem));
             }
         });
@@ -69,19 +68,19 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
     public void write(Span value, WriteBuffer buffer) {
         Optional.ofNullable(traceProperties).ifPresent(t -> {
             if (TextUtils.hasText(type)) {
-                buffer.writeAscii(typeFieldName);
+                buffer.writeAscii(TYPE_FIELD_NAME);
                 buffer.writeUtf8(JsonEscaper.jsonEscape(type));
                 buffer.writeByte(34);
             }
             String tmpService = this.extras.service();
             if (TextUtils.hasText(tmpService)) {
-                buffer.writeAscii(serviceFieldName);
+                buffer.writeAscii(SERVICE_FIELD_NAME);
                 buffer.writeUtf8(JsonEscaper.jsonEscape(tmpService));
                 buffer.writeByte(34);
             }
             String tmpSystem = this.extras.system();
             if (TextUtils.hasText(tmpSystem)) {
-                buffer.writeAscii(systemFieldName);
+                buffer.writeAscii(SYSTEM_FIELD_NAME);
                 buffer.writeUtf8(JsonEscaper.jsonEscape(tmpSystem));
                 buffer.writeByte(34);
             }

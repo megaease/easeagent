@@ -21,10 +21,10 @@ import brave.Tracing;
 import com.megaease.easeagent.mock.config.ConfigMock;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.utils.MockProvider;
-import com.megaease.easeagent.zipkin.TracingProvider;
+import com.megaease.easeagent.zipkin.TracingProviderImpl;
 
 public class TracingProviderMock implements MockProvider {
-    private static final TracingProvider TRACING_PROVIDER = new TracingProvider();
+    private static final TracingProviderImpl TRACING_PROVIDER = new TracingProviderImpl();
     private static final Tracing TRACING;
 
     static {
@@ -34,7 +34,7 @@ public class TracingProviderMock implements MockProvider {
         TRACING = TRACING_PROVIDER.tracing();
     }
 
-    public static TracingProvider getTracingProvider() {
+    public static TracingProviderImpl getTracingProvider() {
         return TRACING_PROVIDER;
     }
 

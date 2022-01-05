@@ -17,7 +17,9 @@
 
 package com.megaease.easeagent.plugin.api.trace;
 
-import java.util.function.Function;
+import com.megaease.easeagent.plugin.api.Context;
+
+import java.util.function.Predicate;
 
 /**
  * a MessagingTracing
@@ -49,7 +51,7 @@ public interface MessagingTracing<R extends MessagingRequest> {
      * yet been made. For example, if a trace is already in progress, this function is not called. You
      * can implement this to skip channels that you never want to trace.
      */
-    Function<R, Boolean> consumerSampler();
+    Predicate<R> consumerSampler();
 
     /**
      * Returns an overriding sampling decision for a new trace. Defaults to ignore the request and use
@@ -59,7 +61,7 @@ public interface MessagingTracing<R extends MessagingRequest> {
      * making an messaging request as a part of booting your application. You may want to opt-out of
      * tracing producer requests that did not originate from a consumer request.
      */
-    Function<R, Boolean> producerSampler();
+    Predicate<R> producerSampler();
 
     /**
      * Returns an overriding sampling decision for a new trace.
@@ -75,4 +77,43 @@ public interface MessagingTracing<R extends MessagingRequest> {
      * @see #consumerSampler()
      */
     boolean producerSampler(R request);
+
+    /**
+     * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rebbitmq consumer
+     * <p>
+     * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
+     * and {@link Request#cacheScope()}.
+     *
+     * <p>
+     * It will set the Span's tags "messaging.operation", "messaging.channel_kind", "messaging.channel_name" from request
+     * {@link MessagingRequest#operation()} {@link MessagingRequest#channelKind()} {@link MessagingRequest#channelName()}
+     *
+     * <p>
+     * It just only obtain the key:value required by Trace from the {@link Request#header(String)},
+     * If you need and get Span, generate result use {@link Context#consumerSpan(MessagingRequest)}.
+     *
+     * @param request {@link MessagingRequest}
+     * @return {@link Span}
+     * @see Context#consumerSpan(MessagingRequest)
+     */
+    Span consumerSpan(R request);
+
+
+    /**
+     * Create a Span for message producer. Examples: kafka producer, rebbitmq producer
+     * <p>
+     * It will set the Span's tags "messaging.operation", "messaging.channel_kind", "messaging.channel_name" from request
+     * {@link MessagingRequest#operation()} {@link MessagingRequest#channelKind()} {@link MessagingRequest#channelName()}
+     *
+     * <p>
+     * It just only pass multiple key:value values required by Trace through
+     * {@link Request#setHeader(String, String)}, And set the Span's kind, name and
+     * cached scope through {@link Request#kind()}, {@link Request#name()} and {@link Request#cacheScope()}.
+     * If you need and get Span, generate result use {@link Context#producerSpan(MessagingRequest)}.
+     *
+     * @param request {@link MessagingRequest}
+     * @return {@link Span}
+     * @see Context#producerSpan(MessagingRequest)
+     */
+    Span producerSpan(R request);
 }

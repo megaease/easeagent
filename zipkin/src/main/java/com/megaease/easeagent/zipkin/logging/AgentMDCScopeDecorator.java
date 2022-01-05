@@ -35,10 +35,6 @@ public class AgentMDCScopeDecorator {
         return INSTANCE_V2;
     }
 
-    public static CorrelationScopeDecorator.Builder newBuilder() {
-        return new AgentMDCScopeDecorator.Builder();
-    }
-
     static final class Builder extends CorrelationScopeDecorator.Builder {
         Builder() {
             super(AgentMDCScopeDecorator.MDCContext.INSTANCE);
@@ -80,10 +76,7 @@ public class AgentMDCScopeDecorator {
         }
 
         private ClassLoader getUserClassLoader() {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            return classLoader;
-//            if (classLoader==null){
-//            }
+            return Thread.currentThread().getContextClassLoader();
         }
     }
 

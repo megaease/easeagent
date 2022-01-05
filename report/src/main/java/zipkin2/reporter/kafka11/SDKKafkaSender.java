@@ -40,10 +40,12 @@ public class SDKKafkaSender extends Sender implements SDKSender {
         return new SDKKafkaSender(sender, properties);
     }
 
+    @Override
     public boolean isClose() {
         return kafkaSender.closeCalled;
     }
 
+    @Override
     public void close() throws IOException {
         kafkaSender.close();
     }
@@ -75,15 +77,13 @@ public class SDKKafkaSender extends Sender implements SDKSender {
         return kafkaSender.messageSizeInBytes(encodedSpans);
     }
 
+    @Override
     public CheckResult check() {
         return kafkaSender.check();
     }
-
 
     @Override
     public int messageSizeInBytes(int encodedSizeInBytes) {
         return kafkaSender.messageSizeInBytes(encodedSizeInBytes);
     }
-
-
 }

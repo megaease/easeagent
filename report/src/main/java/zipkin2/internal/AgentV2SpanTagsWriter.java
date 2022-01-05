@@ -28,12 +28,12 @@ public class AgentV2SpanTagsWriter implements WriteBuffer.Writer<Span> {
         int sizeInBytes = 0;
         if (!value.tags().isEmpty()) {
             sizeInBytes += 10;
-            Iterator i = value.tags().entrySet().iterator();
+            Iterator<Map.Entry<String, String>> i = value.tags().entrySet().iterator();
             while (i.hasNext()) {
-                Map.Entry<String, String> entry = (Map.Entry) i.next();
+                Map.Entry<String, String> entry = i.next();
                 sizeInBytes += 5;
-                sizeInBytes += JsonEscaper.jsonEscapedSizeInBytes((CharSequence) entry.getKey());
-                sizeInBytes += JsonEscaper.jsonEscapedSizeInBytes((CharSequence) entry.getValue());
+                sizeInBytes += JsonEscaper.jsonEscapedSizeInBytes(entry.getKey());
+                sizeInBytes += JsonEscaper.jsonEscapedSizeInBytes(entry.getValue());
                 if (i.hasNext()) {
                     sizeInBytes += 1;
                 }
@@ -46,14 +46,14 @@ public class AgentV2SpanTagsWriter implements WriteBuffer.Writer<Span> {
     public void write(Span value, WriteBuffer b) {
         if (!value.tags().isEmpty()) {
             b.writeAscii(",\"tags\":{");
-            Iterator i = value.tags().entrySet().iterator();
+            Iterator<Map.Entry<String, String>> i = value.tags().entrySet().iterator();
             while (i.hasNext()) {
-                Map.Entry<String, String> entry = (Map.Entry) i.next();
+                Map.Entry<String, String> entry = i.next();
 
                 b.writeByte('\"');
-                b.writeUtf8(JsonEscaper.jsonEscape((CharSequence) entry.getKey()));
+                b.writeUtf8(JsonEscaper.jsonEscape(entry.getKey()));
                 b.writeAscii("\":\"");
-                b.writeUtf8(JsonEscaper.jsonEscape((CharSequence) entry.getValue()));
+                b.writeUtf8(JsonEscaper.jsonEscape(entry.getValue()));
                 b.writeByte('\"');
                 if (i.hasNext()) {
                     b.writeByte(',');
