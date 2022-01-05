@@ -54,7 +54,6 @@ public class TraceReport {
     }
 
     private RefreshableReporter<Span> initSpanRefreshableReporter(Configs configs) {
-        final RefreshableReporter<Span> spanRefreshableReporter;
         OutputProperties outputProperties = Utils.extractOutputProperties(configs);
         Map<String, String> sslConfig = new HashMap<>();
         if (SecurityProtocol.SSL.name.equals(outputProperties.getSecurityProtocol())) {
@@ -67,7 +66,7 @@ public class TraceReport {
             sslConfig.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, outputProperties.getEndpointAlgorithm());
         }
 
-        Sender sender = new SimpleSender();
+        Sender sender;
         TraceProps traceProperties = Utils.extractTraceProps(configs);
         if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()
             && StringUtils.isNotEmpty(outputProperties.getServers())) {
@@ -79,6 +78,8 @@ public class TraceReport {
                     .encoding(Encoding.JSON)
                     .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes())
                     .build());
+        } else {
+            sender = new SimpleSender();
         }
 
         GlobalExtrasSupplier extrasSupplier = new GlobalExtrasSupplier() {
@@ -103,8 +104,7 @@ public class TraceReport {
                 traceProperties,
                 extrasSupplier);
         reporter.startFlushThread();
-        spanRefreshableReporter = new RefreshableReporter<>(reporter, traceProperties, outputProperties);
-        return spanRefreshableReporter;
+        return new RefreshableReporter<>(reporter, traceProperties, outputProperties);
     }
 
     public void report(Span span) {

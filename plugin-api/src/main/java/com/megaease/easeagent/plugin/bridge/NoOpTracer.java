@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class NoOpTracer {
     public static final ITracing NO_OP_TRACING = NoopTracing.INSTANCE;
@@ -233,7 +234,7 @@ public class NoOpTracer {
         }
 
         @Override
-        public MessagingTracing messagingTracing() {
+        public MessagingTracing<MessagingRequest> messagingTracing() {
             return EmptyMessagingTracing.INSTANCE;
         }
 
@@ -255,7 +256,7 @@ public class NoOpTracer {
 
     public static class EmptyMessagingTracing implements MessagingTracing<MessagingRequest> {
         private static final EmptyMessagingTracing INSTANCE = new EmptyMessagingTracing();
-        private static final Function<MessagingRequest, Boolean> NOOP_SAMPLER = r -> false;
+        private static final Predicate<MessagingRequest> NOOP_SAMPLER = r -> false;
 
         @Override
         public Extractor<MessagingRequest> extractor() {
@@ -273,12 +274,12 @@ public class NoOpTracer {
         }
 
         @Override
-        public Function<MessagingRequest, Boolean> consumerSampler() {
+        public Predicate<MessagingRequest> consumerSampler() {
             return NOOP_SAMPLER;
         }
 
         @Override
-        public Function<MessagingRequest, Boolean> producerSampler() {
+        public Predicate<MessagingRequest> producerSampler() {
             return NOOP_SAMPLER;
         }
 
@@ -290,6 +291,16 @@ public class NoOpTracer {
         @Override
         public boolean producerSampler(MessagingRequest request) {
             return false;
+        }
+
+        @Override
+        public Span consumerSpan(MessagingRequest request) {
+            return NoOpTracer.NO_OP_SPAN;
+        }
+
+        @Override
+        public Span producerSpan(MessagingRequest request) {
+            return NoOpTracer.NO_OP_SPAN;
         }
     }
 

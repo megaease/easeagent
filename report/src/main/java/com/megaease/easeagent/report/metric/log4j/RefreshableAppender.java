@@ -60,7 +60,7 @@ public interface RefreshableAppender extends TestableAppender {
 
     class DefaultRefreshableAppender implements RefreshableAppender {
 
-        private final static Logger LOGGER = com.megaease.easeagent.log4j2.LoggerFactory.getLogger(DefaultRefreshableAppender.class);
+        private static final Logger LOGGER = com.megaease.easeagent.log4j2.LoggerFactory.getLogger(DefaultRefreshableAppender.class);
 
         private final String loggerName;
         private final String appenderName;

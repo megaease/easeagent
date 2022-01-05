@@ -17,7 +17,9 @@
 
 package com.megaease.easeagent.plugin.api.trace;
 
-import java.util.function.Function;
+import com.megaease.easeagent.plugin.api.Context;
+
+import java.util.function.Predicate;
 
 /**
  * a MessagingTracing
@@ -49,7 +51,7 @@ public interface MessagingTracing<R extends MessagingRequest> {
      * yet been made. For example, if a trace is already in progress, this function is not called. You
      * can implement this to skip channels that you never want to trace.
      */
-    Function<R, Boolean> consumerSampler();
+    Predicate<R> consumerSampler();
 
     /**
      * Returns an overriding sampling decision for a new trace. Defaults to ignore the request and use
@@ -59,7 +61,7 @@ public interface MessagingTracing<R extends MessagingRequest> {
      * making an messaging request as a part of booting your application. You may want to opt-out of
      * tracing producer requests that did not originate from a consumer request.
      */
-    Function<R, Boolean> producerSampler();
+    Predicate<R> producerSampler();
 
     /**
      * Returns an overriding sampling decision for a new trace.

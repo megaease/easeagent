@@ -47,7 +47,10 @@ import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.WARNING;
 
 public class SDKAsyncReporter<S> extends AsyncReporter<S> {
-    static final Logger logger = Logger.getLogger(BoundedAsyncReporter.class.getName());
+    static final Logger logger = Logger.getLogger(SDKAsyncReporter.class.getName());
+
+    private static final String NAME_PREFIX = "AsyncReporter";
+
     final AtomicBoolean closed = new AtomicBoolean(false);
     final BytesEncoder<S> encoder;
     ByteBoundedQueue<S> pending;
@@ -189,24 +192,20 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
         // Create the next message. Since we are outside the lock shared with writers, we can encode
         ArrayList<byte[]> nextMessage = new ArrayList<>(bundler.count());
-        bundler.drain(new SpanWithSizeConsumer<S>() {
-            @Override
-            public boolean offer(S next, int nextSizeInBytes) {
-                nextMessage.add(encoder.encode(next)); // speculatively add to the pending message
-                if (sender.messageSizeInBytes(nextMessage) > messageMaxBytes) {
-                    // if we overran the message size, remove the encoded message.
-                    nextMessage.remove(nextMessage.size() - 1);
+        bundler.drain((next, nextSizeInBytes) -> {
+            nextMessage.add(encoder.encode(next)); // speculatively add to the pending message
+            if (sender.messageSizeInBytes(nextMessage) > messageMaxBytes) {
+                // if we overran the message size, remove the encoded message.
+                nextMessage.remove(nextMessage.size() - 1);
 
-                    return false;
-                }
-                return true;
+                return false;
             }
+            return true;
         });
 
         try {
-
             sender.sendSpans(nextMessage).execute();
-        } catch (IOException | RuntimeException | Error t) {
+        } catch (IOException | RuntimeException t) {
             // In failure case, we increment messages and spans dropped.
             int count = nextMessage.size();
             Call.propagateIfFatal(t);
@@ -253,13 +252,13 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         int count = pending.clear();
         if (count > 0) {
             metrics.incrementSpansDropped(count);
-            logger.warning("Dropped " + count + " spans due to AsyncReporter.close()");
+            logger.log(WARNING, "Dropped {0} spans due to AsyncReporter.close()", count);
         }
     }
 
     @Override
     public String toString() {
-        return "AsyncReporter{" + sender + "}";
+        return NAME_PREFIX + "{" + sender + "}";
     }
 
     public void setThreadFactory(ThreadFactory threadFactory) {
@@ -268,16 +267,16 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
     public void startFlushThread() {
         if (this.messageTimeoutNanos > 0) {
-            List<Thread> flushThreads = new CopyOnWriteArrayList<>();
+            List<Thread> threads = new CopyOnWriteArrayList<>();
             for (int i = 0; i < traceProperties.getOutput().getReportThread(); i++) { // Multiple consumer consumption
                 final BufferNextMessage<S> consumer =
                     BufferNextMessage.create(encoder.encoding(), this.messageMaxBytes, this.messageTimeoutNanos);
-                Thread flushThread = this.threadFactory.newThread(new Flusher<S>(this, consumer, this.sender, traceProperties));
-                flushThread.setName("AsyncReporter{" + this.sender + "}");
+                Thread flushThread = this.threadFactory.newThread(new Flusher<>(this, consumer, this.sender, traceProperties));
+                flushThread.setName(NAME_PREFIX + "{" + this.sender + "}");
                 flushThread.setDaemon(true);
                 flushThread.start();
             }
-            this.setFlushThreads(flushThreads);
+            this.setFlushThreads(threads);
         }
     }
 
@@ -289,34 +288,35 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
     }
 
+    @SuppressWarnings("unused")
     public static final class Builder {
 
-        private final AsyncReporter.Builder builder;
+        private final AsyncReporter.Builder asyncBuilder;
 
         TracerConverter tracerConverter;
 
         private TraceProps traceProperties;
 
-        public Builder(AsyncReporter.Builder builder) {
-            this.builder = builder;
+        public Builder(AsyncReporter.Builder asyncBuilder) {
+            this.asyncBuilder = asyncBuilder;
         }
 
         public AsyncReporter.Builder getBuilder() {
-            return builder;
+            return asyncBuilder;
         }
 
         public AsyncReporter.Builder threadFactory(ThreadFactory threadFactory) {
-            return builder.threadFactory(threadFactory);
+            return asyncBuilder.threadFactory(threadFactory);
         }
 
         public AsyncReporter.Builder traceProperties(TraceProps traceProperties) {
             this.traceProperties = traceProperties;
-            return builder;
+            return asyncBuilder;
         }
 
         public AsyncReporter.Builder metrics(ReporterMetrics metrics) {
 
-            return builder.metrics(metrics);
+            return asyncBuilder.metrics(metrics);
         }
 
         /**
@@ -325,7 +325,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
          */
         public AsyncReporter.Builder messageMaxBytes(int messageMaxBytes) {
 
-            return builder.messageMaxBytes(messageMaxBytes);
+            return asyncBuilder.messageMaxBytes(messageMaxBytes);
         }
 
         /**
@@ -339,7 +339,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
          */
         public AsyncReporter.Builder messageTimeout(long timeout, TimeUnit unit) {
 
-            return builder.messageTimeout(timeout, unit);
+            return asyncBuilder.messageTimeout(timeout, unit);
         }
 
         /**
@@ -347,7 +347,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
          */
         public AsyncReporter.Builder closeTimeout(long timeout, TimeUnit unit) {
 
-            return builder.closeTimeout(timeout, unit);
+            return asyncBuilder.closeTimeout(timeout, unit);
         }
 
         /**
@@ -365,7 +365,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
          */
         public AsyncReporter.Builder queuedMaxBytes(int queuedMaxBytes) {
 
-            return builder.queuedMaxBytes(queuedMaxBytes);
+            return asyncBuilder.queuedMaxBytes(queuedMaxBytes);
         }
 
         /**
@@ -373,15 +373,13 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
          */
         public SDKAsyncReporter<Span> build(TraceProps traceProperties, GlobalExtrasSupplier extrasSupplier) {
             this.traceProperties = traceProperties;
-            switch (builder.sender.encoding()) {
+            switch (asyncBuilder.sender.encoding()) {
                 case JSON:
                     return build(getAgentEncoder(traceProperties, extrasSupplier));
                 case PROTO3:
                     return build(SpanBytesEncoder.PROTO3);
-                case THRIFT:
-                    return build(SpanBytesEncoder.THRIFT);
                 default:
-                    throw new UnsupportedOperationException(builder.sender.encoding().name());
+                    throw new UnsupportedOperationException(asyncBuilder.sender.encoding().name());
             }
         }
 
@@ -394,7 +392,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
          */
         public AsyncReporter.Builder queuedMaxSpans(int queuedMaxSpans) {
 
-            return builder.queuedMaxSpans(queuedMaxSpans);
+            return asyncBuilder.queuedMaxSpans(queuedMaxSpans);
         }
 
         /**
@@ -403,27 +401,29 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         private <S> SDKAsyncReporter<S> build(BytesEncoder<S> encoder) {
             if (encoder == null) throw new NullPointerException("encoder == null");
 
-            if (encoder.encoding() != builder.sender.encoding()) {
+            if (encoder.encoding() != asyncBuilder.sender.encoding()) {
                 throw new IllegalArgumentException(String.format(
-                    "Encoder doesn't match Sender: %s %s", encoder.encoding(), builder.sender.encoding()));
+                    "Encoder doesn't match Sender: %s %s", encoder.encoding(), asyncBuilder.sender.encoding()));
             }
 
-            final SDKAsyncReporter<S> result = new SDKAsyncReporter<S>(this, encoder, traceProperties);
+            final SDKAsyncReporter<S> result = new SDKAsyncReporter<>(this, encoder, traceProperties);
 
-            if (builder.messageTimeoutNanos > 0) { // Start a thread that flushes the queue in a loop.
+            if (asyncBuilder.messageTimeoutNanos > 0) { // Start a thread that flushes the queue in a loop.
                 List<Thread> flushThreads = new CopyOnWriteArrayList<>();
                 for (int i = 0; i < traceProperties.getOutput().getReportThread(); i++) { // Multiple consumer consumption
                     final BufferNextMessage<S> consumer =
-                        BufferNextMessage.create(encoder.encoding(), builder.messageMaxBytes, builder.messageTimeoutNanos);
-                    Thread flushThread = builder.threadFactory.newThread(new Flusher<S>(result, consumer, builder.sender, traceProperties));
-                    flushThread.setName("AsyncReporter{" + builder.sender + "}");
+                        BufferNextMessage.create(encoder.encoding(), asyncBuilder.messageMaxBytes, asyncBuilder.messageTimeoutNanos);
+
+                    Thread flushThread = asyncBuilder.threadFactory
+                        .newThread(new Flusher<>(result, consumer, asyncBuilder.sender, traceProperties));
+                    flushThread.setName(NAME_PREFIX + "{" + asyncBuilder.sender + "}");
                     flushThread.setDaemon(true);
                     flushThread.start();
                     flushThreads.add(flushThread);
                 }
                 result.setFlushThreads(flushThreads);
-                result.setThreadFactory(builder.threadFactory);
-                result.setSender(builder.sender);
+                result.setThreadFactory(asyncBuilder.threadFactory);
+                result.setSender(asyncBuilder.sender);
             }
 
             return result;
@@ -490,14 +490,11 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
                     // otherwise the cpu will spin.
                     result.flush(consumer, result.pending);
                 }
-            } catch (RuntimeException | Error e) {
-                logger.log(Level.WARNING, "Unexpected error flushing spans", e);
-                throw e;
             } finally {
                 int count = consumer.count();
                 if (count > 0) {
                     result.metrics.incrementSpansDropped(count);
-                    logger.warning("Dropped " + count + " spans due to AsyncReporter.close()");
+                    logger.log(WARNING,"Dropped {0} spans due to AsyncReporter.close()", count);
                 }
                 result.close.countDown();
             }
@@ -505,9 +502,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
         @Override
         public String toString() {
-            return "AsyncReporter{" + result.sender + "}";
+            return NAME_PREFIX + "{" + result.sender + "}";
         }
     }
-
-
 }

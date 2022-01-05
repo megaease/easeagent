@@ -21,112 +21,112 @@ import zipkin2.Span;
 
 public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
 
-    final String traceIDFieldName = "\"traceId\":\"";
-    final String parentIDFieldName = ",\"parentId\":\"";
-    final String spanIDFieldName = ",\"id\":\"";
-    final String kindFieldName = ",\"kind\":\"";
-    final String nameFieldName = ",\"name\":\"";
-    final String timestampFieldName = ",\"timestamp\":";
-    final String durationFieldName = ",\"duration\":";
-    final String debugFieldValue = ",\"debug\":true";
-    final String sharedFieldValue = ",\"shared\":true";
+    static final String TRACE_ID_FIELD_NAME = "\"traceId\":\"";
+    static final String PARENT_ID_FIELD_NAME = ",\"parentId\":\"";
+    static final String SPAN_ID_FIELD_NAME = ",\"id\":\"";
+    static final String KIND_FIELD_NAME = ",\"kind\":\"";
+    static final String NAME_FIELD_NAME = ",\"name\":\"";
+    static final String TIMESTAMP_FIELD_NAME = ",\"timestamp\":";
+    static final String DURATION_FIELD_NAME = ",\"duration\":";
+    static final String DEBUG_FIELD_VALUE = ",\"debug\":true";
+    static final String SHARED_FIELD_VALUE = ",\"shared\":true";
 
     @Override
     public int sizeInBytes(Span value) {
         int sizeInBytes = 0;
 
         //traceId
-        sizeInBytes += traceIDFieldName.length() + 1; // 1 represent the last quote sign
+        sizeInBytes += TRACE_ID_FIELD_NAME.length() + 1; // 1 represent the last quote sign
         sizeInBytes += value.traceId().length();
 
         //parentId
         if (value.parentId() != null) {
-            sizeInBytes += parentIDFieldName.length() + 1;
+            sizeInBytes += PARENT_ID_FIELD_NAME.length() + 1;
             sizeInBytes += value.parentId().length();
         }
 
         // spanId
-        sizeInBytes += spanIDFieldName.length() + 1;
+        sizeInBytes += SPAN_ID_FIELD_NAME.length() + 1;
         sizeInBytes += value.id().length();
 
         // kind
         if (value.kind() != null) {
-            sizeInBytes += kindFieldName.length() + 1;
+            sizeInBytes += KIND_FIELD_NAME.length() + 1;
             sizeInBytes += value.kind().name().length();
         }
 
         // name
         if (value.name() != null) {
-            sizeInBytes += nameFieldName.length() + 1;
+            sizeInBytes += NAME_FIELD_NAME.length() + 1;
             sizeInBytes += JsonEscaper.jsonEscapedSizeInBytes(value.name());
         }
 
         // timestamp
         if (value.timestampAsLong() != 0L) {
-            sizeInBytes += timestampFieldName.length();
+            sizeInBytes += TIMESTAMP_FIELD_NAME.length();
             sizeInBytes += WriteBuffer.asciiSizeInBytes(value.timestampAsLong());
         }
 
         //duration
         if (value.durationAsLong() != 0L) {
-            sizeInBytes += durationFieldName.length();
+            sizeInBytes += DURATION_FIELD_NAME.length();
             sizeInBytes += WriteBuffer.asciiSizeInBytes(value.durationAsLong());
         }
 
 
         if (Boolean.TRUE.equals(value.debug())) {
-            sizeInBytes += debugFieldValue.length();
+            sizeInBytes += DEBUG_FIELD_VALUE.length();
         }
 
         if (Boolean.TRUE.equals(value.shared())) {
-            sizeInBytes += sharedFieldValue.length();
+            sizeInBytes += SHARED_FIELD_VALUE.length();
         }
         return sizeInBytes;
     }
 
     @Override
     public void write(Span value, WriteBuffer b) {
-        b.writeAscii(traceIDFieldName);
+        b.writeAscii(TRACE_ID_FIELD_NAME);
         b.writeAscii(value.traceId());
         b.writeByte('\"');
 
         if (value.parentId() != null) {
-            b.writeAscii(parentIDFieldName);
+            b.writeAscii(PARENT_ID_FIELD_NAME);
             b.writeAscii(value.parentId());
             b.writeByte('\"');
         }
 
-        b.writeAscii(spanIDFieldName);
+        b.writeAscii(SPAN_ID_FIELD_NAME);
         b.writeAscii(value.id());
         b.writeByte(34);
         if (value.kind() != null) {
-            b.writeAscii(kindFieldName);
+            b.writeAscii(KIND_FIELD_NAME);
             b.writeAscii(value.kind().toString());
             b.writeByte('\"');
         }
 
         if (value.name() != null) {
-            b.writeAscii(nameFieldName);
+            b.writeAscii(NAME_FIELD_NAME);
             b.writeUtf8(JsonEscaper.jsonEscape(value.name()));
             b.writeByte('\"');
         }
 
         if (value.timestampAsLong() != 0L) {
-            b.writeAscii(timestampFieldName);
+            b.writeAscii(TIMESTAMP_FIELD_NAME);
             b.writeAscii(value.timestampAsLong());
         }
 
         if (value.durationAsLong() != 0L) {
-            b.writeAscii(durationFieldName);
+            b.writeAscii(DURATION_FIELD_NAME);
             b.writeAscii(value.durationAsLong());
         }
 
         if (Boolean.TRUE.equals(value.debug())) {
-            b.writeAscii(debugFieldValue);
+            b.writeAscii(DEBUG_FIELD_VALUE);
         }
 
         if (Boolean.TRUE.equals(value.shared())) {
-            b.writeAscii(sharedFieldValue);
+            b.writeAscii(SHARED_FIELD_VALUE);
         }
     }
 }

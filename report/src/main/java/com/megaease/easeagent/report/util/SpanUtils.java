@@ -20,6 +20,8 @@ package com.megaease.easeagent.report.util;
 import zipkin2.Span;
 
 public class SpanUtils {
+    private SpanUtils() {}
+
     public static boolean isValidSpan(Object next) {
         if (!(next instanceof Span)) {
             return false;

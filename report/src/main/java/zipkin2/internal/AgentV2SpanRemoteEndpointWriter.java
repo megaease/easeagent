@@ -20,14 +20,14 @@ package zipkin2.internal;
 import zipkin2.Span;
 
 public class AgentV2SpanRemoteEndpointWriter extends AbstractAgentV2SpanEndpointWriter implements WriteBuffer.Writer<Span> {
-    final String remoteEndpointFieldName = ",\"remoteEndpoint\":";
+    static final String REMOTE_ENDPOINT_FIELD_NAME = ",\"remoteEndpoint\":";
 
     @Override
     public int sizeInBytes(Span value) {
         if (value.remoteEndpoint() == null) {
             return 0;
         }
-        int size = remoteEndpointFieldName.length();
+        int size = REMOTE_ENDPOINT_FIELD_NAME.length();
         size += this.endpointSizeInBytes(value.remoteEndpoint(), false);
         return size;
     }
@@ -37,7 +37,7 @@ public class AgentV2SpanRemoteEndpointWriter extends AbstractAgentV2SpanEndpoint
         if (value.remoteEndpoint() == null) {
             return;
         }
-        buffer.writeAscii(remoteEndpointFieldName);
+        buffer.writeAscii(REMOTE_ENDPOINT_FIELD_NAME);
         this.writeEndpoint(value.remoteEndpoint(), buffer, false);
     }
 }
