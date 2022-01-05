@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.api.metric.*;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class MetricRegistryImplTest {
