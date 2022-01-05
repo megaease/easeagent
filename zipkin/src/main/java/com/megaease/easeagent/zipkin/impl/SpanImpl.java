@@ -20,6 +20,7 @@ package com.megaease.easeagent.zipkin.impl;
 import brave.Tracing;
 import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
+import brave.propagation.TraceContextOrSamplingFlags;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -28,14 +29,14 @@ import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 public class SpanImpl implements Span {
     private static final Map<Kind, brave.Span.Kind> KINDS;
 
     static {
-        Map<Kind, brave.Span.Kind> kinds = new HashMap<>();
+        Map<Kind, brave.Span.Kind> kinds = new EnumMap<>(Kind.class);
         kinds.put(Kind.CLIENT, brave.Span.Kind.CLIENT);
         kinds.put(Kind.SERVER, brave.Span.Kind.SERVER);
         kinds.put(Kind.PRODUCER, brave.Span.Kind.PRODUCER);
@@ -48,24 +49,68 @@ public class SpanImpl implements Span {
     private CurrentTraceContext.Scope scope;
     private final TraceContext.Injector<Request> injector;
 
-    private SpanImpl(@Nonnull Tracing tracing, @Nonnull brave.Span span, @Nonnull TraceContext.Injector<Request> injector) {
+    private SpanImpl(@Nonnull Tracing tracing, @Nonnull brave.Span span,
+                     @Nonnull TraceContext.Injector<Request> injector) {
         this.tracing = tracing;
         this.span = span;
         this.injector = injector;
     }
 
-    public static Span build(Tracing tracing, brave.Span span, TraceContext.Injector<Request> injector) {
+    public static Span build(Tracing tracing,
+                             brave.Span span,
+                             boolean cachedScope,
+                             TraceContext.Injector<? extends Request> injector) {
         if (span == null) {
             return NoOpTracer.NO_OP_SPAN;
         }
-        return new SpanImpl(tracing, span, injector);
+
+        TraceContext.Injector<Request> ci = (TraceContext.Injector<Request>) injector;
+        SpanImpl eSpan = new SpanImpl(tracing, span, ci);
+
+        if (cachedScope) {
+            eSpan.cacheScope();
+        }
+        return eSpan;
+    }
+
+    public static Span build(Tracing tracing, brave.Span span, TraceContext.Injector<Request> injector) {
+        return build(tracing, span, false, injector);
     }
 
     public static brave.Span.Kind braveKind(Kind kind) {
         return KINDS.get(kind);
     }
 
-    protected brave.Span getSpan() {
+    public static brave.Span nextBraveSpan(Tracing tracing,
+                                           TraceContext.Extractor<? extends Request> extractor, Request request) {
+        TraceContext maybeParent = tracing.currentTraceContext().get();
+        // Unlike message consumers, we try current span before trying extraction. This is the proper
+        // order because the span in scope should take precedence over a potentially stale header entry.
+        //
+        brave.Span span;
+        if (maybeParent == null) {
+            TraceContext.Extractor<Request> rExtractor = (TraceContext.Extractor<Request>)extractor;
+            TraceContextOrSamplingFlags extracted = rExtractor.extract(request);
+            span = tracing.tracer().nextSpan(extracted);
+        } else { // If we have a span in scope assume headers were cleared before
+            span = tracing.tracer().newChild(maybeParent);
+        }
+        if (span.isNoop()) {
+            return span;
+        }
+        setInfo(span, request);
+        return span;
+    }
+
+    private static void setInfo(brave.Span span, Request request) {
+        Span.Kind kind = request.kind();
+        if (kind != null) {
+            span.kind(SpanImpl.braveKind(kind));
+        }
+        span.name(request.name());
+    }
+
+    public brave.Span getSpan() {
         return span;
     }
 

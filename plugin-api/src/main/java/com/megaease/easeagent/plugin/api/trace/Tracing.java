@@ -75,7 +75,7 @@ public interface Tracing {
      * @return {@link Span}
      * @see Extractor#extract(MessagingRequest)
      */
-    Span nextSpan(Message message);
+    Span nextSpan(Message<?> message);
 
     /**
      * get MessagingTracing for message tracing
@@ -85,5 +85,5 @@ public interface Tracing {
      *
      * @return {@link MessagingRequest}
      */
-    MessagingTracing messagingTracing();
+    MessagingTracing<MessagingRequest> messagingTracing();
 }

@@ -45,32 +45,34 @@ public class LogUtils {
     private static final String LOG4J_CHECK_CLASS_NAME = "org.apache.logging.log4j.core.Appender";
     private static final String LOGBACK_CHECK_CLASS_NAME = "ch.qos.logback.core.Appender";
 
-    private static Boolean LOG4J_LOADED;
-    private static Boolean LOGBACK_LOADED;
+    private static Boolean log4jLoaded;
+    private static Boolean logbackLoaded;
 
-    public static Class<?> LOG4J_MDC_CLASS;
-    public static Class<?> LOGBACK_MDC_CLASS;
+    private static Class<?> log4jMdcClass;
+    private static Class<?> logbackMdcClass;
+
+    private LogUtils() {}
 
     public static Class<?> checkLog4JMDC(ClassLoader classLoader) {
-        if (LOG4J_LOADED != null) {
-            return LOG4J_MDC_CLASS;
+        if (log4jLoaded != null) {
+            return log4jMdcClass;
         }
         if (loadClass(classLoader, LOG4J_CHECK_CLASS_NAME) != null) {
-            LOG4J_MDC_CLASS = loadClass(classLoader, LOG4J_MDC_CLASS_NAME);
+            log4jMdcClass = loadClass(classLoader, LOG4J_MDC_CLASS_NAME);
         }
-        LOG4J_LOADED = true;
-        return LOG4J_MDC_CLASS;
+        log4jLoaded = true;
+        return log4jMdcClass;
     }
 
     public static Class<?> checkLogBackMDC(ClassLoader classLoader) {
-        if (LOGBACK_LOADED != null) {
-            return LOGBACK_MDC_CLASS;
+        if (logbackLoaded != null) {
+            return logbackMdcClass;
         }
         if (loadClass(classLoader, LOGBACK_CHECK_CLASS_NAME) != null) {
-            LOGBACK_MDC_CLASS = loadClass(classLoader, LOGBACK_MDC_CLASS_NAME);
+            logbackMdcClass = loadClass(classLoader, LOGBACK_MDC_CLASS_NAME);
         }
-        LOGBACK_LOADED = true;
-        return LOGBACK_MDC_CLASS;
+        logbackLoaded = true;
+        return logbackMdcClass;
     }
 
     public static Class<?> loadClass(ClassLoader classLoader, String className) {
@@ -80,8 +82,6 @@ public class LogUtils {
             return null;
         }
     }
-
-    // Method handling
 
     /**
      * Attempt to find a {@link Method} on the supplied class with the supplied name
@@ -142,7 +142,7 @@ public class LogUtils {
                     result = declaredMethods;
                 }
                 declaredMethodsCache.put(clazz, (result.length == 0 ? EMPTY_METHOD_ARRAY : result));
-            } catch (Throwable ex) {
+            } catch (Exception ex) {
                 throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() +
                     "] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
             }
@@ -269,23 +269,4 @@ public class LogUtils {
         }
         throw new UndeclaredThrowableException(ex);
     }
-
-//
-//    public static Class<?> loadLog4JMDC(ClassLoader classLoader) {
-//        if (LOG4J_LOADED != null) {
-//            return LOG4J_MDC_CLASS;
-//        }
-//        LOG4J_MDC_CLASS = loadClass(classLoader, LOG4J_MDC_CLASS_NAME);
-//        LOG4J_LOADED = true;
-//        return LOG4J_MDC_CLASS;
-//    }
-//
-//    public static Class<?> loadLogBackMDC(ClassLoader classLoader) {
-//        if (LOGBACK_LOADED != null) {
-//            return LOGBACK_MDC_CLASS;
-//        }
-//        LOGBACK_MDC_CLASS = loadClass(classLoader, LOGBACK_MDC_CLASS_NAME);
-//        LOGBACK_LOADED = true;
-//        return LOGBACK_MDC_CLASS;
-//    }
 }

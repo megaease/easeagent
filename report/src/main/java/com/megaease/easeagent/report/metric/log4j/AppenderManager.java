@@ -72,7 +72,7 @@ public interface AppenderManager {
             this.outputProperties = outputProperties;
             ClassLoader initClassLoader = Thread.currentThread().getContextClassLoader();
             LOGGER.info("bind classloader:{} to AppenderManager", initClassLoader);
-            this.provider = (topic) -> {
+            this.provider = topic -> {
                 ClassLoader old = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(initClassLoader);
                 try {

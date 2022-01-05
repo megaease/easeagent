@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @param <S> always zipkin2.reporter
  */
 public class RefreshableReporter<S> implements Reporter<S> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(RefreshableReporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshableReporter.class);
     private final SDKAsyncReporter<S> asyncReporter;
     private final TraceProps traceProperties;
     private final OutputProperties agentOutputProperties;
@@ -67,6 +67,7 @@ public class RefreshableReporter<S> implements Reporter<S> {
                 asyncReporter.getSender().close();
                 asyncReporter.closeFlushThread();
             } catch (Exception ignored) {
+                // ignored
             }
         }
 

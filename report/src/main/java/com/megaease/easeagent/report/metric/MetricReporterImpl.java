@@ -30,14 +30,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MetricReporterImpl implements MetricReporter {
     private final ConcurrentHashMap<String, Reporter> reporters;
-    private final Configs configs;
     private final AppenderManager appenderManager;
 
     public MetricReporterImpl(Configs configs) {
         this.reporters = new ConcurrentHashMap<>();
         OutputProperties outputProperties = Utils.extractOutputProperties(configs);
         this.appenderManager = AppenderManager.create(outputProperties);
-        this.configs = configs;
         configs.addChangeListener(this);
     }
 

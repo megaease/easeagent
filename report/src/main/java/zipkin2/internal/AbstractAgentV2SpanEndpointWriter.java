@@ -22,20 +22,20 @@ import zipkin2.Span;
 
 public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.Writer<Span> {
 
-    final String serviceNameFieldName = "\"serviceName\":\"";
-    final String ipv4FieldName = "\"ipv4\":\"";
-    final String ipv6FieldName = "\"ipv6\":\"";
-    final String portFieldName = "\"port\":";
+    static final String SERVICE_NAME_FIELD_NAME = "\"serviceName\":\"";
+    static final String IPV4_FIELD_NAME = "\"ipv4\":\"";
+    static final String IPV6_FIELD_NAME = "\"ipv6\":\"";
+    static final String PORT_FIELD_NAME = "\"port\":";
 
     protected int endpointSizeInBytes(Endpoint value, boolean writeEmptyServiceName) {
-        int sizeInBytes = 1; // one byte for {
+        int sizeInBytes = 1;
         String serviceName = value.serviceName();
         if (serviceName == null && writeEmptyServiceName) {
             serviceName = "";
         }
 
         if (serviceName != null) {
-            sizeInBytes += serviceNameFieldName.length() + 1;
+            sizeInBytes += SERVICE_NAME_FIELD_NAME.length() + 1;
             sizeInBytes += JsonEscaper.jsonEscapedSizeInBytes(serviceName);
         }
 
@@ -44,7 +44,7 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
                 ++sizeInBytes;
             }
 
-            sizeInBytes += ipv4FieldName.length() + 1;
+            sizeInBytes += IPV4_FIELD_NAME.length() + 1;
             sizeInBytes += value.ipv4().length();
         }
 
@@ -53,7 +53,7 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
                 ++sizeInBytes;
             }
 
-            sizeInBytes += ipv6FieldName.length() + 1;
+            sizeInBytes += IPV6_FIELD_NAME.length() + 1;
             sizeInBytes += value.ipv6().length();
         }
 
@@ -63,11 +63,11 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
                 ++sizeInBytes;
             }
 
-            sizeInBytes += portFieldName.length();
-            sizeInBytes += WriteBuffer.asciiSizeInBytes((long) port);
+            sizeInBytes += PORT_FIELD_NAME.length();
+            sizeInBytes += WriteBuffer.asciiSizeInBytes(port);
         }
 
-        sizeInBytes += 1; // one byte for }
+        sizeInBytes += 1;
         return sizeInBytes;
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
         }
 
         if (serviceName != null) {
-            b.writeAscii(serviceNameFieldName);
+            b.writeAscii(SERVICE_NAME_FIELD_NAME);
             b.writeUtf8(JsonEscaper.jsonEscape(serviceName));
             b.writeByte('\"');
             wroteField = true;
@@ -91,7 +91,7 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
             if (wroteField) {
                 b.writeByte(',');
             }
-            b.writeAscii(ipv4FieldName);
+            b.writeAscii(IPV4_FIELD_NAME);
             b.writeAscii(value.ipv4());
             b.writeByte('\"');
             wroteField = true;
@@ -101,7 +101,7 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
             if (wroteField) {
                 b.writeByte(',');
             }
-            b.writeAscii(ipv6FieldName);
+            b.writeAscii(IPV6_FIELD_NAME);
             b.writeAscii(value.ipv6());
             b.writeByte('\"');
             wroteField = true;
@@ -112,8 +112,8 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
             if (wroteField) {
                 b.writeByte(',');
             }
-            b.writeAscii(portFieldName);
-            b.writeAscii((long) port);
+            b.writeAscii(PORT_FIELD_NAME);
+            b.writeAscii(port);
         }
 
         b.writeByte('}');

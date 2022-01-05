@@ -18,6 +18,8 @@
 package com.megaease.easeagent.report.util;
 
 public class TextUtils {
+    private TextUtils() {}
+
     public static boolean hasText(String content) {
         return content != null && content.trim().length() > 0;
     }

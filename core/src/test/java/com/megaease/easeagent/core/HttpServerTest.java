@@ -113,7 +113,7 @@ public class HttpServerTest {
 
         DatagramSocket s = new DatagramSocket(0);
         int port = s.getLocalPort();
-        
+        s.close();
         String httpServer = "http://127.0.0.1:" + port;
         System.out.println("run up http server : " + httpServer);
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);

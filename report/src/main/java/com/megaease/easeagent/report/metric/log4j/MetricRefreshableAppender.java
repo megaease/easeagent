@@ -82,8 +82,9 @@ public class MetricRefreshableAppender extends AbstractAppender implements Testa
                 return getConsoleAppender();
             case "mock":
                 return getMockAppender();
+            default:
+                return null;
         }
-        return null;
     }
 
     private Appender getKafkaAppender(String topic) {
