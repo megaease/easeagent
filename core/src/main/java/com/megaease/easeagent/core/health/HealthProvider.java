@@ -105,7 +105,11 @@ public class HealthProvider implements AgentHttpHandlerProvider, ConfigAware, IP
 
     enum HStatus implements IStatus {
 
-        SERVICE_UNAVAILABLE(503, "Service Unavailable"),;
+        /**
+         * service unavailable
+         */
+        SERVICE_UNAVAILABLE(503, "Service Unavailable"),
+        ;
         private final int requestStatus;
 
         private final String description;

@@ -44,6 +44,6 @@ public class TracingProviderMock implements MockProvider {
 
     @Override
     public Object get() {
-        return TRACING_PROVIDER;
+        return getTracingProvider();
     }
 }

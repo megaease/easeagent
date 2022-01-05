@@ -27,34 +27,19 @@ import com.megaease.easeagent.core.plugin.transformer.advice.AgentForAdvice;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentJavaConstantValue;
 import com.megaease.easeagent.core.plugin.transformer.advice.MethodIdentityJavaConstant;
 import com.megaease.easeagent.core.plugin.transformer.classloader.CompoundClassloader;
-import com.megaease.easeagent.log4j2.Logger;
-import com.megaease.easeagent.log4j2.LoggerFactory;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.utility.JavaModule;
 
-public class ForAdviceTransformer  implements AgentBuilder.Transformer {
-    private final Logger log = LoggerFactory.getLogger(ForAdviceTransformer.class);
+public class ForAdviceTransformer implements AgentBuilder.Transformer {
 
     private final AgentForAdvice transformer;
     private final MethodTransformation methodTransformInfo;
 
     public ForAdviceTransformer(MethodTransformation methodTransformInfo) {
         this.methodTransformInfo = methodTransformInfo;
-        /*
-        new AgentBuilder.Transformer
-            .ForAdvice(Advice.withCustomMapping().bind(Index.class, methodTransformInfo.getIndex()))
-            .include(getClass().getClassLoader())
-            .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
-                CommonInlineAdvice.class.getCanonicalName());
-        this.transformer = new AgentForAdvice(AgentAdvice.withCustomMapping()
-            .bind(Index.class, methodTransformInfo.getIndex()))
-            .include(getClass().getClassLoader())
-            .advice(methodTransformInfo.getMatcher().and(not(isAnnotatedWith(EaseAgentInstrumented.class))),
-                CommonInlineAdvice.class.getCanonicalName());
-        */
 
         MethodIdentityJavaConstant value = new MethodIdentityJavaConstant(methodTransformInfo.getIndex());
         StackManipulation stackManipulation = new AgentJavaConstantValue(value, methodTransformInfo.getIndex());

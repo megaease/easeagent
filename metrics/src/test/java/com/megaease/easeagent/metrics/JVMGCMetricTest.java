@@ -17,7 +17,14 @@
 
 package com.megaease.easeagent.metrics;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 public class JVMGCMetricTest extends BaseMetricsTest {
+    @Test
+    public void t(){
+        Assert.assertTrue(true);
+    }
 //
 //    @Test
 //    public void success() throws Exception {

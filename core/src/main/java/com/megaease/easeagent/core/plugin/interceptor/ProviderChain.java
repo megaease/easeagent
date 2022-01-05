@@ -21,17 +21,18 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.Provider;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ProviderChain {
-    private final ArrayList<Provider> providers;
+    private final List<Provider> providers;
 
-    ProviderChain(ArrayList<Provider> providers) {
+    ProviderChain(List<Provider> providers) {
         this.providers = providers;
     }
 
-    public ArrayList<Supplier<Interceptor>> getSupplierChain() {
+    public List<Supplier<Interceptor>> getSupplierChain() {
         return this.providers.stream()
             .map(Provider::getInterceptorProvider)
             .collect(Collectors.toCollection(ArrayList::new));
@@ -43,12 +44,12 @@ public class ProviderChain {
 
     @SuppressWarnings("all")
     public static class Builder {
-        private ArrayList<Provider> providers = new ArrayList<>();
+        private List<Provider> providers = new ArrayList<>();
 
         Builder() {
         }
 
-        public Builder providers(ArrayList<Provider> providers) {
+        public Builder providers(List<Provider> providers) {
             this.providers = providers;
             return this;
         }
@@ -62,6 +63,7 @@ public class ProviderChain {
             return new ProviderChain(providers);
         }
 
+        @Override
         public String toString() {
             return "ProviderChain.Builder(providers=" + this.providers + ")";
         }

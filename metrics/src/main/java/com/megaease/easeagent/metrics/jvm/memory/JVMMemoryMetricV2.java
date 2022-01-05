@@ -21,10 +21,7 @@ import com.megaease.easeagent.metrics.model.JVMMemoryGaugeMetricModel;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.*;
-import com.megaease.easeagent.plugin.api.metric.name.MetricName;
-import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
-import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.async.ScheduleHelper;
 import com.megaease.easeagent.plugin.async.ScheduleRunner;
 

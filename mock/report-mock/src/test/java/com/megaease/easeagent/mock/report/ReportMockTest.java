@@ -20,10 +20,13 @@ package com.megaease.easeagent.mock.report;
 import com.megaease.easeagent.report.AgentReport;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
+
 public class ReportMockTest {
 
     @Test
     public void getAgentReport() {
         AgentReport agentReport = ReportMock.getAgentReport();
+        assertNotNull(agentReport);
     }
 }

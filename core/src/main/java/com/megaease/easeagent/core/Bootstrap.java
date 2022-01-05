@@ -178,7 +178,7 @@ public class Bootstrap {
     }
 
     public static AgentBuilder getAgentBuilder(Configs config, boolean test) {
-        // config may used to add some classes to be ignored in future
+        // config may use to add some classes to be ignored in future
         long buildBegin = System.currentTimeMillis();
         AgentBuilder builder = new AgentBuilder.Default()
             .with(LISTENER)
@@ -203,14 +203,14 @@ public class Bootstrap {
             .or(nameStartsWith("junit."))
             .or(nameStartsWith("com.intellij."));
 
-        if (!test && config != null) { // config used here to avoid warning of unused
+        // config used here to avoid warning of unused
+        if (!test && config != null) {
             builder = ignore
                 .or(nameStartsWith("com.megaease.easeagent."));
         } else {
             builder = ignore;
         }
         LOGGER.info("AgentBuilder use time: {}", (System.currentTimeMillis() - buildBegin));
-
         return builder;
     }
 
@@ -267,7 +267,9 @@ public class Bootstrap {
 
         @Override
         public void onError(String name, ClassLoader ld, JavaModule m, boolean loaded, Throwable error) {
-            LOGGER.debug("Just for Debug-log, transform ends exceptionally, which is sometimes normal and sometimes there is an error: {} error:{} loaded: {} from classLoader {}", name, error, loaded, ld);
+            LOGGER.debug("Just for Debug-log, transform ends exceptionally, " +
+                    "which is sometimes normal and sometimes there is an error: {} error:{} loaded: {} from classLoader {}",
+                name, error, loaded, ld);
         }
 
         @Override

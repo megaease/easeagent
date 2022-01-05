@@ -72,7 +72,7 @@ public class ConfigFactory {
         return map;
     }
 
-    private static void validConfigs(Configs configs) {
+    public static void validConfigs(Configs configs) {
         //validate serviceName and systemName
         ValidateUtils.validate(configs, ConfigConst.SERVICE_NAME, HasText);
         ValidateUtils.validate(configs, ConfigConst.SYSTEM_NAME, HasText);

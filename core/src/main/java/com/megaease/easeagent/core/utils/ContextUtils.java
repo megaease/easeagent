@@ -27,6 +27,10 @@ import java.util.Map;
 
 @AutoService(AppendBootstrapClassLoaderSearch.class)
 public class ContextUtils {
+
+    private ContextUtils() {
+    }
+
     private static final String BEGIN_TIME = ContextUtils.class.getSimpleName() + ".beginTime";
     private static final String END_TIME = ContextUtils.class.getSimpleName() + ".endTime";
 

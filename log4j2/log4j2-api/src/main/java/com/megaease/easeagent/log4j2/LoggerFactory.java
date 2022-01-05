@@ -84,27 +84,27 @@ public class LoggerFactory {
 
         @Override
         public void trace(String msg) {
-
+            //ignore
         }
 
         @Override
         public void trace(String format, Object arg) {
-
+            //ignore
         }
 
         @Override
         public void trace(String format, Object arg1, Object arg2) {
-
+            //ignore
         }
 
         @Override
         public void trace(String format, Object... arguments) {
-
+            //ignore
         }
 
         @Override
         public void trace(String msg, Throwable t) {
-
+            //ignore
         }
 
         @Override
@@ -114,27 +114,27 @@ public class LoggerFactory {
 
         @Override
         public void debug(String msg) {
-
+            //ignore
         }
 
         @Override
         public void debug(String format, Object arg) {
-
+            //ignore
         }
 
         @Override
         public void debug(String format, Object arg1, Object arg2) {
-
+            //ignore
         }
 
         @Override
         public void debug(String format, Object... arguments) {
-
+            //ignore
         }
 
         @Override
         public void debug(String msg, Throwable t) {
-
+            //ignore
         }
 
         @Override
@@ -144,27 +144,27 @@ public class LoggerFactory {
 
         @Override
         public void info(String msg) {
-
+            //ignore
         }
 
         @Override
         public void info(String format, Object arg) {
-
+            //ignore
         }
 
         @Override
         public void info(String format, Object arg1, Object arg2) {
-
+            //ignore
         }
 
         @Override
         public void info(String format, Object... arguments) {
-
+            //ignore
         }
 
         @Override
         public void info(String msg, Throwable t) {
-
+            //ignore
         }
 
         @Override
@@ -174,27 +174,27 @@ public class LoggerFactory {
 
         @Override
         public void warn(String msg) {
-
+            //ignore
         }
 
         @Override
         public void warn(String format, Object arg) {
-
+            //ignore
         }
 
         @Override
         public void warn(String format, Object... arguments) {
-
+            //ignore
         }
 
         @Override
         public void warn(String format, Object arg1, Object arg2) {
-
+            //ignore
         }
 
         @Override
         public void warn(String msg, Throwable t) {
-
+            //ignore
         }
 
         @Override
@@ -204,27 +204,27 @@ public class LoggerFactory {
 
         @Override
         public void error(String msg) {
-
+            //ignore
         }
 
         @Override
         public void error(String format, Object arg) {
-
+            //ignore
         }
 
         @Override
         public void error(String format, Object arg1, Object arg2) {
-
+            //ignore
         }
 
         @Override
         public void error(String format, Object... arguments) {
-
+            //ignore
         }
 
         @Override
         public void error(String msg, Throwable t) {
-
+            //ignore
         }
     }
 }

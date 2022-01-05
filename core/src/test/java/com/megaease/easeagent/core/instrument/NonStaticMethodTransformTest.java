@@ -94,7 +94,7 @@ public class NonStaticMethodTransformTest extends TransformTestBase {
             // check
             Object instance = type.getDeclaredConstructor(String.class).newInstance("kkk");
             AgentDynamicFieldAccessor.setDynamicFieldValue(instance, BAR);
-            assertEquals(AgentDynamicFieldAccessor.getDynamicFieldValue(instance), BAR);
+            assertEquals(BAR, AgentDynamicFieldAccessor.getDynamicFieldValue(instance));
             assertThat(type.getDeclaredMethod(FOO, String.class)
                     .invoke(instance, "kkk"),
                 is(QUX + BAR));

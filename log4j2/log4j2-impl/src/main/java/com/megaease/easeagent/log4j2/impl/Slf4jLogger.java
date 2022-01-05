@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 
 import java.util.logging.Level;
 
-import static com.megaease.easeagent.log4j2.api.Level.*;
+import static com.megaease.easeagent.log4j2.api.ILevel.*;
 
 public class Slf4jLogger extends java.util.logging.Logger {
     private final Logger logger;

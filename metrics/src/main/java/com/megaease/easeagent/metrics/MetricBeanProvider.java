@@ -32,8 +32,8 @@ import com.megaease.easeagent.report.AgentReportAware;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MetricProvider implements BeanProvider, AgentHttpHandlerProvider, ConfigAware, com.megaease.easeagent.plugin.api.metric.MetricProvider, AgentReportAware {
-    private MetricProviderImpl metricProvider = new MetricProviderImpl();
+public class MetricBeanProvider implements BeanProvider, AgentHttpHandlerProvider, ConfigAware, com.megaease.easeagent.plugin.api.metric.MetricProvider, AgentReportAware {
+    private final MetricProviderImpl metricProvider = new MetricProviderImpl();
 
     @Override
     public List<AgentHttpHandler> getAgentHttpHandlers() {

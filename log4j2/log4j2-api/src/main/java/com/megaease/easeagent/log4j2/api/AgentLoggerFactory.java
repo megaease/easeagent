@@ -18,6 +18,7 @@
 package com.megaease.easeagent.log4j2.api;
 
 import com.megaease.easeagent.log4j2.ClassloaderSupplier;
+import com.megaease.easeagent.log4j2.exception.Log4j2Exception;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
@@ -70,7 +71,7 @@ public class AgentLoggerFactory<T extends AgentLogger> {
             // 还原为之前的 ClassLoader
             return loggerSupplier.apply(logger);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new Log4j2Exception(e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
         }

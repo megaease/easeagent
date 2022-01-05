@@ -25,10 +25,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 public class MDCTest {
-    static {
-        AllUrlsSupplier.ENABLED = true;
-    }
-
     @Test
     public void put() {
         MDC.put("testA", "testB");

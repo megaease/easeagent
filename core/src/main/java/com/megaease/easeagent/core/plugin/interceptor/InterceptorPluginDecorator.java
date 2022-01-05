@@ -98,21 +98,7 @@ public class InterceptorPluginDecorator implements Interceptor {
         return interceptorOrder << 8 + pluginOrder;
     }
 
-    @SuppressWarnings("all")
     public static Supplier<Interceptor> getInterceptorSupplier(final AgentPlugin plugin, final Supplier<Interceptor> supplier) {
-        return () -> {
-            /*
-            Interceptor interceptor = supplier.get();
-            Field[] fs = interceptor.getClass().getDeclaredFields();
-            for (Field f : fs) {
-                // has non-static field
-                if ((f.getModifiers() & Modifier.ACC_STATIC) == 0) {
-                    interceptor = new StateInterceptor(supplier);
-                    break;
-                }
-            }
-             */
-            return new InterceptorPluginDecorator(supplier.get(), plugin);
-        };
+        return () -> new InterceptorPluginDecorator(supplier.get(), plugin);
     }
 }

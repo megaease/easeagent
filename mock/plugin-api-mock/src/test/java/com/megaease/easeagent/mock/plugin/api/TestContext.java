@@ -20,7 +20,10 @@ package com.megaease.easeagent.mock.plugin.api;
 import com.megaease.easeagent.mock.context.ContextManagerMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.time.Duration;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
@@ -39,6 +42,6 @@ public class TestContext {
         span.cacheScope();
         span.start();
         span.finish();
-        Thread.sleep(10000);
+//        Thread.sleep(10000);
     }
 }

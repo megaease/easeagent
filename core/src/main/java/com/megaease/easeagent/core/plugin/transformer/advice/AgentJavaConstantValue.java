@@ -25,6 +25,7 @@ import net.bytebuddy.utility.JavaConstant;
 public class AgentJavaConstantValue extends JavaConstantValue {
     private final MethodIdentityJavaConstant constant;
     private final int pointcutIndex;
+
     /**
      * Creates a constant pool value representing a {@link JavaConstant}.
      *
@@ -39,6 +40,7 @@ public class AgentJavaConstantValue extends JavaConstantValue {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Size apply(MethodVisitor methodVisitor, Implementation.Context implementationContext) {
         Integer index = (Integer) constant.accept(Visitor.INSTANCE);
         methodVisitor.visitLdcInsn(index);

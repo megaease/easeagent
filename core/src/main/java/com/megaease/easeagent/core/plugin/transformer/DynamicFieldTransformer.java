@@ -35,8 +35,8 @@ import net.bytebuddy.utility.JavaModule;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicFieldTransformer implements AgentBuilder.Transformer {
-    private final static Logger log = LoggerFactory.getLogger(DynamicFieldTransformer.class);
-    private final static ConcurrentHashMap<String, Cache<ClassLoader, Boolean>> fieldMap = new ConcurrentHashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(DynamicFieldTransformer.class);
+    private static final ConcurrentHashMap<String, Cache<ClassLoader, Boolean>> FIELD_MAP = new ConcurrentHashMap<>();
 
     private final String fieldName;
     private final Class<?> accessor;
@@ -63,7 +63,6 @@ public class DynamicFieldTransformer implements AgentBuilder.Transformer {
                 b = b.defineField(this.fieldName, Object.class, Opcodes.ACC_PRIVATE)
                     .implement(this.accessor)
                     .intercept(FieldAccessor.ofField(this.fieldName));
-                        //.setsArgumentAt(0).andThen(FixedValue.value(NullObject.NULL)));
             } catch (Exception e) {
                 log.debug("Type:{} add extend field again!", td.getName());
             }
@@ -74,19 +73,20 @@ public class DynamicFieldTransformer implements AgentBuilder.Transformer {
 
     /**
      * Avoiding add a accessor interface to a class repeatedly
-     * @param td    represent the class to be enhanced
+     *
+     * @param td       represent the class to be enhanced
      * @param accessor access interface class
-     * @param cl current classloader
+     * @param cl       current classloader
      * @return return true when it is the first time
      */
     private static boolean check(TypeDescription td, Class<?> accessor, ClassLoader cl) {
         String key = td.getCanonicalName() + accessor.getCanonicalName();
 
-        Cache<ClassLoader, Boolean> checkCache = fieldMap.get(key);
+        Cache<ClassLoader, Boolean> checkCache = FIELD_MAP.get(key);
         if (checkCache == null) {
             Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
             cache.put(cl, true);
-            checkCache = fieldMap.putIfAbsent(key, cache);
+            checkCache = FIELD_MAP.putIfAbsent(key, cache);
             if (checkCache == null) {
                 return true;
             }

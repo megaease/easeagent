@@ -32,8 +32,6 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 import net.bytebuddy.utility.JavaModule;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 public class AnnotationTransformer implements AgentBuilder.Transformer {
     private final AsmVisitorWrapper visitor;
     private final MethodTransformation methodTransformInfo;
@@ -41,7 +39,7 @@ public class AnnotationTransformer implements AgentBuilder.Transformer {
 
     public AnnotationTransformer(MethodTransformation info) {
         this.methodTransformInfo = info;
-        this.annotation = AnnotationDescription.Latent.Builder
+        this.annotation = AnnotationDescription.Builder
             .ofType(EaseAgentInstrumented.class)
             .define("value", info.getIndex())
             .build();
@@ -57,8 +55,6 @@ public class AnnotationTransformer implements AgentBuilder.Transformer {
     }
 
     public static class ForMethodDelegate implements AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper {
-        private static ConcurrentHashMap<String, Integer> methodToIndex = new ConcurrentHashMap<>();
-
         private final TypeDescription annotation;
         private final MemberAttributeExtension.ForMethod mForMethod;
         private final MethodTransformation info;
@@ -83,16 +79,8 @@ public class AnnotationTransformer implements AgentBuilder.Transformer {
             if (annotation != null) {
                 // merge interceptor chain
                 Integer index = annotation.getValue("value").resolve(Integer.class);
-                return methodVisitor;
-            } else {
-                return methodVisitor;
             }
-            /*
-            MethodVisitor visitor = this.mForMethod.wrap(instrumentedType, instrumentedMethod,
-                methodVisitor, implementationContext, typePool, writerFlags, readerFlags);
-
-            return visitor;
-            */
+            return methodVisitor;
         }
 
         public AsmVisitorWrapper on(ElementMatcher<? super MethodDescription> matcher) {

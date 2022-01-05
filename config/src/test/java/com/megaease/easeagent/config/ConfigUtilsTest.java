@@ -100,15 +100,15 @@ public class ConfigUtilsTest {
     @Test
     public void pluginProperty() {
         PluginProperty pluginProperty = ConfigUtils.pluginProperty("plugin.observability.kafka.self.enabled");
-        Assert.assertEquals(pluginProperty.getDomain(), "observability");
-        Assert.assertEquals(pluginProperty.getNamespace(), "kafka");
-        Assert.assertEquals(pluginProperty.getId(), "self");
-        Assert.assertEquals(pluginProperty.getProperty(), "enabled");
+        Assert.assertEquals("observability", pluginProperty.getDomain());
+        Assert.assertEquals("kafka", pluginProperty.getNamespace());
+        Assert.assertEquals("self", pluginProperty.getId());
+        Assert.assertEquals("enabled", pluginProperty.getProperty());
         pluginProperty = ConfigUtils.pluginProperty("plugin.observability.kafka.self.tcp.enabled");
-        Assert.assertEquals(pluginProperty.getDomain(), "observability");
-        Assert.assertEquals(pluginProperty.getNamespace(), "kafka");
-        Assert.assertEquals(pluginProperty.getId(), "self");
-        Assert.assertEquals(pluginProperty.getProperty(), "tcp.enabled");
+        Assert.assertEquals("observability", pluginProperty.getDomain());
+        Assert.assertEquals("kafka", pluginProperty.getNamespace());
+        Assert.assertEquals("self", pluginProperty.getId());
+        Assert.assertEquals("tcp.enabled", pluginProperty.getProperty());
         try {
             ConfigUtils.pluginProperty("plugin.observability.kafka.self");
             assertTrue("must be error", false);

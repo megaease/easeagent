@@ -65,17 +65,17 @@ public class PluginConfigTest {
 
     @Test
     public void domain() {
-        assertEquals(build().domain(), "testdomain");
+        assertEquals("testdomain", build().domain());
     }
 
     @Test
     public void namespace() {
-        assertEquals(build().namespace(), "NAMESPACE");
+        assertEquals("NAMESPACE", build().namespace());
     }
 
     @Test
     public void id() {
-        assertEquals(build().id(), "testid");
+        assertEquals("testid", build().id());
     }
 
     @Test
@@ -97,12 +97,12 @@ public class PluginConfigTest {
     }
 
     public static void checkString(PluginConfig config) {
-        assertEquals(config.getString("enabled"), "true");
-        assertEquals(config.getString("tcp.enabled"), "false");
-        assertEquals(config.getString("count"), "127");
-        assertEquals(config.getString("host"), "127.0.0.3");
-        assertEquals(config.getString("http.enabled"), "true");
-        assertEquals(config.getString("http.enabled.sss"), null);
+        assertEquals("true", config.getString("enabled"));
+        assertEquals("false", config.getString("tcp.enabled"));
+        assertEquals("127", config.getString("count"));
+        assertEquals("127.0.0.3", config.getString("host"));
+        assertEquals("true", config.getString("http.enabled"));
+        assertEquals(null, config.getString("http.enabled.sss"));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class PluginConfigTest {
     }
 
     public static void checkInt(PluginConfig config) {
-        assertEquals((int) config.getInt("count"), 127);
+        assertEquals(127, (int) config.getInt("count"));
         assertNull(config.getInt("enabled"));
         assertNull(config.getInt("cccccccccccccc"));
     }
@@ -147,7 +147,7 @@ public class PluginConfigTest {
     }
 
     public static void checkLong(PluginConfig config) {
-        assertEquals((long) config.getLong("count"), 127l);
+        assertEquals(127l, (long) config.getLong("count"));
         assertNull(config.getLong("enabled"));
         assertNull(config.getLong("cccccccccccccc"));
     }
@@ -160,10 +160,10 @@ public class PluginConfigTest {
 
     public static void checkStringList(PluginConfig config) {
         List<String> list = config.getStringList("list");
-        assertEquals(list.size(), 3);
-        assertEquals(list.get(0), "a");
-        assertEquals(list.get(1), "b");
-        assertEquals(list.get(2), "c");
+        assertEquals(3, list.size());
+        assertEquals("a", list.get(0));
+        assertEquals("b", list.get(1));
+        assertEquals("c", list.get(2));
     }
 
 
@@ -179,7 +179,7 @@ public class PluginConfigTest {
                 count.incrementAndGet();
             }
         });
-        assertEquals(count.get(), 1);
+        assertEquals(1, count.get());
     }
 
     @Test
