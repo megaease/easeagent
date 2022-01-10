@@ -38,7 +38,9 @@ public class AgentLoggerFactory<T extends AgentLogger> {
     private final Function<Logger, T> loggerSupplier;
     private final Mdc mdc;
 
-    private AgentLoggerFactory(@Nonnull ClassLoader classLoader, @Nonnull Object factory, @Nonnull Method method, @Nonnull Function<Logger, T> loggerSupplier, @Nonnull Mdc mdc) {
+    private AgentLoggerFactory(@Nonnull ClassLoader classLoader,
+                               @Nonnull Object factory, @Nonnull Method method,
+                               @Nonnull Function<Logger, T> loggerSupplier, @Nonnull Mdc mdc) {
         this.classLoader = classLoader;
         this.factory = factory;
         this.method = method;
@@ -47,7 +49,9 @@ public class AgentLoggerFactory<T extends AgentLogger> {
         this.agentLogger = this.getLogger(AgentLoggerFactory.class.getName());
     }
 
-    public static <T extends AgentLogger> Builder<T> builder(ClassloaderSupplier classLoaderSupplier, Function<Logger, T> loggerSupplier, Class<T> tClass) {
+    public static <T extends AgentLogger> Builder<T> builder(ClassloaderSupplier classLoaderSupplier,
+                                                             Function<Logger, T> loggerSupplier,
+                                                             Class<T> tClass) {
         ClassLoader classLoader = Objects.requireNonNull(classLoaderSupplier.get(), "classLoader must not be null.");
         return new Builder<>(classLoader, loggerSupplier, tClass);
     }
@@ -55,7 +59,8 @@ public class AgentLoggerFactory<T extends AgentLogger> {
     public <N extends AgentLogger> AgentLoggerFactory<N> newFactory(Function<Logger, N> loggerSupplier, Class<N> tClass) {
         try {
             return new Builder<N>(classLoader, loggerSupplier, tClass).build();
-        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | InstantiationException | InvocationTargetException | IllegalAccessException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException
+            | NoSuchFieldException | InstantiationException | InvocationTargetException | IllegalAccessException e) {
             agentLogger.error("new factory fail: {}", e);
         }
         return null;
@@ -92,7 +97,9 @@ public class AgentLoggerFactory<T extends AgentLogger> {
             this.tClass = tClass;
         }
 
-        public AgentLoggerFactory<T> build() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchFieldException {
+        public AgentLoggerFactory<T> build() throws ClassNotFoundException, NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchFieldException {
+
             ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
             try {
                 Thread.currentThread().setContextClassLoader(classLoader);
@@ -123,5 +130,4 @@ public class AgentLoggerFactory<T extends AgentLogger> {
             return new Mdc(put, remove, get);
         }
     }
-
 }

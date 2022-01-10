@@ -18,9 +18,11 @@
 package com.megaease.easeagent.report.metric;
 
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
+import com.megaease.easeagent.report.OutputChange;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.metric.log4j.AppenderManager;
 import com.megaease.easeagent.report.util.Utils;
@@ -29,12 +31,14 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MetricReporterImpl implements MetricReporter {
-    private final ConcurrentHashMap<String, Reporter> reporters;
+    private final ConcurrentHashMap<String, DefaultMetricReporter> reporters;
     private final AppenderManager appenderManager;
+    private final OutputProperties outputProperties;
+    private static final String CONSOLE_APPEND = "console";
 
     public MetricReporterImpl(Configs configs) {
         this.reporters = new ConcurrentHashMap<>();
-        OutputProperties outputProperties = Utils.extractOutputProperties(configs);
+        outputProperties = Utils.extractOutputProperties(configs);
         this.appenderManager = AppenderManager.create(outputProperties);
         configs.addChangeListener(this);
     }
@@ -44,8 +48,8 @@ public class MetricReporterImpl implements MetricReporter {
     }
 
     @Override
-    public com.megaease.easeagent.plugin.api.Reporter reporter(IPluginConfig config) {
-        Reporter reporter = reporters.get(config.namespace());
+    public Reporter reporter(IPluginConfig config) {
+        DefaultMetricReporter reporter = reporters.get(config.namespace());
         if (reporter != null) {
             return reporter;
         }
@@ -54,7 +58,7 @@ public class MetricReporterImpl implements MetricReporter {
             if (reporter != null) {
                 return reporter;
             }
-            reporter = new Reporter(config);
+            reporter = new DefaultMetricReporter(config);
             reporters.put(config.namespace(), reporter);
             return reporter;
         }
@@ -64,17 +68,24 @@ public class MetricReporterImpl implements MetricReporter {
     public void onChange(List<ChangeItem> list) {
         if (Utils.isOutputPropertiesChange(list)) {
             appenderManager.refresh();
+            Utils.updateOutputPropertiesChange(this.outputProperties, list);
+            reporters.forEachValue(1, reporter -> reporter.onOutPutChange(this.outputProperties));
         }
     }
 
-    public class Reporter implements com.megaease.easeagent.plugin.api.Reporter, PluginConfigChangeListener {
+    public class DefaultMetricReporter implements Reporter, OutputChange, PluginConfigChangeListener {
         private final String namespace;
         private MetricProps metricProps;
         private KeySender sender;
+        private String originalAppendType;
 
-        public Reporter(IPluginConfig config) {
+        public DefaultMetricReporter(IPluginConfig config) {
             this.namespace = config.namespace();
             this.metricProps = Utils.extractMetricProps(config);
+            this.originalAppendType = metricProps.getAppendType();
+
+            updateAppendType(metricProps, MetricReporterImpl.this.outputProperties, originalAppendType);
+
             this.sender = newKeyLogger();
             config.addChangeListener(this);
         }
@@ -90,11 +101,36 @@ public class MetricReporterImpl implements MetricReporter {
         @Override
         public void onChange(IPluginConfig oldConfig, IPluginConfig newConfig) {
             MetricProps newProps = Utils.extractMetricProps(newConfig);
-            if (metricProps.getTopic().equals(newProps.getTopic()) && metricProps.getAppendType().equals(newProps.getAppendType())) {
+
+            this.originalAppendType = updateAppendType(newProps,
+                MetricReporterImpl.this.outputProperties, newProps.getAppendType());
+
+            if (metricProps.getTopic().equals(newProps.getTopic())
+                && metricProps.getAppendType().equals(newProps.getAppendType())) {
                 return;
             }
             this.metricProps = newProps;
             this.sender = newKeyLogger();
+        }
+
+        @Override
+        public void onOutPutChange(OutputProperties outputProperties) {
+            String oldAppendType = updateAppendType(this.metricProps, outputProperties, this.originalAppendType);
+            if (oldAppendType.equals(this.metricProps.getAppendType())) {
+                return;
+            }
+            this.sender = newKeyLogger();
+        }
+
+        private String updateAppendType(MetricProps props, OutputProperties output, String originalAppendType) {
+            String currentAppendType = props.getAppendType();
+            if (output.getServers() == null || output.getServers().isEmpty()) {
+                // override the configuration
+                props.changeAppendType(CONSOLE_APPEND);
+            } else {
+                props.changeAppendType(originalAppendType);
+            }
+            return currentAppendType;
         }
     }
 }

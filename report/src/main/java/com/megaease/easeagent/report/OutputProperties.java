@@ -21,6 +21,8 @@ import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 
+import java.util.Map;
+
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
 
 public interface OutputProperties {
@@ -44,6 +46,7 @@ public interface OutputProperties {
 
     String getEndpointAlgorithm();
 
+    void updateConfig(Map<String, String> changed);
 
     static OutputProperties newDefault(Configs configs) {
         return new Default(configs);
@@ -73,6 +76,22 @@ public interface OutputProperties {
             ConfigUtils.bindProp(OUTPUT_TRUST_CERT, configs, Config::getString, v -> this.trustCertificate = v);
             ConfigUtils.bindProp(OUTPUT_TRUST_CERT_TYPE, configs, Config::getString, v -> this.trustCertificateType = v);
             ConfigUtils.bindProp(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM, configs, Config::getString, v -> this.endpointAlgorithm = v);
+        }
+
+        @Override
+        public void updateConfig(Map<String, String> changed) {
+            Configs configs = new Configs(changed);
+
+            ConfigUtils.bindProp(OUTPUT_SERVERS, configs, Config::getString, v -> { if (v != null) this.servers = v; });
+            ConfigUtils.bindProp(OUTPUT_TIMEOUT, configs, Config::getString, v -> { if (v != null) this.timeout = v; });
+            ConfigUtils.bindProp(OUTPUT_ENABLED, configs, Config::getBoolean, v -> { if (v != null) this.enabled = v; });
+            ConfigUtils.bindProp(OUTPUT_SECURITY_PROTOCOL, configs, Config::getString, v -> { if (v != null) this.protocol = v; });
+            ConfigUtils.bindProp(OUTPUT_SSL_KEYSTORE_TYPE, configs, Config::getString, v -> { if (v != null) this.sslKeyStoreType = v; });
+            ConfigUtils.bindProp(OUTPUT_KEY, configs, Config::getString, v -> { if (v != null) this.sslKey = v; });
+            ConfigUtils.bindProp(OUTPUT_CERT, configs, Config::getString, v -> { if (v != null) this.certificate = v; });
+            ConfigUtils.bindProp(OUTPUT_TRUST_CERT, configs, Config::getString, v -> { if (v != null) this.trustCertificate = v; });
+            ConfigUtils.bindProp(OUTPUT_TRUST_CERT_TYPE, configs, Config::getString, v -> { if (v != null) this.trustCertificateType = v; });
+            ConfigUtils.bindProp(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM, configs, Config::getString, v -> { if (v != null) this.endpointAlgorithm = v; });
         }
 
         @Override
