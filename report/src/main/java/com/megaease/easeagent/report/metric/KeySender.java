@@ -27,6 +27,8 @@ public class KeySender {
     private final AppenderManager appenderManager;
     private final MetricProps metricProps;
     private Logger logger;
+    private org.slf4j.Logger consoleLogger;
+    private boolean isConsole = false;
 
     public KeySender(String key, AppenderManager appenderManager, MetricProps metricProps) {
         this.key = key;
@@ -36,13 +38,24 @@ public class KeySender {
 
     public void send(String content) {
         this.lazyInitLogger();
-        this.logger.info(content);
+        if (this.isConsole) {
+            this.consoleLogger.info(content);
+        } else {
+            this.logger.info(content);
+        }
     }
 
     private void lazyInitLogger() {
-        if (logger == null) {
-            String loggerName = prepareAppenderAndLogger();
-            logger = LoggerFactory.getLoggerContext().getLogger(loggerName);
+        if (logger != null) {
+            return;
+        }
+
+        String loggerName = prepareAppenderAndLogger();
+        logger = LoggerFactory.getLoggerContext().getLogger(loggerName);
+        if (metricProps.getAppendType().equals("kafka")) {
+        } else {
+            this.isConsole = true;
+            this.consoleLogger = org.slf4j.LoggerFactory.getLogger(loggerName);
         }
     }
 

@@ -66,5 +66,4 @@ public interface IPluginConfig {
     Set<String> keySet();
 
     void addChangeListener(PluginConfigChangeListener listener);
-
 }

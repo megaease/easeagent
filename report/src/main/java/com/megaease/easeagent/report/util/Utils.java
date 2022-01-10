@@ -26,6 +26,7 @@ import com.megaease.easeagent.report.metric.MetricProps;
 import com.megaease.easeagent.report.trace.TraceProps;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class Utils {
@@ -44,6 +45,24 @@ public class Utils {
         );
         return list.stream().map(ChangeItem::getFullName)
             .anyMatch(relatedNames::contains);
+    }
+
+    public static void updateOutputPropertiesChange(OutputProperties properties, List<ChangeItem> list) {
+        List<String> relatedNames = Arrays.asList(ConfigConst.Observability.OUTPUT_ENABLED
+            , ConfigConst.Observability.OUTPUT_SERVERS
+            , ConfigConst.Observability.OUTPUT_TIMEOUT
+            , ConfigConst.Observability.OUTPUT_CERT
+            , ConfigConst.Observability.OUTPUT_KEY
+            , ConfigConst.Observability.OUTPUT_SECURITY_PROTOCOL
+            , ConfigConst.Observability.OUTPUT_SSL_KEYSTORE_TYPE
+            , ConfigConst.Observability.OUTPUT_TRUST_CERT
+            , ConfigConst.Observability.OUTPUT_TRUST_CERT_TYPE
+            , ConfigConst.Observability.OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM
+        );
+        HashMap<String, String> changes = new HashMap<>();
+        list.stream().filter(item -> relatedNames.contains(item.getFullName()))
+            .forEach(item -> changes.put(item.getFullName(), item.getNewValue()));
+        properties.updateConfig(changes);
     }
 
     public static boolean isTraceOutputPropertiesChange(List<ChangeItem> list) {
