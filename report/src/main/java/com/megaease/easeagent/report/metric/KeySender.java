@@ -23,6 +23,7 @@ import com.megaease.easeagent.report.metric.log4j.RefreshableAppender;
 import org.apache.logging.log4j.core.Logger;
 
 public class KeySender {
+    private static final String CONSOLE_APPEND = "console";
     private final String key;
     private final AppenderManager appenderManager;
     private final MetricProps metricProps;
@@ -51,11 +52,11 @@ public class KeySender {
         }
 
         String loggerName = prepareAppenderAndLogger();
-        logger = LoggerFactory.getLoggerContext().getLogger(loggerName);
-        if (metricProps.getAppendType().equals("kafka")) {
-        } else {
+        if (metricProps.getAppendType().equals(CONSOLE_APPEND)) {
             this.isConsole = true;
             this.consoleLogger = org.slf4j.LoggerFactory.getLogger(loggerName);
+        } else {
+            logger = LoggerFactory.getLoggerContext().getLogger(loggerName);
         }
     }
 

@@ -6,6 +6,7 @@ dependency-reduced-pom.xml
 *.swp
 **/*.versionsBackup
 
+.patch
 .classpath
 .factorypath
 .project
