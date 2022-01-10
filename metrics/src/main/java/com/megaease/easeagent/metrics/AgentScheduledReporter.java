@@ -68,7 +68,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
     @SuppressWarnings("rawtypes")
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters, SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters, SortedMap<String, com.codahale.metrics.Timer> timers) {
         Boolean e = this.enabled.get();
-        if (e != null && !e.booleanValue()) {
+        if (e == null || !e.booleanValue()) {
             return;
         }
 
