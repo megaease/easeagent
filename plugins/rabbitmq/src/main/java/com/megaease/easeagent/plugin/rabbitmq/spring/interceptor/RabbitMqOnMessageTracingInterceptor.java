@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -113,6 +115,7 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
             span.tag("rabbit.broker", uri);
         }
         span.remoteServiceName("rabbitmq");
+        RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, span);
         span.start();
 
         // CurrentTraceContext currentTraceContext = Tracing.current().currentTraceContext();

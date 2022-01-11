@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.config.ChangeItem;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public class ProgressFieldsManager {
 
@@ -31,45 +31,17 @@ public class ProgressFieldsManager {
     }
 
     public static void init(Configs configs) {
-        BiFunction<String, Map<String, String>, String> changeListener = ProgressFields.changeListener();
-        Change change = new Change(changeListener);
-        for (Map.Entry<String, String> entry : configs.getConfigs().entrySet()) {
-            change.put(entry.getKey(), entry.getValue());
-        }
-        change.flush();
+        Consumer<Map<String, String>> changeListener = ProgressFields.changeListener();
+        changeListener.accept(configs.getConfigs());
         configs.addChangeListener(list -> {
-            Change c = new Change(changeListener);
+            Map<String, String> map = new HashMap<>();
             for (ChangeItem changeItem : list) {
-                c.put(changeItem.getFullName(), changeItem.getNewValue());
+                String key = changeItem.getFullName();
+                if (ProgressFields.isProgressFields(key)) {
+                    map.put(key, changeItem.getNewValue());
+                }
+                changeListener.accept(map);
             }
-            c.flush();
         });
-    }
-
-    static class Change {
-        private final BiFunction<String, Map<String, String>, String> changeListener;
-        private final Map<String, String> forwardedHeaders = new HashMap<>();
-        private final Map<String, String> responseHoldTag = new HashMap<>();
-
-        public Change(BiFunction<String, Map<String, String>, String> changeListener) {
-            this.changeListener = changeListener;
-        }
-
-        public void put(String key, String value) {
-            if (ProgressFields.isForwardedHeader(key)) {
-                forwardedHeaders.put(key, value);
-            } else if (ProgressFields.isResponseHoldTagKey(key)) {
-                responseHoldTag.put(key, value);
-            }
-        }
-
-        public void flush() {
-            if (!forwardedHeaders.isEmpty()) {
-                changeListener.apply(ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, forwardedHeaders);
-            }
-            if (!responseHoldTag.isEmpty()) {
-                changeListener.apply(ProgressFields.OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG, responseHoldTag);
-            }
-        }
     }
 }

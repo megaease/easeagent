@@ -25,6 +25,8 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
@@ -44,8 +46,10 @@ public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
         if (metric == null) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
+                    Tags tags = new Tags("application", "jdbc-statement", "signature");
+                    RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, tags);
                     metric = ServiceMetricRegistry.getOrCreate(config,
-                        new Tags("application", "jdbc-statement", "signature"),
+                        tags,
                         JdbcMetric.METRIC_SUPPLIER);
                     sqlCompression = MD5SQLCompression.getInstance();
                     cache = CacheBuilder.newBuilder()

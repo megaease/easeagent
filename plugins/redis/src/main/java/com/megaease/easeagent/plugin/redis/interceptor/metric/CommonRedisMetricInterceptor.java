@@ -22,6 +22,8 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.metrics.RedisMetric;
@@ -33,7 +35,9 @@ public abstract class CommonRedisMetricInterceptor implements NonReentrantInterc
 
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
-        REDIS_METRIC = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "cache-redis", "signature"), RedisMetric.REDIS_METRIC_SUPPLIER);
+        Tags tags = new Tags("application", "cache-redis", "signature");
+        RedirectProcessor.setTagsIfRedirected(Redirect.REDIS, tags);
+        REDIS_METRIC = ServiceMetricRegistry.getOrCreate(config, tags, RedisMetric.REDIS_METRIC_SUPPLIER);
     }
 
     @Override

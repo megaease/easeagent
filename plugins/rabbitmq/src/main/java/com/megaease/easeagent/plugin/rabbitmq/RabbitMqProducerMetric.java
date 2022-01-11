@@ -22,6 +22,8 @@ import com.megaease.easeagent.plugin.api.metric.Meter;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
@@ -35,6 +37,7 @@ public class RabbitMqProducerMetric {
     public RabbitMqProducerMetric(IPluginConfig config) {
         this.nameFactory = getNameFactory();
         Tags tags = new Tags("application", "rabbitmq-ex-ro", "resource");
+        RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, tags);
         this.metric = EaseAgent.newMetricRegistry(config, this.nameFactory, tags);
     }
 

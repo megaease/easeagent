@@ -64,4 +64,5 @@ public class KafkaUtils {
     public static String getTopic(ProducerRecord producerRecord) {
         return producerRecord.topic();
     }
+
 }

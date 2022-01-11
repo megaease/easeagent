@@ -20,6 +20,8 @@ package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 import com.google.common.collect.ImmutableMap;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
@@ -97,7 +99,9 @@ public class KafkaMetric extends ServiceMetric {
 
     @Nonnull
     public static Tags newTags() {
-        return new Tags("application", "kafka", "resource");
+        Tags tags = new Tags("application", "kafka", "resource");
+        RedirectProcessor.setTagsIfRedirected(Redirect.KAFKA, tags);
+        return tags;
     }
 
     @Nonnull

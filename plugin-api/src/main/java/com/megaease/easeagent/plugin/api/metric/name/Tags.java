@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin.api.metric.name;
 
+import com.megaease.easeagent.plugin.api.ProgressFields;
+
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +54,7 @@ public class Tags {
         this.category = category;
         this.type = type;
         this.keyFieldName = keyFieldName;
-        this.tags = new HashMap<>();
+        this.tags = new HashMap<>(ProgressFields.getServiceTags());
     }
 
     /**

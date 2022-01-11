@@ -21,21 +21,28 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.redis.RedisRedirectPlugin;
 import com.megaease.easeagent.plugin.redis.advice.RedisPropertiesClusterAdvice;
 
 @AdviceTo(value = RedisPropertiesClusterAdvice.class, plugin = RedisRedirectPlugin.class)
 public class RedisPropertiesClusterSetNodesInterceptor implements Interceptor {
+    private static final Logger LOGGER = EaseAgent.getLogger(RedisPropertiesClusterSetNodesInterceptor.class);
+
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_REDIS);
+        ResourceConfig cnf = Redirect.REDIS.getConfig();
         if (cnf == null) {
             return;
         }
+        LOGGER.info("Redirect Redis uris {} to {}", methodInfo.getArgs()[0], cnf.getUris());
         methodInfo.changeArg(0, cnf.getUris());
+        RedirectProcessor.redirected(Redirect.REDIS, cnf.getUris());
     }
 
     @Override

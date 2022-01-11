@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,15 +15,12 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
+package com.megaease.easeagent.plugin.api.middleware;
 
-/**
- * Tagging policy is not yet dynamic. The descriptions below reflect static policy.
- *
- * copy from zipkin.kafka.brave
- */
-final class KafkaTags {
-  static final String KAFKA_KEY_TAG = "kafka.key";
-  static final String KAFKA_TOPIC_TAG = "kafka.topic";
-  static final String KAFKA_BROKER_TAG = "kafka.broker";
+public final class Const {
+    public static final String ENV_REDIS = "EASE_RESOURCE_REDIS";
+    public static final String ENV_ES = "EASE_RESOURCE_ELASTICSEARCH";
+    public static final String ENV_KAFKA = "EASE_RESOURCE_KAFKA";
+    public static final String ENV_RABBITMQ = "EASE_RESOURCE_RABBITMQ";
+    public static final String ENV_DATABASE = "EASE_RESOURCE_DATABASE";
 }

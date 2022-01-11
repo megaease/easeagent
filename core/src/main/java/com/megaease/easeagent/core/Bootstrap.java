@@ -33,7 +33,7 @@ import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.BeanProvider;
 import com.megaease.easeagent.plugin.IProvider;
 import com.megaease.easeagent.plugin.api.metric.MetricProvider;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.report.AgentReport;
@@ -100,7 +100,7 @@ public class Bootstrap {
         initHttpServer(conf);
 
         // redirection
-        MiddlewareConfigProcessor.INSTANCE.init();
+        RedirectProcessor.INSTANCE.init();
 
         // reporter
         final AgentReport agentReport = DefaultAgentReport.create(conf);

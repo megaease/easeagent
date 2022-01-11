@@ -21,39 +21,50 @@ import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public class ProgressFields {
-    public static final String EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG = "easeagent.progress.forwarded.headers";
-    public static final String OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG = "observability.tracings.tag.response.headers";
-    private static volatile Fields FORWARDED_HEADERS = build(Collections.emptyMap());
-    private static volatile Fields RESPONSE_HOLD_TAG_FIELDS = build(Collections.emptyMap());
+    public static final String EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG = "easeagent.progress.forwarded.headers.";
+    public static final String OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG = "observability.tracings.tag.response.headers.";
+    public static final String OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG = "observability.tracings.service.tags.";
+    private static volatile Fields forwardedHeaders = build(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, Collections.emptyMap());
+    private static volatile Fields responseHoldTagFields = build(OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG, Collections.emptyMap());
+    private static volatile Fields serviceTags = build(OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG, Collections.emptyMap());
 
-    public static BiFunction<String, Map<String, String>, String> changeListener() {
-        return (key, values) -> {
-            if (isForwardedHeader(key)) {
-                setForwardedHeaders(values);
-            } else if (isResponseHoldTagKey(key)) {
-                setResponseHoldTagFields(values);
-            }
-            return null;
-        };
+
+    public static Consumer<Map<String, String>> changeListener() {
+        return values -> new Change().putAll(values).flush();
     }
 
-    public static boolean isForwardedHeader(String key) {
+    public static boolean isProgressFields(String key) {
+        return isForwardedHeader(key) || isResponseHoldTagKey(key) || isServerTags(key);
+    }
+
+    private static boolean isForwardedHeader(String key) {
         return key.startsWith(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG);
     }
 
-    public static boolean isResponseHoldTagKey(String key) {
+    private static boolean isResponseHoldTagKey(String key) {
         return key.startsWith(OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG);
     }
 
-    private static void setForwardedHeaders(Map<String, String> headers) {
-        FORWARDED_HEADERS = FORWARDED_HEADERS.rebuild(headers);
+    private static boolean isServerTags(String key) {
+        return key.startsWith(OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG);
     }
 
+    @SuppressWarnings("all")
+    private static void setForwardedHeaders(Map<String, String> headers) {
+        forwardedHeaders = forwardedHeaders.rebuild(headers);
+    }
+
+    @SuppressWarnings("all")
     private static void setResponseHoldTagFields(Map<String, String> fields) {
-        RESPONSE_HOLD_TAG_FIELDS = RESPONSE_HOLD_TAG_FIELDS.rebuild(fields);
+        responseHoldTagFields = responseHoldTagFields.rebuild(fields);
+    }
+
+    @SuppressWarnings("all")
+    private static void setServiceTags(Map<String, String> tags) {
+        serviceTags = serviceTags.rebuild(tags);
     }
 
     public static boolean isEmpty(String[] fields) {
@@ -61,36 +72,49 @@ public class ProgressFields {
     }
 
     public static Set<String> getForwardedHeaders() {
-        return FORWARDED_HEADERS.fieldSet;
+        return forwardedHeaders.fieldSet;
     }
 
     public static String[] getResponseHoldTagFields() {
-        return RESPONSE_HOLD_TAG_FIELDS.fields;
+        return responseHoldTagFields.values;
     }
 
-    private static Fields build(@Nonnull Map<String, String> map) {
+    public static Map<String, String> getServiceTags() {
+        return serviceTags.keyValues;
+    }
+
+
+    private static Fields build(@Nonnull String keyPrefix, @Nonnull Map<String, String> map) {
         if (map.isEmpty()) {
-            return new Fields(Collections.emptySet(), Collections.emptyMap());
+            return new Fields(keyPrefix, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap());
         }
-        return new Fields(Collections.unmodifiableSet(new HashSet<>(map.values())), map);
+        Map<String, String> keyValues = new HashMap<>();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String key = entry.getKey().replace(keyPrefix, "");
+            keyValues.put(key, entry.getValue());
+        }
+        return new Fields(keyPrefix, Collections.unmodifiableSet(new HashSet<>(map.values())), keyValues, map);
     }
-
 
     public static class Fields {
+        private final String keyPrefix;
         private final Set<String> fieldSet;
-        private final String[] fields;
+        private final String[] values;
+        private final Map<String, String> keyValues;
         private final Map<String, String> map;
 
-        public Fields(@Nonnull Set<String> fieldSet, @Nonnull Map<String, String> map) {
+        private Fields(@Nonnull String keyPrefix, @Nonnull Set<String> fieldSet, Map<String, String> keyValues, @Nonnull Map<String, String> map) {
+            this.keyPrefix = keyPrefix;
             this.fieldSet = fieldSet;
-            this.fields = fieldSet.toArray(new String[0]);
+            this.values = fieldSet.toArray(new String[0]);
+            this.keyValues = keyValues;
             this.map = map;
         }
 
         Fields rebuild(@Nonnull Map<String, String> map) {
             if (this.map.isEmpty()) {
                 map.entrySet().removeIf(stringStringEntry -> StringUtils.isEmpty(stringStringEntry.getValue()));
-                return build(map);
+                return build(keyPrefix, map);
             }
             Map<String, String> newMap = new HashMap<>(this.map);
             for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -100,7 +124,42 @@ public class ProgressFields {
                     newMap.put(entry.getKey(), entry.getValue());
                 }
             }
-            return build(Collections.unmodifiableMap(newMap));
+            return build(keyPrefix, Collections.unmodifiableMap(newMap));
+        }
+    }
+
+    static class Change {
+        private final Map<String, String> forwardedHeaders = new HashMap<>();
+        private final Map<String, String> responseHoldTags = new HashMap<>();
+        private final Map<String, String> serverTags = new HashMap<>();
+
+        public Change putAll(Map<String, String> map) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                put(entry.getKey(), entry.getValue());
+            }
+            return this;
+        }
+
+        public void put(String key, String value) {
+            if (ProgressFields.isForwardedHeader(key)) {
+                forwardedHeaders.put(key, value);
+            } else if (ProgressFields.isResponseHoldTagKey(key)) {
+                responseHoldTags.put(key, value);
+            } else if (ProgressFields.isServerTags(key)) {
+                serverTags.put(key, value);
+            }
+        }
+
+        private void flush() {
+            if (!forwardedHeaders.isEmpty()) {
+                setForwardedHeaders(forwardedHeaders);
+            }
+            if (!responseHoldTags.isEmpty()) {
+                setResponseHoldTagFields(responseHoldTags);
+            }
+            if (!serverTags.isEmpty()) {
+                setServiceTags(serverTags);
+            }
         }
     }
 }

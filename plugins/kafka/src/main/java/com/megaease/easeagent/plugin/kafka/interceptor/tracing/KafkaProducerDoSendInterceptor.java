@@ -20,6 +20,8 @@ package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -47,13 +49,14 @@ public class KafkaProducerDoSendInterceptor implements NonReentrantInterceptor {
         if (span.isNoop()) {
             return;
         }
-        span.tag("kafka.broker", uri);
+        span.tag(KafkaTags.KAFKA_BROKER_TAG, uri);
         span.kind(Span.Kind.PRODUCER).name("send");
         if (remoteServiceName != null) span.remoteServiceName(remoteServiceName);
         if (record.key() instanceof String && !"".equals(record.key())) {
             span.tag(KafkaTags.KAFKA_KEY_TAG, record.key().toString());
         }
         span.tag(KafkaTags.KAFKA_TOPIC_TAG, record.topic());
+        RedirectProcessor.setTagsIfRedirected(Redirect.KAFKA, span, uri);
         span.start();
         context.put(SCOPE, span.maybeScope());
         context.put(SPAN, span);

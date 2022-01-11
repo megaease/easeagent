@@ -23,8 +23,11 @@ import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqRedirectPlugin;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqPropertyAdvice;
@@ -35,6 +38,8 @@ import java.net.URI;
 
 @AdviceTo(value = RabbitMqPropertyAdvice.class, plugin = RabbitMqRedirectPlugin.class)
 public class RabbitMqPropertyInterceptor implements Interceptor {
+    private static final Logger LOGGER = EaseAgent.getLogger(RabbitMqPropertyInterceptor.class);
+
     @Override
     public void init(IPluginConfig config, int uniqueIndex) {
     }
@@ -42,7 +47,7 @@ public class RabbitMqPropertyInterceptor implements Interceptor {
     @SneakyThrows
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_RABBITMQ);
+        ResourceConfig cnf = Redirect.RABBITMQ.getConfig();
         if (cnf == null) {
             return;
         }
@@ -52,18 +57,28 @@ public class RabbitMqPropertyInterceptor implements Interceptor {
         Integer port = hostAndPort.getPort();
         String uriStr = "";
         if (method.equals("setHost") && host != null) {
+            LOGGER.info("Redirect RabbitMq host: {} to {}", methodInfo.getArgs()[0], host);
             methodInfo.changeArg(0, host);
+            RedirectProcessor.redirected(Redirect.RABBITMQ, hostAndPort.uri());
         } else if (method.equals("setPort") && port != null) {
+            LOGGER.info("Redirect RabbitMq port: {} to {}", methodInfo.getArgs()[0], port);
             methodInfo.changeArg(0, port);
+            RedirectProcessor.redirected(Redirect.RABBITMQ, hostAndPort.uri());
         } else if (method.equals("setUri") && uriStr != null) {
             if (methodInfo.getArgs()[0] instanceof URI) {
+                LOGGER.info("Redirect RabbitMq uri: {} to {}", methodInfo.getArgs()[0], uriStr);
                 methodInfo.changeArg(0, new URI(uriStr));
+                RedirectProcessor.redirected(Redirect.RABBITMQ, uriStr);
             } else if (methodInfo.getArgs()[0] instanceof String) {
+                LOGGER.info("Redirect RabbitMq uri: {} to {}", methodInfo.getArgs()[0], uriStr);
                 methodInfo.changeArg(0, uriStr);
+                RedirectProcessor.redirected(Redirect.RABBITMQ, uriStr);
             }
         } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
+            LOGGER.info("Redirect RabbitMq Username: {} to {}", methodInfo.getArgs()[0], cnf.getUserName());
             methodInfo.changeArg(0, cnf.getUserName());
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
+            LOGGER.info("Redirect RabbitMq Password: *** to ***");
             methodInfo.changeArg(0, cnf.getPassword());
         }
     }

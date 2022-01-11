@@ -19,8 +19,11 @@ package com.megaease.easeagent.plugin.kafka.interceptor.redirect;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
@@ -28,22 +31,28 @@ import java.util.Map;
 import java.util.Properties;
 
 public class KafkaAbstractConfigConstructInterceptor implements NonReentrantInterceptor {
+    private static final Logger LOGGER = EaseAgent.getLogger(KafkaAbstractConfigConstructInterceptor.class);
+    private static final String BOOTSRAP_CONFIG = "bootstrap.servers";
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_KAFKA);
+        ResourceConfig cnf = Redirect.KAFKA.getConfig();
         if (cnf == null) {
             return;
         }
         if (methodInfo.getArgs()[0] instanceof Properties) {
             Properties properties = (Properties) methodInfo.getArgs()[0];
-            properties.put("bootstrap.servers", cnf.getUris());
+            LOGGER.info("Redirect Kafka uris: {} to {}", properties.getProperty(BOOTSRAP_CONFIG), cnf.getUris());
+            properties.put(BOOTSRAP_CONFIG, cnf.getUris());
             methodInfo.changeArg(0, properties);
+            RedirectProcessor.redirected(Redirect.KAFKA, cnf.getUris());
         } else if (methodInfo.getArgs()[0] instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) methodInfo.getArgs()[0];
-            map.put("bootstrap.servers", cnf.getUris());
+            LOGGER.info("Redirect Kafka uris: {} to {}", map.get(BOOTSRAP_CONFIG), cnf.getUris());
+            map.put(BOOTSRAP_CONFIG, cnf.getUris());
             methodInfo.changeArg(0, map);
+            RedirectProcessor.redirected(Redirect.KAFKA, cnf.getUris());
         }
     }
 
