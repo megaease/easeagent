@@ -25,7 +25,7 @@ public final class Const {
     public static final String ENV_DATABASE = "EASE_RESOURCE_DATABASE";
 
 
-    public static final String TYPE_TAG_NAME = "remote.type";
+    public static final String TYPE_TAG_NAME = "component.type";
     public static final String TYPE_REDIS = "redis";
     public static final String TYPE_ES = "elasticsearch";
     public static final String TYPE_KAFKA = "kafka";

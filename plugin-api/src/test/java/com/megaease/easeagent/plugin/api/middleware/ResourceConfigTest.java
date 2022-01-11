@@ -33,8 +33,6 @@ public class ResourceConfigTest {
         environmentVariables.set(env, "{\"uris\":\"127.0.0.1:9092\"}");
         ResourceConfig resourceConfig = ResourceConfig.getResourceConfig(env, true);
         assertEquals("127.0.0.1:9092", resourceConfig.getUris());
-//        assertFalse(resourceConfig.getTags().isEmpty());
-//        assertEquals("shadow", resourceConfig.getTags().get("label.local"));
         assertNotNull(resourceConfig.getFirstHostAndPort());
         assertEquals("127.0.0.1", resourceConfig.getFirstHostAndPort().getHost());
         assertEquals(9092, (int) resourceConfig.getFirstHostAndPort().getPort());
@@ -45,15 +43,11 @@ public class ResourceConfigTest {
 
         resourceConfig = ResourceConfig.getResourceConfig(env, false);
         assertEquals("127.0.0.1:9092", resourceConfig.getUris());
-//        assertFalse(resourceConfig.getTags().isEmpty());
-//        assertEquals("shadow", resourceConfig.getTags().get("label.local"));
         assertNull(resourceConfig.getFirstHostAndPort());
 
         environmentVariables.set(env, "{\"uris\":\"127.0.0.1:9092,127.0.0.1:9093\"}");
         resourceConfig = ResourceConfig.getResourceConfig(env, true);
         assertEquals("127.0.0.1:9092,127.0.0.1:9093", resourceConfig.getUris());
-//        assertFalse(resourceConfig.getTags().isEmpty());
-//        assertEquals("shadow", resourceConfig.getTags().get("label.local"));
         assertNotNull(resourceConfig.getFirstHostAndPort());
         assertEquals("127.0.0.1", resourceConfig.getFirstHostAndPort().getHost());
         assertEquals(9092, (int) resourceConfig.getFirstHostAndPort().getPort());

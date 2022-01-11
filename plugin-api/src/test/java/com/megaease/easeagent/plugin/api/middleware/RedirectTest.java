@@ -65,15 +65,4 @@ public class RedirectTest {
         assertEquals("jdbc:mysql://localhost:3306/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true", Redirect.DATABASE.getConfig().getUris());
     }
 
-//    @Test
-//    public void getTags() {
-//        assertTrue(Redirect.REDIS.getTags().isEmpty());
-//        assertTrue(Redirect.ELASTICSEARCH.getTags().isEmpty());
-//        assertFalse(Redirect.KAFKA.getTags().isEmpty());
-//        assertTrue(Redirect.RABBITMQ.getTags().isEmpty());
-//        assertTrue(Redirect.DATABASE.getTags().isEmpty());
-//
-//        assertEquals("shadow", Redirect.KAFKA.getTags().get("label.local"));
-//    }
-
 }
