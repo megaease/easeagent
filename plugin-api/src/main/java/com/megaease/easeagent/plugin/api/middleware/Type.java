@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,16 +15,22 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.api.middleware;
 
-public interface Const {
-    int MAX_PLUGIN_STACK = 10000;
-    String ENABLED_CONFIG = "enabled";
+public enum Type {
+    REDIS(Const.TYPE_REDIS),
+    DATABASE(Const.TYPE_DATABASE),
+    KAFKA(Const.TYPE_KAFKA),
+    RABBITMQ(Const.TYPE_RABBITMQ),
+    ELASTICSEARCH(Const.TYPE_ES);
 
-    int METRIC_DEFAULT_INTERVAL = 30;
-    String METRIC_DEFAULT_TOPIC = "application-meter";
-    String METRIC_DEFAULT_APPEND_TYPE = "console";
+    final String remoteType;
 
+    Type(String remoteType) {
+        this.remoteType = remoteType;
+    }
 
-
+    public String getRemoteType() {
+        return remoteType;
+    }
 }

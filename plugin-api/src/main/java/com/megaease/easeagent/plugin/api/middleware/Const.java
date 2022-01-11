@@ -23,4 +23,12 @@ public final class Const {
     public static final String ENV_KAFKA = "EASE_RESOURCE_KAFKA";
     public static final String ENV_RABBITMQ = "EASE_RESOURCE_RABBITMQ";
     public static final String ENV_DATABASE = "EASE_RESOURCE_DATABASE";
+
+
+    public static final String TYPE_TAG_NAME = "remote.type";
+    public static final String TYPE_REDIS = "redis";
+    public static final String TYPE_ES = "elasticsearch";
+    public static final String TYPE_KAFKA = "kafka";
+    public static final String TYPE_RABBITMQ = "rabbitmq";
+    public static final String TYPE_DATABASE = "database";
 }
