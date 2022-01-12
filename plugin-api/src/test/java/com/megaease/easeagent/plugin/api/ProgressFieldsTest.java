@@ -17,9 +17,7 @@
 
 package com.megaease.easeagent.plugin.api;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,9 +27,6 @@ import static com.megaease.easeagent.plugin.api.ProgressFields.*;
 import static org.junit.Assert.*;
 
 public class ProgressFieldsTest {
-    @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
-
 
     @Test
     public void changeListener() {

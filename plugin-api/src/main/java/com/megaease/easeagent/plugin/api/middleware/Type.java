@@ -18,11 +18,11 @@
 package com.megaease.easeagent.plugin.api.middleware;
 
 public enum Type {
-    REDIS(Const.TYPE_REDIS),
-    DATABASE(Const.TYPE_DATABASE),
-    KAFKA(Const.TYPE_KAFKA),
-    RABBITMQ(Const.TYPE_RABBITMQ),
-    ELASTICSEARCH(Const.TYPE_ES);
+    REDIS(MiddlewareConstants.TYPE_REDIS),
+    DATABASE(MiddlewareConstants.TYPE_DATABASE),
+    KAFKA(MiddlewareConstants.TYPE_KAFKA),
+    RABBITMQ(MiddlewareConstants.TYPE_RABBITMQ),
+    ELASTICSEARCH(MiddlewareConstants.TYPE_ES);
 
     final String remoteType;
 

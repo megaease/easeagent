@@ -17,20 +17,15 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
 import static org.junit.Assert.*;
 
 public class ResourceConfigTest {
-    @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     @Test
-    public void getResourceConfig() {
-        String env = "TEST_RESOURCE";
-        environmentVariables.set(env, "{\"uris\":\"127.0.0.1:9092\"}");
+    public void getResourceConfig() throws Exception {
+        String env = "TEST_MIDDLEWARE_RESOURCE_1";
         ResourceConfig resourceConfig = ResourceConfig.getResourceConfig(env, true);
         assertEquals("127.0.0.1:9092", resourceConfig.getUris());
         assertNotNull(resourceConfig.getFirstHostAndPort());
@@ -45,8 +40,7 @@ public class ResourceConfigTest {
         assertEquals("127.0.0.1:9092", resourceConfig.getUris());
         assertNull(resourceConfig.getFirstHostAndPort());
 
-        environmentVariables.set(env, "{\"uris\":\"127.0.0.1:9092,127.0.0.1:9093\"}");
-        resourceConfig = ResourceConfig.getResourceConfig(env, true);
+        resourceConfig = ResourceConfig.getResourceConfig("TEST_MIDDLEWARE_RESOURCE_2", true);
         assertEquals("127.0.0.1:9092,127.0.0.1:9093", resourceConfig.getUris());
         assertNotNull(resourceConfig.getFirstHostAndPort());
         assertEquals("127.0.0.1", resourceConfig.getFirstHostAndPort().getHost());
@@ -58,8 +52,5 @@ public class ResourceConfigTest {
         assertEquals(2, resourceConfig.getUriList().size());
         assertEquals("127.0.0.1:9092", resourceConfig.getFirstUri());
         assertEquals("127.0.0.1:9093", resourceConfig.getUriList().get(1));
-
-
-        environmentVariables.set(env, null);
     }
 }

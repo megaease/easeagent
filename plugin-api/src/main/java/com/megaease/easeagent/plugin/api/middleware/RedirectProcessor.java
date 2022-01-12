@@ -106,8 +106,12 @@ public class RedirectProcessor {
 
 
     protected static Map<String, String> getServiceTagsFromEnv() {
-        String str = System.getenv(ENV_EASEMESH_TAGS);
-        if (str == null) {
+        return getServiceTags(ENV_EASEMESH_TAGS);
+    }
+
+    protected static Map<String, String> getServiceTags(String env) {
+        String str = System.getenv(env);
+        if (StringUtils.isEmpty(env)) {
             return Collections.emptyMap();
         }
         try {

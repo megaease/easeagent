@@ -17,34 +17,21 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RedirectTest {
-    @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
-
-    @Before
-    public void before() {
-        environmentVariables.set(Const.ENV_REDIS, "{\"uris\":\"localhost:6379\"}");
-        environmentVariables.set(Const.ENV_ES, "{\"uris\":\"127.0.0.1:9200\"}");
-        environmentVariables.set(Const.ENV_KAFKA, "{\"uris\":\"127.0.0.1:9092\", \"tags\": {\"label.local\": \"shadow\"}}");
-        environmentVariables.set(Const.ENV_RABBITMQ, "{\"uris\":\"localhost:5672\"}");
-        environmentVariables.set(Const.ENV_DATABASE, "{\"uris\":\"jdbc:mysql://localhost:3306/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true\"}");
-    }
 
 
     @Test
     public void getEnv() {
-        assertEquals(Const.ENV_REDIS, Redirect.REDIS.getEnv());
-        assertEquals(Const.ENV_ES, Redirect.ELASTICSEARCH.getEnv());
-        assertEquals(Const.ENV_KAFKA, Redirect.KAFKA.getEnv());
-        assertEquals(Const.ENV_RABBITMQ, Redirect.RABBITMQ.getEnv());
-        assertEquals(Const.ENV_DATABASE, Redirect.DATABASE.getEnv());
+        assertEquals(MiddlewareConstants.ENV_REDIS, Redirect.REDIS.getEnv());
+        assertEquals(MiddlewareConstants.ENV_ES, Redirect.ELASTICSEARCH.getEnv());
+        assertEquals(MiddlewareConstants.ENV_KAFKA, Redirect.KAFKA.getEnv());
+        assertEquals(MiddlewareConstants.ENV_RABBITMQ, Redirect.RABBITMQ.getEnv());
+        assertEquals(MiddlewareConstants.ENV_DATABASE, Redirect.DATABASE.getEnv());
     }
 
     @Test
@@ -62,7 +49,7 @@ public class RedirectTest {
         assertEquals("127.0.0.1:9200", Redirect.ELASTICSEARCH.getConfig().getUris());
         assertEquals("127.0.0.1:9092", Redirect.KAFKA.getConfig().getUris());
         assertEquals("localhost:5672", Redirect.RABBITMQ.getConfig().getUris());
-        assertEquals("jdbc:mysql://localhost:3306/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true", Redirect.DATABASE.getConfig().getUris());
+        assertEquals("jdbc:mysql://localhost:3306/db_demo?useUnicode=true", Redirect.DATABASE.getConfig().getUris());
     }
 
 }

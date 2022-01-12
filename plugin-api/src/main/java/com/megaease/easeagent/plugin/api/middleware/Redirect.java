@@ -18,11 +18,11 @@
 package com.megaease.easeagent.plugin.api.middleware;
 
 public enum Redirect {
-    REDIS(Const.ENV_REDIS, true),
-    ELASTICSEARCH(Const.ENV_ES, true),
-    KAFKA(Const.ENV_KAFKA, true),
-    RABBITMQ(Const.ENV_RABBITMQ, true),
-    DATABASE(Const.ENV_DATABASE, false);
+    REDIS(MiddlewareConstants.ENV_REDIS, true),
+    ELASTICSEARCH(MiddlewareConstants.ENV_ES, true),
+    KAFKA(MiddlewareConstants.ENV_KAFKA, true),
+    RABBITMQ(MiddlewareConstants.ENV_RABBITMQ, true),
+    DATABASE(MiddlewareConstants.ENV_DATABASE, false);
 
     private final String env;
     private final ResourceConfig config;

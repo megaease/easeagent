@@ -17,34 +17,20 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
-import com.megaease.easeagent.plugin.api.ProgressFields;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
-import static com.megaease.easeagent.plugin.api.ProgressFields.OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG;
-import static com.megaease.easeagent.plugin.api.middleware.RedirectProcessor.ENV_EASEMESH_TAGS;
 import static org.junit.Assert.*;
 
 public class RedirectProcessorTest {
-    @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
-
 
     @Test
-    public void getServerTagsFromEnv() {
-        assertNotEquals(RedirectProcessor.getServiceTagsFromEnv(), null);
-        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
-        environmentVariables.set(ENV_EASEMESH_TAGS, "");
-        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
-        environmentVariables.set(ENV_EASEMESH_TAGS, "{\"a\":\"b\"}");
+    public void getServerTagsFromEnv() throws Exception {
+        assertNotEquals(RedirectProcessor.getServiceTags("EASEMESH_TAGS_TEST_TTTT"), null);
+        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_TEST_TTTT").isEmpty());
+        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_1").isEmpty());
         assertFalse(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
         assertEquals("b", RedirectProcessor.getServiceTagsFromEnv().get("a"));
-        environmentVariables.set(ENV_EASEMESH_TAGS, "aaa");
-        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
-        environmentVariables.set(ENV_EASEMESH_TAGS, "{\"a\":null}");
-        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
-
-        environmentVariables.set(ENV_EASEMESH_TAGS, "");
+        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_2").isEmpty());
+        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_3").isEmpty());
     }
 }

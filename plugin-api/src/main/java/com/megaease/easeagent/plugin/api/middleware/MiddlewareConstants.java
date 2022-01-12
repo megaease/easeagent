@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
-public final class Const {
+public final class MiddlewareConstants {
     public static final String ENV_REDIS = "EASE_RESOURCE_REDIS";
     public static final String ENV_ES = "EASE_RESOURCE_ELASTICSEARCH";
     public static final String ENV_KAFKA = "EASE_RESOURCE_KAFKA";
