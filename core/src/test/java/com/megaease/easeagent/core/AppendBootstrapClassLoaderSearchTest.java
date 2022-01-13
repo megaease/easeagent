@@ -33,9 +33,7 @@ public class AppendBootstrapClassLoaderSearchTest {
         final Set<String> strings = Sets.newHashSet(
                 "com.megaease.easeagent.core.utils.AgentArray",
                 "com.megaease.easeagent.core.utils.ContextUtils",
-                "com.megaease.easeagent.core.plugin.Dispatcher",
-                // "com.megaease.easeagent.core.plugin.interceptor.AgentInterceptorChain",
-                "com.megaease.easeagent.core.plugin.interceptor.AgentSupplierChain"
+                "com.megaease.easeagent.core.plugin.Dispatcher"
             );
         Assert.assertEquals(strings, AppendBootstrapClassLoaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM));
     }
