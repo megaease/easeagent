@@ -15,12 +15,19 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.core.plugin.interceptor;
+package com.megaease.easeagent.plugin.interceptor;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 
-public interface InterceptorChain {
-    void doBefore(MethodInfo methodInfo, Object context);
+import java.util.function.Supplier;
 
-    Object doAfter(MethodInfo methodInfo, Object context);
+/**
+ * used in autogenerate code
+ */
+public interface InterceptorProvider {
+    Supplier<Interceptor> getInterceptorProvider();
+
+    String getAdviceTo();
+
+    String getPluginClassName();
 }

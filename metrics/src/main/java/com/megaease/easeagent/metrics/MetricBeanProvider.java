@@ -23,7 +23,7 @@ import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetricV2;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetricV2;
-import com.megaease.easeagent.plugin.BeanProvider;
+import com.megaease.easeagent.plugin.bean.BeanProvider;
 import com.megaease.easeagent.plugin.annotation.Injection;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.report.AgentReport;

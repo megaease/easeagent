@@ -17,7 +17,7 @@
 
  package easeagent.plugin.spring.gateway.reactor;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;

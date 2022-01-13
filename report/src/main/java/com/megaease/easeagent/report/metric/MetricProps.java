@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.report.metric;
 
-import com.megaease.easeagent.plugin.Const;
+import com.megaease.easeagent.plugin.api.config.Const;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.utils.NoNull;
 

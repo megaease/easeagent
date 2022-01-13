@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
 import com.megaease.easeagent.plugin.api.middleware.Redirect;

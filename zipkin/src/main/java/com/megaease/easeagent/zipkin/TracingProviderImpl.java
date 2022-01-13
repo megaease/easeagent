@@ -23,8 +23,8 @@ import brave.sampler.CountingSampler;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
-import com.megaease.easeagent.plugin.BeanProvider;
-import com.megaease.easeagent.plugin.IProvider;
+import com.megaease.easeagent.plugin.bean.BeanProvider;
+import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.annotation.Injection;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
@@ -42,7 +42,7 @@ import zipkin2.reporter.Reporter;
 import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
 import zipkin2.reporter.urlconnection.URLConnectionSender;
 
-public class TracingProviderImpl implements BeanProvider, AgentReportAware, ConfigAware, IProvider, TracingProvider {
+public class TracingProviderImpl implements BeanProvider, AgentReportAware, ConfigAware, AgentInitializingBean, TracingProvider {
     private static final String ENV_ZIPKIN_SERVER_URL = "ZIPKIN_SERVER_URL";
     private Tracing tracing;
     private ITracing iTracing;

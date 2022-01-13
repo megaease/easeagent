@@ -18,16 +18,16 @@
 package com.megaease.easeagent.core.plugin.interceptor;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 
 import java.util.function.Supplier;
 
-public class ProviderPluginDecorator implements Provider {
+public class ProviderPluginDecorator implements InterceptorProvider {
     private final AgentPlugin plugin;
-    private final Provider provider;
+    private final InterceptorProvider provider;
 
-    public ProviderPluginDecorator(AgentPlugin plugin, Provider provider) {
+    public ProviderPluginDecorator(AgentPlugin plugin, InterceptorProvider provider) {
         this.plugin = plugin;
         this.provider = provider;
     }

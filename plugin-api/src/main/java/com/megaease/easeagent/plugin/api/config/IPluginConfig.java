@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.plugin.api.config;
 
-import com.megaease.easeagent.plugin.Const;
-
 import java.util.List;
 import java.util.Set;
 

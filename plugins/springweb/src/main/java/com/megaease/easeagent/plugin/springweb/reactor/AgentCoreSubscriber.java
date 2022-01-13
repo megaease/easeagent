@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.springweb.reactor;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.springweb.interceptor.tracing.WebClientFilterTracingInterceptor.WebClientResponse;

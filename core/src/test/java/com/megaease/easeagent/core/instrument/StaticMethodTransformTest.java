@@ -22,9 +22,9 @@ import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import net.bytebuddy.agent.ByteBuddyAgent;
@@ -150,7 +150,7 @@ public class StaticMethodTransformTest extends TransformTestBase {
         }
     }
 
-    static class FooClsInitProvider implements Provider {
+    static class FooClsInitProvider implements InterceptorProvider {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
             return FooClassInitInterceptor::new;

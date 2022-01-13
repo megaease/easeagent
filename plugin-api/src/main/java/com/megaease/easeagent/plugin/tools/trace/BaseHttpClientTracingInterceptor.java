@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.tools.trace;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;

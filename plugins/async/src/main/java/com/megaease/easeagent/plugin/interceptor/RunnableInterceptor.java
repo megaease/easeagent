@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.plugin.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.advice.CrossThreadAdvice;
 import com.megaease.easeagent.plugin.advice.ReactSchedulersAdvice;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;

@@ -27,9 +27,9 @@ import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
-import com.megaease.easeagent.plugin.Provider;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
@@ -57,7 +57,7 @@ public class PluginLoader {
     }
 
     public static void providerLoad() {
-        for (Provider provider : BaseLoader.load(Provider.class)) {
+        for (InterceptorProvider provider : BaseLoader.load(InterceptorProvider.class)) {
             log.debug("loading provider:{}", provider.getClass().getName());
 
             try {

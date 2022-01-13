@@ -27,15 +27,15 @@ import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.IStat
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Response;
 import com.megaease.easeagent.httpserver.nanohttpd.protocols.http.response.Status;
 import com.megaease.easeagent.httpserver.nanohttpd.router.RouterNanoHTTPD;
-import com.megaease.easeagent.plugin.BeanProvider;
-import com.megaease.easeagent.plugin.IProvider;
+import com.megaease.easeagent.plugin.bean.BeanProvider;
+import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.api.health.AgentHealth;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class HealthProvider implements AgentHttpHandlerProvider, ConfigAware, IProvider, BeanProvider {
+public class HealthProvider implements AgentHttpHandlerProvider, ConfigAware, AgentInitializingBean, BeanProvider {
     private static final String EASEAGENT_HEALTH_READINESS_ENABLED = "easeagent.health.readiness.enabled";
 
     private Config config;

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.config;
 
-import com.megaease.easeagent.plugin.Const;
+import com.megaease.easeagent.plugin.api.config.Const;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 

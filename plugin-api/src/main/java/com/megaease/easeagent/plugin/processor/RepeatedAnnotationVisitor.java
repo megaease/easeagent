@@ -33,67 +33,67 @@ public class RepeatedAnnotationVisitor
 
     @Override
     public Set<AnnotationMirror> visit(AnnotationValue av, Class<? extends Annotation> p) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visit(AnnotationValue av) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitBoolean(boolean b, Class<? extends Annotation> p) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitByte(byte b, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitChar(char c, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitDouble(double d, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitFloat(float f, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitInt(int i, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitLong(long i, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitShort(short s, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitString(String s, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitType(TypeMirror t, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Set<AnnotationMirror> visitEnumConstant(VariableElement c, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
@@ -114,6 +114,6 @@ public class RepeatedAnnotationVisitor
 
     @Override
     public Set<AnnotationMirror> visitUnknown(AnnotationValue av, Class<? extends Annotation> aClass) {
-        return null;
+        return Collections.emptySet();
     }
 }

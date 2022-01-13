@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.healthy;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.health.AgentHealth;
 import com.megaease.easeagent.plugin.bridge.NoOpContext;
 import org.junit.Assert;

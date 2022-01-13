@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.bean;
 
-public interface IProvider {
+public interface AgentInitializingBean {
     void afterPropertiesSet();
 }

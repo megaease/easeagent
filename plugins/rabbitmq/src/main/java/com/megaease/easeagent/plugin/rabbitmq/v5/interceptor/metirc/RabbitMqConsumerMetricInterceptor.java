@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor.metirc;
 
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;

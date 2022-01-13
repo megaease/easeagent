@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.interceptor;
 
+import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 
 public interface Interceptor extends Ordered {
     /**
