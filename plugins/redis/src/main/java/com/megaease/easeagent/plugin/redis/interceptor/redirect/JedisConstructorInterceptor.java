@@ -21,8 +21,11 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.redis.RedisRedirectPlugin;
@@ -33,12 +36,14 @@ import java.net.URI;
 
 @AdviceTo(value = JedisConstructorAdvice.class, qualifier = "constructor", plugin = RedisRedirectPlugin.class)
 public class JedisConstructorInterceptor implements Interceptor {
+    private static final Logger LOGGER = EaseAgent.getLogger(JedisConstructorInterceptor.class);
+
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         if (methodInfo.argSize() == 0) {
             return;
         }
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_REDIS);
+        ResourceConfig cnf = Redirect.REDIS.getConfig();
         if (cnf == null) {
             return;
         }
@@ -51,25 +56,37 @@ public class JedisConstructorInterceptor implements Interceptor {
             return;
         }
         if (arg0 instanceof String) {
+            LOGGER.info("Redirect Redis host: {} to {}", arg0, host);
             methodInfo.changeArg(0, host);
-        }else if (arg0 instanceof URI) {
+            RedirectProcessor.redirected(Redirect.REDIS, hostAndPort.uri());
+        } else if (arg0 instanceof URI) {
+            LOGGER.info("Redirect Redis URI {} to {}:{}", arg0, host, port);
             AgentFieldReflectAccessor.setFieldValue(arg0, "host", host);
             AgentFieldReflectAccessor.setFieldValue(arg0, "port", port);
             methodInfo.changeArg(0, arg0);
+            RedirectProcessor.redirected(Redirect.REDIS, hostAndPort.uri());
             return;
         } else if (RedisClassUtils.HOST_AND_PORT_TYPE_CHECKER.hasClassAndIsType(arg0)) {
-            methodInfo.changeArg(0, RedisClassUtils.HOST_AND_PORT_TYPE_CHECKER.newInstance(host, port));
+            Object newHostAndPort = RedisClassUtils.HOST_AND_PORT_TYPE_CHECKER.newInstance(host, port);
+            LOGGER.info("Redirect Redis HostAndPort {} to {}", arg0, newHostAndPort);
+            methodInfo.changeArg(0, newHostAndPort);
+            RedirectProcessor.redirected(Redirect.REDIS, hostAndPort.uri());
             return;
         } else if (RedisClassUtils.JEDIS_SHARD_INFO_TYPE_CHEKER.hasClassAndIsType(arg0)) {
             RedisClassUtils.JEDIS_SHARD_INFO_TYPE_CHEKER.setInfo(arg0, host, port, password);
+            LOGGER.info("Redirect Redis JedisShardInfo to {}", arg0);
             methodInfo.changeArg(0, arg0);
+            RedirectProcessor.redirected(Redirect.REDIS, hostAndPort.uri());
             return;
         } else if (RedisClassUtils.JEDIS_SOCKET_FACTORY_TYPE_CHEKER.hasClassAndIsType(arg0)) {
             RedisClassUtils.JEDIS_SOCKET_FACTORY_TYPE_CHEKER.setInfo(arg0, host, port);
+            LOGGER.info("Redirect Redis JedisSocketFactory to {}", arg0);
             methodInfo.changeArg(0, arg0);
+            RedirectProcessor.redirected(Redirect.REDIS, hostAndPort.uri());
             return;
         }
         if (methodInfo.argSize() > 1 && methodInfo.getArgs()[1] instanceof Integer) {
+            LOGGER.info("Redirect Redis port {} to {}", methodInfo.getArgs()[1], port);
             methodInfo.changeArg(1, port);
         }
     }

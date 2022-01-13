@@ -20,6 +20,10 @@ package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
+import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -67,8 +71,7 @@ public class KafkaConsumerTracingInterceptor implements NonReentrantInterceptor 
                 if (span == null) {
                     span = context.consumerSpan(request);
                     if (!span.isNoop()) {
-                        setConsumerSpan(topic, span);
-                        span.tag("kafka.broker", uri);
+                        setConsumerSpan(topic, uri, span);
                         // incur timestamp overhead only once
                         span.start();
                     }
@@ -78,8 +81,7 @@ public class KafkaConsumerTracingInterceptor implements NonReentrantInterceptor 
             } else {
                 Span span = context.consumerSpan(request);
                 if (!span.isNoop()) {
-                    setConsumerSpan(topic, span);
-                    span.tag("kafka.broker", uri);
+                    setConsumerSpan(topic, uri, span);
                     // incur timestamp overhead only once
                     span.start().finish(); // span won't be shared by other records
                     context.consumerInject(span, request);
@@ -89,8 +91,11 @@ public class KafkaConsumerTracingInterceptor implements NonReentrantInterceptor 
         for (Span span : consumerSpansForTopic.values()) span.finish();
     }
 
-    void setConsumerSpan(String topic, Span span) {
+    void setConsumerSpan(String topic, String uri, Span span) {
         span.tag(KafkaTags.KAFKA_TOPIC_TAG, topic);
+        span.tag(KafkaTags.KAFKA_BROKER_TAG, uri);
+        span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.KAFKA.getRemoteType());
+        RedirectProcessor.setTagsIfRedirected(Redirect.KAFKA, span, uri);
         if (remoteServiceName != null) span.remoteServiceName(remoteServiceName);
     }
 

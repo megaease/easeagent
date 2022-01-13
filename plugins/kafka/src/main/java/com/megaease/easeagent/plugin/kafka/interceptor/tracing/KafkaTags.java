@@ -25,4 +25,5 @@ package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 final class KafkaTags {
   static final String KAFKA_KEY_TAG = "kafka.key";
   static final String KAFKA_TOPIC_TAG = "kafka.topic";
+  static final String KAFKA_BROKER_TAG = "kafka.broker";
 }

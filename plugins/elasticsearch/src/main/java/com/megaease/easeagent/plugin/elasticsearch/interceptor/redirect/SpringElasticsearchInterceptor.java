@@ -20,8 +20,11 @@ package com.megaease.easeagent.plugin.elasticsearch.interceptor.redirect;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.elasticsearch.ElasticsearchRedirectPlugin;
 import com.megaease.easeagent.plugin.elasticsearch.advice.SpringElasticsearchAdvice;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -33,22 +36,26 @@ import java.util.List;
 
 @AdviceTo(value = SpringElasticsearchAdvice.class, plugin = ElasticsearchRedirectPlugin.class)
 public class SpringElasticsearchInterceptor implements NonReentrantInterceptor {
+    private static final Logger LOGGER = EaseAgent.getLogger(SpringElasticsearchInterceptor.class);
+
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_ES);
+        ResourceConfig cnf = Redirect.ELASTICSEARCH.getConfig();
         if (cnf == null) {
             return;
         }
         String method = methodInfo.getMethod();
         List<String> uris = this.formatUris(cnf.getUriList());
         if (method.equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
+            LOGGER.info("Redirect Elasticsearch Username: {} to {}", methodInfo.getArgs()[0], cnf.getUserName());
             methodInfo.changeArg(0, cnf.getUserName());
         } else if (method.equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
+            LOGGER.info("Redirect Elasticsearch Password: *** to ***");
             methodInfo.changeArg(0, cnf.getPassword());
-        } else if (method.equals("setEndpoints")) {
+        } else if (method.equals("setEndpoints") || method.equals("setUris")) {
+            LOGGER.info("Redirect Elasticsearch uris: {} to {}", methodInfo.getArgs()[0], cnf.getUris());
             methodInfo.changeArg(0, uris);
-        } else if (method.equals("setUris")) {
-            methodInfo.changeArg(0, uris);
+            RedirectProcessor.redirected(Redirect.ELASTICSEARCH, cnf.getUris());
         }
 
     }

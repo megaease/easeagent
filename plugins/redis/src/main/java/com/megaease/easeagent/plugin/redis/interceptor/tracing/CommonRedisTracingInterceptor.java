@@ -19,6 +19,10 @@ package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
+import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 
@@ -49,14 +53,15 @@ public abstract class CommonRedisTracingInterceptor implements NonReentrantInter
     public abstract void doTraceBefore(MethodInfo methodInfo, Context context);
 
     protected void startTracing(Context context, String name, String uri, String cmd) {
-
-        Span span = context.currentTracing().nextSpan().name(name).start();
+        Span span = context.nextSpan().name(name).start();
         span.kind(Span.Kind.CLIENT);
         span.remoteServiceName("redis");
         context.put(SPAN_KEY, span);
         if (cmd != null) {
             span.tag("redis.method", cmd);
         }
+        span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.REDIS.getRemoteType());
+        RedirectProcessor.setTagsIfRedirected(Redirect.REDIS, span);
     }
 
     protected void finishTracing(Throwable throwable, Context context) {

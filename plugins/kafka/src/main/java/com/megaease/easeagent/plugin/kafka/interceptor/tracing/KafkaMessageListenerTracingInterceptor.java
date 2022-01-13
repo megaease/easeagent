@@ -20,6 +20,10 @@ package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
+import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -44,9 +48,11 @@ public class KafkaMessageListenerTracingInterceptor implements NonReentrantInter
         Span span = context.consumerSpan(request).name("on-message")
             .kind(Span.Kind.CLIENT)
             .remoteServiceName("kafka")
-            .tag("kafka.broker", uri)
+            .tag(KafkaTags.KAFKA_BROKER_TAG, uri)
             .cacheScope()
             .start();
+        span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.KAFKA.getRemoteType());
+        RedirectProcessor.setTagsIfRedirected(Redirect.KAFKA, span, uri);
         context.put(SPAN, span);
     }
 

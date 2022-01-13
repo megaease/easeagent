@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcConnectionMetricPlugin;
@@ -39,8 +41,10 @@ public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor 
 
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
+        Tags tags = new Tags("application", "jdbc-connection", "url");
+        RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, tags);
         metric = ServiceMetricRegistry.getOrCreate(config,
-            new Tags("application", "jdbc-connection", "url"), JdbcMetric.METRIC_SUPPLIER);
+            tags, JdbcMetric.METRIC_SUPPLIER);
     }
 
     @Override

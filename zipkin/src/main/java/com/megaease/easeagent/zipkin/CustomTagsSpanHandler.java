@@ -20,7 +20,10 @@ package com.megaease.easeagent.zipkin;
 import brave.handler.MutableSpan;
 import brave.handler.SpanHandler;
 import brave.propagation.TraceContext;
+import com.megaease.easeagent.plugin.api.ProgressFields;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class CustomTagsSpanHandler extends SpanHandler {
@@ -37,6 +40,17 @@ public class CustomTagsSpanHandler extends SpanHandler {
     public boolean end(TraceContext context, MutableSpan span, Cause cause) {
         span.tag(TAG_INSTANCE, this.instance);
         span.localServiceName(this.serviceName.get());
+        fillTags(span, ProgressFields.getServiceTags());
+        fillTags(span, RedirectProcessor.tags());
         return true;
+    }
+
+    public void fillTags(MutableSpan span, Map<String, String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, String> entry : tags.entrySet()) {
+            span.tag(entry.getKey(), entry.getValue());
+        }
     }
 }

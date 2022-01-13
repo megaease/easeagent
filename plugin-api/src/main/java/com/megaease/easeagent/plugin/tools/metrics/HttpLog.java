@@ -17,13 +17,17 @@
 
 package com.megaease.easeagent.plugin.tools.metrics;
 
+import com.megaease.easeagent.plugin.api.ProgressFields;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.utils.SystemClock;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HttpLog {
 
@@ -48,10 +52,22 @@ public class HttpLog {
         requestInfo.setMethod(serverInfo.getMethod());
         requestInfo.setHeaders(serverInfo.findHeaders());
         requestInfo.setBeginTime(beginTime);
-        requestInfo.setQueries(serverInfo.findQueries());
+        requestInfo.setQueries(getQueries(serverInfo));
         requestInfo.setClientIP(serverInfo.getClientIP());
         requestInfo.setBeginCpuTime(System.nanoTime());
         return requestInfo;
+    }
+
+    private Map<String, String> getQueries(AccessLogServerInfo serverInfo) {
+        Map<String, String> serviceTags = ProgressFields.getServiceTags();
+        Map<String, String> meshTags = RedirectProcessor.tags();
+        if (serviceTags.isEmpty() && meshTags.isEmpty()) {
+            return serverInfo.findQueries();
+        }
+        Map<String, String> queries = new HashMap<>(meshTags);
+        queries.putAll(serviceTags);
+        queries.putAll(serverInfo.findQueries());
+        return queries;
     }
 
     public String getLogString(RequestInfo requestInfo, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {

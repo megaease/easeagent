@@ -17,8 +17,13 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.megaease.easeagent.plugin.utils.SystemEnv;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ResourceConfig {
 
@@ -28,7 +33,21 @@ public class ResourceConfig {
     private final List<String> uriList = new ArrayList<>();
     private final List<HostAndPort> hostAndPorts = new ArrayList<>();
 
-    public void parseHostAndPorts(boolean needParse) {
+    protected static ResourceConfig getResourceConfig(String env, boolean needParse) {
+        String str = SystemEnv.get(env);
+        if (str == null) {
+            return null;
+        }
+        ResourceConfig resourceConfig = JsonUtil.toObject(str, new TypeReference<ResourceConfig>() {
+        });
+        resourceConfig.parseHostAndPorts(needParse);
+        if (resourceConfig.hasUrl()) {
+            return resourceConfig;
+        }
+        return null;
+    }
+
+    private void parseHostAndPorts(boolean needParse) {
         if (!needParse) {
             uriList.add(this.uris);
             return;
@@ -122,6 +141,25 @@ public class ResourceConfig {
 
         public void setPort(Integer port) {
             this.port = port;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            HostAndPort that = (HostAndPort) o;
+            return Objects.equals(host, that.host) &&
+                Objects.equals(port, that.port);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(host, port);
+        }
+
+        public String uri() {
+            return host + ":" + port;
         }
     }
 }

@@ -29,6 +29,8 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricName;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqConsumerMetric;
@@ -58,6 +60,7 @@ public class RabbitMqConsumerMetricInterceptor implements Interceptor {
             }
             NAME_FACTORY = RabbitMqConsumerMetric.getNameFactory();
             Tags tags = new Tags("application", "rabbitmq-consumer", "resource");
+            RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, tags);
             METRIC = EaseAgent.newMetricRegistry(config, NAME_FACTORY, tags);
         }
     }

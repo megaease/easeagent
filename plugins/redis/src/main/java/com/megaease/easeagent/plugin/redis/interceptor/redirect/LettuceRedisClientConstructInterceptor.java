@@ -20,8 +20,11 @@ package com.megaease.easeagent.plugin.redis.interceptor.redirect;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.redis.RedisRedirectPlugin;
@@ -32,9 +35,11 @@ import io.lettuce.core.RedisURI;
 
 @AdviceTo(value = LettuceRedisClientAdvice.class, qualifier = "constructor", plugin = RedisRedirectPlugin.class)
 public class LettuceRedisClientConstructInterceptor implements NonReentrantInterceptor {
+    private static final Logger LOGGER = EaseAgent.getLogger(JedisConstructorInterceptor.class);
+
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_REDIS);
+        ResourceConfig cnf = Redirect.REDIS.getConfig();
         if (cnf == null) {
             return;
         }
@@ -44,8 +49,10 @@ public class LettuceRedisClientConstructInterceptor implements NonReentrantInter
         String host = hostAndPort.getHost();
         Integer port = hostAndPort.getPort();
         if (host != null && port != null) {
+            LOGGER.info("Redirect Redis RedisURI: {} to {}:{}", redisURI, host, port);
             redisURI.setHost(host);
             redisURI.setPort(port);
+            RedirectProcessor.redirected(Redirect.REDIS, hostAndPort.uri());
         }
     }
 

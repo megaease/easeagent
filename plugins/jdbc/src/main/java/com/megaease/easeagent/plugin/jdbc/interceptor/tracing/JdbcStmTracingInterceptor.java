@@ -23,6 +23,10 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
+import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -79,6 +83,8 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
         if (url != null) {
             span.tag(SPAN_URL, url);
         }
+        span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.DATABASE.getRemoteType());
+        RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, span, url);
         DatabaseInfo databaseInfo = DatabaseInfo.getFromConnection(conn);
         if (databaseInfo != null) {
             span.remoteServiceName(databaseInfo.getDatabase());

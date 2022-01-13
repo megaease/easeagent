@@ -21,8 +21,11 @@ import com.megaease.easeagent.plugin.Interceptor;
 import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.middleware.MiddlewareConfigProcessor;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.jdbc.JdbcRedirectPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.HikariDataSourceAdvice;
@@ -30,18 +33,24 @@ import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 @AdviceTo(value = HikariDataSourceAdvice.class, plugin = JdbcRedirectPlugin.class)
 public class HikariSetPropertyInterceptor implements Interceptor {
+    private static final Logger LOGGER = EaseAgent.getLogger(HikariSetPropertyInterceptor.class);
+
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        ResourceConfig cnf = MiddlewareConfigProcessor.INSTANCE.getData(MiddlewareConfigProcessor.ENV_DATABASE);
+        ResourceConfig cnf = Redirect.DATABASE.getConfig();
         if (cnf == null) {
             return;
         }
         if (methodInfo.getMethod().equals("setJdbcUrl")) {
             String jdbcUrl = cnf.getFirstUri();
+            LOGGER.info("Redirect JDBC Url: {} to {}", methodInfo.getArgs()[0], jdbcUrl);
             methodInfo.changeArg(0, jdbcUrl);
+            RedirectProcessor.redirected(Redirect.DATABASE, jdbcUrl);
         } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
+            LOGGER.info("Redirect JDBC Username: {} to {}", methodInfo.getArgs()[0], cnf.getUserName());
             methodInfo.changeArg(0, cnf.getUserName());
         } else if (methodInfo.getMethod().equals("setPassword") && StringUtils.isNotEmpty(cnf.getPassword())) {
+            LOGGER.info("Redirect JDBC Password: *** to ***");
             methodInfo.changeArg(0, cnf.getPassword());
         }
     }
