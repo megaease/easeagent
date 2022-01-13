@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.utils.SystemEnv;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
@@ -110,7 +111,7 @@ public class RedirectProcessor {
     }
 
     protected static Map<String, String> getServiceTags(String env) {
-        String str = System.getenv(env);
+        String str = SystemEnv.get(env);
         if (StringUtils.isEmpty(env)) {
             return Collections.emptyMap();
         }

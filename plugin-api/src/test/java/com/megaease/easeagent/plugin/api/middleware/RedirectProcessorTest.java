@@ -17,20 +17,28 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
+import com.megaease.easeagent.mock.utils.MockSystemEnv;
 import org.junit.Test;
 
+import static com.megaease.easeagent.plugin.api.middleware.RedirectProcessor.ENV_EASEMESH_TAGS;
 import static org.junit.Assert.*;
 
 public class RedirectProcessorTest {
 
     @Test
-    public void getServerTagsFromEnv() throws Exception {
-        assertNotEquals(RedirectProcessor.getServiceTags("EASEMESH_TAGS_TEST_TTTT"), null);
-        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_TEST_TTTT").isEmpty());
-        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_1").isEmpty());
+    public void getServerTagsFromEnv() {
+        assertNotEquals(RedirectProcessor.getServiceTagsFromEnv(), null);
+        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
+        MockSystemEnv.set(ENV_EASEMESH_TAGS, "");
+        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
+        MockSystemEnv.set(ENV_EASEMESH_TAGS, "{\"a\":\"b\"}");
         assertFalse(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
         assertEquals("b", RedirectProcessor.getServiceTagsFromEnv().get("a"));
-        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_2").isEmpty());
-        assertTrue(RedirectProcessor.getServiceTags("EASEMESH_TAGS_3").isEmpty());
+        MockSystemEnv.set(ENV_EASEMESH_TAGS, "aaa");
+        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
+        MockSystemEnv.set(ENV_EASEMESH_TAGS, "{\"a\":null}");
+        assertTrue(RedirectProcessor.getServiceTagsFromEnv().isEmpty());
+
+        MockSystemEnv.set(ENV_EASEMESH_TAGS, "");
     }
 }

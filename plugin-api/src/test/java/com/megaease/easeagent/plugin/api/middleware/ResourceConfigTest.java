@@ -17,15 +17,17 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
+import com.megaease.easeagent.mock.utils.MockSystemEnv;
+import com.megaease.easeagent.plugin.utils.SystemEnv;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class ResourceConfigTest {
-
     @Test
-    public void getResourceConfig() throws Exception {
-        String env = "TEST_MIDDLEWARE_RESOURCE_1";
+    public void getResourceConfig() {
+        String env = "TEST_RESOURCE";
+        MockSystemEnv.set(env, "{\"uris\":\"127.0.0.1:9092\"}");
         ResourceConfig resourceConfig = ResourceConfig.getResourceConfig(env, true);
         assertEquals("127.0.0.1:9092", resourceConfig.getUris());
         assertNotNull(resourceConfig.getFirstHostAndPort());
@@ -40,7 +42,8 @@ public class ResourceConfigTest {
         assertEquals("127.0.0.1:9092", resourceConfig.getUris());
         assertNull(resourceConfig.getFirstHostAndPort());
 
-        resourceConfig = ResourceConfig.getResourceConfig("TEST_MIDDLEWARE_RESOURCE_2", true);
+        MockSystemEnv.set(env, "{\"uris\":\"127.0.0.1:9092,127.0.0.1:9093\"}");
+        resourceConfig = ResourceConfig.getResourceConfig(env, true);
         assertEquals("127.0.0.1:9092,127.0.0.1:9093", resourceConfig.getUris());
         assertNotNull(resourceConfig.getFirstHostAndPort());
         assertEquals("127.0.0.1", resourceConfig.getFirstHostAndPort().getHost());
@@ -52,5 +55,16 @@ public class ResourceConfigTest {
         assertEquals(2, resourceConfig.getUriList().size());
         assertEquals("127.0.0.1:9092", resourceConfig.getFirstUri());
         assertEquals("127.0.0.1:9093", resourceConfig.getUriList().get(1));
+
+
+        MockSystemEnv.remove(env);
+    }
+
+    @Test
+    public void testMockEnv() {
+        String name = "TEST_MIDDLEWARE_RESOURCE_xxxx";
+        String value = "xxxxx";
+        MockSystemEnv.set(name, value);
+        assertEquals(value, SystemEnv.get(name));
     }
 }

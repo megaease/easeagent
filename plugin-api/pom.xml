@@ -53,9 +53,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.stefanbirkner</groupId>
-            <artifactId>system-rules</artifactId>
-            <version>1.18.0</version>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>utils-mock</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -98,26 +98,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
-                <configuration>
-                    <environmentVariables>
-                        <TEST_MIDDLEWARE_RESOURCE_1>{"uris":"127.0.0.1:9092"}</TEST_MIDDLEWARE_RESOURCE_1>
-                        <TEST_MIDDLEWARE_RESOURCE_2>{"uris":"127.0.0.1:9092,127.0.0.1:9093"}</TEST_MIDDLEWARE_RESOURCE_2>
-                        <EASE_RESOURCE_REDIS>{"uris":"localhost:6379"}</EASE_RESOURCE_REDIS>
-                        <EASE_RESOURCE_ELASTICSEARCH>{"uris":"127.0.0.1:9200"}</EASE_RESOURCE_ELASTICSEARCH>
-                        <EASE_RESOURCE_KAFKA>{"uris":"127.0.0.1:9092", "tags": {"label.local": "shadow"}}</EASE_RESOURCE_KAFKA>
-                        <EASE_RESOURCE_RABBITMQ>{"uris":"localhost:5672"}</EASE_RESOURCE_RABBITMQ>
-                        <EASE_RESOURCE_DATABASE>{"uris":"jdbc:mysql://localhost:3306/db_demo?useUnicode=true"}</EASE_RESOURCE_DATABASE>
-                        <EASEMESH_TAGS>{"a":"b"}</EASEMESH_TAGS>
-                        <EASEMESH_TAGS_1>""</EASEMESH_TAGS_1>
-                        <EASEMESH_TAGS_2>aaa</EASEMESH_TAGS_2>
-                        <EASEMESH_TAGS_3>{"a":null}</EASEMESH_TAGS_3>
-                    </environmentVariables>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>

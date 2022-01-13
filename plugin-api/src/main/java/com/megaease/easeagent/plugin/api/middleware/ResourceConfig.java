@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.api.middleware;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.megaease.easeagent.plugin.utils.SystemEnv;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class ResourceConfig {
     private final List<HostAndPort> hostAndPorts = new ArrayList<>();
 
     protected static ResourceConfig getResourceConfig(String env, boolean needParse) {
-        String str = System.getenv(env);
+        String str = SystemEnv.get(env);
         if (str == null) {
             return null;
         }
