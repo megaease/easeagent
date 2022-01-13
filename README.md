@@ -1,17 +1,26 @@
 # EaseAgent
 An agent component for Java system.
 
-- [Overview](#Overview)
-  - [Purpose](#Purpose)
-  - [Principles](#Principles)
-- [Features](#Features)
-- [Architecture Diagram](#Architecture-Diagram)
-- [QuickStart](#QuickStart)
-  - [Download](#Download)
-  - [Build From Source](#Build-From-Source)
-- [User Manual](#User-Manual)
-- [Development Guide](#Plugin-Development-Guide)
-- [Licenses](#Licenses)
+- [EaseAgent](#easeagent)
+  - [Overview](#overview)
+    - [Purpose](#purpose)
+    - [Principles](#principles)
+  - [Features](#features)
+  - [Architecture Diagram](#architecture-diagram)
+      - [Description](#description)
+  - [QuickStart](#quickstart)
+    - [Download](#download)
+    - [Build From Source](#build-from-source)
+    - [1. Get Configuration file](#1-get-configuration-file)
+    - [2. Modify Configuration](#2-modify-configuration)
+    - [3. Building the demo application and simple plugin.](#3-building-the-demo-application-and-simple-plugin)
+    - [4. Copy simple plugin to `plugins` directory](#4-copy-simple-plugin-to-plugins-directory)
+    - [5. Run the demo application with EaseAgent.](#5-run-the-demo-application-with-easeagent)
+    - [6. Integrate with Prometheus](#6-integrate-with-prometheus)
+    - [7. Test Data](#7-test-data)
+  - [User Manual](#user-manual)
+  - [Plugin Development Guide](#plugin-development-guide)
+  - [Licenses](#licenses)
 
 ## Overview
 - Easeagent is the underlying component that provides non-intrusive extensions to applications of the Java ecosystem.
@@ -62,7 +71,7 @@ An agent component for Java system.
 #### Description
 **Plugin Framework** in `core` module is base on [Byte buddy](https://github.com/raphw/byte-buddy) technology.
 
-1. Easeagent's plugin defines where (which classes and methods) to make enhancements by Points implemention and what to do at the point of enhancement by the implementions of Interceptor.
+1. Easeagent's plugin defines where (which classes and methods) to make enhancements by Points implementation and what to do at the point of enhancement by the implementations of Interceptor.
 2. When the program invokes the enhanced method of class defined by Points, the `unique index`(uid) owned by the method will be used as a parameter to call the common interface of `Agent Common Method Advice`, which finds the `Agent Interceptor Chain` by the `Unique Index` and calls the `before` method of each Interceptor in the chain in order of priority.
 3. Normally, both the `Metric Interceptor` and the `Tracing Interceptor` are in the agent interceptor chain and are called sequentially.
 4. According to call the `Metric API` and `Tracing API` in interceptors, the `Metric` and `Tracing` information will be stored in `MetricRegistry` and `Tracing`.
@@ -145,7 +154,7 @@ $ mvn clean package
 $ cd simple-plugin
 $ mvn clean package
 ```
-There is an agent.propertites configuration file in the demo directory, which is configured to print all information to the console.
+There is an agent.properties configuration file in the demo directory, which is configured to print all information to the console.
 If you want to print all information to console, then you can use this configuration file.
 
 ### 4. Copy simple plugin to `plugins` directory
@@ -179,7 +188,7 @@ Start Prometheus
 ```
 $ ./prometheus --config.file=prometheus.yml
 
-# Open another console, run curl to access the test url for serveral times.
+# Open another console, run curl to access the test url for several times.
 $ curl -v http://127.0.0.1:18888/web_client
 
 ```

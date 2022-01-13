@@ -1,22 +1,24 @@
 # Plugin Development Guide
-- [Overview](#Overview)
-- [Plugin Structure](#Plugin-structure)
+- [Plugin Development Guide](#plugin-development-guide)
+  - [Overview](#overview)
+  - [Plugin Structure](#plugin-structure)
     - [A Simple Plugin Example](#a-simple-plugin-example)
-        - [AgentPlugin](#AgentPlugin)
-        - [Points](#points-of-simple-plugin)
-        - [Interceptor](#interceptor-of-simple-plugin)
-        - [Test](#test-result)
-    - [AgentPlugin](#AgentPlugin-plugin-definition)
+      - [AgentPlugin](#agentplugin)
+      - [Points of Simple Plugin](#points-of-simple-plugin)
+      - [Interceptor of Simple Plugin](#interceptor-of-simple-plugin)
+      - [Test](#test)
+    - [AgentPlugin: Plugin definition](#agentplugin-plugin-definition)
     - [Points](#points)
     - [Interceptor](#interceptor)
     - [AdviceTo Annotation](#adviceto-annotation)
     - [Plugin Orchestration](#plugin-orchestration)
     - [Plugin Configuration](#plugin-configuration)
-- [Context](#Context)
-- [Tracing API](#Tracing-API)
-- [Metric API](#Metric-API)
-- [Logging API](#logging-API)
-- [Configuration API](#Configuration-API)
+  - [Context](#context)
+  - [Tracing API](#tracing-api)
+  - [Metric API](#metric-api)
+  - [Logging API](#logging-api)
+  - [Configuration API](#configuration-api)
+    - [Customize](#customize)
 
 ## Overview
 Most of the Easeagent's functions are supported by plugins.
@@ -28,7 +30,7 @@ This document describes how to develop plugins for Easeagent, and it will be div
 5. Configuration API
 
 ##  Plugin Structure
-All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains serveral plugins, eg. a "Tracking Plugin" and a "Metirc Plugin".
+All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains several plugins, eg. a "Tracking Plugin" and a "Metric Plugin".
 ![image](./images/plugin-structure.png)
 
 Let's start with a simple plugin.
@@ -190,7 +192,7 @@ easeagent-1639648241639* Closing connection 0
 
 When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package.
 
-In this simple plugin project, the `com.megaease.easeagent:plugin-api` dependency is wraped in local maven repository which local in `simple-plugin/lib` directory, user can also download Easeagent source tree then install `plugin-api` module.
+In this simple plugin project, the `com.megaease.easeagent:plugin-api` dependency is wrapped in local maven repository which local in `simple-plugin/lib` directory, user can also download Easeagent source tree then install `plugin-api` module.
 
 ```
 $ git clone https://github.com/megaease/easeagent.git
@@ -222,12 +224,12 @@ The `AgentPlugin` interface also includes the `Order` interface that defines the
 
 ### Points
 `Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
-When there is only one methodmatcher in the return set of `getMethodMather()`, the qualifer value defaults to 'default', and there is no need to explicitly assign a value.
+When there is only one methodMatcher in the return set of `getMethodMather()`, the qualifier value defaults to 'default', and there is no need to explicitly assign a value.
 When there are multiple methods in a matched class that require enhancement with different interceptors, a qualifier needs to be assigned to each `MethodMatcher` as the keyword used by different interceptors to bind.
 
-To decouple from ByteBuddy, `ClassMatcher` and `Methodmatcher` are wrapped with reference to the DSL of **ByteBuddy**.
+To decouple from ByteBuddy, `ClassMatcher` and `MethodMatcher` are wrapped with reference to the DSL of **ByteBuddy**.
 
-The DSL of `ClassMatcher` and `MethodMatcher` is discirbe in [Matcher DSL](./matcher-DSL.md)
+The DSL of `ClassMatcher` and `MethodMatcher` is described in [Matcher DSL](./matcher-DSL.md)
 ```java
 public interface Points {
     /**
@@ -287,7 +289,7 @@ Interceptors is the core of implementing specific enhancements.
 
 `Interceptor` interface has a name method `getType` and a initialization method `init`.
 - The name will be used as `serviceId` in combination with the `domain` and `namespace` of the binding plugin to get the plugin configuration which will be automatically injected into the `Context`. The description of the plugin configuration can be found in the user manual.
-- The `init` method is invoked during transfrom, allowing users to initialize staic resources of interceptor, and also allowing to load third party classes which can't load by running time classloader.
+- The `init` method is invoked during transform, allowing users to initialize static resources of interceptor, and also allowing to load third party classes which can't load by runtime classloader.
 
 The `before` and `after` methods of the interceptor are invoked when the method being enhanced enters and returns, respectively.
 Both `before` and `after` methods have parameters `MethodInfo` and `Context`.
@@ -341,7 +343,7 @@ The `Interceptor` interface also includes the `Order` interface that defines the
 ### AdviceTo Annotation
 Within a plugin, there may be multiple interceptors, and multiple enhancement points, so which enhancement point is a particular interceptor used for?
 
-This can be specified through the `@AdviceTo` annotation, which is applied on the Interceptor's implemention to specify the enhancement point binding with the Interceptor.
+This can be specified through the `@AdviceTo` annotation, which is applied on the Interceptor's implementation to specify the enhancement point binding with the Interceptor.
 
 However, when there are multiple plugins within a plugin module, it is necessary to go a step further and specify the plugin to which the Interceptor is bound.
 
@@ -388,7 +390,7 @@ value           : true
 
 `[domain]` and `[namespace]` are defined by `AgentPlugin` interface implementations.
 
-The `function` is provided by `Interceptor` interface implemention's `getType()` method, and this method need return a String value like 'tracing', 'metirc', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword.
+The `function` is provided by `Interceptor` interface implementation's `getType()` method, and this method need return a String value like 'tracing', 'metric', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword.
 
 This prefix `plugin.[domain].[namespace].[function]` is used to maintained configuration for this `Interceptor`, and in this `Interceptor` developer can get its configuration by the `getConfig()` method of the `Context` param.
 
