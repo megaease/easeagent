@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.redirect;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.middleware.Redirect;

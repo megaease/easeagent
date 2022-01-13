@@ -49,7 +49,7 @@ public class MethodMatcher implements IMethodMatcher {
 
     private String qualifier;
 
-    public static int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_STATIC
+    public static final int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_STATIC
         | Modifier.ACC_PRIVATE | Modifier.ACC_PUBLIC | Modifier.ACC_PROTECTED;
 
     protected MethodMatcher() {
@@ -69,6 +69,7 @@ public class MethodMatcher implements IMethodMatcher {
         this.overriddenFrom = overriddenFrom;
     }
 
+    @Override
     public boolean isDefaultQualifier() {
         return this.qualifier.equals(IMethodMatcher.DEFAULT_QUALIFIER);
     }

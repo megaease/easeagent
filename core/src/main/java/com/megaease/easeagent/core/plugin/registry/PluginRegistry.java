@@ -28,7 +28,7 @@ import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Points;
-import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
@@ -96,7 +96,7 @@ public class PluginRegistry {
             .order(order).build();
     }
 
-    public static int register(Provider provider) {
+    public static int register(InterceptorProvider provider) {
         String qualifier = provider.getAdviceTo();
         // map interceptor/pointcut to plugin
 

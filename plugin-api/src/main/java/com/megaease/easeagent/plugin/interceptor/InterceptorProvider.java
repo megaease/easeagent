@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,19 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.interceptor;
 
-public interface Const {
-    int MAX_PLUGIN_STACK = 10000;
-    String ENABLED_CONFIG = "enabled";
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 
-    int METRIC_DEFAULT_INTERVAL = 30;
-    String METRIC_DEFAULT_TOPIC = "application-meter";
-    String METRIC_DEFAULT_APPEND_TYPE = "console";
+import java.util.function.Supplier;
 
+/**
+ * used in autogenerate code
+ */
+public interface InterceptorProvider {
+    Supplier<Interceptor> getInterceptorProvider();
 
+    String getAdviceTo();
 
+    String getPluginClassName();
 }

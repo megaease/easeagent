@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,17 +15,9 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin;
+package com.megaease.easeagent.plugin.bean;
 
-import java.util.function.Supplier;
+import com.megaease.easeagent.plugin.Ordered;
 
-/**
- * used in autogenerate code
- */
-public interface Provider {
-    Supplier<Interceptor> getInterceptorProvider();
-
-    String getAdviceTo();
-
-    String getPluginClassName();
+public interface BeanProvider extends Ordered {
 }

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.api.dispatcher;
 
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 
 public interface IDispatcher {

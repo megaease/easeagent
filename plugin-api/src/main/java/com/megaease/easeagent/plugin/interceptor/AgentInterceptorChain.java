@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.plugin.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.MethodInfo;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.logging.Logger;

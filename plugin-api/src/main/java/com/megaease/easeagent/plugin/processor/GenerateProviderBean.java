@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.processor;
 
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -62,7 +62,7 @@ class GenerateProviderBean {
     }
 
     JavaFile apply() {
-        List<? extends Element> executes = utils.asTypeElement(() -> Provider.class).getEnclosedElements();
+        List<? extends Element> executes = utils.asTypeElement(() -> InterceptorProvider.class).getEnclosedElements();
 
         Set<MethodSpec> methods = new LinkedHashSet<>();
         for (Element e : executes) {
@@ -98,7 +98,7 @@ class GenerateProviderBean {
 
         final TypeSpec.Builder specBuild = TypeSpec
             .classBuilder(this.interceptorClass + this.providerClassExtension)
-            .addSuperinterface(Provider.class)
+            .addSuperinterface(InterceptorProvider.class)
             .addModifiers(Modifier.PUBLIC);
         for (MethodSpec method : methods) {
             specBuild.addMethod(method);

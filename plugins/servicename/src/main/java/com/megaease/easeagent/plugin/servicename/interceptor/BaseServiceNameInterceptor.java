@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
-import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.enums.Order;

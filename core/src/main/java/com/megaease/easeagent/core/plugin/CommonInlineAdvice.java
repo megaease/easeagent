@@ -19,7 +19,7 @@ package com.megaease.easeagent.core.plugin;
 
 import com.megaease.easeagent.core.plugin.annotation.Index;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.NoExceptionHandler;
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import net.bytebuddy.asm.Advice;

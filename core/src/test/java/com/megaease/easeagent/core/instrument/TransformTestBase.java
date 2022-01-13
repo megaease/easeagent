@@ -22,9 +22,9 @@ import com.megaease.easeagent.core.plugin.interceptor.ProviderPluginDecorator;
 import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.plugin.registry.PluginRegistry;
-import com.megaease.easeagent.plugin.Interceptor;
-import com.megaease.easeagent.plugin.MethodInfo;
-import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -44,7 +44,7 @@ public class TransformTestBase {
     @SuppressWarnings("all")
     protected Set<MethodTransformation> getMethodTransformations(int index,
                                                                String methodName,
-                                                               Provider provider) {
+                                                               InterceptorProvider provider) {
         IMethodMatcher m = MethodMatcher.builder().named(methodName).build();
         return getMethodTransformations(index, m, provider);
     }
@@ -52,7 +52,7 @@ public class TransformTestBase {
     @SuppressWarnings("all")
     protected Set<MethodTransformation> getMethodTransformations(int index,
                                                                  IMethodMatcher m,
-                                                                 Provider provider) {
+                                                                 InterceptorProvider provider) {
         ProviderChain.Builder providerBuilder = ProviderChain.builder();
         providerBuilder.addProvider(new ProviderPluginDecorator(new TestPlugin(), provider));
 
@@ -123,7 +123,7 @@ public class TransformTestBase {
         }
     }
 
-    static class FooProvider implements Provider {
+    static class FooProvider implements InterceptorProvider {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
             return FooInterceptor::new;
@@ -140,7 +140,7 @@ public class TransformTestBase {
         }
     }
 
-    static class FooInstProvider implements Provider {
+    static class FooInstProvider implements InterceptorProvider {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
             return FooInstInterceptor::new;
@@ -157,7 +157,7 @@ public class TransformTestBase {
         }
     }
 
-    static class FooSecProvider implements Provider {
+    static class FooSecProvider implements InterceptorProvider {
         @Override
         public Supplier<Interceptor> getInterceptorProvider() {
             return FooSecondInterceptor::new;

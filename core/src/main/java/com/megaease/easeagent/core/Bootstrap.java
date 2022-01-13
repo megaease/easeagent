@@ -30,8 +30,8 @@ import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.plugin.BeanProvider;
-import com.megaease.easeagent.plugin.IProvider;
+import com.megaease.easeagent.plugin.bean.BeanProvider;
+import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
@@ -165,8 +165,8 @@ public class Bootstrap {
             GlobalAgentHolder.getAgentHttpServer()
                 .addHttpRoutes(((AgentHttpHandlerProvider) beanProvider).getAgentHttpHandlers());
         }
-        if (beanProvider instanceof IProvider) {
-            ((IProvider) beanProvider).afterPropertiesSet();
+        if (beanProvider instanceof AgentInitializingBean) {
+            ((AgentInitializingBean) beanProvider).afterPropertiesSet();
         }
         if (beanProvider instanceof TracingProvider) {
             TracingProvider tracingProvider = (TracingProvider) beanProvider;

@@ -19,9 +19,9 @@ package com.megaease.easeagent.plugin.processor;
 
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.Points;
-import com.megaease.easeagent.plugin.Provider;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.annotation.AdvicesTo;
 import com.squareup.javapoet.ClassName;
@@ -50,12 +50,12 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 
 @AutoService(Processor.class)
 public class PluginProcessor extends AbstractProcessor {
-    TreeSet<String>  annotations = new TreeSet<>();
-    {
-        annotations.add(AdviceTo.class.getCanonicalName());
-        annotations.add(AdvicesTo.class.getCanonicalName());
-        // for test temporarily
-        // annotations.add(ProviderBean.class.getCanonicalName());
+    TreeSet<String> processAnnotations = new TreeSet<>();
+
+    public PluginProcessor() {
+        super();
+        processAnnotations.add(AdviceTo.class.getCanonicalName());
+        processAnnotations.add(AdvicesTo.class.getCanonicalName());
     }
 
     @Override
@@ -65,15 +65,15 @@ public class PluginProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return annotations;
+        return processAnnotations;
     }
 
     private Set<TypeElement> process(Set<Class<? extends Annotation>> annotationClasses,
-                            Class<?> dstClass,
                             Elements elements,
                             RoundEnvironment roundEnv) {
         TreeSet<String> services = new TreeSet<>();
         Set<TypeElement> types = new HashSet<>();
+        Class<?> dstClass = Interceptor.class;
 
         Set<Element> roundElements = new HashSet<>();
         for (Class<? extends Annotation> annotationClass : annotationClasses) {
@@ -82,10 +82,7 @@ public class PluginProcessor extends AbstractProcessor {
         }
 
         for (Element e : roundElements) {
-            if (!e.getKind().isClass()) {
-                continue;
-            }
-            if (e.getModifiers().contains(ABSTRACT)) {
+            if (!e.getKind().isClass() || e.getModifiers().contains(ABSTRACT)) {
                 continue;
             }
             TypeElement type = (TypeElement)e;
@@ -135,14 +132,12 @@ public class PluginProcessor extends AbstractProcessor {
             processingEnv.getMessager().printMessage(Kind.WARNING, "Can't find AgentPlugin class!");
             return false;
         }
-        // process(Pointcut.class, Points.class, elements, roundEnv);
         Set<Class<? extends Annotation>> classes = new HashSet<>();
         classes.add(AdvicesTo.class);
         classes.add(AdviceTo.class);
-        Set<TypeElement> interceptors = process(classes, Interceptor.class, elements, roundEnv);
+        Set<TypeElement> interceptors = process(classes, elements, roundEnv);
         // generate providerBean
         generateProviderBeans(plugins, interceptors, utils);
-        // process(ProviderBean.class, Provider.class, elements, roundEnv);
 
         return false;
     }
@@ -169,7 +164,8 @@ public class PluginProcessor extends AbstractProcessor {
         return pluginNames;
     }
 
-    public void generateProviderBeans(LinkedHashMap<String, TypeElement> plugins, Set<TypeElement> interceptors, BeanUtils utils) {
+    private void generateProviderBeans(LinkedHashMap<String, TypeElement> plugins,
+                                       Set<TypeElement> interceptors, BeanUtils utils) {
         TreeSet<String> providers = new TreeSet<>();
         TreeSet<String> points = new TreeSet<>();
         for (TypeElement type : interceptors) {
@@ -200,7 +196,7 @@ public class PluginProcessor extends AbstractProcessor {
                 }
             }
 
-            Integer seq = 0;
+            int seq = 0;
             TypeElement plugin = plugins.values().toArray(new TypeElement[0])[0];
             for (AnnotationMirror annotation : adviceToAnnotations) {
                 Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotation.getElementValues();
@@ -217,13 +213,11 @@ public class PluginProcessor extends AbstractProcessor {
                     to.put(key, value);
                     if (key.equals("value")) {
                         points.add(value);
-                    } else if (key.equals("plugin")) {
-                        if (plugins.get(value) != null) {
-                            plugin = plugins.get(value);
-                        }
+                    } else if (key.equals("plugin") && plugins.get(value) != null) {
+                        plugin = plugins.get(value);
                     }
                 }
-                to.put("seq", seq.toString());
+                to.put("seq", Integer.toString(seq));
                 GenerateProviderBean gb = new GenerateProviderBean(plugin, type, to, utils);
                 JavaFile file = gb.apply();
                 try {
@@ -238,6 +232,6 @@ public class PluginProcessor extends AbstractProcessor {
             }
         }
         writeToMetaInf(Points.class, points);
-        writeToMetaInf(Provider.class, providers);
+        writeToMetaInf(InterceptorProvider.class, providers);
     }
 }

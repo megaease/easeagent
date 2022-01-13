@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.megaease.easeagent.plugin.MethodInfo;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
