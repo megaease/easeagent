@@ -177,8 +177,8 @@ public class NoOpContext {
         }
 
         @Override
-        public void importForwardedHeaders(Getter getter) {
-
+        public Scope importForwardedHeaders(Getter getter) {
+            return NoOpScope.INSTANCE;
         }
 
         public void setCurrentTracing(ITracing tracing) {

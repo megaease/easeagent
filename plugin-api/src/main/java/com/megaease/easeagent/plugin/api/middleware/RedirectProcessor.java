@@ -127,7 +127,7 @@ public class RedirectProcessor {
             }
             return result;
         } catch (Exception e) {
-            LOGGER.warn("get env {} result: `{}` to map fail.", e.getMessage());
+            LOGGER.warn("get env {} result: `{}` to map fail. {}", env, str, e.getMessage());
         }
         return Collections.emptyMap();
     }

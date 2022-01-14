@@ -105,7 +105,7 @@ Following tracing output configuration items are aviable when `observability.tra
 
 ##### Forwarded headers config
 
-Easeagent provides a header pass-through tool.
+Easeagent provides a header pass-through plugin.
 
 Config format: 
 
@@ -126,7 +126,10 @@ In the process of supporting easemesh traffic coloring, the request header `X-Me
                                                                                          |_____> servcieB-canary(X-Mesh-Canary=lv1)
 ```
 
-##### tracing config
+plugin enabled config: [Enabled](#Forwarded headers plugin enabled)
+
+
+##### Tracing config
 
 Easeagent will grab the header from the response of the process, and put the name and value of the header as a tag in the Span of Tracing.
 
@@ -238,6 +241,15 @@ Supported components/plugins and corresponding namespaces:
 | kafka             | `kafka`         | Kafka Redirection         |
 | rabbitmq          | `rabbitmq`      | RabbitMQ Redirection      |
 | elasticsearch     | `elasticsearch` | Elasticsearch Redirection |
+
+#### Forwarded headers plugin enabled
+
+Easeagent provides a header pass-through plugin.
+
+```
+plugin.integrability.global.forwarded.enabled=true
+```
+
 
 #### Service Name Head
 

@@ -26,6 +26,7 @@ import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.bridge.NoOpIPluginConfig;
+import com.megaease.easeagent.plugin.bridge.NoOpScope;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
@@ -152,16 +153,12 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public RequestContext clientRequest(Request request) {
-        RequestContext requestContext = tracing.nextServer(request);
-        injectForwardedHeaders(requestContext);
-        return requestContext;
+        return tracing.clientRequest(request);
     }
 
     @Override
     public RequestContext serverReceive(Request request) {
-        RequestContext requestContext = tracing.serverImport(request);
-        importForwardedHeaders(request, requestContext);
-        return requestContext;
+        return tracing.serverReceive(request);
     }
 
     @Override
@@ -293,23 +290,29 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public void importForwardedHeaders(Getter getter) {
-        importForwardedHeaders(getter, NOOP_SETTER);
+    public Scope importForwardedHeaders(Getter getter) {
+        return importForwardedHeaders(getter, NOOP_SETTER);
     }
 
-    private void importForwardedHeaders(Getter getter, Setter setter) {
+    private Scope importForwardedHeaders(Getter getter, Setter setter) {
         Set<String> fields = ProgressFields.getForwardedHeaders();
         if (fields.isEmpty()) {
-            return;
+            return NoOpScope.INSTANCE;
         }
+        List<String> fieldArr = new ArrayList<>(fields.size());
         for (String field : fields) {
             String o = getter.header(field);
             if (o == null) {
                 continue;
             }
+            fieldArr.add(field);
             this.context.put(field, o);
             setter.setHeader(field, o);
         }
+        if (fieldArr.isEmpty()) {
+            return NoOpScope.INSTANCE;
+        }
+        return new ClearScope(fieldArr);
     }
 
 
@@ -354,6 +357,21 @@ public class SessionContext implements InitializeContext {
         public void run() {
             try (Scope scope = asyncContext.importToCurrent()) {
                 task.run();
+            }
+        }
+    }
+
+    private class ClearScope implements Scope {
+        private final List<String> fields;
+
+        public ClearScope(List<String> fields) {
+            this.fields = fields;
+        }
+
+        @Override
+        public void close() {
+            for (String field : fields) {
+                context.remove(field);
             }
         }
     }

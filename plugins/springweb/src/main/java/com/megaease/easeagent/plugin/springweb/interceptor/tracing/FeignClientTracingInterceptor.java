@@ -17,14 +17,13 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.springweb.FeignClientPlugin;
 import com.megaease.easeagent.plugin.springweb.advice.FeignClientAdvice;
+import com.megaease.easeagent.plugin.springweb.interceptor.HeadersFieldFinder;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
@@ -32,7 +31,6 @@ import feign.Request;
 import feign.Response;
 import lombok.SneakyThrows;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,18 +70,11 @@ public class FeignClientTracingInterceptor extends BaseHttpClientTracingIntercep
 
         private final Request request;
 
-        private final Map<String, Collection<String>> headers = new HashMap<>();
+        private final HashMap<String, Collection<String>> headers;
 
         public FeignClientRequestWrapper(Request request) {
             this.request = request;
-            Field headersField = HeadersFieldFinder.getHeadersField();
-            if (headersField != null) {
-                Map<String, Collection<String>> originHeaders = HeadersFieldFinder.getHeadersFieldValue(headersField, request);
-                if (originHeaders != null) {
-                    headers.putAll(originHeaders);
-                }
-                HeadersFieldFinder.setHeadersFieldValue(headersField, request, headers);
-            }
+            this.headers = HeadersFieldFinder.getHashMapHeaders(request);
         }
 
         @Override
@@ -181,43 +172,4 @@ public class FeignClientTracingInterceptor extends BaseHttpClientTracingIntercep
         }
     }
 
-
-    static class HeadersFieldFinder {
-
-        private static final Logger logger = EaseAgent.getLogger(HeadersFieldFinder.class);
-
-        private static Field headersField;
-
-        static Field getHeadersField() {
-            if (headersField != null) {
-                return headersField;
-            }
-            try {
-                headersField = Request.class.getDeclaredField("headers");
-                headersField.setAccessible(true);
-                return headersField;
-            } catch (Exception e) {
-                logger.warn(e.getMessage());
-                return null;
-            }
-        }
-
-        @SuppressWarnings("unchecked")
-        static Map<String, Collection<String>> getHeadersFieldValue(Field headersField, Object target) {
-            try {
-                return (Map<String, Collection<String>>) headersField.get(target);
-            } catch (IllegalAccessException e) {
-                logger.warn("can not get header in FeignClient. {}", e.getMessage());
-            }
-            return null;
-        }
-
-        static void setHeadersFieldValue(Field headersField, Object target, Object fieldValue) {
-            try {
-                headersField.set(target, fieldValue);
-            } catch (IllegalAccessException e) {
-                logger.warn("can not set header in FeignClient. {}", e.getMessage());
-            }
-        }
-    }
 }

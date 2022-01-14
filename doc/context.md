@@ -308,11 +308,25 @@ public interface Context {
 
     /**
      * Import Forwarded Headers key:value to Context {@link Getter#header(String)}.
+     * <p>
+     * The Scope must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       Scope sc = context.remove(...)
+     *       try{
+     *
+     *       }finally{
+     *           sc.close();
+     *       }
+     *    }
+     * }</pre>
      *
      * @param getter name from
+     * @return {@link Scope} for current session
      * @see Request#header(String)
      */
-    void importForwardedHeaders(Getter getter);
+    Scope importForwardedHeaders(Getter getter);
 }
 
 ```

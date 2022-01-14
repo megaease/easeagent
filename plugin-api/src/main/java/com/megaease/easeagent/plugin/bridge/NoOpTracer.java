@@ -24,13 +24,12 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class NoOpTracer {
     public static final ITracing NO_OP_TRACING = NoopTracing.INSTANCE;
     public static final Span NO_OP_SPAN = NoopSpan.INSTANCE;
-    public static final Scope NO_OP_SCOPE = NoopScope.INSTANCE;
+    public static final Scope NO_OP_SCOPE = NoOpScope.INSTANCE;
     public static final EmptyExtractor NO_OP_EXTRACTOR = EmptyExtractor.INSTANCE;
     public static final EmptyMessagingTracing NO_OP_MESSAGING_TRACING = EmptyMessagingTracing.INSTANCE;
 
@@ -127,7 +126,7 @@ public class NoOpTracer {
 
         @Override
         public Scope maybeScope() {
-            return NoopScope.INSTANCE;
+            return NoOpScope.INSTANCE;
         }
 
         @Override
@@ -171,15 +170,6 @@ public class NoOpTracer {
         }
     }
 
-    public static class NoopScope implements Scope {
-        private static final NoopScope INSTANCE = new NoopScope();
-
-        @Override
-        public void close() {
-
-        }
-    }
-
     public static class NoopTracing implements ITracing {
         private static final NoopTracing INSTANCE = new NoopTracing();
 
@@ -205,16 +195,16 @@ public class NoOpTracer {
 
         @Override
         public Scope importAsync(AsyncContext snapshot) {
-            return NoopScope.INSTANCE;
+            return NoOpScope.INSTANCE;
         }
 
         @Override
-        public RequestContext nextServer(Request request) {
+        public RequestContext clientRequest(Request request) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
 
         @Override
-        public RequestContext serverImport(Request request) {
+        public RequestContext serverReceive(Request request) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
 

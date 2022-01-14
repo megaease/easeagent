@@ -146,7 +146,7 @@ public class TracingImpl implements ITracing {
     }
 
     @Override
-    public RequestContext nextServer(Request request) {
+    public RequestContext clientRequest(Request request) {
         brave.Span span = SpanImpl.nextBraveSpan(tracing, defaultZipkinExtractor, request);
         AsyncRequest asyncRequest = new AsyncRequest(request);
         clientZipkinInjector.inject(span.context(), asyncRequest);
@@ -155,7 +155,7 @@ public class TracingImpl implements ITracing {
     }
 
     @Override
-    public RequestContext serverImport(Request request) {
+    public RequestContext serverReceive(Request request) {
         TraceContextOrSamplingFlags extracted = defaultZipkinExtractor.extract(request);
         brave.Span span = extracted.context() != null
             ? tracer().joinSpan(extracted.context())
