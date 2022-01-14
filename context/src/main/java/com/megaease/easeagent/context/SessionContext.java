@@ -19,14 +19,15 @@ package com.megaease.easeagent.context;
 
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
+import com.megaease.easeagent.plugin.bridge.NoOpCleaner;
 import com.megaease.easeagent.plugin.bridge.NoOpIPluginConfig;
-import com.megaease.easeagent.plugin.bridge.NoOpScope;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
@@ -46,6 +47,7 @@ public class SessionContext implements InitializeContext {
 
     private final Map<Object, Object> context = new HashMap<>();
     private final Map<Object, Integer> entered = new HashMap<>();
+    private boolean hasCleaner = false;
 
     @Override
     public boolean isNoop() {
@@ -144,11 +146,15 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public Scope importAsync(AsyncContext snapshot) {
-        boolean clearContext = !tracing.hasCurrentSpan();
+    public Cleaner importAsync(AsyncContext snapshot) {
         Scope scope = tracing.importAsync(snapshot);
         context.putAll(snapshot.getAll());
-        return new AsyncScope(this, scope, clearContext);
+        if (hasCleaner) {
+            return new AsyncCleaner(scope, false);
+        } else {
+            hasCleaner = true;
+            return new AsyncCleaner(scope, true);
+        }
     }
 
     @Override
@@ -290,14 +296,14 @@ public class SessionContext implements InitializeContext {
     }
 
     @Override
-    public Scope importForwardedHeaders(Getter getter) {
+    public Cleaner importForwardedHeaders(Getter getter) {
         return importForwardedHeaders(getter, NOOP_SETTER);
     }
 
-    private Scope importForwardedHeaders(Getter getter, Setter setter) {
+    private Cleaner importForwardedHeaders(Getter getter, Setter setter) {
         Set<String> fields = ProgressFields.getForwardedHeaders();
         if (fields.isEmpty()) {
-            return NoOpScope.INSTANCE;
+            return NoOpCleaner.INSTANCE;
         }
         List<String> fieldArr = new ArrayList<>(fields.size());
         for (String field : fields) {
@@ -310,7 +316,7 @@ public class SessionContext implements InitializeContext {
             setter.setHeader(field, o);
         }
         if (fieldArr.isEmpty()) {
-            return NoOpScope.INSTANCE;
+            return NoOpCleaner.INSTANCE;
         }
         return new ClearScope(fieldArr);
     }
@@ -342,6 +348,7 @@ public class SessionContext implements InitializeContext {
         if (!this.entered.isEmpty()) {
             this.entered.clear();
         }
+        this.hasCleaner = false;
     }
 
     public static class CurrentContextRunnable implements Runnable {
@@ -355,13 +362,13 @@ public class SessionContext implements InitializeContext {
 
         @Override
         public void run() {
-            try (Scope scope = asyncContext.importToCurrent()) {
+            try (Cleaner cleaner = asyncContext.importToCurrent()) {
                 task.run();
             }
         }
     }
 
-    private class ClearScope implements Scope {
+    private class ClearScope implements Cleaner {
         private final List<String> fields;
 
         public ClearScope(List<String> fields) {
@@ -372,6 +379,24 @@ public class SessionContext implements InitializeContext {
         public void close() {
             for (String field : fields) {
                 context.remove(field);
+            }
+        }
+    }
+
+    public class AsyncCleaner implements Cleaner {
+        private final Scope scope;
+        private final boolean clearContext;
+
+        public AsyncCleaner(Scope scope, boolean clearContext) {
+            this.scope = scope;
+            this.clearContext = clearContext;
+        }
+
+        @Override
+        public void close() {
+            this.scope.close();
+            if (clearContext) {
+                SessionContext.this.clear();
             }
         }
     }

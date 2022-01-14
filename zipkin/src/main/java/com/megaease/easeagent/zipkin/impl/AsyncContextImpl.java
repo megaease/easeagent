@@ -18,10 +18,10 @@
 package com.megaease.easeagent.zipkin.impl;
 
 import brave.propagation.TraceContext;
+import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.HashMap;
@@ -70,7 +70,7 @@ public class AsyncContextImpl implements AsyncContext {
     }
 
     @Override
-    public Scope importToCurrent() {
+    public Cleaner importToCurrent() {
         return supplier.get().importAsync(this);
     }
 

@@ -17,14 +17,13 @@
 
 package com.megaease.easeagent.plugin.bridge;
 
-import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.api.Cleaner;
 
-public class NoOpScope implements Scope {
-    public static final NoOpScope INSTANCE = new NoOpScope();
+public class NoOpCleaner implements Cleaner {
+    public static final NoOpCleaner INSTANCE = new NoOpCleaner();
 
     @Override
     public void close() {
 
     }
-
 }

@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.bridge;
 
+import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -103,8 +104,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Scope importAsync(AsyncContext snapshot) {
-            return NoOpTracer.NO_OP_SCOPE;
+        public Cleaner importAsync(AsyncContext snapshot) {
+            return NoOpCleaner.INSTANCE;
         }
 
         @Override
@@ -177,8 +178,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Scope importForwardedHeaders(Getter getter) {
-            return NoOpScope.INSTANCE;
+        public Cleaner importForwardedHeaders(Getter getter) {
+            return NoOpCleaner.INSTANCE;
         }
 
         public void setCurrentTracing(ITracing tracing) {
@@ -231,8 +232,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Scope importToCurrent() {
-            return NoOpTracer.NO_OP_SCOPE;
+        public Cleaner importToCurrent() {
+            return NoOpCleaner.INSTANCE;
         }
 
         @Override

@@ -244,7 +244,9 @@ public interface Context {
     }
 
 
+    //---------------------------------- 1. async context begin ------------------------------------------
     //---------------------------------- 1. Cross-thread ------------------------------------------
+    // When you import and export the AsyncContext, you will also import and export the Tracing context for Thread.
 
     /**
      * Export a {@link AsyncContext} for async
@@ -260,21 +262,21 @@ public interface Context {
      * <p>
      * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurrent()} proxy call
      * <p>
-     * The Scope must be close after business:
+     * The Cleaner must be close after business:
      * <p>
      * example:
      * <pre>{@code
      *    void callback(Context context, AsyncContext ac){
-     *       try (Scope scope = context.importAsync(ac)) {
+     *       try (Cleaner cleaner = context.importAsync(ac)) {
      *          //do business
      *       }
      *    }
      * }</pre>
      *
      * @param snapshot the AsyncContext from {@link #exportAsync()} called
-     * @return {@link Scope} for tracing
+     * @return {@link Cleaner} for tracing
      */
-    Scope importAsync(AsyncContext snapshot);
+    Cleaner importAsync(AsyncContext snapshot);
 
     /**
      * Wraps the input so that it executes with the same context as now.
@@ -288,6 +290,7 @@ public interface Context {
      * @return true if task is warpped.
      */
     boolean isWrapped(Runnable task);
+    //---------------------------------- 1. async context end ------------------------------------------
 
 
     //----------------------------------2. Cross-server ------------------------------------------
@@ -448,15 +451,15 @@ public interface Context {
     /**
      * Import Forwarded Headers key:value to Context {@link Getter#header(String)}.
      * <p>
-     * The Scope must be close after plugin:
+     * The Cleaner must be close after plugin:
      *
      * <pre>{@code
      *    void after(...){
-     *       Scope sc = context.remove(...)
+     *       Cleaner c = context.remove(...)
      *       try{
      *
      *       }finally{
-     *           sc.close();
+     *           c.close();
      *       }
      *    }
      * }</pre>
@@ -465,5 +468,5 @@ public interface Context {
      * @return {@link Scope} for current session
      * @see Request#header(String)
      */
-    Scope importForwardedHeaders(Getter getter);
+    Cleaner importForwardedHeaders(Getter getter);
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,50 +15,56 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.api.trace;
+package com.megaease.easeagent.plugin.api;
 
 import java.io.Closeable;
 
 /**
- * A span remains in the scope it was bound to until close is called.
- *
- * <p>This type can be extended so that the object graph can be built differently or overridden,
- * for example via zipkin or when mocking.
- * <p>
- * The Scope must be close after plugin:
+ * A Cleaner for Context
+ * It must be call after your business.
  * <p>
  * example 1:
  * <pre>{@code
- *    void after(...){
- *       RequestContext pCtx = context.get(...)
- *       try{
- *          //do business
- *       }finally{
- *           pCtx.scope().close();
- *       }
+ *    Cleaner cleaner = context.importAsync(snapshot);
+ *    try{
+ *       //do business
+ *    }finally{
+ *        cleaner.close();
  *    }
  * }</pre>
  * <p>
  * example 2:
  * <pre>{@code
+ *    void before(...){
+ *       Cleaner cleaner = context.importForwardedHeaders(getter);
+ *    }
  *    void after(...){
- *       RequestContext pCtx = context.get(...)
- *       try (Scope scope = pCtx.scope()) {
+ *      try{
+ *         //do business
+ *      }finally{
+ *          cleaner.close();
+ *      }
+ *    }
+ * }</pre>
+ * <p>
+ * example 3:
+ * <pre>{@code
+ *    void callback(AsyncContext ac){
+ *       try (Cleaner cleaner = ac.importToCurrent()) {
  *          //do business
  *       }
  *    }
  * }</pre>
- * <p>
  */
-public interface Scope extends Closeable {
+public interface Cleaner extends Closeable {
     /**
-     * No exceptions are thrown when unbinding a span scope.
+     * No exceptions are thrown when unbinding a Context.
      * It must be call after your business.
      * <pre>{@code
      *  try{
      *      ......
      *  }finally{
-     *      scope.close();
+     *      cleaner.close();
      *  }
      * }</pre>
      */

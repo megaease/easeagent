@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.api.context;
 
+import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Map;
@@ -58,22 +58,22 @@ public interface AsyncContext {
     Context getContext();
 
     /**
-     * Import this AsyncContext to current {@link Context} and return a {@link Scope}
+     * Import this AsyncContext to current {@link Context} and return a {@link com.megaease.easeagent.plugin.api.Cleaner}
      * <p>
-     * The Scope must be close after business:
+     * The Cleaner must be close after business:
      * <p>
      * example:
      * <pre>{@code
      *    void callback(AsyncContext ac){
-     *       try (Scope scope = ac.importAsync()) {
+     *       try (Cleaner cleaner = ac.importAsync()) {
      *          //do business
      *       }
      *    }
      * }</pre>
      *
-     * @return {@link Scope}
+     * @return {@link com.megaease.easeagent.plugin.api.Cleaner}
      */
-    Scope importToCurrent();
+    Cleaner importToCurrent();
 
     /**
      * @return all async snapshot context key:value

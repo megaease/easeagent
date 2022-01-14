@@ -18,9 +18,9 @@
 package easeagent.plugin.spring.gateway.interceptor.initialize;
 
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import easeagent.plugin.spring.gateway.ForwardedPlugin;
@@ -37,15 +37,15 @@ public class GatewayServerForwardedInterceptor implements NonReentrantIntercepto
     public void doBefore(MethodInfo methodInfo, Context context) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         FluxHttpServerRequest httpServerRequest = new FluxHttpServerRequest(exchange.getRequest());
-        Scope scope = context.importForwardedHeaders(httpServerRequest);
-        context.put(FORWARDED_KEY, scope);
+        Cleaner cleaner = context.importForwardedHeaders(httpServerRequest);
+        context.put(FORWARDED_KEY, cleaner);
     }
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        Scope scope = context.remove(FORWARDED_KEY);
-        if (scope != null) {
-            scope.close();
+        Cleaner cleaner = context.remove(FORWARDED_KEY);
+        if (cleaner != null) {
+            cleaner.close();
         }
     }
 
