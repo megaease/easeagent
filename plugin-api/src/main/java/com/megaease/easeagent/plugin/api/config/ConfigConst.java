@@ -149,6 +149,8 @@ public interface ConfigConst {
         String WEB_CLIENT = "webclient";
         String FEIGN_CLIENT = "feignClient";
         String REST_TEMPLATE = "resTemplate";
+
+        String FORWARDED = "forwarded";
     }
 
     interface PluginID {
@@ -156,5 +158,6 @@ public interface ConfigConst {
         String TRACING = "tracing";
         String METRIC = "metric";
         String REDIRECT = "redirect";
+        String FORWARDED = "forwarded";
     }
 }

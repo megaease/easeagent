@@ -17,18 +17,19 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.httpclient.HttpClientPlugin;
 import com.megaease.easeagent.plugin.httpclient.advice.HttpClientDoExecuteAdvice;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
 
-@AdviceTo(value = HttpClientDoExecuteAdvice.class, qualifier = "default")
+@AdviceTo(value = HttpClientDoExecuteAdvice.class, qualifier = "default", plugin = HttpClientPlugin.class)
 public class HttpClientDoExecuteInterceptor extends BaseHttpClientTracingInterceptor {
     @Override
     public Object getProgressKey() {

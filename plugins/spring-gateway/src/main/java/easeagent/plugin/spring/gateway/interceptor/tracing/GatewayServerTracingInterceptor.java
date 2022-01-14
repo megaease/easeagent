@@ -17,15 +17,15 @@
 
 package easeagent.plugin.spring.gateway.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.Interceptor;
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
-import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
@@ -79,7 +79,7 @@ public class GatewayServerTracingInterceptor implements Interceptor {
     }
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        try (Scope scope = ctx.importToCurrent()) {
+        try (Cleaner cleaner = ctx.importToCurrent()) {
             RequestContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
             ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
             Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);

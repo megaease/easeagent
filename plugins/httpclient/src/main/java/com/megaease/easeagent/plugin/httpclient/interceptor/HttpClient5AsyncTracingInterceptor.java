@@ -17,14 +17,15 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.httpclient.HttpClientPlugin;
 import com.megaease.easeagent.plugin.httpclient.advice.HttpClient5AsyncAdvice;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import org.apache.hc.core5.concurrent.FutureCallback;
@@ -35,7 +36,7 @@ import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 
 import java.net.URISyntaxException;
 
-@AdviceTo(value = HttpClient5AsyncAdvice.class, qualifier = "default")
+@AdviceTo(value = HttpClient5AsyncAdvice.class, qualifier = "default", plugin = HttpClientPlugin.class)
 public class HttpClient5AsyncTracingInterceptor implements NonReentrantInterceptor {
 
 

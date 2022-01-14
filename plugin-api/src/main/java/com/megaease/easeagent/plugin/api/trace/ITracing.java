@@ -64,7 +64,7 @@ public interface ITracing extends Tracing {
      * @return {@link RequestContext}
      * @see Context#clientRequest(Request)
      */
-    RequestContext nextServer(Request request);
+    RequestContext clientRequest(Request request);
 
     /**
      * Obtain key:value from the request passed by a parent server and create a RequestContext
@@ -80,7 +80,7 @@ public interface ITracing extends Tracing {
      * @return {@link RequestContext}
      * @see Context#serverReceive(Request)
      */
-    RequestContext serverImport(Request request);
+    RequestContext serverReceive(Request request);
 
     /**
      * @return the keys necessary for Span

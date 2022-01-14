@@ -17,10 +17,11 @@
 
 package com.megaease.easeagent.plugin.okhttp.interceptor;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.okhttp.OkHttpPlugin;
 import com.megaease.easeagent.plugin.okhttp.advice.OkHttpAdvice;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -28,7 +29,7 @@ import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import okhttp3.Request;
 import okhttp3.Response;
 
-@AdviceTo(value = OkHttpAdvice.class, qualifier = "execute")
+@AdviceTo(value = OkHttpAdvice.class, qualifier = "execute", plugin = OkHttpPlugin.class)
 public class OkHttpTracingInterceptor extends BaseHttpClientTracingInterceptor {
     public static Object REQUEST_BUILDER_KEY = new Object();
     public static Object METHOD_KEY = new Object();

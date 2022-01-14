@@ -15,27 +15,19 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.context;
+package com.megaease.easeagent.plugin.okhttp;
 
-import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
-public class AsyncScope implements Scope {
-    private final InitializeContext context;
-    private final Scope scope;
-    private final boolean clearContext;
-
-    public AsyncScope(InitializeContext context, Scope scope, boolean clearContext) {
-        this.context = context;
-        this.scope = scope;
-        this.clearContext = clearContext;
+public class ForwardedPlugin implements AgentPlugin {
+    @Override
+    public String getNamespace() {
+        return ConfigConst.Namespace.FORWARDED;
     }
 
     @Override
-    public void close() {
-        this.scope.close();
-        if (clearContext) {
-            this.context.clear();
-        }
+    public String getDomain() {
+        return ConfigConst.INTEGRABILITY;
     }
 }

@@ -17,11 +17,12 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.httpclient.HttpClientPlugin;
 import com.megaease.easeagent.plugin.httpclient.advice.HttpClient5DoExecuteAdvice;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
@@ -30,7 +31,7 @@ import org.apache.hc.core5.http.Header;
 
 import java.net.URISyntaxException;
 
-@AdviceTo(value = HttpClient5DoExecuteAdvice.class, qualifier = "default")
+@AdviceTo(value = HttpClient5DoExecuteAdvice.class, qualifier = "default", plugin = HttpClientPlugin.class)
 public class HttpClient5DoExecuteInterceptor extends BaseHttpClientTracingInterceptor {
     @Override
     public Object getProgressKey() {

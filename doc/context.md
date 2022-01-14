@@ -260,7 +260,8 @@ public interface Context {
     }
 
 
-    //---------------------------------- 1. async ------------------------------------------
+    //---------------------------------- 1. async context begin ------------------------------------------
+    // When you import and export the AsyncContext, you will also import and export the Tracing context for Thread.
     /**
      * Export a {@link AsyncContext} for asynchronous program processing
      * It will copy all the key:value in the current Context
@@ -270,15 +271,27 @@ public interface Context {
     AsyncContext exportAsync();
 
     /**
-     * Import a {@link AsyncContext} for asynchronous program processing
+     * Import a {@link AsyncContext} for async
      * It will copy all the key: value to the current Context
      * <p>
      * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurrent()} proxy call
+     * <p>
+     * The Cleaner must be close after business:
+     * <p>
+     * example:
+     * <pre>{@code
+     *    void callback(Context context, AsyncContext ac){
+     *       try (Cleaner cleaner = context.importAsync(ac)) {
+     *          //do business
+     *       }
+     *    }
+     * }</pre>
      *
      * @param snapshot the AsyncContext from {@link #exportAsync()} called
-     * @return {@link Scope} for tracing
+     * @return {@link Cleaner} for tracing
      */
-    Scope importAsync(AsyncContext snapshot);
+    Cleaner importAsync(AsyncContext snapshot);
+
 
     /**
      * Wraps the input so that it executes with the same context as now.
@@ -292,6 +305,8 @@ public interface Context {
      * @return true if task is wrapped.
      */
     boolean isWrapped(Runnable task);
+    
+    //---------------------------------- 1. async end ------------------------------------------
 
     /**
      * @return true if the key is necessary for EaseAgent
@@ -308,11 +323,91 @@ public interface Context {
 
     /**
      * Import Forwarded Headers key:value to Context {@link Getter#header(String)}.
+     * <p>
+     * The Cleaner must be close after plugin:
+     *
+     * <pre>{@code
+     *    void after(...){
+     *       Cleaner c = context.remove(...)
+     *       try{
+     *
+     *       }finally{
+     *           c.close();
+     *       }
+     *    }
+     * }</pre>
      *
      * @param getter name from
+     * @return {@link Scope} for current session
      * @see Request#header(String)
      */
-    void importForwardedHeaders(Getter getter);
+    Cleaner importForwardedHeaders(Getter getter);
 }
 
 ```
+
+
+## Cleaner API
+
+After you import some content into the context, after running your business, you must clean up your content, otherwise it may affect the context content of the next session.
+
+[com.megaease.easeagent.plugin.api.Cleaner](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/Cleaner.java)
+
+```java
+import java.io.Closeable;
+
+/**
+ * A Cleaner for Context
+ * It must be call after your business.
+ * <p>
+ * example 1:
+ * <pre>{@code
+ *    Cleaner cleaner = context.importAsync(snapshot);
+ *    try{
+ *       //do business
+ *    }finally{
+ *        cleaner.close();
+ *    }
+ * }</pre>
+ * <p>
+ * example 2:
+ * <pre>{@code
+ *    void before(...){
+ *       Cleaner cleaner = context.importForwardedHeaders(getter);
+ *    }
+ *    void after(...){
+ *      try{
+ *         //do business
+ *      }finally{
+ *          cleaner.close();
+ *      }
+ *    }
+ * }</pre>
+ * <p>
+ * example 3:
+ * <pre>{@code
+ *    void callback(AsyncContext ac){
+ *       try (Cleaner cleaner = ac.importToCurrent()) {
+ *          //do business
+ *       }
+ *    }
+ * }</pre>
+ */
+public interface Cleaner extends Closeable {
+    /**
+     * No exceptions are thrown when unbinding a Context.
+     * It must be call after your business.
+     * <pre>{@code
+     *  try{
+     *      ......
+     *  }finally{
+     *      cleaner.close();
+     *  }
+     * }</pre>
+     */
+    @Override
+    void close();
+}
+```
+
+

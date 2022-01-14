@@ -32,49 +32,12 @@ According to the information transmission method, the Tracing interface is divid
 ```java
 interface Context{
     //---------------------------------- 1. Cross-thread ------------------------------------------
-
-    /**
-     * Export a {@link AsyncContext} for async
-     * It will copy all the key:value in the current Context
-     *
-     * @return {@link AsyncContext}
-     */
-    AsyncContext exportAsync();
-
-    /**
-     * Import a {@link AsyncContext} for async
-     * It will copy all the key: value to the current Context
-     * <p>
-     * If you don’t want to get the Context, you can use the {@link AsyncContext#importToCurrent()} proxy call
-     * <p>
-     * The Scope must be close after business:
-     * <p>
-     * example:
-     * <pre>{@code
-     *    void callback(Context context, AsyncContext ac){
-     *       try (Scope scope = context.importAsync(ac)) {
-     *          //do business
-     *       }
-     *    }
-     * }</pre>
-     *
-     * @param snapshot the AsyncContext from {@link #exportAsync()} called
-     * @return {@link Scope} for tracing
-     */
-    Scope importAsync(AsyncContext snapshot);
-
-    /**
-     * Wraps the input so that it executes with the same context as now.
-     */
-    Runnable wrap(Runnable task);
-
-    /**
-     * Check task is wrapped.
-     *
-     * @param task Runnable
-     * @return true if task is wrapped.
-     */
-    boolean isWrapped(Runnable task);
+    // When you import and export the AsyncContext, you will also import and export the Tracing context for Thread.
+    // go to Context, see : 
+    //     AsyncContext exportAsync(); 
+    //     Cleaner importAsync(AsyncContext snapshot);
+    //     Runnable wrap(Runnable task); 
+    //     boolean isWrapped(Runnable task);
 
 
     //----------------------------------2. Cross-server ------------------------------------------
@@ -255,11 +218,22 @@ public interface AsyncContext {
     Context getContext();
 
     /**
-     * Import this AsyncContext to current {@link Context} and return a {@link Scope}
+     * Import this AsyncContext to current {@link Context} and return a {@link com.megaease.easeagent.plugin.api.Cleaner}
+     * <p>
+     * The Cleaner must be close after business:
+     * <p>
+     * example:
+     * <pre>{@code
+     *    void callback(AsyncContext ac){
+     *       try (Cleaner cleaner = ac.importAsync()) {
+     *          //do business
+     *       }
+     *    }
+     * }</pre>
      *
-     * @return {@link Scope}
+     * @return {@link com.megaease.easeagent.plugin.api.Cleaner}
      */
-    Scope importToCurrent();
+    Cleaner importToCurrent();
 
     /**
      * @return all async snapshot context key:value

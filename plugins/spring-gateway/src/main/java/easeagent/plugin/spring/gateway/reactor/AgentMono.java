@@ -17,9 +17,9 @@
 
 package easeagent.plugin.spring.gateway.reactor;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
@@ -43,7 +43,7 @@ public class AgentMono extends Mono<Void> {
 
     @Override
     public void subscribe(@Nonnull CoreSubscriber<? super Void> actual) {
-        try (Scope scope = asyncContext.importToCurrent()) {
+        try (Cleaner cleaner = asyncContext.importToCurrent()) {
             this.source.subscribe(new AgentCoreSubscriber(actual, methodInfo,
                 asyncContext, finish));
         }

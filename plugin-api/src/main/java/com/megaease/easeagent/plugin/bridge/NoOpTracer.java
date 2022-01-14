@@ -209,12 +209,12 @@ public class NoOpTracer {
         }
 
         @Override
-        public RequestContext nextServer(Request request) {
+        public RequestContext clientRequest(Request request) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
 
         @Override
-        public RequestContext serverImport(Request request) {
+        public RequestContext serverReceive(Request request) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
 
