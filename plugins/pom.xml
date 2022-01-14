@@ -46,6 +46,7 @@
         <module>okhttp</module>
         <module>elasticsearch</module>
         <module>healthy</module>
+        <module>mongodb</module>
     </modules>
 
     <properties>
