@@ -63,7 +63,7 @@ public class WebClientFilterForwardedInterceptor implements Interceptor {
             ClientRequest req = clientRequest;
             if (autoConfig.enabled()) {
                 Request request = new Request(clientRequest);
-                EaseAgent.contextSupplier.get().injectForwardedHeaders(request);
+                EaseAgent.getContext().injectForwardedHeaders(request);
                 req = request.get();
             }
             return exchangeFunction.exchange(req);

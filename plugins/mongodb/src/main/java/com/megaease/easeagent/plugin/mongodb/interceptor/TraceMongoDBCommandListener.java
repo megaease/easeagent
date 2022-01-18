@@ -60,7 +60,7 @@ public class TraceMongoDBCommandListener implements CommandListener {
         if (!this.config.getConfig().enabled()) {
             return;
         }
-        Context context = EaseAgent.contextSupplier.get();
+        Context context = EaseAgent.getContext();
         Span span = context.nextSpan();
         context.put(SPAN_KEY, span);
 
@@ -103,7 +103,7 @@ public class TraceMongoDBCommandListener implements CommandListener {
 
     @Override
     public void commandSucceeded(CommandSucceededEvent event) {
-        Context context = EaseAgent.contextSupplier.get();
+        Context context = EaseAgent.getContext();
         Span span = context.get(SPAN_KEY);
         if (span == null) {
             return;
@@ -113,7 +113,7 @@ public class TraceMongoDBCommandListener implements CommandListener {
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
-        Context context = EaseAgent.contextSupplier.get();
+        Context context = EaseAgent.getContext();
         Span span = context.get(SPAN_KEY);
         if (span == null) {
             return;

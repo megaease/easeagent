@@ -326,7 +326,7 @@ public class SessionContext implements InitializeContext {
         if (fieldArr.isEmpty()) {
             return NoOpCleaner.INSTANCE;
         }
-        return new ClearScope(fieldArr);
+        return new FieldCleaner(fieldArr);
     }
 
 
@@ -376,10 +376,10 @@ public class SessionContext implements InitializeContext {
         }
     }
 
-    private class ClearScope implements Cleaner {
+    private class FieldCleaner implements Cleaner {
         private final List<String> fields;
 
-        public ClearScope(List<String> fields) {
+        public FieldCleaner(List<String> fields) {
             this.fields = fields;
         }
 

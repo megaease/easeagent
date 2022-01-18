@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.elasticsearch.interceptor;
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseListener;
 
@@ -54,7 +55,7 @@ public class AsyncResponse4TraceListener implements ResponseListener {
 
     private void process(Response response, Exception exception) {
         try (Cleaner ignored = asyncContext.importToCurrent()) {
-            Context context = this.asyncContext.getContext();
+            Context context = EaseAgent.getContext();
             ElasticsearchCtxUtils.finishSpan(response, exception, context);
         }
     }
