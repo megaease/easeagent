@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.api.context;
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.SpanContext;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Map;
 
@@ -31,9 +30,9 @@ import java.util.Map;
  *  AsyncContext asyncContext = context.exportAsync();
  *  class Run implements Runnable{
  *      void run(){
- *          try (Scope scope = asyncContext.importToCurrent()) {
+ *          try (Cleaner cleaner = asyncContext.importToCurrent()) {
  *               //do something
- *               //or asyncContext.getTracer().nextSpan();
+ *               //or EaseAgent.getContext().nextSpan();
  *          }
  *      }
  *  }
@@ -54,11 +53,6 @@ public interface AsyncContext {
      * @return SpanContext
      */
     SpanContext getSpanContext();
-
-    /**
-     * @return current {@link Context} for session
-     */
-    Context getContext();
 
     /**
      * Import this AsyncContext to current {@link Context} and return a {@link com.megaease.easeagent.plugin.api.Cleaner}

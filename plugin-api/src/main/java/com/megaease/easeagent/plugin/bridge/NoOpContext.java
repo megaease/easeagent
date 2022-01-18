@@ -18,7 +18,6 @@
 package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Cleaner;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
@@ -227,11 +226,6 @@ public class NoOpContext {
         }
 
         @Override
-        public Context getContext() {
-            return NoopContext.INSTANCE;
-        }
-
-        @Override
         public Cleaner importToCurrent() {
             return NoOpCleaner.INSTANCE;
         }
@@ -278,11 +272,6 @@ public class NoOpContext {
         @Override
         public Map<String, String> getHeaders() {
             return Collections.emptyMap();
-        }
-
-        @Override
-        public Context getContext() {
-            return NoopContext.INSTANCE;
         }
 
         @Override

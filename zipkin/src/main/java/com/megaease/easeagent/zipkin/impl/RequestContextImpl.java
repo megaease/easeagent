@@ -68,11 +68,6 @@ public class RequestContextImpl implements RequestContext {
     }
 
     @Override
-    public Context getContext() {
-        return supplier.get();
-    }
-
-    @Override
     public void finish(Response response) {
         String[] fields = ProgressFields.getResponseHoldTagFields();
         if (!ProgressFields.isEmpty(fields)) {

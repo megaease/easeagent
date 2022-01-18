@@ -57,11 +57,6 @@ public class AsyncContextImpl implements AsyncContext {
     }
 
     @Override
-    public Context getContext() {
-        return supplier.get();
-    }
-
-    @Override
     public Cleaner importToCurrent() {
         return supplier.get().importAsync(this);
     }

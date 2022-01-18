@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.api.context;
 
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Setter;
@@ -84,11 +83,6 @@ public interface RequestContext extends Setter {
      * @return headers from the progress data context
      */
     Map<String, String> getHeaders();
-
-    /**
-     * @return current {@link Context} for session
-     */
-    Context getContext();
 
     /**
      * finish the progress span and save tag from {@link Response#header(String)}

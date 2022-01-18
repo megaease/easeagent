@@ -181,89 +181,11 @@ interface Context{
 }
 ```
 
-[com.megaease.easeagent.plugin.api.context.AsyncContext](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/context/AsyncContext.java)
-```java
-/**
- * An asynchronous thread snapshot context
- * code example:
- * <pre>{@code
- *  AsyncContext asyncContext = context.exportAsync();
- *  class Run implements Runnable{
- *      void run(){
- *          try (Scope scope = asyncContext.importToCurrent()) {
- *               //do something
- *               //or asyncContext.getTracer().nextSpan();
- *          }
- *      }
- *  }
- *  }</pre>
- */
-public interface AsyncContext {
-    /**
-     * When true, do nothing and nothing is reported . However, this AsyncContext should
-     * still be injected into outgoing requests. Use this flag to avoid performing expensive
-     * computation.
-     */
-    boolean isNoop();
-
-
-    /**
-     * @return {@link Tracing}
-     */
-    Tracing getTracer();
-
-    /**
-     * @return current {@link Context} for session
-     */
-    Context getContext();
-
-    /**
-     * Import this AsyncContext to current {@link Context} and return a {@link com.megaease.easeagent.plugin.api.Cleaner}
-     * <p>
-     * The Cleaner must be close after business:
-     * <p>
-     * example:
-     * <pre>{@code
-     *    void callback(AsyncContext ac){
-     *       try (Cleaner cleaner = ac.importAsync()) {
-     *          //do business
-     *       }
-     *    }
-     * }</pre>
-     *
-     * @return {@link com.megaease.easeagent.plugin.api.Cleaner}
-     */
-    Cleaner importToCurrent();
-
-    /**
-     * @return all async snapshot context key:value
-     */
-    Map<Object, Object> getAll();
-
-
-    /**
-     * put all key:value to context
-     *
-     * @param context key:value
-     */
-    void putAll(Map<Object, Object> context);
-
-}
-```
-
 [com.megaease.easeagent.plugin.api.context.RequestContext](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/context/RequestContext.java)
 ```java
-import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.trace.Response;
-import com.megaease.easeagent.plugin.api.trace.Scope;
-import com.megaease.easeagent.plugin.api.trace.Setter;
-import com.megaease.easeagent.plugin.api.trace.Span;
-
-import java.util.Map;
-
 /**
  * A cross-process data context, including tracing and Forwarded Headers
- *
+ * <p>
  * The Scope must be close after plugin:
  *
  * <pre>{@code
@@ -276,7 +198,6 @@ import java.util.Map;
  *       }
  *    }
  * }</pre>
- *
  */
 public interface RequestContext extends Setter {
     /**
@@ -292,7 +213,6 @@ public interface RequestContext extends Setter {
     Span span();
 
     /**
-     *
      * The Scope must be close after plugin:
      *
      * <pre>{@code
@@ -305,7 +225,7 @@ public interface RequestContext extends Setter {
      *       }
      *    }
      * }</pre>
-     * 
+     *
      * @return {@link Scope} for current Span
      */
     Scope scope();
@@ -324,27 +244,18 @@ public interface RequestContext extends Setter {
     Map<String, String> getHeaders();
 
     /**
-     * Convert RequestContext into AsyncContext and return
-     *
-     * @return {@link AsyncContext} for async
-     */
-    AsyncContext async();
-
-    /**
-     * @return current {@link Context} for session
-     */
-    Context getContext();
-
-    /**
      * finish the progress span and save tag from {@link Response#header(String)}
      *
      * @param response {@link Response}
      */
     void finish(Response response);
 }
-
-
 ```
+
+## Tracing
+The implementation of our Tracing Api and Tracing has been decoupled. For details, see:
+* [com.megaease.easeagent.plugin.api.trace.ITracing](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/trace/ITracing.java)
+
 
 ## Span
 

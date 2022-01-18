@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -80,14 +81,14 @@ public class GatewayServerTracingInterceptor implements Interceptor {
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
         try (Cleaner cleaner = ctx.importToCurrent()) {
-            RequestContext pCtx = ctx.getContext().get(SPAN_CONTEXT_KEY);
+            RequestContext pCtx = EaseAgent.getContext().get(SPAN_CONTEXT_KEY);
             ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
             Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
             if (consumer != null) {
                 consumer.accept(exchange);
             }
 
-            FluxHttpServerRequest httpServerRequest = pCtx.getContext().get(FluxHttpServerRequest.class);
+            FluxHttpServerRequest httpServerRequest = EaseAgent.getContext().get(FluxHttpServerRequest.class);
             PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
             String route = null;
             if (bestPattern != null) {
