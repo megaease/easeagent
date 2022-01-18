@@ -20,28 +20,22 @@ package com.megaease.easeagent.zipkin.impl;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
-import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.Tracing;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class RequestContextImpl implements RequestContext {
-    private final Tracing tracing;
-    private final brave.Span braveSpan;
     private final Span span;
     private final Scope scope;
     private final AsyncRequest asyncRequest;
     private final Supplier<InitializeContext> supplier;
 
-    public RequestContextImpl(Tracing tracing, brave.Span braveSpan, Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
-        this.tracing = tracing;
-        this.braveSpan = braveSpan;
+    public RequestContextImpl(Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
         this.span = span;
         this.scope = scope;
         this.asyncRequest = asyncRequest;
@@ -71,12 +65,6 @@ public class RequestContextImpl implements RequestContext {
     @Override
     public Map<String, String> getHeaders() {
         return asyncRequest.getHeaders();
-    }
-
-    @Override
-    public AsyncContext async() {
-        Map<Object, Object> headers = new HashMap<>(asyncRequest.getHeaders());
-        return AsyncContextImpl.build(tracing, braveSpan.context(), supplier, headers);
     }
 
     @Override

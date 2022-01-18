@@ -103,6 +103,9 @@ public class ContextManager {
             if (tracing == null || tracing.isNoop()) {
                 context.setCurrentTracing(NoNull.of(tracingSupplier.get(this), NoOpTracer.NO_OP_TRACING));
             }
+            if (context.getSupplier() == null) {
+                context.setSupplier(sessionSupplier);
+            }
             return context;
         }
     }

@@ -222,8 +222,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Tracing getTracer() {
-            return NoOpTracer.NO_OP_TRACING;
+        public SpanContext getSpanContext() {
+            return NoOpTracer.NO_OP_SPAN_CONTEXT;
         }
 
         @Override
@@ -242,8 +242,13 @@ public class NoOpContext {
         }
 
         @Override
-        public void putAll(Map<Object, Object> context) {
+        public <T> T get(Object o) {
+            return null;
+        }
 
+        @Override
+        public <V> V put(Object key, V value) {
+            return null;
         }
     }
 
@@ -273,11 +278,6 @@ public class NoOpContext {
         @Override
         public Map<String, String> getHeaders() {
             return Collections.emptyMap();
-        }
-
-        @Override
-        public AsyncContext async() {
-            return EmptyAsyncContext.INSTANCE;
         }
 
         @Override

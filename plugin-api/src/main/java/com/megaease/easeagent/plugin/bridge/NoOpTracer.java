@@ -17,19 +17,18 @@
 
 package com.megaease.easeagent.plugin.bridge;
 
-import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class NoOpTracer {
     public static final ITracing NO_OP_TRACING = NoopTracing.INSTANCE;
     public static final Span NO_OP_SPAN = NoopSpan.INSTANCE;
+    public static final SpanContext NO_OP_SPAN_CONTEXT = EmptySpanContext.INSTANCE;
     public static final Scope NO_OP_SCOPE = NoopScope.INSTANCE;
     public static final EmptyExtractor NO_OP_EXTRACTOR = EmptyExtractor.INSTANCE;
     public static final EmptyMessagingTracing NO_OP_MESSAGING_TRACING = EmptyMessagingTracing.INSTANCE;
@@ -199,12 +198,12 @@ public class NoOpTracer {
         }
 
         @Override
-        public AsyncContext exportAsync() {
-            return NoOpContext.NO_OP_ASYNC_CONTEXT;
+        public SpanContext exportAsync() {
+            return EmptySpanContext.INSTANCE;
         }
 
         @Override
-        public Scope importAsync(AsyncContext snapshot) {
+        public Scope importAsync(SpanContext snapshot) {
             return NoopScope.INSTANCE;
         }
 
@@ -236,6 +235,11 @@ public class NoOpTracer {
         @Override
         public MessagingTracing<MessagingRequest> messagingTracing() {
             return EmptyMessagingTracing.INSTANCE;
+        }
+
+        @Override
+        public Object unwrap() {
+            return null;
         }
 
         @Override
@@ -330,6 +334,20 @@ public class NoOpTracer {
         @Override
         public void inject(Span span, MessagingRequest request) {
 
+        }
+    }
+
+    public static class EmptySpanContext implements SpanContext {
+        private static final EmptySpanContext INSTANCE = new EmptySpanContext();
+
+        @Override
+        public boolean isNoop() {
+            return true;
+        }
+
+        @Override
+        public Object unwrap() {
+            return this;
         }
     }
 }

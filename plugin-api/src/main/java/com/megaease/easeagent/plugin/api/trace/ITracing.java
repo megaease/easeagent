@@ -31,25 +31,25 @@ import java.util.List;
  */
 public interface ITracing extends Tracing {
     /**
-     * Export a {@link AsyncContext} for async
+     * Export a {@link SpanContext} for async
      * It will only export the information about the current Span.
-     * If you need AsyncContext, generate result use {@link Context#exportAsync()}.
+     * If you need SpanContext, generate result use {@link Context#exportAsync()}.
      *
-     * @return {@link AsyncContext}
+     * @return {@link SpanContext}
      * @see Context#exportAsync()
      */
-    AsyncContext exportAsync();
+    SpanContext exportAsync();
 
     /**
-     * Import a {@link AsyncContext} for async
+     * Import a {@link SpanContext} for async
      * It will only import the information about the async TraceContext.
-     * If you need import AsyncContext and get Scope, generate result use {@link Context#importAsync(AsyncContext)}.
+     * If you need import SpanContext and get Scope, generate result use {@link Context#importAsync(AsyncContext)}.
      *
-     * @param snapshot {@link AsyncContext}
+     * @param snapshot {@link SpanContext}
      * @return {@link Scope}
      * @see Context#importAsync(AsyncContext)
      */
-    Scope importAsync(AsyncContext snapshot);
+    Scope importAsync(SpanContext snapshot);
 
 
     /**
