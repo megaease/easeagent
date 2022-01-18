@@ -83,7 +83,7 @@ public class GatewayAccessLogInterceptor implements Interceptor {
         if (requestInfo == null) {
             return;
         }
-        Long beginTime = (Long) ctx.getAll().get(START_TIME);
+        Long beginTime = ctx.get(START_TIME);
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         String logString = this.httpLog.getLogString(requestInfo, methodInfo.isSuccess(), beginTime, serverInfo);
         reportConsumer.report(logString);

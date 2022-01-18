@@ -86,4 +86,12 @@ public interface Tracing {
      * @return {@link MessagingRequest}
      */
     MessagingTracing<MessagingRequest> messagingTracing();
+
+    /**
+     * Returns the underlying Tracing object or {@code null} if there is none. Here is a Tracing
+     * objects: {@code brave.propagation.TraceContext}.
+     * @return
+     */
+
+    Object unwrap();
 }

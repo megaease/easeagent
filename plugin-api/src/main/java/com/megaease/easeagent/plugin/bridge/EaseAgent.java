@@ -87,4 +87,11 @@ public final class EaseAgent {
     public static IPluginConfig getConfig(String domain, String namespace, String name) {
         return configFactory.getConfig(domain, namespace, name);
     }
+
+    /**
+     * @return current {@link Context} for session
+     */
+    public static Context getContext() {
+        return contextSupplier.get();
+    }
 }

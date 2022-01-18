@@ -17,12 +17,12 @@
 
 package easeagent.plugin.spring.gateway.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
@@ -51,7 +51,7 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
         }
         FluxHttpServerRequest request = new HeaderFilterRequest(exchange.getRequest());
 
-        RequestContext pnCtx = pCtx.getContext().clientRequest(request);
+        RequestContext pnCtx = context.clientRequest(request);
         try (Scope scope = pnCtx.scope()) {
             pnCtx.span().start();
             exchange.getAttributes().put(GatewayCons.CHILD_SPAN_KEY, pnCtx);

@@ -127,18 +127,22 @@ public class TracingImpl implements ITracing {
     }
 
     @Override
-    public AsyncContext exportAsync() {
+    public SpanContext exportAsync() {
         TraceContext traceContext = currentTraceContext();
         if (traceContext == null) {
-            return NoOpContext.NO_OP_ASYNC_CONTEXT;
+            return NoOpTracer.NO_OP_SPAN_CONTEXT;
         }
-        return AsyncContextImpl.build(this, traceContext, supplier);
+        return new SpanContextImpl(traceContext);
     }
 
     @Override
-    public Scope importAsync(AsyncContext snapshot) {
-        if (snapshot instanceof AsyncContextImpl) {
-            TraceContext traceContext = ((AsyncContextImpl) snapshot).getTraceContext();
+    public Scope importAsync(SpanContext snapshot) {
+        if (snapshot.isNoop()) {
+            return NoOpTracer.NO_OP_SCOPE;
+        }
+        Object context = snapshot.unwrap();
+        if (context instanceof TraceContext) {
+            TraceContext traceContext = (TraceContext) context;
             CurrentTraceContext.Scope scope = tracing().currentTraceContext().maybeScope(traceContext);
             return new ScopeImpl(scope);
         }
@@ -151,7 +155,7 @@ public class TracingImpl implements ITracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         clientZipkinInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new RequestContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new RequestContextImpl(newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     @Override
@@ -167,7 +171,7 @@ public class TracingImpl implements ITracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultZipkinInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new RequestContextImpl(this, span, newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new RequestContextImpl(newSpan, newSpan.maybeScope(), asyncRequest, supplier);
     }
 
     @Override
@@ -195,6 +199,11 @@ public class TracingImpl implements ITracing {
     @Override
     public MessagingTracing<MessagingRequest> messagingTracing() {
         return messagingTracing;
+    }
+
+    @Override
+    public Object unwrap() {
+        return tracing;
     }
 
     @Override

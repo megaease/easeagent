@@ -54,7 +54,7 @@ public class ContextManagerMock {
     }
 
     public static Context getContext() {
-        return EaseAgent.contextSupplier.get();
+        return EaseAgent.getContext();
     }
 
     public static InitializeContext getInitializeContext() {

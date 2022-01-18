@@ -87,7 +87,7 @@ public class GatewayMetricsInterceptor implements Interceptor {
             code = statusCode.value();
         }
         SERVER_METRIC.collectMetric(key, code, methodInfo.getThrowable(),
-            (Long) ctx.getAll().get(START_TIME), SystemClock.now());
+            ctx.get(START_TIME), SystemClock.now());
     }
 
     public static String getKey(ServerWebExchange exchange) {

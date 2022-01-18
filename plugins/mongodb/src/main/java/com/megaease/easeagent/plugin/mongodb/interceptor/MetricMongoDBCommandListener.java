@@ -41,7 +41,7 @@ public class MetricMongoDBCommandListener implements CommandListener {
 
     @Override
     public void commandStarted(CommandStartedEvent event) {
-        Context context = EaseAgent.contextSupplier.get();
+        Context context = EaseAgent.getContext();
         context.put(START_TIME, System.currentTimeMillis());
     }
 
@@ -62,7 +62,7 @@ public class MetricMongoDBCommandListener implements CommandListener {
         if (!this.config.getConfig().enabled()) {
             return;
         }
-        Context context = EaseAgent.contextSupplier.get();
+        Context context = EaseAgent.getContext();
         long startTime = context.get(START_TIME);
         long duration = System.currentTimeMillis() - startTime;
         this.mongoDBMetric.collectMetric(key, duration, success);

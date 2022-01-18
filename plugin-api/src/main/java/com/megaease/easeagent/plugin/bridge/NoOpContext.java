@@ -18,7 +18,6 @@
 package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Cleaner;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
@@ -222,13 +221,8 @@ public class NoOpContext {
         }
 
         @Override
-        public Tracing getTracer() {
-            return NoOpTracer.NO_OP_TRACING;
-        }
-
-        @Override
-        public Context getContext() {
-            return NoopContext.INSTANCE;
+        public SpanContext getSpanContext() {
+            return NoOpTracer.NO_OP_SPAN_CONTEXT;
         }
 
         @Override
@@ -242,8 +236,13 @@ public class NoOpContext {
         }
 
         @Override
-        public void putAll(Map<Object, Object> context) {
+        public <T> T get(Object o) {
+            return null;
+        }
 
+        @Override
+        public <V> V put(Object key, V value) {
+            return null;
         }
     }
 
@@ -273,16 +272,6 @@ public class NoOpContext {
         @Override
         public Map<String, String> getHeaders() {
             return Collections.emptyMap();
-        }
-
-        @Override
-        public AsyncContext async() {
-            return EmptyAsyncContext.INSTANCE;
-        }
-
-        @Override
-        public Context getContext() {
-            return NoopContext.INSTANCE;
         }
 
         @Override

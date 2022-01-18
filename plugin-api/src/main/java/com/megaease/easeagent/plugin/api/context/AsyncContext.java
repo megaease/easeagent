@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.api.context;
 
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.api.trace.SpanContext;
 
 import java.util.Map;
 
@@ -30,9 +30,9 @@ import java.util.Map;
  *  AsyncContext asyncContext = context.exportAsync();
  *  class Run implements Runnable{
  *      void run(){
- *          try (Scope scope = asyncContext.importToCurrent()) {
+ *          try (Cleaner cleaner = asyncContext.importToCurrent()) {
  *               //do something
- *               //or asyncContext.getTracer().nextSpan();
+ *               //or EaseAgent.getContext().nextSpan();
  *          }
  *      }
  *  }
@@ -48,14 +48,11 @@ public interface AsyncContext {
 
 
     /**
-     * @return {@link Tracing}
+     * get Span Context for Tracing
+     *
+     * @return SpanContext
      */
-    Tracing getTracer();
-
-    /**
-     * @return current {@link Context} for session
-     */
-    Context getContext();
+    SpanContext getSpanContext();
 
     /**
      * Import this AsyncContext to current {@link Context} and return a {@link com.megaease.easeagent.plugin.api.Cleaner}
@@ -80,12 +77,45 @@ public interface AsyncContext {
      */
     Map<Object, Object> getAll();
 
+    /**
+     * Returns the value to which the specified key is mapped,
+     * or {@code null} if this context contains no mapping for the key.
+     *
+     * <p>More formally, if this context contains a mapping from a key
+     * {@code k} to a value {@code v} such that {@code (key==null ? k==null :
+     * key.equals(k))}, then this method returns {@code v}; otherwise
+     * it returns {@code null}.  (There can be at most one such mapping.)
+     *
+     * <p>If this context permits null values, then a return value of
+     * {@code null} does not <i>necessarily</i> indicate that the context
+     * contains no mapping for the key; it's also possible that the context
+     * explicitly maps the key to {@code null}.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the value to which the specified key is mapped, or
+     * {@code null} if this context contains no mapping for the key
+     * @throws ClassCastException if the key is of an inappropriate type for
+     *                            this context
+     *                            (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
+     */
+    <T> T get(Object key);
 
     /**
-     * put all key:value to context
+     * Associates the specified value with the specified key in this context
+     * (optional operation).  If the context previously contained a mapping for
+     * the key, the old value is replaced by the specified value.  (A context
+     * <tt>m</tt> is said to contain a mapping for a key <tt>k</tt>
      *
-     * @param context key:value
+     * @param key   key with which the specified value is to be associated
+     * @param value value to be associated with the specified key
+     * @return the previous value associated with <tt>key</tt>, or
+     * <tt>null</tt> if there was no mapping for <tt>key</tt>.
+     * (A <tt>null</tt> return can also indicate that the context
+     * previously associated <tt>null</tt> with <tt>key</tt>,
+     * if the implementation supports <tt>null</tt> values.)
+     * @throws ClassCastException if the class of the specified key or value
+     *                            prevents it from being stored in this context
      */
-    void putAll(Map<Object, Object> context);
+    <V> V put(Object key, V value);
 
 }

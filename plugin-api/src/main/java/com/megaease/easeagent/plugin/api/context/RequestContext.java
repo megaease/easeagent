@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.api.context;
 
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Setter;
@@ -27,7 +26,7 @@ import java.util.Map;
 
 /**
  * A cross-process data context, including tracing and Forwarded Headers
- *
+ * <p>
  * The Scope must be close after plugin:
  *
  * <pre>{@code
@@ -40,7 +39,6 @@ import java.util.Map;
  *       }
  *    }
  * }</pre>
- *
  */
 public interface RequestContext extends Setter {
     /**
@@ -56,7 +54,6 @@ public interface RequestContext extends Setter {
     Span span();
 
     /**
-     *
      * The Scope must be close after plugin:
      *
      * <pre>{@code
@@ -86,18 +83,6 @@ public interface RequestContext extends Setter {
      * @return headers from the progress data context
      */
     Map<String, String> getHeaders();
-
-    /**
-     * Convert RequestContext into AsyncContext and return
-     *
-     * @return {@link AsyncContext} for async
-     */
-    AsyncContext async();
-
-    /**
-     * @return current {@link Context} for session
-     */
-    Context getContext();
 
     /**
      * finish the progress span and save tag from {@link Response#header(String)}

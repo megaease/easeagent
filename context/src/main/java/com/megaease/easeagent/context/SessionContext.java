@@ -33,6 +33,7 @@ import com.megaease.easeagent.plugin.field.NullObject;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unused, unchecked")
 public class SessionContext implements InitializeContext {
@@ -41,6 +42,7 @@ public class SessionContext implements InitializeContext {
     };
     private ITracing tracing = NoOpTracer.NO_OP_TRACING;
 
+    private Supplier<InitializeContext> supplier;
     private final Deque<IPluginConfig> configs = new ArrayDeque<>();
     private final Deque<Object> retStack = new ArrayDeque<>();
     private final Deque<RetBound> retBound = new ArrayDeque<>();
@@ -52,6 +54,14 @@ public class SessionContext implements InitializeContext {
     @Override
     public boolean isNoop() {
         return false;
+    }
+
+    public Supplier<InitializeContext> getSupplier() {
+        return supplier;
+    }
+
+    public void setSupplier(Supplier<InitializeContext> supplier) {
+        this.supplier = supplier;
     }
 
     @Override
@@ -140,14 +150,12 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public AsyncContext exportAsync() {
-        AsyncContext asyncContext = tracing.exportAsync();
-        asyncContext.putAll(context);
-        return asyncContext;
+        return AsyncContextImpl.build(tracing.exportAsync(), supplier, context);
     }
 
     @Override
     public Cleaner importAsync(AsyncContext snapshot) {
-        Scope scope = tracing.importAsync(snapshot);
+        Scope scope = tracing.importAsync(snapshot.getSpanContext());
         context.putAll(snapshot.getAll());
         if (hasCleaner) {
             return new AsyncCleaner(scope, false);
@@ -318,7 +326,7 @@ public class SessionContext implements InitializeContext {
         if (fieldArr.isEmpty()) {
             return NoOpCleaner.INSTANCE;
         }
-        return new ClearScope(fieldArr);
+        return new FieldCleaner(fieldArr);
     }
 
 
@@ -368,10 +376,10 @@ public class SessionContext implements InitializeContext {
         }
     }
 
-    private class ClearScope implements Cleaner {
+    private class FieldCleaner implements Cleaner {
         private final List<String> fields;
 
-        public ClearScope(List<String> fields) {
+        public FieldCleaner(List<String> fields) {
             this.fields = fields;
         }
 

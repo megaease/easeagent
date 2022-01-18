@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseListener;
@@ -61,7 +62,7 @@ public class AsyncResponse4MetricsListener implements ResponseListener {
 
     private void process(Response response, Exception exception) {
         try (Cleaner ignored = asyncContext.importToCurrent()) {
-            Context context = this.asyncContext.getContext();
+            Context context = EaseAgent.getContext();
             Request request = context.get(REQUEST);
             long duration = ContextUtils.getDuration(context);
             boolean success = exception == null;

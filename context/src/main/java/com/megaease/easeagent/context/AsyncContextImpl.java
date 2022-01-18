@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,43 +15,35 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.zipkin.impl;
+package com.megaease.easeagent.context;
 
-import brave.propagation.TraceContext;
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
+import com.megaease.easeagent.plugin.api.trace.SpanContext;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class AsyncContextImpl implements AsyncContext {
-    private final Tracing tracing;
-    private final TraceContext traceContext;
+    private final SpanContext spanContext;
     private final Map<Object, Object> context;
     private final Supplier<InitializeContext> supplier;
 
-    private AsyncContextImpl(Tracing tracing, TraceContext traceContext,
-                             Supplier<InitializeContext> supplier,
-                             Map<Object, Object> context) {
-        this.tracing = tracing;
-        this.traceContext = traceContext;
-        this.supplier = supplier;
+    private AsyncContextImpl(@Nonnull SpanContext spanContext, @Nonnull Map<Object, Object> context, @Nonnull Supplier<InitializeContext> supplier) {
+        this.spanContext = spanContext;
         this.context = context;
+        this.supplier = supplier;
     }
 
-    public static AsyncContextImpl build(Tracing tracing, TraceContext traceContext, Supplier<InitializeContext> supplier) {
-        return build(tracing, traceContext, supplier, null);
-    }
-
-    public static AsyncContextImpl build(Tracing tracing, TraceContext traceContext,
+    public static AsyncContextImpl build(SpanContext spanContext,
                                          Supplier<InitializeContext> supplier,
                                          Map<Object, Object> context) {
         Map<Object, Object> contextMap = context == null ? new HashMap<>() : new HashMap<>(context);
-        return new AsyncContextImpl(tracing, traceContext, supplier, contextMap);
+        return new AsyncContextImpl(spanContext, contextMap, supplier);
     }
 
     @Override
@@ -60,22 +52,13 @@ public class AsyncContextImpl implements AsyncContext {
     }
 
     @Override
-    public Tracing getTracer() {
-        return tracing;
-    }
-
-    @Override
-    public Context getContext() {
-        return supplier.get();
+    public SpanContext getSpanContext() {
+        return spanContext;
     }
 
     @Override
     public Cleaner importToCurrent() {
         return supplier.get().importAsync(this);
-    }
-
-    public TraceContext getTraceContext() {
-        return traceContext;
     }
 
     @Override
@@ -84,7 +67,14 @@ public class AsyncContextImpl implements AsyncContext {
     }
 
     @Override
-    public void putAll(Map<Object, Object> context) {
-        this.context.putAll(context);
+    @SuppressWarnings("unchecked")
+    public <T> T get(Object o) {
+        return (T) this.context.get(o);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V> V put(Object key, V value) {
+        return (V) this.context.put(key, value);
     }
 }
