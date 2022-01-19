@@ -22,7 +22,9 @@ public enum Redirect {
     ELASTICSEARCH(MiddlewareConstants.ENV_ES, true),
     KAFKA(MiddlewareConstants.ENV_KAFKA, true),
     RABBITMQ(MiddlewareConstants.ENV_RABBITMQ, true),
-    DATABASE(MiddlewareConstants.ENV_DATABASE, false);
+    DATABASE(MiddlewareConstants.ENV_DATABASE, false),
+    MONGODB(MiddlewareConstants.ENV_MONGODB, false),
+    ;
 
     private final String env;
     private final ResourceConfig config;

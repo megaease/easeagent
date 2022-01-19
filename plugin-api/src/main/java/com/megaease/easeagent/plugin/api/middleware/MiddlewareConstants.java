@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.api.middleware;
 public final class MiddlewareConstants {
     public static final String ENV_REDIS = "EASE_RESOURCE_REDIS";
     public static final String ENV_ES = "EASE_RESOURCE_ELASTICSEARCH";
+    public static final String ENV_MONGODB = "EASE_RESOURCE_MONGODB";
     public static final String ENV_KAFKA = "EASE_RESOURCE_KAFKA";
     public static final String ENV_RABBITMQ = "EASE_RESOURCE_RABBITMQ";
     public static final String ENV_DATABASE = "EASE_RESOURCE_DATABASE";
@@ -31,4 +32,5 @@ public final class MiddlewareConstants {
     public static final String TYPE_KAFKA = "kafka";
     public static final String TYPE_RABBITMQ = "rabbitmq";
     public static final String TYPE_DATABASE = "database";
+    public static final String TYPE_MONGODB = "mongodb";
 }

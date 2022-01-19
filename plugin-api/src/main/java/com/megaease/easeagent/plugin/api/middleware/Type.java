@@ -22,7 +22,9 @@ public enum Type {
     DATABASE(MiddlewareConstants.TYPE_DATABASE),
     KAFKA(MiddlewareConstants.TYPE_KAFKA),
     RABBITMQ(MiddlewareConstants.TYPE_RABBITMQ),
-    ELASTICSEARCH(MiddlewareConstants.TYPE_ES);
+    ELASTICSEARCH(MiddlewareConstants.TYPE_ES),
+    MONGODB(MiddlewareConstants.TYPE_MONGODB),
+    ;
 
     final String remoteType;
 
