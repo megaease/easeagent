@@ -29,8 +29,8 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-public class MongoDBMetric extends ServiceMetric {
-    public MongoDBMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+public class MongoMetric extends ServiceMetric {
+    public MongoMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
         super(metricRegistry, nameFactory);
     }
 

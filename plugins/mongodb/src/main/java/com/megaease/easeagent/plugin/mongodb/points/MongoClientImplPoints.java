@@ -25,18 +25,19 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-public class MongoDBRedirectPoints implements Points {
+public class MongoClientImplPoints implements Points {
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
-            .hasClassName("com.mongodb.ConnectionString")
+            .hasClassName("com.mongodb.client.internal.MongoClientImpl")
             .build();
     }
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
-        return MethodMatcher.builder().isConstruct()
-            .argsLength(1)
+        return MethodMatcher.builder().named("createCluster")
+            .isStatic()
+            .isPrivate()
             .build().toSet();
     }
 }

@@ -25,10 +25,10 @@ import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.mongodb.MongoDBRedirectPlugin;
-import com.megaease.easeagent.plugin.mongodb.points.MongoDBRedirectPoints;
+import com.megaease.easeagent.plugin.mongodb.MongoRedirectPlugin;
+import com.megaease.easeagent.plugin.mongodb.points.MongoRedirectPoints;
 
-@AdviceTo(value = MongoDBRedirectPoints.class, plugin = MongoDBRedirectPlugin.class)
+@AdviceTo(value = MongoRedirectPoints.class, plugin = MongoRedirectPlugin.class)
 public class MongoDbRedirectInterceptor implements Interceptor {
 
     @Override

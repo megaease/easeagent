@@ -17,17 +17,18 @@
 
 package com.megaease.easeagent.plugin.mongodb;
 
-import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import lombok.SneakyThrows;
 
-public class MongoDBRedirectPlugin implements AgentPlugin {
-    @Override
-    public String getNamespace() {
-        return "mongodb";
-    }
+import java.lang.reflect.Field;
 
-    @Override
-    public String getDomain() {
-        return ConfigConst.INTEGRABILITY;
+public class MongoUtils {
+
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
+    public static <T> T getFieldValue(Object obj, String fieldName) {
+        Class<?> clazz = obj.getClass();
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return (T) field.get(obj);
     }
 }
