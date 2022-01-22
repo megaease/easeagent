@@ -32,7 +32,6 @@ import com.mongodb.event.CommandListener;
 
 import java.util.List;
 
-import static com.megaease.easeagent.plugin.mongodb.interceptor.InterceptorHelper.mongoClientSettings;
 
 public abstract class MongoBaseInterceptor implements NonReentrantInterceptor {
 
@@ -45,7 +44,7 @@ public abstract class MongoBaseInterceptor implements NonReentrantInterceptor {
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
-        MongoClientSettings mongoClientSettings = mongoClientSettings(methodInfo);
+        MongoClientSettings mongoClientSettings = MongoUtils.mongoClientSettings(methodInfo);
         if (mongoClientSettings == null) {
             return;
         }

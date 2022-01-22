@@ -22,7 +22,7 @@ package com.megaease.easeagent.plugin.mongodb.interceptor.listener;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.mongodb.interceptor.InterceptorHelper;
+import com.megaease.easeagent.plugin.mongodb.MongoUtils;
 import com.megaease.easeagent.plugin.mongodb.interceptor.MongoCtx;
 import com.megaease.easeagent.plugin.mongodb.interceptor.TraceHelper;
 import com.mongodb.event.CommandFailedEvent;
@@ -43,7 +43,7 @@ public class MongoReactiveTraceCommandListener extends MongoBaseTraceCommandList
         Context context = EaseAgent.getContext();
         TraceHelper.commandStarted(context, this.config, event);
         MongoCtx mongoCtx = MongoCtx.getOrCreate(context);
-        mongoCtx.put(InterceptorHelper.CONFIG, this.config);
+        mongoCtx.put(MongoUtils.CONFIG, this.config);
         mongoCtx.put(TraceHelper.SPAN_KEY, context.get(TraceHelper.SPAN_KEY));
     }
 
@@ -52,14 +52,14 @@ public class MongoReactiveTraceCommandListener extends MongoBaseTraceCommandList
     public void commandSucceeded(CommandSucceededEvent event) {
 //        LOGGER.warn("reactive commandSucceeded trace");
         Context context = EaseAgent.getContext();
-        context.put(InterceptorHelper.EVENT_KEY, event);
+        context.put(MongoUtils.EVENT_KEY, event);
     }
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
 //        LOGGER.warn("reactive commandFailed trace");
         Context context = EaseAgent.getContext();
-        context.put(InterceptorHelper.EVENT_KEY, event);
+        context.put(MongoUtils.EVENT_KEY, event);
     }
 
 }

@@ -17,23 +17,5 @@
 
 package com.megaease.easeagent.plugin.mongodb.interceptor;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.mongodb.MongoClientSettings;
-
 public class InterceptorHelper {
-    public static final String CONFIG = InterceptorHelper.class.getName() + ".Config";
-    public static final String METRIC = InterceptorHelper.class.getName() + ".Metric";
-    public static final String EVENT_KEY = InterceptorHelper.class.getName() + "-Event";
-
-
-    public static MongoClientSettings mongoClientSettings(MethodInfo methodInfo) {
-        if (methodInfo.getArgs() != null) {
-            for (Object arg : methodInfo.getArgs()) {
-                if (arg instanceof MongoClientSettings) {
-                    return (MongoClientSettings) arg;
-                }
-            }
-        }
-        return null;
-    }
 }

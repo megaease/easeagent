@@ -22,7 +22,7 @@ package com.megaease.easeagent.plugin.mongodb.interceptor.listener;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.mongodb.interceptor.InterceptorHelper;
+import com.megaease.easeagent.plugin.mongodb.MongoUtils;
 import com.megaease.easeagent.plugin.mongodb.interceptor.MetricHelper;
 import com.megaease.easeagent.plugin.mongodb.interceptor.MongoCtx;
 import com.megaease.easeagent.plugin.mongodb.interceptor.MongoMetric;
@@ -44,22 +44,22 @@ public class MongoReactiveMetricCommandListener extends MongoBaseMetricCommandLi
         Context context = EaseAgent.getContext();
         MongoCtx mongoCtx = MongoCtx.getOrCreate(context);
         MetricHelper.commandStarted(context, event);
-        mongoCtx.put(InterceptorHelper.METRIC, this.mongoMetric);
-        mongoCtx.put(InterceptorHelper.CONFIG, this.config);
+        mongoCtx.put(MongoUtils.METRIC, this.mongoMetric);
+        mongoCtx.put(MongoUtils.CONFIG, this.config);
     }
 
     @Override
     public void commandSucceeded(CommandSucceededEvent event) {
 //        LOGGER.warn("reactive commandSucceeded metric");
         Context context = EaseAgent.getContext();
-        context.put(InterceptorHelper.EVENT_KEY, event);
+        context.put(MongoUtils.EVENT_KEY, event);
     }
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
 //        LOGGER.warn("reactive commandFailed metric");
         Context context = EaseAgent.getContext();
-        context.put(InterceptorHelper.EVENT_KEY, event);
+        context.put(MongoUtils.EVENT_KEY, event);
     }
 
 }

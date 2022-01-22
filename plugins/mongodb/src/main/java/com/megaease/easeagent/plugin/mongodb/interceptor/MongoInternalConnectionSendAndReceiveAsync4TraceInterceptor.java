@@ -26,6 +26,7 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.mongodb.MongoPlugin;
+import com.megaease.easeagent.plugin.mongodb.MongoUtils;
 import com.megaease.easeagent.plugin.mongodb.points.MongoDBInternalConnectionPoints;
 import com.mongodb.event.CommandEvent;
 import com.mongodb.event.CommandFailedEvent;
@@ -67,7 +68,7 @@ public class MongoInternalConnectionSendAndReceiveAsync4TraceInterceptor impleme
 //            LOGGER.info("SingleResultCallbackProxy onResult trace");
             this.delegate.onResult(result, t);
             Context context = EaseAgent.getContext();
-            CommandEvent event = context.get(InterceptorHelper.EVENT_KEY);
+            CommandEvent event = context.get(MongoUtils.EVENT_KEY);
             if (event == null) {
                 return;
             }
