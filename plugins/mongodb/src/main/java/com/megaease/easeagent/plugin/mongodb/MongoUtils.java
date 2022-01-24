@@ -17,11 +17,29 @@
 
 package com.megaease.easeagent.plugin.mongodb;
 
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.mongodb.MongoClientSettings;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 
-public class MongoDBUtils {
+public class MongoUtils {
+
+    public static final String CONFIG = MongoUtils.class.getName() + ".Config";
+    public static final String METRIC = MongoUtils.class.getName() + ".Metric";
+    public static final String EVENT_KEY = MongoUtils.class.getName() + "-Event";
+
+
+    public static MongoClientSettings mongoClientSettings(MethodInfo methodInfo) {
+        if (methodInfo.getArgs() != null) {
+            for (Object arg : methodInfo.getArgs()) {
+                if (arg instanceof MongoClientSettings) {
+                    return (MongoClientSettings) arg;
+                }
+            }
+        }
+        return null;
+    }
 
     @SuppressWarnings("unchecked")
     @SneakyThrows

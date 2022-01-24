@@ -17,28 +17,23 @@
 
 package com.megaease.easeagent.plugin.mongodb.interceptor;
 
-import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
-import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
-import com.megaease.easeagent.plugin.mongodb.MongoDBPlugin;
-import com.megaease.easeagent.plugin.mongodb.MongoDBUtils;
-import com.megaease.easeagent.plugin.mongodb.points.MongoDBClientConstructPoints;
+import com.megaease.easeagent.plugin.mongodb.MongoUtils;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.event.CommandListener;
 
 import java.util.List;
 
-import static com.megaease.easeagent.plugin.mongodb.interceptor.InterceptorHelper.mongoClientSettings;
 
-@AdviceTo(value = MongoDBClientConstructPoints.class, plugin = MongoDBPlugin.class)
-public class MongoDBClientConstruct4TraceInterceptor implements NonReentrantInterceptor {
-    private AutoRefreshPluginConfigImpl config;
+public abstract class MongoBaseInterceptor implements NonReentrantInterceptor {
+
+    protected AutoRefreshPluginConfigImpl config;
 
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
@@ -47,16 +42,13 @@ public class MongoDBClientConstruct4TraceInterceptor implements NonReentrantInte
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
-        MongoClientSettings mongoClientSettings = mongoClientSettings(methodInfo);
+        MongoClientSettings mongoClientSettings = MongoUtils.mongoClientSettings(methodInfo);
         if (mongoClientSettings == null) {
             return;
         }
-        List<CommandListener> commandListeners = MongoDBUtils.getFieldValue(mongoClientSettings, "commandListeners");
-        commandListeners.add(new TraceMongoDBCommandListener(this.config));
+        List<CommandListener> commandListeners = MongoUtils.getFieldValue(mongoClientSettings, "commandListeners");
+        commandListeners.add(this.commandListener());
     }
 
-    @Override
-    public String getType() {
-        return Order.TRACING.getName();
-    }
+    protected abstract CommandListener commandListener();
 }

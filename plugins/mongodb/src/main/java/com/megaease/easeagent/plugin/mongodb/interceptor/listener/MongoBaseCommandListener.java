@@ -15,7 +15,17 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.mongodb.interceptor;
+package com.megaease.easeagent.plugin.mongodb.interceptor.listener;
 
-public class InterceptorHelper {
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
+import com.mongodb.event.CommandListener;
+
+public abstract class MongoBaseCommandListener implements CommandListener {
+
+    protected final AutoRefreshPluginConfigImpl config;
+
+    public MongoBaseCommandListener(AutoRefreshPluginConfigImpl config) {
+        this.config = config;
+    }
+
 }

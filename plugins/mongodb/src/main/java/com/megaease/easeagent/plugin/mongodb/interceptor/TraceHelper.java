@@ -22,12 +22,10 @@ import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
 import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.mongodb.MongoSocketException;
 import com.mongodb.connection.ConnectionDescription;
 import com.mongodb.connection.ConnectionId;
 import com.mongodb.event.CommandFailedEvent;
-import com.mongodb.event.CommandListener;
 import com.mongodb.event.CommandStartedEvent;
 import com.mongodb.event.CommandSucceededEvent;
 import org.bson.BsonDocument;
@@ -38,12 +36,8 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * copy from https://github.com/openzipkin/brave/blob/master/instrumentation/mongodb/src/main/java/brave/mongodb/TraceMongoCommandListener.java
- */
-public class TraceMongoDBCommandListener implements CommandListener {
-
-    private static final String SPAN_KEY = TraceMongoDBCommandListener.class.getName() + "-Span";
+public class TraceHelper {
+    public static final String SPAN_KEY = TraceHelper.class.getName() + "-Span";
 
     // See https://docs.mongodb.com/manual/reference/command for the command reference
     static final Set<String> COMMANDS_WITH_COLLECTION_NAME = new LinkedHashSet<>(Arrays.asList(
@@ -51,18 +45,10 @@ public class TraceMongoDBCommandListener implements CommandListener {
         "insert", "update", "collMod", "compact", "convertToCapped", "create", "createIndexes", "drop",
         "dropIndexes", "killCursors", "listIndexes", "reIndex"));
 
-    private final AutoRefreshPluginConfigImpl config;
-
-    public TraceMongoDBCommandListener(AutoRefreshPluginConfigImpl config) {
-        this.config = config;
-    }
-
-    @Override
-    public void commandStarted(CommandStartedEvent event) {
-        if (!this.config.getConfig().enabled()) {
+    public static void commandStarted(Context context, AutoRefreshPluginConfigImpl config, CommandStartedEvent event) {
+        if (!config.getConfig().enabled()) {
             return;
         }
-        Context context = EaseAgent.getContext();
         Span span = context.nextSpan();
         context.put(SPAN_KEY, span);
 
@@ -105,9 +91,7 @@ public class TraceMongoDBCommandListener implements CommandListener {
         span.start();
     }
 
-    @Override
-    public void commandSucceeded(CommandSucceededEvent event) {
-        Context context = EaseAgent.getContext();
+    public static void commandSucceeded(Context context, CommandSucceededEvent event) {
         Span span = context.get(SPAN_KEY);
         if (span == null) {
             return;
@@ -115,9 +99,7 @@ public class TraceMongoDBCommandListener implements CommandListener {
         span.finish();
     }
 
-    @Override
-    public void commandFailed(CommandFailedEvent event) {
-        Context context = EaseAgent.getContext();
+    public static void commandFailed(Context context, CommandFailedEvent event) {
         Span span = context.get(SPAN_KEY);
         if (span == null) {
             return;
@@ -126,8 +108,7 @@ public class TraceMongoDBCommandListener implements CommandListener {
         span.finish();
     }
 
-
-    String getCollectionName(BsonDocument command, String commandName) {
+    public static String getCollectionName(BsonDocument command, String commandName) {
         if (COMMANDS_WITH_COLLECTION_NAME.contains(commandName)) {
             String collectionName = getNonEmptyBsonString(command.get(commandName));
             if (collectionName != null) {
@@ -142,14 +123,15 @@ public class TraceMongoDBCommandListener implements CommandListener {
      * @return trimmed string from {@code bsonValue} or null if the trimmed string was empty or the
      * value wasn't a string
      */
-    static String getNonEmptyBsonString(BsonValue bsonValue) {
+    protected static String getNonEmptyBsonString(BsonValue bsonValue) {
         if (bsonValue == null || !bsonValue.isString()) return null;
         String stringValue = bsonValue.asString().getValue().trim();
         return stringValue.isEmpty() ? null : stringValue;
     }
 
-    static String getSpanName(String commandName, String collectionName) {
+    protected static String getSpanName(String commandName, String collectionName) {
         if (collectionName == null) return commandName;
         return commandName + " " + collectionName;
     }
+
 }

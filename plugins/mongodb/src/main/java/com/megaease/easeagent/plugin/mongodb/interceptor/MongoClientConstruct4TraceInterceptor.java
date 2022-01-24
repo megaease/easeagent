@@ -17,5 +17,17 @@
 
 package com.megaease.easeagent.plugin.mongodb.interceptor;
 
-public class InterceptorHelper {
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.mongodb.MongoPlugin;
+import com.megaease.easeagent.plugin.mongodb.interceptor.listener.MongoTraceCommandListener;
+import com.megaease.easeagent.plugin.mongodb.points.MongoClientImplPoints;
+import com.mongodb.event.CommandListener;
+
+@AdviceTo(value = MongoClientImplPoints.class, plugin = MongoPlugin.class)
+public class MongoClientConstruct4TraceInterceptor extends MongoBaseTraceInterceptor {
+
+    protected CommandListener commandListener() {
+        return new MongoTraceCommandListener(this.config);
+    }
+
 }

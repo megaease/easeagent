@@ -15,7 +15,19 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.mongodb.interceptor;
+package com.megaease.easeagent.plugin.mongodb;
 
-public class InterceptorHelper {
+import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+
+public class MongoPlugin implements AgentPlugin {
+    @Override
+    public String getNamespace() {
+        return "mongodb";
+    }
+
+    @Override
+    public String getDomain() {
+        return ConfigConst.OBSERVABILITY;
+    }
 }

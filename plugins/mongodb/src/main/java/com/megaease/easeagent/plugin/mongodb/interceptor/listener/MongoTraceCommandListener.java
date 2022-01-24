@@ -15,56 +15,44 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.mongodb.interceptor;
+package com.megaease.easeagent.plugin.mongodb.interceptor.listener;
 
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.mongodb.interceptor.TraceHelper;
 import com.mongodb.event.CommandFailedEvent;
-import com.mongodb.event.CommandListener;
 import com.mongodb.event.CommandStartedEvent;
 import com.mongodb.event.CommandSucceededEvent;
-import org.bson.BsonDocument;
-import org.bson.BsonValue;
 
-public class MetricMongoDBCommandListener implements CommandListener {
+public class MongoTraceCommandListener extends MongoBaseTraceCommandListener {
 
-    private static final String START_TIME = MetricMongoDBCommandListener.class.getName() + "-StartTime";
+//    private static final Logger LOGGER = LoggerFactory.getLogger(MongoTraceCommandListener.class);
 
-    private final MongoDBMetric mongoDBMetric;
-    private final AutoRefreshPluginConfigImpl config;
-
-    public MetricMongoDBCommandListener(MongoDBMetric mongoDBMetric, AutoRefreshPluginConfigImpl config) {
-        this.mongoDBMetric = mongoDBMetric;
-        this.config = config;
+    public MongoTraceCommandListener(AutoRefreshPluginConfigImpl config) {
+        super(config);
     }
 
     @Override
     public void commandStarted(CommandStartedEvent event) {
+//        LOGGER.warn("commandStarted trace");
         Context context = EaseAgent.getContext();
-        context.put(START_TIME, System.currentTimeMillis());
+        TraceHelper.commandStarted(context, this.config, event);
     }
+
 
     @Override
     public void commandSucceeded(CommandSucceededEvent event) {
-        BsonDocument bsonDocument = event.getResponse();
-        BsonValue writeErrors = bsonDocument.get("writeErrors");
-        boolean success = writeErrors == null;
-        this.process(event.getCommandName(), success);
+//        LOGGER.warn("commandSucceeded trace");
+        Context context = EaseAgent.getContext();
+        TraceHelper.commandSucceeded(context, event);
     }
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
-        this.process(event.getCommandName(), false);
+//        LOGGER.warn("commandFailed trace");
+        Context context = EaseAgent.getContext();
+        TraceHelper.commandFailed(context, event);
     }
 
-    private void process(String key, boolean success) {
-        if (!this.config.getConfig().enabled()) {
-            return;
-        }
-        Context context = EaseAgent.getContext();
-        long startTime = context.get(START_TIME);
-        long duration = System.currentTimeMillis() - startTime;
-        this.mongoDBMetric.collectMetric(key, duration, success);
-    }
 }

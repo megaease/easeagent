@@ -17,5 +17,12 @@
 
 package com.megaease.easeagent.plugin.mongodb.interceptor;
 
-public class InterceptorHelper {
+import com.megaease.easeagent.plugin.enums.Order;
+
+public abstract class MongoBaseTraceInterceptor extends MongoBaseInterceptor {
+
+    @Override
+    public String getType() {
+        return Order.TRACING.getName();
+    }
 }

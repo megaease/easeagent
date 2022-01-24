@@ -15,7 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.mongodb.interceptor;
+package com.megaease.easeagent.plugin.mongodb.interceptor.listener;
 
-public class InterceptorHelper {
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
+import com.megaease.easeagent.plugin.mongodb.interceptor.MongoMetric;
+
+public class MongoBaseMetricCommandListener extends MongoBaseCommandListener {
+
+    protected final MongoMetric mongoMetric;
+
+    public MongoBaseMetricCommandListener(AutoRefreshPluginConfigImpl config, MongoMetric mongoMetric) {
+        super(config);
+        this.mongoMetric = mongoMetric;
+    }
+
 }

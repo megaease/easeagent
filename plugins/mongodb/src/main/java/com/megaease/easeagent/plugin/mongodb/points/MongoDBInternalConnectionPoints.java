@@ -25,27 +25,26 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-/**
- * Brave-instrumentation-mongodb usage: https://github.com/openzipkin/brave/tree/master/instrumentation/mongodb
- * <pre>
- * CommandListener listener = MongoDBTracing.create(Tracing.current())
- *         .commandListener();
- * MongoClientSettings settings = MongoClientSettings.builder()
- *         .addCommandListener(listener)
- *         .build();
- * MongoClient client = MongoClients.create(settings);
- *     </pre>
- */
-public class MongoDBClientConstructPoints implements Points {
+public class MongoDBInternalConnectionPoints implements Points {
+
+    private final String clsName = "com.mongodb.internal.connection.InternalConnection";
+
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
-            .hasClassName("com.mongodb.client.internal.MongoClientImpl")
+            .hasInterface(clsName)
+            .notInterface()
             .build();
     }
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
-        return MethodMatcher.builder().isConstruct().build().toSet();
+        IClassMatcher overriddenFrom = ClassMatcher.builder()
+            .hasClassName(clsName)
+            .build();
+        return MethodMatcher.builder()
+            .named("sendAndReceiveAsync").isOverriddenFrom(overriddenFrom)
+            .build()
+            .toSet();
     }
 }

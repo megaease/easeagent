@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.mongodb;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
-public class MongoDBPlugin implements AgentPlugin {
+public class MongoRedirectPlugin implements AgentPlugin {
     @Override
     public String getNamespace() {
         return "mongodb";
@@ -28,6 +28,6 @@ public class MongoDBPlugin implements AgentPlugin {
 
     @Override
     public String getDomain() {
-        return ConfigConst.OBSERVABILITY;
+        return ConfigConst.INTEGRABILITY;
     }
 }

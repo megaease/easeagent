@@ -15,19 +15,14 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.mongodb;
+package com.megaease.easeagent.plugin.mongodb.interceptor.listener;
 
-import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
 
-public class MongoDBRedirectPlugin implements AgentPlugin {
-    @Override
-    public String getNamespace() {
-        return "mongodb";
+public abstract class MongoBaseTraceCommandListener extends MongoBaseCommandListener {
+
+    public MongoBaseTraceCommandListener(AutoRefreshPluginConfigImpl config) {
+        super(config);
     }
 
-    @Override
-    public String getDomain() {
-        return ConfigConst.INTEGRABILITY;
-    }
 }
