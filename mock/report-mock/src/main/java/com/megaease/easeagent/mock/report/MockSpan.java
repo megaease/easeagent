@@ -22,7 +22,7 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import java.util.Map;
 
 public interface MockSpan {
-    Span.Kind kine();
+    Span.Kind kind();
 
     String traceId();
 

@@ -28,7 +28,6 @@ import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.message.BasicHttpResponse;
-import org.apache.http.ProtocolVersion;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -52,7 +51,7 @@ public class HttpClient5DoExecuteInterceptorTest {
         httpClient5DoExecuteInterceptor.after(methodInfo, context);
         MockSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kine());
+        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 

@@ -50,7 +50,7 @@ public class HttpClient5AsyncTracingInterceptorTest {
             httpResponseFutureCallback.completed(basicHttpResponse);
         });
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kine());
+        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 

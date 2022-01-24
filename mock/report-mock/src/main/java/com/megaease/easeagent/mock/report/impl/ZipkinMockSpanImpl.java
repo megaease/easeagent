@@ -47,7 +47,7 @@ public class ZipkinMockSpanImpl implements MockSpan {
     }
 
     @Override
-    public com.megaease.easeagent.plugin.api.trace.Span.Kind kine() {
+    public com.megaease.easeagent.plugin.api.trace.Span.Kind kind() {
         return KINDS.get(span.kind());
     }
 
