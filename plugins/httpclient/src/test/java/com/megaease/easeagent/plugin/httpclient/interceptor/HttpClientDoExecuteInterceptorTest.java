@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseagent;
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-@MockEaseagent
+@MockEaseAgent
 public class HttpClientDoExecuteInterceptorTest {
 
 

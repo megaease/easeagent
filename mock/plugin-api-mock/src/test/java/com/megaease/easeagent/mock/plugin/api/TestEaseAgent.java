@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
-@MockEaseagent
+@MockEaseAgent
 public class TestEaseAgent {
     @Test
     public void testEaseAgent() {
