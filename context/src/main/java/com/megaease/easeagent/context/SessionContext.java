@@ -177,21 +177,12 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public Span consumerSpan(MessagingRequest request) {
-        Span span = tracing.consumerSpan(request);
-        String[] fields = ProgressFields.getResponseHoldTagFields();
-        if (!ProgressFields.isEmpty(fields)) {
-            for (String field : fields) {
-                span.tag(field, request.header(field));
-            }
-        }
-        return span;
+        return tracing.consumerSpan(request);
     }
 
     @Override
     public Span producerSpan(MessagingRequest request) {
-        Span span = tracing.producerSpan(request);
-        injectForwardedHeaders(request);
-        return span;
+        return tracing.producerSpan(request);
     }
 
     @Override
@@ -270,7 +261,7 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public boolean isNecessaryKeys(String key) {
-        return tracing.propagationKeys().contains(key) || ProgressFields.getForwardedHeaders().contains(key);
+        return tracing.propagationKeys().contains(key);
     }
 
     @Override
@@ -278,7 +269,6 @@ public class SessionContext implements InitializeContext {
         @SuppressWarnings("unchecked")
         Injector<MessagingRequest> injector = tracing.messagingTracing().consumerInjector();
         injector.inject(span, request);
-        injectForwardedHeaders(request);
     }
 
     @Override
@@ -286,7 +276,6 @@ public class SessionContext implements InitializeContext {
         @SuppressWarnings("unchecked")
         Injector<MessagingRequest> injector = tracing.messagingTracing().producerInjector();
         injector.inject(span, request);
-        injectForwardedHeaders(request);
     }
 
     @Override

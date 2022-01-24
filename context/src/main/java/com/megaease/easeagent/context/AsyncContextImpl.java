@@ -18,14 +18,13 @@
 package com.megaease.easeagent.context;
 
 import com.megaease.easeagent.plugin.api.Cleaner;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.trace.SpanContext;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class AsyncContextImpl implements AsyncContext {
@@ -33,10 +32,10 @@ public class AsyncContextImpl implements AsyncContext {
     private final Map<Object, Object> context;
     private final Supplier<InitializeContext> supplier;
 
-    private AsyncContextImpl(@Nonnull SpanContext spanContext, @Nonnull Map<Object, Object> context, @Nonnull Supplier<InitializeContext> supplier) {
-        this.spanContext = spanContext;
-        this.context = context;
-        this.supplier = supplier;
+    private AsyncContextImpl(SpanContext spanContext, Map<Object, Object> context, Supplier<InitializeContext> supplier) {
+        this.spanContext = Objects.requireNonNull(spanContext, "spanContext must not be null");
+        this.context = Objects.requireNonNull(context, "context must not be null");
+        this.supplier = Objects.requireNonNull(supplier, "supplier must not be null");
     }
 
     public static AsyncContextImpl build(SpanContext spanContext,

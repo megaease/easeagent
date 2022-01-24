@@ -20,13 +20,13 @@ package com.megaease.easeagent.metrics.impl;
 import com.codahale.metrics.Meter;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class MeterImpl implements com.megaease.easeagent.plugin.api.metric.Meter {
     private final Meter meter;
 
-    private MeterImpl(@Nonnull Meter meter) {
-        this.meter = meter;
+    private MeterImpl(Meter meter) {
+        this.meter = Objects.requireNonNull(meter, "meter must not be null");
     }
 
     public static com.megaease.easeagent.plugin.api.metric.Meter build(Meter meter) {

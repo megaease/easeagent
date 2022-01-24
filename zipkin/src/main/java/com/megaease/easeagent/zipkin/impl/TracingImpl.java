@@ -24,7 +24,6 @@ import brave.propagation.TraceContextOrSamplingFlags;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.InitializeContext;
-import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.*;
 import com.megaease.easeagent.plugin.bridge.NoOpContext;
@@ -145,6 +144,8 @@ public class TracingImpl implements ITracing {
             TraceContext traceContext = (TraceContext) context;
             CurrentTraceContext.Scope scope = tracing().currentTraceContext().maybeScope(traceContext);
             return new ScopeImpl(scope);
+        } else {
+            LOGGER.warn("import async span to brave.Tracing fail: SpanContext.unwrap() result Class<{}> must be Class<{}>", context.getClass().getName(), TraceContext.class.getName());
         }
         return NoOpTracer.NO_OP_SCOPE;
     }
@@ -155,15 +156,25 @@ public class TracingImpl implements ITracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         clientZipkinInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new RequestContextImpl(newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new RequestContextImpl(newSpan, newSpan.maybeScope(), asyncRequest);
     }
 
     @Override
     public RequestContext serverReceive(Request request) {
-        TraceContextOrSamplingFlags extracted = defaultZipkinExtractor.extract(request);
-        brave.Span span = extracted.context() != null
-            ? tracer().joinSpan(extracted.context())
-            : tracer().nextSpan(extracted);
+        TraceContext maybeParent = tracing.currentTraceContext().get();
+        // Unlike message consumers, we try current span before trying extraction. This is the proper
+        // order because the span in scope should take precedence over a potentially stale header entry.
+        //
+        brave.Span span;
+        if (maybeParent == null) {
+            TraceContextOrSamplingFlags extracted = defaultZipkinExtractor.extract(request);
+            span = extracted.context() != null
+                ? tracer().joinSpan(extracted.context())
+                : tracer().nextSpan(extracted);
+        } else { // If we have a span in scope assume headers were cleared before
+            span = tracing.tracer().newChild(maybeParent);
+        }
+
         if (span.isNoop()) {
             return NoOpContext.NO_OP_PROGRESS_CONTEXT;
         }
@@ -171,7 +182,7 @@ public class TracingImpl implements ITracing {
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultZipkinInjector.inject(span.context(), asyncRequest);
         Span newSpan = build(span, request.cacheScope());
-        return new RequestContextImpl(newSpan, newSpan.maybeScope(), asyncRequest, supplier);
+        return new RequestContextImpl(newSpan, newSpan.maybeScope(), asyncRequest);
     }
 
     @Override
@@ -181,19 +192,7 @@ public class TracingImpl implements ITracing {
 
     @Override
     public Span nextSpan() {
-        return nextSpan(null);
-    }
-
-    @Override
-    public Span nextSpan(Message<?> message) {
-        Object msg = message == null ? null : message.get();
-        Span span = null;
-        if (msg == null) {
-            span = build(tracer().nextSpan(), true);
-        } else if (msg instanceof TraceContextOrSamplingFlags) {
-            span = build(tracer().nextSpan((TraceContextOrSamplingFlags) msg), true);
-        }
-        return NoOpTracer.noNullSpan(span);
+        return build(tracer().nextSpan(), false);
     }
 
     @Override

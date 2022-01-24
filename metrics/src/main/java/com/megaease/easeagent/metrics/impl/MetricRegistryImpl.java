@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
@@ -35,7 +36,7 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
     private final MetricRegistry metricRegistry;
 
     private MetricRegistryImpl(MetricRegistry metricRegistry) {
-        this.metricRegistry = metricRegistry;
+        this.metricRegistry = Objects.requireNonNull(metricRegistry, "metricRegistry must not be null");
         this.gauges = new ConcurrentHashMap<>();
     }
 

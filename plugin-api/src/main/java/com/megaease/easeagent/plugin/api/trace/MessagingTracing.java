@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.api.trace;
 
 import com.megaease.easeagent.plugin.api.Context;
 
-import java.util.function.Predicate;
+import java.util.function.Function;
 
 /**
  * a MessagingTracing
@@ -31,7 +31,12 @@ public interface MessagingTracing<R extends MessagingRequest> {
     /**
      * @return {@link Extractor}
      */
-    Extractor<R> extractor();
+    Extractor<R> producerExtractor();
+
+    /**
+     * @return {@link Extractor}
+     */
+    Extractor<R> consumerExtractor();
 
     /**
      * @return {@link Injector}
@@ -51,7 +56,7 @@ public interface MessagingTracing<R extends MessagingRequest> {
      * yet been made. For example, if a trace is already in progress, this function is not called. You
      * can implement this to skip channels that you never want to trace.
      */
-    Predicate<R> consumerSampler();
+    Function<R, Boolean> consumerSampler();
 
     /**
      * Returns an overriding sampling decision for a new trace. Defaults to ignore the request and use
@@ -61,22 +66,7 @@ public interface MessagingTracing<R extends MessagingRequest> {
      * making an messaging request as a part of booting your application. You may want to opt-out of
      * tracing producer requests that did not originate from a consumer request.
      */
-    Predicate<R> producerSampler();
-
-    /**
-     * Returns an overriding sampling decision for a new trace.
-     *
-     * @param request parameter to evaluate for a sampling decision. null input results in a null result
-     * @return true to sample a new trace or false to deny. Null defers the decision.
-     */
-    boolean consumerSampler(R request);
-
-    /**
-     * @param request
-     * @return
-     * @see #consumerSampler()
-     */
-    boolean producerSampler(R request);
+    Function<R, Boolean> producerSampler();
 
     /**
      * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rebbitmq consumer

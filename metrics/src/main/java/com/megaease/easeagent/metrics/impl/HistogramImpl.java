@@ -21,17 +21,17 @@ import com.codahale.metrics.Histogram;
 import com.megaease.easeagent.plugin.api.metric.Snapshot;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class HistogramImpl implements com.megaease.easeagent.plugin.api.metric.Histogram {
     private final Histogram histogram;
 
-    private HistogramImpl(@Nonnull Histogram histogram) {
-        this.histogram = histogram;
+    private HistogramImpl(Histogram histogram) {
+        this.histogram = Objects.requireNonNull(histogram, "histogram must not be null");
     }
 
-    public static com.megaease.easeagent.plugin.api.metric.Histogram build(Histogram histogram){
-        return histogram==null?NoOpMetrics.NO_OP_HISTOGRAM:new HistogramImpl(histogram);
+    public static com.megaease.easeagent.plugin.api.metric.Histogram build(Histogram histogram) {
+        return histogram == null ? NoOpMetrics.NO_OP_HISTOGRAM : new HistogramImpl(histogram);
     }
 
     @Override

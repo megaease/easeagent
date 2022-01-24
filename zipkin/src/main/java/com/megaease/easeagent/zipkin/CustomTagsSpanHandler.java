@@ -45,7 +45,7 @@ public class CustomTagsSpanHandler extends SpanHandler {
         return true;
     }
 
-    public void fillTags(MutableSpan span, Map<String, String> tags) {
+    protected void fillTags(MutableSpan span, Map<String, String> tags) {
         if (tags == null || tags.isEmpty()) {
             return;
         }
