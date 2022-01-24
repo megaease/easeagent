@@ -48,7 +48,6 @@ public class RequestMock implements Request {
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             this.headers.put(entry.getKey(), entry.getValue());
         }
-        this.headers = headers;
         return this;
     }
 
