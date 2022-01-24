@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.plugin.api;
+package com.megaease.easeagent.context.log;
 
-import com.megaease.easeagent.mock.context.ContextManagerMock;
-import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import org.junit.Test;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static org.junit.Assert.*;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MockEaseagent {
-    Context CONTEXT = ContextManagerMock.getContext();
+public class LoggerImplTest {
+    @Test
+    public void test() {
+        LoggerFactoryImpl loggerFactory = LoggerFactoryImpl.build();
+        Logger logger = loggerFactory.getLogger(LoggerFactoryImplTest.class.getName());
+        assertTrue(logger instanceof LoggerImpl);
+    }
 }

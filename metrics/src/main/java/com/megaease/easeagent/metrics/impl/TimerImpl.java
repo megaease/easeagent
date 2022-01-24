@@ -21,8 +21,8 @@ import com.codahale.metrics.Timer;
 import com.megaease.easeagent.plugin.api.metric.Snapshot;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 
-import javax.annotation.Nonnull;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -30,8 +30,8 @@ import java.util.function.Supplier;
 public class TimerImpl implements com.megaease.easeagent.plugin.api.metric.Timer {
     private final Timer timer;
 
-    private TimerImpl(@Nonnull Timer timer) {
-        this.timer = timer;
+    private TimerImpl(Timer timer) {
+        this.timer = Objects.requireNonNull(timer, "timer must not be null");
     }
 
     public static com.megaease.easeagent.plugin.api.metric.Timer build(Timer timer) {

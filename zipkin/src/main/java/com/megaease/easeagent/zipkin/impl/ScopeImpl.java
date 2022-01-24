@@ -31,4 +31,9 @@ public class ScopeImpl implements Scope {
     public void close() {
         scope.close();
     }
+
+    @Override
+    public Object unwrap() {
+        return scope;
+    }
 }

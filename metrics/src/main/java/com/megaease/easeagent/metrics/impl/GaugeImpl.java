@@ -20,11 +20,13 @@ package com.megaease.easeagent.metrics.impl;
 
 import com.megaease.easeagent.plugin.api.metric.Gauge;
 
+import java.util.Objects;
+
 public class GaugeImpl implements com.codahale.metrics.Gauge {
     private final Gauge g;
 
     public GaugeImpl(Gauge g) {
-        this.g = g;
+        this.g = Objects.requireNonNull(g, "g must not be null");
     }
 
     Gauge getG() {

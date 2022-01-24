@@ -21,12 +21,13 @@ import com.codahale.metrics.Snapshot;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 
 import java.io.OutputStream;
+import java.util.Objects;
 
 public class SnapshotImpl implements com.megaease.easeagent.plugin.api.metric.Snapshot {
     private final Snapshot snapshot;
 
     private SnapshotImpl(Snapshot snapshot) {
-        this.snapshot = snapshot;
+        this.snapshot = Objects.requireNonNull(snapshot, "snapshot must not be null");
     }
 
     public static com.megaease.easeagent.plugin.api.metric.Snapshot build(Snapshot snapshot) {

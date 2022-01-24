@@ -89,7 +89,7 @@ public class SpanImpl implements Span {
         //
         brave.Span span;
         if (maybeParent == null) {
-            TraceContext.Extractor<Request> rExtractor = (TraceContext.Extractor<Request>)extractor;
+            TraceContext.Extractor<Request> rExtractor = (TraceContext.Extractor<Request>) extractor;
             TraceContextOrSamplingFlags extracted = rExtractor.extract(request);
             span = tracing.tracer().nextSpan(extracted);
         } else { // If we have a span in scope assume headers were cleared before
@@ -108,10 +108,6 @@ public class SpanImpl implements Span {
             span.kind(SpanImpl.braveKind(kind));
         }
         span.name(request.name());
-    }
-
-    public brave.Span getSpan() {
-        return span;
     }
 
     @Override
@@ -257,5 +253,10 @@ public class SpanImpl implements Span {
     @Override
     public Long parentId() {
         return span.context().parentId();
+    }
+
+    @Override
+    public Object unwrap() {
+        return span;
     }
 }

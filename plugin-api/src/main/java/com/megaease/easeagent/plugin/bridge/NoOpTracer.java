@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.function.Function;
 
 public class NoOpTracer {
     public static final ITracing NO_OP_TRACING = NoopTracing.INSTANCE;
@@ -165,6 +165,11 @@ public class NoOpTracer {
         }
 
         @Override
+        public Object unwrap() {
+            return null;
+        }
+
+        @Override
         public String toString() {
             return "NoopSpan";
         }
@@ -176,6 +181,11 @@ public class NoOpTracer {
         @Override
         public void close() {
 
+        }
+
+        @Override
+        public Object unwrap() {
+            return null;
         }
     }
 
@@ -189,11 +199,6 @@ public class NoOpTracer {
 
         @Override
         public Span nextSpan() {
-            return NoopSpan.INSTANCE;
-        }
-
-        @Override
-        public Span nextSpan(Message message) {
             return NoopSpan.INSTANCE;
         }
 
@@ -260,10 +265,15 @@ public class NoOpTracer {
 
     public static class EmptyMessagingTracing implements MessagingTracing<MessagingRequest> {
         private static final EmptyMessagingTracing INSTANCE = new EmptyMessagingTracing();
-        private static final Predicate<MessagingRequest> NOOP_SAMPLER = r -> false;
+        private static final Function<MessagingRequest, Boolean> NOOP_SAMPLER = r -> null;
 
         @Override
-        public Extractor<MessagingRequest> extractor() {
+        public Extractor<MessagingRequest> producerExtractor() {
+            return EmptyExtractor.INSTANCE;
+        }
+
+        @Override
+        public Extractor<MessagingRequest> consumerExtractor() {
             return EmptyExtractor.INSTANCE;
         }
 
@@ -278,23 +288,13 @@ public class NoOpTracer {
         }
 
         @Override
-        public Predicate<MessagingRequest> consumerSampler() {
+        public Function<MessagingRequest, Boolean> consumerSampler() {
             return NOOP_SAMPLER;
         }
 
         @Override
-        public Predicate<MessagingRequest> producerSampler() {
+        public Function<MessagingRequest, Boolean> producerSampler() {
             return NOOP_SAMPLER;
-        }
-
-        @Override
-        public boolean consumerSampler(MessagingRequest request) {
-            return false;
-        }
-
-        @Override
-        public boolean producerSampler(MessagingRequest request) {
-            return false;
         }
 
         @Override

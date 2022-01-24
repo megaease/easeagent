@@ -64,4 +64,12 @@ public interface Scope extends Closeable {
      */
     @Override
     void close();
+
+    /**
+     * Returns the underlying Scope object or {@code null} if there is none. Here is a Scope
+     * objects: {@code brave.Scope}.
+     *
+     * @return
+     */
+    Object unwrap();
 }

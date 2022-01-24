@@ -17,29 +17,23 @@
 
 package com.megaease.easeagent.zipkin.impl;
 
-import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Response;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.api.trace.Tracing;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class RequestContextImpl implements RequestContext {
     private final Span span;
     private final Scope scope;
     private final AsyncRequest asyncRequest;
-    private final Supplier<InitializeContext> supplier;
 
-    public RequestContextImpl(Span span, Scope scope, AsyncRequest asyncRequest, Supplier<InitializeContext> supplier) {
+    public RequestContextImpl(Span span, Scope scope, AsyncRequest asyncRequest) {
         this.span = span;
         this.scope = scope;
         this.asyncRequest = asyncRequest;
-        this.supplier = supplier;
     }
 
     @Override

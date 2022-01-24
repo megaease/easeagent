@@ -21,13 +21,13 @@ package com.megaease.easeagent.metrics.impl;
 import com.codahale.metrics.Counter;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class CounterImpl implements com.megaease.easeagent.plugin.api.metric.Counter {
     private final Counter counter;
 
-    private CounterImpl(@Nonnull Counter counter) {
-        this.counter = counter;
+    private CounterImpl(Counter counter) {
+        this.counter = Objects.requireNonNull(counter, "counter must not be null");
     }
 
     public static com.megaease.easeagent.plugin.api.metric.Counter build(Counter counter) {

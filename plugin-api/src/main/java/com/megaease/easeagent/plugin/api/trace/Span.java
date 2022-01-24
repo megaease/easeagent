@@ -239,16 +239,24 @@ public interface Span {
      */
     Span cacheScope();
 
-    /** Returns the hex representation of the span's trace ID */
+    /**
+     * Returns the hex representation of the span's trace ID
+     */
     String traceIdString();
 
-    /** Returns the hex representation of the span's ID */
+    /**
+     * Returns the hex representation of the span's ID
+     */
     String spanIdString();
 
-    /** Returns the hex representation of the span's parent ID */
+    /**
+     * Returns the hex representation of the span's parent ID
+     */
     String parentIdString();
 
-    /** Unique 8-byte identifier for a trace, set on all spans within it. */
+    /**
+     * Unique 8-byte identifier for a trace, set on all spans within it.
+     */
     Long traceId();
 
     /**
@@ -262,4 +270,12 @@ public interface Span {
      * The parent's {@link #spanId} or null if this the root span in a trace.
      */
     Long parentId();
+
+    /**
+     * Returns the underlying Span object or {@code null} if there is none. Here is some Span
+     * objects: {@code brave.LazySpan}, {@code brave.RealSpan} .
+     *
+     * @return
+     */
+    Object unwrap();
 }

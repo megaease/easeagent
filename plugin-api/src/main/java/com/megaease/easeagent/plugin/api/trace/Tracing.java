@@ -60,24 +60,6 @@ public interface Tracing {
     Span nextSpan();
 
     /**
-     * This creates a new span based on parameters message from an incoming request. This will
-     * always result in a new span. If no trace identifiers were incoming, a span will be created
-     * based on the implicit context in the same manner as {@link #nextSpan()}. If a sampling decision
-     * has not yet been made, one will happen here.
-     *
-     * <p>Ex.
-     * <pre>{@code
-     * message = extractor.extract(request);
-     * span = tracer.nextSpan(message);
-     * }</pre>
-     *
-     * @param message {@link Message}
-     * @return {@link Span}
-     * @see Extractor#extract(MessagingRequest)
-     */
-    Span nextSpan(Message<?> message);
-
-    /**
      * get MessagingTracing for message tracing
      * <p>
      * If you have a Message Server and need Span, generate result use {@link Context#consumerSpan(MessagingRequest)} and
@@ -92,6 +74,5 @@ public interface Tracing {
      * objects: {@code brave.propagation.TraceContext}.
      * @return
      */
-
     Object unwrap();
 }
