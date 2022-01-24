@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.plugin.mongodb.interceptor;
 
-import com.megaease.easeagent.log4j2.Logger;
-import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
@@ -55,7 +53,7 @@ public class MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor implem
 
     static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
+//        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
         private final SingleResultCallback<T> delegate;
         private final MongoCtx mongoCtx;
 
