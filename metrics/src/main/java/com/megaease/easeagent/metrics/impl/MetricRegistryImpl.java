@@ -24,19 +24,18 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.metric.MetricRegistry {
-    private final ConcurrentMap<String, Gauge> gauges;
+    private final ConcurrentMap<String, Metric> metricCache;
     private final MetricRegistry metricRegistry;
 
     private MetricRegistryImpl(MetricRegistry metricRegistry) {
         this.metricRegistry = Objects.requireNonNull(metricRegistry, "metricRegistry must not be null");
-        this.gauges = new ConcurrentHashMap<>();
+        this.metricCache = new ConcurrentHashMap<>();
     }
 
     public static com.megaease.easeagent.plugin.api.metric.MetricRegistry build(MetricRegistry metricRegistry) {
@@ -46,61 +45,68 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
 
     @Override
     public boolean remove(String name) {
-        gauges.remove(name);
+        metricCache.remove(name);
         return metricRegistry.remove(name);
+    }
+
+    private <T extends Metric> T getOrAdd(String name, MetricInstance<T> instance, MetricBuilder<T> builder) {
+        Metric metric = metricCache.get(name);
+        if (metric != null) {
+            return instance.to(name, metric);
+        }
+        synchronized (metricCache) {
+            metric = metricCache.get(name);
+            if (metric != null) {
+                return instance.to(name, metric);
+            }
+            T t = builder.newMetric(name);
+            metricCache.putIfAbsent(name, t);
+            return t;
+        }
     }
 
     @Override
     public Map<String, Metric> getMetrics() {
-        Map<String, com.codahale.metrics.Metric> metricMap = metricRegistry.getMetrics();
-        Map<String, Metric> result = new HashMap<>();
-        for (Map.Entry<String, com.codahale.metrics.Metric> entry : metricMap.entrySet()) {
-            com.codahale.metrics.Metric oleMetric = entry.getValue();
-            if (oleMetric instanceof com.codahale.metrics.Meter) {
-                result.put(entry.getKey(), MeterImpl.build((com.codahale.metrics.Meter) oleMetric));
-            } else if (oleMetric instanceof com.codahale.metrics.Counter) {
-                result.put(entry.getKey(), CounterImpl.build((com.codahale.metrics.Counter) oleMetric));
-            } else if (oleMetric instanceof com.codahale.metrics.Histogram) {
-                result.put(entry.getKey(), HistogramImpl.build((com.codahale.metrics.Histogram) oleMetric));
-            } else if (oleMetric instanceof com.codahale.metrics.Timer) {
-                result.put(entry.getKey(), TimerImpl.build((com.codahale.metrics.Timer) oleMetric));
-            }
-        }
-        result.putAll(this.gauges);
-        return Collections.unmodifiableMap(result);
+        return Collections.unmodifiableMap(metricCache);
     }
 
     @Override
     public Meter meter(String name) {
-        return NoNull.of(MeterImpl.build(metricRegistry.meter(name)), NoOpMetrics.NO_OP_METER);
+        return getOrAdd(name, MetricInstance.METER, METERS);
     }
 
     @Override
     public Counter counter(String name) {
-        return NoNull.of(CounterImpl.build(metricRegistry.counter(name)), NoOpMetrics.NO_OP_COUNTER);
+        return getOrAdd(name, MetricInstance.COUNTER, COUNTERS);
     }
 
     @Override
     @SuppressWarnings("rawtypes")
     public Gauge gauge(String name, MetricSupplier<Gauge> supplier) {
-        Gauge gauge = gauges.get(name);
-        if (gauge != null) {
-            return gauge;
+        Metric metric = metricCache.get(name);
+        if (metric != null) {
+            return MetricInstance.GAUGE.to(name, metric);
         }
-        com.codahale.metrics.Gauge result = metricRegistry.gauge(name, new GaugeSupplier(supplier));
-        gauge = ((GaugeImpl) result).getG();
-        gauges.put(name, gauge);
-        return gauge;
+        synchronized (metricCache) {
+            metric = metricCache.get(name);
+            if (metric != null) {
+                return MetricInstance.GAUGE.to(name, metric);
+            }
+            com.codahale.metrics.Gauge result = metricRegistry.gauge(name, new GaugeSupplier(supplier));
+            Gauge g = ((GaugeImpl) result).getG();
+            metricCache.putIfAbsent(name, g);
+            return g;
+        }
     }
 
     @Override
     public Histogram histogram(String name) {
-        return NoNull.of(HistogramImpl.build(metricRegistry.histogram(name)), NoOpMetrics.NO_OP_HISTOGRAM);
+        return getOrAdd(name, MetricInstance.HISTOGRAM, HISTOGRAMS);
     }
 
     @Override
     public Timer timer(String name) {
-        return NoNull.of(TimerImpl.build(metricRegistry.timer(name)), NoOpMetrics.NO_OP_TIMER);
+        return getOrAdd(name, MetricInstance.TIMER, TIMERS);
     }
 
     public static class GaugeSupplier implements MetricRegistry.MetricSupplier<com.codahale.metrics.Gauge> {
@@ -116,4 +122,42 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
             return new GaugeImpl(newGauge);
         }
     }
+
+    /**
+     * A quick and easy way of capturing the notion of default metrics.
+     */
+    private interface MetricBuilder<T extends Metric> {
+        T newMetric(String name);
+    }
+
+    MetricBuilder<Counter> COUNTERS = new MetricBuilder<Counter>() {
+        @Override
+        public Counter newMetric(String name) {
+            return NoNull.of(CounterImpl.build(metricRegistry.counter(name)), NoOpMetrics.NO_OP_COUNTER);
+        }
+    };
+
+    MetricBuilder<Histogram> HISTOGRAMS = new MetricBuilder<Histogram>() {
+        @Override
+        public Histogram newMetric(String name) {
+            return NoNull.of(HistogramImpl.build(metricRegistry.histogram(name)), NoOpMetrics.NO_OP_HISTOGRAM);
+        }
+
+    };
+
+    MetricBuilder<Meter> METERS = new MetricBuilder<Meter>() {
+        @Override
+        public Meter newMetric(String name) {
+            return NoNull.of(MeterImpl.build(metricRegistry.meter(name)), NoOpMetrics.NO_OP_METER);
+        }
+
+    };
+
+    MetricBuilder<Timer> TIMERS = new MetricBuilder<Timer>() {
+        @Override
+        public Timer newMetric(String name) {
+            return NoNull.of(TimerImpl.build(metricRegistry.timer(name)), NoOpMetrics.NO_OP_TIMER);
+        }
+    };
+
 }
