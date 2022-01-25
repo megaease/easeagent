@@ -21,6 +21,7 @@ package com.megaease.easeagent.config;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class Configs implements Config, ConfigManagerMXBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(Configs.class);
-    private volatile Map<String, String> source;
+    private Map<String, String> source;
     private final ConfigNotifier notifier;
     private volatile String mainLatestVersion;
     private volatile String canaryLatestVersion;

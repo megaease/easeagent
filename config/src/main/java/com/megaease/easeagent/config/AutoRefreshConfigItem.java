@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.api.config.Config;
+
 import java.util.function.BiFunction;
 
 public class AutoRefreshConfigItem<T> {

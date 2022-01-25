@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.bridge;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.Reporter;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.dispatcher.IDispatcher;
@@ -65,6 +66,10 @@ public final class EaseAgent {
      */
     public static Reporter metricReporter(IPluginConfig config) {
         return metricRegistrySupplier.reporter(config);
+    }
+
+    public static Config getConfigs() {
+        return configFactory.getConfigs();
     }
 
     /**

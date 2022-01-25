@@ -146,6 +146,13 @@
                 <artifactId>auto-service</artifactId>
                 <version>${version.auto-service}</version>
             </dependency>
+            
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service-annotations</artifactId>
+                <version>${version.auto-service}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>

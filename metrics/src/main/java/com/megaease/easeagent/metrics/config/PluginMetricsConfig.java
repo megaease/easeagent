@@ -34,7 +34,6 @@ public class PluginMetricsConfig implements MetricsConfig {
         config.addChangeListener(new PluginConfigChange());
     }
 
-
     @Override
     public boolean isEnabled() {
         return enabled;

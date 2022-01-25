@@ -22,7 +22,7 @@ import com.megaease.easeagent.config.PluginConfigManager;
 import com.megaease.easeagent.core.config.PluginPropertiesHttpHandler;
 import com.megaease.easeagent.core.config.PluginPropertyHttpHandler;
 import com.megaease.easeagent.core.config.ServiceUpdateAgentHttpHandler;
-import com.megaease.easeagent.core.config.WrappedConfigManager;
+import com.megaease.easeagent.config.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;

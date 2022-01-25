@@ -19,6 +19,7 @@ package com.megaease.easeagent.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -18,9 +18,11 @@
 package com.megaease.easeagent.config;
 
 
+import com.megaease.easeagent.config.report.ReporterConfigAdapter;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +37,8 @@ import static com.megaease.easeagent.config.ValidateUtils.*;
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
     private static final String CONFIG_FILE = "agent.properties";
+
+    private ConfigFactory() {}
 
     public static Configs loadFromClasspath(ClassLoader classLoader) {
         try {
@@ -60,6 +64,24 @@ public class ConfigFactory {
         }
         return new Configs(Collections.emptyMap());
 
+    }
+
+    public static Configs loadConfigs(String pathname, ClassLoader loader) {
+        Configs configs = ConfigFactory.loadFromClasspath(loader);
+        // report config convert
+        ReporterConfigAdapter.convertReportConfig(configs);
+        if (StringUtils.isNotEmpty(pathname)) {
+            Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
+            // report config convert
+            ReporterConfigAdapter.convertReportConfig(configsFromOuterFile);
+            configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            final String display = configs.toPrettyDisplay();
+            LOGGER.debug("Loaded conf:\n{}", display);
+        }
+        return configs;
     }
 
     private static HashMap<String, String> extractPropsMap(InputStream in) throws IOException {

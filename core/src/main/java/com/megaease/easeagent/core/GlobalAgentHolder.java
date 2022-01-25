@@ -17,7 +17,7 @@
  */
 package com.megaease.easeagent.core;
 
-import com.megaease.easeagent.core.config.WrappedConfigManager;
+import com.megaease.easeagent.config.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.report.AgentReport;
 

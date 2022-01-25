@@ -17,18 +17,17 @@
 
 package com.megaease.easeagent.report.trace;
 
-import com.megaease.easeagent.log4j2.Logger;
-import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.report.OutputProperties;
-import org.apache.commons.lang3.StringUtils;
-import zipkin2.codec.Encoding;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.report.async.SDKAsyncReporter;
+import com.megaease.easeagent.report.async.TraceAsyncProps;
+import com.megaease.easeagent.report.plugin.ReporterRegistry;
+import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import zipkin2.reporter.Reporter;
-import zipkin2.reporter.SDKAsyncReporter;
-import zipkin2.reporter.kafka11.KafkaSender;
-import zipkin2.reporter.kafka11.SDKKafkaSender;
-import zipkin2.reporter.kafka11.SimpleSender;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.megaease.easeagent.config.report.ReportConfigConst.TRACE_SENDER_NAME;
 
 /**
  * RefreshableReporter is a reporter wrapper, which enhances the AgentAsyncReporter with refreshable function
@@ -36,18 +35,13 @@ import java.util.concurrent.TimeUnit;
  * @param <S> always zipkin2.reporter
  */
 public class RefreshableReporter<S> implements Reporter<S> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshableReporter.class);
     private final SDKAsyncReporter<S> asyncReporter;
-    private final TraceProps traceProperties;
-    private final OutputProperties agentOutputProperties;
-
+    private TraceAsyncProps traceProperties;
 
     public RefreshableReporter(SDKAsyncReporter<S> reporter,
-                               TraceProps traceProperties,
-                               OutputProperties agentOutputProperties) {
+                               TraceAsyncProps traceProperties) {
         this.asyncReporter = reporter;
         this.traceProperties = traceProperties;
-        this.agentOutputProperties = agentOutputProperties;
     }
 
     /**
@@ -60,44 +54,32 @@ public class RefreshableReporter<S> implements Reporter<S> {
         this.asyncReporter.report(span);
     }
 
+    public synchronized void refresh(Map<String, String> cfg) {
+        SenderWithEncoder sender = asyncReporter.getSender();
 
-    public synchronized void refresh() {
-        if (asyncReporter.getSender() != null) {
-            try {
-                asyncReporter.getSender().close();
-                asyncReporter.closeFlushThread();
-            } catch (Exception ignored) {
-                // ignored
+        if (sender != null) {
+            String name = cfg.remove(TRACE_SENDER_NAME);
+            if (!sender.name().equals(name)) {
+                try {
+                    sender.close();
+                } catch (Exception ignored) {
+                    // ignored
+                }
+                sender = ReporterRegistry.getSender(TRACE_SENDER_NAME, EaseAgent.getConfigs());
+                asyncReporter.setSender(sender);
             }
         }
-
-        if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()
-                && StringUtils.isNotEmpty(agentOutputProperties.getServers())) {
-            final SDKKafkaSender sender = SDKKafkaSender.wrap(traceProperties,
-                    KafkaSender.newBuilder()
-                            .bootstrapServers(agentOutputProperties.getServers())
-                            .topic(traceProperties.getOutput().getTopic())
-                            .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes())
-                            .encoding(Encoding.JSON)
-                            .build());
-            asyncReporter.setSender(sender);
-            LOGGER.info("Set async reporter to Kafka sender");
-
-        } else {
-            asyncReporter.setSender(new SimpleSender());
-        }
-        asyncReporter.setPending(traceProperties.getOutput().getQueuedMaxSpans(), traceProperties.getOutput().getQueuedMaxSize());
-        asyncReporter.setMessageTimeoutNanos(messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS));
+        traceProperties = TraceAsyncProps.newDefault(EaseAgent.getConfigs());
+        asyncReporter.closeFlushThread();
+        asyncReporter.setPending(traceProperties.getQueuedMaxSpans(), traceProperties.getQueuedMaxSize());
+        asyncReporter.setMessageTimeoutNanos(messageTimeout(traceProperties.getMessageTimeout()));
         asyncReporter.startFlushThread(); // start thread
     }
 
-    protected long messageTimeout(long timeout, TimeUnit unit) {
+    protected long messageTimeout(long timeout) {
         if (timeout < 0) {
             timeout = 1000L;
         }
-        if (unit == null) {
-            unit = TimeUnit.MILLISECONDS;
-        }
-        return unit.toNanos(timeout);
+        return TimeUnit.MILLISECONDS.toNanos(timeout);
     }
 }

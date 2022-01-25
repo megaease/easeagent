@@ -20,6 +20,7 @@ package com.megaease.easeagent.config;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 
@@ -43,6 +44,11 @@ public class PluginConfigManager implements IConfigFactory {
     public static PluginConfigManager.Builder builder(Configs configs) {
         PluginConfigManager pluginConfigManager = new PluginConfigManager(configs, new HashMap<>(), new HashMap<>());
         return pluginConfigManager.new Builder();
+    }
+
+    @Override
+    public Config getConfigs() {
+        return this.configs;
     }
 
     @Override

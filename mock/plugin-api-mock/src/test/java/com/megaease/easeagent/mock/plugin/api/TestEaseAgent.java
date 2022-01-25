@@ -18,6 +18,7 @@
 package com.megaease.easeagent.mock.plugin.api;
 
 import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -41,7 +42,17 @@ public class TestEaseAgent {
         assertNotNull(EaseAgent.metricRegistrySupplier);
         assertNotNull(EaseAgent.metricRegistrySupplier.reporter(config));
         AtomicReference<String> message = new AtomicReference<>("");
-        ReportMock.setMetricReportMock(msg -> message.set(msg));
+        ReportMock.setMetricReportMock(new Reporter() {
+            @Override
+            public void report(String msg) {
+                message.set(msg);
+            }
+
+            @Override
+            public void report(byte[] msg) {
+                message.set(new String(msg));
+            }
+        });
         EaseAgent.metricRegistrySupplier.reporter(config).report("test");
         assertEquals("test",message.get());
         Logger logger = EaseAgent.getLogger(TestEaseAgent.class);

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.metrics.converter;
 
-import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.utils.AdditionalAttributes;

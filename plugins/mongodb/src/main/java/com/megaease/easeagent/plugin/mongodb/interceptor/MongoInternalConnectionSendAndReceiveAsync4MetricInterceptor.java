@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.mongodb.interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
+import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -54,6 +55,7 @@ public class MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor implem
     static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
 
 //        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
+
         private final SingleResultCallback<T> delegate;
         private final MongoCtx mongoCtx;
 

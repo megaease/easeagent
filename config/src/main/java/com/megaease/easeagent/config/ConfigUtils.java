@@ -20,12 +20,14 @@ package com.megaease.easeagent.config;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.*;
@@ -141,5 +143,64 @@ public class ConfigUtils {
 
     public static String buildPluginProperty(String domain, String namespace, String id, String property) {
         return String.format(PLUGIN_FORMAT, domain, namespace, id, property);
+    }
+
+    /**
+     * Convert config item with a fromPrefix to toPrefix for configuration Compatibility
+     *
+     * @param config config
+     * @param fromPrefix from
+     * @param toPrefix to
+     * @return Extracted and converted KV map
+     */
+    public static Map<String, String> extractAndConvertPrefix(
+            Config config, String fromPrefix, String toPrefix) {
+        return extractAndConvertPrefix(config.getConfigs(), fromPrefix, toPrefix);
+    }
+
+    public static Map<String, String> extractAndConvertPrefix(Map<String, String> cfg, String fromPrefix, String toPrefix) {
+        Map<String, String> convert = new HashMap<>();
+
+        cfg.forEach((key, value) -> {
+            if (key.startsWith(fromPrefix)) {
+                key = toPrefix + key.substring(fromPrefix.length());
+                convert.put(key, value);
+            }
+        });
+
+        // override, new configuration KV override previous KV
+        convert.putAll(extractByPrefix(cfg, toPrefix));
+
+        return convert;
+    }
+
+    /**
+     * Extract config items from config by prefix
+     * @param config  config
+     * @param prefix  prefix
+     * @return Extracted KV
+     */
+    public static Map<String, String> extractByPrefix(Config config, String prefix) {
+        return extractByPrefix(config.getConfigs(), prefix);
+    }
+
+    public static Map<String, String> extractByPrefix(Map<String, String> cfg, String prefix) {
+        Map<String, String> extract = new HashMap<>();
+
+        // override, new configuration KV override previous KV
+        cfg.forEach((key, value) -> {
+            if (key.startsWith(prefix)) {
+                extract.put(key, value);
+            }
+        });
+
+        return extract;
+    }
+
+    public static int isChanged(String name, Map<String, String> map, String check) {
+        if (map.get(name) == null || map.get(name).equals(check)) {
+            return 0;
+        }
+        return 1;
     }
 }

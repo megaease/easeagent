@@ -19,6 +19,13 @@ package com.megaease.easeagent.plugin.api.config;
 
 public interface IConfigFactory {
     /**
+     * Returns the global configuration of this Java agent.
+     *
+     * @return The global configuration of this Java agent.
+     */
+    Config getConfigs();
+
+    /**
      * Returns a configuration property from the agent's all configuration.
      *
      * @return The configuration of this Java agent.

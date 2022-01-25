@@ -17,12 +17,14 @@
 
 package com.megaease.easeagent.report;
 
-import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.api.config.Config;
 
 import java.util.Map;
 
+import static com.megaease.easeagent.config.ConfigUtils.bindProp;
+import static com.megaease.easeagent.config.ConfigUtils.isChanged;
+import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
 
 public interface OutputProperties {
@@ -46,9 +48,9 @@ public interface OutputProperties {
 
     String getEndpointAlgorithm();
 
-    void updateConfig(Map<String, String> changed);
+    boolean updateConfig(Map<String, String> changed);
 
-    static OutputProperties newDefault(Configs configs) {
+    static OutputProperties newDefault(Config configs) {
         return new Default(configs);
     }
 
@@ -65,33 +67,54 @@ public interface OutputProperties {
         private volatile String certificate = "";
 
 
-        public Default(Configs configs) {
-            ConfigUtils.bindProp(OUTPUT_SERVERS, configs, Config::getString, v -> this.servers = v);
-            ConfigUtils.bindProp(OUTPUT_TIMEOUT, configs, Config::getString, v -> this.timeout = v);
-            ConfigUtils.bindProp(OUTPUT_ENABLED, configs, Config::getBoolean, v -> this.enabled = v);
-            ConfigUtils.bindProp(OUTPUT_SECURITY_PROTOCOL, configs, Config::getString, v -> this.protocol = v);
-            ConfigUtils.bindProp(OUTPUT_SSL_KEYSTORE_TYPE, configs, Config::getString, v -> this.sslKeyStoreType = v);
-            ConfigUtils.bindProp(OUTPUT_KEY, configs, Config::getString, v -> this.sslKey = v);
-            ConfigUtils.bindProp(OUTPUT_CERT, configs, Config::getString, v -> this.certificate = v);
-            ConfigUtils.bindProp(OUTPUT_TRUST_CERT, configs, Config::getString, v -> this.trustCertificate = v);
-            ConfigUtils.bindProp(OUTPUT_TRUST_CERT_TYPE, configs, Config::getString, v -> this.trustCertificateType = v);
-            ConfigUtils.bindProp(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM, configs, Config::getString, v -> this.endpointAlgorithm = v);
+        public Default(Config configs) {
+            extractProp(configs);
         }
 
         @Override
-        public void updateConfig(Map<String, String> changed) {
+        public boolean updateConfig(Map<String, String> changed) {
             Configs configs = new Configs(changed);
+            int changeItems = 0;
+            changeItems += isChanged(OUTPUT_SERVERS, changed, this.servers);
+            changeItems += isChanged(OUTPUT_TIMEOUT, changed, this.timeout);
+            changeItems += isChanged(OUTPUT_ENABLED, changed, String.valueOf(this.enabled));
+            changeItems += isChanged(OUTPUT_SECURITY_PROTOCOL, changed, this.protocol);
+            changeItems += isChanged(OUTPUT_SSL_KEYSTORE_TYPE, changed, this.sslKeyStoreType);
+            changeItems += isChanged(OUTPUT_KEY, changed, this.sslKey);
+            changeItems += isChanged(OUTPUT_CERT, changed, this.certificate);
+            changeItems += isChanged(OUTPUT_TRUST_CERT, changed, this.trustCertificate);
+            changeItems += isChanged(OUTPUT_TRUST_CERT_TYPE, changed, this.trustCertificateType);
+            changeItems += isChanged(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM, changed, this.endpointAlgorithm);
+            if (changeItems == 0) {
+                return false;
+            }
+            extractProp(configs);
+            return true;
+        }
 
-            ConfigUtils.bindProp(OUTPUT_SERVERS, configs, Config::getString, v -> { if (v != null) this.servers = v; });
-            ConfigUtils.bindProp(OUTPUT_TIMEOUT, configs, Config::getString, v -> { if (v != null) this.timeout = v; });
-            ConfigUtils.bindProp(OUTPUT_ENABLED, configs, Config::getBoolean, v -> { if (v != null) this.enabled = v; });
-            ConfigUtils.bindProp(OUTPUT_SECURITY_PROTOCOL, configs, Config::getString, v -> { if (v != null) this.protocol = v; });
-            ConfigUtils.bindProp(OUTPUT_SSL_KEYSTORE_TYPE, configs, Config::getString, v -> { if (v != null) this.sslKeyStoreType = v; });
-            ConfigUtils.bindProp(OUTPUT_KEY, configs, Config::getString, v -> { if (v != null) this.sslKey = v; });
-            ConfigUtils.bindProp(OUTPUT_CERT, configs, Config::getString, v -> { if (v != null) this.certificate = v; });
-            ConfigUtils.bindProp(OUTPUT_TRUST_CERT, configs, Config::getString, v -> { if (v != null) this.trustCertificate = v; });
-            ConfigUtils.bindProp(OUTPUT_TRUST_CERT_TYPE, configs, Config::getString, v -> { if (v != null) this.trustCertificateType = v; });
-            ConfigUtils.bindProp(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM, configs, Config::getString, v -> { if (v != null) this.endpointAlgorithm = v; });
+        private void extractProp(Config configs) {
+            bindProp(OUTPUT_SERVERS, configs, Config::getString, v -> this.servers = v);
+            bindProp(OUTPUT_TIMEOUT, configs, Config::getString, v -> this.timeout = v);
+            bindProp(OUTPUT_ENABLED, configs, Config::getBoolean, v -> this.enabled = v);
+            bindProp(OUTPUT_SECURITY_PROTOCOL, configs, Config::getString, v -> this.protocol = v);
+            bindProp(OUTPUT_SSL_KEYSTORE_TYPE, configs, Config::getString, v -> this.sslKeyStoreType = v);
+            bindProp(OUTPUT_KEY, configs, Config::getString, v -> this.sslKey = v);
+            bindProp(OUTPUT_CERT, configs, Config::getString, v -> this.certificate = v);
+            bindProp(OUTPUT_TRUST_CERT, configs, Config::getString, v -> this.trustCertificate = v);
+            bindProp(OUTPUT_TRUST_CERT_TYPE, configs, Config::getString, v -> this.trustCertificateType = v);
+            bindProp(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM, configs, Config::getString, v -> this.endpointAlgorithm = v);
+
+            // if there are v2 configuration items, override with v2 config.
+            bindProp(BOOTSTRAP_SERVERS, configs, Config::getString, v -> this.servers = v);
+            bindProp(OUTPUT_SERVERS_TIMEOUT, configs, Config::getString, v -> this.timeout = v);
+            bindProp(OUTPUT_SERVERS_ENABLE, configs, Config::getBoolean, v -> this.enabled = v);
+            bindProp(OUTPUT_SECURITY_PROTOCOL_V2, configs, Config::getString, v -> this.protocol = v);
+            bindProp(OUTPUT_SSL_KEYSTORE_TYPE_V2, configs, Config::getString, v -> this.sslKeyStoreType = v);
+            bindProp(OUTPUT_KEY_V2, configs, Config::getString, v -> this.sslKey = v);
+            bindProp(OUTPUT_CERT_V2, configs, Config::getString, v -> this.certificate = v);
+            bindProp(OUTPUT_TRUST_CERT_V2, configs, Config::getString, v -> this.trustCertificate = v);
+            bindProp(OUTPUT_TRUST_CERT_TYPE_V2, configs, Config::getString, v -> this.trustCertificateType = v);
+            bindProp(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM_V2, configs, Config::getString, v -> this.endpointAlgorithm = v);
         }
 
         @Override

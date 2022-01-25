@@ -17,10 +17,18 @@
 
 package com.megaease.easeagent.plugin.bridge;
 
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 
+import java.util.*;
+
 public class NoOpConfigFactory implements IConfigFactory {
+    @Override
+    public Config getConfigs() {
+        return NoOpConfig.INSTANCE;
+    }
 
     @Override
     public String getConfig(String property) {
@@ -30,5 +38,70 @@ public class NoOpConfigFactory implements IConfigFactory {
     @Override
     public IPluginConfig getConfig(String domain, String namespace, String id) {
         return new NoOpIPluginConfig(domain, namespace, id);
+    }
+
+    static class NoOpConfig implements Config {
+        static final NoOpConfig INSTANCE = new NoOpConfig();
+        private final HashMap<String, String> source = new HashMap<>();
+
+        @Override
+        public boolean hasPath(String path) {
+            return false;
+        }
+
+        @Override
+        public String getString(String name) {
+            return null;
+        }
+
+        @Override
+        public Integer getInt(String name) {
+            return null;
+        }
+
+        @Override
+        public Boolean getBoolean(String name) {
+            return false;
+        }
+
+        @Override
+        public Double getDouble(String name) {
+            return null;
+        }
+
+        @Override
+        public Long getLong(String name) {
+            return null;
+        }
+
+        @Override
+        public List<String> getStringList(String name) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Runnable addChangeListener(ConfigChangeListener listener) {
+            return null;
+        }
+
+        @Override
+        public Set<String> keySet() {
+            return this.source.keySet();
+        }
+
+        @Override
+        public Map<String, String> getConfigs() {
+            return source;
+        }
+
+        @Override
+        public void updateConfigs(Map<String, String> changes) {
+            // ignored
+        }
+
+        @Override
+        public void updateConfigsNotNotify(Map<String, String> changes) {
+            // ignored
+        }
     }
 }

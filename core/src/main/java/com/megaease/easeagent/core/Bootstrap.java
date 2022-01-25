@@ -17,10 +17,7 @@
 
 package com.megaease.easeagent.core;
 
-import com.megaease.easeagent.config.ConfigAware;
-import com.megaease.easeagent.config.ConfigFactory;
-import com.megaease.easeagent.config.ConfigManagerMXBean;
-import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.context.ContextManager;
 import com.megaease.easeagent.core.config.*;
 import com.megaease.easeagent.core.plugin.BaseLoader;
@@ -90,7 +87,8 @@ public class Bootstrap {
         }
 
         // initiate configuration
-        final Configs conf = loadConfigs(args);
+        final Configs conf = ConfigFactory.loadConfigs(args, Bootstrap.class.getClassLoader());
+        wrapConfig(conf);
 
         // init Context/API
         contextManager = ContextManager.build(conf);
@@ -231,8 +229,10 @@ public class Bootstrap {
 
     private static Configs loadConfigs(String pathname) {
         Configs configs = ConfigFactory.loadFromClasspath(Bootstrap.class.getClassLoader());
+        // report config convert
         if (StringUtils.isNotEmpty(pathname)) {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
+            // report config convert
             configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
 
@@ -240,14 +240,14 @@ public class Bootstrap {
             final String display = configs.toPrettyDisplay();
             LOGGER.debug("Loaded conf:\n{}", display);
         }
-
-        WrappedConfigManager wrappedConfigManager = new WrappedConfigManager(Bootstrap.class.getClassLoader(), configs);
-        registerMBeans(wrappedConfigManager);
-        GlobalAgentHolder.setWrappedConfigManager(wrappedConfigManager);
-
         return configs;
     }
 
+    private static void wrapConfig(Configs configs) {
+        WrappedConfigManager wrappedConfigManager = new WrappedConfigManager(Bootstrap.class.getClassLoader(), configs);
+        registerMBeans(wrappedConfigManager);
+        GlobalAgentHolder.setWrappedConfigManager(wrappedConfigManager);
+    }
 
     private static final AgentBuilder.Listener LISTENER = new AgentBuilder.Listener() {
         @Override
