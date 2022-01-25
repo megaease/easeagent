@@ -65,11 +65,12 @@ public class ReportMock {
 
         @Override
         public void report(Span span) {
+            agentReport.report(span);
             if (!SpanUtils.isValidSpan(span)) {
-                LOGGER.error("span<traceId({}), id({}), name({}), kind({})> not start(), please call span.start() before span.finish().", span.traceId(), span.id(), span.name(), span.kind());
+                LOGGER.warn("span<traceId({}), id({}), name({}), kind({})> not start(), skip it.", span.traceId(), span.id(), span.name(), span.kind());
+                return;
             }
             LAST_SPAN.set(span);
-            agentReport.report(span);
             try {
                 SpanReportMock spanReportMock = ReportMock.spanReportMock;
                 if (spanReportMock != null) {
