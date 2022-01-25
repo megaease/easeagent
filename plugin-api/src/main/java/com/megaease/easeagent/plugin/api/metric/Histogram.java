@@ -51,4 +51,12 @@ public interface Histogram extends Metric {
      * @return a snapshot of the values
      */
     Snapshot getSnapshot();
+
+    /**
+     * Returns the underlying Histogram object or {@code null} if there is none. Here is a Histogram
+     * objects: {@code com.codahale.metrics.Histogram}
+     *
+     * @return
+     */
+    Object unwrap();
 }

@@ -67,6 +67,7 @@ public final class NoOpMetrics {
         public T getValue() {
             return null;
         }
+
     }
 
     public static final class NoopSnapshot implements Snapshot {
@@ -136,11 +137,21 @@ public final class NoOpMetrics {
         public void dump(OutputStream output) {
             // NOP
         }
+
+        @Override
+        public Object unwrap() {
+            return null;
+        }
     }
 
     public static final class NoopTimer implements Timer {
         private static final NoopTimer INSTANCE = new NoopTimer();
         private static final Timer.Context CONTEXT = new NoopTimer.Context();
+
+        @Override
+        public Object unwrap() {
+            return null;
+        }
 
         private static class Context implements Timer.Context {
 
@@ -292,6 +303,11 @@ public final class NoOpMetrics {
         public Snapshot getSnapshot() {
             return NoopSnapshot.INSTANCE;
         }
+
+        @Override
+        public Object unwrap() {
+            return null;
+        }
     }
 
     public static final class NoopCounter implements Counter {
@@ -335,6 +351,11 @@ public final class NoOpMetrics {
         @Override
         public long getCount() {
             return 0L;
+        }
+
+        @Override
+        public Object unwrap() {
+            return null;
         }
     }
 
@@ -396,6 +417,11 @@ public final class NoOpMetrics {
         public double getOneMinuteRate() {
             return 0D;
         }
+
+        @Override
+        public Object unwrap() {
+            return null;
+        }
     }
 
     public static final class NoopMetricRegistry implements MetricRegistry {
@@ -422,7 +448,7 @@ public final class NoOpMetrics {
         }
 
         @Override
-        public Gauge gauge(String name, Supplier<Gauge> supplier) {
+        public Gauge gauge(String name, MetricSupplier<Gauge> supplier) {
             return NoopGauge.INSTANCE;
         }
 

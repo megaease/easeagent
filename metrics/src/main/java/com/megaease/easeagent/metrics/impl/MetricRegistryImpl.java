@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
 
 public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.metric.MetricRegistry {
     private final ConcurrentMap<String, Gauge> gauges;
@@ -83,7 +82,7 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
 
     @Override
     @SuppressWarnings("rawtypes")
-    public Gauge gauge(String name, Supplier<Gauge> supplier) {
+    public Gauge gauge(String name, MetricSupplier<Gauge> supplier) {
         Gauge gauge = gauges.get(name);
         if (gauge != null) {
             return gauge;
@@ -105,15 +104,15 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
     }
 
     public static class GaugeSupplier implements MetricRegistry.MetricSupplier<com.codahale.metrics.Gauge> {
-        private final Supplier<Gauge> supplier;
+        private final MetricSupplier<Gauge> supplier;
 
-        GaugeSupplier(@Nonnull Supplier<Gauge> supplier) {
+        GaugeSupplier(@Nonnull MetricSupplier<Gauge> supplier) {
             this.supplier = supplier;
         }
 
         @Override
         public com.codahale.metrics.Gauge newMetric() {
-            Gauge newGauge = supplier.get();
+            Gauge newGauge = supplier.newMetric();
             return new GaugeImpl(newGauge);
         }
     }

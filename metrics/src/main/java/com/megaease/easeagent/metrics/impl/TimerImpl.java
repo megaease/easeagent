@@ -98,6 +98,11 @@ public class TimerImpl implements com.megaease.easeagent.plugin.api.metric.Timer
         return SnapshotImpl.build(timer.getSnapshot());
     }
 
+    @Override
+    public Object unwrap() {
+        return timer;
+    }
+
 
     public static class ContextImpl implements Context {
         private final Timer.Context context;

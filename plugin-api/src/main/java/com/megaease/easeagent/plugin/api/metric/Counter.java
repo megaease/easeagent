@@ -51,5 +51,13 @@ public interface Counter extends Metric {
      * @return the counter's current value
      */
     long getCount();
+
+    /**
+     * Returns the underlying Counter object or {@code null} if there is none. Here is a Counter
+     * objects: {@code com.codahale.metrics.Counter}
+     *
+     * @return
+     */
+    Object unwrap();
 }
 

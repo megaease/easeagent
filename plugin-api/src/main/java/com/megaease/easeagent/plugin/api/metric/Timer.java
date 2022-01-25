@@ -150,4 +150,12 @@ public interface Timer extends Metric {
      * @return a snapshot of the values
      */
     Snapshot getSnapshot();
+
+    /**
+     * Returns the underlying Timer object or {@code null} if there is none. Here is a Timer
+     * objects: {@code com.codahale.metrics.Timer}
+     *
+     * @return
+     */
+    Object unwrap();
 }

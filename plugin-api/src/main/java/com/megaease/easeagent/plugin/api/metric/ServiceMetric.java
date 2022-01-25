@@ -43,7 +43,7 @@ public abstract class ServiceMetric {
         return metricRegistry.counter(nameFactory.counterName(key, subType));
     }
 
-    public Gauge gauge(String key, MetricSubType subType, Supplier<Gauge> supplier) {
+    public Gauge gauge(String key, MetricSubType subType, MetricSupplier<Gauge> supplier) {
         return metricRegistry.gauge(nameFactory.gaugeName(key, subType), supplier);
     }
 
