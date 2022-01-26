@@ -87,7 +87,7 @@ public class Bootstrap {
         }
 
         // initiate configuration
-        final Configs conf = ConfigFactory.loadConfigs(args, Bootstrap.class.getClassLoader());
+        final GlobalConfigs conf = ConfigFactory.loadConfigs(args, Bootstrap.class.getClassLoader());
         wrapConfig(conf);
 
         // init Context/API
@@ -243,7 +243,7 @@ public class Bootstrap {
         return configs;
     }
 
-    private static void wrapConfig(Configs configs) {
+    private static void wrapConfig(GlobalConfigs configs) {
         WrappedConfigManager wrappedConfigManager = new WrappedConfigManager(Bootstrap.class.getClassLoader(), configs);
         registerMBeans(wrappedConfigManager);
         GlobalAgentHolder.setWrappedConfigManager(wrappedConfigManager);

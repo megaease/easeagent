@@ -18,6 +18,7 @@
 package com.megaease.easeagent.core;
 
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.GlobalConfigs;
 import com.megaease.easeagent.config.PluginConfigManager;
 import com.megaease.easeagent.core.config.PluginPropertiesHttpHandler;
 import com.megaease.easeagent.core.config.PluginPropertyHttpHandler;
@@ -88,7 +89,7 @@ public class HttpServerTest {
         source.put("plugin.observability.kafka.metric.topic", "platform-meter");
         source.put("plugin.observability.kafka.metric.appendType", "kafka");
 
-        Configs configs = new Configs(source);
+        GlobalConfigs configs = new GlobalConfigs(source);
         IConfigFactory iConfigFactory = PluginConfigManager.builder(configs).build();
         AtomicInteger count = new AtomicInteger(0);
 

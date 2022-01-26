@@ -26,7 +26,7 @@ import java.util.*;
 
 public class NoOpConfigFactory implements IConfigFactory {
     @Override
-    public Config getConfigs() {
+    public Config getConfig() {
         return NoOpConfig.INSTANCE;
     }
 

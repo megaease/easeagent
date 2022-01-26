@@ -40,40 +40,35 @@ public class ConfigFactory {
 
     private ConfigFactory() {}
 
-    public static Configs loadFromClasspath(ClassLoader classLoader) {
+    public static GlobalConfigs loadFromClasspath(ClassLoader classLoader) {
         try {
             InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE);
             if (inputStream != null) {
                 final HashMap<String, String> propsMap = extractPropsMap(inputStream);
-                return new Configs(propsMap);
+                return new GlobalConfigs(propsMap);
             }
         } catch (IOException e) {
             LOGGER.warn("Load config file:{} by classloader:{} failure: {}", CONFIG_FILE, classLoader.toString(), e);
         }
-        return new Configs(Collections.emptyMap());
+        return new GlobalConfigs(Collections.emptyMap());
     }
 
     public static Configs loadFromFile(File file) {
         try {
             try (FileInputStream in = new FileInputStream(file)) {
                 HashMap<String, String> map = extractPropsMap(in);
-                return new Configs(map);
+                return new GlobalConfigs(map);
             }
         } catch (IOException e) {
             LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
         }
-        return new Configs(Collections.emptyMap());
-
+        return new GlobalConfigs(Collections.emptyMap());
     }
 
-    public static Configs loadConfigs(String pathname, ClassLoader loader) {
-        Configs configs = ConfigFactory.loadFromClasspath(loader);
-        // report config convert
-        ReporterConfigAdapter.convertReportConfig(configs);
+    public static GlobalConfigs loadConfigs(String pathname, ClassLoader loader) {
+        GlobalConfigs configs = ConfigFactory.loadFromClasspath(loader);
         if (StringUtils.isNotEmpty(pathname)) {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
-            // report config convert
-            ReporterConfigAdapter.convertReportConfig(configsFromOuterFile);
             configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
 

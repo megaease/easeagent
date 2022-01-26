@@ -23,7 +23,7 @@ public interface IConfigFactory {
      *
      * @return The global configuration of this Java agent.
      */
-    Config getConfigs();
+    Config getConfig();
 
     /**
      * Returns a configuration property from the agent's all configuration.

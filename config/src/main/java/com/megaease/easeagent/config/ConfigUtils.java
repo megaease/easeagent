@@ -161,15 +161,19 @@ public class ConfigUtils {
     public static Map<String, String> extractAndConvertPrefix(Map<String, String> cfg, String fromPrefix, String toPrefix) {
         Map<String, String> convert = new HashMap<>();
 
+        Set<String> keys = new HashSet<>();
         cfg.forEach((key, value) -> {
             if (key.startsWith(fromPrefix)) {
                 key = toPrefix + key.substring(fromPrefix.length());
                 convert.put(key, value);
+                keys.add(key);
             }
         });
+        keys.forEach(k -> cfg.remove(k));
 
         // override, new configuration KV override previous KV
         convert.putAll(extractByPrefix(cfg, toPrefix));
+        cfg.putAll(convert);
 
         return convert;
     }

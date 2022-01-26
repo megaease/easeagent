@@ -69,7 +69,7 @@ public final class EaseAgent {
     }
 
     public static Config getConfig() {
-        return configFactory.getConfigs();
+        return configFactory.getConfig();
     }
 
     /**

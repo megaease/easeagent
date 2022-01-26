@@ -18,6 +18,7 @@
 package com.megaease.easeagent.config.report;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.utils.NoNull;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,47 +33,58 @@ import static com.megaease.easeagent.config.ConfigUtils.*;
 public class ReporterConfigAdapter {
     private ReporterConfigAdapter() {}
 
-    public static void convertReportConfig(Config config) {
-        Map<String, String> cfg = extractReporterConfig(config);
-        config.updateConfigsNotNotify(cfg);
+    public static void convertConfig(Map<String, String> config) {
+        Map<String, String> cfg = extractAndConvertReporterConfig(config);
+        config.putAll(cfg);
     }
 
-    public static Map<String, String> extractReporterConfig(Config config) {
+    public static Map<String, String> extractReporterConfig(Config configs) {
+        Map<String, String> cfg = extractAndConvertReporterConfig(configs.getConfigs());
+
+        // default config
+        cfg.put(TRACE_ENCODER, NoNull.of(cfg.get(TRACE_ENCODER), SPAN_JSON_ENCODER_NAME));
+        cfg.put(METRIC_ENCODER, NoNull.of(cfg.get(METRIC_ENCODER), METRIC_JSON_ENCODER_NAME));
+        cfg.put(TRACE_SENDER_NAME, NoNull.of(cfg.get(TRACE_SENDER_NAME), CONSOLE_SENDER_NAME));
+        cfg.put(METRIC_SENDER_NAME, NoNull.of(cfg.get(METRIC_SENDER_NAME), CONSOLE_SENDER_NAME));
+
+        return cfg;
+    }
+
+    public static Map<String, String> extractAndConvertReporterConfig(Map<String, String> config) {
         // outputServer config
         Map<String, String> extract = extractAndConvertPrefix(config, OUTPUT_SERVER_V1, OUTPUT_SERVER_V2);
         Map<String, String> cfg = new HashMap<>(extract);
-
-        // encoder config
-        final String[] encoder = {TRACE_ENCODER, METRIC_ENCODER};
-        bindProp(TRACE_ENCODER, config, Config::getString, v -> encoder[0] = v, SPAN_JSON_ENCODER_NAME);
-        bindProp(METRIC_ENCODER, config, Config::getString, v -> encoder[1] = v, METRIC_JSON_ENCODER_NAME);
-        cfg.put(TRACE_ENCODER, encoder[0]);
-        cfg.put(METRIC_ENCODER, encoder[1]);
 
         // async config
         extract = extractAndConvertPrefix(config, TRACE_OUTPUT_V1, TRACE_ASYNC);
 
         // trace output to v2 config
-        String target = config.getString(TRACE_OUTPUT_TARGET_V1);
-        if (StringUtils.isEmpty(target)) {
-            cfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
+        String target = remove(join(TRACE_ASYNC, "target"), extract, config);
+        if (!StringUtils.isEmpty(cfg.get(TRACE_SENDER_NAME))) {
+            log.info("Reporter V2 config trace sender as: {}", cfg.get(TRACE_SENDER_NAME));
+        } else if (StringUtils.isEmpty(target)) {
+            log.info("Trace sender name is not found.");
         } else if ("system".equals(target)) {
             // check output servers
             if (StringUtils.hasText(cfg.get(BOOTSTRAP_SERVERS))) {
                 cfg.put(TRACE_SENDER_NAME, KAFKA_SENDER_NAME);
-                cfg.put(join(TRACE_SENDER, TOPIC_KEY), extract.remove(join(TRACE_ASYNC, TOPIC_KEY)));
+                cfg.put(TRACE_SENDER_TOPIC_V2, remove(join(TRACE_ASYNC, TOPIC_KEY), extract, config));
             } else {
                 cfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
             }
         } else if ("zipkin".equals(target)) {
             cfg.put(TRACE_SENDER_NAME, ZIPKIN_SENDER_NAME);
-            cfg.put(join(TRACE_SENDER, "zipkinUrl"), extract.remove(join(TRACE_ASYNC, "target.zipkinUrl")));
+            String url = remove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
+            cfg.put(join(TRACE_SENDER, "zipkinUrl"), url);
+
+            // wait for migrate
+            cfg.put(TRACE_OUTPUT_TARGET_V1, target);
+            cfg.put(TRACE_OUTPUT_TARGET_ZIPKIN_URL, url);
         } else {
             cfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
-            log.error("Unsupported output configuration item:{}={}", TRACE_OUTPUT_TARGET_V1, target);
+            log.info("Unsupported output configuration item:{}={}", TRACE_OUTPUT_TARGET_V1, target);
         }
-        extract.remove(join(TRACE_ASYNC, "target"));
-        extract.remove(join(TRACE_ASYNC, "target.zipkinUrl"));
+        remove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
         cfg.putAll(extract);
 
         // v1 metric config
@@ -85,15 +97,30 @@ public class ReporterConfigAdapter {
         return cfg;
     }
 
-    private static void extractGlobalMetricCfg(Config config, Map<String, String> cfg) {
-        Map<String, String> extract = extractAndConvertPrefix(config, GLOBAL_METRIC, METRIC_ASYNC);
-        extract.remove(join(METRIC_ASYNC, "enabled"));
-        String appendType = extract.remove(join(METRIC_ASYNC, "appendType"));
+    private static void extractGlobalMetricCfg(Map<String, String> config, Map<String, String> cfg) {
+        Map<String, String> globalMetric = extractByPrefix(config, GLOBAL_METRIC);
+        Map<String, String> extract = extractAndConvertPrefix(globalMetric, GLOBAL_METRIC, METRIC_ASYNC);
+
+        remove(join(METRIC_ASYNC, ENABLED_KEY), extract, config);
+
+        String appendType = remove(join(METRIC_ASYNC, "appendType"), extract, config);
         if ("kafka".equals(appendType)) {
             appendType = METRIC_KAFKA_SENDER_NAME;
         }
-        cfg.put(METRIC_SENDER_NAME, appendType);
-        cfg.put(METRIC_SENDER_TOPIC, extract.remove(join(METRIC_ASYNC, "topic")));
+
+        if (!StringUtils.isEmpty(appendType)) {
+            cfg.put(METRIC_SENDER_NAME, NoNull.of(appendType, CONSOLE_SENDER_NAME));
+        }
+        String topic = remove(join(METRIC_ASYNC, TOPIC_KEY), extract, config);
+        if (!StringUtils.isEmpty(topic)) {
+            cfg.put(METRIC_SENDER_TOPIC, topic);
+        }
         cfg.putAll(extract);
+    }
+
+    private static String remove(String key, Map<String, String> extract, Map<String, String> config) {
+        String v = extract.remove(key);
+        config.remove(key);
+        return v;
     }
 }

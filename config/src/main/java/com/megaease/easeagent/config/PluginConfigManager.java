@@ -47,7 +47,7 @@ public class PluginConfigManager implements IConfigFactory {
     }
 
     @Override
-    public Config getConfigs() {
+    public Config getConfig() {
         return this.configs;
     }
 
