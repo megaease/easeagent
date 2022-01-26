@@ -58,8 +58,6 @@ public class PluginMetricsConfigTest {
         pluginMetricsConfig.setIntervalChangeCallback(() -> {
             doit.set(true);
         });
-        System.out.println(this.pluginMetricsConfig);
-        System.out.println(pluginMetricsConfig);
         ConfigMock.getCONFIGS().updateConfigs(Collections.singletonMap(TestConst.INTERVAL_CONFIG, "40"));
         try {
             Thread.sleep(100);
