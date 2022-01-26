@@ -67,7 +67,7 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
         if (changes.isEmpty()) {
             return;
         }
-        Config global = EaseAgent.getConfigs();
+        Config global = EaseAgent.getConfig();
         Map<String, String> reportCfg = ReporterConfigAdapter.extractReporterConfig(global);
         this.reportConfig.updateConfigs(reportCfg);
     }

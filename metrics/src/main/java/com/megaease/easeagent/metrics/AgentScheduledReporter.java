@@ -62,7 +62,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
         // encoder
         this.dataConsumer = dataConsumer;
         this.enabled = enabled;
-        Map<String, String> reporterCfg = ReporterConfigAdapter.extractReporterConfig(EaseAgent.getConfigs());
+        Map<String, String> reporterCfg = ReporterConfigAdapter.extractReporterConfig(EaseAgent.getConfig());
         String name = NoNull.of(reporterCfg.get(METRIC_ENCODER), MetricJsonEncoder.ENCODER_NAME);
         this.encoder = ReporterRegistry.getEncoder(name);
         this.encoder.init(new Configs(reporterCfg));

@@ -65,11 +65,11 @@ public class RefreshableReporter<S> implements Reporter<S> {
                 } catch (Exception ignored) {
                     // ignored
                 }
-                sender = ReporterRegistry.getSender(TRACE_SENDER_NAME, EaseAgent.getConfigs());
+                sender = ReporterRegistry.getSender(TRACE_SENDER_NAME, EaseAgent.getConfig());
                 asyncReporter.setSender(sender);
             }
         }
-        traceProperties = TraceAsyncProps.newDefault(EaseAgent.getConfigs());
+        traceProperties = TraceAsyncProps.newDefault(EaseAgent.getConfig());
         asyncReporter.closeFlushThread();
         asyncReporter.setPending(traceProperties.getQueuedMaxSpans(), traceProperties.getQueuedMaxSize());
         asyncReporter.setMessageTimeoutNanos(messageTimeout(traceProperties.getMessageTimeout()));

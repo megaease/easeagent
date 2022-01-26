@@ -68,7 +68,7 @@ public final class EaseAgent {
         return metricRegistrySupplier.reporter(config);
     }
 
-    public static Config getConfigs() {
+    public static Config getConfig() {
         return configFactory.getConfigs();
     }
 

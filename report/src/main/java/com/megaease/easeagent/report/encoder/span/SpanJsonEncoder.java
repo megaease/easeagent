@@ -35,7 +35,7 @@ public class SpanJsonEncoder extends JsonEncoder<Span> {
 
     @Override
     public void init(Config config) {
-        GlobalExtrasSupplier extrasSupplier = GlobalExtractor.getInstance(EaseAgent.getConfigs());
+        GlobalExtrasSupplier extrasSupplier = GlobalExtractor.getInstance(EaseAgent.getConfig());
         writer = new AgentV2SpanWriter(extrasSupplier);
     }
 
