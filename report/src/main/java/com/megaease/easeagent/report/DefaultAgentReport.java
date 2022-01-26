@@ -18,22 +18,37 @@
 package com.megaease.easeagent.report;
 
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.config.report.ReporterConfigAdapter;
 import com.megaease.easeagent.report.metric.MetricReporter;
 import com.megaease.easeagent.report.metric.MetricReporterImpl;
+import com.megaease.easeagent.report.plugin.ReporterLoader;
 import com.megaease.easeagent.report.trace.TraceReport;
 import zipkin2.Span;
 
-public class DefaultAgentReport implements AgentReport {
-    private TraceReport traceReport;
-    private MetricReporter metricReporter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-    public DefaultAgentReport(TraceReport traceReport, MetricReporter metricReporter) {
-        this.traceReport = traceReport;
-        this.metricReporter = metricReporter;
+import static com.megaease.easeagent.config.report.ReportConfigConst.*;
+
+public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
+    private final TraceReport traceReport;
+    private final MetricReporter metricReporter;
+    private final Config reportConfig;
+
+    DefaultAgentReport(Config config) {
+        this.reportConfig = new Configs(ReporterConfigAdapter.extractReporterConfig(config));
+        this.traceReport = new TraceReport(this.reportConfig);
+        this.metricReporter = MetricReporterImpl.create(this.reportConfig);
     }
 
     public static AgentReport create(Configs config) {
-        return new DefaultAgentReport(new TraceReport(config), MetricReporterImpl.create(config));
+        ReporterLoader.load();
+        return new DefaultAgentReport(config);
     }
 
     @Override
@@ -44,5 +59,30 @@ public class DefaultAgentReport implements AgentReport {
     @Override
     public MetricReporter metricReporter() {
         return this.metricReporter;
+    }
+
+    @Override
+    public void onChange(List<ChangeItem> list) {
+        Map<String, String> changes = filterChanges(list);
+        if (changes.isEmpty()) {
+            return;
+        }
+        Config global = EaseAgent.getConfig();
+        Map<String, String> reportCfg = ReporterConfigAdapter.extractReporterConfig(global);
+        this.reportConfig.updateConfigs(reportCfg);
+    }
+
+    private Map<String, String> filterChanges(List<ChangeItem> list) {
+        Map<String, String> cfg = new HashMap<>();
+        list.stream()
+            .filter(one -> {
+                String name = one.getFullName();
+                return name.startsWith(OUTPUT_SERVER_V1)
+                    || name.startsWith(TRACE_OUTPUT_V1)
+                    || name.startsWith(GLOBAL_METRIC)
+                    || name.startsWith(REPORT);
+            }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
+
+        return cfg;
     }
 }

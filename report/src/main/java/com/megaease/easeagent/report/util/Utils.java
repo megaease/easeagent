@@ -17,68 +17,40 @@
 
 package com.megaease.easeagent.report.util;
 
-import com.megaease.easeagent.config.Configs;
-import com.megaease.easeagent.plugin.api.config.ChangeItem;
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.metric.MetricProps;
-import com.megaease.easeagent.report.trace.TraceProps;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 public class Utils {
     private Utils() {}
-    public static boolean isOutputPropertiesChange(List<ChangeItem> list) {
-        List<String> relatedNames = Arrays.asList(ConfigConst.Observability.OUTPUT_ENABLED
-            , ConfigConst.Observability.OUTPUT_SERVERS
-            , ConfigConst.Observability.OUTPUT_TIMEOUT
-            , ConfigConst.Observability.OUTPUT_CERT
-            , ConfigConst.Observability.OUTPUT_KEY
-            , ConfigConst.Observability.OUTPUT_SECURITY_PROTOCOL
-            , ConfigConst.Observability.OUTPUT_SSL_KEYSTORE_TYPE
-            , ConfigConst.Observability.OUTPUT_TRUST_CERT
-            , ConfigConst.Observability.OUTPUT_TRUST_CERT_TYPE
-            , ConfigConst.Observability.OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM
+
+    public static boolean isOutputPropertiesChange(Map<String, String> changes) {
+        List<String> relatedNames = Arrays.asList(OUTPUT_SERVERS_ENABLE,
+            BOOTSTRAP_SERVERS,
+            OUTPUT_SERVERS_TIMEOUT,
+            OUTPUT_SECURITY_PROTOCOL_V2,
+            OUTPUT_SSL_KEYSTORE_TYPE_V2,
+            OUTPUT_KEY_V2,
+            OUTPUT_CERT_V2,
+            OUTPUT_TRUST_CERT_V2,
+            OUTPUT_TRUST_CERT_TYPE_V2,
+            OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM_V2
         );
-        return list.stream().map(ChangeItem::getFullName)
-            .anyMatch(relatedNames::contains);
+        return changes.keySet().stream().anyMatch(relatedNames::contains);
     }
 
-    public static void updateOutputPropertiesChange(OutputProperties properties, List<ChangeItem> list) {
-        List<String> relatedNames = Arrays.asList(ConfigConst.Observability.OUTPUT_ENABLED
-            , ConfigConst.Observability.OUTPUT_SERVERS
-            , ConfigConst.Observability.OUTPUT_TIMEOUT
-            , ConfigConst.Observability.OUTPUT_CERT
-            , ConfigConst.Observability.OUTPUT_KEY
-            , ConfigConst.Observability.OUTPUT_SECURITY_PROTOCOL
-            , ConfigConst.Observability.OUTPUT_SSL_KEYSTORE_TYPE
-            , ConfigConst.Observability.OUTPUT_TRUST_CERT
-            , ConfigConst.Observability.OUTPUT_TRUST_CERT_TYPE
-            , ConfigConst.Observability.OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM
-        );
-        HashMap<String, String> changes = new HashMap<>();
-        list.stream().filter(item -> relatedNames.contains(item.getFullName()))
-            .forEach(item -> changes.put(item.getFullName(), item.getNewValue()));
-        properties.updateConfig(changes);
-    }
-
-    public static boolean isTraceOutputPropertiesChange(List<ChangeItem> list) {
-        return list.stream().map(ChangeItem::getFullName)
-            .anyMatch(name -> name.startsWith(ConfigConst.Observability.TRACE_OUTPUT + ConfigConst.DELIMITER));
-    }
-
-    public static OutputProperties extractOutputProperties(Configs configs) {
+    public static OutputProperties extractOutputProperties(Config configs) {
         return OutputProperties.newDefault(configs);
     }
 
-    public static TraceProps extractTraceProps(Configs configs) {
-        return TraceProps.newDefault(configs);
-    }
-
-    public static MetricProps extractMetricProps(IPluginConfig config) {
-        return MetricProps.newDefault(config);
+    public static MetricProps extractMetricProps(IPluginConfig config, Config reportConfig) {
+        return MetricProps.newDefault(config, reportConfig);
     }
 }

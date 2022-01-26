@@ -123,6 +123,11 @@ public class ReportMock {
                 LOGGER.error("mock metric report fail: {}", e);
             }
         }
+
+        @Override
+        public void report(byte[] msg) {
+            this.report(new String(msg));
+        }
     }
 
     public static void runForSpan(Runnable runnable, Consumer<Span> callback) {

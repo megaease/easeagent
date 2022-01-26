@@ -27,14 +27,14 @@ import java.util.function.Consumer;
 public class AutoRefreshReporter implements Runnable {
     private final MetricsConfig config;
     private final Converter converter;
-    private final Consumer<String> consumer;
+    private final Consumer<byte[]> consumer;
     private final MetricRegistry metricRegistry;
     private AgentScheduledReporter reporter;
 
     public AutoRefreshReporter(MetricRegistry metricRegistry,
                                MetricsConfig config,
                                Converter converter,
-                               Consumer<String> consumer) {
+                               Consumer<byte[]> consumer) {
         this.metricRegistry = metricRegistry;
         this.config = config;
         this.consumer = consumer;
@@ -44,6 +44,7 @@ public class AutoRefreshReporter implements Runnable {
 
     @Override
     public synchronized void run() {
+        // config changed
         if (reporter != null) {
             reporter.close();
             reporter = null;

@@ -21,7 +21,7 @@ import brave.Tracing;
 import brave.propagation.ThreadLocalCurrentTraceContext;
 import brave.sampler.CountingSampler;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
-import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.plugin.bean.BeanProvider;
 import com.megaease.easeagent.plugin.bean.AgentInitializingBean;

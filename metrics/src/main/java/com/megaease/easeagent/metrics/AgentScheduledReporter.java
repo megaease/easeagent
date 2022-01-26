@@ -19,7 +19,14 @@ package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.report.Encoder;
+import com.megaease.easeagent.plugin.utils.NoNull;
+import com.megaease.easeagent.config.report.ReporterConfigAdapter;
+import com.megaease.easeagent.report.encoder.metric.MetricJsonEncoder;
+import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import lombok.SneakyThrows;
 
 import java.util.*;
@@ -28,15 +35,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static com.megaease.easeagent.config.report.ReportConfigConst.*;
+
+@SuppressWarnings("unused")
 public class AgentScheduledReporter extends ScheduledReporter {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Converter converter;
-    private final Consumer<String> dataConsumer;
+    private final Consumer<byte[]> dataConsumer;
     private final Supplier<Boolean> enabled;
+    private final Encoder<Map<String, Object>> encoder;
 
     @SuppressWarnings("all")
     private AgentScheduledReporter(MetricRegistry registry,
-                                   Consumer<String> dataConsumer,
+                                   Consumer<byte[]> dataConsumer,
                                    TimeUnit rateUnit,
                                    TimeUnit durationUnit,
                                    MetricFilter filter,
@@ -48,8 +59,13 @@ public class AgentScheduledReporter extends ScheduledReporter {
         super(registry, "logger-reporter", filter, rateUnit, durationUnit, executor, shutdownExecutorOnStop,
             disabledMetricAttributes);
         this.converter = converter;
+        // encoder
         this.dataConsumer = dataConsumer;
         this.enabled = enabled;
+        Map<String, String> reporterCfg = ReporterConfigAdapter.extractReporterConfig(EaseAgent.getConfig());
+        String name = NoNull.of(reporterCfg.get(METRIC_ENCODER), MetricJsonEncoder.ENCODER_NAME);
+        this.encoder = ReporterRegistry.getEncoder(name);
+        this.encoder.init(new Configs(reporterCfg));
     }
 
     /**
@@ -65,16 +81,20 @@ public class AgentScheduledReporter extends ScheduledReporter {
 
     @SneakyThrows
     @Override
-    @SuppressWarnings("rawtypes")
-    public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters, SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters, SortedMap<String, com.codahale.metrics.Timer> timers) {
+    public void report(SortedMap<String, Gauge> gauges,
+                       SortedMap<String, Counter> counters,
+                       SortedMap<String, Histogram> histograms,
+                       SortedMap<String, Meter> meters,
+                       SortedMap<String, com.codahale.metrics.Timer> timers) {
         Boolean e = this.enabled.get();
-        if (e == null || !e.booleanValue()) {
+        if (e == null || !e) {
             return;
         }
 
         List<Map<String, Object>> outputs = converter.convertMap(gauges, counters, histograms, meters, timers);
+
         for (Map<String, Object> output : outputs) {
-            this.dataConsumer.accept(objectMapper.writeValueAsString(output));
+            this.dataConsumer.accept(this.encoder.encode(output));
         }
     }
 
@@ -113,7 +133,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
         private Set<MetricAttribute> disabledMetricAttributes;
         private Converter converter;
         private Supplier<Boolean> enabled;
-        private Consumer<String> dataConsumer;
+        private Consumer<byte[]> dataConsumer;
 
         private Builder(MetricRegistry registry) {
             this.registry = registry;
@@ -161,7 +181,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
          *
          * @return {@code this}
          */
-        public Builder outputTo(Consumer<String> dataConsumer) {
+        public Builder outputTo(Consumer<byte[]> dataConsumer) {
             this.dataConsumer = dataConsumer;
             return this;
         }
@@ -222,9 +242,10 @@ public class AgentScheduledReporter extends ScheduledReporter {
          * @return a {@link Slf4jReporter}
          */
         public AgentScheduledReporter build() {
-
-            return new AgentScheduledReporter(registry, dataConsumer, rateUnit,
-                durationUnit, filter, executor, shutdownExecutorOnStop,
+            return new AgentScheduledReporter(registry,
+                dataConsumer,
+                rateUnit, durationUnit,
+                filter, executor, shutdownExecutorOnStop,
                 disabledMetricAttributes, enabled, converter);
         }
 

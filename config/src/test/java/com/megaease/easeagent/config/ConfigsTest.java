@@ -19,6 +19,7 @@ package com.megaease.easeagent.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class ConfigsTest {
     @Test
     public void test_check_change_count1() throws Exception {
         final ObjectMapper json = new ObjectMapper();
-        Configs configs = new Configs(Collections.singletonMap("hello", "world"));
+        GlobalConfigs configs = new GlobalConfigs(Collections.singletonMap("hello", "world"));
         List<ChangeItem> rst = addListener(configs);
 
         configs.updateService("{}", null);

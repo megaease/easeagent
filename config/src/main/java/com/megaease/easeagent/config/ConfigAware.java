@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.plugin.api.config.Config;
+
 public interface ConfigAware {
     void setConfig(Config config);
 }

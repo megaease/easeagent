@@ -24,6 +24,11 @@ public class NoOpReporter implements Reporter {
 
     @Override
     public void report(String msg) {
+        // ignored
+    }
 
+    @Override
+    public void report(byte[] msg) {
+        // ignored
     }
 }

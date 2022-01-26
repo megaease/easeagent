@@ -22,6 +22,7 @@ import com.j256.simplejmx.client.JmxClient;
 import com.j256.simplejmx.common.IoUtils;
 import com.j256.simplejmx.server.JmxServer;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.GlobalConfigs;
 import lombok.SneakyThrows;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -64,7 +65,7 @@ public class BootstrapTest {
         String text2 = UUID.randomUUID().toString();
         source.put("key", text);
         source.put("key2", text2);
-        Configs configs = new Configs(source);
+        GlobalConfigs configs = new GlobalConfigs(source);
 
         Bootstrap.registerMBeans(configs);
         server = new JmxServer(serverAddress, DEFAULT_PORT);

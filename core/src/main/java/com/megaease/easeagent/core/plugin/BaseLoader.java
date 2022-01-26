@@ -17,14 +17,18 @@
 
 package com.megaease.easeagent.core.plugin;
 
-import com.megaease.easeagent.log4j2.Logger;
-import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.Ordered;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceLoader;
 
 public class BaseLoader {
-    private static final Logger logger = LoggerFactory.getLogger(BaseLoader.class);
+    private static final Logger logger = EaseAgent.loggerFactory.getLogger(BaseLoader.class);
 
     public static <T> List<T> load(Class<T> serviceClass) {
         List<T> result = new ArrayList<>();

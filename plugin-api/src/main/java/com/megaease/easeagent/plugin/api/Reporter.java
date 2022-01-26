@@ -27,4 +27,6 @@ public interface Reporter {
      * @param msg metric string like json
      */
     void report(String msg);
+
+    void report(byte[] msg);
 }

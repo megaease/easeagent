@@ -18,7 +18,7 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.metrics.config.MetricsConfig;
 import com.megaease.easeagent.metrics.config.PluginMetricsConfig;

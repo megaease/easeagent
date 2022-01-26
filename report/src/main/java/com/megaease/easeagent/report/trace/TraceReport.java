@@ -18,69 +18,37 @@
 package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
-import com.megaease.easeagent.config.Config;
-import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.report.OutputProperties;
-import com.megaease.easeagent.report.util.Utils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.common.config.SslConfigs;
-import org.apache.kafka.common.security.auth.SecurityProtocol;
+import com.megaease.easeagent.config.report.ReportConfigConst;
+import com.megaease.easeagent.report.async.SDKAsyncReporter;
+import com.megaease.easeagent.report.async.TraceAsyncProps;
+import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;
+import com.megaease.easeagent.report.plugin.ReporterRegistry;
+import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import zipkin2.Span;
-import zipkin2.codec.Encoding;
-import zipkin2.internal.GlobalExtrasSupplier;
-import zipkin2.reporter.AsyncReporter;
-import zipkin2.reporter.SDKAsyncReporter;
-import zipkin2.reporter.Sender;
-import zipkin2.reporter.kafka11.KafkaSender;
-import zipkin2.reporter.kafka11.SDKKafkaSender;
-import zipkin2.reporter.kafka11.SimpleSender;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
+import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 public class TraceReport {
-
     private final RefreshableReporter<Span> spanRefreshableReporter;
 
-    public TraceReport(Configs configs) {
+    public TraceReport(Config configs) {
         spanRefreshableReporter = initSpanRefreshableReporter(configs);
         configs.addChangeListener(new InternalListener());
     }
 
-    private RefreshableReporter<Span> initSpanRefreshableReporter(Configs configs) {
-        OutputProperties outputProperties = Utils.extractOutputProperties(configs);
-        Map<String, String> sslConfig = new HashMap<>();
-        if (SecurityProtocol.SSL.name.equals(outputProperties.getSecurityProtocol())) {
-            sslConfig.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, outputProperties.getSecurityProtocol());
-            sslConfig.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, outputProperties.getSSLKeyStoreType());
-            sslConfig.put(SslConfigs.SSL_KEYSTORE_KEY_CONFIG, outputProperties.getKeyStoreKey());
-            sslConfig.put(SslConfigs.SSL_KEYSTORE_CERTIFICATE_CHAIN_CONFIG, outputProperties.getKeyStoreCertChain());
-            sslConfig.put(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, outputProperties.getTrustCertificate());
-            sslConfig.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, outputProperties.getTrustCertificateType());
-            sslConfig.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, outputProperties.getEndpointAlgorithm());
-        }
+    private RefreshableReporter<Span> initSpanRefreshableReporter(Config configs) {
+        SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.TRACE_SENDER, configs);
 
-        Sender sender;
-        TraceProps traceProperties = Utils.extractTraceProps(configs);
-        if (traceProperties.getOutput().isEnabled() && traceProperties.isEnabled()
-            && StringUtils.isNotEmpty(outputProperties.getServers())) {
-            sender = SDKKafkaSender.wrap(traceProperties,
-                KafkaSender.newBuilder()
-                    .bootstrapServers(outputProperties.getServers())
-                    .topic(traceProperties.getOutput().getTopic())
-                    .overrides(sslConfig)
-                    .encoding(Encoding.JSON)
-                    .messageMaxBytes(traceProperties.getOutput().getMessageMaxBytes())
-                    .build());
-        } else {
-            sender = new SimpleSender();
-        }
+        TraceAsyncProps traceProperties = TraceAsyncProps.newDefault(configs);
 
         GlobalExtrasSupplier extrasSupplier = new GlobalExtrasSupplier() {
             final AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(configs, ConfigConst.SERVICE_NAME, Config::getString);
@@ -96,15 +64,13 @@ public class TraceReport {
                 return systemName.getValue();
             }
         };
+
         SDKAsyncReporter<Span> reporter = SDKAsyncReporter.
-            builderSDKAsyncReporter(AsyncReporter.builder(sender)
-                    .queuedMaxSpans(traceProperties.getOutput().getQueuedMaxSpans())
-                    .messageTimeout(traceProperties.getOutput().getMessageTimeout(), TimeUnit.MILLISECONDS)
-                    .queuedMaxBytes(traceProperties.getOutput().getQueuedMaxSize()),
-                traceProperties,
-                extrasSupplier);
+            builderSDKAsyncReporter(sender, traceProperties, extrasSupplier);
+
         reporter.startFlushThread();
-        return new RefreshableReporter<>(reporter, traceProperties, outputProperties);
+
+        return new RefreshableReporter<>(reporter, traceProperties);
     }
 
     public void report(Span span) {
@@ -114,9 +80,26 @@ public class TraceReport {
     private class InternalListener implements ConfigChangeListener {
         @Override
         public void onChange(List<ChangeItem> list) {
-            if (Utils.isOutputPropertiesChange(list) || Utils.isTraceOutputPropertiesChange(list)) {
-                spanRefreshableReporter.refresh();
+            Map<String, String> cfg = filterChanges(list);
+
+            if (cfg.isEmpty()) {
+                return;
             }
+            cfg = ConfigUtils.extractAndConvertPrefix(cfg, TRACE_OUTPUT_V1, TRACE_ASYNC);
+            spanRefreshableReporter.refresh(cfg);
+        }
+
+        private Map<String, String> filterChanges(List<ChangeItem> list) {
+            Map<String, String> cfg = new HashMap<>();
+            list.stream()
+                .filter(one -> {
+                    String name = one.getFullName();
+                    return name.startsWith(TRACE_OUTPUT_V1)
+                        || name.startsWith(TRACE_SENDER_NAME)
+                        || name.startsWith(TRACE_ASYNC);
+                }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
+
+            return cfg;
         }
     }
 }

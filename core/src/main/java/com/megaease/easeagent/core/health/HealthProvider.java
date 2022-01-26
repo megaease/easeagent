@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.core.health;
 
-import com.megaease.easeagent.config.Config;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;

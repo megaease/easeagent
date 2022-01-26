@@ -18,9 +18,11 @@
 package com.megaease.easeagent.config;
 
 
+import com.megaease.easeagent.config.report.ReporterConfigAdapter;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,30 +38,45 @@ public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
     private static final String CONFIG_FILE = "agent.properties";
 
-    public static Configs loadFromClasspath(ClassLoader classLoader) {
+    private ConfigFactory() {}
+
+    public static GlobalConfigs loadFromClasspath(ClassLoader classLoader) {
         try {
             InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE);
             if (inputStream != null) {
                 final HashMap<String, String> propsMap = extractPropsMap(inputStream);
-                return new Configs(propsMap);
+                return new GlobalConfigs(propsMap);
             }
         } catch (IOException e) {
             LOGGER.warn("Load config file:{} by classloader:{} failure: {}", CONFIG_FILE, classLoader.toString(), e);
         }
-        return new Configs(Collections.emptyMap());
+        return new GlobalConfigs(Collections.emptyMap());
     }
 
     public static Configs loadFromFile(File file) {
         try {
             try (FileInputStream in = new FileInputStream(file)) {
                 HashMap<String, String> map = extractPropsMap(in);
-                return new Configs(map);
+                return new GlobalConfigs(map);
             }
         } catch (IOException e) {
             LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
         }
-        return new Configs(Collections.emptyMap());
+        return new GlobalConfigs(Collections.emptyMap());
+    }
 
+    public static GlobalConfigs loadConfigs(String pathname, ClassLoader loader) {
+        GlobalConfigs configs = ConfigFactory.loadFromClasspath(loader);
+        if (StringUtils.isNotEmpty(pathname)) {
+            Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
+            configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            final String display = configs.toPrettyDisplay();
+            LOGGER.debug("Loaded conf:\n{}", display);
+        }
+        return configs;
     }
 
     private static HashMap<String, String> extractPropsMap(InputStream in) throws IOException {

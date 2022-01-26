@@ -99,6 +99,11 @@
             <artifactId>brave</artifactId>
             <!--            <optional>true</optional>-->
         </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

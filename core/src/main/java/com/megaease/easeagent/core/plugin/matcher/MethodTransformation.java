@@ -66,8 +66,12 @@ public class MethodTransformation {
             InterceptorPluginDecorator interceptor;
             if (i instanceof InterceptorPluginDecorator) {
                 interceptor = (InterceptorPluginDecorator) i;
-                interceptor.init(interceptor.getConfig(), type, method, methodDescription);
-                interceptor.init(interceptor.getConfig(), uniqueIndex);
+                try {
+                    interceptor.init(interceptor.getConfig(), type, method, methodDescription);
+                    interceptor.init(interceptor.getConfig(), uniqueIndex);
+                } catch (Exception e) {
+                    log.error("Interceptor init fail: {}::{}, {}", type, method, interceptor.getClass().getSimpleName());
+                }
             }
         });
 
