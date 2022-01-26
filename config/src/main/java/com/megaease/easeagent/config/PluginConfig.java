@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.config;
 
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.Const;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
@@ -27,6 +29,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PluginConfig implements IPluginConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginConfig.class);
     private final Set<PluginConfigChangeListener> listeners;
     private final String domain;
     private final String namespace;
@@ -187,7 +190,13 @@ public class PluginConfig implements IPluginConfig {
         synchronized (listeners) {
             oldListeners = new HashSet<>(listeners);
         }
-        oldListeners.forEach(action);
+        for (PluginConfigChangeListener oldListener : oldListeners) {
+            try {
+                action.accept(oldListener);
+            } catch (Exception e) {
+                LOGGER.error("PluginConfigChangeListener<{}> change plugin config fail : {}", oldListener.getClass(), e.getMessage());
+            }
+        }
     }
 
     public class Global extends PluginConfig implements IPluginConfig {

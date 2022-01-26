@@ -19,6 +19,7 @@ package com.megaease.easeagent.mock.config;
 
 import com.megaease.easeagent.config.ConfigFactory;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.PluginConfigManager;
 
 import java.io.File;
 import java.net.URL;
@@ -28,6 +29,7 @@ import java.util.Map;
 public class ConfigMock {
     private static final String MOCK_CONFIG_FILE = "mock_agent.properties";
     private static final Configs CONFIGS;
+    private static final PluginConfigManager PLUGIN_CONFIG_MANAGER;
 
     static {
         Map<String, String> initConfigs = new HashMap<>();
@@ -46,9 +48,14 @@ public class ConfigMock {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(url.getFile()));
             CONFIGS.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
+        PLUGIN_CONFIG_MANAGER = PluginConfigManager.builder(CONFIGS).build();
     }
 
     public static Configs getCONFIGS() {
         return CONFIGS;
+    }
+
+    public static PluginConfigManager getPluginConfigManager() {
+        return PLUGIN_CONFIG_MANAGER;
     }
 }

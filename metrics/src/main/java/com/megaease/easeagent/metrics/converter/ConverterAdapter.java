@@ -19,10 +19,7 @@ package com.megaease.easeagent.metrics.converter;
 
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
-import com.megaease.easeagent.metrics.impl.CounterImpl;
-import com.megaease.easeagent.metrics.impl.MeterImpl;
-import com.megaease.easeagent.metrics.impl.SnapshotImpl;
-import com.megaease.easeagent.metrics.impl.TimerImpl;
+import com.megaease.easeagent.metrics.impl.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.tools.metrics.GaugeMetricModel;
 
@@ -145,6 +142,8 @@ public class ConverterAdapter extends AbstractConverter {
             if (value instanceof GaugeMetricModel) {
                 GaugeMetricModel model = (GaugeMetricModel) value;
                 output.putAll(model.toHashMap());
+            } else if (value != null) {
+                output.put(v.name(), value.toString());
             }
         });
     }
@@ -161,8 +160,8 @@ public class ConverterAdapter extends AbstractConverter {
     @Override
     @SuppressWarnings("all")
     protected void writeHistograms(String key, SortedMap<String, Histogram> histograms, Map<String, Object> output) {
-        // TODO
         //write histograms, Temporarily unsupported
+        //Please use timer to calculate the time of P95, P99, etc
     }
 
     @Override
