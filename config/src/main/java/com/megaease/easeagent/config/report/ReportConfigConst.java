@@ -32,6 +32,9 @@ public class ReportConfigConst {
     static final String DELIMITER = ".";
     public static final String TOPIC_KEY = "topic";
     public static final String ENABLED_KEY = "enabled";
+    public static final String SENDER_KEY = "sender";
+    public static final String ENCODER_KEY = "encoder";
+    public static final String NAME_KEY = "name";
 
     /**
      * Reporter v2 configuration
@@ -42,6 +45,7 @@ public class ReportConfigConst {
     public static final String OUTPUT_SERVER_V2 = join(REPORT, "outputServer");
     public static final String TRACE_V2 = join(REPORT, "tracing");
     public static final String METRIC_V2 = join(REPORT, "metric");
+    public static final String GENERAL = join(REPORT, "general");
     // ------ lv3 ------
     public static final String BOOTSTRAP_SERVERS = join(OUTPUT_SERVER_V2, "bootstrapServer");
     public static final String OUTPUT_SERVERS_ENABLE = join(OUTPUT_SERVER_V2, ENABLED_KEY);
@@ -50,16 +54,22 @@ public class ReportConfigConst {
     public static final String OUTPUT_SECURITY_PROTOCOL_V2 = join(OUTPUT_SERVER_V2, "security.protocol");
     public static final String OUTPUT_SERVERS_SSL = join(OUTPUT_SERVER_V2, "ssl");
 
-    public static final String TRACE_SENDER = join(TRACE_V2, "sender");
-    public static final String TRACE_ENCODER = join(TRACE_V2, "encoder");
+    public static final String GENERAL_SENDER = join(GENERAL, SENDER_KEY);
+    public static final String GENERAL_ENCODER = join(GENERAL, ENCODER_KEY);
+
+    public static final String TRACE_SENDER = join(TRACE_V2, SENDER_KEY);
+    public static final String TRACE_ENCODER = join(TRACE_V2, ENCODER_KEY);
     public static final String TRACE_ASYNC = join(TRACE_V2, "async");
 
-    public static final String METRIC_SENDER = join(METRIC_V2, "sender");
-    public static final String METRIC_ENCODER = join(METRIC_V2, "encoder");
+    public static final String METRIC_SENDER = join(METRIC_V2, SENDER_KEY);
+    public static final String METRIC_ENCODER = join(METRIC_V2, ENCODER_KEY);
     public static final String METRIC_ASYNC = join(METRIC_V2, "async");
 
     // -------- lv4  --------
-    public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, "name");
+    public static final String GENERAL_SENDER_NAME = join(GENERAL_SENDER, NAME_KEY);
+    public static final String GENERAL_SENDER_ENABLED = join(GENERAL_SENDER, ENABLED_KEY);
+
+    public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, NAME_KEY);
     public static final String TRACE_SENDER_ENABLED_V2 = join(TRACE_SENDER, ENABLED_KEY);
     public static final String TRACE_SENDER_TOPIC_V2 = join(TRACE_SENDER, TOPIC_KEY);
 
@@ -69,7 +79,7 @@ public class ReportConfigConst {
     public static final String TRACE_ASYNC_QUEUED_MAX_SPANS_V2 = join(TRACE_ASYNC, "queuedMaxSpans");
     public static final String TRACE_ASYNC_QUEUED_MAX_SIZE_V2 = join(TRACE_ASYNC, "queuedMaxSize");
 
-    public static final String METRIC_SENDER_NAME = join(METRIC_SENDER, "name");
+    public static final String METRIC_SENDER_NAME = join(METRIC_SENDER, NAME_KEY);
     public static final String METRIC_SENDER_ENABLED = join(METRIC_SENDER, ENABLED_KEY);
     public static final String METRIC_SENDER_TOPIC = join(METRIC_SENDER, TOPIC_KEY);
     public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, "appenderName");
@@ -107,6 +117,8 @@ public class ReportConfigConst {
 
     public static final String GLOBAL_METRIC = "plugin.observability.global.metric";
     public static final String GLOBAL_METRIC_ENABLED = join(GLOBAL_METRIC, ENABLED_KEY);
+    public static final String GLOBAL_METRIC_TOPIC = join(GLOBAL_METRIC, TOPIC_KEY);
+    public static final String GLOBAL_METRIC_APPENDER = join(GLOBAL_METRIC, "appendType");
 
     public static String join(String... texts) {
         return String.join(DELIMITER, texts);

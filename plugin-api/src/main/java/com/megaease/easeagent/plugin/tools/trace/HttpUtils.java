@@ -22,6 +22,8 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import static com.megaease.easeagent.plugin.tools.trace.TraceConst.HTTP_HEADER_X_FORWARDED_FOR;
 
 public class HttpUtils {
+    private HttpUtils() {}
+
     public static void handleReceive(Span span, HttpRequest httpRequest) {
         span.name(httpRequest.name());
         span.tag(TraceConst.HTTP_TAG_ROUTE, httpRequest.route());

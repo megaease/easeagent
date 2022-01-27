@@ -65,6 +65,11 @@ public class NoOpConfigFactory implements IConfigFactory {
         }
 
         @Override
+        public Boolean getBooleanNullForUnset(String name) {
+            return null;
+        }
+
+        @Override
         public Double getDouble(String name) {
             return null;
         }

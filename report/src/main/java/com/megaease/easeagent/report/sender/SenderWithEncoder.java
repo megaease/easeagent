@@ -17,7 +17,7 @@
  */
 package com.megaease.easeagent.report.sender;
 
-import com.megaease.easeagent.plugin.report.Callback;
+import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.report.Sender;
 
@@ -32,5 +32,5 @@ public interface SenderWithEncoder extends Sender {
      * @param encodedData list of encoded data, such as encoded spans.
      * @throws IllegalStateException if {@link #close() close} was called.
      */
-    Callback<Void> send(List<byte[]> encodedData);
+    Call<Void> send(List<byte[]> encodedData);
 }

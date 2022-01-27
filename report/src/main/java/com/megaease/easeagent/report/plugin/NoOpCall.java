@@ -17,11 +17,26 @@
  */
 package com.megaease.easeagent.report.plugin;
 
-import com.megaease.easeagent.plugin.report.Callback;
+import com.megaease.easeagent.plugin.report.Call;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class NoOpCallback<V> implements Callback<V> {
+public class NoOpCall<V> implements Call<V> {
+    private static final Map<Class<?>, NoOpCall> INSTANCE_MAP = new ConcurrentHashMap<>();
+
+    @SuppressWarnings("unchecked")
+    public static <T> NoOpCall<T> getInstance(Class<?> clazz) {
+        NoOpCall<T> b = INSTANCE_MAP.get(clazz);
+        if (b != null) {
+            return (NoOpCall<T>)b;
+        }
+        b = new NoOpCall<>();
+        INSTANCE_MAP.put(clazz, b);
+        return b;
+    }
+
     @Override
     public V execute() throws IOException {
         return null;

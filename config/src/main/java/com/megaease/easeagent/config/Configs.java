@@ -35,7 +35,7 @@ public class Configs implements Config {
     protected Configs() {}
 
     public Configs(Map<String, String> source) {
-        this.source = new HashMap<>(source);
+        this.source = new TreeMap<>(source);
         notifier = new ConfigNotifier("");
     }
 
@@ -92,6 +92,14 @@ public class Configs implements Config {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public Boolean getBooleanNullForUnset(String name) {
+        String value = this.source.get(name);
+        if (value == null) {
+            return null;
+        }
+        return value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
     }
 
     public Boolean getBoolean(String name) {

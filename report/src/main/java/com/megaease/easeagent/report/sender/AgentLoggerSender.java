@@ -22,6 +22,7 @@ import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Callback;
 import com.megaease.easeagent.plugin.report.Sender;
 
@@ -48,8 +49,8 @@ public class AgentLoggerSender implements Sender {
     }
 
     @Override
-    public Callback<Void> send(byte[] encodedData) {
-        return new ConsoleCallback(encodedData);
+    public Call<Void> send(byte[] encodedData) {
+        return new ConsoleCall(encodedData);
     }
 
     @Override
@@ -67,10 +68,10 @@ public class AgentLoggerSender implements Sender {
         // ignored
     }
 
-    static class ConsoleCallback implements Callback<Void> {
+    static class ConsoleCall implements Call<Void> {
         private final byte[] msg;
 
-        ConsoleCallback(byte[] msg) {
+        ConsoleCall(byte[] msg) {
             this.msg = msg;
         }
 
@@ -81,9 +82,8 @@ public class AgentLoggerSender implements Sender {
         }
 
         @Override
-        public Void enqueue() {
+        public void enqueue(Callback<Void> cb) {
             LOGGER.debug("{}", new String(msg));
-            return null;
         }
     }
 }

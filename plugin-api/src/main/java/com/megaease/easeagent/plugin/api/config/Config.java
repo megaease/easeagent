@@ -31,6 +31,8 @@ public interface Config {
 
     Boolean getBoolean(String name);
 
+    Boolean getBooleanNullForUnset(String name);
+
     Double getDouble(String name);
 
     Long getLong(String name);

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2017, MegaEase
  * All rights reserved.
@@ -40,9 +39,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@AdviceTo(value = DoFilterAdvice.class, qualifier = "default", plugin = HttpServletPlugin.class)
+@AdviceTo(value = DoFilterAdvice.class, plugin = HttpServletPlugin.class)
 public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
     private static final String AFTER_MARK = DoFilterTraceInterceptor.class.getName() + "$AfterMark";
+    private static final String ERROR_KEY = "error";
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
@@ -73,11 +73,9 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
             } else if (methodInfo.getThrowable() != null) {
                 span.error(methodInfo.getThrowable());
                 span.finish();
-                return;
             } else {
                 httpServletRequest.getAsyncContext().addListener(new TracingAsyncListener(requestContext), httpServletRequest, httpServletResponse);
             }
-            return;
         } finally {
             requestContext.scope().close();
         }
@@ -128,7 +126,7 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
             if (caught != null) {
                 return caught;
             }
-            Object maybeError = httpServletRequest.getAttribute("error");
+            Object maybeError = httpServletRequest.getAttribute(ERROR_KEY);
             if (maybeError instanceof Throwable) {
                 return (Throwable) maybeError;
             } else {
@@ -163,19 +161,14 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
         }
 
         public void onTimeout(AsyncEvent e) {
-            ServletRequest request = e.getSuppliedRequest();
-            if (request.getAttribute("error") == null) {
-                request.setAttribute("error", e.getThrowable());
-            }
-
+            onError(e);
         }
 
         public void onError(AsyncEvent e) {
             ServletRequest request = e.getSuppliedRequest();
-            if (request.getAttribute("error") == null) {
-                request.setAttribute("error", e.getThrowable());
+            if (request.getAttribute(ERROR_KEY) == null) {
+                request.setAttribute(ERROR_KEY, e.getThrowable());
             }
-
         }
 
         public void onStartAsync(AsyncEvent e) {
@@ -183,7 +176,6 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
             if (eventAsyncContext != null) {
                 eventAsyncContext.addListener(this, e.getSuppliedRequest(), e.getSuppliedResponse());
             }
-
         }
 
         public String toString() {

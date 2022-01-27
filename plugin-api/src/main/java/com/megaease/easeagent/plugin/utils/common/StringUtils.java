@@ -26,6 +26,26 @@ public class StringUtils {
     }
 
     /**
+     * <p> If the first one is empty, return the alternative value</p>
+     * @param first     first
+     * @param alternate alternative value
+     * @return  String
+     */
+    public static String noEmptyOf(String first, String alternate) {
+        if (isEmpty(first)) {
+            return alternate;
+        }
+        return first;
+    }
+
+    public static String noEmptyOf(String first, String alternate, String defaultValue) {
+        if (isEmpty(first)) {
+            return noEmptyOf(alternate, defaultValue);
+        }
+        return first;
+    }
+
+    /**
      * <p>Checks if a CharSequence is empty ("") or null.</p>
      *
      * <pre>

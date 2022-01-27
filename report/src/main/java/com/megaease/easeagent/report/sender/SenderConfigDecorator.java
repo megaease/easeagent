@@ -21,7 +21,7 @@ import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
-import com.megaease.easeagent.plugin.report.Callback;
+import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
@@ -32,11 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.megaease.easeagent.config.ConfigUtils.extractAndConvertPrefix;
 import static com.megaease.easeagent.config.ConfigUtils.extractByPrefix;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 @Slf4j
 public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeListener {
+
     protected Sender sender;
     String prefix;
     Config config;
@@ -59,17 +61,17 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
     @Override
     public void init(Config config) {
         this.packer = ReporterRegistry.getEncoder(config.getString(this.encoderKey));
-        this.packer.init(config);
-        this.sender.init(config);
+        this.packer.init(this.config);
+        this.sender.init(this.config);
     }
 
     @Override
-    public Callback<Void> send(byte[] encodedData) {
+    public Call<Void> send(byte[] encodedData) {
         return this.sender.send(encodedData);
     }
 
     @Override
-    public Callback<Void> send(List<byte[]> encodedData) {
+    public Call<Void> send(List<byte[]> encodedData) {
         byte[] data = this.packer.encodeList(encodedData);
         return sender.send(data);
     }
@@ -81,7 +83,7 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
 
     @Override
     public void updateConfigs(Map<String, String> changes) {
-        String name = changes.get(join(prefix, "name"));
+        String name = changes.get(join(GENERAL_SENDER, "name"));
         if (name == null || name.equals(name())) {
             this.sender.updateConfigs(changes);
         } else {
@@ -127,18 +129,15 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
         }
     }
 
-    public static Map<String, String> extractSenderConfig(String cfgPrefix, Config config) {
-        // outputServer config
-        Map<String, String> extract = extractByPrefix(config, OUTPUT_SERVER_V2);
+    private static Map<String, String> extractSenderConfig(String cfgPrefix, Config config) {
+        Map<String, String> extract = extractByPrefix(config, cfgPrefix);
         Map<String, String> cfg = new HashMap<>(extract);
 
-        // encoder config
-        String encoderKey = getEncoderKey(cfgPrefix);
-        cfg.put(encoderKey, config.getString(encoderKey));
+        // convert to general cfg, then sender don't need to care about any special business.
+        cfg = extractAndConvertPrefix(cfg, cfgPrefix, GENERAL_SENDER);
 
-        // sender config
-        extract = extractByPrefix(config, cfgPrefix);
-        cfg.putAll(extract);
+        // outputServer config
+        cfg.putAll(extractByPrefix(config, OUTPUT_SERVER_V2));
 
         return cfg;
     }
@@ -153,7 +152,7 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
                     || name.startsWith(OUTPUT_SERVER_V2);
             }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
 
-        return cfg;
+        return extractAndConvertPrefix(cfg, prefix, GENERAL);
     }
 
     @Override

@@ -23,10 +23,7 @@ import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalConfigs.class);
@@ -37,9 +34,9 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
     public GlobalConfigs(Map<String, String> source) {
         super();
         // reporter adapter
-        Map<String, String> map = new HashMap<>(source);
+        Map<String, String> map = new TreeMap<>(source);
         ReporterConfigAdapter.convertConfig(map);
-        this.source = new HashMap<>(source);
+        this.source = new TreeMap<>(map);
         this.notifier = new ConfigNotifier("");
     }
 
