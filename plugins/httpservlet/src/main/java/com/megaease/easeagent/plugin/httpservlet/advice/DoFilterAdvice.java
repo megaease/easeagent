@@ -31,14 +31,6 @@ public class DoFilterAdvice implements Points {
     static final String SERVLET_REQUEST = "javax.servlet.ServletRequest";
     static final String SERVLET_RESPONSE = "javax.servlet.ServletResponse";
 
-    //        return def.type(
-    //                hasSuperType(namedOneOf(FILTER_NAME, HTTP_SERVLET_NAME)))
-    //                .transform(doFilterOrService(
-    //                        namedOneOf("doFilter", "service")
-    //                                .and(takesArgument(0, named(SERVLET_REQUEST)))
-    //                                .and(takesArgument(1, named(SERVLET_RESPONSE)))
-    //                        )
-    //                ).end();
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()

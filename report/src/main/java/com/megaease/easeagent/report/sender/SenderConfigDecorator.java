@@ -32,11 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.megaease.easeagent.config.ConfigUtils.extractAndConvertPrefix;
 import static com.megaease.easeagent.config.ConfigUtils.extractByPrefix;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 @Slf4j
 public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeListener {
+
     protected Sender sender;
     String prefix;
     Config config;
@@ -81,7 +83,7 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
 
     @Override
     public void updateConfigs(Map<String, String> changes) {
-        String name = changes.get(join(prefix, "name"));
+        String name = changes.get(join(GENERAL_SENDER, "name"));
         if (name == null || name.equals(name())) {
             this.sender.updateConfigs(changes);
         } else {
@@ -127,19 +129,15 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
         }
     }
 
-    public static Map<String, String> extractSenderConfig(String cfgPrefix, Config config) {
+    private static Map<String, String> extractSenderConfig(String cfgPrefix, Config config) {
         // outputServer config
         Map<String, String> extract = extractByPrefix(config, OUTPUT_SERVER_V2);
         Map<String, String> cfg = new HashMap<>(extract);
-
-        // encoder config
-        String encoderKey = getEncoderKey(cfgPrefix);
-        cfg.put(encoderKey, config.getString(encoderKey));
-
-        // sender config
         extract = extractByPrefix(config, cfgPrefix);
         cfg.putAll(extract);
 
+        // convert to general cfg, then sender don't need to care about any special business.
+        cfg = extractAndConvertPrefix(cfg, cfgPrefix, GENERAL);
         return cfg;
     }
 
@@ -153,7 +151,7 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
                     || name.startsWith(OUTPUT_SERVER_V2);
             }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
 
-        return cfg;
+        return extractAndConvertPrefix(cfg, prefix, GENERAL);
     }
 
     @Override

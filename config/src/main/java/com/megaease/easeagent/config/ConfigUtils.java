@@ -27,15 +27,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.*;
 
 public class ConfigUtils {
-    public static String extractServiceName(Configs configs) {
-        return configs.getString(ConfigConst.SERVICE_NAME);
-    }
+    private ConfigUtils() {}
 
     public static <R> void bindProp(String name, Config configs, BiFunction<Config, String, R> func, Consumer<R> consumer, R def) {
         Runnable process = () -> {
@@ -99,23 +96,15 @@ public class ConfigUtils {
     }
 
     public static boolean isGlobal(String namespace) {
-        return namespace != null && PLUGIN_GLOBAL.equals(namespace);
+        return PLUGIN_GLOBAL.equals(namespace);
     }
 
     public static boolean isPluginConfig(String key) {
-        boolean r = false;
-        if (key != null && key.startsWith(PLUGIN_PREFIX)) {
-            r = true;
-        }
-        return r;
+        return key != null && key.startsWith(PLUGIN_PREFIX);
     }
 
     public static boolean isPluginConfig(String key, String domain, String namespace, String id) {
-        boolean r = false;
-        if (key != null && key.startsWith(ConfigConst.join(PLUGIN, domain, namespace, id))) {
-            r = true;
-        }
-        return r;
+        return key != null && key.startsWith(ConfigConst.join(PLUGIN, domain, namespace, id));
     }
 
     public static PluginProperty pluginProperty(String path) {
@@ -148,16 +137,11 @@ public class ConfigUtils {
     /**
      * Convert config item with a fromPrefix to toPrefix for configuration Compatibility
      *
-     * @param config config
+     * @param cfg config source map
      * @param fromPrefix from
      * @param toPrefix to
      * @return Extracted and converted KV map
      */
-    public static Map<String, String> extractAndConvertPrefix(
-            Config config, String fromPrefix, String toPrefix) {
-        return extractAndConvertPrefix(config.getConfigs(), fromPrefix, toPrefix);
-    }
-
     public static Map<String, String> extractAndConvertPrefix(Map<String, String> cfg, String fromPrefix, String toPrefix) {
         Map<String, String> convert = new HashMap<>();
 
@@ -169,7 +153,7 @@ public class ConfigUtils {
                 keys.add(key);
             }
         });
-        keys.forEach(k -> cfg.remove(k));
+        keys.forEach(cfg::remove);
 
         // override, new configuration KV override previous KV
         convert.putAll(extractByPrefix(cfg, toPrefix));

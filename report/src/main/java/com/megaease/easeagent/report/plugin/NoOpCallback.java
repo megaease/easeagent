@@ -20,8 +20,21 @@ package com.megaease.easeagent.report.plugin;
 import com.megaease.easeagent.plugin.report.Callback;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NoOpCallback<V> implements Callback<V> {
+    private static final Map<Class<?>, NoOpCallback> INSTANCE_MAP = new ConcurrentHashMap<>();
+
+    @SuppressWarnings("unchecked")
+    public static <T> NoOpCallback<T> getInstance(Class<?> clazz) {
+        NoOpCallback<?> b = INSTANCE_MAP.get(clazz);
+        if (b != null) {
+            return (NoOpCallback<T>)b;
+        }
+        return null;
+    }
+
     @Override
     public V execute() throws IOException {
         return null;

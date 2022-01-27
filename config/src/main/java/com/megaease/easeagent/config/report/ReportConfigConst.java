@@ -32,6 +32,8 @@ public class ReportConfigConst {
     static final String DELIMITER = ".";
     public static final String TOPIC_KEY = "topic";
     public static final String ENABLED_KEY = "enabled";
+    public static final String SENDER_KEY = "sender";
+    public static final String ENCODER_KEY = "encoder";
 
     /**
      * Reporter v2 configuration
@@ -42,6 +44,7 @@ public class ReportConfigConst {
     public static final String OUTPUT_SERVER_V2 = join(REPORT, "outputServer");
     public static final String TRACE_V2 = join(REPORT, "tracing");
     public static final String METRIC_V2 = join(REPORT, "metric");
+    public static final String GENERAL = join(REPORT, "general");
     // ------ lv3 ------
     public static final String BOOTSTRAP_SERVERS = join(OUTPUT_SERVER_V2, "bootstrapServer");
     public static final String OUTPUT_SERVERS_ENABLE = join(OUTPUT_SERVER_V2, ENABLED_KEY);
@@ -50,12 +53,15 @@ public class ReportConfigConst {
     public static final String OUTPUT_SECURITY_PROTOCOL_V2 = join(OUTPUT_SERVER_V2, "security.protocol");
     public static final String OUTPUT_SERVERS_SSL = join(OUTPUT_SERVER_V2, "ssl");
 
-    public static final String TRACE_SENDER = join(TRACE_V2, "sender");
-    public static final String TRACE_ENCODER = join(TRACE_V2, "encoder");
+    public static final String GENERAL_SENDER = join(GENERAL, SENDER_KEY);
+    public static final String GENERAL_ENCODER = join(GENERAL, ENCODER_KEY);
+
+    public static final String TRACE_SENDER = join(TRACE_V2, SENDER_KEY);
+    public static final String TRACE_ENCODER = join(TRACE_V2, ENCODER_KEY);
     public static final String TRACE_ASYNC = join(TRACE_V2, "async");
 
-    public static final String METRIC_SENDER = join(METRIC_V2, "sender");
-    public static final String METRIC_ENCODER = join(METRIC_V2, "encoder");
+    public static final String METRIC_SENDER = join(METRIC_V2, SENDER_KEY);
+    public static final String METRIC_ENCODER = join(METRIC_V2, ENCODER_KEY);
     public static final String METRIC_ASYNC = join(METRIC_V2, "async");
 
     // -------- lv4  --------
