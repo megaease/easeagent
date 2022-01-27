@@ -58,6 +58,7 @@ public class HttpSender implements Sender {
     private static final String PASSWORD_KEY = join(GENERAL_SENDER, "password");
     private static final String GZIP_KEY = join(GENERAL_SENDER, "compress");
     private static final String MAX_REQUESTS_KEY = join(GENERAL_SENDER, "maxRequests");
+    private static final int MIN_TIMEOUT = 30_000;
 
     private Config config;
 
@@ -99,7 +100,10 @@ public class HttpSender implements Sender {
         this.gzip = NoNull.of(config.getBooleanNullForUnset(GZIP_KEY),
             NoNull.of(config.getBooleanNullForUnset(SERVER_GZIP_KEY), true));
 
-        this.timeout = NoNull.of(config.getInt(OUTPUT_SERVERS_TIMEOUT), 1000);
+        this.timeout = NoNull.of(config.getInt(OUTPUT_SERVERS_TIMEOUT), MIN_TIMEOUT);
+        if (this.timeout < MIN_TIMEOUT) {
+            this.timeout = MIN_TIMEOUT;
+        }
         this.enabled = NoNull.of(config.getBooleanNullForUnset(GENERAL_SENDER_ENABLED), true);
         this.maxRequests = NoNull.of(config.getInt(MAX_REQUESTS_KEY), 65);
 
