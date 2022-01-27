@@ -28,13 +28,13 @@ public class NoOpCall<V> implements Call<V> {
 
     @SuppressWarnings("unchecked")
     public static <T> NoOpCall<T> getInstance(Class<?> clazz) {
-        NoOpCall<?> b = INSTANCE_MAP.get(clazz);
+        NoOpCall<T> b = INSTANCE_MAP.get(clazz);
         if (b != null) {
             return (NoOpCall<T>)b;
         }
         b = new NoOpCall<>();
         INSTANCE_MAP.put(clazz, b);
-        return null;
+        return b;
     }
 
     @Override
