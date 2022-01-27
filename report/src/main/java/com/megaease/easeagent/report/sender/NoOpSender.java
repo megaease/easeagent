@@ -18,9 +18,9 @@
 package com.megaease.easeagent.report.sender;
 
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.report.Callback;
+import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Sender;
-import com.megaease.easeagent.report.plugin.NoOpCallback;
+import com.megaease.easeagent.report.plugin.NoOpCall;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,8 +39,8 @@ public class NoOpSender implements Sender {
     }
 
     @Override
-    public Callback<Void> send(byte[] encodedData) {
-        return new NoOpCallback<>();
+    public Call<Void> send(byte[] encodedData) {
+        return new NoOpCall<>();
     }
 
     @Override

@@ -34,6 +34,7 @@ public class ReportConfigConst {
     public static final String ENABLED_KEY = "enabled";
     public static final String SENDER_KEY = "sender";
     public static final String ENCODER_KEY = "encoder";
+    public static final String NAME_KEY = "name";
 
     /**
      * Reporter v2 configuration
@@ -65,7 +66,10 @@ public class ReportConfigConst {
     public static final String METRIC_ASYNC = join(METRIC_V2, "async");
 
     // -------- lv4  --------
-    public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, "name");
+    public static final String GENERAL_SENDER_NAME = join(GENERAL_SENDER, NAME_KEY);
+    public static final String GENERAL_SENDER_ENABLED = join(GENERAL_SENDER, ENABLED_KEY);
+
+    public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, NAME_KEY);
     public static final String TRACE_SENDER_ENABLED_V2 = join(TRACE_SENDER, ENABLED_KEY);
     public static final String TRACE_SENDER_TOPIC_V2 = join(TRACE_SENDER, TOPIC_KEY);
 
@@ -75,7 +79,7 @@ public class ReportConfigConst {
     public static final String TRACE_ASYNC_QUEUED_MAX_SPANS_V2 = join(TRACE_ASYNC, "queuedMaxSpans");
     public static final String TRACE_ASYNC_QUEUED_MAX_SIZE_V2 = join(TRACE_ASYNC, "queuedMaxSize");
 
-    public static final String METRIC_SENDER_NAME = join(METRIC_SENDER, "name");
+    public static final String METRIC_SENDER_NAME = join(METRIC_SENDER, NAME_KEY);
     public static final String METRIC_SENDER_ENABLED = join(METRIC_SENDER, ENABLED_KEY);
     public static final String METRIC_SENDER_TOPIC = join(METRIC_SENDER, TOPIC_KEY);
     public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, "appenderName");
@@ -113,6 +117,8 @@ public class ReportConfigConst {
 
     public static final String GLOBAL_METRIC = "plugin.observability.global.metric";
     public static final String GLOBAL_METRIC_ENABLED = join(GLOBAL_METRIC, ENABLED_KEY);
+    public static final String GLOBAL_METRIC_TOPIC = join(GLOBAL_METRIC, TOPIC_KEY);
+    public static final String GLOBAL_METRIC_APPENDER = join(GLOBAL_METRIC, "appendType");
 
     public static String join(String... texts) {
         return String.join(DELIMITER, texts);

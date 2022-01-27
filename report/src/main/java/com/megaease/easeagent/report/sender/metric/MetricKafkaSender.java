@@ -20,11 +20,11 @@ package com.megaease.easeagent.report.sender.metric;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.report.Callback;
+import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.metric.MetricProps;
-import com.megaease.easeagent.report.plugin.NoOpCallback;
+import com.megaease.easeagent.report.plugin.NoOpCall;
 import com.megaease.easeagent.report.sender.metric.log4j.AppenderManager;
 import com.megaease.easeagent.report.sender.metric.log4j.LoggerFactory;
 import com.megaease.easeagent.report.sender.metric.log4j.RefreshableAppender;
@@ -36,7 +36,7 @@ import java.util.Map;
 
 @AutoService(Sender.class)
 public class MetricKafkaSender implements Sender {
-    public static final String SENDER_NAME = ReportConfigConst.METRIC_SENDER_NAME;
+    public static final String SENDER_NAME = ReportConfigConst.METRIC_KAFKA_SENDER_NAME;
     private static AppenderManager appenderManager;
 
     private OutputProperties outputProperties;
@@ -56,11 +56,11 @@ public class MetricKafkaSender implements Sender {
     }
 
     @Override
-    public Callback<Void> send(byte[] encodedData) {
+    public Call<Void> send(byte[] encodedData) {
         lazyInitLogger();
         String msg = new String(encodedData);
         logger.info(msg);
-        return new NoOpCallback<>();
+        return new NoOpCall<>();
     }
 
     @Override

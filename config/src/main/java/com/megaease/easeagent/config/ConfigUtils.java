@@ -148,9 +148,9 @@ public class ConfigUtils {
         Set<String> keys = new HashSet<>();
         cfg.forEach((key, value) -> {
             if (key.startsWith(fromPrefix)) {
+                keys.add(key);
                 key = toPrefix + key.substring(fromPrefix.length());
                 convert.put(key, value);
-                keys.add(key);
             }
         });
         keys.forEach(cfg::remove);

@@ -124,6 +124,10 @@
                             <pattern>org.apache.kafka</pattern>
                             <shadedPattern>com.megaease.easeagent.org.apache.kafka</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>okhttp3</pattern>
+                            <shadedPattern>easeagent.okhttp3</shadedPattern>
+                        </relocation>
                     </relocations>
                 </configuration>
                 <executions>

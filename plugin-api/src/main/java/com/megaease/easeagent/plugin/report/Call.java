@@ -13,21 +13,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.megaease.easeagent.plugin.async;
+package com.megaease.easeagent.plugin.report;
 
-import javax.annotation.Nullable;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.IOException;
 
-public class AgentThreadFactory implements ThreadFactory {
-    protected static AtomicInteger createCount = new AtomicInteger(1);					// Used internally to compute Thread names that comply with the Java specification
+public interface Call<V> {
+    V execute() throws IOException;
 
-    @Override
-    public Thread newThread(@Nullable Runnable r) {
-        Thread thread = new Thread(r, "EaseAgent-" + createCount.getAndIncrement());
-        thread.setDaemon(true);
-        return thread;
+    default void enqueue(Callback<V> cb) {
+        return;
     }
 }

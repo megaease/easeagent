@@ -20,14 +20,14 @@ package com.megaease.easeagent.config.report;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.utils.NoNull;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
-
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
+import static com.megaease.easeagent.config.ConfigUtils.extractAndConvertPrefix;
+import static com.megaease.easeagent.config.ConfigUtils.extractByPrefix;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
-import static com.megaease.easeagent.config.ConfigUtils.*;
 
 @Slf4j
 public class ReporterConfigAdapter {
@@ -53,7 +53,7 @@ public class ReporterConfigAdapter {
     public static Map<String, String> extractAndConvertReporterConfig(Map<String, String> config) {
         // outputServer config
         Map<String, String> extract = extractAndConvertPrefix(config, OUTPUT_SERVER_V1, OUTPUT_SERVER_V2);
-        Map<String, String> cfg = new HashMap<>(extract);
+        Map<String, String> cfg = new TreeMap<>(extract);
 
         // async config
         extract = extractAndConvertPrefix(config, TRACE_OUTPUT_V1, TRACE_ASYNC);
@@ -87,35 +87,41 @@ public class ReporterConfigAdapter {
         remove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
         cfg.putAll(extract);
 
-        // v1 metric config
-        extractGlobalMetricCfg(config, cfg);
-
         // v2 configuration migrate and override
         extract = extractByPrefix(config, REPORT);
         cfg.putAll(extract);
 
+        // v1 metric config
+        extractGlobalMetricCfg(config, cfg);
+
         return cfg;
     }
 
+    /** metric global report configuration will override plugin global namespace configuration */
     private static void extractGlobalMetricCfg(Map<String, String> config, Map<String, String> cfg) {
         Map<String, String> globalMetric = extractByPrefix(config, GLOBAL_METRIC);
         Map<String, String> extract = extractAndConvertPrefix(globalMetric, GLOBAL_METRIC, METRIC_ASYNC);
-
-        remove(join(METRIC_ASYNC, ENABLED_KEY), extract, config);
+        extract.putAll(extractByPrefix(config, METRIC_SENDER));
 
         String appendType = remove(join(METRIC_ASYNC, "appendType"), extract, config);
         if ("kafka".equals(appendType)) {
             appendType = METRIC_KAFKA_SENDER_NAME;
         }
-
         if (!StringUtils.isEmpty(appendType)) {
-            cfg.put(METRIC_SENDER_NAME, NoNull.of(appendType, CONSOLE_SENDER_NAME));
+            // overridden by v2 configuration
+            cfg.put(METRIC_SENDER_NAME, NoNull.of(cfg.get(METRIC_SENDER_NAME), appendType));
+            globalMetric.put(join(METRIC_ASYNC, "appendType"), NoNull.of(cfg.get(METRIC_SENDER_NAME), appendType));
         }
+
         String topic = remove(join(METRIC_ASYNC, TOPIC_KEY), extract, config);
         if (!StringUtils.isEmpty(topic)) {
-            cfg.put(METRIC_SENDER_TOPIC, topic);
+            // overridden by v2 configuration
+            cfg.put(METRIC_SENDER_TOPIC, NoNull.of(cfg.get(METRIC_SENDER_TOPIC), topic));
+            globalMetric.put(join(METRIC_ASYNC, "topic"), NoNull.of(cfg.get(METRIC_SENDER_TOPIC), topic));
         }
         cfg.putAll(extract);
+        // make plugin-global-metric has the same configuration with v2 global metric report configuration
+        config.putAll(extractAndConvertPrefix(globalMetric, METRIC_ASYNC, GLOBAL_METRIC));
     }
 
     private static String remove(String key, Map<String, String> extract, Map<String, String> config) {

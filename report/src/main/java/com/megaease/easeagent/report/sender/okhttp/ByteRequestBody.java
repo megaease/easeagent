@@ -9,10 +9,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 
 public class ByteRequestBody extends RequestBody {
+    // for improved: this should given by encoder
     static final MediaType CONTENT_TYPE = MediaType.parse("application/json");
 
-    private byte[] data;
-    private int contentLength;
+    private final byte[] data;
+    private final int contentLength;
 
     public ByteRequestBody(byte[] data) {
         this.data = data;

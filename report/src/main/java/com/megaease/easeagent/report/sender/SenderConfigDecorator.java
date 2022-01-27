@@ -21,7 +21,7 @@ import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
-import com.megaease.easeagent.plugin.report.Callback;
+import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
@@ -61,17 +61,17 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
     @Override
     public void init(Config config) {
         this.packer = ReporterRegistry.getEncoder(config.getString(this.encoderKey));
-        this.packer.init(config);
-        this.sender.init(config);
+        this.packer.init(this.config);
+        this.sender.init(this.config);
     }
 
     @Override
-    public Callback<Void> send(byte[] encodedData) {
+    public Call<Void> send(byte[] encodedData) {
         return this.sender.send(encodedData);
     }
 
     @Override
-    public Callback<Void> send(List<byte[]> encodedData) {
+    public Call<Void> send(List<byte[]> encodedData) {
         byte[] data = this.packer.encodeList(encodedData);
         return sender.send(data);
     }
@@ -130,14 +130,15 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
     }
 
     private static Map<String, String> extractSenderConfig(String cfgPrefix, Config config) {
-        // outputServer config
-        Map<String, String> extract = extractByPrefix(config, OUTPUT_SERVER_V2);
+        Map<String, String> extract = extractByPrefix(config, cfgPrefix);
         Map<String, String> cfg = new HashMap<>(extract);
-        extract = extractByPrefix(config, cfgPrefix);
-        cfg.putAll(extract);
 
         // convert to general cfg, then sender don't need to care about any special business.
-        cfg = extractAndConvertPrefix(cfg, cfgPrefix, GENERAL);
+        cfg = extractAndConvertPrefix(cfg, cfgPrefix, GENERAL_SENDER);
+
+        // outputServer config
+        cfg.putAll(extractByPrefix(config, OUTPUT_SERVER_V2));
+
         return cfg;
     }
 

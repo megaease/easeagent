@@ -19,13 +19,11 @@ package com.megaease.easeagent.report.sender;
 
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.config.ConfigUtils;
-import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.report.Callback;
+import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
-import com.megaease.easeagent.report.plugin.NoOpCallback;
-import zipkin2.Call;
+import com.megaease.easeagent.report.plugin.NoOpCall;
 import zipkin2.codec.Encoding;
 import zipkin2.reporter.kafka11.KafkaSender;
 import zipkin2.reporter.kafka11.SDKKafkaSender;
@@ -74,12 +72,12 @@ public class AgentKafkaSender implements Sender {
     }
 
     @Override
-    public Callback<Void> send(byte[] encodedData) {
+    public Call<Void> send(byte[] encodedData) {
         if (!enabled) {
-            return new NoOpCallback<>();
+            return new NoOpCall<>();
         }
-        Call<Void> call =  this.sender.sendSpans(encodedData);
-        return call::execute;
+        zipkin2.Call<Void> call =  this.sender.sendSpans(encodedData);
+        return new ZipkinCallWrapper<>(call);
     }
 
     @Override

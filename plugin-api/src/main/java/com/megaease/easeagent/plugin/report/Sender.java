@@ -18,11 +18,8 @@
 package com.megaease.easeagent.plugin.report;
 
 import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 
 import java.io.Closeable;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,7 +43,7 @@ public interface Sender extends Closeable {
      * @param encodedData encoded data, such as encoded spans.
      * @throws IllegalStateException if {@link #close() close} was called.
      */
-    Callback<Void> send(byte[] encodedData);
+    Call<Void> send(byte[] encodedData);
 
     /**
      * If sender is available( not closed), return true, otherwise false.
