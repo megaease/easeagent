@@ -53,4 +53,9 @@ public class HistogramImpl implements com.megaease.easeagent.plugin.api.metric.H
     public Snapshot getSnapshot() {
         return SnapshotImpl.build(histogram.getSnapshot());
     }
+
+    @Override
+    public Object unwrap() {
+        return histogram;
+    }
 }

@@ -74,4 +74,9 @@ public class SnapshotImpl implements com.megaease.easeagent.plugin.api.metric.Sn
     public void dump(OutputStream output) {
         snapshot.dump(output);
     }
+
+    @Override
+    public Object unwrap() {
+        return snapshot;
+    }
 }

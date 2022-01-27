@@ -133,5 +133,13 @@ public interface Snapshot extends Metric {
     default double get999thPercentile() {
         return getValue(0.999);
     }
+
+    /**
+     * Returns the underlying Snapshot object or {@code null} if there is none. Here is a Snapshot
+     * objects: {@code com.codahale.metrics.Snapshot}
+     *
+     * @return
+     */
+    Object unwrap();
 }
 

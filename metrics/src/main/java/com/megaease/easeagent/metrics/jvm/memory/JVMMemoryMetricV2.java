@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class JVMMemoryMetricV2 extends ServiceMetric implements ScheduleRunner {
-    public static final ServiceMetricSupplier<JVMMemoryMetricV2> SUPPLIER = new ServiceMetricSupplier<JVMMemoryMetricV2>() {
+    private static final ServiceMetricSupplier<JVMMemoryMetricV2> SUPPLIER = new ServiceMetricSupplier<JVMMemoryMetricV2>() {
         @Override
         public NameFactory newNameFactory() {
             return JVMMemoryMetricV2.nameFactory();
@@ -50,7 +50,7 @@ public class JVMMemoryMetricV2 extends ServiceMetric implements ScheduleRunner {
     private static final String POOLS = "pools";
     private static IPluginConfig config;
 
-    public JVMMemoryMetricV2(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+    private JVMMemoryMetricV2(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
         super(metricRegistry, nameFactory);
     }
 

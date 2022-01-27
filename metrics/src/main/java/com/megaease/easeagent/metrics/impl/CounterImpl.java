@@ -58,4 +58,9 @@ public class CounterImpl implements com.megaease.easeagent.plugin.api.metric.Cou
     public long getCount() {
         return counter.getCount();
     }
+
+    @Override
+    public Object unwrap() {
+        return counter;
+    }
 }

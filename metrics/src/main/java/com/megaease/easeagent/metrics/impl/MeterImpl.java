@@ -67,4 +67,9 @@ public class MeterImpl implements com.megaease.easeagent.plugin.api.metric.Meter
     public double getOneMinuteRate() {
         return meter.getOneMinuteRate();
     }
+
+    @Override
+    public Object unwrap() {
+        return meter;
+    }
 }

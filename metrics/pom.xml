@@ -34,9 +34,9 @@
             <version>${project.version}</version>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>com.megaease.easeagent</groupId>-->
-            <!--<artifactId>common</artifactId>-->
-            <!--<version>${project.version}</version>-->
+        <!--<groupId>com.megaease.easeagent</groupId>-->
+        <!--<artifactId>common</artifactId>-->
+        <!--<version>${project.version}</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
@@ -88,6 +88,20 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>3.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>config-mock</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>context-mock</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -67,7 +67,7 @@ public interface MetricRegistry {
      * @return a new or pre-existing {@link Gauge}
      */
     @SuppressWarnings("rawtypes")
-    Gauge gauge(String name, Supplier<Gauge> supplier);
+    Gauge gauge(String name, MetricSupplier<Gauge> supplier);
 
     /**
      * Return the {@link Histogram} registered under this name; or create and register

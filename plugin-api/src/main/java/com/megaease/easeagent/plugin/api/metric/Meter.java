@@ -76,5 +76,13 @@ public interface Meter extends Metric {
      * occurred since the meter was created
      */
     double getOneMinuteRate();
+
+    /**
+     * Returns the underlying Meter object or {@code null} if there is none. Here is a Meter
+     * objects: {@code com.codahale.metrics.Meter}
+     *
+     * @return
+     */
+    Object unwrap();
 }
 
