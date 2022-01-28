@@ -51,7 +51,6 @@ public class ClientHttpRequestInterceptorTest {
         ClientHttpResponse clientHttpResponse = SimpleClientHttpResponseFactory.createMockResponse(url);
         MethodInfo.MethodInfoBuilder methodInfoBuilder = MethodInfo.builder();
         MethodInfo methodInfo = methodInfoBuilder.invoker(request).build();
-
         Context context = EaseAgent.getContext();
         ClientHttpRequestInterceptor clientHttpRequestInterceptor = new ClientHttpRequestInterceptor();
         ReportMock.cleanLastSpan();
@@ -106,7 +105,7 @@ public class ClientHttpRequestInterceptorTest {
         HttpRequest httpRequest = clientHttpRequestInterceptor.getRequest(methodInfo, context);
         assertEquals(com.megaease.easeagent.plugin.api.trace.Span.Kind.CLIENT, httpRequest.kind());
         assertEquals("GET", httpRequest.method());
-        assertEquals(RequestUtils.URL, httpRequest.path());
+        assertEquals("/test", httpRequest.path());
     }
 
     @Test

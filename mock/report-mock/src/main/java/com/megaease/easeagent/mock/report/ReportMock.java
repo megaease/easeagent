@@ -17,13 +17,16 @@
 
 package com.megaease.easeagent.mock.report;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.mock.report.impl.ZipkinMockSpanImpl;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.DefaultAgentReport;
 import com.megaease.easeagent.report.metric.MetricReporter;
@@ -31,9 +34,12 @@ import com.megaease.easeagent.report.util.SpanUtils;
 import zipkin2.Span;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class ReportMock {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportMock.class);
@@ -41,6 +47,7 @@ public class ReportMock {
     private static final AtomicReference<Span> LAST_SPAN = new AtomicReference<>();
     private static volatile SpanReportMock spanReportMock = null;
     private static volatile Reporter metricReportMock = null;
+    private static volatile JsonReporter metricJsonReport = null;
 
     public static AgentReport getAgentReport() {
         return AGENT_REPORT;
@@ -52,6 +59,31 @@ public class ReportMock {
 
     public static void setMetricReportMock(Reporter metricReportMock) {
         ReportMock.metricReportMock = metricReportMock;
+    }
+
+    public static LastJsonReporter lastMetricJsonReporter(Predicate<Map<String, Object>> filter) {
+        LastJsonReporter lastJsonReporter = new LastJsonReporter(filter);
+        metricJsonReport = lastJsonReporter;
+        return lastJsonReporter;
+    }
+
+
+    private static void reportMetricToJson(String text) {
+        if (metricJsonReport == null) {
+            return;
+        }
+        try {
+            List<Map<String, Object>> json;
+            if (text.trim().startsWith("{")) {
+                Map<String, Object> jsonMap = JsonUtil.toMap(text);
+                json = Collections.singletonList(jsonMap);
+            } else {
+                json = JsonUtil.toList(text);
+            }
+            metricJsonReport.report(json);
+        } catch (Exception e) {
+            LOGGER.error("string to List<Map<String, Object>> fail: ", e);
+        }
     }
 
     static class MockAgentReport implements AgentReport {
@@ -123,6 +155,7 @@ public class ReportMock {
             } catch (Exception e) {
                 LOGGER.error("mock metric report fail: {}", e);
             }
+            reportMetricToJson(msg);
         }
 
         @Override

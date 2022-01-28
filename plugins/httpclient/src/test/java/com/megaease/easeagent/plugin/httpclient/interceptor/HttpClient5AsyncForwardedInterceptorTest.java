@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.httpclient.interceptor;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
@@ -47,5 +48,11 @@ public class HttpClient5AsyncForwardedInterceptorTest {
         } finally {
             context.remove(TestConst.FORWARDED_NAME);
         }
+    }
+
+    @Test
+    public void getType() {
+        HttpClient5AsyncForwardedInterceptor httpClient5AsyncForwardedInterceptor = new HttpClient5AsyncForwardedInterceptor();
+        assertEquals(ConfigConst.PluginID.FORWARDED, httpClient5AsyncForwardedInterceptor.getType());
     }
 }
