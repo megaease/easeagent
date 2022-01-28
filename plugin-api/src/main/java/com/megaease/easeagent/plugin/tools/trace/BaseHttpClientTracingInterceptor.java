@@ -30,7 +30,6 @@ public abstract class BaseHttpClientTracingInterceptor implements NonReentrantIn
         RequestContext requestContext = context.clientRequest(request);
         HttpUtils.handleReceive(requestContext.span().start(), request);
         context.put(getProgressKey(), requestContext);
-        // context.push(requestContext);
     }
 
     @Override
@@ -39,7 +38,6 @@ public abstract class BaseHttpClientTracingInterceptor implements NonReentrantIn
         if (requestContext == null) {
             return;
         }
-        // RequestContext requestContext = context.pop();
         try {
             HttpResponse responseWrapper = getResponse(methodInfo, context);
             HttpUtils.save(requestContext.span(), responseWrapper);

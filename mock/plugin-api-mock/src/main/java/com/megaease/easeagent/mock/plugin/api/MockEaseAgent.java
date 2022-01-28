@@ -17,8 +17,7 @@
 
 package com.megaease.easeagent.mock.plugin.api;
 
-import com.megaease.easeagent.mock.context.ContextManagerMock;
-import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.mock.context.MockContext;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,6 +26,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@MockContext
 public @interface MockEaseAgent {
-    Context CONTEXT = ContextManagerMock.getContext();
 }

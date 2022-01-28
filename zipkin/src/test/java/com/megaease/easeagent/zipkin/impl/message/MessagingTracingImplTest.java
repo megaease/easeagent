@@ -67,6 +67,7 @@ public class MessagingTracingImplTest {
         Span span = messagingTracing.consumerSpan(new MessagingRequestMock().setOperation(operation).setChannelKind(channelKind).setChannelName(channelName));
         assertFalse(span.isNoop());
         MutableSpan state = AgentFieldReflectAccessor.getFieldValue(span.unwrap(), "state");
+        assertNotNull(state);
         checkTag(state);
 
 
@@ -95,6 +96,7 @@ public class MessagingTracingImplTest {
         Span span = messagingTracing.producerSpan(new MessagingRequestMock().setOperation(operation).setChannelKind(channelKind).setChannelName(channelName));
         assertFalse(span.isNoop());
         MutableSpan state = AgentFieldReflectAccessor.getFieldValue(span.unwrap(), "state");
+        assertNotNull(state);
         checkTag(state);
 
         MessagingRequestMock messagingRequestMock = new MessagingRequestMock();
@@ -136,7 +138,6 @@ public class MessagingTracingImplTest {
         assertNotNull(messagingRequestMock.header(MESSAGE_B3_HEADER_NAME));
         assertTrue(messagingRequestMock.header(MESSAGE_B3_HEADER_NAME).contains(span.traceIdString()));
     }
-
 
 
     private void check(Span span, Message message) {

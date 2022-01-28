@@ -61,7 +61,7 @@ public class OkHttpAsyncTracingInterceptor implements NonReentrantInterceptor {
         if (requestContext == null) {
             return;
         }
-        try (Scope scope = requestContext.scope()) {
+        try (Scope ignored = requestContext.scope()) {
             if (methodInfo.isSuccess()) {
                 return;
             }

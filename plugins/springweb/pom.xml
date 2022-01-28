@@ -57,6 +57,14 @@
             <artifactId>spring-webflux</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>plugin-api-mock</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

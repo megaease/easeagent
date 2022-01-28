@@ -15,18 +15,11 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.context;
+package com.megaease.easeagent.plugin.okhttp.interceptor;
 
-import com.megaease.easeagent.plugin.api.Context;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MockContext {
-    @SuppressWarnings("unused")
-    Context ignored = ContextManagerMock.getContext();
+public class TestConst {
+    public static final String FORWARDED_NAME = "X-Forwarded-For";
+    public static final String FORWARDED_VALUE = "testForwarded";
+    public static final String RESPONSE_TAG_NAME = "X-EG-Test";
+    public static final String RESPONSE_TAG_VALUE = "X-EG-Test-Value";
 }
