@@ -17,7 +17,9 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
@@ -36,7 +38,6 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,7 @@ import static org.junit.Assert.*;
 
 @MockEaseAgent
 public class ServletHttpLogInterceptorTest {
+    static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void init() {
@@ -64,7 +66,7 @@ public class ServletHttpLogInterceptorTest {
     }
 
     @Test
-    public void doBefore() {
+    public void doBefore() throws JsonProcessingException {
         internalAfter();
     }
 
@@ -89,17 +91,18 @@ public class ServletHttpLogInterceptorTest {
         assertNotNull(servletHttpLogInterceptor.getAfterMark());
     }
 
-    private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
+    private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) throws JsonProcessingException {
         List<Map<String, Object>> metric = lastJsonReporter.getLast();
         assertNotNull(metric);
         assertEquals(1, metric.size());
         String result = JsonUtil.toJson(metric.get(0));
-        return JsonUtil.toObject(result, new TypeReference<RequestInfo>() {
+        assertNotNull(result);
+        return mapper.readValue(result, new TypeReference<RequestInfo>() {
         });
     }
 
     @Test
-    public void internalAfter() {
+    public void internalAfter() throws JsonProcessingException {
         MockHttpServletRequest httpServletRequest = TestServletUtils.buildMockRequest();
         HttpServletResponse response = TestServletUtils.buildMockResponse();
         ServletHttpLogInterceptor servletHttpLogInterceptor = new ServletHttpLogInterceptor();
