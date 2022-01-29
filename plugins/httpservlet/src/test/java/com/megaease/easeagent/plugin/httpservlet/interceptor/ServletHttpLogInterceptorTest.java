@@ -18,8 +18,6 @@
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
@@ -45,7 +43,6 @@ import static org.junit.Assert.*;
 
 @MockEaseAgent
 public class ServletHttpLogInterceptorTest {
-    static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void init() {
@@ -91,14 +88,13 @@ public class ServletHttpLogInterceptorTest {
         assertNotNull(servletHttpLogInterceptor.getAfterMark());
     }
 
-    private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) throws JsonProcessingException {
+    private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
         List<Map<String, Object>> metric = lastJsonReporter.getLast();
         assertNotNull(metric);
         assertEquals(1, metric.size());
         String result = JsonUtil.toJson(metric.get(0));
         assertNotNull(result);
-        return mapper.readValue(result, new TypeReference<RequestInfo>() {
-        });
+        return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
     }
 
     @Test
