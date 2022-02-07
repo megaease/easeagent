@@ -53,7 +53,7 @@ public class ConnectionFutureWrapper<T> implements ConnectionFuture<T> {
     }
 
     private T processResult(T t, Throwable throwable, Object dynamicFieldValue) {
-        if (this.processed) {
+        if (this.processed || t == null) {
             return t;
         }
         AgentDynamicFieldAccessor.setDynamicFieldValue(t, dynamicFieldValue);

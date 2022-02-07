@@ -17,19 +17,18 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.redis.RedisPlugin;
 import com.megaease.easeagent.plugin.redis.advice.JedisAdvice;
-import redis.clients.jedis.Jedis;
 
 @AdviceTo(value = JedisAdvice.class, qualifier = "default", plugin = RedisPlugin.class)
 public class JedisTracingInterceptor extends CommonRedisTracingInterceptor {
 
     @Override
     public void doTraceBefore(MethodInfo methodInfo, Context context) {
-        Jedis invoker = (Jedis) methodInfo.getInvoker();
+        Object invoker = methodInfo.getInvoker();
         String name = invoker.getClass().getSimpleName() + "." + methodInfo.getMethod();
         String cmd = methodInfo.getMethod();
         this.startTracing(context, name, null, cmd);

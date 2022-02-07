@@ -35,7 +35,7 @@ import io.lettuce.core.RedisURI;
 
 @AdviceTo(value = LettuceRedisClientAdvice.class, qualifier = "constructor", plugin = RedisRedirectPlugin.class)
 public class LettuceRedisClientConstructInterceptor implements NonReentrantInterceptor {
-    private static final Logger LOGGER = EaseAgent.getLogger(JedisConstructorInterceptor.class);
+    private static final Logger LOGGER = EaseAgent.getLogger(LettuceRedisClientConstructInterceptor.class);
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
@@ -52,6 +52,9 @@ public class LettuceRedisClientConstructInterceptor implements NonReentrantInter
             LOGGER.info("Redirect Redis RedisURI: {} to {}:{}", redisURI, host, port);
             redisURI.setHost(host);
             redisURI.setPort(port);
+            if (cnf.getPassword() != null) {
+                redisURI.setPassword(cnf.getPassword());
+            }
             RedirectProcessor.redirected(Redirect.REDIS, hostAndPort.uri());
         }
     }

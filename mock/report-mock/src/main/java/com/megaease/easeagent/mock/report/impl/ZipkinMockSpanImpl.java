@@ -90,6 +90,16 @@ public class ZipkinMockSpanImpl implements MockSpan {
     }
 
     @Override
+    public boolean hasError() {
+        return span.tags().containsKey("error");
+    }
+
+    @Override
+    public String errorInfo() {
+        return span.tags().get("error");
+    }
+
+    @Override
     public String remoteServiceName() {
         return span.remoteServiceName();
     }

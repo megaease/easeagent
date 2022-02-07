@@ -50,16 +50,20 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     }
 
     private T processResult(T t, Throwable throwable, Object dynamicFieldValue) {
-        if (this.processed) {
+        if (this.processed || t == null) {
             return t;
         }
+        obtrudeProcessResult(t, dynamicFieldValue);
+        this.processed = true;
+        return t;
+    }
+
+    private void obtrudeProcessResult(T t, Object dynamicFieldValue) {
         AgentDynamicFieldAccessor.setDynamicFieldValue(t, dynamicFieldValue);
         Object channelWriter = AgentFieldReflectAccessor.getFieldValue(t, "channelWriter");
         if (channelWriter != null) {
             AgentDynamicFieldAccessor.setDynamicFieldValue(channelWriter, dynamicFieldValue);
         }
-        this.processed = true;
-        return t;
     }
 
     @Override
@@ -325,7 +329,7 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public CompletableFuture<T> toCompletableFuture() {
-        return source.toCompletableFuture();
+        return this;
     }
 
     @Override
@@ -356,7 +360,7 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public void obtrudeValue(T value) {
         source.obtrudeValue(value);
-        this.processResult(value);
+        this.obtrudeProcessResult(value, attach);
     }
 
     @Override

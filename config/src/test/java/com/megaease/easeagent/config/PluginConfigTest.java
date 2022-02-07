@@ -102,7 +102,7 @@ public class PluginConfigTest {
         assertEquals("127", config.getString("count"));
         assertEquals("127.0.0.3", config.getString("host"));
         assertEquals("true", config.getString("http.enabled"));
-        assertEquals(null, config.getString("http.enabled.sss"));
+        assertNull(config.getString("http.enabled.sss"));
     }
 
     @Test

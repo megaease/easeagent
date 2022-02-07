@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.mock.report;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.mock.config.ConfigMock;

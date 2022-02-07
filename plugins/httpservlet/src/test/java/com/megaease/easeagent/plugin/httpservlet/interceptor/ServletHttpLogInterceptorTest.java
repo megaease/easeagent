@@ -38,6 +38,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -89,7 +90,7 @@ public class ServletHttpLogInterceptorTest {
     }
 
     private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
-        List<Map<String, Object>> metric = lastJsonReporter.getLast();
+        List<Map<String, Object>> metric = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
         assertNotNull(metric);
         assertEquals(1, metric.size());
         String result = JsonUtil.toJson(metric.get(0));

@@ -23,15 +23,20 @@ public enum Redirect {
     KAFKA(MiddlewareConstants.ENV_KAFKA, true),
     RABBITMQ(MiddlewareConstants.ENV_RABBITMQ, true),
     DATABASE(MiddlewareConstants.ENV_DATABASE, false),
-    MONGODB(MiddlewareConstants.ENV_MONGODB, false),
-    ;
+    MONGODB(MiddlewareConstants.ENV_MONGODB, false);
 
     private final String env;
+    private final boolean needParse;
     private final ResourceConfig config;
 
     Redirect(String env, boolean needParse) {
         this.env = env;
+        this.needParse = needParse;
         this.config = ResourceConfig.getResourceConfig(env, needParse);
+    }
+
+    public boolean isNeedParse() {
+        return needParse;
     }
 
     public String getEnv() {

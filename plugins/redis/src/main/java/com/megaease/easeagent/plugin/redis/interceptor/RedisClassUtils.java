@@ -69,7 +69,7 @@ public class RedisClassUtils {
 
         @Override
         protected boolean isType(Object o) {
-            return o instanceof redis.clients.jedis.JedisShardInfo;
+            return o instanceof redis.clients.jedis.JedisSocketFactory;
         }
 
         public void setInfo(Object o, String host, int port) {

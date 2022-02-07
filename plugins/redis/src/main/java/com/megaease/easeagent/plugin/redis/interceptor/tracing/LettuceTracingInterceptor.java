@@ -17,10 +17,9 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.redis.RedisPlugin;
 import com.megaease.easeagent.plugin.redis.advice.RedisChannelWriterAdvice;
 import com.megaease.easeagent.plugin.redis.interceptor.RedisClientUtils;
@@ -29,11 +28,7 @@ import com.megaease.easeagent.plugin.redis.interceptor.RedisClientUtils;
 public class LettuceTracingInterceptor extends CommonRedisTracingInterceptor {
     @Override
     public void doTraceBefore(MethodInfo methodInfo, Context context) {
-        String data = AgentDynamicFieldAccessor.getDynamicFieldValue(methodInfo.getInvoker());
-        if (data == null) {
-            return;
-        }
         String cmd = RedisClientUtils.cmd(methodInfo.getArgs()[0]);
-        this.startTracing(context, cmd, data, cmd);
+        this.startTracing(context, cmd, null, cmd);
     }
 }

@@ -117,8 +117,8 @@ public class OkHttpTracingInterceptorTest {
 
         HttpResponse httpResponse = okHttpTracingInterceptor.getResponse(methodInfo, EaseAgent.getContext());
         assertEquals("GET", httpResponse.method());
-        assertEquals(null, httpResponse.route());
-        assertEquals(null, httpResponse.maybeError());
+        assertNull(httpResponse.route());
+        assertNull(httpResponse.maybeError());
         assertEquals(200, httpResponse.statusCode());
 
         RuntimeException runtimeException = new RuntimeException("test error");

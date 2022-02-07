@@ -43,8 +43,9 @@ public class CommonRedisClientInterceptor implements NonReentrantInterceptor {
         Object invoker = methodInfo.getInvoker();
         if (invoker instanceof RedisClusterClient) {
             this.processRedisClusterClient(methodInfo, context);
+        } else if (invoker instanceof RedisClient) {
+            this.processRedisClient(methodInfo, context);
         }
-        this.processRedisClient(methodInfo, context);
     }
 
 

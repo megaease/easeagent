@@ -120,8 +120,8 @@ public class ClientHttpRequestInterceptorTest {
         ClientHttpRequestInterceptor clientHttpRequestInterceptor = new ClientHttpRequestInterceptor();
         HttpResponse httpResponse = clientHttpRequestInterceptor.getResponse(methodInfo, EaseAgent.getContext());
         assertEquals("GET", httpResponse.method());
-        assertEquals(null, httpResponse.route());
-        assertEquals(null, httpResponse.maybeError());
+        assertNull(httpResponse.route());
+        assertNull(httpResponse.maybeError());
         assertEquals(200, httpResponse.statusCode());
 
         RuntimeException runtimeException = new RuntimeException("test error");
