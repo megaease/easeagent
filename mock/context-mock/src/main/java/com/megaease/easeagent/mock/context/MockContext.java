@@ -27,5 +27,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface MockContext {
-    Context CONTEXT = ContextManagerMock.getContext();
+    @SuppressWarnings("unused")
+    Context ignored = ContextManagerMock.getContext();
 }

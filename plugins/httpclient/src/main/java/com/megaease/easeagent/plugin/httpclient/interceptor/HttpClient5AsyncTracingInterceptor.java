@@ -60,7 +60,7 @@ public class HttpClient5AsyncTracingInterceptor implements NonReentrantIntercept
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         RequestContext requestContext = context.remove(HttpClient5AsyncTracingInterceptor.class);
-        try (Scope scope = requestContext.scope()) {
+        try (Scope ignored = requestContext.scope()) {
             if (methodInfo.isSuccess()) {
                 return;
             }

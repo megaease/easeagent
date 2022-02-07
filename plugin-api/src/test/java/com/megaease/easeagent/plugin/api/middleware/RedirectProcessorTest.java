@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.api.middleware;
 
-import com.megaease.easeagent.mock.utils.MockSystemEnv;
+import com.megaease.easeagent.plugin.api.MockSystemEnv;
 import org.junit.Test;
 
 import static com.megaease.easeagent.plugin.api.middleware.RedirectProcessor.ENV_EASEMESH_TAGS;

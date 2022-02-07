@@ -45,6 +45,11 @@
             <artifactId>zipkin-mock</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>utils-mock</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

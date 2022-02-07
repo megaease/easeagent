@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 
+import java.util.List;
 import java.util.Map;
 
 public class JsonUtil {
@@ -49,6 +50,16 @@ public class JsonUtil {
     public static Map<String, Object> toMap(String json) {
         try {
             return mapper.readValue(json, Map.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> toList(String json) {
+        try {
+            return mapper.readValue(json, new TypeReference<List<T>>() {
+            });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

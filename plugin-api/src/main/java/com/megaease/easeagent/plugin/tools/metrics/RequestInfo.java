@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.tools.metrics;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,6 +27,8 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class RequestInfo {
+    public static final TypeReference<RequestInfo> TYPE_REFERENCE = new TypeReference<RequestInfo>() {
+    };
 
     @JsonProperty("span_id")
     protected String spanId;

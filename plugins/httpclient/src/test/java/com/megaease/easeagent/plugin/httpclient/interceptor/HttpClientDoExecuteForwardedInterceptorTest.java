@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.httpclient.interceptor;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.apache.http.client.methods.HttpGet;
@@ -44,5 +45,11 @@ public class HttpClientDoExecuteForwardedInterceptorTest {
         httpClientDoExecuteForwardedInterceptor.before(methodInfo, context);
         assertEquals(TestConst.FORWARDED_VALUE, httpGet.getFirstHeader(TestConst.FORWARDED_NAME).getValue());
         context.remove(TestConst.FORWARDED_NAME);
+    }
+
+    @Test
+    public void getType() {
+        HttpClientDoExecuteForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpClientDoExecuteForwardedInterceptor();
+        assertEquals(ConfigConst.PluginID.FORWARDED, httpClientDoExecuteForwardedInterceptor.getType());
     }
 }
