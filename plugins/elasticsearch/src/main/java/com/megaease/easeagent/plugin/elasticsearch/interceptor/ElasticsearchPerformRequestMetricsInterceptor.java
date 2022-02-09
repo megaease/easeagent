@@ -41,10 +41,7 @@ public class ElasticsearchPerformRequestMetricsInterceptor extends Elasticsearch
     public void after(MethodInfo methodInfo, Context context) {
         Response response = (Response) methodInfo.getRetValue();
         Request request = (Request) methodInfo.getArgs()[0];
-        boolean success = methodInfo.getThrowable() == null;
-        if (response != null && response.getStatusLine().getStatusCode() != 200) {
-            success = false;
-        }
+        boolean success = ElasticsearchCtxUtils.checkSuccess(response, methodInfo.getThrowable());
         this.elasticsearchMetric.collectMetric(ElasticsearchCtxUtils.getIndex(request.getEndpoint()),
             ContextUtils.getDuration(context), success);
     }
