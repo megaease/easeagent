@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.elasticsearch.interceptor;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.tools.trace.TraceConst;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import lombok.SneakyThrows;
 import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
@@ -52,14 +52,37 @@ public class ElasticsearchCtxUtils {
     }
 
     public static String getIndex(String endpoint) {
-        int end = endpoint.indexOf("/");
-        if (end == 0) {
-            end = endpoint.indexOf("/", 1);
+        if (StringUtils.isEmpty(endpoint)) {
+            return "";
         }
-        if (end == -1) {
-            return endpoint;
+        String tmp = endpoint;
+        if (!tmp.startsWith("/")) {
+            tmp = "/" + tmp;
         }
-        return endpoint.substring(0, end);
+        int end = tmp.indexOf("/", 1);
+        String index;
+        if (end < 0) {
+            index = tmp.substring(1);
+        } else if (end > 0) {
+            index = tmp.substring(1, end);
+        } else {
+            index = tmp.substring(1);
+        }
+        if (index.startsWith("_") || index.startsWith("-") || index.startsWith("+")) {
+            return "";
+        }
+        return index;
+    }
+
+    public static boolean checkSuccess(Response response, Throwable throwable) {
+        if (throwable != null) {
+            return false;
+        }
+        if (response == null) {
+            return false;
+        }
+        return response.getStatusLine().getStatusCode() == 200
+            || response.getStatusLine().getStatusCode() == 201;
     }
 
     public static void finishSpan(Response response, Throwable throwable, Context context) {
@@ -70,10 +93,14 @@ public class ElasticsearchCtxUtils {
         if (throwable != null) {
             span.error(throwable);
         } else {
-            int statusCode = response.getStatusLine().getStatusCode();
-            span.tag(TraceConst.HTTP_TAG_STATUS_CODE, String.valueOf(statusCode));
-            if (statusCode != 200) {
-                span.tag(TraceConst.HTTP_TAG_ERROR, String.valueOf(statusCode));
+            if (!checkSuccess(response, null)) {
+                if (response != null) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    span.tag("error", String.valueOf(statusCode));
+                } else {
+                    span.tag("error", "unknown");
+                }
+
             }
         }
         span.finish();
