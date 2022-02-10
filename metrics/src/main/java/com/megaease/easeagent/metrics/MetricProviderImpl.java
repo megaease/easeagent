@@ -18,7 +18,6 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.metrics.config.MetricsConfig;
 import com.megaease.easeagent.metrics.config.PluginMetricsConfig;
@@ -27,6 +26,7 @@ import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.metrics.converter.MetricsAdditionalAttributes;
 import com.megaease.easeagent.metrics.impl.MetricRegistryImpl;
 import com.megaease.easeagent.plugin.api.Reporter;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
@@ -71,7 +71,7 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
         public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(
             IPluginConfig config,
             NameFactory nameFactory, Tags tags) {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry();
+            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry(additionalAttributes, tags);
             MetricsConfig metricsConfig = new PluginMetricsConfig(config);
             List<KeyType> keyTypes = new ArrayList<>();
             for (MetricType metricType : nameFactory.metricTypes()) {
