@@ -37,7 +37,7 @@ public class MetricRegistryImplTest {
     String histogramName = buildMetricName("histogramName");
     String timerName = buildMetricName("timerName");
     String gaugeName = buildMetricName("gauge");
-    com.codahale.metrics.MetricRegistry mr = MetricRegistryService.DEFAULT.createMetricRegistry();
+    com.codahale.metrics.MetricRegistry mr = MetricRegistryService.DEFAULT.createMetricRegistry(null, null);
     MetricRegistry metricRegistry = MetricRegistryImpl.build(mr);
 
 
@@ -75,7 +75,7 @@ public class MetricRegistryImplTest {
 
     @Test
     public void getMetrics() {
-        com.codahale.metrics.MetricRegistry mr = MetricRegistryService.DEFAULT.createMetricRegistry();
+        com.codahale.metrics.MetricRegistry mr = MetricRegistryService.DEFAULT.createMetricRegistry(null, null);
         MetricRegistry metricRegistry = MetricRegistryImpl.build(mr);
         String gaugeName = buildMetricName("getMetrics_gaugeName");
         String value1 = "test_remove_value1";

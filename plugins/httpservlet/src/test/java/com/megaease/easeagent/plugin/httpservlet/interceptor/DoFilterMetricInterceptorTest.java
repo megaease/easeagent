@@ -17,10 +17,12 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
+import com.megaease.easeagent.mock.metrics.MockMetricUtils;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
@@ -30,9 +32,9 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -99,6 +101,7 @@ public class DoFilterMetricInterceptorTest {
         assertEquals(1, (int) metric.get("cnt"));
         assertEquals(0, (int) metric.get("errcnt"));
 
+        MockMetricUtils.clear(Objects.requireNonNull(AgentFieldReflectAccessor.<ServiceMetric>getFieldValue(doFilterMetricInterceptor, "SERVER_METRIC")));
         lastJsonReporter.clean();
         httpServletRequest = TestServletUtils.buildMockRequest();
         response = TestServletUtils.buildMockResponse();
@@ -107,7 +110,7 @@ public class DoFilterMetricInterceptorTest {
         doFilterMetricInterceptor.doAfter(methodInfo, EaseAgent.getContext());
 
         metric = getMetric(lastJsonReporter);
-        assertEquals(2, (int) metric.get("cnt"));
+        assertEquals(1, (int) metric.get("cnt"));
         assertEquals(1, (int) metric.get("errcnt"));
     }
 

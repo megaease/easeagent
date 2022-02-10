@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.metrics.impl;
+package com.megaease.easeagent.metrics;
 
-import com.codahale.metrics.MetricRegistry;
-import com.megaease.easeagent.metrics.MetricRegistryService;
+import org.junit.Test;
 
-public class MetricRegistryMock {
-    private static final MetricRegistry CODAHALE_METRIC_REGISTRY = MetricRegistryService.DEFAULT.createMetricRegistry(null, null);
+import static org.junit.Assert.assertEquals;
 
-    public static MetricRegistry getCodahaleMetricRegistry() {
-        return CODAHALE_METRIC_REGISTRY;
+public class PrometheusAgentHttpHandlerTest {
+
+    @Test
+    public void getPath() {
+        assertEquals("/prometheus/metrics", new PrometheusAgentHttpHandler().getPath());
     }
 }
