@@ -36,50 +36,50 @@ public class ElasticsearchMetric extends ServiceMetric {
 
     public static NameFactory nameFactory() {
         return NameFactory.createBuilder()
-                .timerType(MetricSubType.DEFAULT,
-                        ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                                .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
-                                .put(MetricField.MAX_EXECUTION_TIME, MetricValueFetcher.SnapshotMaxValue)
-                                .put(MetricField.MEAN_EXECUTION_TIME, MetricValueFetcher.SnapshotMeanValue)
-                                .put(MetricField.P25_EXECUTION_TIME, MetricValueFetcher.Snapshot25Percentile)
-                                .put(MetricField.P50_EXECUTION_TIME, MetricValueFetcher.Snapshot50PercentileValue)
-                                .put(MetricField.P75_EXECUTION_TIME, MetricValueFetcher.Snapshot75PercentileValue)
-                                .put(MetricField.P95_EXECUTION_TIME, MetricValueFetcher.Snapshot95PercentileValue)
-                                .put(MetricField.P98_EXECUTION_TIME, MetricValueFetcher.Snapshot98PercentileValue)
-                                .put(MetricField.P99_EXECUTION_TIME, MetricValueFetcher.Snapshot99PercentileValue)
-                                .put(MetricField.P999_EXECUTION_TIME, MetricValueFetcher.Snapshot999PercentileValue)
-                                .build())
-                .gaugeType(MetricSubType.DEFAULT, new HashMap<>())
-                .meterType(MetricSubType.DEFAULT,
-                        ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                                .put(MetricField.M1_RATE, MetricValueFetcher.MeteredM1Rate)
-                                .put(MetricField.M5_RATE, MetricValueFetcher.MeteredM5Rate)
-                                .put(MetricField.M15_RATE, MetricValueFetcher.MeteredM15Rate)
-                                .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
-                                .build())
-                .meterType(MetricSubType.ERROR,
-                        ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                                .put(MetricField.M1_ERROR_RATE, MetricValueFetcher.MeteredM1Rate)
-                                .put(MetricField.M5_ERROR_RATE, MetricValueFetcher.MeteredM5Rate)
-                                .put(MetricField.M15_ERROR_RATE, MetricValueFetcher.MeteredM15Rate)
-                                .build())
-                .counterType(MetricSubType.ERROR, ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                        .put(MetricField.EXECUTION_ERROR_COUNT, MetricValueFetcher.CountingCount)
-                        .build())
-                .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
-                        .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
-                        .build())
-                .build();
+            .timerType(MetricSubType.DEFAULT,
+                ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                    .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
+                    .put(MetricField.MAX_EXECUTION_TIME, MetricValueFetcher.SnapshotMaxValue)
+                    .put(MetricField.MEAN_EXECUTION_TIME, MetricValueFetcher.SnapshotMeanValue)
+                    .put(MetricField.P25_EXECUTION_TIME, MetricValueFetcher.Snapshot25Percentile)
+                    .put(MetricField.P50_EXECUTION_TIME, MetricValueFetcher.Snapshot50PercentileValue)
+                    .put(MetricField.P75_EXECUTION_TIME, MetricValueFetcher.Snapshot75PercentileValue)
+                    .put(MetricField.P95_EXECUTION_TIME, MetricValueFetcher.Snapshot95PercentileValue)
+                    .put(MetricField.P98_EXECUTION_TIME, MetricValueFetcher.Snapshot98PercentileValue)
+                    .put(MetricField.P99_EXECUTION_TIME, MetricValueFetcher.Snapshot99PercentileValue)
+                    .put(MetricField.P999_EXECUTION_TIME, MetricValueFetcher.Snapshot999PercentileValue)
+                    .build())
+            .gaugeType(MetricSubType.DEFAULT, new HashMap<>())
+            .meterType(MetricSubType.DEFAULT,
+                ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                    .put(MetricField.M1_RATE, MetricValueFetcher.MeteredM1Rate)
+                    .put(MetricField.M5_RATE, MetricValueFetcher.MeteredM5Rate)
+                    .put(MetricField.M15_RATE, MetricValueFetcher.MeteredM15Rate)
+                    .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
+                    .build())
+            .meterType(MetricSubType.ERROR,
+                ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                    .put(MetricField.M1_ERROR_RATE, MetricValueFetcher.MeteredM1Rate)
+                    .put(MetricField.M5_ERROR_RATE, MetricValueFetcher.MeteredM5Rate)
+                    .put(MetricField.M15_ERROR_RATE, MetricValueFetcher.MeteredM15Rate)
+                    .build())
+            .counterType(MetricSubType.ERROR, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                .put(MetricField.EXECUTION_ERROR_COUNT, MetricValueFetcher.CountingCount)
+                .build())
+            .counterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount)
+                .build())
+            .build();
     }
 
     public void collectMetric(String key, long duration, boolean success) {
         metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
         final Meter defaultMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.DEFAULT));
         final Counter defaultCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT));
-        final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
-        final Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
 
         if (!success) {
+            final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
+            final Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
             errorMeter.mark();
             errorCounter.inc();
         }
@@ -88,10 +88,10 @@ public class ElasticsearchMetric extends ServiceMetric {
 
         MetricName gaugeName = nameFactory.gaugeNames(key).get(MetricSubType.DEFAULT);
         metricRegistry.gauge(gaugeName.name(), () -> () ->
-                LastMinutesCounterGauge.builder()
-                        .m1Count((long) (defaultMeter.getOneMinuteRate() * 60))
-                        .m5Count((long) (defaultMeter.getFiveMinuteRate() * 60 * 5))
-                        .m15Count((long) (defaultMeter.getFifteenMinuteRate() * 60 * 15))
-                        .build());
+            LastMinutesCounterGauge.builder()
+                .m1Count((long) (defaultMeter.getOneMinuteRate() * 60))
+                .m5Count((long) (defaultMeter.getFiveMinuteRate() * 60 * 5))
+                .m15Count((long) (defaultMeter.getFifteenMinuteRate() * 60 * 15))
+                .build());
     }
 }

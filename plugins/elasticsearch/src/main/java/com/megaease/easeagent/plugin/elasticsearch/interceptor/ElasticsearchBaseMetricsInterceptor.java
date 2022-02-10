@@ -49,4 +49,8 @@ public abstract class ElasticsearchBaseMetricsInterceptor extends ElasticsearchB
     public String getType() {
         return Order.METRIC.getName();
     }
+
+    public ElasticsearchMetric getElasticsearchMetric() {
+        return elasticsearchMetric;
+    }
 }
