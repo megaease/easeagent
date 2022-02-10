@@ -20,9 +20,15 @@ package com.megaease.easeagent.plugin.api.context;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.utils.SystemClock;
 
+import java.util.Map;
+
 public class ContextUtils {
     private static final String BEGIN_TIME = ContextUtils.class.getSimpleName() + ".beginTime";
     private static final String END_TIME = ContextUtils.class.getSimpleName() + ".endTime";
+
+    public static void setBeginTime(Context context) {
+        context.put(BEGIN_TIME, SystemClock.now());
+    }
 
     public static Long getBeginTime(Context context) {
         return context.get(BEGIN_TIME);

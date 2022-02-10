@@ -92,6 +92,7 @@ public class ElasticsearchCtxUtils {
         }
         if (throwable != null) {
             span.error(throwable);
+            span.tag("error", throwable.getMessage());
         } else {
             if (!checkSuccess(response, null)) {
                 if (response != null) {

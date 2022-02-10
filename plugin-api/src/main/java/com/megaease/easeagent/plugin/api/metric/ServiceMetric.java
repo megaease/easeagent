@@ -54,4 +54,12 @@ public abstract class ServiceMetric {
     public Timer timer(String key, MetricSubType subType) {
         return metricRegistry.timer(nameFactory.timerName(key, subType));
     }
+
+    public MetricRegistry getMetricRegistry() {
+        return metricRegistry;
+    }
+
+    public NameFactory getNameFactory() {
+        return nameFactory;
+    }
 }
