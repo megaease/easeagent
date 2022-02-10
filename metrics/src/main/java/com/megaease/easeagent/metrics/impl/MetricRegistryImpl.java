@@ -109,6 +109,10 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
         return getOrAdd(name, MetricInstance.TIMER, TIMERS);
     }
 
+    public MetricRegistry getMetricRegistry() {
+        return metricRegistry;
+    }
+
     public static class GaugeSupplier implements MetricRegistry.MetricSupplier<com.codahale.metrics.Gauge> {
         private final MetricSupplier<Gauge> supplier;
 
