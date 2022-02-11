@@ -29,7 +29,6 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.mongodb.interceptor.MongoMetric;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.mongodb.ServerAddress;
 import com.mongodb.connection.ClusterId;
@@ -68,6 +67,7 @@ public class MongoBaseTest {
         IPluginConfig iPluginConfig = mock(IPluginConfig.class);
         when(iPluginConfig.enabled()).thenReturn(true);
         when(iPluginConfig.namespace()).thenReturn("mongodb");
+        when(iPluginConfig.domain()).thenReturn("observability");
         config.onChange(null, iPluginConfig);
         Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);

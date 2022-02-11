@@ -22,7 +22,6 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.mongodb.interceptor.MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor;
-import com.megaease.easeagent.plugin.mongodb.interceptor.MongoInternalConnectionSendAndReceiveAsync4TraceInterceptor;
 import com.megaease.easeagent.plugin.mongodb.interceptor.MongoReactiveInitMetricInterceptor;
 import com.megaease.easeagent.plugin.mongodb.interceptor.listener.MongoMetricCommandListener;
 import com.mongodb.event.CommandFailedEvent;
@@ -52,7 +51,6 @@ public class MongoReactiveMetricTest extends MongoBaseTest {
         interceptor = new MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor();
         initMetricInterceptor = new MongoReactiveInitMetricInterceptor();
         initMetricInterceptor.init(config, "", "", "");
-        interceptor.init(config, "", "", "");
         listener = new MongoMetricCommandListener(this.config, initMetricInterceptor.getMongoMetric());
     }
 
