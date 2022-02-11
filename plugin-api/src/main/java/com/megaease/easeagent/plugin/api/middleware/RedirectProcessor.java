@@ -76,6 +76,9 @@ public class RedirectProcessor {
     }
 
     private static String getRemote(Redirect key, String uris) {
+        if (!key.hasConfig()) {
+            return null;
+        }
         String remote = INSTANCE.getRedirected(key);
         if (remote == null) {
             return null;

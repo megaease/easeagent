@@ -44,7 +44,7 @@ public class KafkaMetric extends ServiceMetric {
     }
 
 
-    public void meter(String topic, MetricSubType... meterTypes) {
+    private void countMeter(String topic, MetricSubType... meterTypes) {
         for (MetricSubType meterType : meterTypes) {
             Meter meter = this.metricRegistry.meter(nameFactory.meterName(topic, meterType));
             if (meter != null) {
@@ -54,21 +54,21 @@ public class KafkaMetric extends ServiceMetric {
     }
 
     void producerStop(long beginTime, String topic) {
-        meter(topic, MetricSubType.PRODUCER);
+        countMeter(topic, MetricSubType.PRODUCER);
         Timer timer = this.metricRegistry.timer(nameFactory.timerName(topic, MetricSubType.PRODUCER));
-        timer.update(beginTime, TimeUnit.MILLISECONDS);
+        timer.update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
         Counter counter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.PRODUCER));
         counter.inc();
     }
 
     public void errorProducer(String topic) {
-        meter(topic, MetricSubType.PRODUCER_ERROR);
+        countMeter(topic, MetricSubType.PRODUCER_ERROR);
         Counter counter = metricRegistry.counter(this.nameFactory.counterName(topic, MetricSubType.PRODUCER_ERROR));
         counter.inc();
     }
 
     public Timer.Context consumeStart(String topic) {
-        meter(topic, MetricSubType.CONSUMER);// meter
+        countMeter(topic, MetricSubType.CONSUMER);// meter
         Timer timer = this.metricRegistry.timer(nameFactory.timerName(topic, MetricSubType.CONSUMER)); //timer
         return timer.time();
     }
@@ -80,18 +80,18 @@ public class KafkaMetric extends ServiceMetric {
     }
 
     public void consumeError(String topic) {
-        meter(topic, MetricSubType.CONSUMER_ERROR);
+        countMeter(topic, MetricSubType.CONSUMER_ERROR);
         Counter errorCounter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
         errorCounter.inc();
     }
 
     public void consume(String topic, long beginTime, boolean success) {
-        meter(topic, MetricSubType.CONSUMER);
+        countMeter(topic, MetricSubType.CONSUMER);
         this.metricRegistry.timer(nameFactory.timerName(topic, MetricSubType.CONSUMER)).update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
         Counter counter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.CONSUMER));
         counter.inc();
         if (!success) {
-            meter(topic, MetricSubType.CONSUMER_ERROR);
+            countMeter(topic, MetricSubType.CONSUMER_ERROR);
             Counter errorCounter = metricRegistry.counter(nameFactory.counterName(topic, MetricSubType.CONSUMER_ERROR));
             errorCounter.inc();
         }

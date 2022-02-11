@@ -27,7 +27,7 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class LettuceRedisClientConstructInterceptorTest {
 
@@ -39,11 +39,11 @@ public class LettuceRedisClientConstructInterceptorTest {
         RedisClient redisClient = RedisClient.create(r);
         RedisUtils.mockRedirect(() -> {
             MethodInfo methodInfo = MethodInfo.builder().invoker(redisClient).build();
-            lettuceRedisClientConstructInterceptor.before(methodInfo, EaseAgent.getContext());
+            lettuceRedisClientConstructInterceptor.doAfter(methodInfo, EaseAgent.getContext());
             RedisURI redisURI = RedisClientUtils.getRedisURI((RedisClient) methodInfo.getInvoker(), null);
             assertEquals(TestConst.REDIRECT_HOST, redisURI.getHost());
             assertEquals(TestConst.REDIRECT_PORT, redisURI.getPort());
-            assertEquals(TestConst.REDIRECT_PASSWORD, redisURI.getPassword());
+            assertEquals(TestConst.REDIRECT_PASSWORD, new String(redisURI.getPassword()));
         });
     }
 

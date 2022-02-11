@@ -44,6 +44,7 @@ import java.util.function.Supplier;
 public class MetricProviderImpl implements AgentReportAware, ConfigAware, MetricProvider {
     @SuppressWarnings("unused")
     private Config config;
+    private static final List<com.megaease.easeagent.plugin.api.metric.MetricRegistry> REGISTRY_LIST = new ArrayList<>();
     private AgentReport agentReport;
     private Supplier<Map<String, Object>> additionalAttributes;
 
@@ -103,12 +104,18 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
                 reporter::report);
             autoRefreshReporter.run();
 
-            return MetricRegistryImpl.build(metricRegistry);
+            com.megaease.easeagent.plugin.api.metric.MetricRegistry result = MetricRegistryImpl.build(metricRegistry);
+            REGISTRY_LIST.add(result);
+            return result;
         }
 
         @Override
         public Reporter reporter(IPluginConfig config) {
             return agentReport.metricReporter().reporter(config);
         }
+    }
+
+    public static List<com.megaease.easeagent.plugin.api.metric.MetricRegistry> getRegistryList() {
+        return REGISTRY_LIST;
     }
 }

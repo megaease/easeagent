@@ -17,22 +17,58 @@
 
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.servicename.Const;
+import com.megaease.easeagent.plugin.servicename.ServiceNamePlugin;
+import com.megaease.easeagent.plugin.servicename.ServiceNamePluginConfig;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class BaseServiceNameInterceptorTest {
 
+    public static void initInterceptor(Interceptor interceptor) {
+        ServiceNamePlugin plugin = new ServiceNamePlugin();
+        IPluginConfig config = EaseAgent.getConfig(plugin.getDomain(), plugin.getNamespace(), interceptor.getType());
+        interceptor.init(config, "", "", "");
+    }
+
+
     @Test
     public void init() {
+        MockBaseServiceNameInterceptor mockBaseServiceNameInterceptor = new MockBaseServiceNameInterceptor();
+        initInterceptor(mockBaseServiceNameInterceptor);
+        ServiceNamePluginConfig serviceNamePluginConfig = mockBaseServiceNameInterceptor.getConfig();
+        assertEquals(Const.DEFAULT_PROPAGATE_HEAD, serviceNamePluginConfig.getPropagateHead());
     }
 
     @Test
     public void order() {
+        MockBaseServiceNameInterceptor mockBaseServiceNameInterceptor = new MockBaseServiceNameInterceptor();
+        assertEquals(Order.HIGH.getOrder(), mockBaseServiceNameInterceptor.order());
     }
 
     @Test
     public void getType() {
+        MockBaseServiceNameInterceptor mockBaseServiceNameInterceptor = new MockBaseServiceNameInterceptor();
+        assertEquals("addServiceNameHead", mockBaseServiceNameInterceptor.getType());
+    }
 
+    static class MockBaseServiceNameInterceptor extends BaseServiceNameInterceptor {
+
+        @Override
+        public void before(MethodInfo methodInfo, Context context) {
+
+        }
+
+        public ServiceNamePluginConfig getConfig() {
+            return config;
+        }
     }
 }

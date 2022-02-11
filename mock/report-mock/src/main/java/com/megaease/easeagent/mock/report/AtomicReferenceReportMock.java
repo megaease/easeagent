@@ -17,19 +17,17 @@
 
 package com.megaease.easeagent.mock.report;
 
-import zipkin2.Span;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AtomicReferenceReportMock implements SpanReportMock {
-    AtomicReference<Span> spanAtomicReference = new AtomicReference<>();
+    AtomicReference<MockSpan> spanAtomicReference = new AtomicReference<>();
 
     @Override
-    public void report(Span span) {
+    public void report(MockSpan span) {
         spanAtomicReference.set(span);
     }
 
-    public Span get() {
+    public MockSpan get() {
         return spanAtomicReference.get();
     }
 }

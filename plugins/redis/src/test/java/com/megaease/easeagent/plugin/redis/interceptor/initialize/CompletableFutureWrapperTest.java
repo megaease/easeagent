@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.initialize;
 
-import io.lettuce.core.ConnectionFuture;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,8 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
@@ -85,9 +82,10 @@ public class CompletableFutureWrapperTest {
     public void complete() throws ExecutionException, InterruptedException {
         CompletableFutureWrapper<DynamicFieldAccessorObj> completableFutureWrapper = createOne();
         DynamicFieldAccessorObj dynamicFieldAccessorObj = new DynamicFieldAccessorObj();
+        dynamicFieldAccessorObj.setChannelWriter(new DynamicFieldAccessorObj());
         completableFutureWrapper.complete(dynamicFieldAccessorObj);
         checkDynamicFieldAccessorObj(dynamicFieldAccessorObj);
-        checkDynamicFieldAccessorObj(completableFutureWrapper.get());
+        assertNotSame(dynamicFieldAccessorObj, completableFutureWrapper.get());
     }
 
     @Test
@@ -514,7 +512,7 @@ public class CompletableFutureWrapperTest {
     public void toCompletableFuture() throws ExecutionException, InterruptedException {
         CompletableFutureWrapper<DynamicFieldAccessorObj> completableFutureWrapper = createOne();
         CompletableFuture<DynamicFieldAccessorObj> c = completableFutureWrapper.toCompletableFuture();
-        checkDynamicFieldAccessorObj(c.get());
+        assertNull(c.get().getValue());
     }
 
     @Test

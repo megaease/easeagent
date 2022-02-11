@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
@@ -50,6 +51,16 @@ public class PluginMetricsConfigTest {
     public void getInterval() {
         assertEquals(30, pluginMetricsConfig.getInterval());
     }
+
+    @Test
+    public void getIntervalUnit() {
+        assertEquals(TimeUnit.SECONDS, pluginMetricsConfig.getIntervalUnit());
+
+        PluginConfig pluginConfig2 = ConfigMock.getPluginConfigManager().getConfig(ConfigConst.OBSERVABILITY, TestConst.NAMESPACE2, ConfigConst.PluginID.METRIC);
+        PluginMetricsConfig pluginMetricsConfig2 = new PluginMetricsConfig(pluginConfig2);
+        assertEquals(TimeUnit.MILLISECONDS, pluginMetricsConfig2.getIntervalUnit());
+    }
+
 
     @Test
     public void setIntervalChangeCallback() {

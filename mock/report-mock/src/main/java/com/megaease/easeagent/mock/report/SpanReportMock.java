@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.mock.report;
 
-import zipkin2.Span;
-
 public interface SpanReportMock {
-    void report(Span span);
+    void report(MockSpan span);
 }

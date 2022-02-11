@@ -22,7 +22,6 @@ import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
 import com.megaease.easeagent.plugin.api.middleware.Redirect;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
-import com.megaease.easeagent.plugin.redis.interceptor.TestConst;
 
 public class RedisUtils {
     public static void mockRedirect(Runnable r) {
@@ -30,6 +29,7 @@ public class RedisUtils {
         try {
             MockSystemEnv.set(MiddlewareConstants.ENV_REDIS, String.format("{\"uris\":\"%s:%s\", \"password\": \"%s\"}", TestConst.REDIRECT_HOST, TestConst.REDIRECT_PORT, TestConst.REDIRECT_PASSWORD));
             AgentFieldReflectAccessor.setFieldValue(Redirect.REDIS, "config", ResourceConfig.getResourceConfig(Redirect.REDIS.getEnv(), Redirect.REDIS.isNeedParse()));
+            r.run();
         } finally {
             AgentFieldReflectAccessor.setFieldValue(Redirect.REDIS, "config", oldConfig);
         }

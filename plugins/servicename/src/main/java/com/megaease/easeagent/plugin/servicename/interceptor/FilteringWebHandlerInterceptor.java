@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.servicename.Const;
 import com.megaease.easeagent.plugin.servicename.advice.FilteringWebHandlerAdvice;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.StringUtils;
@@ -30,7 +31,7 @@ import org.springframework.web.server.ServerWebExchange;
 import java.net.URI;
 
 @AdviceTo(value = FilteringWebHandlerAdvice.class, qualifier = "servicename")
-public class FilteringWebHandlerInterceptor  extends BaseServiceNameInterceptor {
+public class FilteringWebHandlerInterceptor extends BaseServiceNameInterceptor {
     private static final Logger LOGGER = EaseAgent.getLogger(FilteringWebHandlerInterceptor.class);
 
     @Override
@@ -41,7 +42,7 @@ public class FilteringWebHandlerInterceptor  extends BaseServiceNameInterceptor 
                 LOGGER.debug("enter method [{}]", method);
             }
             ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-            org.springframework.cloud.gateway.route.Route route = exchange.getAttribute("org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRoute");
+            org.springframework.cloud.gateway.route.Route route = exchange.getAttribute(Const.SERVER_WEB_EXCHANGE_ROUTE_ATTRIBUTE);
             if (route == null) {
                 return;
             }

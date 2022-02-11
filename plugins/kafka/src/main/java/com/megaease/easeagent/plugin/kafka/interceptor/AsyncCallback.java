@@ -24,9 +24,9 @@ public abstract class AsyncCallback implements Callback {
     protected final Callback delegate;
     private final boolean async;
 
-    public AsyncCallback(Callback delegate, boolean async) {
+    public AsyncCallback(Callback delegate) {
         this.delegate = delegate;
-        this.async = async;
+        this.async = isAsync(delegate);
     }
 
     public boolean isAsync() {

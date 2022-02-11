@@ -56,6 +56,6 @@ public class AutoRefreshReporter implements Runnable {
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build();
         reporter.setConverter(converter);
-        reporter.start(config.getInterval(), TimeUnit.SECONDS);
+        reporter.start(config.getInterval(), config.getIntervalUnit());
     }
 }

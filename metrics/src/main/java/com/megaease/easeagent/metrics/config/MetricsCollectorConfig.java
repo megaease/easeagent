@@ -17,14 +17,16 @@
 
 package com.megaease.easeagent.metrics.config;
 
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigUtils;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability;
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.join;
 
-public class MetricsCollectorConfig implements MetricsConfig{
+public class MetricsCollectorConfig implements MetricsConfig {
     private volatile boolean globalEnabled;
     private volatile boolean enabled;
     private volatile int interval;
@@ -44,6 +46,11 @@ public class MetricsCollectorConfig implements MetricsConfig{
     @Override
     public boolean isEnabled() {
         return globalEnabled && enabled;
+    }
+
+    @Override
+    public TimeUnit getIntervalUnit() {
+        return TimeUnit.SECONDS;
     }
 
     @Override

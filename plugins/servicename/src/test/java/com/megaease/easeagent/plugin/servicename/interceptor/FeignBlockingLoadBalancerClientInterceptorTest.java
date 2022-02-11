@@ -17,13 +17,52 @@
 
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.trace.Getter;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.servicename.Const;
+import com.megaease.easeagent.plugin.servicename.ServiceNamePlugin;
+import feign.Request;
+import feign.RequestTemplate;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+@MockEaseAgent
 public class FeignBlockingLoadBalancerClientInterceptorTest {
+
 
     @Test
     public void before() {
+        FeignBlockingLoadBalancerClientInterceptor interceptor = new FeignBlockingLoadBalancerClientInterceptor();
+        BaseServiceNameInterceptorTest.initInterceptor(interceptor);
+        EaseAgent.getContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
+
+
+        RequestTemplate requestTemplate = new RequestTemplate();
+        String host = "TEST-SERVER";
+        Request request = Request.create(
+            Request.HttpMethod.GET,
+            "http://" + host,
+            requestTemplate.headers(),
+            Request.Body.create(requestTemplate.body()),
+            requestTemplate
+        );
+
+        MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{request}).build();
+
+        interceptor.before(methodInfo, EaseAgent.getContext());
+
+        Request newRequest = (Request) methodInfo.getArgs()[0];
+        CheckUtils.check(name -> {
+            Collection<String> head = newRequest.headers().get(name);
+            assertNotNull(head);
+            return head.iterator().next();
+        }, host);
     }
 }

@@ -43,7 +43,7 @@ import java.util.function.Predicate;
 public class ReportMock {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportMock.class);
     private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(ConfigMock.getCONFIGS()));
-    private static final AtomicReference<Span> LAST_SPAN = new AtomicReference<>();
+    private static final AtomicReference<MockSpan> LAST_SPAN = new AtomicReference<>();
     private static volatile SpanReportMock spanReportMock = null;
     private static volatile Reporter metricReportMock = null;
     private static volatile JsonReporter metricJsonReport = null;
@@ -101,11 +101,12 @@ public class ReportMock {
                 LOGGER.warn("span<traceId({}), id({}), name({}), kind({})> not start(), skip it.", span.traceId(), span.id(), span.name(), span.kind());
                 return;
             }
-            LAST_SPAN.set(span);
+            MockSpan mockSpan = new ZipkinMockSpanImpl(span);
+            LAST_SPAN.set(mockSpan);
             try {
                 SpanReportMock spanReportMock = ReportMock.spanReportMock;
                 if (spanReportMock != null) {
-                    spanReportMock.report(span);
+                    spanReportMock.report(mockSpan);
                 }
             } catch (Exception e) {
                 LOGGER.error("mock span report : {}", e);
@@ -163,7 +164,7 @@ public class ReportMock {
         }
     }
 
-    public static void runForSpan(Runnable runnable, Consumer<Span> callback) {
+    public static void runForSpan(Runnable runnable, Consumer<MockSpan> callback) {
         AtomicReferenceReportMock atomicReferenceReportMock = new AtomicReferenceReportMock();
         setSpanReportMock(atomicReferenceReportMock);
         try {
@@ -175,11 +176,7 @@ public class ReportMock {
     }
 
     public static MockSpan getLastSpan() {
-        Span span = LAST_SPAN.get();
-        if (span == null) {
-            return null;
-        }
-        return new ZipkinMockSpanImpl(span);
+        return LAST_SPAN.get();
     }
 
     public static void cleanLastSpan() {

@@ -25,7 +25,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
  * copy from zipkin.kafka.brave
  */
 // intentionally not yet public until we add tag parsing functionality
- final class KafkaProducerRequest implements MessagingRequest {
+final class KafkaProducerRequest implements MessagingRequest {
 //    static final RemoteGetter<KafkaProducerRequest> GETTER =
 //            new RemoteGetter<KafkaProducerRequest>() {
 //                @Override
@@ -107,7 +107,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
     @Override
     public boolean cacheScope() {
-        return true;
+        return false;
     }
 
     @Override

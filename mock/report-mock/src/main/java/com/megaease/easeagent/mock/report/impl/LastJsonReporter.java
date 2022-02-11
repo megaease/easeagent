@@ -90,7 +90,6 @@ public class LastJsonReporter implements JsonReporter {
         return reference.get();
     }
 
-
     public List<Map<String, Object>> waitOne(long time, TimeUnit unit) {
         List<Map<String, Object>> result = reference.get();
         if (result != null) {

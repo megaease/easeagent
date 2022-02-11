@@ -27,7 +27,7 @@ public class TraceCallback extends AsyncCallback {
     final Span span;
 
     public TraceCallback(Span span, Callback delegate) {
-        super(delegate, isAsync(delegate));
+        super(delegate);
         this.span = span;
     }
 
@@ -38,7 +38,7 @@ public class TraceCallback extends AsyncCallback {
             span.finish();
             return;
         }
-        try (Scope scope = span.maybeScope()) {
+        try (Scope ignored = span.maybeScope()) {
             this.delegate.onCompletion(metadata, exception);
         } finally {
             span.finish();
