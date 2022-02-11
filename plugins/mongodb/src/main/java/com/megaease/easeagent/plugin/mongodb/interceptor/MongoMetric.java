@@ -76,10 +76,9 @@ public class MongoMetric extends ServiceMetric {
         metricRegistry.timer(this.nameFactory.timerName(key, MetricSubType.DEFAULT)).update(duration, TimeUnit.MILLISECONDS);
         final Meter defaultMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.DEFAULT));
         final Counter defaultCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT));
-        final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
-        final Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
-
         if (!success) {
+            final Meter errorMeter = metricRegistry.meter(nameFactory.meterName(key, MetricSubType.ERROR));
+            final Counter errorCounter = metricRegistry.counter(nameFactory.counterName(key, MetricSubType.ERROR));
             errorMeter.mark();
             errorCounter.inc();
         }

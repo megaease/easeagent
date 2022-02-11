@@ -96,6 +96,25 @@ public class TraceHelper {
         if (span == null) {
             return;
         }
+        BsonDocument bsonDocument = event.getResponse();
+        BsonValue writeErrors = bsonDocument.get("writeErrors");
+        boolean success = writeErrors == null;
+        String msg = null;
+        if (!success) {
+            if (writeErrors.isArray()) {
+                for (BsonValue bsonValue : writeErrors.asArray()) {
+                    if (bsonValue.isDocument()) {
+                        BsonDocument document = bsonValue.asDocument();
+                        BsonValue errmsgBsonValue = document.get("errmsg");
+                        msg = errmsgBsonValue.asString().getValue();
+                        break;
+                    }
+                }
+            } else {
+                msg = "unknown";
+            }
+            span.tag("error", msg);
+        }
         span.finish();
     }
 

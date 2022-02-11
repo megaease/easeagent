@@ -52,7 +52,7 @@ public class MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor implem
         return Order.METRIC.getName();
     }
 
-    static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
+    public static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
 
 //        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
 
