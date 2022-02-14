@@ -29,7 +29,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -50,14 +49,14 @@ public class TimerImplTest {
         Timer timer = TimerImpl.build(null);
         assertTrue(timer instanceof NoOpMetrics.NoopTimer);
         Pair<Timer, com.codahale.metrics.Timer> pair = buildTimer("build");
-        assertTrue(pair.getO1() instanceof TimerImpl);
+        assertTrue(pair.getKey() instanceof TimerImpl);
     }
 
 
     public void test(String name) {
         Pair<Timer, com.codahale.metrics.Timer> pair = buildTimer(name);
 
-        Timer timer = pair.getO1();
+        Timer timer = pair.getKey();
 
         long duration = 10;
         timer.update(duration, TimeUnit.MILLISECONDS);
@@ -214,7 +213,7 @@ public class TimerImplTest {
     private void testRate(String name) {
         Pair<Timer, com.codahale.metrics.Timer> pair = buildTimer(name);
 
-        Timer timer = pair.getO1();
+        Timer timer = pair.getKey();
         Meter meter = AgentFieldReflectAccessor.getFieldValue(timer.unwrap(), "meter");
         assertNotNull(meter);
 

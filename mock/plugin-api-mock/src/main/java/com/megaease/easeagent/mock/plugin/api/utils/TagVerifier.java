@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.utils;
+package com.megaease.easeagent.mock.plugin.api.utils;
 
-import javafx.util.Pair;
+import com.megaease.easeagent.plugin.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.List;

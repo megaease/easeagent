@@ -17,17 +17,10 @@
 
 package com.megaease.easeagent.metrics.impl;
 
-import com.codahale.metrics.Clock;
-import com.megaease.easeagent.plugin.api.metric.Counter;
-import com.megaease.easeagent.plugin.api.metric.Histogram;
 import com.megaease.easeagent.plugin.api.metric.Meter;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
-import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.utils.Pair;
 import org.junit.Test;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.*;
 
@@ -47,13 +40,13 @@ public class MeterImplTest {
         Meter meter = MeterImpl.build(null);
         assertTrue(meter instanceof NoOpMetrics.NoopMeter);
         Pair<Meter, com.codahale.metrics.Meter> pair = buildMeter("build");
-        assertTrue(pair.getO1() instanceof MeterImpl);
+        assertTrue(pair.getKey() instanceof MeterImpl);
     }
 
 
     private void test(String name) {
         Pair<Meter, com.codahale.metrics.Meter> pair = buildMeter(name);
-        Meter meter = pair.getO1();
+        Meter meter = pair.getKey();
         int count = 0;
         for (int i = 0; i < 15 * 60 / 5; i++) {
             meter.mark();
@@ -62,7 +55,7 @@ public class MeterImplTest {
             meter.mark(10 + i);
             count += 10 + i;
             assertEquals(count, meter.getCount());
-            MetricTestUtils.nextWindow(pair.getO2());
+            MetricTestUtils.nextWindow(pair.getValue());
         }
         double meanRate = meter.getMeanRate();
         double oneMeanRate = meter.getOneMinuteRate();
