@@ -42,21 +42,6 @@ public class MetricHelper {
         long duration = System.currentTimeMillis() - startTime;
         mongoMetric.collectMetric(key, duration, success);
     }
-//
-//    public static void processAfter(Context context, AutoRefreshPluginConfigImpl config,
-//                                    MongoMetric mongoMetric,
-//                                    CommandSucceededEvent commandSucceededEvent,
-//                                    CommandFailedEvent commandFailedEvent
-//    ) {
-//        if (commandSucceededEvent != null) {
-//            BsonDocument bsonDocument = commandSucceededEvent.getResponse();
-//            BsonValue writeErrors = bsonDocument.get("writeErrors");
-//            boolean success = writeErrors == null;
-//            MetricHelper.processAfter(context, config, mongoMetric, commandSucceededEvent.getCommandName(), success);
-//        } else if (commandFailedEvent != null) {
-//            MetricHelper.processAfter(context, config, mongoMetric, commandFailedEvent.getCommandName(), false);
-//        }
-//    }
 
     public static void commandSucceeded(Context context, AutoRefreshPluginConfigImpl config,
                                         MongoMetric mongoMetric,

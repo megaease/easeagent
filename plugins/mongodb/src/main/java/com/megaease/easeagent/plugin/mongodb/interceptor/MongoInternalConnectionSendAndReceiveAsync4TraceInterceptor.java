@@ -50,9 +50,9 @@ public class MongoInternalConnectionSendAndReceiveAsync4TraceInterceptor impleme
         return Order.TRACING.getName();
     }
 
-    static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
+    public static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
 
-//        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
+        //        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
         private final SingleResultCallback<T> delegate;
         private final MongoCtx mongoCtx;
 
