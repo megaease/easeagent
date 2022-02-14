@@ -43,7 +43,7 @@ import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Collections.list;
 
-public final class AppendBootstrapClassLoaderSearch {
+public final class AppendBootstrapClassloaderSearch {
     private static final File TMP_FILE = new File(
         AccessController.doPrivileged(
             new PrivilegedAction<String>() {
@@ -61,7 +61,7 @@ public final class AppendBootstrapClassLoaderSearch {
     }
 
     private static Map<TypeDescription, byte[]> types(Set<String> names) {
-        final ClassLoader loader = AppendBootstrapClassLoaderSearch.class.getClassLoader();
+        final ClassLoader loader = AppendBootstrapClassloaderSearch.class.getClassLoader();
         final ClassFileLocator locator = ClassFileLocator.ForClassLoader.of(loader);
         final TypePool pool = TypePool.Default.of(locator);
 
@@ -77,7 +77,7 @@ public final class AppendBootstrapClassLoaderSearch {
     }
 
     private static Set<String> findClassAnnotatedAutoService(Class<?> cls) throws IOException {
-        final ClassLoader loader = AppendBootstrapClassLoaderSearch.class.getClassLoader();
+        final ClassLoader loader = AppendBootstrapClassloaderSearch.class.getClassLoader();
 
         return from(list(loader.getResources("META-INF/services/" + cls.getName())))
             .transform(input -> {
@@ -102,6 +102,6 @@ public final class AppendBootstrapClassLoaderSearch {
             .toSet();
     }
 
-    private AppendBootstrapClassLoaderSearch() {
+    private AppendBootstrapClassloaderSearch() {
     }
 }
