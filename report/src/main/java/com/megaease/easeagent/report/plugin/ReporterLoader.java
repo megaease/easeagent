@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
+@SuppressWarnings("rawtypes")
 public class ReporterLoader {
     static Logger logger = LoggerFactory.getLogger(ReporterLoader.class);
 

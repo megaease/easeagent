@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  */
-package com.megaease.easeagent.report.trace;
+package com.megaease.easeagent.plugin;
 
-public interface TraceReporter {
+public interface AppendBootstrapLoader {
 }

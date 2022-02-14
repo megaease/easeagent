@@ -20,10 +20,10 @@ package com.megaease.easeagent.plugin.report;
 
 import java.io.IOException;
 
+@SuppressWarnings("unused")
 public interface Call<V> {
     V execute() throws IOException;
 
     default void enqueue(Callback<V> cb) {
-        return;
     }
 }

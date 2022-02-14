@@ -18,18 +18,19 @@
 package com.megaease.easeagent.report.encoder.span;
 
 import com.google.common.collect.ImmutableList;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import org.apache.commons.lang3.mutable.MutableInt;
 import zipkin2.Span;
 import zipkin2.internal.WriteBuffer;
 
 import java.util.Collection;
 
-public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
+public class AgentV2SpanWriter implements WriteBuffer.Writer<ReportSpan> {
 
-    public final Collection<WriteBuffer.Writer<Span>> writerList;
+    public final Collection<WriteBuffer.Writer<ReportSpan>> writerList;
 
     public AgentV2SpanWriter(GlobalExtrasSupplier extrasSupplier) {
-        writerList = ImmutableList.<WriteBuffer.Writer<Span>>builder()
+        writerList = ImmutableList.<WriteBuffer.Writer<ReportSpan>>builder()
                 .add(new AgentV2SpanBaseWriter())
                 .add(new AgentV2SpanLocalEndpointWriter())
                 .add(new AgentV2SpanRemoteEndpointWriter())
@@ -40,7 +41,7 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
     }
 
 
-    public int sizeInBytes(Span value) {
+    public int sizeInBytes(ReportSpan value) {
         final MutableInt size = new MutableInt(1);
         writerList.forEach(w -> size.add(w.sizeInBytes(value)));
         size.add(1);
@@ -48,7 +49,7 @@ public class AgentV2SpanWriter implements WriteBuffer.Writer<Span> {
     }
 
     @Override
-    public void write(Span value, WriteBuffer buffer) {
+    public void write(ReportSpan value, WriteBuffer buffer) {
         buffer.writeByte(123);
         writerList.forEach(w -> w.write(value, buffer));
         buffer.writeByte(125);

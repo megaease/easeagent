@@ -18,6 +18,8 @@
 package com.megaease.easeagent.report.plugin;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.report.ByteWrapper;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
 
 import java.nio.charset.StandardCharsets;
@@ -42,15 +44,15 @@ public class NoOpEncoder<S> implements Encoder<S> {
     }
 
     @Override
-    public byte[] encode(S input) {
-        return input.toString().getBytes(StandardCharsets.US_ASCII);
+    public EncodedData encode(S input) {
+        return new ByteWrapper(input.toString().getBytes(StandardCharsets.US_ASCII));
     }
 
     @Override
-    public byte[] encodeList(List<byte[]> encodedItems) {
+    public EncodedData encodeList(List<EncodedData> encodedItems) {
         StringBuilder sb = new StringBuilder();
         encodedItems.forEach(sb::append);
-        return sb.toString().getBytes(StandardCharsets.US_ASCII);
+        return new ByteWrapper(sb.toString().getBytes(StandardCharsets.US_ASCII));
     }
 
     @Override

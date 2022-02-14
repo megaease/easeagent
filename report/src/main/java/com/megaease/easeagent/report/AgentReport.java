@@ -17,11 +17,11 @@
 
 package com.megaease.easeagent.report;
 
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.report.metric.MetricReporter;
-import zipkin2.Span;
 
 public interface AgentReport {
-    void report(Span span);
+    void report(ReportSpan span);
 
     MetricReporter metricReporter();
 }

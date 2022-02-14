@@ -18,9 +18,10 @@
 package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Reporter;
+import com.megaease.easeagent.plugin.report.EncodedData;
 
 public class NoOpReporter implements Reporter {
-    public static NoOpReporter NO_OP_REPORTER = new NoOpReporter();
+    public static final NoOpReporter NO_OP_REPORTER = new NoOpReporter();
 
     @Override
     public void report(String msg) {
@@ -28,7 +29,7 @@ public class NoOpReporter implements Reporter {
     }
 
     @Override
-    public void report(byte[] msg) {
+    public void report(EncodedData msg) {
         // ignored
     }
 }

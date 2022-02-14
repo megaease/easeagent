@@ -25,7 +25,9 @@ import com.megaease.easeagent.mock.report.impl.ZipkinMockSpanImpl;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.DefaultAgentReport;
 import com.megaease.easeagent.report.metric.MetricReporter;
@@ -43,7 +45,8 @@ import java.util.function.Predicate;
 public class ReportMock {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportMock.class);
     private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(ConfigMock.getCONFIGS()));
-    private static final AtomicReference<MockSpan> LAST_SPAN = new AtomicReference<>();
+
+    private static final AtomicReference<ReportSpan> LAST_SPAN = new AtomicReference<>();
     private static volatile SpanReportMock spanReportMock = null;
     private static volatile Reporter metricReportMock = null;
     private static volatile JsonReporter metricJsonReport = null;
@@ -95,18 +98,18 @@ public class ReportMock {
         }
 
         @Override
-        public void report(Span span) {
+        public void report(ReportSpan span) {
             agentReport.report(span);
             if (!SpanUtils.isValidSpan(span)) {
                 LOGGER.warn("span<traceId({}), id({}), name({}), kind({})> not start(), skip it.", span.traceId(), span.id(), span.name(), span.kind());
                 return;
             }
-            MockSpan mockSpan = new ZipkinMockSpanImpl(span);
-            LAST_SPAN.set(mockSpan);
+            // MockSpan mockSpan = new ZipkinMockSpanImpl(span);
+            LAST_SPAN.set(span);
             try {
                 SpanReportMock spanReportMock = ReportMock.spanReportMock;
                 if (spanReportMock != null) {
-                    spanReportMock.report(mockSpan);
+                    spanReportMock.report(span);
                 }
             } catch (Exception e) {
                 LOGGER.error("mock span report : {}", e);
@@ -159,12 +162,12 @@ public class ReportMock {
         }
 
         @Override
-        public void report(byte[] msg) {
-            this.report(new String(msg));
+        public void report(EncodedData msg) {
+            this.report(new String(msg.getData()));
         }
     }
 
-    public static void runForSpan(Runnable runnable, Consumer<MockSpan> callback) {
+    public static void runForSpan(Runnable runnable, Consumer<ReportSpan> callback) {
         AtomicReferenceReportMock atomicReferenceReportMock = new AtomicReferenceReportMock();
         setSpanReportMock(atomicReferenceReportMock);
         try {
@@ -175,7 +178,7 @@ public class ReportMock {
         }
     }
 
-    public static MockSpan getLastSpan() {
+    public static ReportSpan getLastSpan() {
         return LAST_SPAN.get();
     }
 

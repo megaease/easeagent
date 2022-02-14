@@ -18,7 +18,7 @@
 package com.megaease.easeagent.core.utils;
 
 import com.google.auto.service.AutoService;
-import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
+import com.megaease.easeagent.plugin.AppendBootstrapLoader;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -27,7 +27,7 @@ import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-@AutoService(AppendBootstrapClassLoaderSearch.class)
+@AutoService(AppendBootstrapLoader.class)
 @SuppressWarnings("unchecked")
 public class AgentArray<E> {
     private static final int DEFAULT_INIT_SIZE = 256;

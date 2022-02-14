@@ -27,7 +27,7 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.AccessPlugin;
-import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterPoints;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
@@ -36,7 +36,7 @@ import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@AdviceTo(value = DoFilterAdvice.class, qualifier = "default", plugin = AccessPlugin.class)
+@AdviceTo(value = DoFilterPoints.class, qualifier = "default", plugin = AccessPlugin.class)
 public class ServletHttpLogInterceptor extends BaseServletInterceptor {
     private static final String BEFORE_MARK = ServletHttpLogInterceptor.class.getName() + "$BeforeMark";
     private static final String AFTER_MARK = ServletHttpLogInterceptor.class.getName() + "$AfterMark";

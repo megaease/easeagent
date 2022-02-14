@@ -24,6 +24,7 @@ import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -49,9 +50,9 @@ public class HttpClient5DoExecuteInterceptorTest {
         ReportMock.cleanLastSpan();
         httpClient5DoExecuteInterceptor.before(methodInfo, context);
         httpClient5DoExecuteInterceptor.after(methodInfo, context);
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
@@ -62,7 +63,7 @@ public class HttpClient5DoExecuteInterceptorTest {
             mockSpan = ReportMock.getLastSpan();
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
-            assertNotNull(mockSpan.spanId());
+            assertNotNull(mockSpan.id());
         }
     }
 

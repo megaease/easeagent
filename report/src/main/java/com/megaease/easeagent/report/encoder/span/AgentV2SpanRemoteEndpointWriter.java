@@ -17,14 +17,16 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import zipkin2.Span;
 import zipkin2.internal.WriteBuffer;
 
-public class AgentV2SpanRemoteEndpointWriter extends AbstractAgentV2SpanEndpointWriter implements WriteBuffer.Writer<Span> {
+public class AgentV2SpanRemoteEndpointWriter extends AbstractAgentV2SpanEndpointWriter
+    implements WriteBuffer.Writer<ReportSpan> {
     static final String REMOTE_ENDPOINT_FIELD_NAME = ",\"remoteEndpoint\":";
 
     @Override
-    public int sizeInBytes(Span value) {
+    public int sizeInBytes(ReportSpan value) {
         if (value.remoteEndpoint() == null) {
             return 0;
         }
@@ -34,7 +36,7 @@ public class AgentV2SpanRemoteEndpointWriter extends AbstractAgentV2SpanEndpoint
     }
 
     @Override
-    public void write(Span value, WriteBuffer buffer) {
+    public void write(ReportSpan value, WriteBuffer buffer) {
         if (value.remoteEndpoint() == null) {
             return;
         }

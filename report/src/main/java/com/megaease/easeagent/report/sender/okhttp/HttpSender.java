@@ -21,6 +21,7 @@ import com.google.auto.service.AutoService;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.async.AgentThreadFactory;
 import com.megaease.easeagent.plugin.report.Call;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.plugin.utils.NoNull;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
@@ -45,7 +46,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Slf4j
 @AutoService(Sender.class)
 public class HttpSender implements Sender {
-    public static final String SENDER_NAME = "http";
+    public static final String SENDER_NAME = ZIPKIN_SENDER_NAME;
 
     private static final String AUTH_HEADER = "Authorization";
 
@@ -134,16 +135,22 @@ public class HttpSender implements Sender {
     }
 
     @Override
-    public Call<Void> send(byte[] encodedData) {
+    public Call<Void> send(EncodedData encodedData) {
         if (!enabled) {
             return NoOpCall.getInstance(Void.class);
         }
         Request request;
+
         try {
-            request = newRequest(new ByteRequestBody(encodedData));
+            if (encodedData instanceof RequestBody) {
+                request = newRequest((RequestBody)encodedData);
+            } else {
+                request = newRequest(new ByteRequestBody(encodedData.getData()));
+            }
         } catch (IOException e) {
             return NoOpCall.getInstance(Void.class);
         }
+
         return new HttpCall(client.newCall(request));
     }
 

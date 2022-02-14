@@ -21,6 +21,7 @@ import com.google.auto.service.AutoService;
 import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.Call;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.metric.MetricProps;
@@ -56,9 +57,9 @@ public class MetricKafkaSender implements Sender {
     }
 
     @Override
-    public Call<Void> send(byte[] encodedData) {
+    public Call<Void> send(EncodedData encodedData) {
         lazyInitLogger();
-        String msg = new String(encodedData);
+        String msg = new String(encodedData.getData());
         logger.info(msg);
         return new NoOpCall<>();
     }

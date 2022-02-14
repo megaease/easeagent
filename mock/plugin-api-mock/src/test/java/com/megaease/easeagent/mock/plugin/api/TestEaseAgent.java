@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,8 +50,8 @@ public class TestEaseAgent {
             }
 
             @Override
-            public void report(byte[] msg) {
-                message.set(new String(msg));
+            public void report(EncodedData msg) {
+                message.set(new String(msg.getData()));
             }
         });
         EaseAgent.metricRegistrySupplier.reporter(config).report("test");

@@ -21,26 +21,23 @@ import brave.Tracing;
 import brave.propagation.ThreadLocalCurrentTraceContext;
 import brave.sampler.CountingSampler;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
-import com.megaease.easeagent.plugin.bean.BeanProvider;
-import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.annotation.Injection;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.trace.ITracing;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
+import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
+import com.megaease.easeagent.plugin.bean.BeanProvider;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.plugin.utils.AdditionalAttributes;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
-import org.apache.commons.lang3.StringUtils;
-import zipkin2.Span;
-import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.Reporter;
-import zipkin2.reporter.brave.AsyncZipkinSpanHandler;
-import zipkin2.reporter.urlconnection.URLConnectionSender;
+import zipkin2.reporter.brave.ConvertZipkinSpanHandler;
 
 public class TracingProviderImpl implements BeanProvider, AgentReportAware, ConfigAware, AgentInitializingBean, TracingProvider {
     private static final String ENV_ZIPKIN_SERVER_URL = "ZIPKIN_SERVER_URL";
@@ -69,6 +66,8 @@ public class TracingProviderImpl implements BeanProvider, AgentReportAware, Conf
             .build();
 
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
+
+        /*
         String target = config.getString("observability.tracings.output.target");
         String zipkinUrl = config.getString("observability.tracings.output.target.zipkinUrl");
         Boolean compressionEnabled = config.getBoolean("observability.tracings.output.target.zipkin.compressionEnabled");
@@ -90,13 +89,17 @@ public class TracingProviderImpl implements BeanProvider, AgentReportAware, Conf
         } else {
             reporter = span -> agentReport.report(span);
         }
+        */
+
+        Reporter<ReportSpan> reporter;
+        reporter = span -> agentReport.report(span);
         this.tracing = Tracing.newBuilder()
             .localServiceName(getServiceName())
             .traceId128Bit(false)
             .sampler(CountingSampler.create(1))
             .addSpanHandler(new CustomTagsSpanHandler(this::getServiceName, AdditionalAttributes.getHostName()))
-            .addSpanHandler(AsyncZipkinSpanHandler
-                .newBuilder(reporter)
+            .addSpanHandler(ConvertZipkinSpanHandler
+                .builder(reporter)
                 .alwaysReportSpans(true)
                 .build()
             )

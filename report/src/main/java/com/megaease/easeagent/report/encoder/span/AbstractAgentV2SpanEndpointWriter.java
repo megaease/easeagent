@@ -17,12 +17,12 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
-import zipkin2.Endpoint;
-import zipkin2.Span;
+import com.megaease.easeagent.plugin.report.zipkin.Endpoint;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import zipkin2.internal.JsonEscaper;
 import zipkin2.internal.WriteBuffer;
 
-public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.Writer<Span> {
+public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.Writer<ReportSpan> {
 
     static final String SERVICE_NAME_FIELD_NAME = "\"serviceName\":\"";
     static final String IPV4_FIELD_NAME = "\"ipv4\":\"";
@@ -59,7 +59,7 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
             sizeInBytes += value.ipv6().length();
         }
 
-        int port = value.portAsInt();
+        int port = value.port();
         if (port != 0) {
             if (sizeInBytes != 1) {
                 ++sizeInBytes;
@@ -109,7 +109,7 @@ public abstract class AbstractAgentV2SpanEndpointWriter implements WriteBuffer.W
             wroteField = true;
         }
 
-        int port = value.portAsInt();
+        int port = value.port();
         if (port != 0) {
             if (wroteField) {
                 b.writeByte(',');

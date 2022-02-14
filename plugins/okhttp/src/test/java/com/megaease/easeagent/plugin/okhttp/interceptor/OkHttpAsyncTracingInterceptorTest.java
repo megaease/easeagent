@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -44,7 +45,7 @@ public class OkHttpAsyncTracingInterceptorTest {
     @Test
     public void doBefore() throws InterruptedException {
 
-        MockSpan mockSpan = runOne((call, callback) -> {
+        ReportSpan mockSpan = runOne((call, callback) -> {
             Response response = OkHttpTestUtils.responseBuilder(call)
                 .addHeader(TestConst.RESPONSE_TAG_NAME, TestConst.RESPONSE_TAG_VALUE)
                 .build();
@@ -55,7 +56,7 @@ public class OkHttpAsyncTracingInterceptorTest {
             }
         });
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
@@ -75,7 +76,7 @@ public class OkHttpAsyncTracingInterceptorTest {
             assertNotNull(mockSpan);
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
-            assertNotNull(mockSpan.spanId());
+            assertNotNull(mockSpan.id());
         }
 
         mockSpan = runOne((call, callback) -> {
@@ -84,7 +85,7 @@ public class OkHttpAsyncTracingInterceptorTest {
         assertNull(mockSpan);
     }
 
-    private static MockSpan runOne(final BiConsumer<Call, Callback> consumer) throws InterruptedException {
+    private static ReportSpan runOne(final BiConsumer<Call, Callback> consumer) throws InterruptedException {
         Call call = OkHttpTestUtils.buildCall();
         MethodInfo.MethodInfoBuilder methodInfoBuilder = MethodInfo.builder().invoker(call).args(new Object[]{
             new Callback() {

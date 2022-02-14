@@ -19,6 +19,7 @@ package com.megaease.easeagent.report.sender;
 
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.Call;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.report.plugin.NoOpCall;
 
@@ -39,7 +40,7 @@ public class NoOpSender implements Sender {
     }
 
     @Override
-    public Call<Void> send(byte[] encodedData) {
+    public Call<Void> send(EncodedData encodedData) {
         return new NoOpCall<>();
     }
 

@@ -25,8 +25,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
+/**
+ * should be replaced by HttpSpanJsonEncoder to return OkHttpJsonRequestBody
+ */
 public class ByteRequestBody extends RequestBody {
-    // for improved: this should given by encoder
     static final MediaType CONTENT_TYPE = MediaType.parse("application/json");
 
     private final byte[] data;

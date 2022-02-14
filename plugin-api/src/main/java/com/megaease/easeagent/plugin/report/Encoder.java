@@ -36,5 +36,5 @@ public interface Encoder<T> extends Packer {
     int sizeInBytes(T input);
 
     /** Serializes an object into its binary form. */
-    byte[] encode(T input);
+    EncodedData encode(T input);
 }

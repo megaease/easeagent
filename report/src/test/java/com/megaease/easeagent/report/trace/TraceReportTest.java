@@ -19,12 +19,12 @@ package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.config.report.ReporterConfigAdapter;
+import com.megaease.easeagent.config.report.ReportConfigAdapter;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.report.plugin.ReporterLoader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import zipkin2.Span;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,9 +48,9 @@ public class TraceReportTest {
         source.put(ConfigConst.Observability.TRACE_OUTPUT_MESSAGE_MAX_BYTES, "999900");
         source.put(ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SIZE, "1000000");
         source.put(ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SPANS, "1000");
-        Map<String, String> cfg = ReporterConfigAdapter.extractReporterConfig(new Configs(source));
+        Map<String, String> cfg = ReportConfigAdapter.extractReporterConfig(new Configs(source));
         final TraceReport report = new TraceReport(new Configs(cfg));
-        final Span build = Span.newBuilder()
+        final ReportSpan build = ReportSpanBuilder.newBuilder()
                 .traceId("122332")
                 .id(1L)
                 .timestamp(10000)
@@ -74,9 +74,9 @@ public class TraceReportTest {
         source.put(ConfigConst.Observability.TRACE_OUTPUT_MESSAGE_MAX_BYTES, "999900");
         source.put(ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SIZE, "1000000");
         source.put(ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SPANS, "1000");
-        Map<String, String> cfg = ReporterConfigAdapter.extractReporterConfig(new Configs(source));
+        Map<String, String> cfg = ReportConfigAdapter.extractReporterConfig(new Configs(source));
         final TraceReport report = new TraceReport(new Configs(cfg));
-        final Span build = Span.newBuilder()
+        final ReportSpan build = ReportSpanBuilder.newBuilder()
                 .traceId("122332")
                 .id(1L)
                 .timestamp(10000)

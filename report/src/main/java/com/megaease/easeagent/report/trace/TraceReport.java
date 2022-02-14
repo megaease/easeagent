@@ -24,12 +24,13 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.report.ReportConfigConst;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.report.async.SDKAsyncReporter;
 import com.megaease.easeagent.report.async.TraceAsyncProps;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
-import zipkin2.Span;
+import zipkin2.reporter.Reporter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,14 +39,14 @@ import java.util.Map;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 public class TraceReport {
-    private final RefreshableReporter<Span> spanRefreshableReporter;
+    private final RefreshableReporter<ReportSpan> spanRefreshableReporter;
 
     public TraceReport(Config configs) {
         spanRefreshableReporter = initSpanRefreshableReporter(configs);
         configs.addChangeListener(new InternalListener());
     }
 
-    private RefreshableReporter<Span> initSpanRefreshableReporter(Config configs) {
+    private RefreshableReporter<ReportSpan> initSpanRefreshableReporter(Config configs) {
         SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.TRACE_SENDER, configs);
 
         TraceAsyncProps traceProperties = TraceAsyncProps.newDefault(configs);
@@ -65,7 +66,7 @@ public class TraceReport {
             }
         };
 
-        SDKAsyncReporter<Span> reporter = SDKAsyncReporter.
+        SDKAsyncReporter<ReportSpan> reporter = SDKAsyncReporter.
             builderSDKAsyncReporter(sender, traceProperties, extrasSupplier);
 
         reporter.startFlushThread();
@@ -73,7 +74,7 @@ public class TraceReport {
         return new RefreshableReporter<>(reporter, traceProperties);
     }
 
-    public void report(Span span) {
+    public void report(ReportSpan span) {
         this.spanRefreshableReporter.report(span);
     }
 
@@ -102,4 +103,14 @@ public class TraceReport {
             return cfg;
         }
     }
+
+    static Reporter<ReportSpan> NOOP = new Reporter<ReportSpan>() {
+        @Override
+        public void report(ReportSpan span) {
+        }
+
+        @Override public String toString() {
+            return "NoopReporter{}";
+        }
+    };
 }

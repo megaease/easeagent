@@ -23,13 +23,13 @@ import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
-import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterPoints;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@AdviceTo(value = DoFilterAdvice.class, qualifier = "default", plugin = HttpServletPlugin.class)
+@AdviceTo(value = DoFilterPoints.class, qualifier = "default", plugin = HttpServletPlugin.class)
 public class DoFilterMetricInterceptor extends BaseServletInterceptor {
     private static final String AFTER_MARK = DoFilterMetricInterceptor.class.getName() + "$AfterMark";
     private static volatile ServerMetric SERVER_METRIC = null;

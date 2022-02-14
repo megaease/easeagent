@@ -22,14 +22,14 @@ import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.httpservlet.ForwardedPlugin;
-import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterPoints;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 
 import javax.servlet.http.HttpServletRequest;
 
-@AdviceTo(value = DoFilterAdvice.class, qualifier = "default", plugin = ForwardedPlugin.class)
+@AdviceTo(value = DoFilterPoints.class, qualifier = "default", plugin = ForwardedPlugin.class)
 public class DoFilterForwardedInterceptor implements NonReentrantInterceptor {
     private static final Object FORWARDED_KEY = new Object();
 

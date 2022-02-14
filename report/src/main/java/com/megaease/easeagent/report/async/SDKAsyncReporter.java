@@ -17,7 +17,9 @@
 
 package com.megaease.easeagent.report.async;
 
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.report.async.zipkin.AgentBufferNextMessage;
 import com.megaease.easeagent.report.async.zipkin.AgentByteBoundedQueue;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;
@@ -26,7 +28,6 @@ import com.megaease.easeagent.report.util.SpanUtils;
 import lombok.SneakyThrows;
 import zipkin2.Call;
 import zipkin2.CheckResult;
-import zipkin2.Span;
 import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.ReporterMetrics;
 
@@ -79,10 +80,10 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         this.traceProperties = traceProperties;
     }
 
-    public static SDKAsyncReporter<Span> builderSDKAsyncReporter(SenderWithEncoder sender,
-                                                                 TraceAsyncProps traceProperties,
-                                                                 GlobalExtrasSupplier extrasSupplier) {
-        final SDKAsyncReporter<Span> reporter = new Builder(sender, traceProperties)
+    public static SDKAsyncReporter<ReportSpan> builderSDKAsyncReporter(SenderWithEncoder sender,
+                                                                       TraceAsyncProps traceProperties,
+                                                                       GlobalExtrasSupplier extrasSupplier) {
+        final SDKAsyncReporter<ReportSpan> reporter = new Builder(sender, traceProperties)
             .globalExtractor(extrasSupplier)
             .build();
 
@@ -186,7 +187,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         metrics.incrementMessageBytes(bundler.sizeInBytes());
 
         // Create the next message. Since we are outside the lock shared with writers, we can encode
-        ArrayList<byte[]> nextMessage = new ArrayList<>(bundler.count());
+        ArrayList<EncodedData> nextMessage = new ArrayList<>(bundler.count());
         bundler.drain((next, nextSizeInBytes) -> {
             nextMessage.add(encoder.encode(next)); // speculatively add to the pending message
             if (encoder.messageSizeInBytes(nextMessage) > messageMaxBytes) {

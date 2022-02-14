@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-public class DoFilterAdvice implements Points {
+public class DoFilterPoints implements Points {
     private static final String FILTER_NAME = "javax.servlet.Filter";
     private static final String HTTP_SERVLET_NAME = "javax.servlet.http.HttpServlet";
     static final String SERVLET_REQUEST = "javax.servlet.ServletRequest";

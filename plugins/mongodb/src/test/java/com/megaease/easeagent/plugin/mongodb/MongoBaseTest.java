@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.mongodb;
 
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
@@ -29,6 +28,7 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.mongodb.ServerAddress;
 import com.mongodb.connection.ClusterId;
@@ -84,16 +84,16 @@ public class MongoBaseTest {
     }
 
     protected void assertTrace(boolean success, String error) {
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals("mongodb-" + this.dbName, mockSpan.remoteServiceName());
         assertEquals(this.cmdName, mockSpan.tag("mongodb.command"));
         assertEquals("mongodb", mockSpan.tag("component.type"));
         assertEquals(this.collection, mockSpan.tag("mongodb.collection"));
         assertEquals(this.clusterId.getValue(), mockSpan.tag("mongodb.cluster_id"));
-        assertEquals(this.serverAddress.getHost(), mockSpan.remoteIp());
-        assertEquals(this.serverAddress.getPort(), mockSpan.remotePort());
+        assertEquals(this.serverAddress.getHost(), mockSpan.remoteEndpoint().ipv4());
+        assertEquals(this.serverAddress.getPort(), mockSpan.remoteEndpoint().port());
         if (success) {
             assertNull(mockSpan.tag("error"));
         }

@@ -28,6 +28,7 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.ByteArrayEntity;
@@ -91,9 +92,9 @@ public abstract class ElasticsearchBaseTest {
     }
 
     protected void assertTrace(boolean success, String error) {
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals("index-1", mockSpan.tag("es.index"));
         assertEquals("GET /index-1/_search", mockSpan.tag("es.operation"));
         assertEquals(body, mockSpan.tag("es.body"));

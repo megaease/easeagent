@@ -19,13 +19,14 @@ package com.megaease.easeagent.mock.plugin.api.utils;
 
 import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 
 import static org.junit.Assert.assertEquals;
 
 public class SpanTestUtils {
-    public static void sameId(Span span, MockSpan mockSpan) {
+    public static void sameId(Span span, ReportSpan mockSpan) {
         assertEquals(span.traceIdString(), mockSpan.traceId());
-        assertEquals(span.spanIdString(), mockSpan.spanId());
+        assertEquals(span.spanIdString(), mockSpan.id());
         assertEquals(span.parentIdString(), mockSpan.parentId());
     }
 }

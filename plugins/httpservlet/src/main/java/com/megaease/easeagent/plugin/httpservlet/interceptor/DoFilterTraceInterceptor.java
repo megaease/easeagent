@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
-import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterAdvice;
+import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterPoints;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@AdviceTo(value = DoFilterAdvice.class, plugin = HttpServletPlugin.class)
+@AdviceTo(value = DoFilterPoints.class, plugin = HttpServletPlugin.class)
 public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
     private static final String AFTER_MARK = DoFilterTraceInterceptor.class.getName() + "$AfterMark";
     private static final String ERROR_KEY = "error";

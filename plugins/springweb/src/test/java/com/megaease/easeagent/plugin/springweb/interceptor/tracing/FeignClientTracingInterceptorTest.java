@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.plugin.springweb.interceptor.RequestUtils;
 import com.megaease.easeagent.plugin.springweb.interceptor.TestConst;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -52,9 +53,9 @@ public class FeignClientTracingInterceptorTest {
         methodInfo = methodInfoBuilder.retValue(RequestUtils.responseBuilder(request).build()).build();
         feignClientTracingInterceptor.after(methodInfo, context);
 
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
@@ -68,7 +69,7 @@ public class FeignClientTracingInterceptorTest {
 
         mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
@@ -83,7 +84,7 @@ public class FeignClientTracingInterceptorTest {
             mockSpan = ReportMock.getLastSpan();
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
-            assertNotNull(mockSpan.spanId());
+            assertNotNull(mockSpan.id());
         }
     }
 

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-@SuppressWarnings("unused")
+//@SuppressWarnings({"unused", "rawtypes", "unchecked"})
 public class ReporterRegistry {
     static Logger logger = LoggerFactory.getLogger(ReporterRegistry.class);
 
@@ -48,15 +48,15 @@ public class ReporterRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public static <V> Encoder<V> getEncoder(String name) {
+    public static <T> Encoder<T> getEncoder(String name) {
         if (encoders.get(name) == null) {
             logger.error("Encoder name \"{}\" is not exists!", name);
-            return (Encoder<V>) NoOpEncoder.INSTANCE;
+            return (Encoder<T>) NoOpEncoder.INSTANCE;
         }
-        Encoder<V> encoder = (Encoder<V>)encoders.get(name).get();
+        Encoder<T> encoder = (Encoder<T>)encoders.get(name).get();
 
         if (encoder == null) {
-            return (Encoder<V>)NoOpEncoder.INSTANCE;
+            return (Encoder<T>)NoOpEncoder.INSTANCE;
         }
 
         return encoder;
@@ -78,7 +78,7 @@ public class ReporterRegistry {
         return sender;
     }
 
-    public static Sender getSender(String name) {
+    private static Sender getSender(String name) {
         Supplier<Sender> supplier = senderSuppliers.get(name);
         if (supplier == null) {
             return NoOpSender.INSTANCE;

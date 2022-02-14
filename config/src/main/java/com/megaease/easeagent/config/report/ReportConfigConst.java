@@ -24,10 +24,11 @@ public class ReportConfigConst {
     public static final String KAFKA_SENDER_NAME = "kafka";
     public static final String METRIC_KAFKA_SENDER_NAME = "metricKafka";
     public static final String CONSOLE_SENDER_NAME = "console";
-    public static final String ZIPKIN_SENDER_NAME = "zipkin";
+    public static final String ZIPKIN_SENDER_NAME = "http";
 
     public static final String SPAN_JSON_ENCODER_NAME = "SpanJsonEncoder";
     public static final String METRIC_JSON_ENCODER_NAME = "MetricJsonEncoder";
+    public static final String HTTP_SPAN_JSON_ENCODER_NAME = "HttpSpanJsonEncoder";
 
     static final String DELIMITER = ".";
     public static final String TOPIC_KEY = "topic";

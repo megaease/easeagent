@@ -28,6 +28,7 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.plugin.tools.trace.TraceConst;
 import org.junit.Test;
 import org.springframework.mock.web.MockAsyncContext;
@@ -62,7 +63,7 @@ public class DoFilterTraceInterceptorTest {
         assertNotNull(o2);
         assertSame(o, o2);
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
         assertNull(mockSpan.parentId());
         checkServerSpan(mockSpan);
@@ -73,13 +74,13 @@ public class DoFilterTraceInterceptorTest {
     }
 
 
-    private void checkServerSpan(MockSpan mockSpan) {
-        assertEquals(Span.Kind.SERVER, mockSpan.kind());
+    private void checkServerSpan(ReportSpan mockSpan) {
+        assertEquals(Span.Kind.SERVER.name(), mockSpan.kind());
         assertEquals(TestConst.ROUTE, mockSpan.tag(TraceConst.HTTP_ATTRIBUTE_ROUTE));
         assertEquals(TestConst.METHOD, mockSpan.tag("http.method"));
         assertEquals(TestConst.URL, mockSpan.tag("http.path"));
-        assertEquals(TestConst.REMOTE_ADDR, mockSpan.remoteIp());
-        assertEquals(TestConst.REMOTE_PORT, mockSpan.remotePort());
+        assertEquals(TestConst.REMOTE_ADDR, mockSpan.remoteEndpoint().ipv4());
+        assertEquals(TestConst.REMOTE_PORT, mockSpan.remoteEndpoint().port());
     }
 
     @Test
@@ -91,9 +92,9 @@ public class DoFilterTraceInterceptorTest {
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
         doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.SERVER, mockSpan.kind());
+        assertEquals(Span.Kind.SERVER.name(), mockSpan.kind());
         assertNull(mockSpan.parentId());
         checkServerSpan(mockSpan);
         assertEquals(errorInfo, mockSpan.tag("error"));
@@ -112,19 +113,19 @@ public class DoFilterTraceInterceptorTest {
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
         doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(requestContext.span().traceIdString(), mockSpan.traceId());
-        assertEquals(requestContext.span().spanIdString(), mockSpan.spanId());
+        assertEquals(requestContext.span().spanIdString(), mockSpan.id());
         assertEquals(requestContext.span().parentIdString(), mockSpan.parentId());
         checkServerSpan(mockSpan);
     }
 
     @Test
     public void testAsync() throws InterruptedException {
-        MockSpan mockSpan = runAsyncOne(AsyncContext::complete);
+        ReportSpan mockSpan = runAsyncOne(AsyncContext::complete);
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.SERVER, mockSpan.kind());
+        assertEquals(Span.Kind.SERVER.name(), mockSpan.kind());
         assertNull(mockSpan.parentId());
         checkServerSpan(mockSpan);
 
@@ -142,13 +143,13 @@ public class DoFilterTraceInterceptorTest {
             asyncContext.complete();
         });
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.SERVER, mockSpan.kind());
+        assertEquals(Span.Kind.SERVER.name(), mockSpan.kind());
         assertNull(mockSpan.parentId());
         checkServerSpan(mockSpan);
         assertEquals(errorInfo, mockSpan.tag("error"));
     }
 
-    public MockSpan runAsyncOne(Consumer<AsyncContext> asyncContextConsumer) throws InterruptedException {
+    public ReportSpan runAsyncOne(Consumer<AsyncContext> asyncContextConsumer) throws InterruptedException {
         MockHttpServletRequest httpServletRequest = TestServletUtils.buildMockRequest();
         HttpServletResponse response = TestServletUtils.buildMockResponse();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();

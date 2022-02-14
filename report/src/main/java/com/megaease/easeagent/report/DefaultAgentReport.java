@@ -22,12 +22,12 @@ import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.config.report.ReporterConfigAdapter;
+import com.megaease.easeagent.config.report.ReportConfigAdapter;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import com.megaease.easeagent.report.metric.MetricReporter;
 import com.megaease.easeagent.report.metric.MetricReporterImpl;
 import com.megaease.easeagent.report.plugin.ReporterLoader;
 import com.megaease.easeagent.report.trace.TraceReport;
-import zipkin2.Span;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,7 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
     private final Config reportConfig;
 
     DefaultAgentReport(Config config) {
-        this.reportConfig = new Configs(ReporterConfigAdapter.extractReporterConfig(config));
+        this.reportConfig = new Configs(ReportConfigAdapter.extractReporterConfig(config));
         this.traceReport = new TraceReport(this.reportConfig);
         this.metricReporter = MetricReporterImpl.create(this.reportConfig);
     }
@@ -52,7 +52,7 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
     }
 
     @Override
-    public void report(Span span) {
+    public void report(ReportSpan span) {
         this.traceReport.report(span);
     }
 
@@ -68,7 +68,7 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
             return;
         }
         Config global = EaseAgent.getConfig();
-        Map<String, String> reportCfg = ReporterConfigAdapter.extractReporterConfig(global);
+        Map<String, String> reportCfg = ReportConfigAdapter.extractReporterConfig(global);
         this.reportConfig.updateConfigs(reportCfg);
     }
 

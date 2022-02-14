@@ -24,6 +24,7 @@ import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,7 +41,7 @@ public class TraceCallbackTest {
         Span span = context.nextSpan().start();
         TraceCallback traceCallback = new TraceCallback(span, null);
         traceCallback.onCompletion(null, null);
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
         assertFalse(mockSpan.hasError());
 
