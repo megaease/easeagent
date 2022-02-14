@@ -27,7 +27,7 @@ import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 
-public class AppendBootstrapClassloaderSearchTest {
+public class AppendBootstrapClassLoaderSearchTest {
     @Test
     public void should_inject_classes() throws Exception {
         final Set<String> strings = Sets.newHashSet(
@@ -35,6 +35,6 @@ public class AppendBootstrapClassloaderSearchTest {
                 "com.megaease.easeagent.core.utils.ContextUtils",
                 "com.megaease.easeagent.core.plugin.Dispatcher"
             );
-        Assert.assertEquals(strings, AppendBootstrapClassloaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM));
+        Assert.assertEquals(strings, AppendBootstrapClassLoaderSearch.by(mock(Instrumentation.class), ClassInjector.UsingInstrumentation.Target.SYSTEM));
     }
 }

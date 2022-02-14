@@ -81,7 +81,7 @@ public class Bootstrap {
         long begin = System.nanoTime();
 
         // add bootstrap classes
-        Set<String> bootstrapClassSet = AppendBootstrapClassloaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP);
+        Set<String> bootstrapClassSet = AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Injected class: {}", bootstrapClassSet);
         }
