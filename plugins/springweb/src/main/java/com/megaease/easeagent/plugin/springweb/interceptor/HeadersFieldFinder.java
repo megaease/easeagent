@@ -31,7 +31,7 @@ public class HeadersFieldFinder {
 
     private static Field headersField;
 
-    public static Field getHeadersField() {
+    private static Field getHeadersField() {
         if (headersField != null) {
             return headersField;
         }
@@ -46,7 +46,7 @@ public class HeadersFieldFinder {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Collection<String>> getHeadersFieldValue(Field headersField, Object target) {
+    private static Map<String, Collection<String>> getHeadersFieldValue(Field headersField, Object target) {
         try {
             return (Map<String, Collection<String>>) headersField.get(target);
         } catch (IllegalAccessException e) {
@@ -55,7 +55,7 @@ public class HeadersFieldFinder {
         return null;
     }
 
-    public static void setHeadersFieldValue(Field headersField, Object target, Object fieldValue) {
+    private static void setHeadersFieldValue(Field headersField, Object target, Object fieldValue) {
         try {
             headersField.set(target, fieldValue);
         } catch (IllegalAccessException e) {

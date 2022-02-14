@@ -17,17 +17,17 @@
 
 package com.megaease.easeagent.plugin.springweb.reactor;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.springweb.interceptor.tracing.WebClientFilterTracingInterceptor.WebClientResponse;
+import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
 import org.reactivestreams.Subscription;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.CoreSubscriber;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
 
@@ -35,7 +35,7 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
     private final MethodInfo methodInfo;
     // private final Integer chain;
     private final RequestContext requestContext;
-    private final List<ClientResponse> results = new ArrayList<>();
+    private AtomicReference<ClientResponse> result = new AtomicReference<>();
 
     @SuppressWarnings("unchecked")
     public AgentCoreSubscriber(CoreSubscriber<? super ClientResponse> actual, MethodInfo methodInfo,
@@ -59,7 +59,9 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
     @Override
     public void onNext(ClientResponse t) {
         actual.onNext(t);
-        results.add(t);
+        if (result.get() == null) {
+            result.set(t);
+        }
     }
 
     @Override
@@ -73,20 +75,17 @@ public class AgentCoreSubscriber implements CoreSubscriber<ClientResponse> {
     @Override
     public void onComplete() {
         actual.onComplete();
-        methodInfo.setRetValue(results);
         finish();
     }
 
     private void finish() {
-        if (methodInfo.isSuccess()) {
-            WebClientResponse webClientResponse;
-            if (results.size() > 0) {
-                ClientResponse resp = results.get(0);
-                webClientResponse = new WebClientResponse(null, resp);
-                this.requestContext.finish(webClientResponse);
-            } else {
-                requestContext.span().finish();
-            }
+        ClientResponse resp = result.get();
+        if (resp != null) {
+            WebClientResponse webClientResponse = new WebClientResponse(methodInfo.getThrowable(), resp);
+            HttpUtils.save(requestContext.span(), webClientResponse);
+            this.requestContext.finish(webClientResponse);
+        } else if (methodInfo.isSuccess()) {
+            requestContext.span().finish();
         } else {
             Span span = requestContext.span();
             span.error(methodInfo.getThrowable());

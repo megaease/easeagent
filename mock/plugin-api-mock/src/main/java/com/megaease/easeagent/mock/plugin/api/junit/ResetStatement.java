@@ -17,27 +17,10 @@
 
 package com.megaease.easeagent.mock.plugin.api.junit;
 
-import com.megaease.easeagent.mock.metrics.MockMetricUtils;
-import com.megaease.easeagent.plugin.api.middleware.Redirect;
-import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.mock.plugin.api.utils.ContextUtils;
 import org.junit.runners.model.Statement;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ResetStatement extends Statement {
-    static final Map<Redirect, ResourceConfig> OLD_CONFIG;
-
-    static {
-        Map<Redirect, ResourceConfig> oldConfig = new HashMap<>();
-        for (Redirect redirect : Redirect.values()) {
-            oldConfig.put(redirect, redirect.getConfig());
-        }
-        OLD_CONFIG = oldConfig;
-    }
-
     private final Statement after;
 
     public ResetStatement(Statement after) {
@@ -51,18 +34,7 @@ public class ResetStatement extends Statement {
     }
 
     private void cleanAll() {
-        EaseAgent.initializeContextSupplier.get().clear();
-        MockMetricUtils.clearAll();
-        resetRedirect();
-    }
-
-    private void resetRedirect() {
-        for (Map.Entry<Redirect, ResourceConfig> entry : OLD_CONFIG.entrySet()) {
-            if (entry.getKey().getConfig() == entry.getValue()) {
-                continue;
-            }
-            AgentFieldReflectAccessor.setFieldValue(entry.getKey(), "config", entry.getValue());
-        }
+        ContextUtils.resetAll();
     }
 
 }

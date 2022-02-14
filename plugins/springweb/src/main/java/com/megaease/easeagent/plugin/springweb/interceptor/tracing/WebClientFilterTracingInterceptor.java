@@ -42,12 +42,7 @@ import java.util.Collection;
 
 @AdviceTo(value = WebClientFilterAdvice.class, plugin = WebClientPlugin.class)
 public class WebClientFilterTracingInterceptor implements NonReentrantInterceptor {
-    static Logger log = EaseAgent.getLogger(WebClientFilterTracingInterceptor.class);
     private static final Object PROGRESS_CONTEXT = new Object();
-
-    @Override
-    public void init(IPluginConfig config, int index) {
-    }
 
     public Object getProgressKey() {
         return PROGRESS_CONTEXT;
@@ -65,7 +60,7 @@ public class WebClientFilterTracingInterceptor implements NonReentrantIntercepto
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         RequestContext pCtx = context.get(getProgressKey());
-        try (Scope scope = pCtx.scope()) {
+        try (Scope ignored = pCtx.scope()) {
             @SuppressWarnings("unchecked")
             Mono<ClientResponse> mono = (Mono<ClientResponse>) methodInfo.getRetValue();
             methodInfo.setRetValue(new AgentMono(mono, methodInfo, pCtx));

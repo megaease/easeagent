@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -29,6 +29,7 @@ import com.megaease.easeagent.plugin.springweb.interceptor.TestConst;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.*;
 
@@ -38,7 +39,7 @@ import java.net.URISyntaxException;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class ClientHttpRequestInterceptorTest {
 
     @Test

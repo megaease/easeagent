@@ -17,14 +17,16 @@
 
 package com.megaease.easeagent.mock.plugin.api.junit;
 
-import com.megaease.easeagent.mock.context.MockContext;
+import com.megaease.easeagent.context.ContextManager;
+import com.megaease.easeagent.mock.context.ContextManagerMock;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-@MockContext
 public final class EaseAgentJunit4ClassRunner extends BlockJUnit4ClassRunner {
+    public static final ContextManager ignored = ContextManagerMock.getContextManagerMock();
+
     public EaseAgentJunit4ClassRunner(Class<?> testClass) throws InitializationError {
         super(testClass);
     }

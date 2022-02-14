@@ -43,9 +43,21 @@ public class AgentMono extends Mono<Void> {
 
     @Override
     public void subscribe(@Nonnull CoreSubscriber<? super Void> actual) {
-        try (Cleaner cleaner = asyncContext.importToCurrent()) {
+        try (Cleaner ignored = asyncContext.importToCurrent()) {
             this.source.subscribe(new AgentCoreSubscriber(actual, methodInfo,
                 asyncContext, finish));
         }
+    }
+
+    public MethodInfo getMethodInfo() {
+        return methodInfo;
+    }
+
+    public AsyncContext getAsyncContext() {
+        return asyncContext;
+    }
+
+    public BiConsumer<MethodInfo, AsyncContext> getFinish() {
+        return finish;
     }
 }

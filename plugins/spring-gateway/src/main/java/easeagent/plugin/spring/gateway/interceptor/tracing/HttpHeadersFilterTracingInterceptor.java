@@ -52,7 +52,7 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
         FluxHttpServerRequest request = new HeaderFilterRequest(exchange.getRequest());
 
         RequestContext pnCtx = context.clientRequest(request);
-        try (Scope scope = pnCtx.scope()) {
+        try (Scope ignored = pnCtx.scope()) {
             pnCtx.span().start();
             exchange.getAttributes().put(GatewayCons.CHILD_SPAN_KEY, pnCtx);
             Map<String, String> map = getHeadersFromExchange(exchange);

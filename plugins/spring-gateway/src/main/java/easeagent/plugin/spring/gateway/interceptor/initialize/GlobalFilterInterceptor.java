@@ -35,6 +35,9 @@ public class GlobalFilterInterceptor implements Interceptor {
     @Override
     @SuppressWarnings("unchecked")
     public void before(MethodInfo methodInfo, Context context) {
+        if (loadAgentFilter) {
+            return;
+        }
         List<GlobalFilter> list = null;
         switch (methodInfo.getMethod()) {
             case "filteringWebHandler":
@@ -46,9 +49,6 @@ public class GlobalFilterInterceptor implements Interceptor {
                 break;
         }
         if (list == null) {
-            return;
-        }
-        if (loadAgentFilter) {
             return;
         }
         loadAgentFilter = true;
