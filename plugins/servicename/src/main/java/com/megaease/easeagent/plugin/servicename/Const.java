@@ -29,6 +29,7 @@ public interface Const {
     String LoadBalancerExchangeFilterFunction = "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerExchangeFilterFunction";
     String FilteringWebHandler = "org.springframework.cloud.gateway.handler.FilteringWebHandler";
 
+    String SERVER_WEB_EXCHANGE_ROUTE_ATTRIBUTE = "org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRoute";
     String DEFAULT_PROPAGATE_HEAD = "X-Mesh-RPC-Service";
     String PROPAGATE_HEAD_CONFIG = "propagate.head";
 }

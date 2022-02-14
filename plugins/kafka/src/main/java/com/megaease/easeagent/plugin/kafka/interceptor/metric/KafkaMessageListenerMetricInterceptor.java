@@ -17,11 +17,12 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
+import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaMessageListenerAdvice;
@@ -29,7 +30,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 @AdviceTo(value = KafkaMessageListenerAdvice.class, plugin = KafkaPlugin.class)
 public class KafkaMessageListenerMetricInterceptor implements NonReentrantInterceptor {
-    private static final Object START = new Object();
+    protected static final Object START = new Object();
     private static KafkaMetric kafkaMetric;
 
     @Override
@@ -47,5 +48,15 @@ public class KafkaMessageListenerMetricInterceptor implements NonReentrantInterc
     public void doAfter(MethodInfo methodInfo, Context context) {
         ConsumerRecord<?, ?> consumerRecord = (ConsumerRecord<?, ?>) methodInfo.getArgs()[0];
         this.kafkaMetric.consume(consumerRecord.topic(), context.remove(START), methodInfo.isSuccess());
+    }
+
+    public static KafkaMetric getKafkaMetric() {
+        return kafkaMetric;
+    }
+
+
+    @Override
+    public String getType() {
+        return Order.METRIC.getName();
     }
 }

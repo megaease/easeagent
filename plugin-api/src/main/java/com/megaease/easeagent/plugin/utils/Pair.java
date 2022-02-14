@@ -17,20 +17,20 @@
 
 package com.megaease.easeagent.plugin.utils;
 
-public class Pair<O1, O2> {
-    private final O1 o1;
-    private final O2 o2;
+public class Pair<K, V> {
+    private final K key;
+    private final V value;
 
-    public Pair(O1 o1, O2 o2) {
-        this.o1 = o1;
-        this.o2 = o2;
+    public Pair(K key, V value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public O1 getO1() {
-        return o1;
+    public K getKey() {
+        return key;
     }
 
-    public O2 getO2() {
-        return o2;
+    public V getValue() {
+        return value;
     }
 }

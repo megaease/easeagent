@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
 public class FeignClientTracingInterceptorTest {
 
     @Test
-    public void testFeignTracing(){
+    public void testFeignTracing() {
         Request request = RequestUtils.buildFeignClient();
         MethodInfo.MethodInfoBuilder methodInfoBuilder = MethodInfo.builder();
         MethodInfo methodInfo = methodInfoBuilder.args(new Object[]{request}).build();
@@ -111,8 +111,8 @@ public class FeignClientTracingInterceptorTest {
         FeignClientTracingInterceptor feignClientTracingInterceptor = new FeignClientTracingInterceptor();
         HttpResponse httpResponse = feignClientTracingInterceptor.getResponse(methodInfo, EaseAgent.getContext());
         assertEquals("GET", httpResponse.method());
-        assertEquals(null, httpResponse.route());
-        assertEquals(null, httpResponse.maybeError());
+        assertNull(httpResponse.route());
+        assertNull(httpResponse.maybeError());
         assertEquals(200, httpResponse.statusCode());
 
         RuntimeException runtimeException = new RuntimeException("test error");

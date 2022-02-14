@@ -33,7 +33,7 @@ public class ResourceConfig {
     private final List<String> uriList = new ArrayList<>();
     private final List<HostAndPort> hostAndPorts = new ArrayList<>();
 
-    protected static ResourceConfig getResourceConfig(String env, boolean needParse) {
+    public static ResourceConfig getResourceConfig(String env, boolean needParse) {
         String str = SystemEnv.get(env);
         if (str == null) {
             return null;

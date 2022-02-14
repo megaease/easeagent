@@ -50,16 +50,20 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     }
 
     private T processResult(T t, Throwable throwable, Object dynamicFieldValue) {
-        if (this.processed) {
+        if (this.processed || t == null) {
             return t;
         }
+        obtrudeProcessResult(t, dynamicFieldValue);
+        this.processed = true;
+        return t;
+    }
+
+    private void obtrudeProcessResult(T t, Object dynamicFieldValue) {
         AgentDynamicFieldAccessor.setDynamicFieldValue(t, dynamicFieldValue);
         Object channelWriter = AgentFieldReflectAccessor.getFieldValue(t, "channelWriter");
         if (channelWriter != null) {
             AgentDynamicFieldAccessor.setDynamicFieldValue(channelWriter, dynamicFieldValue);
         }
-        this.processed = true;
-        return t;
     }
 
     @Override
@@ -278,17 +282,18 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public <U> CompletableFuture<U> thenCompose(Function<? super T, ? extends CompletionStage<U>> fn) {
-        return source.thenCompose(t -> fn.apply(processResult(t)));
+        CompletableFuture<U> u = source.thenCompose(t -> fn.apply(processResult(t)));
+        return new CompletableFutureWrapper<>(u, attach);
     }
 
     @Override
     public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn) {
-        return source.thenComposeAsync(t -> fn.apply(processResult(t)));
+        return new CompletableFutureWrapper<>(source.thenComposeAsync(t -> fn.apply(processResult(t))), attach);
     }
 
     @Override
     public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn, Executor executor) {
-        return source.thenComposeAsync(t -> fn.apply(processResult(t)), executor);
+        return new CompletableFutureWrapper<>(source.thenComposeAsync(t -> fn.apply(processResult(t)), executor), attach);
     }
 
     @Override
@@ -319,7 +324,6 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public <U> CompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn, Executor executor) {
-
         return source.handleAsync((t, throwable) -> fn.apply(processResult(t, throwable), throwable), executor);
     }
 
@@ -330,10 +334,10 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public CompletableFuture<T> exceptionally(Function<Throwable, ? extends T> fn) {
-        return source.exceptionally(throwable -> {
+        return new CompletableFutureWrapper<>(source.exceptionally(throwable -> {
             processException(throwable);
             return fn.apply(throwable);
-        });
+        }), attach);
     }
 
     @Override
@@ -356,7 +360,7 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public void obtrudeValue(T value) {
         source.obtrudeValue(value);
-        this.processResult(value);
+        this.obtrudeProcessResult(value, attach);
     }
 
     @Override

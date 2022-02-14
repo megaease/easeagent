@@ -21,12 +21,17 @@ import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import com.megaease.easeagent.plugin.utils.NoNull;
 
-import static com.megaease.easeagent.plugin.api.config.Const.METRIC_DEFAULT_INTERVAL;
+import java.util.concurrent.TimeUnit;
+
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.KEY_COMM_INTERVAL;
+import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.KEY_COMM_INTERVAL_UNIT;
+import static com.megaease.easeagent.plugin.api.config.Const.METRIC_DEFAULT_INTERVAL;
+import static com.megaease.easeagent.plugin.api.config.Const.METRIC_DEFAULT_INTERVAL_UNIT;
 
 public class PluginMetricsConfig implements MetricsConfig {
     private volatile boolean enabled;
     private volatile int interval;
+    private volatile TimeUnit intervalUnit;
     private Runnable callback;
 
     public PluginMetricsConfig(IPluginConfig config) {
@@ -45,6 +50,11 @@ public class PluginMetricsConfig implements MetricsConfig {
     }
 
     @Override
+    public TimeUnit getIntervalUnit() {
+        return intervalUnit;
+    }
+
+    @Override
     public void setIntervalChangeCallback(Runnable runnable) {
         this.callback = runnable;
     }
@@ -52,6 +62,13 @@ public class PluginMetricsConfig implements MetricsConfig {
     private void set(IPluginConfig config) {
         this.enabled = config.enabled();
         this.interval = NoNull.of(config.getInt(KEY_COMM_INTERVAL), METRIC_DEFAULT_INTERVAL);
+        String timeUnit = NoNull.of(config.getString(KEY_COMM_INTERVAL_UNIT), METRIC_DEFAULT_INTERVAL_UNIT);
+        try {
+            this.intervalUnit = TimeUnit.valueOf(timeUnit);
+        } catch (Exception e) {
+            this.intervalUnit = TimeUnit.SECONDS;
+        }
+
     }
 
     class PluginConfigChange implements PluginConfigChangeListener {

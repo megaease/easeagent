@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -27,6 +26,7 @@ import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaMessageListenerAdvice;
@@ -37,7 +37,7 @@ import java.util.Map;
 
 @AdviceTo(value = KafkaMessageListenerAdvice.class, plugin = KafkaPlugin.class)
 public class KafkaMessageListenerTracingInterceptor implements NonReentrantInterceptor {
-    private static final Object SPAN = new Object();
+    protected static final Object SPAN = new Object();
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {

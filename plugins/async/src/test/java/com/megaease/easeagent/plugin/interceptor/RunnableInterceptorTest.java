@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.interceptor;
 
 import com.megaease.easeagent.mock.context.ContextManagerMock;
+import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -61,17 +62,17 @@ public class RunnableInterceptorTest {
         thread.start();
         thread.join();
         assertEquals(run.get(), 1);
-        AtomicReference<zipkin2.Span> spanAtomicReference = new AtomicReference<>();
+        AtomicReference<MockSpan> spanAtomicReference = new AtomicReference<>();
         ReportMock.setSpanReportMock(span1 -> {
             run.incrementAndGet();
             spanAtomicReference.set(span1);
         });
         span.finish();
         assertEquals(run.get(), 2);
-        zipkin2.Span span1 = spanAtomicReference.get();
+        MockSpan span1 = spanAtomicReference.get();
         assertEquals(span.traceIdString(), span1.traceId());
         assertEquals(span.parentIdString(), span1.parentId());
-        assertEquals(span.spanIdString(), span1.id());
+        assertEquals(span.spanIdString(), span1.spanId());
         System.out.println("run count: " + run.get());
     }
 }

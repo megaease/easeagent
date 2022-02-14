@@ -24,6 +24,7 @@ public class TestConst {
     public static final String SERVICE_NAME = "test-metric-service";
     public static final String SERVICE_SYSTEM = "test-metric-system";
     public static final String NAMESPACE = "testMetric";
+    public static final String NAMESPACE2 = "testMetric2";
     public static final String INTERVAL_CONFIG = ConfigConst.join(
         ConfigConst.PLUGIN,
         ConfigConst.OBSERVABILITY,

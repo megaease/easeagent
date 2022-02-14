@@ -17,10 +17,14 @@
 
 package com.megaease.easeagent.metrics.config;
 
+import java.util.concurrent.TimeUnit;
+
 public interface MetricsConfig {
     boolean isEnabled();
 
     int getInterval();
+
+    TimeUnit getIntervalUnit();
 
     void setIntervalChangeCallback(Runnable runnable);
 }

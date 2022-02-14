@@ -26,6 +26,7 @@ import org.junit.Test;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @MockEaseAgent
 public class DoFilterForwardedInterceptorTest {
@@ -37,7 +38,7 @@ public class DoFilterForwardedInterceptorTest {
         doFilterForwardedInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         assertEquals(TestConst.FORWARDED_VALUE, EaseAgent.getContext().get(TestConst.FORWARDED_NAME));
         doFilterForwardedInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        assertEquals(null, (String) EaseAgent.getContext().get(TestConst.FORWARDED_NAME));
+        assertNull(EaseAgent.getContext().get(TestConst.FORWARDED_NAME));
     }
 
     @Test

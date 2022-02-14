@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -27,6 +26,7 @@ import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
@@ -41,7 +41,7 @@ import java.util.Map;
 
 @AdviceTo(value = KafkaConsumerAdvice.class, qualifier = "poll", plugin = KafkaPlugin.class)
 public class KafkaConsumerTracingInterceptor implements NonReentrantInterceptor {
-    private static final String remoteServiceName = "kafka";
+    protected static final String REMOTE_SERVICE_NAME = "kafka";
     boolean singleRootSpanOnReceiveBatch = true;
 
     @Override
@@ -58,7 +58,7 @@ public class KafkaConsumerTracingInterceptor implements NonReentrantInterceptor 
         afterPoll(context, consumerRecords, uri);
     }
 
-    public void afterPoll(Context context, ConsumerRecords<?, ?> records, String uri) {
+    void afterPoll(Context context, ConsumerRecords<?, ?> records, String uri) {
         Iterator<? extends ConsumerRecord<?, ?>> iterator = records.iterator();
         Map<String, Span> consumerSpansForTopic = new LinkedHashMap<>();
         while (iterator.hasNext()) {
@@ -96,7 +96,7 @@ public class KafkaConsumerTracingInterceptor implements NonReentrantInterceptor 
         span.tag(KafkaTags.KAFKA_BROKER_TAG, uri);
         span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.KAFKA.getRemoteType());
         RedirectProcessor.setTagsIfRedirected(Redirect.KAFKA, span, uri);
-        if (remoteServiceName != null) span.remoteServiceName(remoteServiceName);
+        span.remoteServiceName(REMOTE_SERVICE_NAME);
     }
 
 

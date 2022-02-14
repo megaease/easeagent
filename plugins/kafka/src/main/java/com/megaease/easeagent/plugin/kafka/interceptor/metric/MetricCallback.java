@@ -27,7 +27,7 @@ public class MetricCallback extends AsyncCallback {
     private final KafkaMetric kafkaMetric;
 
     public MetricCallback(Callback delegate, String topic, KafkaMetric kafkaMetric) {
-        super(delegate, isAsync(delegate));
+        super(delegate);
         this.topic = topic;
         this.kafkaMetric = kafkaMetric;
         this.start = System.currentTimeMillis();

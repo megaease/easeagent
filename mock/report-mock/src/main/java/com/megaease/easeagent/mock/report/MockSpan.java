@@ -59,4 +59,8 @@ public interface MockSpan {
     Boolean shared();
 
     int tagCount();
+
+    boolean hasError();
+
+    String errorInfo();
 }

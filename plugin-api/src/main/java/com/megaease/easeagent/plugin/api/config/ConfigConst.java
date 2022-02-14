@@ -69,6 +69,7 @@ public interface ConfigConst {
         String KEY_COMM_TAG = "tag";
         String KEY_COMM_SERVICE_PREFIX = "servicePrefix";
         String KEY_COMM_INTERVAL = "interval";
+        String KEY_COMM_INTERVAL_UNIT = "intervalUnit";
         String KEY_COMM_TOPIC = "topic";
         String KEY_COMM_APPEND_TYPE = "appendType";
 

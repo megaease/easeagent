@@ -21,6 +21,7 @@ import com.megaease.easeagent.mock.metrics.MockMetricUtils;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
+import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -59,17 +61,8 @@ public class DoFilterMetricInterceptorTest {
 
     }
 
-    public boolean contains(Map<String, Object> map, String key, String value) {
-        Object v = map.get(key);
-        if (!(v instanceof String)) {
-            return false;
-        }
-        return v.equals(value);
-    }
-
     public Map<String, Object> getMetric(LastJsonReporter lastJsonReporter) throws InterruptedException {
-        Thread.sleep(2001);
-        List<Map<String, Object>> mapList = lastJsonReporter.getLast();
+        List<Map<String, Object>> mapList = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
         assertNotNull(mapList);
         assertEquals(1, mapList.size());
         return mapList.get(0);
@@ -89,11 +82,11 @@ public class DoFilterMetricInterceptorTest {
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
         doFilterMetricInterceptor.doBefore(methodInfo, EaseAgent.getContext());
-        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(stringObjectMap -> {
-            return contains(stringObjectMap, "category", "application") &&
-                contains(stringObjectMap, "type", "http-request") &&
-                contains(stringObjectMap, "url", TestConst.METHOD + " " + TestConst.ROUTE);
-        });
+        TagVerifier tagVerifier = new TagVerifier()
+            .add("category", "application")
+            .add("type", "http-request")
+            .add("url", TestConst.METHOD + " " + TestConst.ROUTE);
+        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(tagVerifier::verifyAnd);
 
         doFilterMetricInterceptor.doAfter(methodInfo, EaseAgent.getContext());
         Map<String, Object> metric = getMetric(lastJsonReporter);

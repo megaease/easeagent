@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -27,6 +26,7 @@ import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaProducerAdvice;
@@ -37,9 +37,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 @AdviceTo(value = KafkaProducerAdvice.class, qualifier = "doSend", plugin = KafkaPlugin.class)
 public class KafkaProducerDoSendInterceptor implements NonReentrantInterceptor {
-    private static final String remoteServiceName = "kafka";
-    private static final Object SCOPE = new Object();
-    private static final Object SPAN = new Object();
+    protected static final String REMOTE_SERVICE_NAME = "kafka";
+    protected static final Object SCOPE = new Object();
+    protected static final Object SPAN = new Object();
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
@@ -53,12 +53,12 @@ public class KafkaProducerDoSendInterceptor implements NonReentrantInterceptor {
         }
         span.tag(KafkaTags.KAFKA_BROKER_TAG, uri);
         span.kind(Span.Kind.PRODUCER).name("send");
-        if (remoteServiceName != null) span.remoteServiceName(remoteServiceName);
+        if (REMOTE_SERVICE_NAME != null) span.remoteServiceName(REMOTE_SERVICE_NAME);
         if (record.key() instanceof String && !"".equals(record.key())) {
             span.tag(KafkaTags.KAFKA_KEY_TAG, record.key().toString());
         }
         span.tag(KafkaTags.KAFKA_TOPIC_TAG, record.topic());
-        span.tag(MiddlewareConstants.TYPE_TAG_NAME,  Type.KAFKA.getRemoteType());
+        span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.KAFKA.getRemoteType());
         RedirectProcessor.setTagsIfRedirected(Redirect.KAFKA, span, uri);
         span.start();
         context.put(SCOPE, span.maybeScope());
@@ -86,6 +86,4 @@ public class KafkaProducerDoSendInterceptor implements NonReentrantInterceptor {
         }
 
     }
-
-
 }

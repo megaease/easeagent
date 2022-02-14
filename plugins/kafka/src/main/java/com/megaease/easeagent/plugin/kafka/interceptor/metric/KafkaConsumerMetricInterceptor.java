@@ -17,13 +17,13 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.kafka.KafkaPlugin;
 import com.megaease.easeagent.plugin.kafka.advice.KafkaConsumerAdvice;
@@ -59,4 +59,7 @@ public class KafkaConsumerMetricInterceptor implements NonReentrantInterceptor {
         return Order.METRIC.getName();
     }
 
+    public static KafkaMetric getKafkaMetric() {
+        return kafkaMetric;
+    }
 }
