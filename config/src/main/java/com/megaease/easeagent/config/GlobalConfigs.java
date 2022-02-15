@@ -17,7 +17,7 @@
  */
 package com.megaease.easeagent.config;
 
-import com.megaease.easeagent.config.report.ReporterConfigAdapter;
+import com.megaease.easeagent.config.report.ReportConfigAdapter;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -35,7 +35,7 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
         super();
         // reporter adapter
         Map<String, String> map = new TreeMap<>(source);
-        ReporterConfigAdapter.convertConfig(map);
+        ReportConfigAdapter.convertConfig(map);
         this.source = new TreeMap<>(map);
         this.notifier = new ConfigNotifier("");
     }
@@ -44,7 +44,7 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
     public void updateConfigs(Map<String, String> changes) {
         // report adapter
         Map<String, String> changesMap = new HashMap<>(changes);
-        ReporterConfigAdapter.convertConfig(changesMap);
+        ReportConfigAdapter.convertConfig(changesMap);
 
         super.updateConfigs(changesMap);
     }

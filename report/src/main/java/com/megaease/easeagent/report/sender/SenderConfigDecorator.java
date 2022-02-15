@@ -21,9 +21,7 @@ import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
-import com.megaease.easeagent.plugin.report.Call;
-import com.megaease.easeagent.plugin.report.Encoder;
-import com.megaease.easeagent.plugin.report.Sender;
+import com.megaease.easeagent.plugin.report.*;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +35,8 @@ import static com.megaease.easeagent.config.ConfigUtils.extractByPrefix;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 @Slf4j
-public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeListener {
+public class SenderConfigDecorator
+    implements SenderWithEncoder, ConfigChangeListener {
 
     protected Sender sender;
     String prefix;
@@ -66,13 +65,13 @@ public class SenderConfigDecorator implements SenderWithEncoder, ConfigChangeLis
     }
 
     @Override
-    public Call<Void> send(byte[] encodedData) {
+    public Call<Void> send(EncodedData encodedData) {
         return this.sender.send(encodedData);
     }
 
     @Override
-    public Call<Void> send(List<byte[]> encodedData) {
-        byte[] data = this.packer.encodeList(encodedData);
+    public Call<Void> send(List<EncodedData> encodedData) {
+        EncodedData data = this.packer.encodeList(encodedData);
         return sender.send(data);
     }
 

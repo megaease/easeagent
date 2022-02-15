@@ -34,15 +34,15 @@ public interface Packer {
      * @param encodedItems encoded item
      * @return encoded list
      */
-    byte[] encodeList(List<byte[]> encodedItems);
+    EncodedData encodeList(List<EncodedData> encodedItems);
 
     /**
      * Calculate the size of a message package combined by a list of item
      * @param encodedItems encodes item
      * @return size of packaged message
      */
-    default int messageSizeInBytes(List<byte[]> encodedItems) {
-        return packageSizeInBytes(encodedItems.stream().map(v -> v.length).collect(Collectors.toList()));
+    default int messageSizeInBytes(List<EncodedData> encodedItems) {
+        return packageSizeInBytes(encodedItems.stream().map(EncodedData::size).collect(Collectors.toList()));
     }
 
     /**

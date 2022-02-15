@@ -20,6 +20,7 @@ package com.megaease.easeagent.report.sender;
 import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.Call;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Sender;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class ZipkinSender implements Sender {
     }
 
     @Override
-    public Call<Void> send(byte[] encodedData) {
+    public Call<Void> send(EncodedData encodedData) {
         return null;
     }
 

@@ -17,6 +17,8 @@
  */
 package com.megaease.easeagent.plugin.report.encoder;
 
+import com.megaease.easeagent.plugin.report.ByteWrapper;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
 
 import java.util.List;
@@ -27,11 +29,11 @@ import java.util.List;
  */
 public abstract class JsonEncoder<T> implements Encoder<T> {
     @Override
-    public byte[] encodeList(List<byte[]> encodedItems) {
+    public EncodedData encodeList(List<EncodedData> encodedItems) {
         int sizeOfArray = 2;
         int length = encodedItems.size();
         for (int i = 0; i < length; ) {
-            sizeOfArray += encodedItems.get(i++).length;
+            sizeOfArray += encodedItems.get(i++).size();
             if (i < length) sizeOfArray++;
         }
 
@@ -39,13 +41,13 @@ public abstract class JsonEncoder<T> implements Encoder<T> {
         int pos = 0;
         buf[pos++] = '[';
         for (int i = 0; i < length; ) {
-            byte[] v = encodedItems.get(i++);
+            byte[] v = encodedItems.get(i++).getData();
             System.arraycopy(v, 0, buf, pos, v.length);
             pos += v.length;
             if (i < length) buf[pos++] = ',';
         }
         buf[pos] = ']';
-        return buf;
+        return new ByteWrapper(buf);
     }
 
     @Override

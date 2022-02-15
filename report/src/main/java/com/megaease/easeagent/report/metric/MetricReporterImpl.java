@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
+import com.megaease.easeagent.plugin.report.ByteWrapper;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.ReportConfigChange;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
@@ -120,14 +122,14 @@ public class MetricReporterImpl implements MetricReporter {
 
         public void report(String context) {
             try {
-                sender.send(context.getBytes()).execute();
+                sender.send(new ByteWrapper(context.getBytes())).execute();
             } catch (IOException e) {
                 // ignored
             }
         }
 
         @Override
-        public void report(byte[] encodedData) {
+        public void report(EncodedData encodedData) {
             try {
                 sender.send(encodedData).execute();
             } catch (IOException e) {

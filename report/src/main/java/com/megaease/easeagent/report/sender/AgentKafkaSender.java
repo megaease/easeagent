@@ -21,6 +21,7 @@ import com.google.auto.service.AutoService;
 import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.Call;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Sender;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.plugin.NoOpCall;
@@ -72,11 +73,11 @@ public class AgentKafkaSender implements Sender {
     }
 
     @Override
-    public Call<Void> send(byte[] encodedData) {
+    public Call<Void> send(EncodedData encodedData) {
         if (!enabled) {
             return new NoOpCall<>();
         }
-        zipkin2.Call<Void> call =  this.sender.sendSpans(encodedData);
+        zipkin2.Call<Void> call =  this.sender.sendSpans(encodedData.getData());
         return new ZipkinCallWrapper<>(call);
     }
 

@@ -18,7 +18,6 @@
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -26,6 +25,7 @@ import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -43,9 +43,9 @@ public class JedisTracingInterceptorTest {
         jedisTracingInterceptor.doTraceBefore(methodInfo, context);
         Span span = context.remove(CommonRedisTracingInterceptorTest.SPAN_KEY);
         span.finish();
-        MockSpan mockSpan = Objects.requireNonNull(ReportMock.getLastSpan());
+        ReportSpan mockSpan = Objects.requireNonNull(ReportMock.getLastSpan());
         assertEquals("string.get", mockSpan.name());
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals("redis", mockSpan.remoteServiceName());
         assertEquals(Type.REDIS.getRemoteType(), mockSpan.tag(MiddlewareConstants.TYPE_TAG_NAME));
 

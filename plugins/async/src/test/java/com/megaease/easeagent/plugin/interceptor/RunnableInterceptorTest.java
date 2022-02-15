@@ -18,10 +18,10 @@
 package com.megaease.easeagent.plugin.interceptor;
 
 import com.megaease.easeagent.mock.context.ContextManagerMock;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,17 +62,18 @@ public class RunnableInterceptorTest {
         thread.start();
         thread.join();
         assertEquals(run.get(), 1);
-        AtomicReference<MockSpan> spanAtomicReference = new AtomicReference<>();
+        AtomicReference<ReportSpan> spanAtomicReference = new AtomicReference<>();
         ReportMock.setSpanReportMock(span1 -> {
             run.incrementAndGet();
             spanAtomicReference.set(span1);
         });
         span.finish();
         assertEquals(run.get(), 2);
-        MockSpan span1 = spanAtomicReference.get();
+
+        ReportSpan span1 = spanAtomicReference.get();
         assertEquals(span.traceIdString(), span1.traceId());
         assertEquals(span.parentIdString(), span1.parentId());
-        assertEquals(span.spanIdString(), span1.spanId());
+        assertEquals(span.spanIdString(), span1.id());
         System.out.println("run count: " + run.get());
     }
 }

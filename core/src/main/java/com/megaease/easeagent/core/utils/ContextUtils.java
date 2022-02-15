@@ -18,14 +18,14 @@
 package com.megaease.easeagent.core.utils;
 
 import com.google.auto.service.AutoService;
-import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
+import com.megaease.easeagent.plugin.AppendBootstrapLoader;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.utils.SystemClock;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@AutoService(AppendBootstrapClassLoaderSearch.class)
+@AutoService(AppendBootstrapLoader.class)
 public class ContextUtils {
 
     private ContextUtils() {

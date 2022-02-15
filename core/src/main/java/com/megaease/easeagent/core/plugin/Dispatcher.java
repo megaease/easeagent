@@ -18,14 +18,14 @@
 package com.megaease.easeagent.core.plugin;
 
 import com.google.auto.service.AutoService;
-import com.megaease.easeagent.core.AppendBootstrapClassLoaderSearch;
 import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.core.utils.ContextUtils;
+import com.megaease.easeagent.plugin.AppendBootstrapLoader;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
 
-@AutoService(AppendBootstrapClassLoaderSearch.class)
+@AutoService(AppendBootstrapLoader.class)
 public final class Dispatcher {
 
     private Dispatcher() {

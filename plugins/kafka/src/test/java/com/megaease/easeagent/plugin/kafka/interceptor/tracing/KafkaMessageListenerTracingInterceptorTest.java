@@ -19,7 +19,6 @@ package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -32,6 +31,7 @@ import com.megaease.easeagent.plugin.kafka.interceptor.MockConsumerRecord;
 import com.megaease.easeagent.plugin.kafka.interceptor.MockKafkaConsumer;
 import com.megaease.easeagent.plugin.kafka.interceptor.TestConst;
 import com.megaease.easeagent.plugin.kafka.interceptor.redirect.KafkaAbstractConfigConstructInterceptor;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Test;
@@ -50,9 +50,9 @@ public class KafkaMessageListenerTracingInterceptorTest {
         return mockConsumerRecord;
     }
 
-    private void check(MockSpan mockSpan, String broker) {
+    private void check(ReportSpan mockSpan, String broker) {
         assertEquals("on-message", mockSpan.name());
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals("kafka", mockSpan.remoteServiceName());
         assertEquals(broker, mockSpan.tag(KafkaTags.KAFKA_BROKER_TAG));
         assertEquals(Type.KAFKA.getRemoteType(), mockSpan.tag(MiddlewareConstants.TYPE_TAG_NAME));
@@ -108,7 +108,7 @@ public class KafkaMessageListenerTracingInterceptorTest {
         context.put(KafkaMessageListenerTracingInterceptor.SPAN, span);
         MethodInfo methodInfo = MethodInfo.builder().build();
         interceptor.doAfter(methodInfo, context);
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
 
         String errorInfo = "test error";
@@ -118,8 +118,8 @@ public class KafkaMessageListenerTracingInterceptorTest {
         interceptor.doAfter(methodInfo, context);
         mockSpan = ReportMock.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
-        assertTrue(mockSpan.hasError());
-        assertEquals(errorInfo, mockSpan.errorInfo());
+        assertTrue(mockSpan.tags().containsKey("error"));
+        assertEquals(errorInfo, mockSpan.tags().get("error"));
 
     }
 }

@@ -17,16 +17,20 @@
 
 package com.megaease.easeagent.report.util;
 
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.Span;
 
 public class SpanUtils {
     private SpanUtils() {}
 
     public static boolean isValidSpan(Object next) {
-        if (!(next instanceof Span)) {
-            return false;
+        if (next instanceof ReportSpan) {
+            ReportSpan s = (ReportSpan) next;
+            return s.timestamp() > 0;
+        } else if (next instanceof Span) {
+            Span s = (Span) next;
+            return s.timestamp() != null && s.timestamp() > 0;
         }
-        Span s = (Span) next;
-        return s.timestamp() != null && s.timestamp() > 0;
+        return false;
     }
 }

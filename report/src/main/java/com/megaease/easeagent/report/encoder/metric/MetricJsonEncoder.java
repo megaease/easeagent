@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.report.ByteWrapper;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.report.encoder.JsonEncoder;
 
@@ -30,6 +32,8 @@ import java.util.Map;
 @AutoService(Encoder.class)
 public class MetricJsonEncoder extends JsonEncoder<Map<String, Object>> {
     public static final String ENCODER_NAME = ReportConfigConst.METRIC_JSON_ENCODER_NAME;
+
+    static final String ENCODED_TMP = "__agent_encoded__";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,18 +49,30 @@ public class MetricJsonEncoder extends JsonEncoder<Map<String, Object>> {
 
     @Override
     public int sizeInBytes(Map<String, Object> input) {
-        // ignored for default metric output
-        return 0;
+        EncodedData d;
+        if (input.get(ENCODED_TMP) != null) {
+            d = (EncodedData)input.get(ENCODED_TMP);
+        } else {
+            d = encode(input);
+            input.put(ENCODED_TMP, d);
+        }
+        return d.size();
     }
 
     @Override
-    public byte[] encode(Map<String, Object> input) {
+    public EncodedData encode(Map<String, Object> input) {
         try {
-            String data = this.objectMapper.writeValueAsString(input);
-            return data.getBytes();
+            byte[] data;
+            if (input.get(ENCODED_TMP) != null) {
+                data = (byte[])input.get(ENCODED_TMP);
+            } else {
+                data = this.objectMapper.writeValueAsBytes(input);
+                input.put(ENCODED_TMP, data);
+            }
+            return new ByteWrapper(data);
         } catch (JsonProcessingException e) {
             // ignored
         }
-        return new byte[0];
+        return new ByteWrapper(new byte[0]);
     }
 }

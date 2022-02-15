@@ -18,7 +18,6 @@
 package com.megaease.easeagent.config;
 
 
-import com.megaease.easeagent.config.report.ReporterConfigAdapter;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;

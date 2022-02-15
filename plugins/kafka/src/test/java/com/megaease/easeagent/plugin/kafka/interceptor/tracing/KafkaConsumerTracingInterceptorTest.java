@@ -18,7 +18,6 @@
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -30,6 +29,7 @@ import com.megaease.easeagent.plugin.kafka.interceptor.KafkaTestUtils;
 import com.megaease.easeagent.plugin.kafka.interceptor.MockKafkaConsumer;
 import com.megaease.easeagent.plugin.kafka.interceptor.TestConst;
 import com.megaease.easeagent.plugin.kafka.interceptor.redirect.KafkaAbstractConfigConstructInterceptor;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -73,7 +73,7 @@ public class KafkaConsumerTracingInterceptorTest {
 
         methodInfo = MethodInfo.builder().invoker(kafkaConsumer).retValue(consumerRecords).build();
         interceptor.doAfter(methodInfo, EaseAgent.getContext());
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         checkBaseInfo(mockSpan, topic, (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data());
 
     }
@@ -110,7 +110,7 @@ public class KafkaConsumerTracingInterceptorTest {
         interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
         checkBaseInfo(Objects.requireNonNull(ReportMock.getLastSpan()), topic, uri);
 
-        List<MockSpan> mockSpans = new ArrayList<>();
+        List<ReportSpan> mockSpans = new ArrayList<>();
         ReportMock.setSpanReportMock(mockSpans::add);
         consumerRecords = new ConsumerRecords<>(
             Collections.singletonMap(new TopicPartition(topic, 1),
@@ -123,7 +123,7 @@ public class KafkaConsumerTracingInterceptorTest {
 
         interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
         assertEquals(10, mockSpans.size());
-        for (MockSpan mockSpan : mockSpans) {
+        for (ReportSpan mockSpan : mockSpans) {
             checkBaseInfo(mockSpan, topic, uri);
         }
         mockSpans.clear();
@@ -137,20 +137,20 @@ public class KafkaConsumerTracingInterceptorTest {
         interceptor.singleRootSpanOnReceiveBatch = false;
         interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
         assertEquals(10, mockSpans.size());
-        for (MockSpan mockSpan : mockSpans) {
+        for (ReportSpan mockSpan : mockSpans) {
             checkBaseInfo(mockSpan, topic, uri);
         }
         mockSpans.clear();
     }
 
-    private void checkTowTopicMockSpans(List<MockSpan> mockSpans, String uri) {
+    private void checkTowTopicMockSpans(List<ReportSpan> mockSpans, String uri) {
         Set<String> topics = new HashSet<>();
-        for (MockSpan mockSpan : mockSpans) {
+        for (ReportSpan mockSpan : mockSpans) {
             topics.add(mockSpan.tag(KafkaTags.KAFKA_TOPIC_TAG));
         }
         assertTrue(topics.contains(topic1));
         assertTrue(topics.contains(topic2));
-        for (MockSpan mockSpan : mockSpans) {
+        for (ReportSpan mockSpan : mockSpans) {
             String topic = mockSpan.tag(KafkaTags.KAFKA_TOPIC_TAG);
             checkBaseInfo(mockSpan, topic, uri);
         }
@@ -172,7 +172,7 @@ public class KafkaConsumerTracingInterceptorTest {
         records.put(new TopicPartition(topic1, 1), Collections.singletonList(record(topic1, 0)));
         records.put(new TopicPartition(topic2, 1), Collections.singletonList(record(topic2, 0)));
 
-        List<MockSpan> mockSpans = new ArrayList<>();
+        List<ReportSpan> mockSpans = new ArrayList<>();
         ReportMock.setSpanReportMock(mockSpans::add);
 
         String uri = (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data();
@@ -204,7 +204,7 @@ public class KafkaConsumerTracingInterceptorTest {
         mockSpans.clear();
     }
 
-    private void checkBaseInfo(MockSpan mockSpan, String topic, String uri) {
+    private void checkBaseInfo(ReportSpan mockSpan, String topic, String uri) {
         assertEquals(topic, mockSpan.tag(KafkaTags.KAFKA_TOPIC_TAG));
         assertEquals(uri, mockSpan.tag(KafkaTags.KAFKA_BROKER_TAG));
         assertEquals(Type.KAFKA.getRemoteType(), mockSpan.tag(MiddlewareConstants.TYPE_TAG_NAME));
@@ -221,7 +221,7 @@ public class KafkaConsumerTracingInterceptorTest {
         String uri = "testUri";
         interceptor.setConsumerSpan(topic, uri, span);
         span.finish();
-        MockSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = ReportMock.getLastSpan();
         checkBaseInfo(mockSpan, topic, uri);
 
         KafkaAbstractConfigConstructInterceptor kafkaAbstractConfigConstructInterceptor = new KafkaAbstractConfigConstructInterceptor();
@@ -240,7 +240,7 @@ public class KafkaConsumerTracingInterceptorTest {
             Span span1 = context.nextSpan().start();
             interceptor.setConsumerSpan(topic, (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data(), span1);
             span1.finish();
-            MockSpan mockSpan1 = ReportMock.getLastSpan();
+            ReportSpan mockSpan1 = ReportMock.getLastSpan();
             assertEquals(TestConst.REDIRECT_URIS, mockSpan1.tag("label.remote"));
         });
     }

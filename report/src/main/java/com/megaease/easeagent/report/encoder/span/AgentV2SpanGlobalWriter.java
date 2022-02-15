@@ -17,13 +17,13 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.util.TextUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
-import zipkin2.Span;
 import zipkin2.internal.JsonEscaper;
 import zipkin2.internal.WriteBuffer;
 
-public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
+public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<ReportSpan> {
 
     final String type;
     final GlobalExtrasSupplier extras;
@@ -38,7 +38,7 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
     }
 
     @Override
-    public int sizeInBytes(Span value) {
+    public int sizeInBytes(ReportSpan value) {
         final MutableInt mutableInt = new MutableInt(0);
         if (TextUtils.hasText(type)) {
             mutableInt.add(TYPE_FIELD_NAME.length() + 1);
@@ -60,7 +60,7 @@ public class AgentV2SpanGlobalWriter implements WriteBuffer.Writer<Span> {
     }
 
     @Override
-    public void write(Span value, WriteBuffer buffer) {
+    public void write(ReportSpan value, WriteBuffer buffer) {
         if (TextUtils.hasText(type)) {
             buffer.writeAscii(TYPE_FIELD_NAME);
             buffer.writeUtf8(JsonEscaper.jsonEscape(type));

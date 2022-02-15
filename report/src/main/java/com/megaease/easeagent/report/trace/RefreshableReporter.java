@@ -18,10 +18,10 @@
 package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import com.megaease.easeagent.report.async.SDKAsyncReporter;
 import com.megaease.easeagent.report.async.TraceAsyncProps;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
-import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import zipkin2.reporter.Reporter;
 
 import java.util.Map;

@@ -21,6 +21,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
+import com.megaease.easeagent.plugin.AppendBootstrapLoader;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
@@ -54,7 +55,7 @@ public final class AppendBootstrapClassLoaderSearch {
     );
 
     static Set<String> by(Instrumentation inst, ClassInjector.UsingInstrumentation.Target target) throws IOException {
-        final Set<String> names = findClassAnnotatedAutoService(AppendBootstrapClassLoaderSearch.class);
+        final Set<String> names = findClassAnnotatedAutoService(AppendBootstrapLoader.class);
         ClassInjector.UsingInstrumentation.of(TMP_FILE, target, inst).inject(types(names));
         return names;
     }
@@ -76,7 +77,8 @@ public final class AppendBootstrapClassLoaderSearch {
     }
 
     private static Set<String> findClassAnnotatedAutoService(Class<?> cls) throws IOException {
-        final ClassLoader loader = cls.getClassLoader();
+        final ClassLoader loader = AppendBootstrapClassLoaderSearch.class.getClassLoader();
+
         return from(list(loader.getResources("META-INF/services/" + cls.getName())))
             .transform(input -> {
                 try {

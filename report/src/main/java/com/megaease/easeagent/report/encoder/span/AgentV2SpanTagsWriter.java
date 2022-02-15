@@ -17,16 +17,16 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
-import zipkin2.Span;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.internal.JsonEscaper;
 import zipkin2.internal.WriteBuffer;
 
 import java.util.Iterator;
 import java.util.Map;
 
-public class AgentV2SpanTagsWriter implements WriteBuffer.Writer<Span> {
+public class AgentV2SpanTagsWriter implements WriteBuffer.Writer<ReportSpan> {
     @Override
-    public int sizeInBytes(Span value) {
+    public int sizeInBytes(ReportSpan value) {
         int sizeInBytes = 0;
         if (!value.tags().isEmpty()) {
             sizeInBytes += 10;
@@ -45,7 +45,7 @@ public class AgentV2SpanTagsWriter implements WriteBuffer.Writer<Span> {
     }
 
     @Override
-    public void write(Span value, WriteBuffer b) {
+    public void write(ReportSpan value, WriteBuffer b) {
         if (!value.tags().isEmpty()) {
             b.writeAscii(",\"tags\":{");
             Iterator<Map.Entry<String, String>> i = value.tags().entrySet().iterator();

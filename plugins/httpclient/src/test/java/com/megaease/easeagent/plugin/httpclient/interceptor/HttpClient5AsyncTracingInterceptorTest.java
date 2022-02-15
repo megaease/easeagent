@@ -18,13 +18,13 @@
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.apache.hc.core5.concurrent.FutureCallback;
@@ -46,11 +46,11 @@ public class HttpClient5AsyncTracingInterceptorTest {
     public void doBefore() throws InterruptedException {
         BasicHttpResponse basicHttpResponse = new BasicHttpResponse(200);
         basicHttpResponse.setHeader(TestConst.RESPONSE_TAG_NAME, TestConst.RESPONSE_TAG_VALUE);
-        MockSpan mockSpan = runOne(httpResponseFutureCallback -> {
+        ReportSpan mockSpan = runOne(httpResponseFutureCallback -> {
             httpResponseFutureCallback.completed(basicHttpResponse);
         });
         assertNotNull(mockSpan);
-        assertEquals(Span.Kind.CLIENT, mockSpan.kind());
+        assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
@@ -63,7 +63,7 @@ public class HttpClient5AsyncTracingInterceptorTest {
             assertNotNull(mockSpan);
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
-            assertNotNull(mockSpan.spanId());
+            assertNotNull(mockSpan.id());
         }
 
         mockSpan = runOne(httpResponseFutureCallback -> {
@@ -73,7 +73,7 @@ public class HttpClient5AsyncTracingInterceptorTest {
 
     }
 
-    private static MockSpan runOne(final Consumer<FutureCallback<HttpResponse>> consumer) throws InterruptedException {
+    private static ReportSpan runOne(final Consumer<FutureCallback<HttpResponse>> consumer) throws InterruptedException {
         SimpleHttpRequest simpleHttpRequest = SimpleHttpRequest.create("GET", "http://127.0.0.1:8080");
         SimpleRequestProducer simpleRequestProducer = SimpleRequestProducer.create(simpleHttpRequest);
         FutureCallback<HttpResponse> callback = new FutureCallback<HttpResponse>() {

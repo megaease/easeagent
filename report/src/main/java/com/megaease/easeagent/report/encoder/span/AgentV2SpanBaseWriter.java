@@ -17,11 +17,11 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
-import zipkin2.Span;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.internal.JsonEscaper;
 import zipkin2.internal.WriteBuffer;
 
-public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
+public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<ReportSpan> {
 
     static final String TRACE_ID_FIELD_NAME = "\"traceId\":\"";
     static final String PARENT_ID_FIELD_NAME = ",\"parentId\":\"";
@@ -34,7 +34,7 @@ public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
     static final String SHARED_FIELD_VALUE = ",\"shared\":true";
 
     @Override
-    public int sizeInBytes(Span value) {
+    public int sizeInBytes(ReportSpan value) {
         int sizeInBytes = 0;
 
         //traceId
@@ -54,7 +54,7 @@ public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
         // kind
         if (value.kind() != null) {
             sizeInBytes += KIND_FIELD_NAME.length() + 1;
-            sizeInBytes += value.kind().name().length();
+            sizeInBytes += value.kind().length();
         }
 
         // name
@@ -64,30 +64,30 @@ public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
         }
 
         // timestamp
-        if (value.timestampAsLong() != 0L) {
+        if (value.timestamp() != 0L) {
             sizeInBytes += TIMESTAMP_FIELD_NAME.length();
-            sizeInBytes += WriteBuffer.asciiSizeInBytes(value.timestampAsLong());
+            sizeInBytes += WriteBuffer.asciiSizeInBytes(value.timestamp());
         }
 
         //duration
-        if (value.durationAsLong() != 0L) {
+        if (value.duration() != 0L) {
             sizeInBytes += DURATION_FIELD_NAME.length();
-            sizeInBytes += WriteBuffer.asciiSizeInBytes(value.durationAsLong());
+            sizeInBytes += WriteBuffer.asciiSizeInBytes(value.duration());
         }
 
 
-        if (Boolean.TRUE.equals(value.debug())) {
+        if (value.debug()) {
             sizeInBytes += DEBUG_FIELD_VALUE.length();
         }
 
-        if (Boolean.TRUE.equals(value.shared())) {
+        if (value.shared()) {
             sizeInBytes += SHARED_FIELD_VALUE.length();
         }
         return sizeInBytes;
     }
 
     @Override
-    public void write(Span value, WriteBuffer b) {
+    public void write(ReportSpan value, WriteBuffer b) {
         b.writeAscii(TRACE_ID_FIELD_NAME);
         b.writeAscii(value.traceId());
         b.writeByte('\"');
@@ -103,7 +103,7 @@ public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
         b.writeByte(34);
         if (value.kind() != null) {
             b.writeAscii(KIND_FIELD_NAME);
-            b.writeAscii(value.kind().toString());
+            b.writeAscii(value.kind());
             b.writeByte('\"');
         }
 
@@ -113,14 +113,14 @@ public class AgentV2SpanBaseWriter implements WriteBuffer.Writer<Span> {
             b.writeByte('\"');
         }
 
-        if (value.timestampAsLong() != 0L) {
+        if (value.timestamp() != 0L) {
             b.writeAscii(TIMESTAMP_FIELD_NAME);
-            b.writeAscii(value.timestampAsLong());
+            b.writeAscii(value.timestamp());
         }
 
-        if (value.durationAsLong() != 0L) {
+        if (value.duration() != 0L) {
             b.writeAscii(DURATION_FIELD_NAME);
-            b.writeAscii(value.durationAsLong());
+            b.writeAscii(value.duration());
         }
 
         if (Boolean.TRUE.equals(value.debug())) {

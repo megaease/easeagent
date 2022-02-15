@@ -92,12 +92,11 @@ public class CommonRedisMetricInterceptorTest {
         assertEquals(1, (int) metric.get("cnt"));
         assertEquals(0, (int) metric.get("errcnt"));
 
-        lastJsonReporter.clean();
-
         methodInfo = MethodInfo.builder().invoker("tttt").method("get").throwable(new RuntimeException("test error")).build();
         commonRedisMetricInterceptor.doBefore(methodInfo, context);
         commonRedisMetricInterceptor.doAfter(methodInfo, context);
 
+        lastJsonReporter.clean();
         metric = getMetric(lastJsonReporter);
         assertEquals(2, (int) metric.get("cnt"));
         assertEquals(1, (int) metric.get("errcnt"));

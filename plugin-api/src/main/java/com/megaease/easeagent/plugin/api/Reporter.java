@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin.api;
 
+import com.megaease.easeagent.plugin.report.EncodedData;
+
 /**
  * a reporter for message like metric or trace
  */
@@ -28,5 +30,5 @@ public interface Reporter {
      */
     void report(String msg);
 
-    void report(byte[] msg);
+    void report(EncodedData msg);
 }

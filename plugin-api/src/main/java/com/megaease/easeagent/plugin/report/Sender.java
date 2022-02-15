@@ -43,7 +43,7 @@ public interface Sender extends Closeable {
      * @param encodedData encoded data, such as encoded spans.
      * @throws IllegalStateException if {@link #close() close} was called.
      */
-    Call<Void> send(byte[] encodedData);
+    Call<Void> send(EncodedData encodedData);
 
     /**
      * If sender is available( not closed), return true, otherwise false.

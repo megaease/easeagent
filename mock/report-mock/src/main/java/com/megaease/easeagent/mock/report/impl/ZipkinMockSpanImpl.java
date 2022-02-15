@@ -18,31 +18,29 @@
 package com.megaease.easeagent.mock.report.impl;
 
 import com.megaease.easeagent.mock.report.MockSpan;
-import zipkin2.Annotation;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.Span;
+import com.megaease.easeagent.plugin.report.tracing.Annotation;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ZipkinMockSpanImpl implements MockSpan {
-    private static final Map<Span.Kind, com.megaease.easeagent.plugin.api.trace.Span.Kind> KINDS;
+    private static final Map<String, com.megaease.easeagent.plugin.api.trace.Span.Kind> KINDS;
 
     static {
-        Map<Span.Kind, com.megaease.easeagent.plugin.api.trace.Span.Kind> kinds = new EnumMap<>(Span.Kind.class);
-        kinds.put(Span.Kind.CLIENT, com.megaease.easeagent.plugin.api.trace.Span.Kind.CLIENT);
-        kinds.put(Span.Kind.SERVER, com.megaease.easeagent.plugin.api.trace.Span.Kind.SERVER);
-        kinds.put(Span.Kind.PRODUCER, com.megaease.easeagent.plugin.api.trace.Span.Kind.PRODUCER);
-        kinds.put(Span.Kind.CONSUMER, com.megaease.easeagent.plugin.api.trace.Span.Kind.CONSUMER);
+        Map<String, com.megaease.easeagent.plugin.api.trace.Span.Kind> kinds = new HashMap<>();
+        kinds.put(Span.Kind.CLIENT.name(), com.megaease.easeagent.plugin.api.trace.Span.Kind.CLIENT);
+        kinds.put(Span.Kind.SERVER.name(), com.megaease.easeagent.plugin.api.trace.Span.Kind.SERVER);
+        kinds.put(Span.Kind.PRODUCER.name(), com.megaease.easeagent.plugin.api.trace.Span.Kind.PRODUCER);
+        kinds.put(Span.Kind.CONSUMER.name(), com.megaease.easeagent.plugin.api.trace.Span.Kind.CONSUMER);
         KINDS = Collections.unmodifiableMap(kinds);
     }
 
 
-    private final Span span;
+    private final ReportSpan span;
 
-    public ZipkinMockSpanImpl(@Nonnull Span span) {
+    public ZipkinMockSpanImpl(@Nonnull ReportSpan span) {
         this.span = span;
     }
 
@@ -101,7 +99,7 @@ public class ZipkinMockSpanImpl implements MockSpan {
 
     @Override
     public String remoteServiceName() {
-        return span.remoteServiceName();
+        return span.remoteEndpoint().serviceName();
     }
 
     @Override
@@ -134,13 +132,13 @@ public class ZipkinMockSpanImpl implements MockSpan {
 
     @Override
     public int remotePort() {
-        return span.remoteEndpoint().portAsInt();
+        return span.remoteEndpoint().port();
     }
 
 
     @Override
     public int localPort() {
-        return span.localEndpoint().portAsInt();
+        return span.localEndpoint().port();
     }
 
     @Override

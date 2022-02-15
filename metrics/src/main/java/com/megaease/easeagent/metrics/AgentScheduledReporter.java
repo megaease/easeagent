@@ -22,9 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.utils.NoNull;
-import com.megaease.easeagent.config.report.ReporterConfigAdapter;
+import com.megaease.easeagent.config.report.ReportConfigAdapter;
 import com.megaease.easeagent.report.encoder.metric.MetricJsonEncoder;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import lombok.SneakyThrows;
@@ -41,13 +42,13 @@ import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 public class AgentScheduledReporter extends ScheduledReporter {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Converter converter;
-    private final Consumer<byte[]> dataConsumer;
+    private final Consumer<EncodedData> dataConsumer;
     private final Supplier<Boolean> enabled;
     private final Encoder<Map<String, Object>> encoder;
 
     @SuppressWarnings("all")
     private AgentScheduledReporter(MetricRegistry registry,
-                                   Consumer<byte[]> dataConsumer,
+                                   Consumer<EncodedData> dataConsumer,
                                    TimeUnit rateUnit,
                                    TimeUnit durationUnit,
                                    MetricFilter filter,
@@ -62,7 +63,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
         // encoder
         this.dataConsumer = dataConsumer;
         this.enabled = enabled;
-        Map<String, String> reporterCfg = ReporterConfigAdapter.extractReporterConfig(EaseAgent.getConfig());
+        Map<String, String> reporterCfg = ReportConfigAdapter.extractReporterConfig(EaseAgent.getConfig());
         String name = NoNull.of(reporterCfg.get(METRIC_ENCODER), MetricJsonEncoder.ENCODER_NAME);
         this.encoder = ReporterRegistry.getEncoder(name);
         this.encoder.init(new Configs(reporterCfg));
@@ -133,7 +134,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
         private Set<MetricAttribute> disabledMetricAttributes;
         private Converter converter;
         private Supplier<Boolean> enabled;
-        private Consumer<byte[]> dataConsumer;
+        private Consumer<EncodedData> dataConsumer;
 
         private Builder(MetricRegistry registry) {
             this.registry = registry;
@@ -181,7 +182,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
          *
          * @return {@code this}
          */
-        public Builder outputTo(Consumer<byte[]> dataConsumer) {
+        public Builder outputTo(Consumer<EncodedData> dataConsumer) {
             this.dataConsumer = dataConsumer;
             return this;
         }
@@ -225,7 +226,7 @@ public class AgentScheduledReporter extends ScheduledReporter {
         }
 
         /**
-         * Don't report the passed metric attributes for all metrics (e.g. "p999", "stddev" or "m15").
+         * Don't report the passed metric attributes for all metrics (e.g. "p999", "stdDev" or "m15").
          * See {@link MetricAttribute}.
          *
          * @param disabledMetricAttributes a set of {@link MetricAttribute}

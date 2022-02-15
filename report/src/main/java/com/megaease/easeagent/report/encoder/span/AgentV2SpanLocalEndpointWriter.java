@@ -17,14 +17,16 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
-import zipkin2.Span;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.internal.WriteBuffer;
 
-public class AgentV2SpanLocalEndpointWriter extends AbstractAgentV2SpanEndpointWriter implements WriteBuffer.Writer<Span> {
+public class AgentV2SpanLocalEndpointWriter
+    extends AbstractAgentV2SpanEndpointWriter implements WriteBuffer.Writer<ReportSpan> {
+
     static final String LOCAL_ENDPOINT_FIELD_NAME = ",\"localEndpoint\":";
 
     @Override
-    public int sizeInBytes(Span value) {
+    public int sizeInBytes(ReportSpan value) {
         if (value.localEndpoint() == null) {
             return 0;
         }
@@ -34,7 +36,7 @@ public class AgentV2SpanLocalEndpointWriter extends AbstractAgentV2SpanEndpointW
     }
 
     @Override
-    public void write(Span value, WriteBuffer buffer) {
+    public void write(ReportSpan value, WriteBuffer buffer) {
         if (value.localEndpoint() == null) {
             return;
         }

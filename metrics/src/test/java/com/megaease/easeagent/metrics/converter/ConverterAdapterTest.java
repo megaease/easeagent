@@ -308,17 +308,17 @@ public class ConverterAdapterTest {
         Map<String, Object> result = new HashMap<>();
         converter.writeTimers(key, timers, result);
 
-        assertEquals(0d, (double) result.get(MetricField.MIN_EXECUTION_TIME.getField()), 0.1);
-        assertEquals(49.5d, (double) result.get(MetricField.MEAN_EXECUTION_TIME.getField()), 0.2);
-        assertEquals(99d, (double) result.get(MetricField.MAX_EXECUTION_TIME.getField()), 0.1);
+        assertEquals(0d, (double) result.get(MetricField.MIN_EXECUTION_TIME.getField()), 1);
+        assertEquals(49.5d, (double) result.get(MetricField.MEAN_EXECUTION_TIME.getField()), 1);
+        assertEquals(99d, (double) result.get(MetricField.MAX_EXECUTION_TIME.getField()), 1);
 
-        assertEquals(24d, (double) result.get(MetricField.P25_EXECUTION_TIME.getField()), 0.1);
-        assertEquals(49d, (double) result.get(MetricField.P50_EXECUTION_TIME.getField()), 0.1);
-        assertEquals(74d, (double) result.get(MetricField.P75_EXECUTION_TIME.getField()), 0.1);
-        assertEquals(94d, (double) result.get(MetricField.P95_EXECUTION_TIME.getField()), 0.1);
-        assertEquals(97d, (double) result.get(MetricField.P98_EXECUTION_TIME.getField()), 0.1);
-        assertEquals(98d, (double) result.get(MetricField.P99_EXECUTION_TIME.getField()), 0.1);
-        assertEquals(99d, (double) result.get(MetricField.P999_EXECUTION_TIME.getField()), 0.1);
+        assertEquals(24d, (double) result.get(MetricField.P25_EXECUTION_TIME.getField()), 1);
+        assertEquals(49d, (double) result.get(MetricField.P50_EXECUTION_TIME.getField()), 1);
+        assertEquals(74d, (double) result.get(MetricField.P75_EXECUTION_TIME.getField()), 1);
+        assertEquals(94d, (double) result.get(MetricField.P95_EXECUTION_TIME.getField()), 1);
+        assertEquals(97d, (double) result.get(MetricField.P98_EXECUTION_TIME.getField()), 1);
+        assertEquals(98d, (double) result.get(MetricField.P99_EXECUTION_TIME.getField()), 1);
+        assertEquals(99d, (double) result.get(MetricField.P999_EXECUTION_TIME.getField()),1);
 
     }
 }

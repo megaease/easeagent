@@ -23,10 +23,11 @@ import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.report.EncodedData;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.metric.MetricReporter;
 import org.junit.Test;
-import zipkin2.Span;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class MetricProviderImplTest {
         METRIC_PROVIDER.setConfig(ConfigMock.getCONFIGS());
         METRIC_PROVIDER.setAgentReport(new AgentReport() {
             @Override
-            public void report(Span span) {
+            public void report(ReportSpan span) {
 
             }
 
@@ -56,7 +57,7 @@ public class MetricProviderImplTest {
                             }
 
                             @Override
-                            public void report(byte[] msg) {
+                            public void report(EncodedData msg) {
 
                             }
                         };

@@ -20,6 +20,7 @@ package com.megaease.easeagent.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.metrics.config.MetricsConfig;
 import com.megaease.easeagent.metrics.converter.Converter;
+import com.megaease.easeagent.plugin.report.EncodedData;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -27,14 +28,14 @@ import java.util.function.Consumer;
 public class AutoRefreshReporter implements Runnable {
     private final MetricsConfig config;
     private final Converter converter;
-    private final Consumer<byte[]> consumer;
+    private final Consumer<EncodedData> consumer;
     private final MetricRegistry metricRegistry;
     private AgentScheduledReporter reporter;
 
     public AutoRefreshReporter(MetricRegistry metricRegistry,
                                MetricsConfig config,
                                Converter converter,
-                               Consumer<byte[]> consumer) {
+                               Consumer<EncodedData> consumer) {
         this.metricRegistry = metricRegistry;
         this.config = config;
         this.consumer = consumer;

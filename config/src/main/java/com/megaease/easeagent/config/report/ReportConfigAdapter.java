@@ -30,8 +30,8 @@ import static com.megaease.easeagent.config.ConfigUtils.extractByPrefix;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 @Slf4j
-public class ReporterConfigAdapter {
-    private ReporterConfigAdapter() {}
+public class ReportConfigAdapter {
+    private ReportConfigAdapter() {}
 
     public static void convertConfig(Map<String, String> config) {
         Map<String, String> cfg = extractAndConvertReporterConfig(config);
@@ -75,7 +75,11 @@ public class ReporterConfigAdapter {
         } else if ("zipkin".equals(target)) {
             cfg.put(TRACE_SENDER_NAME, ZIPKIN_SENDER_NAME);
             String url = remove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
-            cfg.put(join(TRACE_SENDER, "zipkinUrl"), url);
+            if (StringUtils.isEmpty(url)) {
+                cfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
+            } else {
+                cfg.put(join(TRACE_SENDER, "url"), url);
+            }
 
             // wait for migrate
             cfg.put(TRACE_OUTPUT_TARGET_V1, target);

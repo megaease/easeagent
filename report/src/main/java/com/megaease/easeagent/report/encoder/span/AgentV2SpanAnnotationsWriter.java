@@ -17,13 +17,12 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
-import zipkin2.Annotation;
-import zipkin2.Span;
+import com.megaease.easeagent.plugin.report.tracing.Annotation;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.internal.JsonEscaper;
-import zipkin2.internal.Nullable;
 import zipkin2.internal.WriteBuffer;
 
-public class AgentV2SpanAnnotationsWriter implements WriteBuffer.Writer<Span> {
+public class AgentV2SpanAnnotationsWriter implements WriteBuffer.Writer<ReportSpan> {
     static final String ANNOTATION_FIELD_NAME = ",\"annotations\":[";
     static final String TIMESTAMP_FIELD_NAME = "{\"timestamp\":";
     static final String VALUE_FIELD_NAME = ",\"value\":\"";
@@ -44,7 +43,7 @@ public class AgentV2SpanAnnotationsWriter implements WriteBuffer.Writer<Span> {
         return sizeInBytes;
     }
 
-    void writeAnnotation(long timestamp, String value, @Nullable byte[] endpoint, WriteBuffer b) {
+    void writeAnnotation(long timestamp, String value, byte[] endpoint, WriteBuffer b) {
         b.writeAscii(TIMESTAMP_FIELD_NAME);
         b.writeAscii(timestamp);
         b.writeAscii(VALUE_FIELD_NAME);
@@ -60,7 +59,7 @@ public class AgentV2SpanAnnotationsWriter implements WriteBuffer.Writer<Span> {
     }
 
     @Override
-    public int sizeInBytes(Span value) {
+    public int sizeInBytes(ReportSpan value) {
         int tagCount;
         int sizeInBytes = 0;
         if (!value.annotations().isEmpty()) {
@@ -79,7 +78,7 @@ public class AgentV2SpanAnnotationsWriter implements WriteBuffer.Writer<Span> {
     }
 
     @Override
-    public void write(Span value, WriteBuffer b) {
+    public void write(ReportSpan value, WriteBuffer b) {
         if (!value.annotations().isEmpty()) {
             b.writeAscii(ANNOTATION_FIELD_NAME);
             int i = 0;
@@ -87,7 +86,7 @@ public class AgentV2SpanAnnotationsWriter implements WriteBuffer.Writer<Span> {
 
             while (i < length) {
                 Annotation a = value.annotations().get(i++);
-                writeAnnotation(a.timestamp(), a.value(), (byte[]) null, b);
+                writeAnnotation(a.timestamp(), a.value(), null, b);
                 if (i < length) {
                     b.writeByte(44); //, for array item
                 }
