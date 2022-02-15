@@ -28,7 +28,7 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.mongodb.ServerAddress;
 import com.mongodb.connection.ClusterId;

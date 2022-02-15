@@ -30,7 +30,7 @@ import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.bean.BeanProvider;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.AdditionalAttributes;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;

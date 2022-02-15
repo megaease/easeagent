@@ -18,9 +18,8 @@
 package com.megaease.easeagent.report.encoder.span;
 
 import com.google.common.collect.ImmutableList;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.commons.lang3.mutable.MutableInt;
-import zipkin2.Span;
 import zipkin2.internal.WriteBuffer;
 
 import java.util.Collection;

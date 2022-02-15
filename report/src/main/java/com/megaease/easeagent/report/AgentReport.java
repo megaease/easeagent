@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.report;
 
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.metric.MetricReporter;
 
 public interface AgentReport {

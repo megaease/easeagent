@@ -19,7 +19,6 @@ package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -32,7 +31,7 @@ import com.megaease.easeagent.plugin.kafka.interceptor.MockConsumerRecord;
 import com.megaease.easeagent.plugin.kafka.interceptor.MockKafkaConsumer;
 import com.megaease.easeagent.plugin.kafka.interceptor.TestConst;
 import com.megaease.easeagent.plugin.kafka.interceptor.redirect.KafkaAbstractConfigConstructInterceptor;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Test;

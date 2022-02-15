@@ -19,7 +19,7 @@ package com.megaease.easeagent.report.async;
 
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.async.zipkin.AgentBufferNextMessage;
 import com.megaease.easeagent.report.async.zipkin.AgentByteBoundedQueue;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;

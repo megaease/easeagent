@@ -18,9 +18,9 @@
 package com.megaease.easeagent.mock.report.impl;
 
 import com.megaease.easeagent.mock.report.MockSpan;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.Span;
-import com.megaease.easeagent.plugin.report.zipkin.Annotation;
+import com.megaease.easeagent.plugin.report.tracing.Annotation;
 
 import javax.annotation.Nonnull;
 import java.util.*;

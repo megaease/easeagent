@@ -17,10 +17,10 @@
  */
 package com.megaease.easeagent.report.trace;
 
-import com.megaease.easeagent.plugin.report.zipkin.Annotation;
-import com.megaease.easeagent.plugin.report.zipkin.Endpoint;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpanImpl;
+import com.megaease.easeagent.plugin.report.tracing.Annotation;
+import com.megaease.easeagent.plugin.report.tracing.Endpoint;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpanImpl;
 import zipkin2.Span;
 import zipkin2.Span.Kind;
 import zipkin2.internal.Platform;

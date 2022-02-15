@@ -20,7 +20,7 @@ package com.megaease.easeagent.report.trace;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.report.ReportConfigAdapter;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.plugin.ReporterLoader;
 import org.junit.Assert;
 import org.junit.Before;

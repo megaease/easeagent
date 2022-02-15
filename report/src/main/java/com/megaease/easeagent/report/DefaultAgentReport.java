@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.config.report.ReportConfigAdapter;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.metric.MetricReporter;
 import com.megaease.easeagent.report.metric.MetricReporterImpl;
 import com.megaease.easeagent.report.plugin.ReporterLoader;

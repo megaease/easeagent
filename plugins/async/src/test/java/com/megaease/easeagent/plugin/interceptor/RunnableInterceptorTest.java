@@ -18,11 +18,10 @@
 package com.megaease.easeagent.plugin.interceptor;
 
 import com.megaease.easeagent.mock.context.ContextManagerMock;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;

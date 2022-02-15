@@ -24,7 +24,7 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.config.report.ReportConfigConst;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.async.SDKAsyncReporter;
 import com.megaease.easeagent.report.async.TraceAsyncProps;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;

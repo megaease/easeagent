@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.report.util;
 
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.Span;
 
 public class SpanUtils {

@@ -24,11 +24,10 @@ import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.report.EncodedData;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.metric.MetricReporter;
 import org.junit.Test;
-import zipkin2.Span;
 
 import java.util.List;
 

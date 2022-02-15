@@ -18,14 +18,13 @@
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.springweb.interceptor.RequestUtils;
 import com.megaease.easeagent.plugin.springweb.interceptor.TestConst;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;

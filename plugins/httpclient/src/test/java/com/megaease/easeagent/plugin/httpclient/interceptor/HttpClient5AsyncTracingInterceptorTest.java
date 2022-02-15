@@ -18,14 +18,13 @@
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.apache.hc.core5.concurrent.FutureCallback;

@@ -19,12 +19,11 @@ package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;

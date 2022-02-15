@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  */
-package com.megaease.easeagent.plugin.report.zipkin;
+package com.megaease.easeagent.plugin.report.tracing;
 
 import java.util.*;
 

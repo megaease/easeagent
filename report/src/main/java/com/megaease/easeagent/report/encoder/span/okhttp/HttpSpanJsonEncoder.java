@@ -22,7 +22,7 @@ import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.encoder.span.SpanJsonEncoder;
 
 import java.util.List;

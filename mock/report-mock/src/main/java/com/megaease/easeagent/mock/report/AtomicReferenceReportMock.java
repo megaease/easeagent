@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.mock.report;
 
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 
 import java.util.concurrent.atomic.AtomicReference;
 

@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.elasticsearch.interceptor;
 
-import com.megaease.easeagent.mock.report.MockSpan;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -28,7 +27,7 @@ import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.ByteArrayEntity;

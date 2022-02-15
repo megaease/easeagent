@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.report.encoder.span;
 
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.internal.WriteBuffer;
 
 public class AgentV2SpanLocalEndpointWriter

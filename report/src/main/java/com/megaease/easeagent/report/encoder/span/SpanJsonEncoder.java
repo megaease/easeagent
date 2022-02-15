@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.report.ByteWrapper;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.report.encoder.JsonEncoder;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.GlobalExtractor;
 import zipkin2.internal.JsonCodec;
 

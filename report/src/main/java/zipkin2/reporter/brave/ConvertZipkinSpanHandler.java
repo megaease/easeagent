@@ -18,7 +18,7 @@
 package zipkin2.reporter.brave;
 
 import brave.handler.SpanHandler;
-import com.megaease.easeagent.plugin.report.zipkin.ReportSpan;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import zipkin2.reporter.Reporter;
 
 public class ConvertZipkinSpanHandler extends ZipkinSpanHandler {
