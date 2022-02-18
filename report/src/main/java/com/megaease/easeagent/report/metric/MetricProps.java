@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.report.metric;
 
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.Const;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -43,6 +44,8 @@ public interface MetricProps {
     boolean isEnabled();
 
     Map<String, String> toReportConfigMap();
+
+    Configs asReportConfig();
 
     static MetricProps newDefault(IPluginConfig config, Config reportConfig) {
 
@@ -75,6 +78,7 @@ public interface MetricProps {
         private final String topic;
         private final String name;
         private final int interval;
+        private final Config config;
 
         public Default(Config reportConfig, String name, boolean enabled,
                        String senderName, String topic, int interval) {
@@ -83,6 +87,7 @@ public interface MetricProps {
             this.senderName = senderName;
             this.topic = topic;
             this.interval = interval;
+            this.config = reportConfig;
 
             if ("kafka".equals(this.senderName)) {
                 this.senderName = MetricKafkaSender.SENDER_NAME;
@@ -122,6 +127,14 @@ public interface MetricProps {
             map.put(METRIC_SENDER_TOPIC, this.topic);
             map.put(METRIC_ASYNC_INTERVAL, String.valueOf(this.interval));
             return map;
+        }
+
+        public Configs asReportConfig() {
+            Map<String, String> map = toReportConfigMap();
+            // merge plugin and global config
+            Map<String, String> cfg = this.config.getConfigs();
+            cfg.putAll(toReportConfigMap());
+            return new Configs(cfg);
         }
 
         @Override

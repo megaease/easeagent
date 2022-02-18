@@ -27,15 +27,44 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 
 import static com.megaease.easeagent.config.ValidateUtils.*;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
     private static final String CONFIG_FILE = "agent.properties";
+
+    private static final String AGENT_SERVICE_NAME = "easeagent.name";
+    private static final String AGENT_SYSTEM_NAME = "easeagent.system";
+
+    private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
+    private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
+
+    private static final List<String> subEnvKeys = new LinkedList<>();
+    private static final List<String> envKeys = new LinkedList<>();
+    static {
+        subEnvKeys.add(AGENT_SERVICE_NAME);
+        subEnvKeys.add(AGENT_SYSTEM_NAME);
+        envKeys.add(AGENT_SERVER_ENABLED_KEY);
+        envKeys.add(AGENT_SERVER_PORT_KEY);
+    }
+
+    static Map<String, String> updateEnvCfg(Map<String, String> fileCfgMap) {
+        for (String key : subEnvKeys) {
+            String value = System.getProperty(key);
+            if (!StringUtils.isEmpty(value)) {
+                fileCfgMap.put(key.substring("easeagent.".length()), value);
+            }
+        }
+        for (String key : envKeys) {
+            String value = System.getProperty(key);
+            if (!StringUtils.isEmpty(value)) {
+                fileCfgMap.put(key, value);
+            }
+        }
+        return fileCfgMap;
+    }
 
     private ConfigFactory() {}
 
@@ -66,10 +95,13 @@ public class ConfigFactory {
 
     public static GlobalConfigs loadConfigs(String pathname, ClassLoader loader) {
         GlobalConfigs configs = ConfigFactory.loadFromClasspath(loader);
+        // override by user special config file
         if (StringUtils.isNotEmpty(pathname)) {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
             configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
+        // check environment cfg override
+        configs.updateConfigsNotNotify(updateEnvCfg(configs.getConfigs()));
 
         if (LOGGER.isDebugEnabled()) {
             final String display = configs.toPrettyDisplay();

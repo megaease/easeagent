@@ -112,10 +112,7 @@ public class MetricReporterImpl implements MetricReporter {
 
             this.metricProps = Utils.extractMetricProps(pluginConfig, reportConfig);
 
-            // merge plugin and global config
-            Map<String, String> cfg = reportConfig.getConfigs();
-            cfg.putAll(this.metricProps.toReportConfigMap());
-            this.reporterConfig = new Configs(cfg);
+            this.reporterConfig = this.metricProps.asReportConfig();
 
             this.sender = ReporterRegistry.getSender(METRIC_SENDER, this.reporterConfig);
         }

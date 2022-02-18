@@ -53,7 +53,9 @@ public class PluginConfig implements IPluginConfig {
         }
     }
 
-    public static PluginConfig build(@Nonnull String domain, @Nonnull String id, @Nonnull Map<String, String> global, @Nonnull String namespace, @Nonnull Map<String, String> cover, PluginConfig oldConfig) {
+    public static PluginConfig build(@Nonnull String domain, @Nonnull String id,
+                                     @Nonnull Map<String, String> global, @Nonnull String namespace,
+                                     @Nonnull Map<String, String> cover, PluginConfig oldConfig) {
         Set<PluginConfigChangeListener> listeners;
         if (oldConfig == null) {
             listeners = new HashSet<>();

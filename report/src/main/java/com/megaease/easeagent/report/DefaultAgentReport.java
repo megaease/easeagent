@@ -29,12 +29,15 @@ import com.megaease.easeagent.report.metric.MetricReporterImpl;
 import com.megaease.easeagent.report.plugin.ReporterLoader;
 import com.megaease.easeagent.report.trace.TraceReport;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
+@Slf4j
 public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
     private final TraceReport traceReport;
     private final MetricReporter metricReporter;
@@ -53,6 +56,9 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
 
     @Override
     public void report(ReportSpan span) {
+        if (log.isDebugEnabled()) {
+            log.debug("traceId: {}, spanId: {}", span.traceId(), span.id());
+        }
         this.traceReport.report(span);
     }
 
