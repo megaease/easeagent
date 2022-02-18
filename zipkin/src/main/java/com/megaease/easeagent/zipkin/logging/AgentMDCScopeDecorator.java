@@ -22,6 +22,7 @@ import brave.internal.CorrelationContext;
 import brave.internal.Nullable;
 import brave.propagation.CurrentTraceContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 public class AgentMDCScopeDecorator {
     static final CurrentTraceContext.ScopeDecorator INSTANCE = new AgentMDCScopeDecorator.Builder().build();
@@ -85,15 +86,22 @@ public class AgentMDCScopeDecorator {
 
         @Override
         public String getValue(String name) {
-            return EaseAgent.loggerMdc.get(name);
+            String value = EaseAgent.loggerMdc.get(name);
+            if (StringUtils.isEmpty(value)) {
+                return org.slf4j.MDC.get(name);
+            } else {
+                return value;
+            }
         }
 
         @Override
         public boolean update(String name, @Nullable String value) {
             if (value != null) {
                 EaseAgent.loggerMdc.put(name, value);
+                org.slf4j.MDC.put(name, value);
             } else {
                 EaseAgent.loggerMdc.remove(name);
+                org.slf4j.MDC.remove(name);
             }
             return true;
         }
