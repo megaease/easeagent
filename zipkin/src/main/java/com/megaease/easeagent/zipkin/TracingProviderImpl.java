@@ -63,6 +63,7 @@ public class TracingProviderImpl implements BeanProvider, AgentReportAware, Conf
         ThreadLocalCurrentTraceContext traceContext = ThreadLocalCurrentTraceContext.newBuilder()
             .addScopeDecorator(AgentMDCScopeDecorator.get())
             .addScopeDecorator(AgentMDCScopeDecorator.getV2())
+            .addScopeDecorator(AgentMDCScopeDecorator.getAgentDecorator())
             .build();
 
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
