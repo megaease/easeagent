@@ -33,14 +33,6 @@ import java.net.URISyntaxException;
 
 @AdviceTo(value = HttpClient5DoExecuteAdvice.class, qualifier = "default", plugin = HttpClientPlugin.class)
 public class HttpClient5DoExecuteInterceptor extends BaseHttpClientTracingInterceptor {
-    /**
-     * Logger eLog = EaseAgent.getLogger(HttpClient5DoExecuteInterceptor.class);
-     * org.slf4j.Logger sLog = LoggerFactory.getLogger(HttpClient5DoExecuteInterceptor.class);
-     *
-     * org.slf4j.MDC.put("testMDC", "MDC-Test");
-     * eLog.info(" -- easeLogger test mdc");
-     * sLog.info(" -- slf4jLogger test mdc");
-     */
     @Override
     public Object getProgressKey() {
         return HttpClient5DoExecuteInterceptor.class;

@@ -17,22 +17,20 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.config.ConfigAware;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
-import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetricV2;
-import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetricV2;
-import com.megaease.easeagent.plugin.bean.BeanProvider;
-import com.megaease.easeagent.plugin.annotation.Injection;
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.bean.BeanProvider;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MetricBeanProvider implements BeanProvider, AgentHttpHandlerProvider, ConfigAware, com.megaease.easeagent.plugin.api.metric.MetricProvider, AgentReportAware {
+public class MetricBeanProvider implements BeanProvider, AgentHttpHandlerProvider,ConfigAware,
+    com.megaease.easeagent.plugin.api.metric.MetricProvider, AgentReportAware {
     private final MetricProviderImpl metricProvider = new MetricProviderImpl();
 
     @Override
@@ -56,15 +54,5 @@ public class MetricBeanProvider implements BeanProvider, AgentHttpHandlerProvide
     @Override
     public void setAgentReport(AgentReport report) {
         this.metricProvider.setAgentReport(report);
-    }
-
-    @Injection.Bean
-    public JVMGCMetricV2 jvmGcMetricV2() {
-        return JVMGCMetricV2.getMetric();
-    }
-
-    @Injection.Bean
-    public JVMMemoryMetricV2 jvmMemoryMetricV2() {
-        return JVMMemoryMetricV2.getMetric();
     }
 }
