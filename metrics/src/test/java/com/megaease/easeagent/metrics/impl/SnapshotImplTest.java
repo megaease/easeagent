@@ -19,7 +19,6 @@ package com.megaease.easeagent.metrics.impl;
 
 import com.megaease.easeagent.plugin.api.metric.Histogram;
 import com.megaease.easeagent.plugin.api.metric.Snapshot;
-import com.megaease.easeagent.plugin.api.metric.Timer;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 import org.junit.Test;
 
@@ -63,15 +62,15 @@ public class SnapshotImplTest {
 
         assertEquals(100, snapshot.size());
         assertEquals(0, snapshot.getMin());
-        assertEquals(49.5, snapshot.getMean(), 0.2);
+        assertEquals(49.5, snapshot.getMean(), 1);
         assertEquals(99, snapshot.getMax());
 
-        assertEquals(49, snapshot.getMedian(), 0.1);
-        assertEquals(74, snapshot.get75thPercentile(), 0.1);
-        assertEquals(94, snapshot.get95thPercentile(), 0.1);
-        assertEquals(97, snapshot.get98thPercentile(), 0.1);
-        assertEquals(98, snapshot.get99thPercentile(), 0.1);
-        assertEquals(99, snapshot.get999thPercentile(), 0.1);
+        assertEquals(49, snapshot.getMedian(), 1);
+        assertEquals(74, snapshot.get75thPercentile(), 1);
+        assertEquals(94, snapshot.get95thPercentile(), 1);
+        assertEquals(97, snapshot.get98thPercentile(), 1);
+        assertEquals(98, snapshot.get99thPercentile(), 1);
+        assertEquals(99, snapshot.get999thPercentile(), 1);
     }
 
     @Test
