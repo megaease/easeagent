@@ -32,6 +32,7 @@ import okio.Buffer;
 import okio.BufferedSink;
 import okio.GzipSink;
 import okio.Okio;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Map;
@@ -148,6 +149,10 @@ public class HttpSender implements Sender {
                 request = newRequest(new ByteRequestBody(encodedData.getData()));
             }
         } catch (IOException e) {
+            // log rate-limit
+            if (log.isDebugEnabled()) {
+                log.debug("tracing send fail!");
+            }
             return NoOpCall.getInstance(Void.class);
         }
 

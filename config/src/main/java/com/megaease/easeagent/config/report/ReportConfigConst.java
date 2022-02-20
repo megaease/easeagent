@@ -60,11 +60,11 @@ public class ReportConfigConst {
 
     public static final String TRACE_SENDER = join(TRACE_V2, SENDER_KEY);
     public static final String TRACE_ENCODER = join(TRACE_V2, ENCODER_KEY);
-    public static final String TRACE_ASYNC = join(TRACE_V2, "async");
+    public static final String TRACE_ASYNC = join(TRACE_V2, "output");
 
     public static final String METRIC_SENDER = join(METRIC_V2, SENDER_KEY);
     public static final String METRIC_ENCODER = join(METRIC_V2, ENCODER_KEY);
-    public static final String METRIC_ASYNC = join(METRIC_V2, "async");
+    public static final String METRIC_ASYNC = join(METRIC_V2, "output");
 
     // -------- lv4  --------
     public static final String GENERAL_SENDER_NAME = join(GENERAL_SENDER, NAME_KEY);

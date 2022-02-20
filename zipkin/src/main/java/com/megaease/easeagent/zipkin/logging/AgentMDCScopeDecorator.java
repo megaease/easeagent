@@ -22,10 +22,12 @@ import brave.internal.CorrelationContext;
 import brave.internal.Nullable;
 import brave.propagation.CurrentTraceContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 public class AgentMDCScopeDecorator {
-    static final CurrentTraceContext.ScopeDecorator INSTANCE = new AgentMDCScopeDecorator.Builder().build();
-    static final CurrentTraceContext.ScopeDecorator INSTANCE_V2 = new AgentMDCScopeDecorator.BuilderV2().build();
+    static final CurrentTraceContext.ScopeDecorator INSTANCE = new BuilderApp().build();
+    static final CurrentTraceContext.ScopeDecorator INSTANCE_V2 = new BuilderEaseLogger().build();
+    static final CurrentTraceContext.ScopeDecorator INSTANCE_EASEAGENT_LOADER = new BuilderAgentLoader().build();
 
     public static CurrentTraceContext.ScopeDecorator get() {
         return INSTANCE;
@@ -35,19 +37,48 @@ public class AgentMDCScopeDecorator {
         return INSTANCE_V2;
     }
 
-    static final class Builder extends CorrelationScopeDecorator.Builder {
-        Builder() {
-            super(AgentMDCScopeDecorator.MDCContext.INSTANCE);
+    public static CurrentTraceContext.ScopeDecorator getAgentDecorator() {
+        return INSTANCE_EASEAGENT_LOADER;
+    }
+
+    static final class BuilderApp extends CorrelationScopeDecorator.Builder {
+        BuilderApp() {
+            super(MDCContextApp.INSTANCE);
         }
     }
 
-    static final class BuilderV2 extends CorrelationScopeDecorator.Builder {
-        BuilderV2() {
-            super(AgentMDCScopeDecorator.MDCContextV2.INSTANCE);
+    static final class BuilderEaseLogger extends CorrelationScopeDecorator.Builder {
+        BuilderEaseLogger() {
+            super(MDCContextEaseLogger.INSTANCE);
         }
     }
 
-    enum MDCContext implements CorrelationContext {
+    static final class BuilderAgentLoader extends CorrelationScopeDecorator.Builder {
+        BuilderAgentLoader() {
+            super(MDCContextAgentLoader.INSTANCE);
+        }
+    }
+
+    enum MDCContextAgentLoader implements CorrelationContext {
+        INSTANCE;
+
+        @Override
+        public String getValue(String name) {
+            return org.slf4j.MDC.get(name);
+        }
+
+        @Override
+        public boolean update(String name, @Nullable String value) {
+            if (value != null) {
+                org.slf4j.MDC.put(name, value);
+            } else {
+                org.slf4j.MDC.remove(name);
+            }
+            return true;
+        }
+    }
+
+    enum MDCContextApp implements CorrelationContext {
         INSTANCE;
 
         @Override
@@ -80,7 +111,7 @@ public class AgentMDCScopeDecorator {
         }
     }
 
-    enum MDCContextV2 implements CorrelationContext {
+    enum MDCContextEaseLogger implements CorrelationContext {
         INSTANCE;
 
         @Override

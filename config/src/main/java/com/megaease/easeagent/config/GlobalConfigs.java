@@ -36,6 +36,7 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
         // reporter adapter
         Map<String, String> map = new TreeMap<>(source);
         ReportConfigAdapter.convertConfig(map);
+        // check environment config
         this.source = new TreeMap<>(map);
         this.notifier = new ConfigNotifier("");
     }

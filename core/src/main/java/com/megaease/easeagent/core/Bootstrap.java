@@ -62,7 +62,6 @@ public class Bootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 
     private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
-
     private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
 
     private static final String AGENT_MIDDLEWARE_UPDATE = "easeagent.middleware.update";

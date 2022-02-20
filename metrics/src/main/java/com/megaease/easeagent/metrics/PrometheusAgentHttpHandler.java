@@ -49,7 +49,10 @@ public class PrometheusAgentHttpHandler extends AgentHttpHandler {
     public Response process(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, IHTTPSession session) {
         Map<String, String> headers = session.getHeaders();
         String contentType = TextFormat.chooseContentType(headers.get("Accept"));
-        Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
+
+        Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry
+            .filteredMetricFamilySamples(Collections.emptySet());
+
         StringWriter stringWriter = new StringWriter();
         try (Writer writer = new BufferedWriter(stringWriter)) {
             TextFormat.writeFormat(contentType, writer, samples);

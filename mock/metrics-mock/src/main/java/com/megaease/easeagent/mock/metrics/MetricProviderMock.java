@@ -18,6 +18,7 @@
 package com.megaease.easeagent.mock.metrics;
 
 import com.megaease.easeagent.metrics.MetricBeanProvider;
+import com.megaease.easeagent.metrics.jvm.JvmBeanProvider;
 import com.megaease.easeagent.metrics.jvm.gc.JVMGCMetricV2;
 import com.megaease.easeagent.metrics.jvm.memory.JVMMemoryMetricV2;
 import com.megaease.easeagent.mock.config.ConfigMock;
@@ -26,27 +27,16 @@ import com.megaease.easeagent.mock.utils.MockProvider;
 
 public class MetricProviderMock implements MockProvider {
     private static final MetricBeanProvider METRIC_PROVIDER = new MetricBeanProvider();
-    private static final JVMGCMetricV2 JVMGC_METRIC_V_2;
-    private static final JVMMemoryMetricV2 JVM_MEMORY_METRIC_V_2;
+    private static final JvmBeanProvider JVM_METRIC_PROVIDER = new JvmBeanProvider();
 
     static {
         METRIC_PROVIDER.setConfig(ConfigMock.getCONFIGS());
         METRIC_PROVIDER.setAgentReport(ReportMock.getAgentReport());
-        JVMGC_METRIC_V_2 = METRIC_PROVIDER.jvmGcMetricV2();
-        JVM_MEMORY_METRIC_V_2 = METRIC_PROVIDER.jvmMemoryMetricV2();
+        JVM_METRIC_PROVIDER.afterPropertiesSet();
     }
-
 
     public static MetricBeanProvider getMetricProvider() {
         return METRIC_PROVIDER;
-    }
-
-    public static JVMGCMetricV2 getJvmgcMetricV2() {
-        return JVMGC_METRIC_V_2;
-    }
-
-    public static JVMMemoryMetricV2 getJvmMemoryMetricV2() {
-        return JVM_MEMORY_METRIC_V_2;
     }
 
     @Override

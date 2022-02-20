@@ -65,6 +65,9 @@ public class AgentMDCScopeDecoratorTest {
     public void checkEmptySpanIds() {
         assertNull(EaseAgent.loggerMdc.get(BaggageFields.TRACE_ID.name()));
         assertNull(EaseAgent.loggerMdc.get(BaggageFields.SPAN_ID.name()));
+
+        assertNull(org.slf4j.MDC.get(BaggageFields.TRACE_ID.name()));
+        assertNull(org.slf4j.MDC.get(BaggageFields.SPAN_ID.name()));
     }
 
     @Test
