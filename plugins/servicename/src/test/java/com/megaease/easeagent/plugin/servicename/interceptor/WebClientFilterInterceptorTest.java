@@ -17,17 +17,18 @@
 
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.MockClientRequest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class WebClientFilterInterceptorTest {
 
     @Test

@@ -18,6 +18,7 @@
 package com.megaease.easeagent.metrics.impl;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.MetricRegistryListener;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.bridge.NoOpMetrics;
 import com.megaease.easeagent.plugin.utils.NoNull;
@@ -36,6 +37,8 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
     private MetricRegistryImpl(MetricRegistry metricRegistry) {
         this.metricRegistry = Objects.requireNonNull(metricRegistry, "metricRegistry must not be null");
         this.metricCache = new ConcurrentHashMap<>();
+        this.metricRegistry.addListener(new MetricRemoveListener());
+
     }
 
     public static com.megaease.easeagent.plugin.api.metric.MetricRegistry build(MetricRegistry metricRegistry) {
@@ -45,8 +48,9 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
 
     @Override
     public boolean remove(String name) {
-        metricCache.remove(name);
-        return metricRegistry.remove(name);
+        synchronized (metricCache) {
+            return metricRegistry.remove(name);
+        }
     }
 
     private <T extends Metric> T getOrAdd(String name, MetricInstance<T> instance, MetricBuilder<T> builder) {
@@ -79,6 +83,7 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
     public Counter counter(String name) {
         return getOrAdd(name, MetricInstance.COUNTER, COUNTERS);
     }
+
 
     @Override
     @SuppressWarnings("rawtypes")
@@ -163,5 +168,70 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
             return NoNull.of(TimerImpl.build(metricRegistry.timer(name)), NoOpMetrics.NO_OP_TIMER);
         }
     };
+
+    class MetricRemoveListener implements MetricRegistryListener {
+
+        @Override
+        public void onGaugeAdded(String name, com.codahale.metrics.Gauge<?> gauge) {
+
+        }
+
+        @Override
+        public void onGaugeRemoved(String name) {
+            synchronized (metricCache) {
+                metricCache.remove(name);
+            }
+        }
+
+        @Override
+        public void onCounterAdded(String name, com.codahale.metrics.Counter counter) {
+
+        }
+
+        @Override
+        public void onCounterRemoved(String name) {
+            synchronized (metricCache) {
+                metricCache.remove(name);
+            }
+        }
+
+        @Override
+        public void onHistogramAdded(String name, com.codahale.metrics.Histogram histogram) {
+
+        }
+
+        @Override
+        public void onHistogramRemoved(String name) {
+            synchronized (metricCache) {
+                metricCache.remove(name);
+            }
+
+        }
+
+        @Override
+        public void onMeterAdded(String name, com.codahale.metrics.Meter meter) {
+
+        }
+
+        @Override
+        public void onMeterRemoved(String name) {
+            synchronized (metricCache) {
+                metricCache.remove(name);
+            }
+
+        }
+
+        @Override
+        public void onTimerAdded(String name, com.codahale.metrics.Timer timer) {
+
+        }
+
+        @Override
+        public void onTimerRemoved(String name) {
+            synchronized (metricCache) {
+                metricCache.remove(name);
+            }
+        }
+    }
 
 }

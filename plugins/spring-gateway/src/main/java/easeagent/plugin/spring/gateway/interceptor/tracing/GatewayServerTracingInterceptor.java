@@ -20,7 +20,6 @@ package easeagent.plugin.spring.gateway.interceptor.tracing;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -42,7 +41,7 @@ import java.util.function.Consumer;
 
 @AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = SpringGatewayPlugin.class)
 public class GatewayServerTracingInterceptor implements Interceptor {
-    final String SPAN_CONTEXT_KEY = this.getClass().getName() + "-P-CTX";
+    static final String SPAN_CONTEXT_KEY = GatewayServerTracingInterceptor.class.getName() + "-P-CTX";
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
@@ -53,6 +52,11 @@ public class GatewayServerTracingInterceptor implements Interceptor {
         context.put(SPAN_CONTEXT_KEY, pCtx);
         context.put(FluxHttpServerRequest.class, httpServerRequest);
         exchange.getAttributes().put(GatewayCons.SPAN_KEY, pCtx);
+    }
+
+    private void cleanContext(Context context) {
+        context.remove(FluxHttpServerRequest.class);
+        context.remove(SPAN_CONTEXT_KEY);
     }
 
     @Override
@@ -73,14 +77,14 @@ public class GatewayServerTracingInterceptor implements Interceptor {
             Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();
             methodInfo.setRetValue(new AgentMono(mono, methodInfo, context.exportAsync(), this::finishCallback));
         } finally {
-            context.remove(SPAN_CONTEXT_KEY);
+            cleanContext(context);
             pCtx.scope().close();
         }
 
     }
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
-        try (Cleaner cleaner = ctx.importToCurrent()) {
+        try (Cleaner ignored = ctx.importToCurrent()) {
             RequestContext pCtx = EaseAgent.getContext().get(SPAN_CONTEXT_KEY);
             ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
             Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
@@ -97,7 +101,6 @@ public class GatewayServerTracingInterceptor implements Interceptor {
             HttpResponse response = new FluxHttpServerResponse(httpServerRequest,
                 exchange.getResponse(), route, methodInfo.getThrowable());
             HttpUtils.finish(pCtx.span(), response);
-            // this.httpServerHandler.handleSend(response, span);
             exchange.getAttributes().remove(GatewayCons.SPAN_KEY);
         }
     }
@@ -105,10 +108,6 @@ public class GatewayServerTracingInterceptor implements Interceptor {
     @Override
     public String getType() {
         return Order.TRACING.getName();
-    }
-
-    @Override
-    public void init(IPluginConfig config, int uniqueIndex) {
     }
 
     @Override

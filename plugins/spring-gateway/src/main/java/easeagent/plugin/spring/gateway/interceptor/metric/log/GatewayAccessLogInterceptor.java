@@ -17,16 +17,17 @@
 
 package easeagent.plugin.spring.gateway.interceptor.metric.log;
 
-import com.megaease.easeagent.plugin.interceptor.Interceptor;
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
 import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
@@ -42,7 +43,7 @@ import static easeagent.plugin.spring.gateway.interceptor.metric.TimeUtils.start
 
 @AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = AccessPlugin.class)
 public class GatewayAccessLogInterceptor implements Interceptor {
-    private static Object START_TIME = new Object();
+    private static final Object START_TIME = new Object();
     private static Reporter reportConsumer;
     private final HttpLog httpLog = new HttpLog();
 
@@ -56,12 +57,8 @@ public class GatewayAccessLogInterceptor implements Interceptor {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         Long beginTime = startTime(context, START_TIME);
-        RequestContext pCtx = exchange.getAttribute(GatewayCons.SPAN_KEY);
-        if (pCtx == null) {
-            return;
-        }
         RequestInfo requestInfo = this.httpLog.prepare(getSystem(),
-            getServiceName(), beginTime, pCtx.span(), serverInfo);
+            getServiceName(), beginTime, getSpan(exchange), serverInfo);
         exchange.getAttributes().put(RequestInfo.class.getName(), requestInfo);
     }
 
@@ -77,6 +74,14 @@ public class GatewayAccessLogInterceptor implements Interceptor {
         }
     }
 
+    Span getSpan(ServerWebExchange exchange) {
+        RequestContext pCtx = exchange.getAttribute(GatewayCons.SPAN_KEY);
+        if (pCtx == null) {
+            return null;
+        }
+        return pCtx.span();
+    }
+
     private void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         RequestInfo requestInfo = exchange.getAttribute(RequestInfo.class.getName());
@@ -89,17 +94,17 @@ public class GatewayAccessLogInterceptor implements Interceptor {
         reportConsumer.report(logString);
     }
 
-    public AccessLogServerInfo serverInfo(ServerWebExchange exchange) {
+    AccessLogServerInfo serverInfo(ServerWebExchange exchange) {
         SpringGatewayAccessLogServerInfo serverInfo = new SpringGatewayAccessLogServerInfo();
         serverInfo.load(exchange);
         return serverInfo;
     }
 
-    private String getSystem() {
+    String getSystem() {
         return EaseAgent.getConfig("system");
     }
 
-    private String getServiceName() {
+    String getServiceName() {
         return EaseAgent.getConfig("name");
     }
 

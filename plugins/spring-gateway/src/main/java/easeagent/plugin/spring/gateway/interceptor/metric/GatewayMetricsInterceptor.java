@@ -17,8 +17,6 @@
 
 package easeagent.plugin.spring.gateway.interceptor.metric;
 
-import com.megaease.easeagent.plugin.interceptor.Interceptor;
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -26,6 +24,8 @@ import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
 import com.megaease.easeagent.plugin.utils.SystemClock;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
@@ -69,6 +69,7 @@ public class GatewayMetricsInterceptor implements Interceptor {
                 Long start = startTime(context, START_TIME);
                 long end = System.currentTimeMillis();
                 SERVER_METRIC.collectMetric(key, 500, methodInfo.getThrowable(), start, end);
+                return;
             }
             // async
             Mono<Void> mono = (Mono<Void>) methodInfo.getRetValue();

@@ -35,11 +35,11 @@ import reactor.core.publisher.Mono;
 
 @AdviceTo(value = WebClientBuilderAdvice.class, plugin = ForwardedPlugin.class)
 public class WebClientFilterForwardedInterceptor implements Interceptor {
-    private static volatile AutoRefreshPluginConfigImpl autoConfig;
+    protected static volatile AutoRefreshPluginConfigImpl AUTO_CONFIG;
 
     @Override
     public void init(IPluginConfig config, int uniqueIndex) {
-        autoConfig = AutoRefreshPluginConfigRegistry.getOrCreate(config.domain(), config.namespace(), config.id());
+        AUTO_CONFIG = AutoRefreshPluginConfigRegistry.getOrCreate(config.domain(), config.namespace(), config.id());
     }
 
     @Override
@@ -61,7 +61,7 @@ public class WebClientFilterForwardedInterceptor implements Interceptor {
         @Override
         public Mono<ClientResponse> filter(@NonNull ClientRequest clientRequest, @NonNull ExchangeFunction exchangeFunction) {
             ClientRequest req = clientRequest;
-            if (autoConfig.enabled()) {
+            if (AUTO_CONFIG.enabled()) {
                 Request request = new Request(clientRequest);
                 EaseAgent.getContext().injectForwardedHeaders(request);
                 req = request.get();
@@ -71,11 +71,11 @@ public class WebClientFilterForwardedInterceptor implements Interceptor {
     }
 
 
-    public static class Request implements Setter {
+    protected static class Request implements Setter {
         private final ClientRequest request;
         private ClientRequest.Builder builder;
 
-        public Request(ClientRequest request) {
+        protected Request(ClientRequest request) {
             this.request = request;
         }
 

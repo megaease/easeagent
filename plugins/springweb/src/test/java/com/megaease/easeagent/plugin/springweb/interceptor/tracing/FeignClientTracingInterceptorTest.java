@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -32,10 +33,12 @@ import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import feign.Request;
 import feign.Response;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class FeignClientTracingInterceptorTest {
 
     @Test
