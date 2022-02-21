@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -29,13 +29,14 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class CommonRedisTracingInterceptorTest {
     protected static final Object ENTER = AgentFieldReflectAccessor.getStaticFieldValue(CommonRedisTracingInterceptor.class, "ENTER");
     protected static final Object SPAN_KEY = AgentFieldReflectAccessor.getStaticFieldValue(CommonRedisTracingInterceptor.class, "SPAN_KEY");

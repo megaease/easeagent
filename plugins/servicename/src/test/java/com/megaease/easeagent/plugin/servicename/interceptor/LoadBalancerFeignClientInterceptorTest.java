@@ -17,18 +17,18 @@
 
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import org.junit.Test;
-import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
+import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class LoadBalancerFeignClientInterceptorTest {
 
     @Test

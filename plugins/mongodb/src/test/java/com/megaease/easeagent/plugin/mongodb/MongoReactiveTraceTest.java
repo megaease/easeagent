@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.mongodb;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -32,13 +32,14 @@ import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class MongoReactiveTraceTest extends MongoBaseTest {
 
     MongoReactiveTraceCommandListener listener;

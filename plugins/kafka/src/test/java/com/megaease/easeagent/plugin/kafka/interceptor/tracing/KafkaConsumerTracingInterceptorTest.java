@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -35,12 +35,13 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.*;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class KafkaConsumerTracingInterceptorTest {
     String topic1 = "testTopic1";
     String topic2 = "testTopic2";

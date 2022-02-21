@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -27,12 +27,13 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Objects;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class LettuceTracingInterceptorTest {
 
     @Test
