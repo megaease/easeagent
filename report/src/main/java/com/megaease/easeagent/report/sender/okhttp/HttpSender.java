@@ -268,14 +268,14 @@ public class HttpSender implements Sender {
         }
     }
 
-    public static void appendBasicAuth(OkHttpClient.Builder builder, String basicUser, String basicPassword) {
-        builder.addInterceptor(chain -> {
-            Request request = chain.request();
-            Request authRequest = request.newBuilder()
-                .header(AUTH_HEADER, Credentials.basic(basicUser, basicPassword)).build();
-            return chain.proceed(authRequest);
-        });
-    }
+//    public static void appendBasicAuth(OkHttpClient.Builder builder, String basicUser, String basicPassword) {
+//        builder.addInterceptor(chain -> {
+//            Request request = chain.request();
+//            Request authRequest = request.newBuilder()
+//                .header(AUTH_HEADER, Credentials.basic(basicUser, basicPassword)).build();
+//            return chain.proceed(authRequest);
+//        });
+//    }
 
     public static void appendBasicAuth(OkHttpClient.Builder builder, String basicCredential) {
         builder.addInterceptor(chain -> {
