@@ -17,22 +17,17 @@
 
 package com.megaease.easeagent.plugin.servicename.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import feign.Request;
 import org.junit.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
+import org.junit.runner.RunWith;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 
-import static org.junit.Assert.*;
-
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class RestTemplateInterceptInterceptorTest {
 
     @Test
