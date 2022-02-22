@@ -17,34 +17,35 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.metrics.converter.AbstractConverter;
+import com.megaease.easeagent.metrics.converter.EaseAgentPrometheusExports;
 import com.megaease.easeagent.plugin.api.metric.name.MetricName;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.tools.metrics.GaugeMetricModel;
 import io.prometheus.client.Collector;
-import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
-import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class MetricRegistryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricRegistryService.class);
+    public static final String METRIC_TYPE_LABEL_NAME = "MetricType";
+    public static final String METRIC_SUB_TYPE_LABEL_NAME = "MetricSubType";
     public static final MetricRegistryService DEFAULT = new MetricRegistryService();
 
     private static final List<MetricRegistry> REGISTRY_LIST = new ArrayList<>();
 
-    public MetricRegistry createMetricRegistry(Supplier<Map<String, Object>> additionalAttributes, Tags tags) {
+    public MetricRegistry createMetricRegistry(AbstractConverter abstractConverter, Supplier<Map<String, Object>> additionalAttributes, Tags tags) {
         MetricRegistry registry = new MetricRegistry();
         REGISTRY_LIST.add(registry);
         EaseAgentSampleBuilder easeAgentSampleBuilder = new EaseAgentSampleBuilder(additionalAttributes, tags);
-        new GaugeDropwizardExports(registry, (name, metric) -> metric instanceof Gauge, easeAgentSampleBuilder).register();
-        new DropwizardExports(registry, (name, metric) -> !(metric instanceof Gauge), easeAgentSampleBuilder).register();
+        EaseAgentPrometheusExports easeAgentPrometheusExports = new EaseAgentPrometheusExports(registry, abstractConverter, easeAgentSampleBuilder);
+        easeAgentPrometheusExports.register();
         return registry;
     }
 
@@ -75,10 +76,6 @@ public class MetricRegistryService {
             if (tags == null) {
                 return;
             }
-            additionalLabelNames.add(Tags.CATEGORY);
-            additionalLabelValues.add(tags.getCategory());
-            additionalLabelNames.add(Tags.TYPE);
-            additionalLabelValues.add(tags.getType());
             Map<String, String> other = tags.getTags();
             if (other == null || other.isEmpty()) {
                 return;
@@ -95,16 +92,20 @@ public class MetricRegistryService {
             List<String> newAdditionalLabelValues = new ArrayList<>(additionalLabelValues);
             additionalAttributes(newAdditionalLabelNames, newAdditionalLabelValues);
             tags(newAdditionalLabelNames, newAdditionalLabelValues);
-            return super.createSample(rebuildName(dropwizardName), nameSuffix, newAdditionalLabelNames, newAdditionalLabelValues, value);
+            return super.createSample(rebuildName(dropwizardName, newAdditionalLabelNames, newAdditionalLabelValues), nameSuffix, newAdditionalLabelNames, newAdditionalLabelValues, value);
         }
 
-        private String rebuildName(String name) {
+        private String rebuildName(String name, List<String> additionalLabelNames, List<String> additionalLabelValues) {
             try {
                 MetricName metricName = MetricName.metricNameFor(name);
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(metricName.getMetricType());
+                additionalLabelNames.add(METRIC_TYPE_LABEL_NAME);
+                additionalLabelNames.add(METRIC_SUB_TYPE_LABEL_NAME);
+                additionalLabelValues.add(metricName.getMetricType().name());
+                additionalLabelValues.add(metricName.getMetricSubType().name());
+                stringBuilder.append(tags.getCategory());
                 stringBuilder.append(".");
-                stringBuilder.append(metricName.getMetricSubType());
+                stringBuilder.append(tags.getType());
                 stringBuilder.append(".");
                 stringBuilder.append(metricName.getKey());
                 return stringBuilder.toString();
@@ -114,98 +115,6 @@ public class MetricRegistryService {
             }
         }
 
-    }
-
-    public static class GaugeDropwizardExports extends Collector implements Collector.Describable {
-        protected static final String KEY_LABEL_NAME = "value_key";
-        private MetricRegistry registry;
-        private MetricFilter metricFilter;
-        private SampleBuilder sampleBuilder;
-
-        public GaugeDropwizardExports(MetricRegistry registry, MetricFilter metricFilter, SampleBuilder sampleBuilder) {
-            this.registry = registry;
-            this.metricFilter = metricFilter;
-            this.sampleBuilder = sampleBuilder;
-        }
-
-
-        private static String getHelpMessage(String metricName) {
-            return String.format("Generated from Dropwizard metric import (metric=%s, type=%s)", metricName, Gauge.class.getName());
-        }
-
-
-        public List<MetricFamilySamples> collect() {
-            Map<String, MetricFamilySamples> mfSamplesMap = new HashMap();
-            Iterator var2 = this.registry.getGauges(this.metricFilter).entrySet().iterator();
-
-            Map.Entry entry;
-            while (var2.hasNext()) {
-                entry = (Map.Entry) var2.next();
-                Gauge gauge = (Gauge) entry.getValue();
-                Object gaugeValue = gauge.getValue();
-                if (gaugeValue instanceof GaugeMetricModel) {
-                    this.addToMap(mfSamplesMap, this.fromGaugeModel((String) entry.getKey(), (GaugeMetricModel) gaugeValue));
-                } else {
-                    this.addToMap(mfSamplesMap, this.fromGauge((String) entry.getKey(), gaugeValue));
-                }
-            }
-            return new ArrayList(mfSamplesMap.values());
-        }
-
-        MetricFamilySamples fromGaugeModel(String dropwizardName, GaugeMetricModel gauge) {
-            Map<String, Object> values = gauge.toHashMap();
-            if (values == null || values.isEmpty()) {
-                return null;
-            }
-            List<MetricFamilySamples.Sample> samples = new ArrayList<>();
-            String name = "";
-            for (Map.Entry<String, Object> entry : gauge.toHashMap().entrySet()) {
-                MetricFamilySamples.Sample sample = fromGaugeSample(dropwizardName, entry.getValue());
-                sample.labelNames.add(KEY_LABEL_NAME);
-                sample.labelValues.add(entry.getKey());
-                samples.add(sample);
-                name = sample.name;
-            }
-            return new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName), samples);
-        }
-
-        private MetricFamilySamples.Sample fromGaugeSample(String dropwizardName, Object gaugeValue) {
-            double value;
-            if (gaugeValue instanceof Number) {
-                value = ((Number) gaugeValue).doubleValue();
-            } else {
-                if (!(gaugeValue instanceof Boolean)) {
-                    LOGGER.warn(String.format("Invalid type for Gauge %s: %s", sanitizeMetricName(dropwizardName), gaugeValue == null ? "null" : gaugeValue.getClass().getName()));
-                    return null;
-                }
-
-                value = (Boolean) gaugeValue ? 1.0D : 0.0D;
-            }
-            return this.sampleBuilder.createSample(dropwizardName, "", new ArrayList(), new ArrayList(), value);
-        }
-
-        private MetricFamilySamples fromGauge(String dropwizardName, Object gaugeValue) {
-            MetricFamilySamples.Sample sample = fromGaugeSample(dropwizardName, gaugeValue);
-            return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName), Arrays.asList(sample));
-        }
-
-        private void addToMap(Map<String, MetricFamilySamples> mfSamplesMap, MetricFamilySamples newMfSamples) {
-            if (newMfSamples != null) {
-                MetricFamilySamples currentMfSamples = (MetricFamilySamples) mfSamplesMap.get(newMfSamples.name);
-                if (currentMfSamples == null) {
-                    mfSamplesMap.put(newMfSamples.name, newMfSamples);
-                } else {
-                    List<MetricFamilySamples.Sample> samples = new ArrayList(currentMfSamples.samples);
-                    samples.addAll(newMfSamples.samples);
-                    mfSamplesMap.put(newMfSamples.name, new MetricFamilySamples(newMfSamples.name, currentMfSamples.type, currentMfSamples.help, samples));
-                }
-            }
-
-        }
-
-        public List<MetricFamilySamples> describe() {
-            return new ArrayList();
-        }
     }
 
 }

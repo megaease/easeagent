@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -33,6 +33,7 @@ import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class ServletHttpLogInterceptorTest {
 
     @Test

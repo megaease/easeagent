@@ -66,39 +66,44 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
         return new ApplicationMetricRegistrySupplier();
     }
 
+    public static List<KeyType> keyTypes(NameFactory nameFactory) {
+        List<KeyType> keyTypes = new ArrayList<>();
+        for (MetricType metricType : nameFactory.metricTypes()) {
+            switch (metricType) {
+                case TimerType:
+                    keyTypes.add(KeyType.Timer);
+                    break;
+                case GaugeType:
+                    keyTypes.add(KeyType.Gauge);
+                    break;
+                case MeterType:
+                    keyTypes.add(KeyType.Meter);
+                    break;
+                case CounterType:
+                    keyTypes.add(KeyType.Counter);
+                    break;
+                case HistogramType:
+                    keyTypes.add(KeyType.Histogram);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return keyTypes;
+    }
+
     public class ApplicationMetricRegistrySupplier implements MetricRegistrySupplier {
 
         @Override
         public com.megaease.easeagent.plugin.api.metric.MetricRegistry newMetricRegistry(
             IPluginConfig config,
             NameFactory nameFactory, Tags tags) {
-            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry(additionalAttributes, tags);
             MetricsConfig metricsConfig = new PluginMetricsConfig(config);
-            List<KeyType> keyTypes = new ArrayList<>();
-            for (MetricType metricType : nameFactory.metricTypes()) {
-                switch (metricType) {
-                    case TimerType:
-                        keyTypes.add(KeyType.Timer);
-                        break;
-                    case GaugeType:
-                        keyTypes.add(KeyType.Gauge);
-                        break;
-                    case MeterType:
-                        keyTypes.add(KeyType.Meter);
-                        break;
-                    case CounterType:
-                        keyTypes.add(KeyType.Counter);
-                        break;
-                    case HistogramType:
-                        keyTypes.add(KeyType.Histogram);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            List<KeyType> keyTypes = keyTypes(nameFactory);
             ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes,
                 MetricProviderImpl.this.additionalAttributes, tags);
             Reporter reporter = agentReport.metricReporter().reporter(config);
+            MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry(converterAdapter, additionalAttributes, tags);
             AutoRefreshReporter autoRefreshReporter = new AutoRefreshReporter(metricRegistry, metricsConfig,
                 converterAdapter,
                 reporter::report);

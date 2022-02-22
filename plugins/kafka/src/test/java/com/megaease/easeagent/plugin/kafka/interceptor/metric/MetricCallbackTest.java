@@ -18,10 +18,11 @@
 package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
 import com.megaease.easeagent.mock.metrics.MockMetricUtils;
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.metric.name.MetricField;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class MetricCallbackTest {
 
     @Test

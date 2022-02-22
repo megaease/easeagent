@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
@@ -35,12 +35,13 @@ import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Properties;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class KafkaMessageListenerTracingInterceptorTest {
     String topic = "testTopic";
 

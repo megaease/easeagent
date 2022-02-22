@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -31,6 +31,7 @@ import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.message.BasicHttpResponse;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -39,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class HttpClient5AsyncTracingInterceptorTest {
 
     @Test

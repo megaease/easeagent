@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.mock.metrics.MockMetricUtils;
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
@@ -30,6 +30,7 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.httpservlet.HttpServletPlugin;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
@@ -41,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class DoFilterMetricInterceptorTest {
 
     @Test

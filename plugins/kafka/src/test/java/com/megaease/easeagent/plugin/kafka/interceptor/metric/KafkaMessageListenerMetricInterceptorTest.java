@@ -18,7 +18,7 @@
 package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
 import com.megaease.easeagent.mock.metrics.MockMetricUtils;
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -27,13 +27,14 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class KafkaMessageListenerMetricInterceptorTest {
 
     @Test

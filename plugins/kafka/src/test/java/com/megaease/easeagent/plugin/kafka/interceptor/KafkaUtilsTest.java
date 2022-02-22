@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.kafka.interceptor.tracing.KafkaConsumerRequ
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class KafkaUtilsTest {
 
     @Test

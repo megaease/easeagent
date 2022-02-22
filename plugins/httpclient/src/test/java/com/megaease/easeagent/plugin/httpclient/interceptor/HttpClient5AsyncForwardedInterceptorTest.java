@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -25,10 +25,11 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class HttpClient5AsyncForwardedInterceptorTest {
 
     @Test

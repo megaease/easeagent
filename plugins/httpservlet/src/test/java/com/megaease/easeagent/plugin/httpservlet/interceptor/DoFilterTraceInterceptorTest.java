@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
@@ -30,6 +30,7 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.tools.trace.TraceConst;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -44,7 +45,7 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class DoFilterTraceInterceptorTest {
 
     private void testTrace() {

@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.mock.plugin.api;
 
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -24,12 +25,13 @@ import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class TestEaseAgent {
     @Test
     public void testEaseAgent() {

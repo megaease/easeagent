@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;

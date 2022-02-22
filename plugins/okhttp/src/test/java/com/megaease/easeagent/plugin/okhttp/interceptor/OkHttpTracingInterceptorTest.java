@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.okhttp.interceptor;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -29,10 +29,11 @@ import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
 import okhttp3.*;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class OkHttpTracingInterceptorTest {
 
     @Test

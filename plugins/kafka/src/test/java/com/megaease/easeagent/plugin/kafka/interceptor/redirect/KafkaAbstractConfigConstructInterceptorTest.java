@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.redirect;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.kafka.interceptor.KafkaTestUtils;
 import com.megaease.easeagent.plugin.kafka.interceptor.TestConst;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +33,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class KafkaAbstractConfigConstructInterceptorTest {
 
     @Test

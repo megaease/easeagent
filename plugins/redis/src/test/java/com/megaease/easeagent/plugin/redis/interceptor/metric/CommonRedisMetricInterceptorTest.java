@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.metric;
 
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
@@ -29,6 +29,7 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.redis.RedisPlugin;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
-@MockEaseAgent
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class CommonRedisMetricInterceptorTest {
     protected static final String key = "test_redis_metric";
     protected static final Object START = AgentFieldReflectAccessor.getStaticFieldValue(MockCommonRedisMetricInterceptor.class, "START");
