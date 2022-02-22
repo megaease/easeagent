@@ -17,14 +17,18 @@
 
 package com.megaease.easeagent.metrics.converter;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
-import com.megaease.easeagent.metrics.impl.*;
+import com.codahale.metrics.Timer;
+import com.megaease.easeagent.metrics.impl.CounterImpl;
+import com.megaease.easeagent.metrics.impl.MeterImpl;
+import com.megaease.easeagent.metrics.impl.SnapshotImpl;
+import com.megaease.easeagent.metrics.impl.TimerImpl;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.tools.metrics.GaugeMetricModel;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ConverterAdapter extends AbstractConverter {
@@ -131,9 +135,9 @@ public class ConverterAdapter extends AbstractConverter {
 
     @Override
     @SuppressWarnings("rawtypes")
-    protected void writeGauges(String key, SortedMap<String, Gauge> gauges, Map<String, Object> output) {
+    protected void writeGauges(String key, MetricSubType metricSubType, SortedMap<String, Gauge> gauges, Map<String, Object> output) {
         Map<MetricSubType, MetricName> map = nameFactory.gaugeNames(key);
-        map.values().forEach(v -> {
+        consumerMetric(map, metricSubType, v -> {
             Gauge gauge = gauges.get(v.name());
             if (gauge == null) {
                 return;
@@ -150,10 +154,20 @@ public class ConverterAdapter extends AbstractConverter {
         });
     }
 
+    protected static <T> void consumerMetric(Map<MetricSubType, T> map, MetricSubType metricSubType, Consumer<T> consumer) {
+        if (metricSubType == null) {
+            map.values().forEach(consumer);
+        }
+        T t = map.get(metricSubType);
+        if (t != null) {
+            consumer.accept(t);
+        }
+    }
+
     @Override
-    protected void writeCounters(String key, SortedMap<String, Counter> counters, Map<String, Object> output) {
+    protected void writeCounters(String key, MetricSubType metricSubType, SortedMap<String, Counter> counters, Map<String, Object> output) {
         Map<MetricSubType, MetricName> map = nameFactory.counterNames(key);
-        map.values().forEach(v -> Optional
+        consumerMetric(map, metricSubType, v -> Optional
             .ofNullable(counters.get(v.name()))
             .ifPresent(c -> v.getValueFetcher().forEach((fieldName, fetcher) -> appendField(output, fieldName, fetcher, CounterImpl.build(c)))));
 
@@ -161,15 +175,15 @@ public class ConverterAdapter extends AbstractConverter {
 
     @Override
     @SuppressWarnings("all")
-    protected void writeHistograms(String key, SortedMap<String, Histogram> histograms, Map<String, Object> output) {
+    protected void writeHistograms(String key, MetricSubType metricSubType, SortedMap<String, Histogram> histograms, Map<String, Object> output) {
         //write histograms, Temporarily unsupported
         //Please use timer to calculate the time of P95, P99, etc
     }
 
     @Override
-    protected void writeMeters(String key, SortedMap<String, Meter> meters, Map<String, Object> output) {
+    protected void writeMeters(String key, MetricSubType metricSubType, SortedMap<String, Meter> meters, Map<String, Object> output) {
         Map<MetricSubType, MetricName> map = nameFactory.meterNames(key);
-        map.values().forEach(v -> Optional
+        consumerMetric(map, metricSubType, v -> Optional
             .ofNullable(meters.get(v.name()))
             .ifPresent(m -> v.getValueFetcher().forEach(
                 (fieldName, fetcher) -> appendField(output, fieldName, fetcher, MeterImpl.build(m))))
@@ -192,9 +206,9 @@ public class ConverterAdapter extends AbstractConverter {
     }
 
     @Override
-    protected void writeTimers(String key, SortedMap<String, Timer> timers, Map<String, Object> output) {
+    protected void writeTimers(String key, MetricSubType metricSubType, SortedMap<String, Timer> timers, Map<String, Object> output) {
         Map<MetricSubType, MetricName> map = nameFactory.timerNames(key);
-        map.values().forEach(v -> Optional.ofNullable(timers.get(v.name())).ifPresent(t -> {
+        consumerMetric(map, metricSubType, v -> Optional.ofNullable(timers.get(v.name())).ifPresent(t -> {
                 final Snapshot snapshot = t.getSnapshot();
                 v.getValueFetcher().forEach((fieldName, fetcher) -> {
                     if (fetcher.getClazz().equals(com.megaease.easeagent.plugin.api.metric.Snapshot.class)) {

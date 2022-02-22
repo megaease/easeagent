@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static com.megaease.easeagent.plugin.api.metric.name.MetricField.EXECUTION_COUNT;
 import static org.junit.Assert.assertEquals;
@@ -135,6 +136,24 @@ public class ConverterAdapterTest {
     }
 
     @Test
+    public void consumerMetric() {
+        Map<MetricSubType, String> map = new HashMap<>();
+        for (MetricSubType metricSubType : MetricSubType.values()) {
+            map.put(metricSubType, metricSubType.getCode());
+        }
+        List<String> result = new ArrayList<>();
+        ConverterAdapter.consumerMetric(map, null, result::add);
+        assertEquals(map.size(), result.size());
+        for (String s : map.values()) {
+            assertTrue(result.contains(s));
+        }
+        result.clear();
+        ConverterAdapter.consumerMetric(map, MetricSubType.ERROR, result::add);
+        assertEquals(1, result.size());
+        assertEquals(MetricSubType.ERROR.getCode(), result.get(0));
+    }
+
+    @Test
     public void keysFromMetrics() {
 
         ConverterAdapter converter = createAllTypeConverterAdapter();
@@ -204,7 +223,7 @@ public class ConverterAdapterTest {
             MetricRegistryMock.getCodahaleMetricRegistry().gauge(gaugeName, () -> () -> value))
         );
         Map<String, Object> result = new HashMap<>();
-        converter.writeGauges(key, gauges, result);
+        converter.writeGauges(key, null, gauges, result);
         assertEquals(value, result.get("value"));
     }
 
@@ -220,11 +239,11 @@ public class ConverterAdapterTest {
         );
         counter.inc();
         Map<String, Object> result = new HashMap<>();
-        converter.writeCounters(key, counters, result);
+        converter.writeCounters(key, null, counters, result);
         assertEquals(1l, result.get(MetricField.EXECUTION_COUNT.getField()));
         counter.inc();
 
-        converter.writeCounters(key, counters, result);
+        converter.writeCounters(key, null, counters, result);
         assertEquals(2l, result.get(MetricField.EXECUTION_COUNT.getField()));
     }
 
@@ -242,7 +261,7 @@ public class ConverterAdapterTest {
             histogram)
         );
         Map<String, Object> result = new HashMap<>();
-        converter.writeHistograms(key, histograms, result);
+        converter.writeHistograms(key, null, histograms, result);
         assertTrue(result.isEmpty());
     }
 
@@ -268,7 +287,7 @@ public class ConverterAdapterTest {
             meter)
         );
         Map<String, Object> result = new HashMap<>();
-        converter.writeMeters(key, meters, result);
+        converter.writeMeters(key, null, meters, result);
         Object meanRateO = result.get(MetricField.MEAN_RATE.getField());
         Object m1O = result.get(MetricField.M1_RATE.getField());
         Object m5O = result.get(MetricField.M5_RATE.getField());
@@ -306,7 +325,7 @@ public class ConverterAdapterTest {
             timer)
         );
         Map<String, Object> result = new HashMap<>();
-        converter.writeTimers(key, timers, result);
+        converter.writeTimers(key, null, timers, result);
 
         assertEquals(0d, (double) result.get(MetricField.MIN_EXECUTION_TIME.getField()), 1);
         assertEquals(49.5d, (double) result.get(MetricField.MEAN_EXECUTION_TIME.getField()), 1);
@@ -318,7 +337,7 @@ public class ConverterAdapterTest {
         assertEquals(94d, (double) result.get(MetricField.P95_EXECUTION_TIME.getField()), 1);
         assertEquals(97d, (double) result.get(MetricField.P98_EXECUTION_TIME.getField()), 1);
         assertEquals(98d, (double) result.get(MetricField.P99_EXECUTION_TIME.getField()), 1);
-        assertEquals(99d, (double) result.get(MetricField.P999_EXECUTION_TIME.getField()),1);
+        assertEquals(99d, (double) result.get(MetricField.P999_EXECUTION_TIME.getField()), 1);
 
     }
 }

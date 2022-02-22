@@ -114,7 +114,7 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
             Map<String, Object> values = new HashMap<>();
             SortedMap<String, T> gaugeSortedMap = getMetric();
             for (String s : gaugeSortedMap.keySet()) {
-                writeValue(MetricName.metricNameFor(s).getKey(), gaugeSortedMap, values);
+                writeValue(MetricName.metricNameFor(s), gaugeSortedMap, values);
                 List<MetricFamilySamples.Sample> samples = new ArrayList<>();
                 String name = null;
                 for (Map.Entry<String, Object> entry : values.entrySet()) {
@@ -135,7 +135,7 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
 
         protected abstract SortedMap<String, T> getMetric();
 
-        protected abstract void writeValue(String key, SortedMap<String, T> metric, Map<String, Object> values);
+        protected abstract void writeValue(MetricName metricName, SortedMap<String, T> metric, Map<String, Object> values);
     }
 
 
@@ -151,8 +151,8 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
         }
 
         @Override
-        protected void writeValue(String key, SortedMap<String, Counter> metric, Map<String, Object> values) {
-            abstractConverter.writeCounters(key, metric, values);
+        protected void writeValue(MetricName metricName, SortedMap<String, Counter> metric, Map<String, Object> values) {
+            abstractConverter.writeCounters(metricName.getKey(), metricName.getMetricSubType(), metric, values);
         }
     }
 
@@ -168,8 +168,8 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
         }
 
         @Override
-        protected void writeValue(String key, SortedMap<String, Meter> metric, Map<String, Object> values) {
-            abstractConverter.writeMeters(key, metric, values);
+        protected void writeValue(MetricName metricName, SortedMap<String, Meter> metric, Map<String, Object> values) {
+            abstractConverter.writeMeters(metricName.getKey(), metricName.getMetricSubType(), metric, values);
         }
     }
 
@@ -185,8 +185,8 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
         }
 
         @Override
-        protected void writeValue(String key, SortedMap<String, Timer> metric, Map<String, Object> values) {
-            abstractConverter.writeTimers(key, metric, values);
+        protected void writeValue(MetricName metricName, SortedMap<String, Timer> metric, Map<String, Object> values) {
+            abstractConverter.writeTimers(metricName.getKey(), metricName.getMetricSubType(), metric, values);
         }
     }
 
@@ -202,8 +202,8 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
         }
 
         @Override
-        protected void writeValue(String key, SortedMap<String, Histogram> metric, Map<String, Object> values) {
-            abstractConverter.writeHistograms(key, metric, values);
+        protected void writeValue(MetricName metricName, SortedMap<String, Histogram> metric, Map<String, Object> values) {
+            abstractConverter.writeHistograms(metricName.getKey(), metricName.getMetricSubType(), metric, values);
         }
     }
 
@@ -219,8 +219,8 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
         }
 
         @Override
-        protected void writeValue(String key, SortedMap<String, Gauge> metric, Map<String, Object> values) {
-            abstractConverter.writeGauges(key, metric, values);
+        protected void writeValue(MetricName metricName, SortedMap<String, Gauge> metric, Map<String, Object> values) {
+            abstractConverter.writeGauges(metricName.getKey(), metricName.getMetricSubType(), metric, values);
         }
     }
 }

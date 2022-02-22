@@ -17,10 +17,11 @@
 
 package com.megaease.easeagent.metrics.converter;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import lombok.SneakyThrows;
 
@@ -74,11 +75,11 @@ public abstract class AbstractConverter implements Converter {
                 Map<String, Object> output = buildMap();
                 writeKey(output, k);
                 writeTag(output);
-                writeGauges(k, gauges, output);
-                writeCounters(k, counters, output);
-                writeHistograms(k, histograms, output);
-                writeMeters(k, meters, output);
-                writeTimers(k, timers, output);
+                writeGauges(k, null, gauges, output);
+                writeCounters(k, null, counters, output);
+                writeHistograms(k, null, histograms, output);
+                writeMeters(k, null, meters, output);
+                writeTimers(k, null, timers, output);
                 result.add(output);
             } catch (IgnoreOutputException exception) {
                 LOGGER.trace("convert key of " + k + " error: " + exception.getMessage());
@@ -115,13 +116,13 @@ public abstract class AbstractConverter implements Converter {
 
 
     @SuppressWarnings("rawtypes")
-    protected abstract void writeGauges(String key, SortedMap<String, Gauge> gauges, Map<String, Object> output);
+    protected abstract void writeGauges(String key, MetricSubType metricSubType, SortedMap<String, Gauge> gauges, Map<String, Object> output);
 
-    protected abstract void writeCounters(String key, SortedMap<String, Counter> counters, Map<String, Object> output);
+    protected abstract void writeCounters(String key, MetricSubType metricSubType, SortedMap<String, Counter> counters, Map<String, Object> output);
 
-    protected abstract void writeHistograms(String key, SortedMap<String, Histogram> histograms, Map<String, Object> output);
+    protected abstract void writeHistograms(String key, MetricSubType metricSubType, SortedMap<String, Histogram> histograms, Map<String, Object> output);
 
-    protected abstract void writeMeters(String key, SortedMap<String, Meter> meters, Map<String, Object> output);
+    protected abstract void writeMeters(String key, MetricSubType metricSubType, SortedMap<String, Meter> meters, Map<String, Object> output);
 
-    protected abstract void writeTimers(String key, SortedMap<String, Timer> timers, Map<String, Object> output);
+    protected abstract void writeTimers(String key, MetricSubType metricSubType, SortedMap<String, Timer> timers, Map<String, Object> output);
 }
