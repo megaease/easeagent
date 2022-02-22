@@ -28,13 +28,16 @@ import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.plugin.NoOpCall;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import okhttp3.tls.Certificates;
+import okhttp3.tls.HandshakeCertificates;
+import okhttp3.tls.HeldCertificate;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.GzipSink;
 import okio.Okio;
-import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
@@ -47,6 +50,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Slf4j
 @AutoService(Sender.class)
 public class HttpSender implements Sender {
+
     public static final String SENDER_NAME = ZIPKIN_SENDER_NAME;
 
     private static final String AUTH_HEADER = "Authorization";
@@ -60,6 +64,13 @@ public class HttpSender implements Sender {
     private static final String PASSWORD_KEY = join(GENERAL_SENDER, "password");
     private static final String GZIP_KEY = join(GENERAL_SENDER, "compress");
     private static final String MAX_REQUESTS_KEY = join(GENERAL_SENDER, "maxRequests");
+
+    private static final String TLS_ENABLE = join(OUTPUT_SERVER_V2, "tls.enable");
+    // private key should be pkcs8 format
+    private static final String TLS_KEY = join(OUTPUT_SERVER_V2, "tls.key");
+    private static final String TLS_CERT = join(OUTPUT_SERVER_V2, "tls.cert");
+    private static final String TLS_CA_CERT = join(OUTPUT_SERVER_V2, "tls.ca_cert");
+
     private static final int MIN_TIMEOUT = 30_000;
 
     private Config config;
@@ -78,6 +89,11 @@ public class HttpSender implements Sender {
 
     private String credential;
     private OkHttpClient client;
+
+    private Boolean tlsEnable;
+    private String tlsKey;
+    private String tlsCert;
+    private String tlsCaCert;
 
     // URL-USER-PASSWORD as unique key shared a client
     static ConcurrentHashMap<String, OkHttpClient> clientMap = new ConcurrentHashMap<>();
@@ -98,6 +114,10 @@ public class HttpSender implements Sender {
         this.url = getUrl(config);
         this.userName = StringUtils.noEmptyOf(config.getString(USER_NAME_KEY), config.getString(SERVER_USER_NAME_KEY));
         this.password = StringUtils.noEmptyOf(config.getString(PASSWORD_KEY), config.getString(SERVER_PASSWORD_KEY));
+        this.tlsEnable = config.getBoolean(TLS_ENABLE);
+        this.tlsKey = config.getString(TLS_KEY);
+        this.tlsCert = config.getString(TLS_CERT);
+        this.tlsCaCert = config.getString(TLS_CA_CERT);
 
         this.gzip = NoNull.of(config.getBooleanNullForUnset(GZIP_KEY),
             NoNull.of(config.getBooleanNullForUnset(SERVER_GZIP_KEY), true));
@@ -144,7 +164,7 @@ public class HttpSender implements Sender {
 
         try {
             if (encodedData instanceof RequestBody) {
-                request = newRequest((RequestBody)encodedData);
+                request = newRequest((RequestBody) encodedData);
             } else {
                 request = newRequest(new ByteRequestBody(encodedData.getData()));
             }
@@ -168,10 +188,15 @@ public class HttpSender implements Sender {
     public void updateConfigs(Map<String, String> changes) {
         this.config.updateConfigsNotNotify(changes);
 
+        String newUserName = StringUtils.noEmptyOf(config.getString(USER_NAME_KEY), config.getString(SERVER_USER_NAME_KEY));
+        String newPwd = StringUtils.noEmptyOf(config.getString(PASSWORD_KEY), config.getString(SERVER_PASSWORD_KEY));
         // check new client
         boolean renewClient = !getUrl(this.config).equals(this.url)
-            || !this.config.getString(USER_NAME_KEY).equals(this.userName)
-            || !this.config.getString(PASSWORD_KEY).equals(this.password);
+            || org.apache.commons.lang3.StringUtils.equals(newUserName, this.userName)
+            || org.apache.commons.lang3.StringUtils.equals(newPwd, this.password)
+            || org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CA_CERT), this.tlsCaCert)
+            || org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CERT), this.tlsCert)
+            || org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_KEY), this.tlsKey);
 
         if (renewClient) {
             clearClient();
@@ -185,7 +210,9 @@ public class HttpSender implements Sender {
         clearClient();
     }
 
-    /** Waits up to a second for in-flight requests to finish before cancelling them */
+    /**
+     * Waits up to a second for in-flight requests to finish before cancelling them
+     */
     private void clearClient() {
         OkHttpClient dClient = clientMap.remove(getClientKey());
         if (dClient == null) {
@@ -223,17 +250,11 @@ public class HttpSender implements Sender {
 
         // auth
         if (this.isAuth) {
-            builder.authenticator((route, response) -> {
-                if (response.request().header(AUTH_HEADER) != null) {
-                    return null;
-                }
-                log.info("Authenticating for response: " + response);
-                log.info("Challenges: " + response.challenges());
-                credential = Credentials.basic(userName, password);
-                return response.request().newBuilder()
-                    .header(AUTH_HEADER, credential)
-                    .build();
-            });
+            appendBasicAuth(builder, this.credential);
+        }
+        // tls
+        if (this.tlsEnable) {
+            appendTLS(builder, this.tlsCaCert, this.tlsCert, this.tlsKey);
         }
         synchronized (HttpSender.class) {
             if (clientMap.get(clientKey) != null) {
@@ -245,6 +266,37 @@ public class HttpSender implements Sender {
                 client = newClient;
             }
         }
+    }
+
+//    public static void appendBasicAuth(OkHttpClient.Builder builder, String basicUser, String basicPassword) {
+//        builder.addInterceptor(chain -> {
+//            Request request = chain.request();
+//            Request authRequest = request.newBuilder()
+//                .header(AUTH_HEADER, Credentials.basic(basicUser, basicPassword)).build();
+//            return chain.proceed(authRequest);
+//        });
+//    }
+
+    public static void appendBasicAuth(OkHttpClient.Builder builder, String basicCredential) {
+        builder.addInterceptor(chain -> {
+            Request request = chain.request();
+            Request authRequest = request.newBuilder()
+                .header(AUTH_HEADER, basicCredential).build();
+            return chain.proceed(authRequest);
+        });
+    }
+
+    public static void appendTLS(OkHttpClient.Builder builder, String tlsCaCert, String tlsCert, String tlsKey) {
+        // Create the root for client and server to trust. We could also use different roots for each!
+        X509Certificate clientX509Certificate = Certificates.decodeCertificatePem(tlsCert);
+        X509Certificate rootX509Certificate = Certificates.decodeCertificatePem(tlsCaCert);
+        // Create a client certificate and a client that uses it.
+        HeldCertificate clientCertificateKey = HeldCertificate.decode(tlsCert + tlsKey);
+        HandshakeCertificates clientCertificates = new HandshakeCertificates.Builder()
+            .addTrustedCertificate(rootX509Certificate)
+            .heldCertificate(clientCertificateKey, clientX509Certificate)
+            .build();
+        builder.sslSocketFactory(clientCertificates.sslSocketFactory(), clientCertificates.trustManager());
     }
 
     private void initClient() {
@@ -294,7 +346,9 @@ public class HttpSender implements Sender {
 
     static class OkHttpSenderThreadFactory extends AgentThreadFactory {
         public static final OkHttpSenderThreadFactory INSTANCE = new OkHttpSenderThreadFactory();
-        @Override public Thread newThread(Runnable r) {
+
+        @Override
+        public Thread newThread(Runnable r) {
             return new Thread(r, "AgentHttpSenderDispatcher-" + createCount.getAndIncrement());
         }
     }
