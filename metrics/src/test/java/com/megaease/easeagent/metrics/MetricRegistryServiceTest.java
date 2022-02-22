@@ -18,6 +18,9 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.MetricRegistry;
+import com.megaease.easeagent.metrics.converter.ConverterAdapter;
+import com.megaease.easeagent.metrics.converter.EaseAgentPrometheusExports;
+import com.megaease.easeagent.metrics.converter.KeyType;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.tools.metrics.GaugeMetricModel;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
@@ -25,20 +28,25 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
 public class MetricRegistryServiceTest {
 
-    private MetricRegistry reset() {
+    private MetricRegistry reset(NameFactory nameFactory) {
         CollectorRegistry.defaultRegistry.clear();
+        List<KeyType> keyTypes = MetricProviderImpl.keyTypes(nameFactory);
+        Tags tags = new Tags("testCategory", "testType", "testName").put("testKey", "testValue");
+        Supplier<Map<String, Object>> additionalAttributes = () -> Collections.singletonMap("additionalAttributesKey", "additionalAttributesValue");
+        ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes,
+            additionalAttributes, tags);
         MetricRegistry metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry(
-            () -> Collections.singletonMap("additionalAttributesKey", "additionalAttributesValue"),
-            new Tags("testCategory", "testType", "testName").put("testKey", "testValue")
+            converterAdapter,
+            additionalAttributes,
+            tags
         );
         for (String s : metricRegistry.getNames()) {
             metricRegistry.remove(s);
@@ -53,7 +61,7 @@ public class MetricRegistryServiceTest {
                 .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount).build()
         ).gaugeType(MetricSubType.DEFAULT, new HashMap<>()).build();
         String name = nameFactory.counterName("GET tt", MetricSubType.NONE);
-        MetricRegistry metricRegistry = reset();
+        MetricRegistry metricRegistry = reset(nameFactory);
 
         metricRegistry.counter(name).inc();
         Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
@@ -61,20 +69,27 @@ public class MetricRegistryServiceTest {
             Collector.MetricFamilySamples s = samples.nextElement();
             for (Collector.MetricFamilySamples.Sample sample : s.samples) {
                 assertTrue(sample.labelNames.contains("additionalAttributesKey"));
-                assertTrue(sample.labelNames.contains(Tags.CATEGORY));
-                assertTrue(sample.labelNames.contains(Tags.TYPE));
                 assertTrue(sample.labelNames.contains("testKey"));
                 assertTrue(sample.labelValues.contains("additionalAttributesValue"));
-                assertTrue(sample.labelValues.contains("testCategory"));
-                assertTrue(sample.labelValues.contains("testType"));
-                assertTrue(sample.labelValues.contains("testValue"));
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                assertTrue(sample.labelValues.contains(MetricType.CounterType.name()));
+                assertTrue(sample.labelValues.contains(MetricSubType.NONE.name()));
+                assertTrue(sample.name.contains("testCategory_"));
+                assertTrue(sample.name.contains("testType_"));
             }
         }
+
         for (String s : metricRegistry.getNames()) {
             metricRegistry.remove(s);
         }
-
+        List<KeyType> keyTypes = MetricProviderImpl.keyTypes(nameFactory);
+        Tags tags = new Tags("testCategory", "testType", "testName").put("testKey", "testValue");
+        Supplier<Map<String, Object>> additionalAttributes = () -> Collections.singletonMap("additionalAttributesKey", "additionalAttributesValue");
+        ConverterAdapter converterAdapter = new ConverterAdapter(nameFactory, keyTypes,
+            additionalAttributes, tags);
         metricRegistry = MetricRegistryService.DEFAULT.createMetricRegistry(
+            converterAdapter,
             null,
             null
         );
@@ -83,13 +98,138 @@ public class MetricRegistryServiceTest {
         while (samples.hasMoreElements()) {
             Collector.MetricFamilySamples s = samples.nextElement();
             for (Collector.MetricFamilySamples.Sample sample : s.samples) {
-                assertTrue(sample.labelNames.isEmpty());
-                assertTrue(sample.labelValues.isEmpty());
+                assertEquals(3, sample.labelNames.size());
+                assertEquals(3, sample.labelValues.size());
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                assertTrue(sample.labelValues.contains(MetricType.CounterType.name()));
+                assertTrue(sample.labelValues.contains(MetricSubType.NONE.name()));
             }
         }
 
 
-        metricRegistry = reset();
+    }
+
+    @Test
+    public void testCounter() {
+        NameFactory nameFactory = NameFactory.createBuilder().counterType(MetricSubType.NONE,
+            ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                .put(MetricField.EXECUTION_COUNT, MetricValueFetcher.CountingCount).build()
+        ).build();
+        MetricRegistry metricRegistry = reset(nameFactory);
+        String name = nameFactory.counterName("GET tt", MetricSubType.NONE);
+        metricRegistry.counter(name).inc();
+        Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
+        while (samples.hasMoreElements()) {
+            Collector.MetricFamilySamples s = samples.nextElement();
+            for (Collector.MetricFamilySamples.Sample sample : s.samples) {
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                assertTrue(sample.labelValues.contains(MetricType.CounterType.name()));
+                assertTrue(sample.labelValues.contains(MetricSubType.NONE.name()));
+                assertTrue(sample.name.contains("testCategory_"));
+                assertTrue(sample.name.contains("testType_"));
+
+                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+                assertTrue(sample.labelValues.contains(MetricField.EXECUTION_COUNT.getField()));
+                assertEquals(1, (int) sample.value);
+            }
+        }
+    }
+
+    @Test
+    public void testTimer() {
+        Map<MetricField, MetricValueFetcher> valueFetchers = ImmutableMap.<MetricField, MetricValueFetcher>builder()
+            .put(MetricField.MIN_EXECUTION_TIME, MetricValueFetcher.SnapshotMinValue)
+            .put(MetricField.MAX_EXECUTION_TIME, MetricValueFetcher.SnapshotMaxValue)
+            .put(MetricField.MEAN_EXECUTION_TIME, MetricValueFetcher.SnapshotMeanValue)
+            .put(MetricField.P25_EXECUTION_TIME, MetricValueFetcher.Snapshot25Percentile)
+            .put(MetricField.P50_EXECUTION_TIME, MetricValueFetcher.Snapshot50PercentileValue)
+            .put(MetricField.P75_EXECUTION_TIME, MetricValueFetcher.Snapshot75PercentileValue)
+            .put(MetricField.P95_EXECUTION_TIME, MetricValueFetcher.Snapshot95PercentileValue)
+            .put(MetricField.P98_EXECUTION_TIME, MetricValueFetcher.Snapshot98PercentileValue)
+            .put(MetricField.P99_EXECUTION_TIME, MetricValueFetcher.Snapshot99PercentileValue)
+            .put(MetricField.P999_EXECUTION_TIME, MetricValueFetcher.Snapshot999PercentileValue)
+            .build();
+        NameFactory nameFactory = NameFactory.createBuilder().timerType(MetricSubType.DEFAULT,
+            valueFetchers)
+            .build();
+        List<String> labelValues = labelValues(valueFetchers);
+        MetricRegistry metricRegistry = reset(nameFactory);
+        String name = nameFactory.timerName("GET tt", MetricSubType.DEFAULT);
+        metricRegistry.timer(name).update(1000, TimeUnit.MILLISECONDS);
+        Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
+        while (samples.hasMoreElements()) {
+            Collector.MetricFamilySamples s = samples.nextElement();
+            for (Collector.MetricFamilySamples.Sample sample : s.samples) {
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                assertTrue(sample.labelValues.contains(MetricType.TimerType.name()));
+                assertTrue(sample.labelValues.contains(MetricSubType.DEFAULT.name()));
+                assertTrue(sample.name.contains("testCategory_"));
+                assertTrue(sample.name.contains("testType_"));
+
+
+                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+                assertTrue(labelValues.contains(sample.labelValues.get(0)));
+                assertEquals(1000, (int) sample.value);
+            }
+        }
+    }
+
+    private List<String> labelValues(Map<MetricField, MetricValueFetcher> valueFetchers) {
+        List<String> values = new ArrayList<>();
+        for (MetricField metricField : valueFetchers.keySet()) {
+            values.add(metricField.getField());
+        }
+        return values;
+    }
+
+    @Test
+    public void testMeter() {
+        Map<MetricField, MetricValueFetcher> valueFetchers = ImmutableMap.<MetricField, MetricValueFetcher>builder()
+            .put(MetricField.M1_ERROR_RATE, MetricValueFetcher.MeteredM1Rate)
+            .put(MetricField.M5_ERROR_RATE, MetricValueFetcher.MeteredM5Rate)
+            .put(MetricField.M15_ERROR_RATE, MetricValueFetcher.MeteredM15Rate)
+            .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
+            .build();
+        NameFactory nameFactory = NameFactory.createBuilder().meterType(MetricSubType.ERROR,
+            valueFetchers)
+            .build();
+        List<String> labelValues = labelValues(valueFetchers);
+        MetricRegistry metricRegistry = reset(nameFactory);
+        String name = nameFactory.meterName("GET tt", MetricSubType.ERROR);
+        metricRegistry.meter(name).mark();
+        Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
+        while (samples.hasMoreElements()) {
+            Collector.MetricFamilySamples s = samples.nextElement();
+            for (Collector.MetricFamilySamples.Sample sample : s.samples) {
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                assertTrue(sample.labelValues.contains(MetricType.MeterType.name()));
+                assertTrue(sample.labelValues.contains(MetricSubType.ERROR.name()));
+                assertTrue(sample.name.contains("testCategory_"));
+                assertTrue(sample.name.contains("testType_"));
+
+
+                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+                assertTrue(labelValues.contains(sample.labelValues.get(0)));
+            }
+        }
+    }
+
+    @Test
+    public void testHistogram() {
+        // Temporarily unsupported
+        // Please use timer to calculate the time of P95, P99, etc
+    }
+
+
+    @Test
+    public void testGauge() {
+        NameFactory nameFactory = NameFactory.createBuilder().gaugeType(MetricSubType.DEFAULT, new HashMap<>()).build();
+        MetricRegistry metricRegistry = reset(nameFactory);
+
         String gaugeName1 = "GETtt1";
         String gaugeName = nameFactory.gaugeName(gaugeName1, MetricSubType.DEFAULT);
         String key = "testGaugeKey1";
@@ -104,12 +244,20 @@ public class MetricRegistryServiceTest {
         gaugeName = nameFactory.gaugeName(gaugeName2, MetricSubType.DEFAULT);
         metricRegistry.gauge(gaugeName, () -> () -> value3);
 
-        samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
+        Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
         while (samples.hasMoreElements()) {
             Collector.MetricFamilySamples s = samples.nextElement();
             if (s.name.endsWith(gaugeName1)) {
                 for (Collector.MetricFamilySamples.Sample sample : s.samples) {
-                    assertTrue(sample.labelNames.contains(MetricRegistryService.GaugeDropwizardExports.KEY_LABEL_NAME));
+                    assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                    assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                    assertTrue(sample.labelValues.contains(MetricType.GaugeType.name()));
+                    assertTrue(sample.labelValues.contains(MetricSubType.DEFAULT.name()));
+                    assertTrue(sample.name.contains("testCategory_"));
+                    assertTrue(sample.name.contains("testType_"));
+
+
+                    assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
                     int sampleIntValue = (int) sample.value;
                     if (sample.labelValues.contains(key)) {
                         assertEquals(value, sampleIntValue);
@@ -122,7 +270,16 @@ public class MetricRegistryServiceTest {
             } else if (s.name.endsWith(gaugeName2)) {
                 assertEquals(1, s.samples.size());
                 for (Collector.MetricFamilySamples.Sample sample : s.samples) {
-                    assertFalse(sample.labelNames.contains(MetricRegistryService.GaugeDropwizardExports.KEY_LABEL_NAME));
+                    assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                    assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                    assertTrue(sample.labelValues.contains(MetricType.GaugeType.name()));
+                    assertTrue(sample.labelValues.contains(MetricSubType.DEFAULT.name()));
+                    assertTrue(sample.name.contains("testCategory_"));
+                    assertTrue(sample.name.contains("testType_"));
+
+
+                    assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+                    assertTrue(sample.labelValues.contains("value"));
                     assertEquals(value3, (int) sample.value);
                 }
             } else {

@@ -205,7 +205,7 @@ public class ConverterAdapterTest {
         );
         Map<String, Object> result = new HashMap<>();
         converter.writeGauges(key, gauges, result);
-        assertEquals(value, result.get(gaugeName));
+        assertEquals(value, result.get("value"));
     }
 
     @Test

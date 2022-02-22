@@ -21,7 +21,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.metrics.MetricRegistryService;
 
 public class MetricRegistryMock {
-    private static final MetricRegistry CODAHALE_METRIC_REGISTRY = MetricRegistryService.DEFAULT.createMetricRegistry(null, null);
+    private static final MetricRegistry CODAHALE_METRIC_REGISTRY = MetricRegistryService.DEFAULT.createMetricRegistry(null, null, null);
 
     public static MetricRegistry getCodahaleMetricRegistry() {
         return CODAHALE_METRIC_REGISTRY;

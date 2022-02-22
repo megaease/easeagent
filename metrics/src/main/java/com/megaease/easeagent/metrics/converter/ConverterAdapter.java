@@ -142,8 +142,10 @@ public class ConverterAdapter extends AbstractConverter {
             if (value instanceof GaugeMetricModel) {
                 GaugeMetricModel model = (GaugeMetricModel) value;
                 output.putAll(model.toHashMap());
-            } else if (value != null) {
-                output.put(v.name(), value.toString());
+            } else if (value instanceof Number || value instanceof Boolean) {
+                output.put("value", value);
+            } else {
+                output.put("value", value.toString());
             }
         });
     }
