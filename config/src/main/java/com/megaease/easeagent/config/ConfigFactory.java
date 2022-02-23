@@ -43,6 +43,7 @@ public class ConfigFactory {
 
     private static final List<String> subEnvKeys = new LinkedList<>();
     private static final List<String> envKeys = new LinkedList<>();
+
     static {
         subEnvKeys.add(AGENT_SERVICE_NAME);
         subEnvKeys.add(AGENT_SYSTEM_NAME);
@@ -66,7 +67,8 @@ public class ConfigFactory {
         return fileCfgMap;
     }
 
-    private ConfigFactory() {}
+    private ConfigFactory() {
+    }
 
     public static GlobalConfigs loadFromClasspath(ClassLoader classLoader) {
         try {

@@ -157,7 +157,7 @@ Taking the `spring-web` module under [ease-test-demo](https://github.com/megaeas
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ cd ../spring-web
 $ mvn clean package
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
 ```
 4. Test
 Execute the following test and the header information added can be seen in the HTTP Response.
