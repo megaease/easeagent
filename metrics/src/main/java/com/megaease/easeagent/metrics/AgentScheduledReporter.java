@@ -18,14 +18,13 @@
 package com.megaease.easeagent.metrics;
 
 import com.codahale.metrics.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.report.ReportConfigAdapter;
 import com.megaease.easeagent.metrics.converter.Converter;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.utils.NoNull;
-import com.megaease.easeagent.config.report.ReportConfigAdapter;
 import com.megaease.easeagent.report.encoder.metric.MetricJsonEncoder;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import lombok.SneakyThrows;
@@ -36,11 +35,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.megaease.easeagent.config.report.ReportConfigConst.*;
+import static com.megaease.easeagent.config.report.ReportConfigConst.METRIC_ENCODER;
 
 @SuppressWarnings("unused")
 public class AgentScheduledReporter extends ScheduledReporter {
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private Converter converter;
     private final Consumer<EncodedData> dataConsumer;
     private final Supplier<Boolean> enabled;

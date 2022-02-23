@@ -73,23 +73,23 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
 
     @Override
     public List<MetricFamilySamples> collect() {
-        Map<String, MetricFamilySamples> mfSamplesMap = new HashMap();
+        Map<String, MetricFamilySamples> mfSamplesMap = new HashMap<>();
 
         gaugeExports.addToMap(mfSamplesMap);
         counterExports.addToMap(mfSamplesMap);
         meterExports.addToMap(mfSamplesMap);
         timerExports.addToMap(mfSamplesMap);
         histogramExports.addToMap(mfSamplesMap);
-        return new ArrayList(mfSamplesMap.values());
+        return new ArrayList<>(mfSamplesMap.values());
     }
 
     protected void addToMap(Map<String, MetricFamilySamples> mfSamplesMap, MetricFamilySamples newMfSamples) {
         if (newMfSamples != null) {
-            MetricFamilySamples currentMfSamples = (MetricFamilySamples) mfSamplesMap.get(newMfSamples.name);
+            MetricFamilySamples currentMfSamples = mfSamplesMap.get(newMfSamples.name);
             if (currentMfSamples == null) {
                 mfSamplesMap.put(newMfSamples.name, newMfSamples);
             } else {
-                List<MetricFamilySamples.Sample> samples = new ArrayList(currentMfSamples.samples);
+                List<MetricFamilySamples.Sample> samples = new ArrayList<>(currentMfSamples.samples);
                 samples.addAll(newMfSamples.samples);
                 mfSamplesMap.put(newMfSamples.name, new MetricFamilySamples(newMfSamples.name, currentMfSamples.type, currentMfSamples.help, samples));
             }
@@ -98,7 +98,7 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
     }
 
     public List<MetricFamilySamples> describe() {
-        return new ArrayList();
+        return new ArrayList<>();
     }
 
     abstract class Exports<T extends Metric> {
