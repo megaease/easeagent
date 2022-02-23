@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.mock.zipkin;
 
+import brave.TracerTestUtils;
 import brave.Tracing;
 import com.megaease.easeagent.mock.config.ConfigMock;
 import com.megaease.easeagent.mock.report.ReportMock;
@@ -45,5 +46,9 @@ public class TracingProviderMock implements MockProvider {
     @Override
     public Object get() {
         return getTracingProvider();
+    }
+
+    public static synchronized void cleanPendingSpans() {
+        TracerTestUtils.clean(TRACING.tracer());
     }
 }

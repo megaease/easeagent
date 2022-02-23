@@ -27,6 +27,7 @@ import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.zipkin.TracingProviderImplMock;
 import org.junit.Assert;
 import org.junit.Before;
@@ -259,7 +260,11 @@ public class SpanImplTest {
     public void flush() {
         Span eSpan = SpanImpl.build(tracing, tracing.tracer().nextSpan(), injector);
         eSpan.start();
-        ReportMock.runForSpan(eSpan::flush, Assert::assertNotNull);
+        ReportMock.runForSpan(eSpan::flush, Assert::assertNull);
+        ReportSpan reportSpan = ReportMock.getLastSipSpan();
+        Assert.assertNotNull(reportSpan);
+        assertEquals(eSpan.traceIdString(), reportSpan.traceId());
+        assertEquals(eSpan.spanIdString(), reportSpan.id());
     }
 
     @Test

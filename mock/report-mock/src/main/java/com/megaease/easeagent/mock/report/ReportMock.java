@@ -45,6 +45,7 @@ public class ReportMock {
     private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(ConfigMock.getCONFIGS()));
 
     private static final AtomicReference<ReportSpan> LAST_SPAN = new AtomicReference<>();
+    private static final AtomicReference<ReportSpan> LAST_SKIP_SPAN = new AtomicReference<>();
     private static volatile SpanReportMock spanReportMock = null;
     private static volatile Reporter metricReportMock = null;
     private static volatile JsonReporter metricJsonReport = null;
@@ -100,6 +101,12 @@ public class ReportMock {
             agentReport.report(span);
             if (!SpanUtils.isValidSpan(span)) {
                 LOGGER.warn("span<traceId({}), id({}), name({}), kind({})> not start(), skip it.", span.traceId(), span.id(), span.name(), span.kind());
+                LAST_SKIP_SPAN.set(span);
+                return;
+            }
+            if (span.duration() == 0) {
+                LOGGER.warn(String.format("span<traceId(%s), id(%s), name(%s), kind(%s), timestamp(%s) duration(%s) not finish, skip it.", span.traceId(), span.id(), span.name(), span.kind(), span.timestamp(), span.duration()));
+                LAST_SKIP_SPAN.set(span);
                 return;
             }
             // MockSpan mockSpan = new ZipkinMockSpanImpl(span);
@@ -182,5 +189,9 @@ public class ReportMock {
 
     public static void cleanLastSpan() {
         LAST_SPAN.set(null);
+    }
+
+    public static ReportSpan getLastSipSpan() {
+        return LAST_SKIP_SPAN.get();
     }
 }
