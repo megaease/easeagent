@@ -21,7 +21,7 @@ import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
 import com.megaease.easeagent.metrics.TestConst;
 import com.megaease.easeagent.metrics.impl.MetricRegistryMock;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
@@ -102,7 +102,7 @@ public class AbstractConverterTest {
     public void convertMap() {
         MockAbstractConverter mockAbstractConverter = new MockAbstractConverter(
             new MetricsAdditionalAttributes(
-                ConfigMock.getCONFIGS()),
+                MockConfig.getCONFIGS()),
             new Tags("testCategory", "testType", "testKeyFieldName"));
         List<Map<String, Object>> result = mockAbstractConverter.convertMap(
             new TreeMap<>(Collections.singletonMap("testConvertMap",

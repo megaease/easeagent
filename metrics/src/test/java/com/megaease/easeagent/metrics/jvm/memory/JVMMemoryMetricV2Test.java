@@ -17,9 +17,8 @@
 
 package com.megaease.easeagent.metrics.jvm.memory;
 
-import com.megaease.easeagent.metrics.MetricProviderImpl;
 import com.megaease.easeagent.metrics.MetricProviderImplTest;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.MetricType;
@@ -34,7 +33,7 @@ public class JVMMemoryMetricV2Test {
     private static final JVMMemoryMetricV2 JVM_MEMORY_METRIC_V_2;
 
     static {
-        EaseAgent.configFactory = ConfigMock.getPluginConfigManager();
+        EaseAgent.configFactory = MockConfig.getPluginConfigManager();
         EaseAgent.metricRegistrySupplier = MetricProviderImplTest.METRIC_PROVIDER.metricSupplier();
         JVM_MEMORY_METRIC_V_2 = JVMMemoryMetricV2.getMetric();
     }

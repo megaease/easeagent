@@ -17,19 +17,16 @@
 
 package com.megaease.easeagent.mock.report;
 
-import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
+import com.megaease.easeagent.report.AgentReport;
+import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicReference;
+import static org.junit.Assert.assertNotNull;
 
-public class AtomicReferenceReportMock implements SpanReportMock {
-    AtomicReference<ReportSpan> spanAtomicReference = new AtomicReference<>();
+public class MockReportTest {
 
-    @Override
-    public void report(ReportSpan span) {
-        spanAtomicReference.set(span);
-    }
-
-    public ReportSpan get() {
-        return spanAtomicReference.get();
+    @Test
+    public void getAgentReport() {
+        AgentReport agentReport = MockReport.getAgentReport();
+        assertNotNull(agentReport);
     }
 }

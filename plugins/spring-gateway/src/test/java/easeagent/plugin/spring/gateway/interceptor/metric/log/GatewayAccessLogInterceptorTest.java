@@ -17,10 +17,10 @@
 
 package easeagent.plugin.spring.gateway.interceptor.metric.log;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -117,7 +117,7 @@ public class GatewayAccessLogInterceptorTest {
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
         AgentMono agentMono = (AgentMono) methodInfo.getRetValue();
         TagVerifier tagVerifier = new TagVerifier().add("type", "access-log").add("system", "test-gateway-system");
-        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
         Thread thread = new Thread(() -> agentMono.getFinish().accept(agentMono.getMethodInfo(), agentMono.getAsyncContext()));
         thread.start();
         thread.join();

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.mongodb;
 
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -72,7 +72,7 @@ public class MongoBaseTest {
         config.onChange(null, iPluginConfig);
         Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         clusterId = new ClusterId("local-cluster");
         serverAddress = new ServerAddress("127.0.0.1", 2020);
         serverId = new ServerId(clusterId, serverAddress);
@@ -84,7 +84,7 @@ public class MongoBaseTest {
     }
 
     protected void assertTrace(boolean success, String error) {
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals("mongodb-" + this.dbName, mockSpan.remoteServiceName());

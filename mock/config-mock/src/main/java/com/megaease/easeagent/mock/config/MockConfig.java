@@ -26,7 +26,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfigMock {
+public class MockConfig {
     private static final String MOCK_CONFIG_FILE = "mock_agent.properties";
     private static final Configs CONFIGS;
     private static final PluginConfigManager PLUGIN_CONFIG_MANAGER;

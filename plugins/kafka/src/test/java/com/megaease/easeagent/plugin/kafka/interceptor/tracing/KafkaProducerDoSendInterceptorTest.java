@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
 import com.megaease.easeagent.plugin.api.middleware.Type;
@@ -79,7 +79,7 @@ public class KafkaProducerDoSendInterceptorTest {
         assertTrue(context.currentTracing().hasCurrentSpan());
         Span span = finishSpan();
         assertFalse(context.currentTracing().hasCurrentSpan());
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
         checkBaseInfo(mockSpan);
         assertEquals(key, mockSpan.tag(KafkaTags.KAFKA_KEY_TAG));
@@ -93,7 +93,7 @@ public class KafkaProducerDoSendInterceptorTest {
         assertTrue(context.currentTracing().hasCurrentSpan());
         span = finishSpan();
         assertFalse(context.currentTracing().hasCurrentSpan());
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
         checkBaseInfo(mockSpan);
         assertNull(mockSpan.tag(KafkaTags.KAFKA_KEY_TAG));
@@ -133,7 +133,7 @@ public class KafkaProducerDoSendInterceptorTest {
             assertTrue(context.currentTracing().hasCurrentSpan());
             finishSpan();
             assertFalse(context.currentTracing().hasCurrentSpan());
-            ReportSpan mockSpan = ReportMock.getLastSpan();
+            ReportSpan mockSpan = MockEaseAgent.getLastSpan();
             assertEquals(TestConst.REDIRECT_URIS, mockSpan.tag("label.remote"));
         });
     }
@@ -155,7 +155,7 @@ public class KafkaProducerDoSendInterceptorTest {
         assertFalse(context.currentTracing().hasCurrentSpan());
         Callback callback = (Callback) methodInfo.getArgs()[1];
         callback.onCompletion(null, null);
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertFalse(mockSpan.tags().containsKey("error"));
 
         record = new ProducerRecord<>(topic, key, value);
@@ -168,7 +168,7 @@ public class KafkaProducerDoSendInterceptorTest {
         callback = (Callback) methodInfo.getArgs()[1];
         callback.onCompletion(null, null);
 
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         assertTrue(mockSpan.tags().containsKey("error"));
         assertEquals(errorInfo, mockSpan.tags().get("error"));
 

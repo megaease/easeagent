@@ -24,18 +24,14 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.megaease.easeagent.metrics.impl.MetricRegistryMock;
 import com.megaease.easeagent.metrics.impl.MetricTestUtils;
-import com.megaease.easeagent.mock.config.ConfigMock;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.metric.name.*;
-import com.megaease.easeagent.plugin.tools.metrics.ServerMetric;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
-import static com.megaease.easeagent.plugin.api.metric.name.MetricField.EXECUTION_COUNT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -131,7 +127,7 @@ public class ConverterAdapterTest {
             nameFactory,
             Arrays.asList(KeyType.values()),
             new MetricsAdditionalAttributes(
-                ConfigMock.getCONFIGS()),
+                MockConfig.getCONFIGS()),
             new Tags("testCategory", "testType", "testKeyFieldName"));
     }
 
@@ -202,7 +198,7 @@ public class ConverterAdapterTest {
             nameFactory,
             Arrays.asList(KeyType.Counter),
             new MetricsAdditionalAttributes(
-                ConfigMock.getCONFIGS()),
+                MockConfig.getCONFIGS()),
             new Tags("testCategory", "testType", "testKeyFieldName")));
 
 

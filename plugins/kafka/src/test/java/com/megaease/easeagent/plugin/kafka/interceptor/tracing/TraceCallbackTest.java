@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -41,7 +41,7 @@ public class TraceCallbackTest {
         Span span = context.nextSpan().start();
         TraceCallback traceCallback = new TraceCallback(span, null);
         traceCallback.onCompletion(null, null);
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
         assertFalse(mockSpan.hasError());
 
@@ -50,7 +50,7 @@ public class TraceCallbackTest {
         String errorInfo = "test error";
         traceCallback = new TraceCallback(span, null);
         traceCallback.onCompletion(null, new RuntimeException(errorInfo));
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
         assertTrue(mockSpan.hasError());
         assertEquals(errorInfo, mockSpan.errorInfo());
@@ -65,7 +65,7 @@ public class TraceCallbackTest {
         thread.start();
         thread.join();
 
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
         assertFalse(mockSpan.hasError());
         assertTrue(ran.get());

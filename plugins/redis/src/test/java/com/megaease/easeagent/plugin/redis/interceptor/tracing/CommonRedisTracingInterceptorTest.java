@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
 import com.megaease.easeagent.plugin.api.middleware.Type;
@@ -84,13 +84,13 @@ public class CommonRedisTracingInterceptorTest {
         commonRedisTracingInterceptor.startTracing(context, name, null, null);
         Span span = context.get(SPAN_KEY);
         span.finish();
-        checkMockSpanInfo(Objects.requireNonNull(ReportMock.getLastSpan()));
+        checkMockSpanInfo(Objects.requireNonNull(MockEaseAgent.getLastSpan()));
 
         String cmd = "testCmd";
         commonRedisTracingInterceptor.startTracing(context, name, null, cmd);
         span = context.get(SPAN_KEY);
         span.finish();
-        ReportSpan mockSpan = Objects.requireNonNull(ReportMock.getLastSpan());
+        ReportSpan mockSpan = Objects.requireNonNull(MockEaseAgent.getLastSpan());
         checkMockSpanInfo(mockSpan);
         assertEquals(cmd, mockSpan.tag("redis.method"));
 
@@ -101,11 +101,11 @@ public class CommonRedisTracingInterceptorTest {
             commonRedisTracingInterceptor.startTracing(context, name, null, null);
             span = context.get(SPAN_KEY);
             span.finish();
-            child = Objects.requireNonNull(ReportMock.getLastSpan());
+            child = Objects.requireNonNull(MockEaseAgent.getLastSpan());
         } finally {
             pSpan.finish();
         }
-        ReportSpan parent = Objects.requireNonNull(ReportMock.getLastSpan());
+        ReportSpan parent = Objects.requireNonNull(MockEaseAgent.getLastSpan());
         assertEquals(parent.traceId(), child.traceId());
         assertEquals(parent.id(), child.parentId());
         assertNull(parent.parentId());
@@ -121,7 +121,7 @@ public class CommonRedisTracingInterceptorTest {
         span.name(name);
         context.put(SPAN_KEY, span);
         commonRedisTracingInterceptor.finishTracing(null, context);
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertEquals(name, mockSpan.name());
         assertEquals(span.traceIdString(), mockSpan.traceId());
         assertNull(context.get(SPAN_KEY));
@@ -131,7 +131,7 @@ public class CommonRedisTracingInterceptorTest {
         String errorInfo = "test error";
         context.put(SPAN_KEY, span);
         commonRedisTracingInterceptor.finishTracing(new RuntimeException(errorInfo), context);
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         assertEquals(name, mockSpan.name());
         assertEquals(span.traceIdString(), mockSpan.traceId());
         assertNull(context.get(SPAN_KEY));

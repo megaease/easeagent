@@ -15,10 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.report;
+package com.megaease.easeagent.mock.config;
 
-import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
+import org.junit.Test;
 
-public interface SpanReportMock {
-    void report(ReportSpan span);
+import static org.junit.Assert.*;
+
+public class MockConfigTest {
+
+    @Test
+    public void getCONFIGS() {
+        assertTrue(MockConfig.getCONFIGS().getBoolean("test.mock.key"));
+        assertEquals("testValue", MockConfig.getCONFIGS().getString("test.mock.keyStr"));
+        assertNull(MockConfig.getCONFIGS().getString("test.mock.keyStrAAAAAAAAAA"));
+    }
 }

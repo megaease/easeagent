@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -42,9 +42,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -70,7 +68,7 @@ public class KafkaMetricTest {
             .add("category", "application")
             .add("type", "kafka")
             .add("resource", topic);
-        return ReportMock.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        return MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
     }
 
     public static Map<String, Object> waitOne(LastJsonReporter lastJsonReporter) {

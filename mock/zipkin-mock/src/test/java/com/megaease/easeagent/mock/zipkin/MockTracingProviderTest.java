@@ -22,26 +22,26 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-public class TracingProviderMockTest {
+public class MockTracingProviderTest {
 
     @Test
     public void getTracingProvider() {
-        assertNotNull(TracingProviderMock.getTracingProvider());
+        assertNotNull(MockTracingProvider.getTracingProvider());
     }
 
     @Test
     public void getTRACING() {
-        assertNotNull(TracingProviderMock.getTRACING());
+        assertNotNull(MockTracingProvider.getTRACING());
     }
 
     @Test
     public void get() {
-        assertNotNull(TracingProviderMock.getTRACING());
+        assertNotNull(MockTracingProvider.getTRACING());
     }
 
     @Test
     public void testSpan() {
-        assertNotNull(TracingProviderMock.getTRACING().tracer().nextSpan());
-        assertFalse(TracingProviderMock.getTRACING().tracer().nextSpan().isNoop());
+        assertNotNull(MockTracingProvider.getTRACING().tracer().nextSpan());
+        assertFalse(MockTracingProvider.getTRACING().tracer().nextSpan().isNoop());
     }
 }

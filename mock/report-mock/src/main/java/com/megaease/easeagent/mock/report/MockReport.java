@@ -19,7 +19,7 @@ package com.megaease.easeagent.mock.report;
 
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
@@ -37,17 +37,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ReportMock {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportMock.class);
-    private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(ConfigMock.getCONFIGS()));
+public class MockReport {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockReport.class);
+    private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(MockConfig.getCONFIGS()));
 
     private static final AtomicReference<ReportSpan> LAST_SPAN = new AtomicReference<>();
     private static final AtomicReference<ReportSpan> LAST_SKIP_SPAN = new AtomicReference<>();
     private static volatile MetricFlushable metricFlushable;
-    private static volatile SpanReportMock spanReportMock = null;
+    private static volatile MockSpanReport mockSpanReport = null;
     private static volatile Reporter metricReportMock = null;
     private static volatile JsonReporter metricJsonReport = null;
 
@@ -56,15 +55,15 @@ public class ReportMock {
     }
 
     public static void setMetricFlushable(MetricFlushable metricFlushable) {
-        ReportMock.metricFlushable = metricFlushable;
+        MockReport.metricFlushable = metricFlushable;
     }
 
-    public static void setSpanReportMock(SpanReportMock spanReportMock) {
-        ReportMock.spanReportMock = spanReportMock;
+    public static void setMockSpanReport(MockSpanReport mockSpanReport) {
+        MockReport.mockSpanReport = mockSpanReport;
     }
 
-    public static void setMetricReportMock(Reporter metricReportMock) {
-        ReportMock.metricReportMock = metricReportMock;
+    public static void setMockMetricReport(Reporter metricReportMock) {
+        MockReport.metricReportMock = metricReportMock;
     }
 
     public static LastJsonReporter lastMetricJsonReporter(Predicate<Map<String, Object>> filter) {
@@ -117,9 +116,9 @@ public class ReportMock {
             // MockSpan mockSpan = new ZipkinMockSpanImpl(span);
             LAST_SPAN.set(span);
             try {
-                SpanReportMock spanReportMock = ReportMock.spanReportMock;
-                if (spanReportMock != null) {
-                    spanReportMock.report(span);
+                MockSpanReport mockSpanReport = MockReport.mockSpanReport;
+                if (mockSpanReport != null) {
+                    mockSpanReport.report(span);
                 }
             } catch (Exception e) {
                 LOGGER.error("mock span report : {}", e);
@@ -177,17 +176,6 @@ public class ReportMock {
         }
     }
 
-    public static void runForSpan(Runnable runnable, Consumer<ReportSpan> callback) {
-        AtomicReferenceReportMock atomicReferenceReportMock = new AtomicReferenceReportMock();
-        setSpanReportMock(atomicReferenceReportMock);
-        try {
-            runnable.run();
-            callback.accept(atomicReferenceReportMock.get());
-        } finally {
-            setSpanReportMock(null);
-        }
-    }
-
     public static ReportSpan getLastSpan() {
         return LAST_SPAN.get();
     }
@@ -196,7 +184,11 @@ public class ReportMock {
         LAST_SPAN.set(null);
     }
 
-    public static ReportSpan getLastSipSpan() {
+    public static ReportSpan getLastSkipSpan() {
         return LAST_SKIP_SPAN.get();
+    }
+
+    public static void cleanSkipSpan() {
+        LAST_SKIP_SPAN.set(null);
     }
 }

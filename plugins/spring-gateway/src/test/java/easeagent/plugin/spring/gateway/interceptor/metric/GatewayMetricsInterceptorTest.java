@@ -17,10 +17,10 @@
 
 package easeagent.plugin.spring.gateway.interceptor.metric;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -86,7 +86,7 @@ public class GatewayMetricsInterceptorTest {
             .add("category", "application")
             .add("type", "http-request")
             .add("url", GatewayMetricsInterceptor.getKey(mockServerWebExchange));
-        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
         Map<String, Object> metric = getMetric(lastJsonReporter);
         assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
         assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));

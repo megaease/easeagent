@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -53,13 +53,13 @@ public class ClientHttpRequestInterceptorTest {
         MethodInfo methodInfo = methodInfoBuilder.invoker(request).build();
         Context context = EaseAgent.getContext();
         ClientHttpRequestInterceptor clientHttpRequestInterceptor = new ClientHttpRequestInterceptor();
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
 
         clientHttpRequestInterceptor.before(methodInfo, context);
         methodInfo = methodInfoBuilder.retValue(clientHttpResponse).build();
         clientHttpRequestInterceptor.after(methodInfo, context);
 
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
@@ -73,7 +73,7 @@ public class ClientHttpRequestInterceptorTest {
         methodInfo.throwable(runtimeException);
         clientHttpRequestInterceptor.after(methodInfo, context);
 
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
@@ -87,7 +87,7 @@ public class ClientHttpRequestInterceptorTest {
             clientHttpRequestInterceptor.before(methodInfo, context);
             methodInfo = methodInfoBuilder.retValue(clientHttpResponse).build();
             clientHttpRequestInterceptor.after(methodInfo, context);
-            mockSpan = ReportMock.getLastSpan();
+            mockSpan = MockEaseAgent.getLastSpan();
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());

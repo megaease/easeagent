@@ -17,11 +17,10 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
-import com.megaease.easeagent.mock.metrics.MockMetricUtils;
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
-import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
+import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -34,10 +33,8 @@ import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -84,7 +81,7 @@ public class DoFilterMetricInterceptorTest {
             .add("category", "application")
             .add("type", "http-request")
             .add("url", TestConst.METHOD + " " + TestConst.ROUTE);
-        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
 
         doFilterMetricInterceptor.doAfter(methodInfo, EaseAgent.getContext());
         Map<String, Object> metric = getMetric(lastJsonReporter);
@@ -92,7 +89,7 @@ public class DoFilterMetricInterceptorTest {
         assertEquals(1, (int) metric.get("cnt"));
         assertEquals(0, (int) metric.get("errcnt"));
 
-        MockMetricUtils.clear(Objects.requireNonNull(AgentFieldReflectAccessor.<ServiceMetric>getFieldValue(doFilterMetricInterceptor, "SERVER_METRIC")));
+        MockEaseAgent.clearMetric(Objects.requireNonNull(AgentFieldReflectAccessor.<ServiceMetric>getFieldValue(doFilterMetricInterceptor, "SERVER_METRIC")));
         lastJsonReporter.clean();
         httpServletRequest = TestServletUtils.buildMockRequest();
         response = TestServletUtils.buildMockResponse();

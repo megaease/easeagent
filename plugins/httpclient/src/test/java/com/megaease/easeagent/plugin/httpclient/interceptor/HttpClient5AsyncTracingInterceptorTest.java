@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -36,9 +36,7 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class HttpClient5AsyncTracingInterceptorTest {
@@ -96,7 +94,7 @@ public class HttpClient5AsyncTracingInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{
             simpleRequestProducer, null, null, null, callback
         }).build();
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         HttpClient5AsyncTracingInterceptor httpClient5AsyncTracingInterceptor = new HttpClient5AsyncTracingInterceptor();
         httpClient5AsyncTracingInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         assertNotNull(EaseAgent.getContext().get(HttpClient5AsyncTracingInterceptor.class));
@@ -109,12 +107,12 @@ public class HttpClient5AsyncTracingInterceptorTest {
             }
         }
         assertNotNull(newCallBack.get());
-        assertNull(ReportMock.getLastSpan());
+        assertNull(MockEaseAgent.getLastSpan());
 
         Thread thread = new Thread(() -> consumer.accept(newCallBack.get()));
         thread.start();
         thread.join();
-        return ReportMock.getLastSpan();
+        return MockEaseAgent.getLastSpan();
     }
 
     @Test

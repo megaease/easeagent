@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.metric;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -77,7 +77,7 @@ public class CommonRedisMetricInterceptorTest {
             .add("category", "application")
             .add("type", "cache-redis")
             .add("signature", "test_redis_metric");
-        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
 
         commonRedisMetricInterceptor.doBefore(methodInfo, context);
         commonRedisMetricInterceptor.doAfter(methodInfo, context);

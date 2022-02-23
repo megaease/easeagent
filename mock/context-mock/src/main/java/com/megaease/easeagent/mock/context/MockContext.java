@@ -28,5 +28,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface MockContext {
     @SuppressWarnings("unused")
-    Context ignored = ContextManagerMock.getContext();
+    Context ignored = MockContextManager.getContext();
 }

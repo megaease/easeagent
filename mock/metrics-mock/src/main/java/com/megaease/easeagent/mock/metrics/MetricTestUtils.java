@@ -21,7 +21,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.megaease.easeagent.metrics.impl.MetricRegistryImpl;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
 
-public class MockMetricUtils {
+public class MetricTestUtils {
     public static void clear(com.megaease.easeagent.plugin.api.metric.MetricRegistry metricRegistry) {
         if (!(metricRegistry instanceof MetricRegistryImpl)) {
             return;
@@ -33,7 +33,7 @@ public class MockMetricUtils {
     }
 
     public static void clear(ServiceMetric serviceMetric) {
-        MockMetricUtils.clear(serviceMetric.getMetricRegistry());
+        MetricTestUtils.clear(serviceMetric.getMetricRegistry());
     }
 
 }

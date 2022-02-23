@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
@@ -68,7 +68,7 @@ public class WebClientFilterTracingInterceptorTest {
         requestContext.scope().close();
         requestContext.span().finish();
         assertNull(requestContext.span().parentIdString());
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(requestContext.span(), mockSpan);
 
         ClientRequest request = (ClientRequest) methodInfo.getArgs()[0];
@@ -84,7 +84,7 @@ public class WebClientFilterTracingInterceptorTest {
             requestContext = context.get(interceptor.getProgressKey());
             requestContext.scope().close();
             requestContext.span().finish();
-            mockSpan = ReportMock.getLastSpan();
+            mockSpan = MockEaseAgent.getLastSpan();
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
         }
@@ -100,10 +100,10 @@ public class WebClientFilterTracingInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
         interceptor.doBefore(methodInfo, context);
         assertTrue(context.currentTracing().hasCurrentSpan());
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         interceptor.doAfter(methodInfo, context);
         assertFalse(context.currentTracing().hasCurrentSpan());
-        assertNull(ReportMock.getLastSpan());
+        assertNull(MockEaseAgent.getLastSpan());
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
 
         String errorInfo = "test error";
@@ -115,7 +115,7 @@ public class WebClientFilterTracingInterceptorTest {
         assertFalse(context.currentTracing().hasCurrentSpan());
 
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertTrue(mockSpan.hasError());
         assertEquals(errorInfo, mockSpan.errorInfo());

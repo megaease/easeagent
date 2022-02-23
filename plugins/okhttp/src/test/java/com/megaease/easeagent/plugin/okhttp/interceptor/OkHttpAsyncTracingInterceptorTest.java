@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.okhttp.interceptor;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -101,18 +101,18 @@ public class OkHttpAsyncTracingInterceptorTest {
         MethodInfo methodInfo = methodInfoBuilder.build();
         Context context = EaseAgent.getContext();
         OkHttpAsyncTracingInterceptor okHttpAsyncTracingInterceptor = new OkHttpAsyncTracingInterceptor();
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
 
         okHttpAsyncTracingInterceptor.doBefore(methodInfo, context);
         okHttpAsyncTracingInterceptor.doAfter(methodInfo, context);
 
         Callback callback = (Callback) methodInfo.getArgs()[0];
-        assertNull(ReportMock.getLastSpan());
+        assertNull(MockEaseAgent.getLastSpan());
 
         Thread thread = new Thread(() -> consumer.accept(call, callback));
         thread.start();
         thread.join();
-        return ReportMock.getLastSpan();
+        return MockEaseAgent.getLastSpan();
     }
 
     @Test

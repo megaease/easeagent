@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.metrics;
 
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -38,7 +38,7 @@ public class MetricProviderImplTest {
 
     static {
         METRIC_PROVIDER = new MetricProviderImpl();
-        METRIC_PROVIDER.setConfig(ConfigMock.getCONFIGS());
+        METRIC_PROVIDER.setConfig(MockConfig.getCONFIGS());
         METRIC_PROVIDER.setAgentReport(new AgentReport() {
             @Override
             public void report(ReportSpan span) {

@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Request;
@@ -39,7 +39,6 @@ import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.function.Consumer;
 
@@ -63,14 +62,14 @@ public class DoFilterTraceInterceptorTest {
         assertNotNull(o2);
         assertSame(o, o2);
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertNull(mockSpan.parentId());
         checkServerSpan(mockSpan);
 
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        assertNull(ReportMock.getLastSpan());
+        assertNull(MockEaseAgent.getLastSpan());
     }
 
 
@@ -92,7 +91,7 @@ public class DoFilterTraceInterceptorTest {
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
         doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.SERVER.name(), mockSpan.kind());
         assertNull(mockSpan.parentId());
@@ -113,7 +112,7 @@ public class DoFilterTraceInterceptorTest {
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
         doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(requestContext.span().traceIdString(), mockSpan.traceId());
         assertEquals(requestContext.span().spanIdString(), mockSpan.id());
@@ -159,11 +158,11 @@ public class DoFilterTraceInterceptorTest {
         final AsyncContext asyncContext = httpServletRequest.startAsync(httpServletRequest, response);
         doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
 
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         Thread thread = new Thread(() -> asyncContextConsumer.accept(asyncContext));
         thread.start();
         thread.join();
-        return ReportMock.getLastSpan();
+        return MockEaseAgent.getLastSpan();
     }
 
     @Test

@@ -15,18 +15,21 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.config;
+package com.megaease.easeagent.mock.report;
 
-import org.junit.Test;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 
-import static org.junit.Assert.*;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class ConfigMockTest {
+public class MockAtomicReferenceReportSpanReport implements MockSpanReport {
+    AtomicReference<ReportSpan> spanAtomicReference = new AtomicReference<>();
 
-    @Test
-    public void getCONFIGS() {
-        assertTrue(ConfigMock.getCONFIGS().getBoolean("test.mock.key"));
-        assertEquals("testValue", ConfigMock.getCONFIGS().getString("test.mock.keyStr"));
-        assertNull(ConfigMock.getCONFIGS().getString("test.mock.keyStrAAAAAAAAAA"));
+    @Override
+    public void report(ReportSpan span) {
+        spanAtomicReference.set(span);
+    }
+
+    public ReportSpan get() {
+        return spanAtomicReference.get();
     }
 }

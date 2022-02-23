@@ -21,19 +21,19 @@ import com.megaease.easeagent.metrics.AutoRefreshReporter;
 import com.megaease.easeagent.metrics.MetricBeanProvider;
 import com.megaease.easeagent.metrics.MetricProviderImpl;
 import com.megaease.easeagent.metrics.jvm.JvmBeanProvider;
-import com.megaease.easeagent.mock.config.ConfigMock;
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.config.MockConfig;
+import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.utils.MockProvider;
 
-public class MetricProviderMock implements MockProvider {
+public class MockMetricProvider implements MockProvider {
     private static final MetricBeanProvider METRIC_PROVIDER = new MetricBeanProvider();
     private static final JvmBeanProvider JVM_METRIC_PROVIDER = new JvmBeanProvider();
 
     static {
-        METRIC_PROVIDER.setConfig(ConfigMock.getCONFIGS());
-        METRIC_PROVIDER.setAgentReport(ReportMock.getAgentReport());
+        METRIC_PROVIDER.setConfig(MockConfig.getCONFIGS());
+        METRIC_PROVIDER.setAgentReport(MockReport.getAgentReport());
         JVM_METRIC_PROVIDER.afterPropertiesSet();
-        ReportMock.setMetricFlushable(MetricProviderMock::flush);
+        MockReport.setMetricFlushable(MockMetricProvider::flush);
     }
 
     public static MetricBeanProvider getMetricProvider() {
@@ -61,7 +61,7 @@ public class MetricProviderMock implements MockProvider {
             return;
         }
         for (com.megaease.easeagent.plugin.api.metric.MetricRegistry metricRegistry : metricProvider.getRegistryList()) {
-            MockMetricUtils.clear(metricRegistry);
+            MetricTestUtils.clear(metricRegistry);
         }
     }
 }
