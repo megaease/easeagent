@@ -91,10 +91,7 @@ public class ServletHttpLogInterceptorTest {
     }
 
     private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
-        List<Map<String, Object>> metric = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(metric);
-        assertEquals(1, metric.size());
-        String result = JsonUtil.toJson(metric.get(0));
+        String result = JsonUtil.toJson(lastJsonReporter.flushAndOnlyOne());
         assertNotNull(result);
         return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
     }

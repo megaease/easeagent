@@ -31,21 +31,17 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import easeagent.plugin.spring.gateway.SpringGatewayPlugin;
 import easeagent.plugin.spring.gateway.TestServerWebExchangeUtils;
-import easeagent.plugin.spring.gateway.interceptor.metric.log.GatewayAccessLogInterceptor;
 import easeagent.plugin.spring.gateway.reactor.AgentMono;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -71,10 +67,7 @@ public class GatewayMetricsInterceptorTest {
     }
 
     public Map<String, Object> getMetric(LastJsonReporter lastJsonReporter) {
-        List<Map<String, Object>> mapList = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(mapList);
-        assertEquals(1, mapList.size());
-        return mapList.get(0);
+        return lastJsonReporter.flushAndOnlyOne();
     }
 
     @Test

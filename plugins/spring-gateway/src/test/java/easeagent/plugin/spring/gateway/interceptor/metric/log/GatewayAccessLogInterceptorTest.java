@@ -44,10 +44,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.mock.web.server.MockServerWebExchange;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
@@ -130,10 +126,7 @@ public class GatewayAccessLogInterceptorTest {
     }
 
     private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
-        List<Map<String, Object>> metric = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(metric);
-        assertEquals(1, metric.size());
-        String result = JsonUtil.toJson(metric.get(0));
+        String result = JsonUtil.toJson(lastJsonReporter.flushAndOnlyOne());
         assertNotNull(result);
         return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
     }

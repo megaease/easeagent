@@ -17,11 +17,10 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
-import com.megaease.easeagent.mock.metrics.MockMetricUtils;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
+import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
-import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
@@ -75,16 +74,12 @@ public class KafkaMetricTest {
     }
 
     public static Map<String, Object> waitOne(LastJsonReporter lastJsonReporter) {
-        List<Map<String, Object>> one = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(one);
-        assertEquals(1, one.size());
-        return one.get(0);
+        return lastJsonReporter.flushAndOnlyOne();
     }
 
 
     @Test
     public void producerStop() {
-        MockMetricUtils.clearAll();
         KafkaMetric kafkaMetric = get();
         kafkaMetric.producerStop(System.currentTimeMillis() - 100, TOPIC);
         LastJsonReporter lastJsonReporter = lastMetricSupplier(TOPIC);
@@ -95,7 +90,6 @@ public class KafkaMetricTest {
 
     @Test
     public void errorProducer() {
-        MockMetricUtils.clearAll();
         KafkaMetric kafkaMetric = get();
         kafkaMetric.errorProducer(TOPIC);
         LastJsonReporter lastJsonReporter = lastMetricSupplier(TOPIC);
@@ -106,7 +100,6 @@ public class KafkaMetricTest {
 
     @Test
     public void consumeStart() {
-        MockMetricUtils.clearAll();
         KafkaMetric kafkaMetric = get();
         Timer.Context context = kafkaMetric.consumeStart(TOPIC);
         assertNotNull(context);
@@ -114,7 +107,6 @@ public class KafkaMetricTest {
 
     @Test
     public void consumeStop() {
-        MockMetricUtils.clearAll();
         KafkaMetric kafkaMetric = get();
         Timer.Context context = kafkaMetric.consumeStart(TOPIC);
         kafkaMetric.consumeStop(context, TOPIC);
@@ -125,7 +117,6 @@ public class KafkaMetricTest {
 
     @Test
     public void consumeError() {
-        MockMetricUtils.clearAll();
         KafkaMetric kafkaMetric = get();
         kafkaMetric.consumeError(TOPIC);
         LastJsonReporter lastJsonReporter = lastMetricSupplier(TOPIC);
@@ -135,7 +126,6 @@ public class KafkaMetricTest {
 
     @Test
     public void consume() {
-        MockMetricUtils.clearAll();
         KafkaMetric kafkaMetric = get();
         kafkaMetric.consume(TOPIC, System.currentTimeMillis() - 100, true);
         LastJsonReporter lastJsonReporter = lastMetricSupplier(TOPIC);

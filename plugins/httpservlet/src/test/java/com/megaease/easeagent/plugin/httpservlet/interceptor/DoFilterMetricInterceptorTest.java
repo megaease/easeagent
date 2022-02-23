@@ -63,10 +63,7 @@ public class DoFilterMetricInterceptorTest {
     }
 
     public Map<String, Object> getMetric(LastJsonReporter lastJsonReporter) throws InterruptedException {
-        List<Map<String, Object>> mapList = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(mapList);
-        assertEquals(1, mapList.size());
-        return mapList.get(0);
+        return lastJsonReporter.flushAndOnlyOne();
     }
 
     @Test

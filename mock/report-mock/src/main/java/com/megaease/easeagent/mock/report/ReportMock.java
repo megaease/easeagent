@@ -46,12 +46,17 @@ public class ReportMock {
 
     private static final AtomicReference<ReportSpan> LAST_SPAN = new AtomicReference<>();
     private static final AtomicReference<ReportSpan> LAST_SKIP_SPAN = new AtomicReference<>();
+    private static volatile MetricFlushable metricFlushable;
     private static volatile SpanReportMock spanReportMock = null;
     private static volatile Reporter metricReportMock = null;
     private static volatile JsonReporter metricJsonReport = null;
 
     public static AgentReport getAgentReport() {
         return AGENT_REPORT;
+    }
+
+    public static void setMetricFlushable(MetricFlushable metricFlushable) {
+        ReportMock.metricFlushable = metricFlushable;
     }
 
     public static void setSpanReportMock(SpanReportMock spanReportMock) {
@@ -63,7 +68,7 @@ public class ReportMock {
     }
 
     public static LastJsonReporter lastMetricJsonReporter(Predicate<Map<String, Object>> filter) {
-        LastJsonReporter lastJsonReporter = new LastJsonReporter(filter);
+        LastJsonReporter lastJsonReporter = new LastJsonReporter(filter, metricFlushable);
         metricJsonReport = lastJsonReporter;
         return lastJsonReporter;
     }

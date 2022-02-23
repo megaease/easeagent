@@ -18,9 +18,9 @@
 package com.megaease.easeagent.plugin.redis.interceptor.metric;
 
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
+import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
 import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
-import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -31,9 +31,7 @@ import com.megaease.easeagent.plugin.redis.RedisPlugin;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -62,10 +60,7 @@ public class CommonRedisMetricInterceptorTest {
     }
 
     public Map<String, Object> getMetric(LastJsonReporter lastJsonReporter) throws InterruptedException {
-        List<Map<String, Object>> mapList = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(mapList);
-        assertEquals(1, mapList.size());
-        return mapList.get(0);
+        return lastJsonReporter.flushAndOnlyOne();
     }
 
     @Test

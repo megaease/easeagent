@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.metric;
 
-import com.megaease.easeagent.mock.metrics.MockMetricUtils;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -59,7 +58,6 @@ public class KafkaProducerMetricInterceptorTest {
 
     @Test
     public void doAfter() {
-        MockMetricUtils.clearAll();
 
         KafkaProducerMetricInterceptor interceptor = new KafkaProducerMetricInterceptor();
         KafkaMetricTest.init(interceptor);
