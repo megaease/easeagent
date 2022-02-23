@@ -178,8 +178,16 @@ public class MetricRegistryImplTest {
         Snapshot snapshot = timer.getSnapshot();
         assertEquals(3, snapshot.size());
         assertEquals(TimeUnit.MILLISECONDS.toNanos(10), snapshot.getMin());
-        Assert.assertTrue(snapshot.getMedian() > TimeUnit.MILLISECONDS.toNanos(20));
-        Assert.assertTrue(snapshot.getMedian() < TimeUnit.MILLISECONDS.toNanos(80));
+
+        timer = metricRegistry.timer(timerName);
+        timer.update(10, TimeUnit.MILLISECONDS);
+        timer.update(50, TimeUnit.MILLISECONDS);
+        timer.update(200, TimeUnit.MILLISECONDS);
+
+        double median = snapshot.getMedian();
+        String info = "median = " + (int) median;
+        Assert.assertTrue(info, median > TimeUnit.MILLISECONDS.toNanos(20));
+        Assert.assertTrue(info, median < TimeUnit.MILLISECONDS.toNanos(80));
         assertEquals(TimeUnit.MILLISECONDS.toNanos(200), snapshot.getMax());
     }
 
