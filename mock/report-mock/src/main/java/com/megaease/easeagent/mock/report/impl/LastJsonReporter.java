@@ -52,6 +52,13 @@ public class LastJsonReporter implements JsonReporter {
         }
     }
 
+    /**
+     * flush and get only one metric and verify it is only one metric.
+     *
+     * @return Map of metrics
+     * @throws RuntimeException if metric is null or empty or metricSize!=1.
+     */
+
     public Map<String, Object> flushAndOnlyOne() {
         List<Map<String, Object>> metrics = flushAndGet();
         if (metrics.size() != 1) {
@@ -60,7 +67,14 @@ public class LastJsonReporter implements JsonReporter {
         return metrics.get(0);
     }
 
+    /**
+     * flush and get metric and verify it is not null or empty.
+     *
+     * @return list of metric
+     * @throws RuntimeException if metric is null or empty.
+     */
     public List<Map<String, Object>> flushAndGet() {
+        reference.set(null);
         metricFlushable.flush();
         List<Map<String, Object>> metric = reference.get();
         if (metric == null || metric.isEmpty()) {

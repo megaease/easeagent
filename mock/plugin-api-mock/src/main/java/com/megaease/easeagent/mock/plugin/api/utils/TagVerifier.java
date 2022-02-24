@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.mock.plugin.api.utils;
 
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.utils.Pair;
 
 import java.util.ArrayList;
@@ -47,5 +48,12 @@ public class TagVerifier {
             return false;
         }
         return v.equals(value);
+    }
+
+    public static TagVerifier build(Tags tags, String key) {
+        return new TagVerifier()
+            .add(Tags.CATEGORY, tags.getCategory())
+            .add(Tags.TYPE, tags.getType())
+            .add(tags.getKeyFieldName(), key);
     }
 }
