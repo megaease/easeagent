@@ -38,7 +38,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import static org.junit.Assert.*;
 
@@ -124,7 +124,8 @@ public class GatewayServerTracingInterceptorTest {
         assertNull(MockEaseAgent.getLastSpan());
 
         AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-        mockServerWebExchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, (Consumer<ServerWebExchange>) serverWebExchange -> atomicBoolean.set(true));
+        BiConsumer<ServerWebExchange, MethodInfo> consumer = (methodInfo1, exchange) -> atomicBoolean.set(true);
+        mockServerWebExchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, consumer);
         AgentMono agentMono = (AgentMono) methodInfo.getRetValue();
         Thread thread = new Thread(() -> agentMono.getFinish().accept(agentMono.getMethodInfo(), agentMono.getAsyncContext()));
         thread.start();
