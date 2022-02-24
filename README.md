@@ -171,7 +171,7 @@ cp target/simple-plugin-1.0.jar $EASE_AGENT_PATH/plugins/
 ```
 # Open another console
 $ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar=${EASE_AGENT_PATH}/agent.properties" -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
 
 ```
 

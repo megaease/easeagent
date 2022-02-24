@@ -53,7 +53,7 @@ $ jar xf easeagent.jar agent.properties easeagent-log4j2.xml
 Run the user application with EaseAgent
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar=${EASE_AGENT_PATH}/agent.properties" -jar user-app.jar
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -jar user-app.jar
 ```
 
 

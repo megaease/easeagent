@@ -27,11 +27,11 @@ import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.plugin.bean.BeanProvider;
-import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
+import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
+import com.megaease.easeagent.plugin.bean.BeanProvider;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
@@ -62,6 +62,7 @@ public class Bootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 
     private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
+    private static final String AGENT_CONFIG_PATH = "easeagent.config.path";
     private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
 
     private static final String AGENT_MIDDLEWARE_UPDATE = "easeagent.middleware.update";
@@ -86,7 +87,8 @@ public class Bootstrap {
         }
 
         // initiate configuration
-        final GlobalConfigs conf = ConfigFactory.loadConfigs(args, Bootstrap.class.getClassLoader());
+        String configPath = System.getProperty(AGENT_CONFIG_PATH);
+        final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, Bootstrap.class.getClassLoader());
         wrapConfig(conf);
 
         // init Context/API
