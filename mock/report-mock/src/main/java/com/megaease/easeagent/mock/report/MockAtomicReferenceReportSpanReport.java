@@ -15,18 +15,21 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.context;
+package com.megaease.easeagent.mock.report;
 
-import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.concurrent.atomic.AtomicReference;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MockContext {
-    @SuppressWarnings("unused")
-    Context ignored = MockContextManager.getContext();
+public class MockAtomicReferenceReportSpanReport implements MockSpanReport {
+    AtomicReference<ReportSpan> spanAtomicReference = new AtomicReference<>();
+
+    @Override
+    public void report(ReportSpan span) {
+        spanAtomicReference.set(span);
+    }
+
+    public ReportSpan get() {
+        return spanAtomicReference.get();
+    }
 }

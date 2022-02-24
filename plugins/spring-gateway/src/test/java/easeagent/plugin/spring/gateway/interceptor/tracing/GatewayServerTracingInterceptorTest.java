@@ -17,9 +17,9 @@
 
 package easeagent.plugin.spring.gateway.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
@@ -74,7 +74,7 @@ public class GatewayServerTracingInterceptorTest {
         assertFalse(context.currentTracing().hasCurrentSpan());
         context.remove(FluxHttpServerRequest.class);
         requestContext2.span().finish();
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(requestContext.span(), mockSpan);
     }
 
@@ -88,7 +88,7 @@ public class GatewayServerTracingInterceptorTest {
         String errorInfo = "test error";
         methodInfo.throwable(new RuntimeException(errorInfo));
         interceptor.after(methodInfo, context);
-        ReportSpan reportSpan = ReportMock.getLastSpan();
+        ReportSpan reportSpan = MockEaseAgent.getLastSpan();
         assertNotNull(reportSpan);
         assertTrue(reportSpan.hasError());
         assertEquals(errorInfo, reportSpan.errorInfo());
@@ -121,7 +121,7 @@ public class GatewayServerTracingInterceptorTest {
         interceptor.after(methodInfo, context);
         assertNotNull(methodInfo.getRetValue());
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
-        assertNull(ReportMock.getLastSpan());
+        assertNull(MockEaseAgent.getLastSpan());
 
         AtomicBoolean atomicBoolean = new AtomicBoolean(false);
         mockServerWebExchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, (Consumer<ServerWebExchange>) serverWebExchange -> atomicBoolean.set(true));
@@ -130,7 +130,7 @@ public class GatewayServerTracingInterceptorTest {
         thread.start();
         thread.join();
         assertTrue(atomicBoolean.get());
-        ReportSpan reportSpan = ReportMock.getLastSpan();
+        ReportSpan reportSpan = MockEaseAgent.getLastSpan();
         assertTrue(reportSpan.name().contains("/test"));
         SpanTestUtils.sameId(requestContext.span(), reportSpan);
     }

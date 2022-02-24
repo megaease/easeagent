@@ -34,6 +34,36 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
     private final ConcurrentMap<String, Metric> metricCache;
     private final MetricRegistry metricRegistry;
 
+    MetricBuilder<Counter> counters = new MetricBuilder<Counter>() {
+        @Override
+        public Counter newMetric(String name) {
+            return NoNull.of(CounterImpl.build(metricRegistry.counter(name)), NoOpMetrics.NO_OP_COUNTER);
+        }
+    };
+
+    MetricBuilder<Histogram> histograms = new MetricBuilder<Histogram>() {
+        @Override
+        public Histogram newMetric(String name) {
+            return NoNull.of(HistogramImpl.build(metricRegistry.histogram(name)), NoOpMetrics.NO_OP_HISTOGRAM);
+        }
+
+    };
+
+    MetricBuilder<Meter> meters = new MetricBuilder<Meter>() {
+        @Override
+        public Meter newMetric(String name) {
+            return NoNull.of(MeterImpl.build(metricRegistry.meter(name)), NoOpMetrics.NO_OP_METER);
+        }
+
+    };
+
+    MetricBuilder<Timer> timers = new MetricBuilder<Timer>() {
+        @Override
+        public Timer newMetric(String name) {
+            return NoNull.of(TimerImpl.build(metricRegistry.timer(name)), NoOpMetrics.NO_OP_TIMER);
+        }
+    };
+
     private MetricRegistryImpl(MetricRegistry metricRegistry) {
         this.metricRegistry = Objects.requireNonNull(metricRegistry, "metricRegistry must not be null");
         this.metricCache = new ConcurrentHashMap<>();
@@ -76,12 +106,12 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
 
     @Override
     public Meter meter(String name) {
-        return getOrAdd(name, MetricInstance.METER, METERS);
+        return getOrAdd(name, MetricInstance.METER, meters);
     }
 
     @Override
     public Counter counter(String name) {
-        return getOrAdd(name, MetricInstance.COUNTER, COUNTERS);
+        return getOrAdd(name, MetricInstance.COUNTER, counters);
     }
 
 
@@ -106,12 +136,12 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
 
     @Override
     public Histogram histogram(String name) {
-        return getOrAdd(name, MetricInstance.HISTOGRAM, HISTOGRAMS);
+        return getOrAdd(name, MetricInstance.HISTOGRAM, histograms);
     }
 
     @Override
     public Timer timer(String name) {
-        return getOrAdd(name, MetricInstance.TIMER, TIMERS);
+        return getOrAdd(name, MetricInstance.TIMER, timers);
     }
 
     public MetricRegistry getMetricRegistry() {
@@ -139,41 +169,16 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
         T newMetric(String name);
     }
 
-    MetricBuilder<Counter> COUNTERS = new MetricBuilder<Counter>() {
-        @Override
-        public Counter newMetric(String name) {
-            return NoNull.of(CounterImpl.build(metricRegistry.counter(name)), NoOpMetrics.NO_OP_COUNTER);
-        }
-    };
-
-    MetricBuilder<Histogram> HISTOGRAMS = new MetricBuilder<Histogram>() {
-        @Override
-        public Histogram newMetric(String name) {
-            return NoNull.of(HistogramImpl.build(metricRegistry.histogram(name)), NoOpMetrics.NO_OP_HISTOGRAM);
-        }
-
-    };
-
-    MetricBuilder<Meter> METERS = new MetricBuilder<Meter>() {
-        @Override
-        public Meter newMetric(String name) {
-            return NoNull.of(MeterImpl.build(metricRegistry.meter(name)), NoOpMetrics.NO_OP_METER);
-        }
-
-    };
-
-    MetricBuilder<Timer> TIMERS = new MetricBuilder<Timer>() {
-        @Override
-        public Timer newMetric(String name) {
-            return NoNull.of(TimerImpl.build(metricRegistry.timer(name)), NoOpMetrics.NO_OP_TIMER);
-        }
-    };
-
     class MetricRemoveListener implements MetricRegistryListener {
 
+        /**
+         * Do nothing because of added by {@link MetricRegistryImpl#getOrAdd(String, MetricInstance, MetricBuilder)}
+         * @param name
+         * @param gauge
+         */
         @Override
         public void onGaugeAdded(String name, com.codahale.metrics.Gauge<?> gauge) {
-
+            //Do nothing
         }
 
         @Override
@@ -183,9 +188,14 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
             }
         }
 
+        /**
+         * Do nothing because of added by {@link MetricRegistryImpl#getOrAdd(String, MetricInstance, MetricBuilder)}
+         * @param name
+         * @param counter
+         */
         @Override
         public void onCounterAdded(String name, com.codahale.metrics.Counter counter) {
-
+            //Do nothing
         }
 
         @Override
@@ -195,9 +205,14 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
             }
         }
 
+        /**
+         * Do nothing because of added by {@link MetricRegistryImpl#getOrAdd(String, MetricInstance, MetricBuilder)}
+         * @param name
+         * @param histogram
+         */
         @Override
         public void onHistogramAdded(String name, com.codahale.metrics.Histogram histogram) {
-
+            //Do nothing
         }
 
         @Override
@@ -208,9 +223,14 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
 
         }
 
+        /**
+         * Do nothing because of added by {@link MetricRegistryImpl#getOrAdd(String, MetricInstance, MetricBuilder)}
+         * @param name
+         * @param meter
+         */
         @Override
         public void onMeterAdded(String name, com.codahale.metrics.Meter meter) {
-
+            //Do nothing
         }
 
         @Override
@@ -221,9 +241,15 @@ public class MetricRegistryImpl implements com.megaease.easeagent.plugin.api.met
 
         }
 
+        /**
+         * Do nothing because of added by {@link MetricRegistryImpl#getOrAdd(String, MetricInstance, MetricBuilder)}
+         *
+         * @param name
+         * @param timer
+         */
         @Override
         public void onTimerAdded(String name, com.codahale.metrics.Timer timer) {
-
+            //Do nothing
         }
 
         @Override

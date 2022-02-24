@@ -21,8 +21,9 @@ import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
 import com.megaease.easeagent.metrics.TestConst;
 import com.megaease.easeagent.metrics.impl.MetricRegistryMock;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import org.junit.Test;
 
@@ -67,31 +68,31 @@ public class AbstractConverterTest {
         }
 
         @Override
-        protected void writeGauges(String key, SortedMap<String, Gauge> gauges, Map<String, Object> output) {
+        protected void writeGauges(String key, MetricSubType metricSubType, SortedMap<String, Gauge> gauges, Map<String, Object> output) {
             writeGaugesCount.incrementAndGet();
             output.put("writeGaugesKey", 1);
         }
 
         @Override
-        protected void writeCounters(String key, SortedMap<String, Counter> counters, Map<String, Object> output) {
+        protected void writeCounters(String key, MetricSubType metricSubType, SortedMap<String, Counter> counters, Map<String, Object> output) {
             writeCountersCount.incrementAndGet();
             output.put("writeCountersKey", 1);
         }
 
         @Override
-        protected void writeHistograms(String key, SortedMap<String, Histogram> histograms, Map<String, Object> output) {
+        protected void writeHistograms(String key, MetricSubType metricSubType, SortedMap<String, Histogram> histograms, Map<String, Object> output) {
             writeHistogramsCount.incrementAndGet();
             output.put("writeHistogramsKey", 1);
         }
 
         @Override
-        protected void writeMeters(String key, SortedMap<String, Meter> meters, Map<String, Object> output) {
+        protected void writeMeters(String key, MetricSubType metricSubType, SortedMap<String, Meter> meters, Map<String, Object> output) {
             writeMetersCount.incrementAndGet();
             output.put("writeMetersKey", 1);
         }
 
         @Override
-        protected void writeTimers(String key, SortedMap<String, Timer> timers, Map<String, Object> output) {
+        protected void writeTimers(String key, MetricSubType metricSubType, SortedMap<String, Timer> timers, Map<String, Object> output) {
             writeTimersCount.incrementAndGet();
             output.put("writeTimersKey", 1);
         }
@@ -101,7 +102,7 @@ public class AbstractConverterTest {
     public void convertMap() {
         MockAbstractConverter mockAbstractConverter = new MockAbstractConverter(
             new MetricsAdditionalAttributes(
-                ConfigMock.getCONFIGS()),
+                MockConfig.getCONFIGS()),
             new Tags("testCategory", "testType", "testKeyFieldName"));
         List<Map<String, Object>> result = mockAbstractConverter.convertMap(
             new TreeMap<>(Collections.singletonMap("testConvertMap",

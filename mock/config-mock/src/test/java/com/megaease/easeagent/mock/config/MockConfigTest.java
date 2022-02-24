@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.context;
+package com.megaease.easeagent.mock.config;
 
-import com.megaease.easeagent.plugin.api.Context;
+import org.junit.Test;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static org.junit.Assert.*;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MockContext {
-    @SuppressWarnings("unused")
-    Context ignored = MockContextManager.getContext();
+public class MockConfigTest {
+
+    @Test
+    public void getCONFIGS() {
+        assertTrue(MockConfig.getCONFIGS().getBoolean("test.mock.key"));
+        assertEquals("testValue", MockConfig.getCONFIGS().getString("test.mock.keyStr"));
+        assertNull(MockConfig.getCONFIGS().getString("test.mock.keyStrAAAAAAAAAA"));
+    }
 }

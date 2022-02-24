@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.springweb.reactor;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -26,7 +26,6 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.springweb.interceptor.tracing.WebClientFilterTracingInterceptor;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -43,11 +42,6 @@ import static org.junit.Assert.*;
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class AgentCoreSubscriberTest {
     String url = "http://127.0.0.1:8080/test";
-
-    @Before
-    public void before() {
-        ReportMock.cleanLastSpan();
-    }
 
     private AgentCoreSubscriber createOne(MockCoreSubscriber mockCoreSubscriber) throws URISyntaxException {
         WebClientFilterTracingInterceptor interceptor = new WebClientFilterTracingInterceptor();
@@ -113,12 +107,12 @@ public class AgentCoreSubscriberTest {
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, methodInfo, requestContext);
         agentCoreSubscriber.onError(new RuntimeException(errorInfo));
         assertFalse(methodInfo.isSuccess());
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertTrue(mockSpan.hasError());
         assertEquals(errorInfo, mockSpan.errorInfo());
         assertTrue(mockCoreSubscriber.onError.get());
 
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
 
         methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
         interceptor.doBefore(methodInfo, context);
@@ -128,7 +122,7 @@ public class AgentCoreSubscriberTest {
         agentCoreSubscriber.onNext(clientResponse);
         agentCoreSubscriber.onError(new RuntimeException(errorInfo));
         assertFalse(methodInfo.isSuccess());
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         assertTrue(mockSpan.hasError());
         assertEquals(errorInfo, mockSpan.errorInfo());
         assertEquals("500", mockSpan.tag("http.status_code"));
@@ -149,10 +143,10 @@ public class AgentCoreSubscriberTest {
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, methodInfo, requestContext);
         agentCoreSubscriber.onComplete();
         assertTrue(mockCoreSubscriber.onComplete.get());
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertFalse(mockSpan.hasError());
 
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
         interceptor.doBefore(methodInfo, context);
         requestContext = context.get(interceptor.getProgressKey());
@@ -161,7 +155,7 @@ public class AgentCoreSubscriberTest {
         agentCoreSubscriber.onNext(clientResponse);
         agentCoreSubscriber.onComplete();
         assertTrue(mockCoreSubscriber.onComplete.get());
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         assertFalse(mockSpan.hasError());
 
     }

@@ -17,19 +17,20 @@
 
 package com.megaease.easeagent.mock.zipkin;
 
+import brave.TracerTestUtils;
 import brave.Tracing;
-import com.megaease.easeagent.mock.config.ConfigMock;
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.config.MockConfig;
+import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.utils.MockProvider;
 import com.megaease.easeagent.zipkin.TracingProviderImpl;
 
-public class TracingProviderMock implements MockProvider {
+public class MockTracingProvider implements MockProvider {
     private static final TracingProviderImpl TRACING_PROVIDER = new TracingProviderImpl();
     private static final Tracing TRACING;
 
     static {
-        TRACING_PROVIDER.setConfig(ConfigMock.getCONFIGS());
-        TRACING_PROVIDER.setAgentReport(ReportMock.getAgentReport());
+        TRACING_PROVIDER.setConfig(MockConfig.getCONFIGS());
+        TRACING_PROVIDER.setAgentReport(MockReport.getAgentReport());
         TRACING_PROVIDER.afterPropertiesSet();
         TRACING = TRACING_PROVIDER.tracing();
     }
@@ -45,5 +46,9 @@ public class TracingProviderMock implements MockProvider {
     @Override
     public Object get() {
         return getTracingProvider();
+    }
+
+    public static synchronized void cleanPendingSpans() {
+        TracerTestUtils.clean(TRACING.tracer());
     }
 }

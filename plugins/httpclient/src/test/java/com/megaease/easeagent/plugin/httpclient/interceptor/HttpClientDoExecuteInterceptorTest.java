@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.httpclient.interceptor;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -33,9 +33,7 @@ import org.apache.http.message.BasicHttpResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class HttpClientDoExecuteInterceptorTest {
@@ -51,20 +49,20 @@ public class HttpClientDoExecuteInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpGet}).retValue(basicHttpResponse).build();
 
         HttpClientDoExecuteInterceptor httpClientDoExecuteInterceptor = new HttpClientDoExecuteInterceptor();
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         httpClientDoExecuteInterceptor.before(methodInfo, context);
         httpClientDoExecuteInterceptor.after(methodInfo, context);
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
         Span span = context.nextSpan();
-        try (Scope scope = span.maybeScope()) {
+        try (Scope ignored = span.maybeScope()) {
             httpClientDoExecuteInterceptor.doBefore(methodInfo, context);
             httpClientDoExecuteInterceptor.doAfter(methodInfo, context);
-            mockSpan = ReportMock.getLastSpan();
+            mockSpan = MockEaseAgent.getLastSpan();
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());

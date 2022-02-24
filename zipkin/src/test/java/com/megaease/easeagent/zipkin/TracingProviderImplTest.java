@@ -17,13 +17,8 @@
 
 package com.megaease.easeagent.zipkin;
 
-import com.megaease.easeagent.mock.config.ConfigMock;
-import com.megaease.easeagent.mock.report.ReportMock;
-import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import org.junit.Test;
-
-import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 

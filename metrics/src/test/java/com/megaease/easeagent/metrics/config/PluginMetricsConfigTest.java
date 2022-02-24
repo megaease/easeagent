@@ -19,7 +19,7 @@ package com.megaease.easeagent.metrics.config;
 
 import com.megaease.easeagent.config.PluginConfig;
 import com.megaease.easeagent.metrics.TestConst;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class PluginMetricsConfigTest {
 
     @Before
     public void before() {
-        pluginConfig = ConfigMock.getPluginConfigManager().getConfig(ConfigConst.OBSERVABILITY, TestConst.NAMESPACE, ConfigConst.PluginID.METRIC);
+        pluginConfig = MockConfig.getPluginConfigManager().getConfig(ConfigConst.OBSERVABILITY, TestConst.NAMESPACE, ConfigConst.PluginID.METRIC);
         pluginMetricsConfig = new PluginMetricsConfig(pluginConfig);
     }
 
@@ -56,7 +56,7 @@ public class PluginMetricsConfigTest {
     public void getIntervalUnit() {
         assertEquals(TimeUnit.SECONDS, pluginMetricsConfig.getIntervalUnit());
 
-        PluginConfig pluginConfig2 = ConfigMock.getPluginConfigManager().getConfig(ConfigConst.OBSERVABILITY, TestConst.NAMESPACE2, ConfigConst.PluginID.METRIC);
+        PluginConfig pluginConfig2 = MockConfig.getPluginConfigManager().getConfig(ConfigConst.OBSERVABILITY, TestConst.NAMESPACE2, ConfigConst.PluginID.METRIC);
         PluginMetricsConfig pluginMetricsConfig2 = new PluginMetricsConfig(pluginConfig2);
         assertEquals(TimeUnit.MILLISECONDS, pluginMetricsConfig2.getIntervalUnit());
     }
@@ -69,7 +69,7 @@ public class PluginMetricsConfigTest {
         pluginMetricsConfig.setIntervalChangeCallback(() -> {
             doit.set(true);
         });
-        ConfigMock.getCONFIGS().updateConfigs(Collections.singletonMap(TestConst.INTERVAL_CONFIG, "40"));
+        MockConfig.getCONFIGS().updateConfigs(Collections.singletonMap(TestConst.INTERVAL_CONFIG, "40"));
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -77,7 +77,7 @@ public class PluginMetricsConfigTest {
         }
         assertTrue(doit.get());
         assertEquals(40, pluginMetricsConfig.getInterval());
-        ConfigMock.getCONFIGS().updateConfigs(Collections.singletonMap(TestConst.INTERVAL_CONFIG, "30"));
+        MockConfig.getCONFIGS().updateConfigs(Collections.singletonMap(TestConst.INTERVAL_CONFIG, "30"));
         assertEquals(30, pluginMetricsConfig.getInterval());
     }
 }

@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.context;
 
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
@@ -32,21 +32,21 @@ public class ContextManagerTest {
 
     @Test
     public void build() {
-        ContextManager contextManager = ContextManager.build(ConfigMock.getCONFIGS());
+        ContextManager contextManager = ContextManager.build(MockConfig.getCONFIGS());
         assertNotNull(contextManager);
         contextManager.setTracing(() -> contextSupplier -> null);
     }
 
     @Test
     public void setTracing() {
-        ContextManager contextManager = ContextManager.build(ConfigMock.getCONFIGS());
+        ContextManager contextManager = ContextManager.build(MockConfig.getCONFIGS());
         assertNotNull(contextManager);
         contextManager.setTracing(() -> contextSupplier -> null);
     }
 
     @Test
     public void setMetric() {
-        ContextManager contextManager = ContextManager.build(ConfigMock.getCONFIGS());
+        ContextManager contextManager = ContextManager.build(MockConfig.getCONFIGS());
         assertNotNull(contextManager);
         contextManager.setMetric(() -> new MetricRegistrySupplier() {
             @Override

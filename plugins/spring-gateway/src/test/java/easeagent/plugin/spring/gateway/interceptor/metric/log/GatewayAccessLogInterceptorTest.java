@@ -17,10 +17,10 @@
 
 package easeagent.plugin.spring.gateway.interceptor.metric.log;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -43,10 +43,6 @@ import easeagent.plugin.spring.gateway.reactor.AgentMono;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.mock.web.server.MockServerWebExchange;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -121,7 +117,7 @@ public class GatewayAccessLogInterceptorTest {
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
         AgentMono agentMono = (AgentMono) methodInfo.getRetValue();
         TagVerifier tagVerifier = new TagVerifier().add("type", "access-log").add("system", "test-gateway-system");
-        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
         Thread thread = new Thread(() -> agentMono.getFinish().accept(agentMono.getMethodInfo(), agentMono.getAsyncContext()));
         thread.start();
         thread.join();
@@ -130,10 +126,7 @@ public class GatewayAccessLogInterceptorTest {
     }
 
     private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
-        List<Map<String, Object>> metric = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(metric);
-        assertEquals(1, metric.size());
-        String result = JsonUtil.toJson(metric.get(0));
+        String result = JsonUtil.toJson(lastJsonReporter.flushAndOnlyOne());
         assertNotNull(result);
         return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
     }

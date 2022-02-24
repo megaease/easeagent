@@ -44,7 +44,8 @@ import java.util.function.Supplier;
 public class MetricProviderImpl implements AgentReportAware, ConfigAware, MetricProvider {
     @SuppressWarnings("unused")
     private Config config;
-    private static final List<com.megaease.easeagent.plugin.api.metric.MetricRegistry> REGISTRY_LIST = new ArrayList<>();
+    private final List<com.megaease.easeagent.plugin.api.metric.MetricRegistry> registries = new ArrayList<>();
+    private final List<AutoRefreshReporter> reporters = new ArrayList<>();
     private AgentReport agentReport;
     private Supplier<Map<String, Object>> additionalAttributes;
 
@@ -64,6 +65,18 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
     @Override
     public MetricRegistrySupplier metricSupplier() {
         return new ApplicationMetricRegistrySupplier();
+    }
+
+    public void registerMetricRegistry(com.megaease.easeagent.plugin.api.metric.MetricRegistry metricRegistry) {
+        synchronized (registries) {
+            registries.add(metricRegistry);
+        }
+    }
+
+    public void registerReporter(AutoRefreshReporter refreshReporter) {
+        synchronized (reporters) {
+            reporters.add(refreshReporter);
+        }
     }
 
     public static List<KeyType> keyTypes(NameFactory nameFactory) {
@@ -108,9 +121,10 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
                 converterAdapter,
                 reporter::report);
             autoRefreshReporter.run();
+            registerReporter(autoRefreshReporter);
 
             com.megaease.easeagent.plugin.api.metric.MetricRegistry result = MetricRegistryImpl.build(metricRegistry);
-            REGISTRY_LIST.add(result);
+            registerMetricRegistry(result);
             return result;
         }
 
@@ -120,7 +134,11 @@ public class MetricProviderImpl implements AgentReportAware, ConfigAware, Metric
         }
     }
 
-    public static List<com.megaease.easeagent.plugin.api.metric.MetricRegistry> getRegistryList() {
-        return REGISTRY_LIST;
+    public List<com.megaease.easeagent.plugin.api.metric.MetricRegistry> getRegistryList() {
+        return registries;
+    }
+
+    public List<AutoRefreshReporter> getReporterList() {
+        return reporters;
     }
 }

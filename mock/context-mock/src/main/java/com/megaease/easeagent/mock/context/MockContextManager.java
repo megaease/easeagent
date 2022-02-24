@@ -18,10 +18,9 @@
 package com.megaease.easeagent.mock.context;
 
 import com.megaease.easeagent.context.ContextManager;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.utils.MockProvider;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -29,8 +28,8 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-public class ContextManagerMock {
-    private static final ContextManager CONTEXT_MANAGER_MOCK = ContextManager.build(ConfigMock.getCONFIGS());
+public class MockContextManager {
+    private static final ContextManager CONTEXT_MANAGER_MOCK = ContextManager.build(MockConfig.getCONFIGS());
 
     static {
         ServiceLoader<MockProvider> loader = ServiceLoader.load(MockProvider.class);
@@ -55,9 +54,5 @@ public class ContextManagerMock {
 
     public static Context getContext() {
         return EaseAgent.getContext();
-    }
-
-    public static InitializeContext getInitializeContext() {
-        return EaseAgent.initializeContextSupplier.get();
     }
 }

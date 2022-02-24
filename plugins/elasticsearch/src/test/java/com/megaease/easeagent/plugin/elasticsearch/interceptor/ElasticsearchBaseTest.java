@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.plugin.elasticsearch.interceptor;
 
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
@@ -54,14 +54,13 @@ public abstract class ElasticsearchBaseTest {
     protected String errMsg;
     protected String index = "index-1";
     protected IPluginConfig config;
-    protected ResponseListener responseListener ;
+    protected ResponseListener responseListener;
 
     @Before
     public void before() {
         Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);
 
-        ReportMock.cleanLastSpan();
         request = new Request("GET", "/" + index + "/_search");
         body = "mock body";
         HttpEntity httpEntity = new ByteArrayEntity(body.getBytes(StandardCharsets.UTF_8), ContentType.APPLICATION_JSON);
@@ -91,7 +90,7 @@ public abstract class ElasticsearchBaseTest {
     }
 
     protected void assertTrace(boolean success, String error) {
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals("index-1", mockSpan.tag("es.index"));

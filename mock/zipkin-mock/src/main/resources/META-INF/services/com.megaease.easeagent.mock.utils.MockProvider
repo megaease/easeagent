@@ -1,1 +1,1 @@
-com.megaease.easeagent.mock.zipkin.TracingProviderMock
+com.megaease.easeagent.mock.zipkin.MockTracingProvider

@@ -1,1 +1,1 @@
-com.megaease.easeagent.mock.metrics.MetricProviderMock
+com.megaease.easeagent.mock.metrics.MockMetricProvider

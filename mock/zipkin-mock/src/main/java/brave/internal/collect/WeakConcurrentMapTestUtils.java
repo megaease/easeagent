@@ -15,18 +15,10 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.context;
+package brave.internal.collect;
 
-import com.megaease.easeagent.plugin.api.Context;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MockContext {
-    @SuppressWarnings("unused")
-    Context ignored = MockContextManager.getContext();
+public class WeakConcurrentMapTestUtils {
+    public static void runExpungeStaleEntries(WeakConcurrentMap weakConcurrentMap) {
+        weakConcurrentMap.expungeStaleEntries();
+    }
 }

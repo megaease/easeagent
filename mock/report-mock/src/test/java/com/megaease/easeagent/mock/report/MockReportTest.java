@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.config;
+package com.megaease.easeagent.mock.report;
 
+import com.megaease.easeagent.report.AgentReport;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
-public class ConfigMockTest {
+public class MockReportTest {
 
     @Test
-    public void getCONFIGS() {
-        assertTrue(ConfigMock.getCONFIGS().getBoolean("test.mock.key"));
-        assertEquals("testValue", ConfigMock.getCONFIGS().getString("test.mock.keyStr"));
-        assertNull(ConfigMock.getCONFIGS().getString("test.mock.keyStrAAAAAAAAAA"));
+    public void getAgentReport() {
+        AgentReport agentReport = MockReport.getAgentReport();
+        assertNotNull(agentReport);
     }
 }

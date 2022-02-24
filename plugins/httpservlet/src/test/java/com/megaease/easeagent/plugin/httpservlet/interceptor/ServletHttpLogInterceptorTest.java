@@ -18,8 +18,8 @@
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -37,9 +37,6 @@ import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -91,10 +88,7 @@ public class ServletHttpLogInterceptorTest {
     }
 
     private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
-        List<Map<String, Object>> metric = lastJsonReporter.waitOne(3, TimeUnit.SECONDS);
-        assertNotNull(metric);
-        assertEquals(1, metric.size());
-        String result = JsonUtil.toJson(metric.get(0));
+        String result = JsonUtil.toJson(lastJsonReporter.flushAndOnlyOne());
         assertNotNull(result);
         return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
     }
@@ -116,7 +110,7 @@ public class ServletHttpLogInterceptorTest {
         RequestInfo requestInfo = (RequestInfo) requestInfoO;
         long start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
         verify(requestInfo, start);
-        LastJsonReporter lastJsonReporter = ReportMock.lastMetricJsonReporter(stringObjectMap -> {
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(stringObjectMap -> {
             Object type = stringObjectMap.get("type");
             return type instanceof String && "access-log".equals(type);
         });

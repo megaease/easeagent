@@ -19,17 +19,6 @@ package com.megaease.easeagent.mock.report;
 
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-public class AtomicReferenceReportMock implements SpanReportMock {
-    AtomicReference<ReportSpan> spanAtomicReference = new AtomicReference<>();
-
-    @Override
-    public void report(ReportSpan span) {
-        spanAtomicReference.set(span);
-    }
-
-    public ReportSpan get() {
-        return spanAtomicReference.get();
-    }
+public interface MockSpanReport {
+    void report(ReportSpan span);
 }

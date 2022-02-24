@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.okhttp.interceptor;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -27,7 +27,8 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
 import com.megaease.easeagent.plugin.tools.trace.HttpResponse;
-import okhttp3.*;
+import okhttp3.Call;
+import okhttp3.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,7 +44,7 @@ public class OkHttpTracingInterceptorTest {
         MethodInfo methodInfo = methodInfoBuilder.build();
         Context context = EaseAgent.getContext();
         OkHttpTracingInterceptor okHttpTracingInterceptor = new OkHttpTracingInterceptor();
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
 
         okHttpTracingInterceptor.before(methodInfo, context);
         methodInfo = methodInfoBuilder.retValue(OkHttpTestUtils.responseBuilder(call)
@@ -51,7 +52,7 @@ public class OkHttpTracingInterceptorTest {
             .build()).build();
         okHttpTracingInterceptor.after(methodInfo, context);
 
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
@@ -67,7 +68,7 @@ public class OkHttpTracingInterceptorTest {
         methodInfo.throwable(runtimeException);
         okHttpTracingInterceptor.after(methodInfo, context);
 
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
@@ -83,7 +84,7 @@ public class OkHttpTracingInterceptorTest {
                 .addHeader(TestConst.RESPONSE_TAG_NAME, TestConst.RESPONSE_TAG_VALUE)
                 .build());
             okHttpTracingInterceptor.after(methodInfo, context);
-            mockSpan = ReportMock.getLastSpan();
+            mockSpan = MockEaseAgent.getLastSpan();
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());

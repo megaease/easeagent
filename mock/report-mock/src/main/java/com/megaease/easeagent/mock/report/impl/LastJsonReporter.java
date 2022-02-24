@@ -18,36 +18,28 @@
 package com.megaease.easeagent.mock.report.impl;
 
 import com.megaease.easeagent.mock.report.JsonReporter;
+import com.megaease.easeagent.mock.report.MetricFlushable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 public class LastJsonReporter implements JsonReporter {
-    private final Lock lock = new ReentrantLock();
-    private final Condition condition = lock.newCondition();
+    private final MetricFlushable metricFlushable;
     private final AtomicReference<List<Map<String, Object>>> reference = new AtomicReference<>();
     private final Predicate<Map<String, Object>> filter;
 
-    public LastJsonReporter() {
-        this(null);
-    }
-
-    public LastJsonReporter(Predicate<Map<String, Object>> filter) {
+    public LastJsonReporter(Predicate<Map<String, Object>> filter, MetricFlushable metricFlushable) {
         this.filter = filter;
+        this.metricFlushable = metricFlushable;
     }
 
     @Override
     public void report(List<Map<String, Object>> json) {
         if (filter == null) {
             reference.set(json);
-            signalAll();
         }
         List<Map<String, Object>> result = new ArrayList<>();
         for (Map<String, Object> stringObjectMap : json) {
@@ -57,50 +49,25 @@ public class LastJsonReporter implements JsonReporter {
         }
         if (!result.isEmpty()) {
             reference.set(result);
-            signalAll();
         }
     }
 
-    private void signalAll() {
-        lock.lock();
-        try {
-            condition.signalAll();
-        } finally {
-            lock.unlock();
+    public Map<String, Object> flushAndOnlyOne() {
+        List<Map<String, Object>> metrics = flushAndGet();
+        if (metrics.size() != 1) {
+            throw new RuntimeException("metrics size is not 1 ");
         }
+        return metrics.get(0);
     }
 
-    private boolean wait(long time, TimeUnit unit) {
-        lock.lock();
-        try {
-            try {
-                if (!condition.await(time, unit)) {
-                    return false;
-                }
-            } catch (InterruptedException ignore) {
-                return false;
-            }
-        } finally {
-            lock.unlock();
+    public List<Map<String, Object>> flushAndGet() {
+        metricFlushable.flush();
+        List<Map<String, Object>> metric = reference.get();
+        if (metric == null || metric.isEmpty()) {
+            throw new RuntimeException("metric must not be null and empty.");
         }
-        return true;
+        return metric;
     }
-
-    public List<Map<String, Object>> getLast() {
-        return reference.get();
-    }
-
-    public List<Map<String, Object>> waitOne(long time, TimeUnit unit) {
-        List<Map<String, Object>> result = reference.get();
-        if (result != null) {
-            return result;
-        }
-        if (!wait(time, unit)) {
-            return null;
-        }
-        return reference.get();
-    }
-
 
     public void clean() {
         reference.set(null);

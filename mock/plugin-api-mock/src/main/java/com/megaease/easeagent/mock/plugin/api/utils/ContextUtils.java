@@ -17,8 +17,9 @@
 
 package com.megaease.easeagent.mock.plugin.api.utils;
 
-import com.megaease.easeagent.mock.metrics.MockMetricUtils;
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.metrics.MockMetricProvider;
+import com.megaease.easeagent.mock.report.MockReport;
+import com.megaease.easeagent.mock.zipkin.MockTracingProvider;
 import com.megaease.easeagent.plugin.api.middleware.Redirect;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -41,9 +42,10 @@ public class ContextUtils {
 
     public static void resetAll() {
         EaseAgent.initializeContextSupplier.get().clear();
-        MockMetricUtils.clearAll();
+        MockMetricProvider.clearAll();
         resetRedirect();
-        ReportMock.cleanLastSpan();
+        MockTracingProvider.cleanPendingSpans();
+        MockReport.cleanLastSpan();
     }
 
     private static void resetRedirect() {

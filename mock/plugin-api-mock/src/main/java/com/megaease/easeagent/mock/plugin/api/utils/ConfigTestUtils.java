@@ -18,7 +18,7 @@
 package com.megaease.easeagent.mock.plugin.api.utils;
 
 import com.megaease.easeagent.config.ConfigUtils;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 
 import java.io.Closeable;
@@ -28,7 +28,7 @@ public class ConfigTestUtils {
     public static Reset changeBoolean(IPluginConfig iPluginConfig, String property, boolean value) {
         String name = ConfigUtils.buildPluginProperty(iPluginConfig.domain(), iPluginConfig.namespace(), iPluginConfig.id(), property);
         Boolean oldValue = iPluginConfig.getBoolean(property);
-        ConfigMock.getCONFIGS().updateConfigs(Collections.singletonMap(name, String.valueOf(value)));
+        MockConfig.getCONFIGS().updateConfigs(Collections.singletonMap(name, String.valueOf(value)));
         return new Reset(name, String.valueOf(oldValue));
     }
 
@@ -36,13 +36,13 @@ public class ConfigTestUtils {
     public static Reset changeString(IPluginConfig iPluginConfig, String property, String value) {
         String name = ConfigUtils.buildPluginProperty(iPluginConfig.domain(), iPluginConfig.namespace(), iPluginConfig.id(), property);
         String oldValue = iPluginConfig.getString(property);
-        ConfigMock.getCONFIGS().updateConfigs(Collections.singletonMap(name, value));
+        MockConfig.getCONFIGS().updateConfigs(Collections.singletonMap(name, value));
         return new Reset(name, oldValue);
     }
 
     public static Reset changeConfig(String name, String value) {
-        String oldValue = ConfigMock.getCONFIGS().getString(name);
-        ConfigMock.getCONFIGS().updateConfigs(Collections.singletonMap(name, value));
+        String oldValue = MockConfig.getCONFIGS().getString(name);
+        MockConfig.getCONFIGS().updateConfigs(Collections.singletonMap(name, value));
         return new Reset(name, oldValue);
     }
 
@@ -57,7 +57,7 @@ public class ConfigTestUtils {
 
         @Override
         public void close() {
-            ConfigMock.getCONFIGS().updateConfigs(Collections.singletonMap(name, value));
+            MockConfig.getCONFIGS().updateConfigs(Collections.singletonMap(name, value));
         }
     }
 }

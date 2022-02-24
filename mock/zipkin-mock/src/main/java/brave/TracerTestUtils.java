@@ -15,18 +15,14 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.mock.report;
+package brave;
 
-import com.megaease.easeagent.report.AgentReport;
-import org.junit.Test;
+import brave.internal.collect.WeakConcurrentMapTestUtils;
+import brave.internal.recorder.PendingSpans;
 
-import static org.junit.Assert.assertNotNull;
-
-public class ReportMockTest {
-
-    @Test
-    public void getAgentReport() {
-        AgentReport agentReport = ReportMock.getAgentReport();
-        assertNotNull(agentReport);
+public class TracerTestUtils {
+    public static void clean(Tracer tracer) {
+        PendingSpans pendingSpans = tracer.pendingSpans;
+        WeakConcurrentMapTestUtils.runExpungeStaleEntries(pendingSpans);
     }
 }

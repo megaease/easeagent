@@ -21,12 +21,13 @@ import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.propagation.CurrentTraceContext;
 import brave.propagation.TraceContext;
-import com.megaease.easeagent.mock.report.AtomicReferenceReportMock;
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.report.MockAtomicReferenceReportSpanReport;
+import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.plugin.api.trace.Request;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.zipkin.TracingProviderImplMock;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,6 +52,8 @@ public class SpanImplTest {
         bSpan = tracing.tracer().nextSpan();
         state = AgentFieldReflectAccessor.getFieldValue(bSpan, "state");
         span = SpanImpl.build(tracing, bSpan, false, injector);
+        MockReport.cleanLastSpan();
+        MockReport.cleanSkipSpan();
     }
 
     @Test
@@ -235,31 +238,44 @@ public class SpanImplTest {
     @Test
     public void abandon() {
         Span eSpan = SpanImpl.build(tracing, tracing.tracer().nextSpan(), injector);
-        AtomicReferenceReportMock atomicReferenceReportMock = new AtomicReferenceReportMock();
-        ReportMock.setSpanReportMock(atomicReferenceReportMock);
-        ReportMock.runForSpan(eSpan::abandon, Assert::assertNull);
-        ReportMock.runForSpan(eSpan::flush, Assert::assertNull);
+        MockAtomicReferenceReportSpanReport mockAtomicReferenceReport = new MockAtomicReferenceReportSpanReport();
+        MockReport.setMockSpanReport(mockAtomicReferenceReport);
+        eSpan.abandon();
+        assertNull(MockReport.getLastSpan());
+        assertNull(MockReport.getLastSkipSpan());
+        MockReport.cleanSkipSpan();
+        eSpan.flush();
+        assertNull(MockReport.getLastSpan());
+        assertNull(MockReport.getLastSkipSpan());
     }
 
     @Test
     public void finish() {
         Span eSpan = SpanImpl.build(tracing, tracing.tracer().nextSpan(), injector);
         eSpan.start();
-        ReportMock.runForSpan(eSpan::finish, Assert::assertNotNull);
+        eSpan.finish();
+        assertNotNull(MockReport.getLastSpan());
     }
 
     @Test
     public void finish1() {
         Span eSpan = SpanImpl.build(tracing, tracing.tracer().nextSpan(), injector);
         eSpan.start();
-        ReportMock.runForSpan(() -> eSpan.finish(System.nanoTime()), Assert::assertNotNull);
+        eSpan.finish(System.nanoTime());
+        assertNotNull(MockReport.getLastSpan());
     }
 
     @Test
     public void flush() {
         Span eSpan = SpanImpl.build(tracing, tracing.tracer().nextSpan(), injector);
         eSpan.start();
-        ReportMock.runForSpan(eSpan::flush, Assert::assertNotNull);
+        eSpan.flush();
+        assertNull(MockReport.getLastSpan());
+        assertNotNull(MockReport.getLastSkipSpan());
+        ReportSpan reportSpan = MockReport.getLastSkipSpan();
+        Assert.assertNotNull(reportSpan);
+        assertEquals(eSpan.traceIdString(), reportSpan.traceId());
+        assertEquals(eSpan.spanIdString(), reportSpan.id());
     }
 
     @Test

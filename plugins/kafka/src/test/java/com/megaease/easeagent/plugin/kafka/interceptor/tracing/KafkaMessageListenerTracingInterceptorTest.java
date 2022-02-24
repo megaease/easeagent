@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.plugin.kafka.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
 import com.megaease.easeagent.plugin.api.middleware.Type;
@@ -68,7 +68,7 @@ public class KafkaMessageListenerTracingInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{createConsumerRecord(kafkaConsumer)}).build();
         interceptor.doBefore(methodInfo, context);
         context.<Span>remove(KafkaMessageListenerTracingInterceptor.SPAN).finish();
-        check(ReportMock.getLastSpan(), (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data());
+        check(MockEaseAgent.getLastSpan(), (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data());
     }
 
     @Test
@@ -92,8 +92,8 @@ public class KafkaMessageListenerTracingInterceptorTest {
             MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{createConsumerRecord(kafkaConsumer)}).build();
             interceptor.doBefore(methodInfo, context);
             context.<Span>remove(KafkaMessageListenerTracingInterceptor.SPAN).finish();
-            check(ReportMock.getLastSpan(), (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data());
-            assertEquals(TestConst.REDIRECT_URIS, ReportMock.getLastSpan().tag("label.remote"));
+            check(MockEaseAgent.getLastSpan(), (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data());
+            assertEquals(TestConst.REDIRECT_URIS, MockEaseAgent.getLastSpan().tag("label.remote"));
         });
 
     }
@@ -102,14 +102,14 @@ public class KafkaMessageListenerTracingInterceptorTest {
     public void doAfter() {
         KafkaMessageListenerTracingInterceptor interceptor = new KafkaMessageListenerTracingInterceptor();
         Context context = EaseAgent.getContext();
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
         interceptor.doAfter(null, context);
-        assertNull(ReportMock.getLastSpan());
+        assertNull(MockEaseAgent.getLastSpan());
         Span span = context.nextSpan().start();
         context.put(KafkaMessageListenerTracingInterceptor.SPAN, span);
         MethodInfo methodInfo = MethodInfo.builder().build();
         interceptor.doAfter(methodInfo, context);
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
 
         String errorInfo = "test error";
@@ -117,7 +117,7 @@ public class KafkaMessageListenerTracingInterceptorTest {
         span = context.nextSpan().start();
         context.put(KafkaMessageListenerTracingInterceptor.SPAN, span);
         interceptor.doAfter(methodInfo, context);
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         SpanTestUtils.sameId(span, mockSpan);
         assertTrue(mockSpan.tags().containsKey("error"));
         assertEquals(errorInfo, mockSpan.tags().get("error"));

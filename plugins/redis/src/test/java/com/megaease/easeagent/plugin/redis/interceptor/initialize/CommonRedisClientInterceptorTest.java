@@ -30,7 +30,6 @@ import org.junit.Test;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
@@ -56,6 +55,8 @@ public class CommonRedisClientInterceptorTest {
         methodInfo = MethodInfo.builder().invoker(redisClient).retValue(connectionFuture).build();
         commonRedisClientInterceptor.doAfter(methodInfo, EaseAgent.getContext());
         assertTrue(methodInfo.getRetValue() instanceof ConnectionFutureWrapper);
+        redisClient.shutdown();
+        redisClusterClient.shutdown();
     }
 
     @Test
@@ -67,6 +68,7 @@ public class CommonRedisClientInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().invoker(redisClient).retValue(connectionFuture).build();
         commonRedisClientInterceptor.processRedisClient(methodInfo, EaseAgent.getContext());
         assertTrue(methodInfo.getRetValue() instanceof ConnectionFutureWrapper);
+        redisClient.shutdown();
     }
 
     @Test
@@ -77,6 +79,7 @@ public class CommonRedisClientInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().invoker(redisClusterClient).retValue(completableFuture).build();
         commonRedisClientInterceptor.processRedisClusterClient(methodInfo, EaseAgent.getContext());
         assertTrue(methodInfo.getRetValue() instanceof CompletableFutureWrapper);
+        redisClusterClient.shutdown();
     }
 
     @Test

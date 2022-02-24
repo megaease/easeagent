@@ -17,13 +17,10 @@
 
 package com.megaease.easeagent.mock.plugin.api;
 
-import com.megaease.easeagent.mock.context.ContextManagerMock;
+import com.megaease.easeagent.mock.context.MockContextManager;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import org.junit.Assert;
 import org.junit.Test;
-
-import java.time.Duration;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
@@ -31,7 +28,7 @@ import static junit.framework.TestCase.assertNotNull;
 public class TestContext {
     @Test
     public void testSpan() throws InterruptedException {
-        Context context = ContextManagerMock.getContext();
+        Context context = MockContextManager.getContext();
         assertNotNull(context);
         assertNotNull(context.currentTracing());
         assertFalse(context.isNoop());

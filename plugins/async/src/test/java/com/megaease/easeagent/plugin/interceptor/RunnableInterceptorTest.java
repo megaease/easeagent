@@ -17,39 +17,38 @@
 
 package com.megaease.easeagent.plugin.interceptor;
 
-import com.megaease.easeagent.mock.context.ContextManagerMock;
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
+@RunWith(EaseAgentJunit4ClassRunner.class)
 public class RunnableInterceptorTest {
 
     @Test
     public void before() throws InterruptedException {
-        Context context = ContextManagerMock.getContext();
+        Context context = EaseAgent.getContext();
         final Span span = context.nextSpan();
         span.start();
         span.cacheScope();
         RunnableInterceptor runnableInterceptor = new RunnableInterceptor();
         AtomicInteger run = new AtomicInteger();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Context runCont = ContextManagerMock.getContext();
-                assertTrue(runCont.currentTracing().hasCurrentSpan());
-                Span span1 = runCont.nextSpan();
-                assertEquals(span.traceId(), span1.traceId());
-                assertEquals(span.spanId(), span1.parentId());
-                assertNotEquals(span.spanId(), span1.spanId());
-                run.incrementAndGet();
-            }
+        Runnable runnable = () -> {
+            Context runCont = EaseAgent.getContext();
+            assertTrue(runCont.currentTracing().hasCurrentSpan());
+            Span span1 = runCont.nextSpan();
+            assertEquals(span.traceId(), span1.traceId());
+            assertEquals(span.spanId(), span1.parentId());
+            assertNotEquals(span.spanId(), span1.spanId());
+            run.incrementAndGet();
         };
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker("")
@@ -62,15 +61,9 @@ public class RunnableInterceptorTest {
         thread.start();
         thread.join();
         assertEquals(run.get(), 1);
-        AtomicReference<ReportSpan> spanAtomicReference = new AtomicReference<>();
-        ReportMock.setSpanReportMock(span1 -> {
-            run.incrementAndGet();
-            spanAtomicReference.set(span1);
-        });
         span.finish();
-        assertEquals(run.get(), 2);
 
-        ReportSpan span1 = spanAtomicReference.get();
+        ReportSpan span1 = MockEaseAgent.getLastSpan();
         assertEquals(span.traceIdString(), span1.traceId());
         assertEquals(span.parentIdString(), span1.parentId());
         assertEquals(span.spanIdString(), span1.id());

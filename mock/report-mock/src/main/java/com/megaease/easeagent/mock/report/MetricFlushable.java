@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.mock.report;
 
-import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
-
-public interface SpanReportMock {
-    void report(ReportSpan span);
+public interface MetricFlushable {
+    void flush();
 }

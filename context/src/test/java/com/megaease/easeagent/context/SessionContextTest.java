@@ -19,7 +19,7 @@ package com.megaease.easeagent.context;
 
 import com.megaease.easeagent.config.PluginConfig;
 import com.megaease.easeagent.config.PluginConfigManager;
-import com.megaease.easeagent.mock.config.ConfigMock;
+import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.ProgressFields;
@@ -46,7 +46,7 @@ public class SessionContextTest {
 
     @Before
     public void before() {
-        ContextManager contextManager = ContextManager.build(ConfigMock.getCONFIGS());
+        ContextManager contextManager = ContextManager.build(MockConfig.getCONFIGS());
         assertNotNull(contextManager);
     }
 
@@ -122,7 +122,7 @@ public class SessionContextTest {
 
         sessionContext.pushConfig(NoOpIPluginConfig.INSTANCE);
         assertNotNull(sessionContext.getConfig());
-        PluginConfigManager pluginConfigManager = PluginConfigManager.builder(ConfigMock.getCONFIGS()).build();
+        PluginConfigManager pluginConfigManager = PluginConfigManager.builder(MockConfig.getCONFIGS()).build();
         String domain = "observability";
         String namespace = "test_config";
         String id = "test";

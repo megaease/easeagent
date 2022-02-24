@@ -17,8 +17,8 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.report.ReportMock;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -48,13 +48,13 @@ public class FeignClientTracingInterceptorTest {
 
         Context context = EaseAgent.getContext();
         FeignClientTracingInterceptor feignClientTracingInterceptor = new FeignClientTracingInterceptor();
-        ReportMock.cleanLastSpan();
+        MockEaseAgent.cleanLastSpan();
 
         feignClientTracingInterceptor.before(methodInfo, context);
         methodInfo = methodInfoBuilder.retValue(RequestUtils.responseBuilder(request).build()).build();
         feignClientTracingInterceptor.after(methodInfo, context);
 
-        ReportSpan mockSpan = ReportMock.getLastSpan();
+        ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
@@ -68,7 +68,7 @@ public class FeignClientTracingInterceptorTest {
         methodInfo.throwable(runtimeException);
         feignClientTracingInterceptor.after(methodInfo, context);
 
-        mockSpan = ReportMock.getLastSpan();
+        mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
@@ -82,7 +82,7 @@ public class FeignClientTracingInterceptorTest {
             feignClientTracingInterceptor.before(methodInfo, context);
             methodInfo.retValue(RequestUtils.responseBuilder(request).build());
             feignClientTracingInterceptor.after(methodInfo, context);
-            mockSpan = ReportMock.getLastSpan();
+            mockSpan = MockEaseAgent.getLastSpan();
             assertEquals(span.traceIdString(), mockSpan.traceId());
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());

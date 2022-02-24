@@ -18,8 +18,8 @@
 package com.megaease.easeagent.zipkin;
 
 import brave.handler.MutableSpan;
-import com.megaease.easeagent.mock.config.ConfigMock;
-import com.megaease.easeagent.mock.report.ReportMock;
+import com.megaease.easeagent.mock.config.MockConfig;
+import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 
@@ -27,8 +27,8 @@ public class TracingProviderImplMock {
     public static final TracingProviderImpl TRACING_PROVIDER = new TracingProviderImpl();
 
     static {
-        TRACING_PROVIDER.setConfig(ConfigMock.getCONFIGS());
-        TRACING_PROVIDER.setAgentReport(ReportMock.getAgentReport());
+        TRACING_PROVIDER.setConfig(MockConfig.getCONFIGS());
+        TRACING_PROVIDER.setAgentReport(MockReport.getAgentReport());
         TRACING_PROVIDER.afterPropertiesSet();
     }
 

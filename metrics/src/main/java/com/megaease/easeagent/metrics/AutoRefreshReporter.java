@@ -59,4 +59,8 @@ public class AutoRefreshReporter implements Runnable {
         reporter.setConverter(converter);
         reporter.start(config.getInterval(), config.getIntervalUnit());
     }
+
+    public AgentScheduledReporter getReporter() {
+        return reporter;
+    }
 }
