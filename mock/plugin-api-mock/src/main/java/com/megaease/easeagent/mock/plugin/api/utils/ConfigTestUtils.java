@@ -25,6 +25,16 @@ import java.io.Closeable;
 import java.util.Collections;
 
 public class ConfigTestUtils {
+
+
+    /**
+     * change boolean ${@code property} to ${@code value } to ${@code iPluginConfig}
+     *
+     * @param iPluginConfig ${@link IPluginConfig} the config change for
+     * @param property      String the config property change for
+     * @param value         boolean the value change for
+     * @return Reset It must be call ${@link Reset#clone()} after your business.
+     */
     public static Reset changeBoolean(IPluginConfig iPluginConfig, String property, boolean value) {
         String name = ConfigUtils.buildPluginProperty(iPluginConfig.domain(), iPluginConfig.namespace(), iPluginConfig.id(), property);
         Boolean oldValue = iPluginConfig.getBoolean(property);
@@ -33,6 +43,15 @@ public class ConfigTestUtils {
     }
 
 
+    /**
+     * change String ${@code property} to ${@code value } to ${@code iPluginConfig}
+     *
+     * @param iPluginConfig ${@link IPluginConfig} the config change for
+     * @param property      String the config property change for
+     * @param value         String the value change for
+     * @return Reset It must be call ${@link Reset#clone()} after your business.
+     */
+
     public static Reset changeString(IPluginConfig iPluginConfig, String property, String value) {
         String name = ConfigUtils.buildPluginProperty(iPluginConfig.domain(), iPluginConfig.namespace(), iPluginConfig.id(), property);
         String oldValue = iPluginConfig.getString(property);
@@ -40,12 +59,30 @@ public class ConfigTestUtils {
         return new Reset(name, oldValue);
     }
 
+    /**
+     * change String ${@code name} to ${@code value } to global Configs
+     *
+     * @param name  String the config property change for
+     * @param value String the value change for
+     * @return Reset It must be call ${@link Reset#clone()} after your business.
+     */
+
     public static Reset changeConfig(String name, String value) {
         String oldValue = MockConfig.getCONFIGS().getString(name);
         MockConfig.getCONFIGS().updateConfigs(Collections.singletonMap(name, value));
         return new Reset(name, oldValue);
     }
 
+    /**
+     * A Reset for Configs
+     * It must be call ${@link Reset#clone()} after your business.
+     *
+     * <pre>${@code
+     *  try (ConfigTestUtils.Reset ignored = ConfigTestUtils.changeConfig(key, value)) {
+     *      //do test
+     *  }
+     * }</pre>
+     */
     public static class Reset implements Closeable {
         private final String name;
         private final String value;

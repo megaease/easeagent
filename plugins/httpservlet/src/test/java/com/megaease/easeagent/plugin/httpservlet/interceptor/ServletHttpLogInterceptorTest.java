@@ -88,7 +88,7 @@ public class ServletHttpLogInterceptorTest {
     }
 
     private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
-        String result = JsonUtil.toJson(lastJsonReporter.flushAndOnlyOne());
+        String result = JsonUtil.toJson(lastJsonReporter.getLastOnlyOne());
         assertNotNull(result);
         return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
     }

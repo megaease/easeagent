@@ -23,15 +23,37 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 
 public class InterceptorTestUtils {
+
+    /**
+     * call ${@link Interceptor#init(IPluginConfig, int)} by AgentPlugin
+     *
+     * @param interceptor ${@link Interceptor}
+     * @param agentPlugin ${@link AgentPlugin}
+     */
     public static void initByUnique(Interceptor interceptor, AgentPlugin agentPlugin) {
         IPluginConfig iPluginConfig = EaseAgent.getConfig(agentPlugin.getDomain(), agentPlugin.getNamespace(), interceptor.getType());
         interceptor.init(iPluginConfig, 0);
     }
 
+    /**
+     * call ${@link Interceptor#init(IPluginConfig, String, String, String)} by AgentPlugin, className="", methodName="", methodDescriptor=""
+     *
+     * @param interceptor ${@link Interceptor}
+     * @param agentPlugin ${@link AgentPlugin}
+     */
     public static void init(Interceptor interceptor, AgentPlugin agentPlugin) {
         init(interceptor, agentPlugin, "", "", "");
     }
 
+    /**
+     * call ${@link Interceptor#init(IPluginConfig, String, String, String)} by AgentPlugin, className, methodName, methodDescriptor
+     *
+     * @param interceptor      ${@link Interceptor}
+     * @param agentPlugin      ${@link AgentPlugin}
+     * @param className        String
+     * @param methodName       String
+     * @param methodDescriptor String
+     */
     public static void init(Interceptor interceptor, AgentPlugin agentPlugin, String className, String methodName, String methodDescriptor) {
         IPluginConfig iPluginConfig = EaseAgent.getConfig(agentPlugin.getDomain(), agentPlugin.getNamespace(), interceptor.getType());
         interceptor.init(iPluginConfig, className, methodName, methodDescriptor);

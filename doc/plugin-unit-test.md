@@ -106,6 +106,8 @@ see:
 
 * [MockEaseAgent](../mock/plugin-api-mock/src/main/java/com/megaease/easeagent/mock/plugin/api/MockEaseAgent.java)
 
+* [TagVerifier](../mock/plugin-api-mock/src/main/java/com/megaease/easeagent/mock/plugin/api/utils/TagVerifier.java)
+
 * [LastJsonReporter](../mock/report-mock/src/main/java/com/megaease/easeagent/mock/report/impl/LastJsonReporter.java)
 
 * [ReportSpan](../plugin-api/src/main/java/com/megaease/easeagent/plugin/report/tracing/ReportSpan.java)
@@ -127,3 +129,12 @@ assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
 for demo see: 
 * [MockEaseAgentTest](../mock/plugin-api-mock/src/test/java/com/megaease/easeagent/mock/plugin/api/demo/MockEaseAgentTest.java)
 * [InterceptorTest](../mock/plugin-api-mock/src/test/java/com/megaease/easeagent/mock/plugin/api/demo/InterceptorTest.java)
+
+### Unit test utils
+
+In order to facilitate testing, several of our commonly used utils are under the `com.megaease.easeagent.mock.plugin.api.utils` package.
+
+* [ConfigTestUtils](../mock/plugin-api-mock/src/main/java/com/megaease/easeagent/mock/plugin/api/utils/ConfigTestUtils.java)
+* [InterceptorTestUtils](../mock/plugin-api-mock/src/main/java/com/megaease/easeagent/mock/plugin/api/utils/InterceptorTestUtils.java)
+* [SpanTestUtils](../mock/plugin-api-mock/src/main/java/com/megaease/easeagent/mock/plugin/api/utils/SpanTestUtils.java)
+

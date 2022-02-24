@@ -28,6 +28,7 @@ import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.springweb.interceptor.tracing.WebClientFilterTracingInterceptor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.reactivestreams.Subscription;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.MockClientRequest;
@@ -71,7 +72,17 @@ public class AgentCoreSubscriberTest {
     public void onSubscribe() throws URISyntaxException {
         MockCoreSubscriber mockCoreSubscriber = new MockCoreSubscriber();
         AgentCoreSubscriber agentCoreSubscriber = createOne(mockCoreSubscriber);
-        agentCoreSubscriber.onSubscribe(null);
+        agentCoreSubscriber.onSubscribe(new Subscription() {
+            @Override
+            public void request(long l) {
+
+            }
+
+            @Override
+            public void cancel() {
+
+            }
+        });
         assertTrue(mockCoreSubscriber.onSubscribe.get());
     }
 

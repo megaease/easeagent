@@ -40,6 +40,9 @@ public class ContextUtils {
     }
 
 
+    /**
+     * reset all of context
+     */
     public static void resetAll() {
         EaseAgent.initializeContextSupplier.get().clear();
         MockMetricProvider.clearAll();

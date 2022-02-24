@@ -36,13 +36,13 @@ public class AutoRefreshPluginConfigRegistry {
     private static final ConcurrentMap<Key, AutoRefreshPluginConfig> configs = new ConcurrentHashMap<>();
 
     /**
-     * Obtain an AutoRefreshConfigImpl when it is already registered. If you have not registered, create one and return
+     * Obtain an AutoRefreshPluginConfigImpl when it is already registered. If you have not registered, create one and return
      * The registered {@link Key} is domain, namespace, id.
      *
      * @param domain    String
      * @param namespace String
      * @param id        String
-     * @return AutoRefreshConfigImpl
+     * @return AutoRefreshPluginConfigImpl
      */
     public static AutoRefreshPluginConfigImpl getOrCreate(String domain, String namespace, String id) {
         return getOrCreate(domain, namespace, id, AUTO_REFRESH_CONFIG_IMPL_SUPPLIER);

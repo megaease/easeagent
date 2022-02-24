@@ -23,7 +23,13 @@ import com.megaease.easeagent.plugin.utils.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
+/**
+ * a tag verifier for metric filter
+ *
+ * @see com.megaease.easeagent.mock.plugin.api.MockEaseAgent#lastMetricJsonReporter(Predicate)
+ */
 public class TagVerifier {
     List<Pair<String, String>> tags = new ArrayList<>();
 
@@ -50,6 +56,13 @@ public class TagVerifier {
         return v.equals(value);
     }
 
+    /**
+     * build a TagVerifier by Tags and key
+     *
+     * @param tags ${@link Tags}
+     * @param key  tags.getKeyFieldName()'s value
+     * @return
+     */
     public static TagVerifier build(Tags tags, String key) {
         return new TagVerifier()
             .add(Tags.CATEGORY, tags.getCategory())

@@ -23,6 +23,12 @@ import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import static org.junit.Assert.assertEquals;
 
 public class SpanTestUtils {
+    /**
+     * verify Span id and ReportSpan id is same
+     *
+     * @param span     ${@link Span}
+     * @param mockSpan ${@link ReportSpan}
+     */
     public static void sameId(Span span, ReportSpan mockSpan) {
         assertEquals(span.traceIdString(), mockSpan.traceId());
         assertEquals(span.spanIdString(), mockSpan.id());
