@@ -34,6 +34,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @AdviceTo(value = HttpHeadersFilterAdvice.class, plugin = SpringGatewayPlugin.class)
@@ -62,14 +63,14 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
             httpHeaders.setAll(map);
             methodInfo.setRetValue(httpHeaders);
 
-            Consumer<ServerWebExchange> consumer = serverWebExchange -> {
+            BiConsumer<ServerWebExchange, MethodInfo> consumer = (serverWebExchange, info) -> {
                 RequestContext p = serverWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
                 if (p == null) {
                     return;
                 }
-                FluxHttpServerResponse response = new FluxHttpServerResponse(serverWebExchange, null);
+                FluxHttpServerResponse response = new FluxHttpServerResponse(serverWebExchange, info.getThrowable());
+                HttpUtils.save(p.span(), response);
                 p.finish(response);
-                HttpUtils.finish(p.span(), response);
             };
             exchange.getAttributes().put(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY, consumer);
         }

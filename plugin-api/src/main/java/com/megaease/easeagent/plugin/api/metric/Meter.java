@@ -19,7 +19,7 @@ package com.megaease.easeagent.plugin.api.metric;
 
 /**
  * A meter metric which measures mean throughput and one-, five-, and fifteen-minute
- * moving average throughputs.
+ * moving average throughput.
  */
 public interface Meter extends Metric {
 

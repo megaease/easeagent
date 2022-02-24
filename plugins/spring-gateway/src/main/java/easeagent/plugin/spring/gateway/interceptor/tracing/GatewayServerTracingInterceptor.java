@@ -37,7 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import reactor.core.publisher.Mono;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 @AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = SpringGatewayPlugin.class)
 public class GatewayServerTracingInterceptor implements Interceptor {
@@ -87,9 +87,9 @@ public class GatewayServerTracingInterceptor implements Interceptor {
         try (Cleaner ignored = ctx.importToCurrent()) {
             RequestContext pCtx = EaseAgent.getContext().get(SPAN_CONTEXT_KEY);
             ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-            Consumer<ServerWebExchange> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
+            BiConsumer<ServerWebExchange, MethodInfo> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
             if (consumer != null) {
-                consumer.accept(exchange);
+                consumer.accept(exchange, methodInfo);
             }
 
             FluxHttpServerRequest httpServerRequest = EaseAgent.getContext().get(FluxHttpServerRequest.class);

@@ -72,7 +72,10 @@ public class SenderConfigDecorator
     @Override
     public Call<Void> send(List<EncodedData> encodedData) {
         EncodedData data = this.packer.encodeList(encodedData);
-        return sender.send(data);
+        if (log.isDebugEnabled()) {
+            log.debug("Span:{}", new String(data.getData()));
+        }
+        return send(data);
     }
 
     @Override

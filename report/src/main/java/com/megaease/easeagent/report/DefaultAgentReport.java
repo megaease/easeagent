@@ -56,9 +56,6 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
 
     @Override
     public void report(ReportSpan span) {
-        if (log.isDebugEnabled()) {
-            log.debug("traceId: {}, spanId: {}", span.traceId(), span.id());
-        }
         this.traceReport.report(span);
     }
 

@@ -28,18 +28,6 @@ import java.util.Set;
 public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
     String DEFAULT_QUALIFIER = "default";
 
-    default IMethodMatcher and(IMethodMatcher other) {
-        return new AndMethodMatcher(this, other);
-    }
-
-    default IMethodMatcher or(IMethodMatcher other) {
-        return new OrMethodMatcher(this, other);
-    }
-
-    default IMethodMatcher negate() {
-        return new NegateMethodMatcher(this);
-    }
-
     String getQualifier();
 
     default boolean isDefaultQualifier() {
@@ -50,5 +38,17 @@ public interface IMethodMatcher extends Operator<IMethodMatcher>, Matcher {
         Set<IMethodMatcher> set = new HashSet<>();
         set.add(this);
         return set;
+    }
+
+    default IMethodMatcher and(IMethodMatcher other) {
+        return new AndMethodMatcher(this, other);
+    }
+
+    default IMethodMatcher or(IMethodMatcher other) {
+        return new OrMethodMatcher(this, other);
+    }
+
+    default IMethodMatcher negate() {
+        return new NegateMethodMatcher(this);
     }
 }
