@@ -42,6 +42,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,6 +71,34 @@ public class HttpServerTest {
         GlobalAgentHolder.setWrappedConfigManager(wrappedConfigManager);
     }
 
+    private static String runUpHttpServer() throws Exception {
+        Exception t = null;
+        for (int i = 0; i < 3; i++) {
+            try {
+                DatagramSocket s = new DatagramSocket(0);
+                int port = s.getLocalPort();
+                s.close();
+                String httpServer = runUpHttpServer(port);
+                System.out.println("run up http server : " + httpServer);
+                return httpServer;
+            } catch (Exception e) {
+                t = e;
+            }
+        }
+        throw t;
+    }
+
+    private static String runUpHttpServer(int port) {
+        String httpServer = "http://127.0.0.1:" + port;
+        AgentHttpServer agentHttpServer = new AgentHttpServer(port);
+        List<AgentHttpHandler> list = new ArrayList<>();
+        list.add(new ServiceUpdateAgentHttpHandler());
+        list.add(new PluginPropertyHttpHandler());
+        list.add(new PluginPropertiesHttpHandler());
+        agentHttpServer.addHttpRoutes(list);
+        agentHttpServer.startServer();
+        return httpServer;
+    }
 
     @Test
     public void httpServer() throws Exception {
@@ -103,7 +132,7 @@ public class HttpServerTest {
         WrappedConfigManager cfgMng = null;
         try {
             ClassLoader customClassLoader = Thread.currentThread().getContextClassLoader();
-             cfgMng = new WrappedConfigManager(customClassLoader, configs);
+            cfgMng = new WrappedConfigManager(customClassLoader, configs);
             setWrappedConfigManager(cfgMng);
         } catch (Exception e) {
             System.out.println("" + e.getMessage());
@@ -112,19 +141,7 @@ public class HttpServerTest {
 
         EaseAgent.configFactory = iConfigFactory;
 
-        DatagramSocket s = new DatagramSocket(0);
-        int port = s.getLocalPort();
-        s.close();
-        String httpServer = "http://127.0.0.1:" + port;
-        System.out.println("run up http server : " + httpServer);
-        AgentHttpServer agentHttpServer = new AgentHttpServer(port);
-        List<AgentHttpHandler> list = new ArrayList<>();
-        list.add(new ServiceUpdateAgentHttpHandler());
-        list.add(new PluginPropertyHttpHandler());
-        list.add(new PluginPropertiesHttpHandler());
-        agentHttpServer.addHttpRoutes(list);
-        agentHttpServer.startServer();
-
+        String httpServer = runUpHttpServer();
         Thread.sleep(100);
         String resp;
         resp = get(httpServer + "/plugins/domains/observability/namespaces/kafka/metric/properties/interval/15/1");
