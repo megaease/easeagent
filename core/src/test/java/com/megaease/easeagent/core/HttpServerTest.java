@@ -17,13 +17,12 @@
 
 package com.megaease.easeagent.core;
 
-import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.GlobalConfigs;
 import com.megaease.easeagent.config.PluginConfigManager;
+import com.megaease.easeagent.config.WrappedConfigManager;
 import com.megaease.easeagent.core.config.PluginPropertiesHttpHandler;
 import com.megaease.easeagent.core.config.PluginPropertyHttpHandler;
 import com.megaease.easeagent.core.config.ServiceUpdateAgentHttpHandler;
-import com.megaease.easeagent.config.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandler;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
@@ -40,13 +39,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.DatagramSocket;
-import java.net.HttpURLConnection;
-import java.net.SocketException;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -72,20 +69,30 @@ public class HttpServerTest {
     }
 
     private static String runUpHttpServer() throws Exception {
-        Exception t = null;
-        for (int i = 0; i < 3; i++) {
-            try {
-                DatagramSocket s = new DatagramSocket(0);
-                int port = s.getLocalPort();
-                s.close();
-                String httpServer = runUpHttpServer(port);
-                System.out.println("run up http server : " + httpServer);
-                return httpServer;
-            } catch (Exception e) {
-                t = e;
+        int port = getPort();
+        return runUpHttpServer(port);
+    }
+
+    private static int getPort() throws IOException {
+        Random random = new Random();
+        for (int i = 0; i < 4; i++) {
+            int port = 8000 + random.nextInt(1000);
+            if (!isPortUsing(port)) {
+                return port;
             }
         }
-        throw t;
+        throw new RuntimeException("can not found port for test.");
+    }
+
+    private static boolean isPortUsing(int port) throws UnknownHostException {
+        boolean flag = false;
+        InetAddress theAddress = InetAddress.getLocalHost();
+        try {
+            new Socket(theAddress, port);
+            flag = true;
+        } catch (IOException e) {
+        }
+        return flag;
     }
 
     private static String runUpHttpServer(int port) {
