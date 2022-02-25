@@ -28,6 +28,7 @@ public class AgentHttpServer extends RouterNanoHTTPD {
 
     public AgentHttpServer(int port) {
         super(port);
+        this.addMappings();
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 

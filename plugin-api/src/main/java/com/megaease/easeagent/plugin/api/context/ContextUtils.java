@@ -20,8 +20,6 @@ package com.megaease.easeagent.plugin.api.context;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.utils.SystemClock;
 
-import java.util.Map;
-
 public class ContextUtils {
     private static final String BEGIN_TIME = ContextUtils.class.getSimpleName() + ".beginTime";
     private static final String END_TIME = ContextUtils.class.getSimpleName() + ".endTime";
@@ -46,6 +44,11 @@ public class ContextUtils {
         return getEndTime(context) - getBeginTime(context);
     }
 
+    public static Long getDuration(Context context, Object startKey) {
+        Long now = SystemClock.now();
+        return now - (Long)context.remove(startKey);
+    }
+
     /**
      * Get data from context
      *
@@ -56,9 +59,5 @@ public class ContextUtils {
      */
     public static <T> T getFromContext(Context context, Object key) {
         return context.get(key);
-    }
-
-    public static <T> void setToContext(Context context, Object key, T value) {
-        context.put(key, value);
     }
 }

@@ -63,7 +63,7 @@ public class ReportConfigAdapter {
         if (!StringUtils.isEmpty(cfg.get(TRACE_SENDER_NAME))) {
             log.info("Reporter V2 config trace sender as: {}", cfg.get(TRACE_SENDER_NAME));
         } else if (StringUtils.isEmpty(target)) {
-            log.info("Trace sender name is not found.");
+            // do nothing
         } else if ("system".equals(target)) {
             // check output servers
             if (StringUtils.hasText(cfg.get(BOOTSTRAP_SERVERS))) {
