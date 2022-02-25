@@ -49,7 +49,7 @@ public class MetricRegistryService {
         return registry;
     }
 
-    class EaseAgentSampleBuilder extends DefaultSampleBuilder {
+    static class EaseAgentSampleBuilder extends DefaultSampleBuilder {
         private final Supplier<Map<String, Object>> additionalAttributes;
         private final Tags tags;
 
@@ -103,11 +103,11 @@ public class MetricRegistryService {
                 additionalLabelNames.add(METRIC_SUB_TYPE_LABEL_NAME);
                 additionalLabelValues.add(metricName.getMetricType().name());
                 additionalLabelValues.add(metricName.getMetricSubType().name());
+                additionalLabelNames.add(tags.getKeyFieldName());
+                additionalLabelValues.add(metricName.getKey());
                 stringBuilder.append(tags.getCategory());
                 stringBuilder.append(".");
                 stringBuilder.append(tags.getType());
-                stringBuilder.append(".");
-                stringBuilder.append(metricName.getKey());
                 return stringBuilder.toString();
             } catch (Exception e) {
                 LOGGER.error("rebuild metric name[{}] fail.{}", name, e);
