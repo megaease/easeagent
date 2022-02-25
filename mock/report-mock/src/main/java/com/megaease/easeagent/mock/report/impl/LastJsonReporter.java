@@ -52,6 +52,41 @@ public class LastJsonReporter implements JsonReporter {
         }
     }
 
+    /**
+     * get only one metrics and verify it is only one metrics.
+     *
+     * @return Map of metrics
+     * @throws RuntimeException if metrics is null or empty or metricSize!=1.
+     */
+    public Map<String, Object> getLastOnlyOne() {
+        List<Map<String, Object>> metrics = getLast();
+        if (metrics.size() != 1) {
+            throw new RuntimeException("metrics size is not 1 ");
+        }
+        return metrics.get(0);
+    }
+
+
+    /**
+     * get last metrics and verify it is not null or empty.
+     *
+     * @return list of metric
+     * @throws RuntimeException if metric is null or empty.
+     */
+    public List<Map<String, Object>> getLast() {
+        List<Map<String, Object>> metric = reference.get();
+        if (metric == null || metric.isEmpty()) {
+            throw new RuntimeException("metric must not be null and empty.");
+        }
+        return metric;
+    }
+
+    /**
+     * clean then flush and get only one metrics and verify it is only one metric.
+     *
+     * @return Map of metrics
+     * @throws RuntimeException if metrics is null or empty or metricSize!=1.
+     */
     public Map<String, Object> flushAndOnlyOne() {
         List<Map<String, Object>> metrics = flushAndGet();
         if (metrics.size() != 1) {
@@ -60,13 +95,16 @@ public class LastJsonReporter implements JsonReporter {
         return metrics.get(0);
     }
 
+    /**
+     * clean then flush and get metrics and verify it is not null or empty.
+     *
+     * @return list of metrics
+     * @throws RuntimeException if metrics is null or empty.
+     */
     public List<Map<String, Object>> flushAndGet() {
+        clean();
         metricFlushable.flush();
-        List<Map<String, Object>> metric = reference.get();
-        if (metric == null || metric.isEmpty()) {
-            throw new RuntimeException("metric must not be null and empty.");
-        }
-        return metric;
+        return getLast();
     }
 
     public void clean() {

@@ -20,9 +20,7 @@ package com.megaease.easeagent.plugin.bridge;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.IConfigFactory;
-import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.config.*;
 import com.megaease.easeagent.plugin.api.dispatcher.IDispatcher;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.logging.Logger;
@@ -91,6 +89,19 @@ public final class EaseAgent {
      */
     public static IPluginConfig getConfig(String domain, String namespace, String name) {
         return configFactory.getConfig(domain, namespace, name);
+    }
+
+    /**
+     * get or create an AutoRefreshPluginConfigImpl
+     *
+     * @param domain    String
+     * @param namespace String
+     * @param name      String
+     * @return AutoRefreshPluginConfigImpl
+     * @see AutoRefreshPluginConfigRegistry#getOrCreate(String, String, String)
+     */
+    public static AutoRefreshPluginConfigImpl getOrCreateAutoRefreshConfig(String domain, String namespace, String name) {
+        return AutoRefreshPluginConfigRegistry.getOrCreate(domain, namespace, name);
     }
 
     /**

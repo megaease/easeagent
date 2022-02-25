@@ -19,6 +19,7 @@
   - [Logging API](#logging-api)
   - [Configuration API](#configuration-api)
     - [Customize](#customize)
+  - [Plugin Unit Test](#plugin-unit-test)
 
 ## Overview
 Most of the Easeagent's functions are supported by plugins.
@@ -497,4 +498,8 @@ public class ServiceNameInterceptor implements Interceptor {
     }
 }
 ```
+
+## Plugin Unit Test
+* [Plugin Unit Test](plugin-unit-test.md)
+
 

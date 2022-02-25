@@ -89,7 +89,7 @@ public class DoFilterMetricInterceptorTest {
         assertEquals(1, (int) metric.get("cnt"));
         assertEquals(0, (int) metric.get("errcnt"));
 
-        MockEaseAgent.clearMetric(Objects.requireNonNull(AgentFieldReflectAccessor.<ServiceMetric>getFieldValue(doFilterMetricInterceptor, "SERVER_METRIC")));
+        MockEaseAgent.cleanMetric(Objects.requireNonNull(AgentFieldReflectAccessor.<ServiceMetric>getFieldValue(doFilterMetricInterceptor, "SERVER_METRIC")));
         lastJsonReporter.clean();
         httpServletRequest = TestServletUtils.buildMockRequest();
         response = TestServletUtils.buildMockResponse();

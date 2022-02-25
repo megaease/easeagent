@@ -24,7 +24,7 @@ import java.io.Closeable;
  * It must be call after your business.
  * <p>
  * example 1:
- * <pre>{@code
+ * <pre>${@code
  *    Cleaner cleaner = context.importAsync(snapshot);
  *    try{
  *       //do business
@@ -34,7 +34,7 @@ import java.io.Closeable;
  * }</pre>
  * <p>
  * example 2:
- * <pre>{@code
+ * <pre>${@code
  *    void before(...){
  *       Cleaner cleaner = context.importForwardedHeaders(getter);
  *    }
@@ -48,7 +48,7 @@ import java.io.Closeable;
  * }</pre>
  * <p>
  * example 3:
- * <pre>{@code
+ * <pre>${@code
  *    void callback(AsyncContext ac){
  *       try (Cleaner cleaner = ac.importToCurrent()) {
  *          //do business
