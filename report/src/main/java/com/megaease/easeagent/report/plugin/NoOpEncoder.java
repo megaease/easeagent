@@ -56,7 +56,7 @@ public class NoOpEncoder<S> implements Encoder<S> {
     }
 
     @Override
-    public int appendSizeInBytes(List<Integer> sizes, int newMsgSize) {
+    public int appendSizeInBytes(int newMsgSize) {
         return newMsgSize;
     }
 
