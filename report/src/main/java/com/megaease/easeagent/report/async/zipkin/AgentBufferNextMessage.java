@@ -44,7 +44,7 @@ public class AgentBufferNextMessage<S> implements WithSizeConsumer<S> {
     }
 
     int messageSizeInBytes(int nextSizeInBytes) {
-        return packageSizeInBytes + encoder.appendSizeInBytes(sizes, nextSizeInBytes);
+        return packageSizeInBytes + encoder.appendSizeInBytes(nextSizeInBytes);
     }
 
     void resetMessageSizeInBytes() {
@@ -93,6 +93,8 @@ public class AgentBufferNextMessage<S> implements WithSizeConsumer<S> {
                 bufferFull = false;
                 spanIterator.remove();
                 sizeIterator.remove();
+            } else {
+                break;
             }
         }
 

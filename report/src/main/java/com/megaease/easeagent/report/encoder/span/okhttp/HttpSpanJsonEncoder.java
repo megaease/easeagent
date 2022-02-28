@@ -60,8 +60,8 @@ public class HttpSpanJsonEncoder implements Encoder<ReportSpan> {
     }
 
     @Override
-    public int appendSizeInBytes(List<Integer> sizes, int newMsgSize) {
-        return this.encoder.appendSizeInBytes(sizes, newMsgSize);
+    public int appendSizeInBytes(int newMsgSize) {
+        return this.encoder.appendSizeInBytes(newMsgSize);
     }
 
     @Override

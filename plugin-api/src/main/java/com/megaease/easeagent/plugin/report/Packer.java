@@ -47,11 +47,10 @@ public interface Packer {
 
     /**
      * Calculate the increase size when append a new message
-     * @param sizes     current message size list
      * @param newMsgSize the size of encoded message to append
      * @return the increase size of a whole message package
      */
-    int appendSizeInBytes(List<Integer> sizes, int newMsgSize);
+    int appendSizeInBytes(int newMsgSize);
 
     /**
      * Calculate the whole message package size combined of items

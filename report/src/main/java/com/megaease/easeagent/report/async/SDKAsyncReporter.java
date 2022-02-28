@@ -22,6 +22,8 @@ import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.async.zipkin.AgentBufferNextMessage;
 import com.megaease.easeagent.report.async.zipkin.AgentByteBoundedQueue;
+import com.megaease.easeagent.report.encoder.PackedMessage;
+import com.megaease.easeagent.report.encoder.PackedMessage.DefaultPackedMessage;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import com.megaease.easeagent.report.util.SpanUtils;
@@ -32,7 +34,6 @@ import zipkin2.reporter.AsyncReporter;
 import zipkin2.reporter.ReporterMetrics;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
@@ -169,8 +170,9 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
 
     void flush(AgentBufferNextMessage<S> bundler, AgentByteBoundedQueue<S> pending) {
-
-        if (closed.get()) throw new IllegalStateException("closed");
+        if (closed.get()) {
+            throw new IllegalStateException("closed");
+        }
 
         pending.drainTo(bundler, bundler.remainingNanos());
 
@@ -187,18 +189,17 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         metrics.incrementMessageBytes(bundler.sizeInBytes());
 
         // Create the next message. Since we are outside the lock shared with writers, we can encode
-        ArrayList<EncodedData> nextMessage = new ArrayList<>(bundler.count());
+        PackedMessage message = new DefaultPackedMessage(bundler.count(), encoder);
         bundler.drain((next, nextSizeInBytes) -> {
-            nextMessage.add(encoder.encode(next)); // speculatively add to the pending message
-            if (encoder.messageSizeInBytes(nextMessage) > messageMaxBytes) {
-                // if we overran the message size, remove the encoded message.
-                nextMessage.remove(nextMessage.size() - 1);
-
+            if (message.calculateAppendSize(nextSizeInBytes) <= messageMaxBytes) {
+                message.addMessage(encoder.encode(next));
+                return true;
+            } else {
                 return false;
             }
-            return true;
         });
 
+        List<EncodedData> nextMessage = message.getMessages();
         try {
             sender.send(nextMessage).execute();
         } catch (IOException | RuntimeException t) {

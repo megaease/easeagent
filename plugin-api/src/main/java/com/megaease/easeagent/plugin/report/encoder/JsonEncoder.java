@@ -54,21 +54,19 @@ public abstract class JsonEncoder<T> implements Encoder<T> {
     public int packageSizeInBytes(List<Integer> sizes) {
         int sizeInBytes = 2; // brackets
 
-        for (int i = 0, length = sizes.size(); i < length; i++) {
-            sizeInBytes += sizes.get(i);
-            if (i < length - 1) {
+        if (sizes != null && !sizes.isEmpty()) {
+            for (Integer size : sizes) {
+                sizeInBytes += size;
                 sizeInBytes++;
             }
+            sizeInBytes--;
         }
+
         return sizeInBytes;
     }
 
     @Override
-    public int appendSizeInBytes(List<Integer> sizes, int newMsgSize) {
-        if (sizes.isEmpty()) {
-            return newMsgSize;
-        } else {
-            return newMsgSize + 1;
-        }
+    public int appendSizeInBytes(int newMsgSize) {
+        return newMsgSize + 1;
     }
 }
