@@ -72,6 +72,12 @@ public class MockReport {
         return lastJsonReporter;
     }
 
+    public static void cleanReporter() {
+        mockSpanReport = null;
+        metricReportMock = null;
+        metricJsonReport = null;
+    }
+
 
     private static void reportMetricToJson(String text) {
         if (metricJsonReport == null) {
@@ -87,7 +93,7 @@ public class MockReport {
             }
             metricJsonReport.report(json);
         } catch (Exception e) {
-            LOGGER.error("string to List<Map<String, Object>> fail: ", e);
+            LOGGER.error("string to List<Map<String, Object>> fail: {}", e.getMessage());
         }
     }
 
