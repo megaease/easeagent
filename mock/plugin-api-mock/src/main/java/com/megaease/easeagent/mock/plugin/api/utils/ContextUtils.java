@@ -37,7 +37,6 @@ public class ContextUtils {
     public static void resetAll() {
         EaseAgent.initializeContextSupplier.get().clear();
         MockMetricProvider.clearAll();
-        MockReport.cleanReporter();
         OldRedirect.resetRedirect();
         MockTracingProvider.cleanPendingSpans();
         MockReport.cleanLastSpan();

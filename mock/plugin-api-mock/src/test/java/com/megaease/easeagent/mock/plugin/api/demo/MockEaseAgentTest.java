@@ -98,7 +98,7 @@ public class MockEaseAgentTest {
         Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
         assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
 
-        //reset all metric to empty.
+        //reset all to empty.
         MockEaseAgent.resetAll();
         try {
             lastJsonReporter.flushAndOnlyOne();
