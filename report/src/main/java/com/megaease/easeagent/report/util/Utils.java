@@ -32,16 +32,8 @@ public class Utils {
     private Utils() {}
 
     public static boolean isOutputPropertiesChange(Map<String, String> changes) {
-        List<String> relatedNames = Arrays.asList(OUTPUT_SERVERS_ENABLE,
-            BOOTSTRAP_SERVERS,
-            OUTPUT_SERVERS_TIMEOUT,
-            OUTPUT_SECURITY_PROTOCOL_V2,
-            OUTPUT_SSL_KEYSTORE_TYPE_V2,
-            OUTPUT_KEY_V2,
-            OUTPUT_CERT_V2,
-            OUTPUT_TRUST_CERT_V2,
-            OUTPUT_TRUST_CERT_TYPE_V2,
-            OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM_V2
+        List<String> relatedNames = Arrays.asList(
+            OUTPUT_SERVER_V2
         );
         return changes.keySet().stream().anyMatch(relatedNames::contains);
     }

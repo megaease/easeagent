@@ -18,6 +18,7 @@
 package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import com.megaease.easeagent.report.async.SDKAsyncReporter;
 import com.megaease.easeagent.report.async.TraceAsyncProps;
@@ -55,11 +56,10 @@ public class RefreshableReporter<S> implements Reporter<S> {
     }
 
     public synchronized void refresh(Map<String, String> cfg) {
+        String name = cfg.remove(TRACE_SENDER_NAME);
         SenderWithEncoder sender = asyncReporter.getSender();
-
         if (sender != null) {
-            String name = cfg.remove(TRACE_SENDER_NAME);
-            if (!sender.name().equals(name)) {
+            if (StringUtils.isNotEmpty(name) && !sender.name().equals(name)) {
                 try {
                     sender.close();
                 } catch (Exception ignored) {
@@ -68,7 +68,11 @@ public class RefreshableReporter<S> implements Reporter<S> {
                 sender = ReporterRegistry.getSender(TRACE_SENDER_NAME, EaseAgent.getConfig());
                 asyncReporter.setSender(sender);
             }
+        } else {
+            sender = ReporterRegistry.getSender(TRACE_SENDER_NAME, EaseAgent.getConfig());
+            asyncReporter.setSender(sender);
         }
+
         traceProperties = TraceAsyncProps.newDefault(EaseAgent.getConfig());
         asyncReporter.closeFlushThread();
         asyncReporter.setPending(traceProperties.getQueuedMaxSpans(), traceProperties.getQueuedMaxSize());

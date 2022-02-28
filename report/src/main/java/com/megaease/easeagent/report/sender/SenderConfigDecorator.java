@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.megaease.easeagent.config.ConfigUtils.extractAndConvertPrefix;
 import static com.megaease.easeagent.config.ConfigUtils.extractByPrefix;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
@@ -58,10 +57,10 @@ public class SenderConfigDecorator
     }
 
     @Override
-    public void init(Config config) {
+    public void init(Config config, String prefix) {
         this.packer = ReporterRegistry.getEncoder(config.getString(this.encoderKey));
         this.packer.init(this.config);
-        this.sender.init(this.config);
+        this.sender.init(this.config, prefix);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class SenderConfigDecorator
 
     @Override
     public void updateConfigs(Map<String, String> changes) {
-        String name = changes.get(join(GENERAL_SENDER, "name"));
+        String name = changes.get(join(this.prefix, "name"));
         if (name == null || name.equals(name())) {
             this.sender.updateConfigs(changes);
         } else {
@@ -135,9 +134,6 @@ public class SenderConfigDecorator
         Map<String, String> extract = extractByPrefix(config, cfgPrefix);
         Map<String, String> cfg = new HashMap<>(extract);
 
-        // convert to general cfg, then sender don't need to care about any special business.
-        cfg = extractAndConvertPrefix(cfg, cfgPrefix, GENERAL_SENDER);
-
         // outputServer config
         cfg.putAll(extractByPrefix(config, OUTPUT_SERVER_V2));
 
@@ -154,7 +150,7 @@ public class SenderConfigDecorator
                     || name.startsWith(OUTPUT_SERVER_V2);
             }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
 
-        return extractAndConvertPrefix(cfg, prefix, GENERAL);
+        return cfg;
     }
 
     @Override

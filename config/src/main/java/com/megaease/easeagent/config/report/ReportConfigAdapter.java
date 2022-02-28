@@ -59,7 +59,7 @@ public class ReportConfigAdapter {
         extract = extractAndConvertPrefix(config, TRACE_OUTPUT_V1, TRACE_ASYNC);
 
         // trace output to v2 config
-        String target = remove(join(TRACE_ASYNC, "target"), extract, config);
+        String target = syncRemove(join(TRACE_ASYNC, "target"), extract, config);
         if (!StringUtils.isEmpty(cfg.get(TRACE_SENDER_NAME))) {
             log.info("Reporter V2 config trace sender as: {}", cfg.get(TRACE_SENDER_NAME));
         } else if (StringUtils.isEmpty(target)) {
@@ -68,13 +68,13 @@ public class ReportConfigAdapter {
             // check output servers
             if (StringUtils.hasText(cfg.get(BOOTSTRAP_SERVERS))) {
                 cfg.put(TRACE_SENDER_NAME, KAFKA_SENDER_NAME);
-                cfg.put(TRACE_SENDER_TOPIC_V2, remove(join(TRACE_ASYNC, TOPIC_KEY), extract, config));
+                cfg.put(TRACE_SENDER_TOPIC_V2, syncRemove(join(TRACE_ASYNC, TOPIC_KEY), extract, config));
             } else {
                 cfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
             }
         } else if ("zipkin".equals(target)) {
             cfg.put(TRACE_SENDER_NAME, ZIPKIN_SENDER_NAME);
-            String url = remove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
+            String url = syncRemove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
             if (StringUtils.isEmpty(url)) {
                 cfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
             } else {
@@ -88,7 +88,7 @@ public class ReportConfigAdapter {
             cfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
             log.info("Unsupported output configuration item:{}={}", TRACE_OUTPUT_TARGET_V1, target);
         }
-        remove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
+        syncRemove(join(TRACE_ASYNC, "target.zipkinUrl"), extract, config);
         cfg.putAll(extract);
 
         // v2 configuration migrate and override
@@ -105,9 +105,10 @@ public class ReportConfigAdapter {
     private static void extractGlobalMetricCfg(Map<String, String> config, Map<String, String> cfg) {
         Map<String, String> globalMetric = extractByPrefix(config, GLOBAL_METRIC);
         Map<String, String> extract = extractAndConvertPrefix(globalMetric, GLOBAL_METRIC, METRIC_ASYNC);
+
         extract.putAll(extractByPrefix(config, METRIC_SENDER));
 
-        String appendType = remove(join(METRIC_ASYNC, "appendType"), extract, config);
+        String appendType = syncRemove(join(METRIC_ASYNC, "appendType"), extract, config);
         if ("kafka".equals(appendType)) {
             appendType = METRIC_KAFKA_SENDER_NAME;
         }
@@ -117,7 +118,7 @@ public class ReportConfigAdapter {
             globalMetric.put(join(METRIC_ASYNC, "appendType"), NoNull.of(cfg.get(METRIC_SENDER_NAME), appendType));
         }
 
-        String topic = remove(join(METRIC_ASYNC, TOPIC_KEY), extract, config);
+        String topic = syncRemove(join(METRIC_ASYNC, TOPIC_KEY), extract, config);
         if (!StringUtils.isEmpty(topic)) {
             // overridden by v2 configuration
             cfg.put(METRIC_SENDER_TOPIC, NoNull.of(cfg.get(METRIC_SENDER_TOPIC), topic));
@@ -128,7 +129,7 @@ public class ReportConfigAdapter {
         config.putAll(extractAndConvertPrefix(globalMetric, METRIC_ASYNC, GLOBAL_METRIC));
     }
 
-    private static String remove(String key, Map<String, String> extract, Map<String, String> config) {
+    private static String syncRemove(String key, Map<String, String> extract, Map<String, String> config) {
         String v = extract.remove(key);
         config.remove(key);
         return v;

@@ -81,6 +81,7 @@ public class MetricReporterImpl implements MetricReporter {
         if (changes.isEmpty()) {
             return;
         }
+
         if (Utils.isOutputPropertiesChange(changes)) {
             this.outputProperties.updateConfig(changes);
             appenderManager.refresh();
@@ -114,7 +115,7 @@ public class MetricReporterImpl implements MetricReporter {
 
             this.reporterConfig = this.metricProps.asReportConfig();
 
-            this.sender = ReporterRegistry.getSender(METRIC_SENDER, this.reporterConfig);
+            this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), this.reporterConfig);
         }
 
         public void report(String context) {
@@ -139,30 +140,25 @@ public class MetricReporterImpl implements MetricReporter {
             MetricProps newProps = Utils.extractMetricProps(newConfig, reportConfig);
 
             this.pluginConfig = newConfig;
-            if (metricProps.getTopic().equals(newProps.getTopic())
-                && metricProps.getSenderName().equals(newProps.getSenderName())) {
-                return;
-            }
-
             this.metricProps = newProps;
+
             this.reporterConfig.updateConfigs(metricProps.toReportConfigMap());
-            this.sender = ReporterRegistry.getSender(METRIC_SENDER_NAME, reportConfig);
+            if (metricProps.getTopic().equals(newProps.getTopic())) {
+                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), reportConfig);
+            }
         }
 
         @Override
         public void updateConfigs(Map<String, String> changes) {
             MetricProps newProps = Utils.extractMetricProps(pluginConfig, reportConfig);
 
-            if (metricProps.getTopic().equals(newProps.getTopic())
-                && metricProps.getSenderName().equals(newProps.getSenderName())) {
-                return;
-            }
-
             this.metricProps = newProps;
-
             changes.putAll(metricProps.toReportConfigMap());
             this.reporterConfig.updateConfigs(changes);
-            this.sender = ReporterRegistry.getSender(METRIC_SENDER_NAME, reportConfig);
+
+            if (!metricProps.getSenderName().equals(newProps.getSenderName())) {
+                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), reportConfig);
+            }
         }
     }
 }

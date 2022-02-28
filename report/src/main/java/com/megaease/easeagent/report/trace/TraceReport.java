@@ -18,25 +18,21 @@
 package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
-import com.megaease.easeagent.config.ConfigUtils;
+import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.async.SDKAsyncReporter;
 import com.megaease.easeagent.report.async.TraceAsyncProps;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
-import zipkin2.reporter.Reporter;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 public class TraceReport {
     private final RefreshableReporter<ReportSpan> spanRefreshableReporter;
@@ -86,31 +82,13 @@ public class TraceReport {
             if (cfg.isEmpty()) {
                 return;
             }
-            cfg = ConfigUtils.extractAndConvertPrefix(cfg, TRACE_OUTPUT_V1, TRACE_ASYNC);
             spanRefreshableReporter.refresh(cfg);
         }
 
         private Map<String, String> filterChanges(List<ChangeItem> list) {
             Map<String, String> cfg = new HashMap<>();
-            list.stream()
-                .filter(one -> {
-                    String name = one.getFullName();
-                    return name.startsWith(TRACE_OUTPUT_V1)
-                        || name.startsWith(TRACE_SENDER_NAME)
-                        || name.startsWith(TRACE_ASYNC);
-                }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
-
+            list.forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
             return cfg;
         }
     }
-
-    static Reporter<ReportSpan> NOOP = new Reporter<ReportSpan>() {
-        @Override
-        public void report(ReportSpan span) {
-        }
-
-        @Override public String toString() {
-            return "NoopReporter{}";
-        }
-    };
 }

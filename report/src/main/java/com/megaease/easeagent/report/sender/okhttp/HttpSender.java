@@ -55,21 +55,31 @@ public class HttpSender implements Sender {
 
     private static final String AUTH_HEADER = "Authorization";
 
-    private static final String SERVER_USER_NAME_KEY = join(OUTPUT_SERVER_V2, "userName");
-    private static final String SERVER_PASSWORD_KEY = join(OUTPUT_SERVER_V2, "password");
-    private static final String SERVER_GZIP_KEY = join(OUTPUT_SERVER_V2, "compress");
 
-    private static final String URL_KEY = join(GENERAL_SENDER, "url");
-    private static final String USER_NAME_KEY = join(GENERAL_SENDER, "userName");
-    private static final String PASSWORD_KEY = join(GENERAL_SENDER, "password");
-    private static final String GZIP_KEY = join(GENERAL_SENDER, "compress");
-    private static final String MAX_REQUESTS_KEY = join(GENERAL_SENDER, "maxRequests");
+    private static final String ENABLED_KEY = "enabled";
+    private static final String URL_KEY = "url";
+    private static final String USER_NAME_KEY = "userName";
+    private static final String PASSWORD_KEY = "password";
+    private static final String GZIP_KEY = "compress";
+    private static final String MAX_REQUESTS_KEY = "maxRequests";
+
+    private static final String SERVER_USER_NAME_KEY = join(OUTPUT_SERVER_V2, USER_NAME_KEY);
+    private static final String SERVER_PASSWORD_KEY = join(OUTPUT_SERVER_V2, PASSWORD_KEY);
+    private static final String SERVER_GZIP_KEY = join(OUTPUT_SERVER_V2, GZIP_KEY);
 
     private static final String TLS_ENABLE = join(OUTPUT_SERVER_V2, "tls.enable");
+
     // private key should be pkcs8 format
     private static final String TLS_KEY = join(OUTPUT_SERVER_V2, "tls.key");
     private static final String TLS_CERT = join(OUTPUT_SERVER_V2, "tls.cert");
     private static final String TLS_CA_CERT = join(OUTPUT_SERVER_V2, "tls.ca_cert");
+
+    private String senderEnabledKey;
+    private String urlKey;
+    private String userNameKey;
+    private String passwordKey;
+    private String gzipKey;
+    private String maxRequestsKey;
 
     private static final int MIN_TIMEOUT = 30_000;
 
@@ -95,6 +105,8 @@ public class HttpSender implements Sender {
     private String tlsCert;
     private String tlsCaCert;
 
+    private String prefix;
+
     // URL-USER-PASSWORD as unique key shared a client
     static ConcurrentHashMap<String, OkHttpClient> clientMap = new ConcurrentHashMap<>();
 
@@ -104,30 +116,42 @@ public class HttpSender implements Sender {
     }
 
     @Override
-    public void init(Config config) {
+    public void init(Config config, String prefix) {
+        this.prefix = prefix;
         extractConfig(config);
         this.config = config;
         initClient();
     }
 
+    private void updatePrefix(String prefix) {
+        senderEnabledKey = join(prefix, ENABLED_KEY);
+        urlKey = join(prefix, URL_KEY);
+        userNameKey = join(prefix, USER_NAME_KEY);
+        passwordKey = join(prefix, PASSWORD_KEY);
+        gzipKey = join(prefix, GZIP_KEY);
+        maxRequestsKey = join(prefix, MAX_REQUESTS_KEY);
+    }
+
     private void extractConfig(Config config) {
+        updatePrefix(this.prefix);
         this.url = getUrl(config);
-        this.userName = StringUtils.noEmptyOf(config.getString(USER_NAME_KEY), config.getString(SERVER_USER_NAME_KEY));
-        this.password = StringUtils.noEmptyOf(config.getString(PASSWORD_KEY), config.getString(SERVER_PASSWORD_KEY));
+        this.userName = StringUtils.noEmptyOf(config.getString(userNameKey), config.getString(SERVER_USER_NAME_KEY));
+        this.password = StringUtils.noEmptyOf(config.getString(passwordKey), config.getString(SERVER_PASSWORD_KEY));
+
         this.tlsEnable = config.getBoolean(TLS_ENABLE);
         this.tlsKey = config.getString(TLS_KEY);
         this.tlsCert = config.getString(TLS_CERT);
         this.tlsCaCert = config.getString(TLS_CA_CERT);
 
-        this.gzip = NoNull.of(config.getBooleanNullForUnset(GZIP_KEY),
+        this.gzip = NoNull.of(config.getBooleanNullForUnset(gzipKey),
             NoNull.of(config.getBooleanNullForUnset(SERVER_GZIP_KEY), true));
 
         this.timeout = NoNull.of(config.getInt(OUTPUT_SERVERS_TIMEOUT), MIN_TIMEOUT);
         if (this.timeout < MIN_TIMEOUT) {
             this.timeout = MIN_TIMEOUT;
         }
-        this.enabled = NoNull.of(config.getBooleanNullForUnset(GENERAL_SENDER_ENABLED), true);
-        this.maxRequests = NoNull.of(config.getInt(MAX_REQUESTS_KEY), 65);
+        this.enabled = NoNull.of(config.getBooleanNullForUnset(senderEnabledKey), true);
+        this.maxRequests = NoNull.of(config.getInt(maxRequestsKey), 65);
 
         if (StringUtils.isEmpty(url) || Boolean.FALSE.equals(config.getBoolean(OUTPUT_SERVERS_ENABLE))) {
             this.enabled = false;
@@ -148,7 +172,7 @@ public class HttpSender implements Sender {
     private String getUrl(Config config) {
         // url
         String outputServer = config.getString(BOOTSTRAP_SERVERS);
-        String cUrl = NoNull.of(config.getString(URL_KEY), "");
+        String cUrl = NoNull.of(config.getString(urlKey), "");
         if (!StringUtils.isEmpty(outputServer) && !cUrl.startsWith("http")) {
             cUrl = outputServer + cUrl;
         }
@@ -188,15 +212,15 @@ public class HttpSender implements Sender {
     public void updateConfigs(Map<String, String> changes) {
         this.config.updateConfigsNotNotify(changes);
 
-        String newUserName = StringUtils.noEmptyOf(config.getString(USER_NAME_KEY), config.getString(SERVER_USER_NAME_KEY));
-        String newPwd = StringUtils.noEmptyOf(config.getString(PASSWORD_KEY), config.getString(SERVER_PASSWORD_KEY));
+        String newUserName = StringUtils.noEmptyOf(config.getString(userNameKey), config.getString(SERVER_USER_NAME_KEY));
+        String newPwd = StringUtils.noEmptyOf(config.getString(passwordKey), config.getString(SERVER_PASSWORD_KEY));
         // check new client
         boolean renewClient = !getUrl(this.config).equals(this.url)
-            || org.apache.commons.lang3.StringUtils.equals(newUserName, this.userName)
-            || org.apache.commons.lang3.StringUtils.equals(newPwd, this.password)
-            || org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CA_CERT), this.tlsCaCert)
-            || org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CERT), this.tlsCert)
-            || org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_KEY), this.tlsKey);
+            || !org.apache.commons.lang3.StringUtils.equals(newUserName, this.userName)
+            || !org.apache.commons.lang3.StringUtils.equals(newPwd, this.password)
+            || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CA_CERT), this.tlsCaCert)
+            || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CERT), this.tlsCert)
+            || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_KEY), this.tlsKey);
 
         if (renewClient) {
             clearClient();
@@ -253,7 +277,7 @@ public class HttpSender implements Sender {
             appendBasicAuth(builder, this.credential);
         }
         // tls
-        if (this.tlsEnable) {
+        if (Boolean.TRUE.equals(this.tlsEnable)) {
             appendTLS(builder, this.tlsCaCert, this.tlsCert, this.tlsKey);
         }
         synchronized (HttpSender.class) {

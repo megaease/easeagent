@@ -47,6 +47,7 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
         this.reportConfig = new Configs(ReportConfigAdapter.extractReporterConfig(config));
         this.traceReport = new TraceReport(this.reportConfig);
         this.metricReporter = MetricReporterImpl.create(this.reportConfig);
+        config.addChangeListener(this);
     }
 
     public static AgentReport create(Configs config) {

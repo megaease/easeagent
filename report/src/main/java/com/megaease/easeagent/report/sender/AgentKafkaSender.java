@@ -42,6 +42,7 @@ public class AgentKafkaSender implements Sender {
 
     SDKKafkaSender sender;
     Map<String, String> ssl;
+    String prefix;
 
     @Override
     public String name() {
@@ -49,8 +50,9 @@ public class AgentKafkaSender implements Sender {
     }
 
     @Override
-    public void init(Config config) {
+    public void init(Config config, String prefix) {
         this.config = config;
+        this.prefix = prefix;
         String outputServer = config.getString(BOOTSTRAP_SERVERS);
         if (StringUtils.isEmpty(outputServer)) {
             this.enabled = false;
@@ -88,7 +90,8 @@ public class AgentKafkaSender implements Sender {
 
     @Override
     public void updateConfigs(Map<String, String> changes) {
-        if (!SENDER_NAME.equals(changes.get(TRACE_SENDER_NAME))) {
+        String name = changes.get(TRACE_SENDER_NAME);
+        if (StringUtils.isNotEmpty(name) && !SENDER_NAME.equals(name)) {
             try {
                 this.close();
             } catch (IOException e) {
@@ -111,7 +114,7 @@ public class AgentKafkaSender implements Sender {
                 // ignored
             }
             this.config.updateConfigsNotNotify(changes);
-            this.init(this.config);
+            this.init(this.config, this.prefix);
         }
     }
 
