@@ -43,7 +43,7 @@ public class RabbitMqChannelConsumeInterceptorTest {
         when(channel.getConnection()).thenReturn(connection);
         String host = "127.0.0.1";
         int port = 1111;
-        InetAddress inetAddress = InetAddress.getLocalHost();
+        InetAddress inetAddress = InetAddress.getByName(host);
         when(connection.getAddress()).thenReturn(inetAddress);
         when(connection.getPort()).thenReturn(port);
         MockConsumer mockConsumer = new MockConsumer(channel);
