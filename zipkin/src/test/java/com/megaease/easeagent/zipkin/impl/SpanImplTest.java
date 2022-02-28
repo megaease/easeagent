@@ -53,9 +53,9 @@ public class SpanImplTest {
         bSpan = tracing.tracer().nextSpan();
         state = AgentFieldReflectAccessor.getFieldValue(bSpan, "state");
         span = SpanImpl.build(tracing, bSpan, false, injector);
+        TracerTestUtils.clean(tracing.tracer());
         MockReport.cleanLastSpan();
         MockReport.cleanSkipSpan();
-        TracerTestUtils.clean(tracing.tracer());
     }
 
     @Test
