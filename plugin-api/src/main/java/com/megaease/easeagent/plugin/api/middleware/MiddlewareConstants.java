@@ -33,4 +33,6 @@ public final class MiddlewareConstants {
     public static final String TYPE_RABBITMQ = "rabbitmq";
     public static final String TYPE_DATABASE = "database";
     public static final String TYPE_MONGODB = "mongodb";
+
+    public static final String REDIRECTED_LABEL_REMOTE_TAG_NAME = "label.remote";
 }

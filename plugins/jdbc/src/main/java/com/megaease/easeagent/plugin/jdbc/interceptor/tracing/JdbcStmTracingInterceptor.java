@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.jdbc.interceptor.tracing;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -30,6 +29,7 @@ import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
@@ -37,15 +37,14 @@ import com.megaease.easeagent.plugin.jdbc.common.DatabaseInfo;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
-import com.megaease.easeagent.plugin.utils.common.ExceptionUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.sql.Connection;
 
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcTracingPlugin.class)
 public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
-    private final static Logger log = EaseAgent.getLogger(JdbcStmTracingInterceptor.class);
-    private final static String SPAN_KEY = JdbcStmTracingInterceptor.class.getName() + "-SPAN";
+    private final static Logger LOG = EaseAgent.getLogger(JdbcStmTracingInterceptor.class);
+    protected final static String SPAN_KEY = JdbcStmTracingInterceptor.class.getName() + "-SPAN";
 
     public static final String SPAN_SQL_QUERY_TAG_NAME = "sql";
     public static final String SPAN_ERROR_TAG_NAME = "error";
@@ -68,10 +67,10 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
     public void doBefore(MethodInfo methodInfo, Context context) {
         SqlInfo sqlInfo = ContextUtils.getFromContext(context, SqlInfo.class);
         if (sqlInfo == null) {
-            log.warn("must get sqlInfo from context");
+            LOG.warn("must get sqlInfo from context");
             return;
         }
-        Span span = context.currentTracing().nextSpan();
+        Span span = context.nextSpan();
         // Statement stm = (Statement) methodInfo.getInvoker();
         span.name(methodInfo.getMethod());
         span.kind(Span.Kind.CLIENT);
@@ -98,7 +97,7 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
     public void doAfter(MethodInfo methodInfo, Context context) {
         Span span = context.get(SPAN_KEY);
         if (methodInfo.getThrowable() != null) {
-            span.tag(SPAN_ERROR_TAG_NAME, ExceptionUtil.getExceptionMessage(methodInfo.getThrowable()));
+            span.error(methodInfo.getThrowable());
         }
         span.finish();
     }

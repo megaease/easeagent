@@ -40,9 +40,6 @@ import java.net.URI;
 public class RabbitMqPropertyInterceptor implements Interceptor {
     private static final Logger LOGGER = EaseAgent.getLogger(RabbitMqPropertyInterceptor.class);
 
-    @Override
-    public void init(IPluginConfig config, int uniqueIndex) {
-    }
 
     @SneakyThrows
     @Override
@@ -55,7 +52,7 @@ public class RabbitMqPropertyInterceptor implements Interceptor {
         ResourceConfig.HostAndPort hostAndPort = cnf.getFirstHostAndPort();
         String host = hostAndPort.getHost();
         Integer port = hostAndPort.getPort();
-        String uriStr = "";
+        String uriStr = hostAndPort.uri();
         if (method.equals("setHost") && host != null) {
             LOGGER.info("Redirect RabbitMq host: {} to {}", methodInfo.getArgs()[0], host);
             methodInfo.changeArg(0, host);
@@ -66,13 +63,17 @@ public class RabbitMqPropertyInterceptor implements Interceptor {
             RedirectProcessor.redirected(Redirect.RABBITMQ, hostAndPort.uri());
         } else if (method.equals("setUri") && uriStr != null) {
             if (methodInfo.getArgs()[0] instanceof URI) {
-                LOGGER.info("Redirect RabbitMq uri: {} to {}", methodInfo.getArgs()[0], uriStr);
-                methodInfo.changeArg(0, new URI(uriStr));
-                RedirectProcessor.redirected(Redirect.RABBITMQ, uriStr);
+                URI oldURI = (URI) methodInfo.getArgs()[0];
+                URI newURI = new URI(oldURI.getScheme(), oldURI.getUserInfo(), host, port, oldURI.getPath(), oldURI.getQuery(), oldURI.getFragment());
+                LOGGER.info("Redirect RabbitMq uri: {} to {}", oldURI, newURI);
+                methodInfo.changeArg(0, newURI);
+                RedirectProcessor.redirected(Redirect.RABBITMQ, hostAndPort.uri());
             } else if (methodInfo.getArgs()[0] instanceof String) {
-                LOGGER.info("Redirect RabbitMq uri: {} to {}", methodInfo.getArgs()[0], uriStr);
-                methodInfo.changeArg(0, uriStr);
-                RedirectProcessor.redirected(Redirect.RABBITMQ, uriStr);
+                URI oldURI = new URI((String) methodInfo.getArgs()[0]);
+                URI newURI = new URI(oldURI.getScheme(), oldURI.getUserInfo(), host, port, oldURI.getPath(), oldURI.getQuery(), oldURI.getFragment());
+                LOGGER.info("Redirect RabbitMq uri: {} to {}", oldURI, newURI);
+                methodInfo.changeArg(0, newURI.toString());
+                RedirectProcessor.redirected(Redirect.RABBITMQ, hostAndPort.uri());
             }
         } else if (methodInfo.getMethod().equals("setUsername") && StringUtils.isNotEmpty(cnf.getUserName())) {
             LOGGER.info("Redirect RabbitMq Username: {} to {}", methodInfo.getArgs()[0], cnf.getUserName());

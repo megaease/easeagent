@@ -56,7 +56,6 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
         }
         AMQP.BasicProperties basicProperties = (AMQP.BasicProperties) methodInfo.getArgs()[4];
         RabbitProducerRequest producerRequest = new RabbitProducerRequest(exchange, routingKey, basicProperties);
-        context.put(RabbitProducerRequest.class, producerRequest);
 
         Span span = context.producerSpan(producerRequest);
         span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.RABBITMQ.getRemoteType());
@@ -79,6 +78,12 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
     @Override
     public void after(MethodInfo method, Context context) {
         Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY);
+        if (span == null) {
+            return;
+        }
+        if (!method.isSuccess()) {
+            span.error(method.getThrowable());
+        }
         span.finish();
     }
 

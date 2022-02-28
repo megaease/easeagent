@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.zipkin.impl;
 
+import brave.TracerTestUtils;
 import brave.Tracing;
 import brave.handler.MutableSpan;
 import brave.propagation.CurrentTraceContext;
@@ -54,6 +55,7 @@ public class SpanImplTest {
         span = SpanImpl.build(tracing, bSpan, false, injector);
         MockReport.cleanLastSpan();
         MockReport.cleanSkipSpan();
+        TracerTestUtils.clean(tracing.tracer());
     }
 
     @Test

@@ -50,7 +50,7 @@ public class RedirectProcessor {
     public static void setTagsIfRedirected(Redirect key, Span span, String uris) {
         String remote = getRemote(key, uris);
         if (!StringUtils.isEmpty(remote)) {
-            span.tag("label.remote", remote);
+            span.tag(MiddlewareConstants.REDIRECTED_LABEL_REMOTE_TAG_NAME, remote);
         }
     }
 
@@ -98,13 +98,13 @@ public class RedirectProcessor {
         }
     }
 
-    private void setRedirected(Redirect key, String uris) {
+    private synchronized void setRedirected(Redirect key, String uris) {
         Map<Redirect, String> uriMap = new HashMap<>(this.redirectedUris);
         uriMap.put(key, uris);
         this.redirectedUris = uriMap;
     }
 
-    private String getRedirected(Redirect key) {
+    private synchronized String getRedirected(Redirect key) {
         return this.redirectedUris.get(key);
     }
 

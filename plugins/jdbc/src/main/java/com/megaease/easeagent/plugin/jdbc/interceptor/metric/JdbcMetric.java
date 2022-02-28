@@ -25,6 +25,8 @@ import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.tools.metrics.LastMinutesCounterGauge;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
@@ -50,6 +52,18 @@ public class JdbcMetric extends ServiceMetric implements RemovalListener<String,
 
     public JdbcMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
         super(metricRegistry, nameFactory);
+    }
+
+    public static Tags newConnectionTags() {
+        Tags tags = new Tags("application", "jdbc-connection", "url");
+        RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, tags);
+        return tags;
+    }
+
+    public static Tags newStmTags() {
+        Tags tags = new Tags("application", "jdbc-statement", "signature");
+        RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, tags);
+        return tags;
     }
 
     public static NameFactory nameFactory() {

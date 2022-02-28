@@ -17,29 +17,46 @@
 
 package com.megaease.easeagent.plugin.rabbitmq;
 
-import com.megaease.easeagent.plugin.api.config.IPluginConfig;
-import com.megaease.easeagent.plugin.api.metric.Meter;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.Timer;
+import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
-import java.util.Map;
+import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
-public class RabbitMqConsumerMetric {
-    final NameFactory nameFactory;
-    final MetricRegistry metric;
+public class RabbitMqConsumerMetric extends ServiceMetric {
+    public static final ServiceMetricSupplier<RabbitMqConsumerMetric> SERVICE_METRIC_SUPPLIER = new ServiceMetricSupplier<RabbitMqConsumerMetric>() {
+        @Override
+        public NameFactory newNameFactory() {
+            return buildNameFactory();
+        }
 
-    public RabbitMqConsumerMetric(IPluginConfig config) {
-        this.nameFactory = getNameFactory();
-        // Tags tags = new Tags("application", "rabbitmq-ex-ro", "resource");
-        Tags tags = new Tags("application", "rabbitmq-consumer", "resource");
-        this.metric = EaseAgent.newMetricRegistry(config, this.nameFactory, tags);
+        @Override
+        public RabbitMqConsumerMetric newInstance(MetricRegistry metricRegistry, NameFactory nameFactory) {
+            return new RabbitMqConsumerMetric(metricRegistry, nameFactory);
+        }
+    };
+
+
+    public RabbitMqConsumerMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+        super(metricRegistry, nameFactory);
     }
 
-    public static NameFactory getNameFactory() {
+    public static Tags buildOnMessageTags() {
+        Tags tags = new Tags("application", "rabbitmq-queue", "resource");
+        RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, tags);
+        return tags;
+    }
+
+    public static Tags buildConsumerTags() {
+        Tags tags = new Tags("application", "rabbitmq-consumer", "resource");
+        RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, tags);
+        return tags;
+    }
+
+    public static NameFactory buildNameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
                 ImmutableMap.<MetricField, MetricValueFetcher>builder()
@@ -68,12 +85,10 @@ public class RabbitMqConsumerMetric {
     }
 
     public void metricAfter(String queue, long beginTime, boolean success) {
-        Map<MetricSubType, MetricName> timerNames = this.nameFactory.timerNames(queue);
-        MetricName metricName = timerNames.get(MetricSubType.DEFAULT);
-        Timer timer = this.metric.timer(metricName.name());
+        Timer timer = timer(queue, MetricSubType.DEFAULT);
         timer.update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
-        final Meter defaultMeter = this.metric.meter(this.nameFactory.meterName(queue, MetricSubType.CONSUMER));
-        final Meter errorMeter = this.metric.meter(this.nameFactory.meterName(queue, MetricSubType.CONSUMER_ERROR));
+        final Meter defaultMeter = meter(queue, MetricSubType.CONSUMER);
+        final Meter errorMeter = meter(queue, MetricSubType.CONSUMER_ERROR);
         if (!success) {
             errorMeter.mark();
         }

@@ -39,14 +39,14 @@ import java.util.List;
 @SuppressWarnings("unused")
 @AdviceTo(RabbitMqMessageListenerAdvice.class)
 public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
-    private static final String SCOPE_CONTEXT_KEY = RabbitMqOnMessageTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
-    private static final String SPAN_CONTEXT_KEY = RabbitMqOnMessageTracingInterceptor.class.getName() + "-Span";
+    protected static final String SCOPE_CONTEXT_KEY = RabbitMqOnMessageTracingInterceptor.class.getName() + "-Tracer.SpanInScope";
+    protected static final String SPAN_CONTEXT_KEY = RabbitMqOnMessageTracingInterceptor.class.getName() + "-Span";
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         if (methodInfo.getArgs()[0] instanceof List) {
             Span span = context.currentTracing().nextSpan();
-            span.name("on-message-list");
+            span.name("on-message-list").cacheScope().start();
             context.put(SCOPE_CONTEXT_KEY, span);
             this.before4List(methodInfo, context);
         } else {
@@ -58,28 +58,28 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
     public void after(MethodInfo methodInfo, Context context) {
         if (methodInfo.getArgs()[0] instanceof List) {
             this.after4List(methodInfo, context);
-            Span span = context.get(SCOPE_CONTEXT_KEY);
+            Span span = context.remove(SCOPE_CONTEXT_KEY);
             span.finish();
         } else {
             this.after4Single(methodInfo, context);
         }
     }
 
-    public void after4Single(MethodInfo methodInfo, Context context) {
+    protected void after4Single(MethodInfo methodInfo, Context context) {
         this.processMessageAfter(methodInfo, context, 0);
     }
 
     @SuppressWarnings("unchecked")
-    public void after4List(MethodInfo methodInfo, Context context) {
+    protected void after4List(MethodInfo methodInfo, Context context) {
         List<Message> messageList = (List<Message>) methodInfo.getArgs()[0];
         for (int i = 0; i < messageList.size(); i++) {
             this.processMessageAfter(methodInfo, context, i);
         }
     }
 
-    private void processMessageAfter(MethodInfo methodInfo, Context context, int index) {
+    protected void processMessageAfter(MethodInfo methodInfo, Context context, int index) {
         // CurrentTraceContext.Scope newScope = ContextUtils.getFromContext(context, SCOPE_CONTEXT_KEY + index);
-        Span span = ContextUtils.getFromContext(context, SPAN_CONTEXT_KEY + index);
+        Span span = context.remove(SPAN_CONTEXT_KEY + index);
         if (!methodInfo.isSuccess()) {
             span.error(methodInfo.getThrowable());
         }
@@ -88,13 +88,13 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
     }
 
 
-    private void before4Single(MethodInfo methodInfo, Context context) {
+    protected void before4Single(MethodInfo methodInfo, Context context) {
         Message message = (Message) methodInfo.getArgs()[0];
         this.processMessageBefore(message, context, 0);
     }
 
     @SuppressWarnings("unchecked")
-    private void before4List(MethodInfo methodInfo, Context context) {
+    protected void before4List(MethodInfo methodInfo, Context context) {
         List<Message> messageList = (List<Message>) methodInfo.getArgs()[0];
         for (int i = 0; i < messageList.size(); i++) {
             Message message = messageList.get(i);
@@ -102,7 +102,7 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
         }
     }
 
-    private void processMessageBefore(Message message, Context context, int index) {
+    protected void processMessageBefore(Message message, Context context, int index) {
         String uri = ContextUtils.getFromContext(context, ContextCons.MQ_URI);
         MessageProperties messageProperties = message.getMessageProperties();
         RabbitConsumerRequest request = new RabbitConsumerRequest(message);
@@ -117,7 +117,7 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
             span.tag("rabbit.broker", uri);
         }
         span.remoteServiceName("rabbitmq");
-        span.tag(MiddlewareConstants.TYPE_TAG_NAME,  Type.RABBITMQ.getRemoteType());
+        span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.RABBITMQ.getRemoteType());
         RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, span);
         span.start();
 
