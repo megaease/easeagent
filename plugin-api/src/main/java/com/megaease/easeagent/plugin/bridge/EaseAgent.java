@@ -25,8 +25,7 @@ import com.megaease.easeagent.plugin.api.dispatcher.IDispatcher;
 import com.megaease.easeagent.plugin.api.logging.ILoggerFactory;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.logging.Mdc;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 
@@ -57,6 +56,10 @@ public final class EaseAgent {
      */
     public static MetricRegistry newMetricRegistry(IPluginConfig config, NameFactory nameFactory, Tags tags) {
         return metricRegistrySupplier.newMetricRegistry(config, nameFactory, tags);
+    }
+
+    public static <T extends ServiceMetric> T getOrCreateServiceMetric(IPluginConfig config, Tags tags, ServiceMetricSupplier<T> supplier) {
+        return ServiceMetricRegistry.getOrCreate(config, tags, supplier);
     }
 
     /**

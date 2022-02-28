@@ -17,22 +17,19 @@
 
 package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.api.middleware.Redirect;
-import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcConnectionMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcDataSourceAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 @AdviceTo(value = JdbcDataSourceAdvice.class, plugin = JdbcConnectionMetricPlugin.class)
 public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor {
@@ -41,8 +38,7 @@ public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor 
 
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
-        Tags tags = new Tags("application", "jdbc-connection", "url");
-        RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, tags);
+        Tags tags = JdbcMetric.newConnectionTags();
         metric = ServiceMetricRegistry.getOrCreate(config,
             tags, JdbcMetric.METRIC_SUPPLIER);
     }
@@ -54,26 +50,17 @@ public class JdbcDataSourceMetricInterceptor implements NonReentrantInterceptor 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         Connection connection = (Connection) methodInfo.getRetValue();
-        try {
-            String key;
-            boolean success = true;
-            if (methodInfo.getRetValue() == null) {
-                key = ERR_CON_METRIC_KEY;
-                success = false;
-            } else {
-                key = getMetricKey(connection, methodInfo.getThrowable());
-            }
-            metric.collectMetric(key, success, context);
-        } catch (SQLException ignored) {
+        String key;
+        boolean success = true;
+        if (methodInfo.getRetValue() == null || methodInfo.getThrowable() != null) {
+            key = ERR_CON_METRIC_KEY;
+            success = false;
+        } else {
+            key = JdbcUtils.getUrl(connection);
         }
+        metric.collectMetric(key, success, context);
     }
 
-    private static String getMetricKey(Connection con, Throwable throwable) throws SQLException {
-        if (throwable != null) {
-            return ERR_CON_METRIC_KEY;
-        }
-        return JdbcUtils.getUrl(con);
-    }
 
     @Override
     public String getType() {

@@ -69,7 +69,7 @@ public class RabbitMqConsumerTracingInterceptor implements Interceptor {
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        Span span = context.get(SPAN_CONTEXT_KEY);
+        Span span = context.remove(SPAN_CONTEXT_KEY);
         if (span == null) {
             return;
         }

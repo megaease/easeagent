@@ -21,6 +21,7 @@ import com.megaease.easeagent.mock.metrics.MockMetricProvider;
 import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.zipkin.MockTracingProvider;
 import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.ResourceConfig;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
@@ -29,16 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ContextUtils {
-    static final Map<Redirect, ResourceConfig> OLD_CONFIG;
-
-    static {
-        Map<Redirect, ResourceConfig> oldConfig = new HashMap<>();
-        for (Redirect redirect : Redirect.values()) {
-            oldConfig.put(redirect, redirect.getConfig());
-        }
-        OLD_CONFIG = oldConfig;
-    }
-
 
     /**
      * reset all of context
@@ -46,17 +37,32 @@ public class ContextUtils {
     public static void resetAll() {
         EaseAgent.initializeContextSupplier.get().clear();
         MockMetricProvider.clearAll();
-        resetRedirect();
+        OldRedirect.resetRedirect();
         MockTracingProvider.cleanPendingSpans();
         MockReport.cleanLastSpan();
     }
 
-    private static void resetRedirect() {
-        for (Map.Entry<Redirect, ResourceConfig> entry : OLD_CONFIG.entrySet()) {
-            if (entry.getKey().getConfig() == entry.getValue()) {
-                continue;
+    static class OldRedirect {
+        static final Map<Redirect, ResourceConfig> OLD_CONFIG;
+        static final Map<String, String> OLD_EASEMESH_TAGS = RedirectProcessor.tags();
+
+        static {
+            Map<Redirect, ResourceConfig> oldConfig = new HashMap<>();
+            for (Redirect redirect : Redirect.values()) {
+                oldConfig.put(redirect, redirect.getConfig());
             }
-            AgentFieldReflectAccessor.setFieldValue(entry.getKey(), "config", entry.getValue());
+            OLD_CONFIG = oldConfig;
+
+        }
+
+        private static void resetRedirect() {
+            for (Map.Entry<Redirect, ResourceConfig> entry : OLD_CONFIG.entrySet()) {
+                if (entry.getKey().getConfig() == entry.getValue()) {
+                    continue;
+                }
+                AgentFieldReflectAccessor.setFieldValue(entry.getKey(), "config", entry.getValue());
+            }
+            AgentFieldReflectAccessor.setFieldValue(RedirectProcessor.INSTANCE, "tags", OLD_EASEMESH_TAGS);
         }
     }
 }

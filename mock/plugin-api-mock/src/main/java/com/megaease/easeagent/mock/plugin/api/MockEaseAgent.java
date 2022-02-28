@@ -180,7 +180,7 @@ public class MockEaseAgent {
     }
 
     /**
-     * reset all of context: metric, tracing, redirect, etc.
+     * reset all of context: metric, tracing, redirect etc.
      * <p>
      * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter
      *
@@ -197,7 +197,7 @@ public class MockEaseAgent {
      * //        Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
      * //        assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
      * //
-     * //        //reset all metric to empty.
+     * //        //reset all.
      * //        MockEaseAgent.resetAll();
      * //        try {
      * //            lastJsonReporter.flushAndOnlyOne();

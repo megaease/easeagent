@@ -17,45 +17,51 @@
 
 package com.megaease.easeagent.plugin.rabbitmq;
 
-import com.megaease.easeagent.plugin.api.config.IPluginConfig;
-import com.megaease.easeagent.plugin.api.metric.Meter;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.Timer;
+import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.api.middleware.Redirect;
 import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 
-import java.util.Map;
+import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
-public class RabbitMqProducerMetric {
-    final NameFactory nameFactory;
-    final MetricRegistry metric;
+public class RabbitMqProducerMetric extends ServiceMetric {
+    public static final ServiceMetricSupplier<RabbitMqProducerMetric> SERVICE_METRIC_SUPPLIER = new ServiceMetricSupplier<RabbitMqProducerMetric>() {
+        @Override
+        public NameFactory newNameFactory() {
+            return buildNameFactory();
+        }
 
-    public RabbitMqProducerMetric(IPluginConfig config) {
-        this.nameFactory = getNameFactory();
-        Tags tags = new Tags("application", "rabbitmq-ex-ro", "resource");
-        RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, tags);
-        this.metric = EaseAgent.newMetricRegistry(config, this.nameFactory, tags);
+        @Override
+        public RabbitMqProducerMetric newInstance(MetricRegistry metricRegistry, NameFactory nameFactory) {
+            return new RabbitMqProducerMetric(metricRegistry, nameFactory);
+        }
+    };
+
+    public RabbitMqProducerMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+        super(metricRegistry, nameFactory);
     }
 
     public void metricAfter(String exchange, String routingKey, long beginTime, boolean success) {
         String key = String.join("-", exchange, routingKey);
-        Map<MetricSubType, MetricName> timerNames = nameFactory.timerNames(key);
-        MetricName name = timerNames.get(MetricSubType.DEFAULT);
-        Timer timer = metric.timer(name.name());
+        Timer timer = timer(key, MetricSubType.DEFAULT);
         timer.update(System.currentTimeMillis() - beginTime, TimeUnit.MILLISECONDS);
-        final Meter defaultMeter = metric.meter(nameFactory.meterName(key, MetricSubType.PRODUCER));
-        final Meter errorMeter = metric.meter(nameFactory.meterName(key, MetricSubType.PRODUCER_ERROR));
+        final Meter defaultMeter = meter(key, MetricSubType.PRODUCER);
+        final Meter errorMeter = meter(key, MetricSubType.PRODUCER_ERROR);
         if (!success) {
             errorMeter.mark();
         }
         defaultMeter.mark();
     }
 
-    public static NameFactory getNameFactory() {
+    public static Tags buildTags() {
+        Tags tags = new Tags("application", "rabbitmq-ex-ro", "resource");
+        RedirectProcessor.setTagsIfRedirected(Redirect.RABBITMQ, tags);
+        return tags;
+    }
+
+    public static NameFactory buildNameFactory() {
         return NameFactory.createBuilder()
             .timerType(MetricSubType.DEFAULT,
                 ImmutableMap.<MetricField, MetricValueFetcher>builder()

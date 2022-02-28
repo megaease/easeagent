@@ -19,15 +19,13 @@ package com.megaease.easeagent.plugin.jdbc.interceptor.metric;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
-import com.megaease.easeagent.plugin.api.middleware.Redirect;
-import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
@@ -46,8 +44,7 @@ public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
         if (metric == null) {
             synchronized (JdbcStmMetricInterceptor.class) {
                 if (metric == null) {
-                    Tags tags = new Tags("application", "jdbc-statement", "signature");
-                    RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, tags);
+                    Tags tags = JdbcMetric.newStmTags();
                     metric = ServiceMetricRegistry.getOrCreate(config,
                         tags,
                         JdbcMetric.METRIC_SUPPLIER);

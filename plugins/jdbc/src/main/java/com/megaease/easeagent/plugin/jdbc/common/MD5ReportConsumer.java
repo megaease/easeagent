@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.tools.config.NameAndSystem;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 
@@ -52,8 +53,8 @@ public class MD5ReportConsumer implements Consumer<Map<String, String>> {
                 .hostName(HostAddress.localhost())
                 .hostIpv4(HostAddress.getHostIpv4())
                 .gid("")
-                .system(EaseAgent.configFactory.getConfig("system"))
-                .service(EaseAgent.configFactory.getConfig("name"))
+                .system(NameAndSystem.system())
+                .service(NameAndSystem.name())
                 .tags("")
                 .type("md5-dictionary")
                 .id("")

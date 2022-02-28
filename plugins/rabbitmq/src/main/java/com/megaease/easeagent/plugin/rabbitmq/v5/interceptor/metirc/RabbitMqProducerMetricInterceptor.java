@@ -17,34 +17,26 @@
 
 package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor.metirc;
 
-import com.megaease.easeagent.plugin.interceptor.Interceptor;
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqPlugin;
 import com.megaease.easeagent.plugin.rabbitmq.RabbitMqProducerMetric;
-import com.megaease.easeagent.plugin.rabbitmq.spring.interceptor.RabbitMqOnMessageMetricInterceptor;
 import com.megaease.easeagent.plugin.rabbitmq.v5.advice.RabbitMqChannelAdvice;
 
 @SuppressWarnings("unused")
 @AdviceTo(value = RabbitMqChannelAdvice.class, qualifier = "basicPublish", plugin = RabbitMqPlugin.class)
 public class RabbitMqProducerMetricInterceptor implements Interceptor {
-    private static volatile RabbitMqProducerMetric METRIC = null;
+    private static volatile RabbitMqProducerMetric metric = null;
 
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
-        if (METRIC != null) {
-            return;
-        }
-        synchronized (RabbitMqOnMessageMetricInterceptor.class) {
-            if (METRIC != null) {
-                return;
-            }
-            METRIC = new RabbitMqProducerMetric(config);
-        }
+        metric = EaseAgent.getOrCreateServiceMetric(config, RabbitMqProducerMetric.buildTags(), RabbitMqProducerMetric.SERVICE_METRIC_SUPPLIER);
     }
 
     @Override
@@ -55,7 +47,7 @@ public class RabbitMqProducerMetricInterceptor implements Interceptor {
     public void after(MethodInfo methodInfo, Context context) {
         String exchange = (String) methodInfo.getArgs()[0];
         String routingKey = (String) methodInfo.getArgs()[1];
-        METRIC.metricAfter(exchange, routingKey, ContextUtils.getBeginTime(context), methodInfo.isSuccess());
+        metric.metricAfter(exchange, routingKey, ContextUtils.getBeginTime(context), methodInfo.isSuccess());
     }
 
     @Override
