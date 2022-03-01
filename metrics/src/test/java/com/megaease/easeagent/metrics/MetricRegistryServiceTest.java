@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 
 public class MetricRegistryServiceTest {
 
-    private final String typeMatch = "testType";
+    private final String typeMatch = "testType_";
 
     private MetricRegistry reset(NameFactory nameFactory) {
         CollectorRegistry.defaultRegistry.clear();
@@ -100,8 +100,8 @@ public class MetricRegistryServiceTest {
         while (samples.hasMoreElements()) {
             Collector.MetricFamilySamples s = samples.nextElement();
             for (Collector.MetricFamilySamples.Sample sample : s.samples) {
-                assertEquals(5, sample.labelNames.size());
-                assertEquals(5, sample.labelValues.size());
+                assertEquals(4, sample.labelNames.size());
+                assertEquals(4, sample.labelValues.size());
                 assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
                 assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
                 assertTrue(sample.labelValues.contains(MetricType.CounterType.name()));
@@ -132,9 +132,9 @@ public class MetricRegistryServiceTest {
             Collector.MetricFamilySamples s = samplesEnumeration.nextElement();
             samples.add(s);
         }
-        assertEquals(1, samples.size());
+        assertEquals(2, samples.size());
         for (Collector.MetricFamilySamples s : samples) {
-            assertEquals(2, s.samples.size());
+            assertEquals(1, s.samples.size());
             for (Collector.MetricFamilySamples.Sample sample : s.samples) {
                 assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
                 assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
@@ -143,14 +143,14 @@ public class MetricRegistryServiceTest {
                 assertTrue(sample.name.contains("testCategory_"));
                 assertTrue(sample.name.contains(typeMatch));
 
-                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+//                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
 
                 if (sample.labelValues.contains(MetricSubType.DEFAULT.name())) {
-                    assertTrue(sample.labelValues.contains(MetricField.EXECUTION_COUNT.getField()));
+                    assertTrue(sample.name.endsWith(MetricField.EXECUTION_COUNT.getField()));
                     assertEquals(1, (int) sample.value);
                 } else {
                     assertTrue(sample.labelValues.contains(MetricSubType.ERROR.name()));
-                    assertTrue(sample.labelValues.contains(MetricField.EXECUTION_ERROR_COUNT.getField()));
+                    assertTrue(sample.name.endsWith(MetricField.EXECUTION_ERROR_COUNT.getField()));
                     assertEquals(0, (int) sample.value);
                 }
             }
@@ -172,14 +172,16 @@ public class MetricRegistryServiceTest {
             .put(MetricField.P999_EXECUTION_TIME, MetricValueFetcher.Snapshot999PercentileValue)
             .build();
         NameFactory nameFactory = NameFactory.createBuilder().timerType(MetricSubType.DEFAULT,
-                valueFetchers)
+            valueFetchers)
             .build();
         List<String> labelValues = labelValues(valueFetchers);
         MetricRegistry metricRegistry = reset(nameFactory);
         String name = nameFactory.timerName("GET tt", MetricSubType.DEFAULT);
         metricRegistry.timer(name).update(1000, TimeUnit.MILLISECONDS);
         Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
+        int size = 0;
         while (samples.hasMoreElements()) {
+            size++;
             Collector.MetricFamilySamples s = samples.nextElement();
             for (Collector.MetricFamilySamples.Sample sample : s.samples) {
                 assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
@@ -190,11 +192,24 @@ public class MetricRegistryServiceTest {
                 assertTrue(sample.name.contains(typeMatch));
 
 
-                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
-                assertTrue(labelValues.contains(sample.labelValues.get(0)));
+//                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+                assertTrue(endWithOnce(sample.name, labelValues));
                 assertEquals(1000, (int) sample.value);
             }
         }
+        assertEquals(10, size);
+    }
+
+    public static boolean endWithOnce(String name, List<String> ends) {
+        Iterator<String> iterator = ends.iterator();
+        while (iterator.hasNext()) {
+            String end = iterator.next();
+            if (name.endsWith(end)) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<String> labelValues(Map<MetricField, MetricValueFetcher> valueFetchers) {
@@ -214,14 +229,16 @@ public class MetricRegistryServiceTest {
             .put(MetricField.MEAN_RATE, MetricValueFetcher.MeteredMeanRate)
             .build();
         NameFactory nameFactory = NameFactory.createBuilder().meterType(MetricSubType.ERROR,
-                valueFetchers)
+            valueFetchers)
             .build();
         List<String> labelValues = labelValues(valueFetchers);
         MetricRegistry metricRegistry = reset(nameFactory);
         String name = nameFactory.meterName("GET tt", MetricSubType.ERROR);
         metricRegistry.meter(name).mark();
         Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
+        int size = 0;
         while (samples.hasMoreElements()) {
+            size++;
             Collector.MetricFamilySamples s = samples.nextElement();
             for (Collector.MetricFamilySamples.Sample sample : s.samples) {
                 assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
@@ -232,10 +249,12 @@ public class MetricRegistryServiceTest {
                 assertTrue(sample.name.contains(typeMatch));
 
 
-                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
-                assertTrue(labelValues.contains(sample.labelValues.get(0)));
+//                assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+//                assertTrue(labelValues.contains(sample.labelValues.get(0)));
+                assertTrue(endWithOnce(sample.name, labelValues));
             }
         }
+        assertEquals(4, size);
     }
 
     @Test
@@ -267,30 +286,28 @@ public class MetricRegistryServiceTest {
         Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(Collections.emptySet());
         while (samples.hasMoreElements()) {
             Collector.MetricFamilySamples s = samples.nextElement();
-            if (s.name.endsWith(typeMatch)) {
-                for (Collector.MetricFamilySamples.Sample sample : s.samples) {
-                    assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
-                    assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
-                    assertTrue(sample.labelValues.contains(MetricType.GaugeType.name()));
-                    assertTrue(sample.labelValues.contains(MetricSubType.DEFAULT.name()));
-                    assertTrue(sample.name.contains("testCategory_"));
-                    assertTrue(sample.name.contains(typeMatch));
+            assertTrue(s.name.contains(typeMatch));
+            for (Collector.MetricFamilySamples.Sample sample : s.samples) {
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_TYPE_LABEL_NAME));
+                assertTrue(sample.labelNames.contains(MetricRegistryService.METRIC_SUB_TYPE_LABEL_NAME));
+                assertTrue(sample.labelValues.contains(MetricType.GaugeType.name()));
+                assertTrue(sample.labelValues.contains(MetricSubType.DEFAULT.name()));
+                assertTrue(sample.name.contains("testCategory_"));
+                assertTrue(sample.name.contains(typeMatch));
 
 
-                    assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
-                    int sampleIntValue = (int) sample.value;
-                    if (sample.labelValues.contains(key)) {
-                        assertEquals(value, sampleIntValue);
-                    } else if (sample.labelValues.contains(key2)) {
-                        assertEquals(value2, sampleIntValue);
-                    } else {
-                        assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
-                        assertTrue(sample.labelValues.contains("value"));
-                        assertEquals(value3, (int) sample.value);
-                    }
+//                    assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+                int sampleIntValue = (int) sample.value;
+                if (sample.name.endsWith(key)) {
+                    assertEquals(value, sampleIntValue);
+                } else if (sample.name.endsWith(key2)) {
+                    assertEquals(value2, sampleIntValue);
+                } else {
+//                        assertTrue(sample.labelNames.contains(EaseAgentPrometheusExports.VALUE_TYPE_LABEL_NAME));
+//                        assertTrue(sample.labelValues.contains("value"));
+                    assertTrue(sample.name.endsWith("value"));
+                    assertEquals(value3, (int) sample.value);
                 }
-            } else {
-                fail();
             }
 
         }

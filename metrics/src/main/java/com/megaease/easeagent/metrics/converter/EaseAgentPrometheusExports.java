@@ -29,7 +29,6 @@ import java.util.*;
 
 public class EaseAgentPrometheusExports extends Collector implements Collector.Describable {
     private static final Logger LOGGER = LoggerFactory.getLogger(EaseAgentPrometheusExports.class);
-    public static final String VALUE_TYPE_LABEL_NAME = "value_type";
     private final MetricRegistry registry;
     private final AbstractConverter abstractConverter;
     private final MetricFilter metricFilter = MetricFilter.ALL;
@@ -64,7 +63,7 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
             value = (Boolean) obj ? 1.0D : 0.0D;
         }
 
-        return this.sampleBuilder.createSample(dropwizardName, "", Arrays.asList(VALUE_TYPE_LABEL_NAME), Arrays.asList(valueType), value);
+        return this.sampleBuilder.createSample(dropwizardName, "_" + valueType, Collections.emptyList(), Collections.emptyList(), value);
     }
 
     public MetricFilter getMetricFilter() {
@@ -115,19 +114,9 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
             SortedMap<String, T> gaugeSortedMap = getMetric();
             for (String s : gaugeSortedMap.keySet()) {
                 writeValue(MetricName.metricNameFor(s), gaugeSortedMap, values);
-                List<MetricFamilySamples.Sample> samples = new ArrayList<>();
-                String name = null;
                 for (Map.Entry<String, Object> entry : values.entrySet()) {
                     MetricFamilySamples.Sample sample = doubleValue(s, entry.getValue(), entry.getKey(), clzss);
-                    if (sample == null) {
-                        continue;
-                    }
-                    name = sample.name;
-                    samples.add(sample);
-                }
-                if (name != null) {
-                    MetricFamilySamples metricFamilySamples = new MetricFamilySamples(name, type, getHelpMessage(s, clzss), samples);
-                    EaseAgentPrometheusExports.this.addToMap(mfSamplesMap, metricFamilySamples);
+                    EaseAgentPrometheusExports.this.addToMap(mfSamplesMap, new MetricFamilySamples(sample.name, type, getHelpMessage(sample.name, clzss), Collections.singletonList(sample)));
                 }
                 values.clear();
             }
@@ -142,7 +131,7 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
     class CounterExports extends Exports<Counter> {
 
         public CounterExports() {
-            super(Type.COUNTER, Counter.class);
+            super(Type.SUMMARY, Counter.class);
         }
 
         @Override
@@ -159,7 +148,7 @@ public class EaseAgentPrometheusExports extends Collector implements Collector.D
     class MeterExports extends Exports<Meter> {
 
         public MeterExports() {
-            super(Type.COUNTER, Meter.class);
+            super(Type.SUMMARY, Meter.class);
         }
 
         @Override
