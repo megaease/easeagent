@@ -196,8 +196,9 @@ The following sections describe the metric and tracing configuration items,  as 
 | `plugin.observability.global.tracing.enabled`   | true              | Enable all tracing collection. `false`: Disable all tracing collection.                                                                                        |
 | `plugin.observability.global.metric.enabled`    | true              | Enable all metrics collection. `false`: Disable all metrics collection.                                                                                        |
 | `plugin.observability.global.metric.interval`   | 30                | Time interval between two outputs. Time Unit: second.                                                                                                          |
-| `plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic.                                                                                                                 |
-| `plugin.observability.global.metric.appendType` | kafka             | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
+| `plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic, only avaliable when `appendType` is `kafka`.                                                                                                                 |
+| `plugin.observability.global.metric.url`        | /metrics          | Send metric data to the specified http URI, which will be appended to `reporter.outputServer.bootstrapServer`, to form a full url, only avaliable when `appendType` is `http`.                                                                                                                 |
+| `plugin.observability.global.metric.appendType` | kafka             | The value should be `kafka`, `console` or `http`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console; `http`: output metric data to http server. |
 
 Supported components and corresponding namespaces:
 
