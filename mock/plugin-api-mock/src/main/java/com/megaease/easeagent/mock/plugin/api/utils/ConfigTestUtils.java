@@ -75,7 +75,7 @@ public class ConfigTestUtils {
 
     /**
      * A Reset for Configs
-     * It must be call ${@link Reset#clone()} after your business.
+     * It must be call ${@link Reset#close()} after your business.
      *
      * <pre>${@code
      *  try (ConfigTestUtils.Reset ignored = ConfigTestUtils.changeConfig(key, value)) {

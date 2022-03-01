@@ -102,7 +102,7 @@ MethodInfo methodInfo = MethodInfo.builder()
 You may have tested the Tracing or Metric generation process. At this time, you need an additional API to get the result, and then verify
 
 ### MockEaseAgent API
-see:
+See:
 
 * [MockEaseAgent](../mock/plugin-api-mock/src/main/java/com/megaease/easeagent/mock/plugin/api/MockEaseAgent.java)
 
@@ -126,7 +126,7 @@ Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
 assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
 ```
 
-for demo see: 
+For example see: 
 * [MockEaseAgentTest](../mock/plugin-api-mock/src/test/java/com/megaease/easeagent/mock/plugin/api/demo/MockEaseAgentTest.java)
 * [InterceptorTest](../mock/plugin-api-mock/src/test/java/com/megaease/easeagent/mock/plugin/api/demo/InterceptorTest.java)
 
