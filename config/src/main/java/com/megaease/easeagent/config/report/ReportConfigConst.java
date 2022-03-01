@@ -32,6 +32,8 @@ public class ReportConfigConst {
 
     static final String DELIMITER = ".";
     public static final String TOPIC_KEY = "topic";
+    public static final String APPENDER_KEY = "appenderName";
+
     public static final String ENABLED_KEY = "enabled";
     public static final String SENDER_KEY = "sender";
     public static final String ENCODER_KEY = "encoder";
@@ -83,7 +85,7 @@ public class ReportConfigConst {
     public static final String METRIC_SENDER_NAME = join(METRIC_SENDER, NAME_KEY);
     public static final String METRIC_SENDER_ENABLED = join(METRIC_SENDER, ENABLED_KEY);
     public static final String METRIC_SENDER_TOPIC = join(METRIC_SENDER, TOPIC_KEY);
-    public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, "appenderName");
+    public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, APPENDER_KEY);
 
     public static final String METRIC_ASYNC_INTERVAL = join(METRIC_ASYNC, "interval");
 

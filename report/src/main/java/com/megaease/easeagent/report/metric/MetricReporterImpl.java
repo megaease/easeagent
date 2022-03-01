@@ -29,7 +29,6 @@ import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.ReportConfigChange;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
-import com.megaease.easeagent.report.sender.metric.log4j.AppenderManager;
 import com.megaease.easeagent.report.util.Utils;
 
 import java.io.IOException;
@@ -38,19 +37,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.megaease.easeagent.config.report.ReportConfigConst.*;
+import static com.megaease.easeagent.config.report.ReportConfigConst.METRIC_V2;
+import static com.megaease.easeagent.config.report.ReportConfigConst.OUTPUT_SERVER_V2;
 
 public class MetricReporterImpl implements MetricReporter {
     private final ConcurrentHashMap<String, DefaultMetricReporter> reporters;
-    private final AppenderManager appenderManager;
     private final OutputProperties outputProperties;
-    private final Config reportConfig;
+    private final Config metricConfig;
 
     public MetricReporterImpl(Config configs) {
         this.reporters = new ConcurrentHashMap<>();
         outputProperties = Utils.extractOutputProperties(configs);
-        this.appenderManager = AppenderManager.create(outputProperties);
-        this.reportConfig = configs;
+        this.metricConfig = configs;
         configs.addChangeListener(this);
     }
 
@@ -69,7 +67,7 @@ public class MetricReporterImpl implements MetricReporter {
             if (reporter != null) {
                 return reporter;
             }
-            reporter = new DefaultMetricReporter(pluginConfig, this.reportConfig);
+            reporter = new DefaultMetricReporter(pluginConfig, this.metricConfig);
             reporters.put(pluginConfig.namespace(), reporter);
             return reporter;
         }
@@ -82,10 +80,6 @@ public class MetricReporterImpl implements MetricReporter {
             return;
         }
 
-        if (Utils.isOutputPropertiesChange(changes)) {
-            this.outputProperties.updateConfig(changes);
-            appenderManager.refresh();
-        }
         reporters.forEachValue(1, reporter -> reporter.updateConfigs(changes));
     }
 
@@ -107,12 +101,11 @@ public class MetricReporterImpl implements MetricReporter {
         private IPluginConfig pluginConfig;
         private final Config reporterConfig;
 
-        public DefaultMetricReporter(IPluginConfig pluginConfig, Config reportConfig) {
+        public DefaultMetricReporter(IPluginConfig pluginConfig, Config config) {
             this.pluginConfig = pluginConfig;
             pluginConfig.addChangeListener(this);
 
-            this.metricProps = Utils.extractMetricProps(pluginConfig, reportConfig);
-
+            this.metricProps = Utils.extractMetricProps(pluginConfig, config);
             this.reporterConfig = this.metricProps.asReportConfig();
 
             this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), this.reporterConfig);
@@ -137,28 +130,44 @@ public class MetricReporterImpl implements MetricReporter {
 
         @Override
         public void onChange(IPluginConfig oldConfig, IPluginConfig newConfig) {
-            MetricProps newProps = Utils.extractMetricProps(newConfig, reportConfig);
+            MetricProps newProps = Utils.extractMetricProps(newConfig, metricConfig);
 
+            String senderName = this.metricProps.getSenderName();
             this.pluginConfig = newConfig;
             this.metricProps = newProps;
 
-            this.reporterConfig.updateConfigs(metricProps.toReportConfigMap());
-            if (metricProps.getTopic().equals(newProps.getTopic())) {
-                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), reportConfig);
+            this.reporterConfig.updateConfigs(metricProps.asReportConfig().getConfigs());
+
+            if (!metricProps.getSenderName().equals(senderName)) {
+                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), this.reporterConfig);
             }
         }
 
         @Override
         public void updateConfigs(Map<String, String> changes) {
-            MetricProps newProps = Utils.extractMetricProps(pluginConfig, reportConfig);
+            Map<String, String> nCfg = this.reporterConfig.getConfigs();
+            nCfg.putAll(changes);
 
-            this.metricProps = newProps;
-            changes.putAll(metricProps.toReportConfigMap());
-            this.reporterConfig.updateConfigs(changes);
+            String senderName = this.metricProps.getSenderName();
+            this.metricProps = Utils.extractMetricProps(pluginConfig, new Configs(nCfg));
 
-            if (!metricProps.getSenderName().equals(newProps.getSenderName())) {
-                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), reportConfig);
+            this.reporterConfig.updateConfigs(this.metricProps.asReportConfig().getConfigs());
+
+            if (!metricProps.getSenderName().equals(senderName)) {
+                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), this.reporterConfig);
             }
+        }
+
+        public Config getReporterConfig() {
+            return this.reporterConfig;
+        }
+
+        public MetricProps getMetricProps() {
+            return this.metricProps;
+        }
+
+        public SenderWithEncoder getSender() {
+            return this.sender;
         }
     }
 }

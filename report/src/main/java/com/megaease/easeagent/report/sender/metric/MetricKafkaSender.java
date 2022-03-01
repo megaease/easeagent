@@ -35,6 +35,8 @@ import org.apache.logging.log4j.core.Logger;
 import java.io.IOException;
 import java.util.Map;
 
+import static com.megaease.easeagent.config.report.ReportConfigConst.*;
+
 @AutoService(Sender.class)
 public class MetricKafkaSender implements Sender {
     public static final String SENDER_NAME = ReportConfigConst.METRIC_KAFKA_SENDER_NAME;
@@ -44,6 +46,8 @@ public class MetricKafkaSender implements Sender {
     private MetricProps props;
     private Logger logger;
 
+    private String prefix;
+
     @Override
     public String name() {
         return SENDER_NAME;
@@ -51,8 +55,9 @@ public class MetricKafkaSender implements Sender {
 
     @Override
     public void init(Config config, String prefix) {
+        this.prefix = prefix;
         this.outputProperties = Utils.extractOutputProperties(config);
-        this.props = MetricProps.newDefault(config);
+        this.props = MetricProps.newDefault(config, prefix);
         initAppenderManager();
     }
 
@@ -75,6 +80,9 @@ public class MetricKafkaSender implements Sender {
             && this.outputProperties.updateConfig(changes)) {
             appenderManager.refresh();
         }
+        // check topic
+
+        // check enabled
     }
 
     @Override
