@@ -34,8 +34,9 @@ public interface Sender extends Closeable {
     /**
      * Initialize the sender with the configuration
      * @param config configuration with the prefix of "plugin.reporter.sender.[name]
+     * @param prefix sender prefix : "reporter.tracing." is the prefix of "reporter.tracing.sender.[name]"
      */
-    void init(Config config);
+    void init(Config config, String prefix);
 
     /**
      * Sends encoded data to a transport such as http or Kafka.

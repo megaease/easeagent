@@ -45,7 +45,7 @@ public class AgentLoggerSender implements Sender {
     }
 
     @Override
-    public void init(Config config) {
+    public void init(Config config, String prefix) {
         // ignored
     }
 

@@ -50,7 +50,7 @@ public class MetricKafkaSender implements Sender {
     }
 
     @Override
-    public void init(Config config) {
+    public void init(Config config, String prefix) {
         this.outputProperties = Utils.extractOutputProperties(config);
         this.props = MetricProps.newDefault(config);
         initAppenderManager();

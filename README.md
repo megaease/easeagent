@@ -19,7 +19,8 @@ An agent component for Java system.
     - [6. Integrate with Prometheus](#6-integrate-with-prometheus)
     - [7. Test Data](#7-test-data)
   - [User Manual](#user-manual)
-  - [Plugin Development Guide](#plugin-development-guide)
+  - [Enhance Plugin Development Guide](#enhance-plugin-development-guide)
+  - [Report Plugin Development Guide](#report-plugin-development-guide)
   - [Licenses](#licenses)
 
 ## Overview
@@ -212,8 +213,13 @@ After visit more pages, open Prometheus manager [http://localhost:9090](http://l
 ## User Manual
 For more information, please refer to the [User Manual](./doc/user-manual.md).
 
-## Plugin Development Guide
+## Enhance Plugin Development Guide
 Refer to [Plugin Development Guide](./doc/development-guide.md).
+
+## Report Plugin Development Guide
+Report plugin enable user report tracing/metric data to different kind of backend in different format.
+
+Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.

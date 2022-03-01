@@ -74,7 +74,7 @@ public class ReporterRegistry {
     public static SenderWithEncoder getSender(String prefix, Config config) {
         String name = config.getString(prefix + ".name");
         SenderWithEncoder sender = new SenderConfigDecorator(prefix, getSender(name), config);
-        sender.init(config);
+        sender.init(config, prefix);
         return sender;
     }
 

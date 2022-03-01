@@ -88,6 +88,10 @@ public class Bootstrap {
 
         // initiate configuration
         String configPath = System.getProperty(AGENT_CONFIG_PATH);
+        if (StringUtils.isEmpty(configPath)) {
+            configPath = args;
+        }
+
         final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, Bootstrap.class.getClassLoader());
         wrapConfig(conf);
 
