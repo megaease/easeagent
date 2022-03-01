@@ -18,6 +18,7 @@
 package com.megaease.easeagent.report.sender.metric;
 
 import com.google.auto.service.AutoService;
+import com.megaease.easeagent.config.GlobalConfigs;
 import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.Call;
@@ -44,6 +45,8 @@ public class MetricKafkaSender implements Sender {
     private MetricProps props;
     private Logger logger;
 
+    private String prefix;
+
     @Override
     public String name() {
         return SENDER_NAME;
@@ -51,8 +54,9 @@ public class MetricKafkaSender implements Sender {
 
     @Override
     public void init(Config config, String prefix) {
+        this.prefix = prefix;
         this.outputProperties = Utils.extractOutputProperties(config);
-        this.props = MetricProps.newDefault(config);
+        this.props = MetricProps.newDefault(config, prefix);
         initAppenderManager();
     }
 
@@ -75,6 +79,21 @@ public class MetricKafkaSender implements Sender {
             && this.outputProperties.updateConfig(changes)) {
             appenderManager.refresh();
         }
+        // check topic
+        Map<String, String> cfg = this.props.asReportConfig().getConfigs();
+        cfg.putAll(changes);
+        MetricProps nProps = MetricProps.newDefault(new GlobalConfigs(cfg), this.prefix);
+        if (!nProps.getTopic().equals(this.props.getTopic())) {
+            try {
+                this.close();
+            } catch (IOException e) {
+                // ignored
+            }
+            this.props = nProps;
+            this.logger = null;
+            lazyInitLogger();
+        }
+        // check enabled
     }
 
     @Override

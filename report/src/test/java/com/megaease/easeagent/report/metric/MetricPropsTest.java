@@ -46,16 +46,19 @@ public class MetricPropsTest {
 
         MetricProps props = MetricProps.newDefault(pluginConfig, new GlobalConfigs(globalConfig));
         Configs reportConfigs = props.asReportConfig();
-        Assert.assertEquals(CONSOLE_SENDER_NAME, reportConfigs.getString(METRIC_SENDER_NAME));
-        Assert.assertEquals("30", reportConfigs.getString(METRIC_ASYNC_INTERVAL));
-        Assert.assertEquals("test-meter", reportConfigs.getString(METRIC_SENDER_TOPIC));
+        String prefix = props.getSenderPrefix();
+
+        Assert.assertEquals(CONSOLE_SENDER_NAME, reportConfigs.getString(join(prefix, NAME_KEY)));
+        Assert.assertEquals("30", reportConfigs.getString(join(prefix, "output.interval")));
+        Assert.assertEquals("test-meter", reportConfigs.getString(join(prefix, TOPIC_KEY)));
 
         // test kafka
         globalConfig.put("observability.outputServer.bootstrapServer", "127.0.0.1:9092");
         pluginConfig = PluginConfig.build("observability", "metric",
             globalConfig, "test", coverConfig, null);
+
         props = MetricProps.newDefault(pluginConfig, new GlobalConfigs(globalConfig));
         reportConfigs = props.asReportConfig();
-        Assert.assertEquals(METRIC_KAFKA_SENDER_NAME, reportConfigs.getString(METRIC_SENDER_NAME));
+        Assert.assertEquals(METRIC_KAFKA_SENDER_NAME, reportConfigs.getString(join(prefix, NAME_KEY)));
     }
 }

@@ -26,12 +26,10 @@ import com.megaease.easeagent.plugin.utils.NoNull;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.sender.AgentLoggerSender;
 import com.megaease.easeagent.report.sender.metric.MetricKafkaSender;
-import com.megaease.easeagent.report.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.megaease.easeagent.plugin.api.config.ConfigConst.Observability.*;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 public interface MetricProps {
@@ -55,22 +53,19 @@ public interface MetricProps {
         return new Default(reportConfig, config);
     }
 
-    static MetricProps newDefault(Config reportConfig) {
-        return new Default(reportConfig,
-                reportConfig.getString(METRIC_SENDER_APPENDER),
-                reportConfig.getBoolean(METRIC_SENDER_ENABLED),
-                NoNull.of(reportConfig.getString(METRIC_SENDER_NAME), Const.METRIC_DEFAULT_APPEND_TYPE),
-                NoNull.of(reportConfig.getString(METRIC_SENDER_TOPIC), Const.METRIC_DEFAULT_TOPIC),
-                NoNull.of(reportConfig.getInt(METRIC_ASYNC_INTERVAL),
-                    Const.METRIC_DEFAULT_INTERVAL));
+    static MetricProps newDefault(Config reportConfig, String prefix) {
+        return new Default(reportConfig, prefix);
     }
 
     class Default implements MetricProps {
         private volatile String senderName;
         private final boolean enabled;
+
+        // for kafka sender
         private final String topic;
         private final String name;
-        private final int interval;
+
+        private int interval;
         private final Config config;
         private final String senderPrefix;
         private final Map<String, String> pluginConfigMap;
@@ -81,51 +76,51 @@ public interface MetricProps {
             this.enabled = pluginConfig.enabled();
             this.senderPrefix = generatePrefix();
 
-            this.senderName = NoNull.of(pluginConfig.getString(KEY_COMM_APPEND_TYPE),
-                NoNull.of(reportConfig.getString(METRIC_SENDER_NAME), Const.METRIC_DEFAULT_APPEND_TYPE));
-            this.topic = NoNull.of(pluginConfig.getString(KEY_COMM_TOPIC),
-                NoNull.of(reportConfig.getString(METRIC_SENDER_TOPIC), Const.METRIC_DEFAULT_TOPIC));
-            this.interval = NoNull.of(pluginConfig.getInt(KEY_COMM_INTERVAL),
-                NoNull.of(reportConfig.getInt(METRIC_ASYNC_INTERVAL), Const.METRIC_DEFAULT_INTERVAL));
+            // low priority: global level
+            Map<String, String> pCfg = ConfigUtils.extractByPrefix(reportConfig, REPORT);
+            pCfg.putAll(ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_SENDER, senderPrefix));
+
+            // high priority: override by plugin level config
+            pluginConfig.keySet().forEach(key -> {
+                if (key.equals("appendType")) {
+                    if (pluginConfig.getString(NAME_KEY) == null) {
+                        pCfg.put(join(senderPrefix, NAME_KEY), pluginConfig.getString(key));
+                    }
+                } else {
+                    pCfg.put(join(senderPrefix, key), pluginConfig.getString(key));
+                }
+            });
+
+            this.senderName = NoNull.of(pCfg.get(join(senderPrefix, NAME_KEY)), Const.METRIC_DEFAULT_APPEND_TYPE);
+            this.topic = NoNull.of(pCfg.get(join(senderPrefix, TOPIC_KEY)), Const.METRIC_DEFAULT_TOPIC);
+            if (pCfg.get(join(senderPrefix, "interval")) != null) {
+                try {
+                    this.interval = Integer.parseInt(pCfg.get(join(senderPrefix, "interval")));
+                } catch (NumberFormatException e) {
+                    this.interval = Const.METRIC_DEFAULT_INTERVAL;
+                }
+            } else {
+                this.interval = Const.METRIC_DEFAULT_INTERVAL;
+            }
             checkSenderName();
-
-            HashMap<String, String> pluginCfgMap = new HashMap<>();
-            // global level
-            Map<String, String> pCfg = ConfigUtils.extractByPrefix(reportConfig, METRIC_V2);
-            pCfg = ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_SENDER, senderPrefix);
-            pluginCfgMap.putAll(pCfg);
-            // plugin level
-            pluginConfig.keySet().forEach(key -> pluginCfgMap.put(key, pluginConfig.getString(key)));
-            pCfg = ConfigUtils.extractAndConvertPrefix(pluginCfgMap,
-                "plugin." + pluginConfig.domain() + "." + pluginConfig.namespace() + ".metric",
-                this.senderPrefix);
             pCfg.put(join(senderPrefix, "name"), this.senderName);
-            this.pluginConfigMap = pCfg;
+            pCfg.put(join(senderPrefix, "appenderName"), this.name);
+            pCfg.put(join(senderPrefix, "output.interval"), Integer.toString(this.interval));
 
-            // remove later
-            this.pluginConfigMap.put(METRIC_SENDER_APPENDER, this.name);
-            this.pluginConfigMap.put(METRIC_SENDER_NAME, this.senderName);
-            this.pluginConfigMap.put(METRIC_SENDER_TOPIC, this.topic);
-            this.pluginConfigMap.put(METRIC_ASYNC_INTERVAL, String.valueOf(this.interval));
+            this.pluginConfigMap = pCfg;
         }
 
-        public Default(Config reportConfig, String name, boolean enabled,
-                       String senderName, String topic, int interval) {
-            this.name = name;
-            this.enabled = enabled;
-            this.senderName = senderName;
-            this.topic = topic;
-            this.interval = interval;
+        public Default(Config reportConfig, String prefix) {
             this.config = reportConfig;
-            this.senderPrefix = generatePrefix();
-            checkSenderName();
-            this.pluginConfigMap = new HashMap<>();
+            this.senderPrefix = prefix;
+            this.name = this.config.getString(join(this.senderPrefix, "appenderName"));
+            this.enabled = this.config.getBoolean(join(this.senderPrefix, ENABLED_KEY));
+            this.senderName = this.config.getString(join(this.senderPrefix, NAME_KEY));
+            this.topic = this.config.getString(join(this.senderPrefix, TOPIC_KEY));
+            this.interval = this.config.getInt(join(this.senderPrefix, METRIC_ASYNC_INTERVAL));
 
-            // remove later
-            this.pluginConfigMap.put(METRIC_SENDER_APPENDER, this.name);
-            this.pluginConfigMap.put(METRIC_SENDER_NAME, this.senderName);
-            this.pluginConfigMap.put(METRIC_SENDER_TOPIC, this.topic);
-            this.pluginConfigMap.put(METRIC_ASYNC_INTERVAL, String.valueOf(this.interval));
+            checkSenderName();
+            this.pluginConfigMap = new HashMap<>(this.config.getConfigs());
         }
 
         private void checkSenderName() {
@@ -179,6 +174,20 @@ public interface MetricProps {
         @Override
         public int getInterval() {
             return this.interval;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.pluginConfigMap.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Default)) {
+                return false;
+            }
+            Default other = (Default) o;
+            return this.pluginConfigMap.equals(other.pluginConfigMap);
         }
 
         private String generatePrefix() {
