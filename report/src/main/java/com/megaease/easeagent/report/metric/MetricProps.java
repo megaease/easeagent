@@ -77,15 +77,16 @@ public interface MetricProps {
             this.senderPrefix = generatePrefix();
 
             // low priority: global level
-            Map<String, String> pCfg = ConfigUtils.extractByPrefix(reportConfig, METRIC_V2);
+            Map<String, String> pCfg = ConfigUtils.extractByPrefix(reportConfig, REPORT);
             pCfg.putAll(ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_SENDER, senderPrefix));
 
             // high priority: override by plugin level config
             pluginConfig.keySet().forEach(key -> {
                 if (key.equals("appendType")) {
-                    key = NAME_KEY;
+                    pCfg.put(join(senderPrefix, NAME_KEY), pluginConfig.getString(key));
+                } else {
+                    pCfg.put(join(senderPrefix, key), pluginConfig.getString(key));
                 }
-                pCfg.put(join(senderPrefix, key), pluginConfig.getString(key));
             });
 
             this.senderName = NoNull.of(pCfg.get(join(senderPrefix, NAME_KEY)), Const.METRIC_DEFAULT_APPEND_TYPE);
