@@ -37,7 +37,8 @@ public class ReportConfigConst {
     public static final String ENABLED_KEY = "enabled";
     public static final String SENDER_KEY = "sender";
     public static final String ENCODER_KEY = "encoder";
-    public static final String NAME_KEY = "name";
+    public static final String NAME_KEY = "appendType";
+    public static final String INTERVAL_KEY = "interval";
 
     /**
      * Reporter v2 configuration
@@ -87,7 +88,7 @@ public class ReportConfigConst {
     public static final String METRIC_SENDER_TOPIC = join(METRIC_SENDER, TOPIC_KEY);
     public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, APPENDER_KEY);
 
-    public static final String METRIC_ASYNC_INTERVAL = join(METRIC_ASYNC, "interval");
+    public static final String METRIC_ASYNC_INTERVAL = join(METRIC_ASYNC, INTERVAL_KEY);
 
     public static final String OUTPUT_SSL_KEYSTORE_TYPE_V2 = join(OUTPUT_SERVERS_SSL, "keystore.type");
     public static final String OUTPUT_KEY_V2 = join(OUTPUT_SERVERS_SSL, "keystore.key");

@@ -45,8 +45,6 @@ public interface MetricProps {
 
     boolean isEnabled();
 
-    Map<String, String> toReportConfigMap();
-
     Configs asReportConfig();
 
     static MetricProps newDefault(IPluginConfig config, Config reportConfig) {
@@ -81,21 +79,13 @@ public interface MetricProps {
             pCfg.putAll(ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_SENDER, senderPrefix));
 
             // high priority: override by plugin level config
-            pluginConfig.keySet().forEach(key -> {
-                if (key.equals("appendType")) {
-                    if (pluginConfig.getString(NAME_KEY) == null) {
-                        pCfg.put(join(senderPrefix, NAME_KEY), pluginConfig.getString(key));
-                    }
-                } else {
-                    pCfg.put(join(senderPrefix, key), pluginConfig.getString(key));
-                }
-            });
+            pluginConfig.keySet().forEach(key -> pCfg.put(join(senderPrefix, key), pluginConfig.getString(key)));
 
             this.senderName = NoNull.of(pCfg.get(join(senderPrefix, NAME_KEY)), Const.METRIC_DEFAULT_APPEND_TYPE);
             this.topic = NoNull.of(pCfg.get(join(senderPrefix, TOPIC_KEY)), Const.METRIC_DEFAULT_TOPIC);
-            if (pCfg.get(join(senderPrefix, "interval")) != null) {
+            if (pCfg.get(join(senderPrefix, INTERVAL_KEY)) != null) {
                 try {
-                    this.interval = Integer.parseInt(pCfg.get(join(senderPrefix, "interval")));
+                    this.interval = Integer.parseInt(pCfg.get(join(senderPrefix, INTERVAL_KEY)));
                 } catch (NumberFormatException e) {
                     this.interval = Const.METRIC_DEFAULT_INTERVAL;
                 }
@@ -103,8 +93,8 @@ public interface MetricProps {
                 this.interval = Const.METRIC_DEFAULT_INTERVAL;
             }
             checkSenderName();
-            pCfg.put(join(senderPrefix, "name"), this.senderName);
-            pCfg.put(join(senderPrefix, "appenderName"), this.name);
+            pCfg.put(join(senderPrefix, NAME_KEY), this.senderName);
+            pCfg.put(join(senderPrefix, APPENDER_KEY), this.name);
             pCfg.put(join(senderPrefix, "output.interval"), Integer.toString(this.interval));
 
             this.pluginConfigMap = pCfg;
@@ -113,7 +103,7 @@ public interface MetricProps {
         public Default(Config reportConfig, String prefix) {
             this.config = reportConfig;
             this.senderPrefix = prefix;
-            this.name = this.config.getString(join(this.senderPrefix, "appenderName"));
+            this.name = this.config.getString(join(this.senderPrefix, APPENDER_KEY));
             this.enabled = this.config.getBoolean(join(this.senderPrefix, ENABLED_KEY));
             this.senderName = this.config.getString(join(this.senderPrefix, NAME_KEY));
             this.topic = this.config.getString(join(this.senderPrefix, TOPIC_KEY));
@@ -159,15 +149,10 @@ public interface MetricProps {
             return this.enabled;
         }
 
-        @Override
-        public Map<String, String> toReportConfigMap() {
-            return this.pluginConfigMap;
-        }
-
         public Configs asReportConfig() {
             // merge plugin and global config
             Map<String, String> cfg = this.config.getConfigs();
-            cfg.putAll(toReportConfigMap());
+            cfg.putAll(this.pluginConfigMap);
             return new Configs(cfg);
         }
 
