@@ -18,6 +18,7 @@
 package com.megaease.easeagent.report.sender.metric;
 
 import com.google.auto.service.AutoService;
+import com.megaease.easeagent.config.GlobalConfigs;
 import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.Call;
@@ -34,8 +35,6 @@ import org.apache.logging.log4j.core.Logger;
 
 import java.io.IOException;
 import java.util.Map;
-
-import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 @AutoService(Sender.class)
 public class MetricKafkaSender implements Sender {
@@ -81,7 +80,19 @@ public class MetricKafkaSender implements Sender {
             appenderManager.refresh();
         }
         // check topic
-
+        Map<String, String> cfg = this.props.asReportConfig().getConfigs();
+        cfg.putAll(changes);
+        MetricProps nProps = MetricProps.newDefault(new GlobalConfigs(cfg), this.prefix);
+        if (!nProps.getTopic().equals(this.props.getTopic())) {
+            try {
+                this.close();
+            } catch (IOException e) {
+                // ignored
+            }
+            this.props = nProps;
+            this.logger = null;
+            lazyInitLogger();
+        }
         // check enabled
     }
 

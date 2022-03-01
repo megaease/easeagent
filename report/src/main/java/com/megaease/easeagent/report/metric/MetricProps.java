@@ -83,7 +83,9 @@ public interface MetricProps {
             // high priority: override by plugin level config
             pluginConfig.keySet().forEach(key -> {
                 if (key.equals("appendType")) {
-                    pCfg.put(join(senderPrefix, NAME_KEY), pluginConfig.getString(key));
+                    if (pluginConfig.getString(NAME_KEY) == null) {
+                        pCfg.put(join(senderPrefix, NAME_KEY), pluginConfig.getString(key));
+                    }
                 } else {
                     pCfg.put(join(senderPrefix, key), pluginConfig.getString(key));
                 }
