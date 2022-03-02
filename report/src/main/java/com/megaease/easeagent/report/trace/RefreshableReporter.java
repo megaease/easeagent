@@ -28,6 +28,7 @@ import zipkin2.reporter.Reporter;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static com.megaease.easeagent.config.report.ReportConfigConst.TRACE_SENDER;
 import static com.megaease.easeagent.config.report.ReportConfigConst.TRACE_SENDER_NAME;
 
 /**
@@ -65,11 +66,11 @@ public class RefreshableReporter<S> implements Reporter<S> {
                 } catch (Exception ignored) {
                     // ignored
                 }
-                sender = ReporterRegistry.getSender(TRACE_SENDER_NAME, EaseAgent.getConfig());
+                sender = ReporterRegistry.getSender(TRACE_SENDER, EaseAgent.getConfig());
                 asyncReporter.setSender(sender);
             }
         } else {
-            sender = ReporterRegistry.getSender(TRACE_SENDER_NAME, EaseAgent.getConfig());
+            sender = ReporterRegistry.getSender(TRACE_SENDER, EaseAgent.getConfig());
             asyncReporter.setSender(sender);
         }
 
