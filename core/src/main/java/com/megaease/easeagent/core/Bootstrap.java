@@ -83,6 +83,8 @@ public class Bootstrap {
     @SneakyThrows
     public static void start(String args, Instrumentation inst) {
         long begin = System.nanoTime();
+        System.out.println("begin delay Bootstrap start >>>>>>>>>>>>>>>");
+        TimeUnit.SECONDS.sleep(5);
 
         // add bootstrap classes
         Set<String> bootstrapClassSet = AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP);

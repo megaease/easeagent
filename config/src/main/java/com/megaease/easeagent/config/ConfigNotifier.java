@@ -53,14 +53,14 @@ public class ConfigNotifier {
             try {
                 one.onChange(changes);
             } catch (Exception e) {
-                LOGGER.warn("Notify config changes to listener failure: {}", one.toString());
+                LOGGER.warn("Notify config changes to listener failure: {}", e);
             }
         });
     }
 
     private List<ChangeItem> filterChanges(List<ChangeItem> list) {
         return list.stream().filter(one -> one.getFullName().startsWith(prefix))
-                .map(e -> new ChangeItem(e.getFullName().substring(prefix.length()), e.getFullName(), e.getOldValue(), e.getNewValue()))
-                .collect(Collectors.toList());
+            .map(e -> new ChangeItem(e.getFullName().substring(prefix.length()), e.getFullName(), e.getOldValue(), e.getNewValue()))
+            .collect(Collectors.toList());
     }
 }

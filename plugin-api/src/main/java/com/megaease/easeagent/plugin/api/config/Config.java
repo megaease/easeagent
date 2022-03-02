@@ -29,13 +29,21 @@ public interface Config {
 
     Integer getInt(String name);
 
+    Integer getInt(String name, int defValue);
+
     Boolean getBoolean(String name);
+
+    Boolean getBoolean(String name, boolean defValue);
 
     Boolean getBooleanNullForUnset(String name);
 
     Double getDouble(String name);
 
+    Double getDouble(String name, double defValue);
+
     Long getLong(String name);
+
+    Long getLong(String name, long defValue);
 
     List<String> getStringList(String name);
 
