@@ -66,40 +66,32 @@ EaseAgent opens port `9900` by default to receive configuration change notificat
 | `easeagent.server.enabled` | true          | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override. |
 | `easeagent.server.port`    | 9900          | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override.                                                                                                                                                                                |
 
-#### Output Data Server: Kafka and Zipkin Server
+#### Output Data Server: Kafka and HTTP/Zipkin Server
 Tracing and metric data can be output to kafka server.
 
 | Key                                          | Default Value  | Description                                                                  |
 |----------------------------------------------|----------------|------------------------------------------------------------------------------|
-| `observability.outputServer.bootstrapServer` | 127.0.0.1:9092 | Kafka server host and port. Tracing and metric data will be output to kafka. |
-| `observability.outputServer.timeout`         | 10000          | Connect timeout. Time Unit: millisecond.                                     |
+| `reporter.outputServer.bootstrapServer` | 127.0.0.1:9092 | Kafka server host and port. Tracing and metric data will be output to kafka. |
+| `reporter.outputServer.timeout`         | 10000          | Connect timeout. Time Unit: millisecond.                                     |
 
 Global configuration for tracing output
 
 | Key                                                                | Default Value                          | Description                                                                                                                                               |
 |--------------------------------------------------------------------|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `observability.tracings.output.enabled`                            | true                                   | `true`: enable output tracing data;<br /> `false`: disable all tracing data output                                                                        |
-| `observability.tracings.output.target`                             | system                                 | `system` : output tracing to kafka output server; `zipkin`: send data to zipkin server                                                                    |
-| `observability.tracings.output.target.zipkinUrl`                   | [http://localhost:9411/api/v2/spans]() | Zipkin server url, only available when `observability.tracings.output.target=zipkin`                                                                      |
-| `observability.outputServer.security.protocol`                     | ''                                     | Protocol used to communicate with brokers. Valid values are: "PLAINTEXT", "SSL", "SASL_PLAINTEXT","SASL_SSL"                                              |
-| `observability.outputServer.ssl.keystore.type`                     | N/A                                    | The file format of the key store file. This is optional for client. The value can only be `PEM` if set.                                                   |
-| `observability.outputServer.ssl.ssl.keystore.key`                  | N/A                                    | Private key in the format specified by 'ssl.keystore.type'.                                                                                               |
-| `observability.outputServer.ssl.keystore.certificate.chain`        | N/A                                    | Certificate chain in the format specified by 'ssl.keystore.type'                                                                                          |
-| `observability.outputServer.ssl.truststore.type`                   | N/A                                    | The file format of the trust store file. This is optional for client. The value can only be `PEM` if set.                                                 |
-| `observability.outputServer.ssl.truststore.certificates`           | N/A                                    | Trusted certificates in the format specified by 'ssl.truststore.type'.                                                                                    |
-| `observability.outputServer.ssl.endpoint.identification.algorithm` | N/A                                    | The endpoint identification algorithm to validate server hostname using server certificate. set to '' to disable domain name checking in mTLS connection. |
+| `reporter.tracing.sender.appendType`                             | console  | `console` : output tracing to console; `kafka` : output tracing to kafka output server; `http`: send data to http server(zipkin) server                                                                    |
+| `reporter.tracing.sender.url`                                    | [http://localhost:9411/api/v2/spans]() | Zipkin(HTTP) server url, only available when `reporter.tracing.sender.appendType=http`                                                                      |
+| `reporter.tracing.sender.topic`                                   | log-tracing | kafka topic, only available when `reporter.tracing.sender.appendType=kafka`                                                                      |
 
 
-
-Following tracing output configuration items are aviable when `observability.tracings.output.target=system`:
+Following tracing sender configuration items:
 
 | Key                                             | Default Value | Description                                                                                                                                                                            |
 |-------------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `observability.tracings.output.topic`           | log-tracing   | Kafka topic for tracing data output                                                                                                                                                    |
-| `observability.tracings.output.messageMaxBytes` | 999900        | Maximum bytes sendable per message including encoding overhead.                                                                                                                        |
-| `observability.tracings.output.queuedMaxSpans`  | 1000          | Maximum backlog of spans reported before sent.                                                                                                                                         |
-| `observability.tracings.output.queuedMaxSize`   | 1000000       | Maximum backlog of span bytes reported before sent.                                                                                                                                    |
-| `observability.tracings.output.messageTimeout`  | 1000          | Spans are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent span is reported, which ensures that spans are not stuck in an incomplete message. |
+| `reporter.tracings.output.enabled`         | true                                   | `true`: enable output tracing data;<br /> `false`: disable all tracing data output                                                                        |
+| `reporter.tracings.output.messageMaxBytes` | 999900        | Maximum bytes sendable per message including encoding overhead.                                                                                                                        |
+| `reporter.tracings.output.queuedMaxSpans`  | 1000          | Maximum backlog of spans reported before sent.                                                                                                                                         |
+| `reporter.tracings.output.queuedMaxSize`   | 1000000       | Maximum backlog of span bytes reported before sent.                                                                                                                                    |
+| `reporter.tracings.output.messageTimeout`  | 1000          | Spans are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent span is reported, which ensures that spans are not stuck in an incomplete message. |
 
 #### Progress Configuration
 
@@ -204,8 +196,9 @@ The following sections describe the metric and tracing configuration items,  as 
 | `plugin.observability.global.tracing.enabled`   | true              | Enable all tracing collection. `false`: Disable all tracing collection.                                                                                        |
 | `plugin.observability.global.metric.enabled`    | true              | Enable all metrics collection. `false`: Disable all metrics collection.                                                                                        |
 | `plugin.observability.global.metric.interval`   | 30                | Time interval between two outputs. Time Unit: second.                                                                                                          |
-| `plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic.                                                                                                                 |
-| `plugin.observability.global.metric.appendType` | kafka             | The value should be `kafka` or `console`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console. |
+| `plugin.observability.global.metric.topic`      | application-meter | Send metric data to the specified kafka topic, only avaliable when `appendType` is `kafka`.                                                                                                                 |
+| `plugin.observability.global.metric.url`        | /metrics          | Send metric data to the specified http URI, which will be appended to `reporter.outputServer.bootstrapServer`, to form a full url, only avaliable when `appendType` is `http`.                                                                                                                 |
+| `plugin.observability.global.metric.appendType` | kafka             | The value should be `kafka`, `console` or `http`. `kafka`: EaseAgent will output metric data to kafka server. `console`: EaseAgent will output metric data to console; `http`: output metric data to http server. |
 
 Supported components and corresponding namespaces:
 

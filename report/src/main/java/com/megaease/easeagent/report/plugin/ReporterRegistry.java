@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-//@SuppressWarnings({"unused", "rawtypes", "unchecked"})
+import static com.megaease.easeagent.config.report.ReportConfigConst.NAME_KEY;
+import static com.megaease.easeagent.config.report.ReportConfigConst.join;
+
 public class ReporterRegistry {
     static Logger logger = LoggerFactory.getLogger(ReporterRegistry.class);
 
@@ -72,7 +74,7 @@ public class ReporterRegistry {
     }
 
     public static SenderWithEncoder getSender(String prefix, Config config) {
-        String name = config.getString(prefix + ".name");
+        String name = config.getString(join(prefix, NAME_KEY));
         SenderWithEncoder sender = new SenderConfigDecorator(prefix, getSender(name), config);
         sender.init(config, prefix);
         return sender;
