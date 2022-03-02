@@ -29,6 +29,7 @@ import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.springweb.ForwardedPlugin;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientBuilderAdvice;
+import com.megaease.easeagent.plugin.utils.common.WeakConcurrentMap;
 import lombok.NonNull;
 import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
@@ -36,6 +37,7 @@ import reactor.core.publisher.Mono;
 @AdviceTo(value = WebClientBuilderAdvice.class, plugin = ForwardedPlugin.class)
 public class WebClientFilterForwardedInterceptor implements Interceptor {
     protected static volatile AutoRefreshPluginConfigImpl AUTO_CONFIG;
+    static WeakConcurrentMap<WebClient.Builder, Boolean> builders = new WeakConcurrentMap<>();
 
     @Override
     public void init(IPluginConfig config, int uniqueIndex) {
@@ -45,7 +47,9 @@ public class WebClientFilterForwardedInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         WebClient.Builder builder = (WebClient.Builder) methodInfo.getInvoker();
-        builder.filter(new WebClientForwardedFilter());
+        if (builders.putIfProbablyAbsent(builder, Boolean.TRUE) == null) {
+            builder.filter(new WebClientForwardedFilter());
+        }
     }
 
 

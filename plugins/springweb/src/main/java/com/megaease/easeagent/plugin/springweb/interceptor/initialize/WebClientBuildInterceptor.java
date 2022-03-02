@@ -17,24 +17,26 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.initialize;
 
-import com.megaease.easeagent.plugin.interceptor.Interceptor;
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.springweb.WebClientPlugin;
 import com.megaease.easeagent.plugin.springweb.advice.WebClientBuilderAdvice;
+import com.megaease.easeagent.plugin.utils.common.WeakConcurrentMap;
 import com.megaease.plugin.easeagent.springweb.interceptor.tracing.WebClientTracingFilter;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @AdviceTo(value = WebClientBuilderAdvice.class, plugin = WebClientPlugin.class)
 public class WebClientBuildInterceptor implements Interceptor {
-
-    // org.springframework.web.reactive.function.client.WebClient$Builder
+    static WeakConcurrentMap<WebClient.Builder, Boolean> builders = new WeakConcurrentMap<>();
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         WebClient.Builder builder = (WebClient.Builder) methodInfo.getInvoker();
-        builder.filter(new WebClientTracingFilter());
+        if (builders.putIfProbablyAbsent(builder, Boolean.TRUE) == null) {
+            builder.filter(new WebClientTracingFilter());
+        }
     }
 
     @Override

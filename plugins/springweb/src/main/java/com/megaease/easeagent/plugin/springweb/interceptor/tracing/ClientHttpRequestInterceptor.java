@@ -143,6 +143,9 @@ public class ClientHttpRequestInterceptor extends BaseHttpClientTracingIntercept
         @SneakyThrows
         @Override
         public int statusCode() {
+            if (response == null) {
+                return 500;
+            }
             return response.getRawStatusCode();
         }
 
@@ -153,6 +156,9 @@ public class ClientHttpRequestInterceptor extends BaseHttpClientTracingIntercept
 
         @Override
         public String header(String name) {
+            if (response == null) {
+                return "";
+            }
             return getFirstHeaderValue(response.getHeaders(), name);
         }
     }

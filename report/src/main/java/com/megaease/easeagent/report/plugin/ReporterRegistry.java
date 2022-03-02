@@ -75,6 +75,9 @@ public class ReporterRegistry {
 
     public static SenderWithEncoder getSender(String prefix, Config config) {
         String name = config.getString(join(prefix, NAME_KEY));
+        if (name == null) {
+            logger.warn("Can not find sender name for:{}", join(prefix, NAME_KEY));
+        }
         SenderWithEncoder sender = new SenderConfigDecorator(prefix, getSender(name), config);
         sender.init(config, prefix);
         return sender;
