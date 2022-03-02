@@ -95,7 +95,7 @@ public interface MetricProps {
             checkSenderName();
             pCfg.put(join(senderPrefix, NAME_KEY), this.senderName);
             pCfg.put(join(senderPrefix, APPENDER_KEY), this.name);
-            pCfg.put(join(senderPrefix, "output.interval"), Integer.toString(this.interval));
+            pCfg.put(join(senderPrefix, INTERVAL_KEY), Integer.toString(this.interval));
 
             this.pluginConfigMap = pCfg;
         }
@@ -107,7 +107,7 @@ public interface MetricProps {
             this.enabled = this.config.getBoolean(join(this.senderPrefix, ENABLED_KEY));
             this.senderName = this.config.getString(join(this.senderPrefix, NAME_KEY));
             this.topic = this.config.getString(join(this.senderPrefix, TOPIC_KEY));
-            this.interval = this.config.getInt(join(this.senderPrefix, METRIC_ASYNC_INTERVAL));
+            this.interval = this.config.getInt(join(this.senderPrefix, INTERVAL_KEY));
 
             checkSenderName();
             this.pluginConfigMap = new HashMap<>(this.config.getConfigs());
