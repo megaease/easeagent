@@ -23,6 +23,7 @@ import com.megaease.easeagent.core.config.*;
 import com.megaease.easeagent.core.plugin.BaseLoader;
 import com.megaease.easeagent.core.plugin.BridgeDispatcher;
 import com.megaease.easeagent.core.plugin.PluginLoader;
+import com.megaease.easeagent.core.utils.JsonUtil;
 import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
@@ -51,7 +52,9 @@ import javax.management.ObjectName;
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -64,6 +67,7 @@ public class Bootstrap {
     private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
     private static final String AGENT_CONFIG_PATH = "easeagent.config.path";
     private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
+    private static final String EASEAGENT_ENV_CONFIG = "EASEAGENT_ENV_CONFIG";
 
     private static final String AGENT_MIDDLEWARE_UPDATE = "easeagent.middleware.update";
 
@@ -93,6 +97,7 @@ public class Bootstrap {
         }
 
         final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, Bootstrap.class.getClassLoader());
+        mergeWithEnv(conf);
         wrapConfig(conf);
 
         // init Context/API
@@ -118,9 +123,9 @@ public class Bootstrap {
 
         long installBegin = System.currentTimeMillis();
         builder.installOn(inst);
-        LOGGER.info("installBegin use time: {}", (System.currentTimeMillis() - installBegin));
+        LOGGER.info("installBegin use time: {}ms", (System.currentTimeMillis() - installBegin));
 
-        LOGGER.info("Initialization has took {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
+        LOGGER.info("Initialization has took {}ns", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin));
     }
 
     private static void initHttpServer(Configs conf) {
@@ -246,6 +251,20 @@ public class Bootstrap {
             LOGGER.debug("Loaded conf:\n{}", display);
         }
         return configs;
+    }
+
+    private static void mergeWithEnv(GlobalConfigs configs) {
+        String configEnv = System.getenv(EASEAGENT_ENV_CONFIG);
+        if (StringUtils.isNotEmpty(configEnv)) {
+            Map<String, Object> map = JsonUtil.toMap(configEnv);
+            if (!map.isEmpty()) {
+                Map<String, String> strMap = new HashMap<>();
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    strMap.put(entry.getKey(), entry.getValue().toString());
+                }
+                configs.updateConfigsNotNotify(strMap);
+            }
+        }
     }
 
     private static void wrapConfig(GlobalConfigs configs) {

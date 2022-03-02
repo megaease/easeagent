@@ -35,9 +35,7 @@ public class ProgressFieldsManagerTest {
     public void init() {
         HashMap<String, String> source = new HashMap<>();
         source.put("plugin.observability.global.metrics.enabled", "true");
-        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + ".0", "aaa");
-        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + ".1", "bbb");
-        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + ".2", "ccc");
+        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, "aaa,bbb,ccc");
         Configs configs = new Configs(source);
         ProgressFieldsManager.init(configs);
         Set<String> fields = ProgressFields.getForwardedHeaders();
@@ -46,7 +44,7 @@ public class ProgressFieldsManagerTest {
 
     @Test
     public void isEmpty() {
-        assertTrue(ProgressFields.isEmpty(null));
+        assertTrue(true);
         assertTrue(ProgressFields.isEmpty(new String[0]));
         assertFalse(ProgressFields.isEmpty(new String[1]));
     }
@@ -55,34 +53,22 @@ public class ProgressFieldsManagerTest {
     public void getFields() {
         HashMap<String, String> source = new HashMap<>();
         source.put("plugin.observability.global.metrics.enabled", "true");
-        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + ".0", "aaa");
-        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + ".1", "bbb");
-        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + ".2", "ccc");
+        source.put(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, "a,b,c");
         Configs configs = new Configs(source);
         ProgressFieldsManager.init(configs);
         Set<String> fields = ProgressFields.getForwardedHeaders();
         assertFalse(fields.isEmpty());
-        assertTrue(fields.contains("aaa"));
-        assertTrue(fields.contains("bbb"));
-        assertTrue(fields.contains("ccc"));
+        assertTrue(fields.contains("a"));
+        assertTrue(fields.contains("b"));
+        assertTrue(fields.contains("c"));
 
-        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG +".0", "aaa"));
-        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG +".2", "ccc"));
+        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, "a"));
+        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, "c"));
         fields = ProgressFields.getForwardedHeaders();
         assertFalse(fields.isEmpty());
-        assertTrue(fields.contains("aaa"));
-        assertTrue(fields.contains("bbb"));
-        assertTrue(fields.contains("ccc"));
-
-        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG +".0", "aaa"));
-        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG +".1", "ddd"));
-        configs.updateConfigs(Collections.singletonMap(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG +".2", "ccc"));
-        fields = ProgressFields.getForwardedHeaders();
-        assertFalse(fields.isEmpty());
-        assertTrue(fields.contains("aaa"));
-        assertTrue(fields.contains("ddd"));
-        assertTrue(fields.contains("ccc"));
-        assertFalse(fields.contains("bbb"));
+        assertFalse(fields.contains("a"));
+        assertFalse(fields.contains("b"));
+        assertTrue(fields.contains("c"));
 
     }
 }

@@ -35,40 +35,34 @@ public class ProgressFieldsTest {
 
     @Test
     public void isProgressFields() {
-        assertTrue(ProgressFields.isProgressFields(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG+"abc"));
-        assertTrue(ProgressFields.isProgressFields(OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG+"abc"));
-        assertTrue(ProgressFields.isProgressFields(OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG +"abc"));
-        assertFalse(ProgressFields.isProgressFields("c"+ OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG +"abc"));
-
+        assertFalse(ProgressFields.isProgressFields(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + "abc"));
+        assertTrue(ProgressFields.isProgressFields(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG));
+        assertTrue(ProgressFields.isProgressFields(OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG + "abc"));
+        assertTrue(ProgressFields.isProgressFields(OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG + "abc"));
+        assertFalse(ProgressFields.isProgressFields("c" + OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG + "abc"));
     }
 
     @Test
     public void isEmpty() {
-        assertTrue(ProgressFields.isEmpty(null));
+        assertTrue(true);
         assertTrue(ProgressFields.isEmpty(new String[0]));
         assertFalse(ProgressFields.isEmpty(new String[1]));
     }
 
     @Test
     public void getForwardedHeaders() {
-        String keyPrefix = EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG;
+        String key = EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG;
         assertTrue(ProgressFields.getForwardedHeaders().isEmpty());
-        ProgressFields.changeListener().accept(Collections.singletonMap(keyPrefix + "aaa", "bbb"));
+        ProgressFields.changeListener().accept(Collections.singletonMap(key, "a,b,c"));
         assertFalse(ProgressFields.getForwardedHeaders().isEmpty());
-        assertEquals(1, ProgressFields.getForwardedHeaders().size());
-        assertTrue(ProgressFields.getForwardedHeaders().contains("bbb"));
-        ProgressFields.changeListener().accept(Collections.singletonMap(keyPrefix + "aaa", ""));
-        assertTrue(ProgressFields.getForwardedHeaders().isEmpty());
-        Map<String, String> map = new HashMap<>();
-        map.put(keyPrefix + "aaa", "bbb");
-        map.put(keyPrefix + "ccc", "ddd");
-        map.put(keyPrefix + "ffff", "fff");
-        ProgressFields.changeListener().accept(map);
         assertEquals(3, ProgressFields.getForwardedHeaders().size());
-        for (String s : map.keySet()) {
-            map.put(s, "");
-        }
-        ProgressFields.changeListener().accept(map);
+        assertTrue(ProgressFields.getForwardedHeaders().contains("b"));
+        ProgressFields.changeListener().accept(Collections.singletonMap(key, "a,b"));
+        assertFalse(ProgressFields.getForwardedHeaders().isEmpty());
+        assertTrue(ProgressFields.getForwardedHeaders().contains("a"));
+        assertTrue(ProgressFields.getForwardedHeaders().contains("b"));
+        assertFalse(ProgressFields.getForwardedHeaders().contains("c"));
+        ProgressFields.changeListener().accept(Collections.singletonMap(key, ""));
         assertTrue(ProgressFields.getForwardedHeaders().isEmpty());
     }
 
@@ -88,9 +82,7 @@ public class ProgressFieldsTest {
         map.put(keyPrefix + "ffff", "fff");
         ProgressFields.changeListener().accept(map);
         assertEquals(3, ProgressFields.getResponseHoldTagFields().length);
-        for (String s : map.keySet()) {
-            map.put(s, "");
-        }
+        map.replaceAll((s, v) -> "");
         ProgressFields.changeListener().accept(map);
         assertTrue(ProgressFields.isEmpty(ProgressFields.getResponseHoldTagFields()));
     }
@@ -114,9 +106,7 @@ public class ProgressFieldsTest {
         assertEquals("bbb", ProgressFields.getServiceTags().get("aaa"));
         assertEquals("ddd", ProgressFields.getServiceTags().get("ccc"));
         assertEquals("fff", ProgressFields.getServiceTags().get("ffff"));
-        for (String s : map.keySet()) {
-            map.put(s, "");
-        }
+        map.replaceAll((s, v) -> "");
         ProgressFields.changeListener().accept(map);
         assertTrue(ProgressFields.getServiceTags().isEmpty());
     }

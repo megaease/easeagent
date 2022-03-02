@@ -77,7 +77,6 @@ public class CompatibilityConversion {
         Map<String, String> newConfigs = new HashMap<>();
         for (Map.Entry<String, String> entry : oldConfigs.entrySet()) {
             Conversion<?> conversion = transformConversion(entry.getKey());
-            @SuppressWarnings("unchecked")
             Object changed = conversion.transform(newConfigs, entry.getValue());
             if (conversion.isChange()) {
                 changedKeys.put(entry.getKey(), changed);
@@ -101,7 +100,7 @@ public class CompatibilityConversion {
         } else if (key.startsWith("observability.tracings.")) {
             return tracingConversion(key);
         } else if (key.startsWith(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".")) {
-            return forwardedHeadersConversion(key);
+//            return forwardedHeadersConversion(key);
         }
         return new FinalConversion(key, false);
     }
@@ -122,9 +121,9 @@ public class CompatibilityConversion {
         return conversion(key, TRACING_SKIP, ConfigConst.PluginID.TRACING);
     }
 
-    private static Conversion<?> forwardedHeadersConversion(String key) {
-        return new FinalConversion(key.replace(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".", ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + "."), true);
-    }
+//    private static Conversion<?> forwardedHeadersConversion(String key) {
+//        return new FinalConversion(key.replace(ConfigConst.GlobalCanaryLabels.SERVICE_HEADERS + ".", ProgressFields.EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG + "."), true);
+//    }
 
     private static Conversion<?> conversion(String key, Set<String> skipSet, String pluginId) {
         String[] keys = ConfigConst.split(key);

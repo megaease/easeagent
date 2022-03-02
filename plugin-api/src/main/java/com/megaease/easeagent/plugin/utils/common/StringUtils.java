@@ -18,6 +18,8 @@
 package com.megaease.easeagent.plugin.utils.common;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public class StringUtils {
@@ -27,9 +29,10 @@ public class StringUtils {
 
     /**
      * <p> If the first one is empty, return the alternative value</p>
+     *
      * @param first     first
      * @param alternate alternative value
-     * @return  String
+     * @return String
      */
     public static String noEmptyOf(String first, String alternate) {
         if (isEmpty(first)) {
@@ -221,5 +224,12 @@ public class StringUtils {
 
     public static boolean hasText(String val) {
         return val != null && val.trim().length() > 0;
+    }
+
+    public static String[] split(final String str, final String separatorChars) {
+        if (isEmpty(str)) {
+            return null;
+        }
+        return str.split(separatorChars);
     }
 }

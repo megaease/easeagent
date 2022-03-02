@@ -33,7 +33,10 @@ import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -42,7 +45,6 @@ import static com.megaease.easeagent.plugin.api.ProgressFields.EASEAGENT_PROGRES
 import static org.junit.Assert.*;
 
 public class SessionContextTest {
-    ContextManager contextManager;
 
     @Before
     public void before() {
@@ -188,7 +190,7 @@ public class SessionContextTest {
     }
 
     @Test
-    public void exportAsync() throws InterruptedException {
+    public void exportAsync() {
         SessionContext sessionContext = new SessionContext();
         sessionContext.setSupplier(EaseAgent.initializeContextSupplier);
         MockITracing iTracing = new MockITracing();
@@ -207,10 +209,10 @@ public class SessionContextTest {
         SessionContext sessionContext2 = new SessionContext();
         sessionContext2.setCurrentTracing(iTracing);
         assertNull(sessionContext2.get(name));
-        try (Cleaner cleaner = sessionContext2.importAsync(asyncContext)) {
+        try (Cleaner ignored = sessionContext2.importAsync(asyncContext)) {
             assertEquals(value, sessionContext2.get(name));
             assertEquals(1, iTracing.importAsyncCount.get());
-            try (Cleaner cleaner2 = sessionContext2.importAsync(asyncContext)) {
+            try (Cleaner ignored1 = sessionContext2.importAsync(asyncContext)) {
                 assertEquals(2, iTracing.importAsyncCount.get());
             }
             assertEquals(value, sessionContext2.get(name));
@@ -219,7 +221,7 @@ public class SessionContextTest {
     }
 
     @Test
-    public void importAsync() throws InterruptedException {
+    public void importAsync() {
         exportAsync();
     }
 
@@ -342,7 +344,7 @@ public class SessionContextTest {
     public void isNecessaryKeys() {
         SessionContext sessionContext = new SessionContext();
         MockITracing iTracing = new MockITracing();
-        iTracing.setPropagationKeys(Arrays.asList(new String[]{"b3"}));
+        iTracing.setPropagationKeys(Collections.singletonList("b3"));
         sessionContext.setCurrentTracing(iTracing);
         assertTrue(sessionContext.isNecessaryKeys("b3"));
         assertFalse(sessionContext.isNecessaryKeys("aaa"));
@@ -372,8 +374,7 @@ public class SessionContextTest {
     @Test
     public void injectForwardedHeaders() {
         String forwarded = "test_forwarded_value";
-        String keyPrefix = EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG;
-        String forwardedKey = keyPrefix + "test_forwarded_key";
+        String forwardedKey = EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG;
         String headerValue = "test_value";
         ProgressFields.changeListener().accept(Collections.singletonMap(forwardedKey, forwarded));
         ProgressFields.changeListener().accept(Collections.singletonMap(forwardedKey + "2", forwarded + "2"));
@@ -393,11 +394,6 @@ public class SessionContextTest {
 
         ProgressFields.changeListener().accept(Collections.singletonMap(forwardedKey, ""));
         ProgressFields.changeListener().accept(Collections.singletonMap(forwardedKey + "2", ""));
-    }
-
-    @Test
-    public void importForwardedHeaders() {
-        injectForwardedHeaders();
     }
 
     @Test

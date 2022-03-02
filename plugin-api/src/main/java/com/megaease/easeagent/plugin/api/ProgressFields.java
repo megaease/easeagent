@@ -24,12 +24,12 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class ProgressFields {
-    public static final String EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG = "easeagent.progress.forwarded.headers.";
+    public static final String EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG = "easeagent.progress.forwarded.headers";
     public static final String OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG = "observability.tracings.tag.response.headers.";
     public static final String OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG = "observability.tracings.service.tags.";
-    private static volatile Fields forwardedHeaders = build(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG, Collections.emptyMap());
     private static volatile Fields responseHoldTagFields = build(OBSERVABILITY_TRACINGS_TAG_RESPONSE_HEADERS_CONFIG, Collections.emptyMap());
     private static volatile Fields serviceTags = build(OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG, Collections.emptyMap());
+    private static final Set<String> forwardHeaderSet = new HashSet<>();
 
 
     public static Consumer<Map<String, String>> changeListener() {
@@ -41,7 +41,7 @@ public class ProgressFields {
     }
 
     private static boolean isForwardedHeader(String key) {
-        return key.startsWith(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG);
+        return key.equals(EASEAGENT_PROGRESS_FORWARDED_HEADERS_CONFIG);
     }
 
     private static boolean isResponseHoldTagKey(String key) {
@@ -52,9 +52,13 @@ public class ProgressFields {
         return key.startsWith(OBSERVABILITY_TRACINGS_SERVICE_TAGS_CONFIG);
     }
 
-    @SuppressWarnings("all")
-    private static void setForwardedHeaders(Map<String, String> headers) {
-        forwardedHeaders = forwardedHeaders.rebuild(headers);
+    private static void buildForwardedHeaderSet(String value) {
+        String[] split = StringUtils.split(value, ",");
+        forwardHeaderSet.clear();
+        if (split == null || split.length == 0) {
+            return;
+        }
+        forwardHeaderSet.addAll(Arrays.asList(split));
     }
 
     @SuppressWarnings("all")
@@ -72,7 +76,7 @@ public class ProgressFields {
     }
 
     public static Set<String> getForwardedHeaders() {
-        return forwardedHeaders.fieldSet;
+        return forwardHeaderSet;
     }
 
     public static String[] getResponseHoldTagFields() {
@@ -98,14 +102,12 @@ public class ProgressFields {
 
     public static class Fields {
         private final String keyPrefix;
-        private final Set<String> fieldSet;
         private final String[] values;
         private final Map<String, String> keyValues;
         private final Map<String, String> map;
 
         private Fields(@Nonnull String keyPrefix, @Nonnull Set<String> fieldSet, Map<String, String> keyValues, @Nonnull Map<String, String> map) {
             this.keyPrefix = keyPrefix;
-            this.fieldSet = fieldSet;
             this.values = fieldSet.toArray(new String[0]);
             this.keyValues = keyValues;
             this.map = map;
@@ -129,7 +131,6 @@ public class ProgressFields {
     }
 
     static class Change {
-        private final Map<String, String> forwardedHeaders = new HashMap<>();
         private final Map<String, String> responseHoldTags = new HashMap<>();
         private final Map<String, String> serverTags = new HashMap<>();
 
@@ -142,7 +143,7 @@ public class ProgressFields {
 
         public void put(String key, String value) {
             if (ProgressFields.isForwardedHeader(key)) {
-                forwardedHeaders.put(key, value);
+                buildForwardedHeaderSet(value);
             } else if (ProgressFields.isResponseHoldTagKey(key)) {
                 responseHoldTags.put(key, value);
             } else if (ProgressFields.isServerTags(key)) {
@@ -151,9 +152,6 @@ public class ProgressFields {
         }
 
         private void flush() {
-            if (!forwardedHeaders.isEmpty()) {
-                setForwardedHeaders(forwardedHeaders);
-            }
             if (!responseHoldTags.isEmpty()) {
                 setResponseHoldTagFields(responseHoldTags);
             }

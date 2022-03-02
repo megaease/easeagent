@@ -51,8 +51,6 @@ public class Main {
     private static ClassLoader loader;
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-//        System.out.println("begin delay start");
-//        TimeUnit.SECONDS.sleep(5);
         File jar = getArchiveFileContains();
         final JarFileArchive archive = new JarFileArchive(jar);
 
