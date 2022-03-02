@@ -33,10 +33,7 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
-import com.megaease.easeagent.plugin.jdbc.common.DatabaseInfo;
-import com.megaease.easeagent.plugin.jdbc.common.JdbcUtils;
-import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
-import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
+import com.megaease.easeagent.plugin.jdbc.common.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.sql.Connection;
@@ -50,7 +47,7 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
     public static final String SPAN_ERROR_TAG_NAME = "error";
     public static final String SPAN_LOCAL_COMPONENT_TAG_NAME = "local-component";
     public static final String SPAN_URL = "url";
-    private static volatile MD5SQLCompression md5SQLCompression;
+    private static volatile SQLCompression md5SQLCompression;
 
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
@@ -59,7 +56,7 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
          * make it loaded during init, so these classes can be found
          * during running
          */
-        md5SQLCompression = MD5SQLCompression.getInstance();
+        md5SQLCompression = SQLCompressionFactory.getSqlCompression();
         DigestUtils.md5Hex("");
     }
 

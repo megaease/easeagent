@@ -33,6 +33,7 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.TestUtils;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
+import com.megaease.easeagent.plugin.jdbc.common.SQLCompressionFactory;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +74,7 @@ public class JdbcStmMetricInterceptorTest {
         sqlInfo.addSql(sql, false);
         context.put(SqlInfo.class, sqlInfo);
 
-        String key = MD5SQLCompression.getInstance().compress(sqlInfo.getSql());
+        String key = SQLCompressionFactory.getSqlCompression().compress(sqlInfo.getSql());
         MethodInfo methodInfo = MethodInfo.builder().build();
         interceptor.doAfter(methodInfo, context);
         TagVerifier tagVerifier = TagVerifier.build(JdbcMetric.newStmTags(), key);
