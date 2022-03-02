@@ -49,7 +49,7 @@ public class MetricPropsTest {
         String prefix = props.getSenderPrefix();
 
         Assert.assertEquals(CONSOLE_SENDER_NAME, reportConfigs.getString(join(prefix, NAME_KEY)));
-        Assert.assertEquals("30", reportConfigs.getString(join(prefix, "output.interval")));
+        Assert.assertEquals("30", reportConfigs.getString(join(prefix, INTERVAL_KEY)));
         Assert.assertEquals("test-meter", reportConfigs.getString(join(prefix, TOPIC_KEY)));
 
         // test kafka
