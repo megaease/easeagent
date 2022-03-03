@@ -18,22 +18,35 @@
 package com.megaease.easeagent.zipkin.logging;
 
 
+import com.megaease.easeagent.plugin.utils.common.WeakConcurrentMap;
+import com.megaease.easeagent.plugin.utils.common.WeakConcurrentMap.WeakKey;
+
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 
 public class AgentLogMDC {
+    static WeakConcurrentMap<ClassLoader, AgentLogMDC> appMdcMap = new WeakConcurrentMap<>();
 
     public final Class<?> clazz;
     private final Method method4Get;
     private final Method method4Put;
     private final Method method4Remove;
 
+
     public static AgentLogMDC create(ClassLoader classLoader) {
+        AgentLogMDC mdc = appMdcMap.getIfPresent(classLoader);
+        if (mdc != null) {
+            return mdc;
+        }
         Class<?> aClass = LogUtils.checkLog4JMDC(classLoader);
         if (aClass == null) {
             aClass = LogUtils.checkLogBackMDC(classLoader);
         }
+
         if (aClass != null) {
-            return new AgentLogMDC(aClass);
+            mdc = new AgentLogMDC(aClass);
+            appMdcMap.putIfProbablyAbsent(classLoader, mdc);
+            return mdc;
         }
         return null;
     }
