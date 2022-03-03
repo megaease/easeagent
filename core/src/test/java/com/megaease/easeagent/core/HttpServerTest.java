@@ -179,7 +179,7 @@ public class HttpServerTest {
         Assert.assertFalse(config.enabled());
 
         get(httpServer + "/plugins/domains/observability/namespaces/global/metric/properties/enabled/true/1");
-        resp = post(httpServer + "/config-service", "{\"observability.metrics.jdbcConnection.enabled\":\"false\",\"observability.metrics.kafka.enabled\": \"false\", \"version\": \"1\"}");
+        resp = post(httpServer + "/config", "{\"observability.metrics.jdbcConnection.enabled\":\"false\",\"observability.metrics.kafka.enabled\": \"false\", \"version\": \"1\"}");
         System.out.println(resp);
 
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
