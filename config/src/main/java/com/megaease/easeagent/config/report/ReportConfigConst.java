@@ -58,9 +58,6 @@ public class ReportConfigConst {
     public static final String OUTPUT_SECURITY_PROTOCOL_V2 = join(OUTPUT_SERVER_V2, "security.protocol");
     public static final String OUTPUT_SERVERS_SSL = join(OUTPUT_SERVER_V2, "ssl");
 
-    public static final String GENERAL_SENDER = join(GENERAL, SENDER_KEY);
-    public static final String GENERAL_ENCODER = join(GENERAL, ENCODER_KEY);
-
     public static final String TRACE_SENDER = join(TRACE_V2, SENDER_KEY);
     public static final String TRACE_ENCODER = join(TRACE_V2, ENCODER_KEY);
     public static final String TRACE_ASYNC = join(TRACE_V2, "output");
@@ -70,9 +67,6 @@ public class ReportConfigConst {
     public static final String METRIC_ASYNC = join(METRIC_V2, "output");
 
     // -------- lv4  --------
-    public static final String GENERAL_SENDER_NAME = join(GENERAL_SENDER, NAME_KEY);
-    public static final String GENERAL_SENDER_ENABLED = join(GENERAL_SENDER, ENABLED_KEY);
-
     public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, NAME_KEY);
     public static final String TRACE_SENDER_ENABLED_V2 = join(TRACE_SENDER, ENABLED_KEY);
     public static final String TRACE_SENDER_TOPIC_V2 = join(TRACE_SENDER, TOPIC_KEY);
