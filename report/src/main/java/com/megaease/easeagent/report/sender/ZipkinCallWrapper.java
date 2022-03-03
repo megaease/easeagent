@@ -19,9 +19,11 @@ package com.megaease.easeagent.report.sender;
 
 import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.Callback;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class ZipkinCallWrapper<V> implements Call<V> {
     private final zipkin2.Call<V> call;
 
@@ -31,7 +33,12 @@ public class ZipkinCallWrapper<V> implements Call<V> {
 
     @Override
     public V execute() throws IOException {
-        return call.execute();
+        try {
+            return call.execute();
+        } catch (Exception e) {
+            log.warn("Call exception: {}", e.getMessage());
+            throw new IOException();
+        }
     }
 
     @Override

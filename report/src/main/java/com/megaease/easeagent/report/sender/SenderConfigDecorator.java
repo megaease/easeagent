@@ -140,7 +140,7 @@ public class SenderConfigDecorator
         Map<String, String> cfg = new HashMap<>(extract);
 
         // outputServer config
-        cfg.putAll(extractByPrefix(config, OUTPUT_SERVER_V2));
+        cfg.putAll(extractByPrefix(config, REPORT));
 
         return cfg;
     }
@@ -150,9 +150,9 @@ public class SenderConfigDecorator
         list.stream()
             .filter(one -> {
                 String name = one.getFullName();
-                return name.startsWith(prefix)
+                return name.startsWith(REPORT)
                     || name.startsWith(this.encoderKey)
-                    || name.startsWith(OUTPUT_SERVER_V2);
+                    || name.startsWith(prefix);
             }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
 
         return cfg;
