@@ -57,12 +57,12 @@ public abstract class ConfigsUpdateAgentHttpHandler extends AgentHttpHandler {
     }
 
     public Response processJsonConfig(Map<String, Object> map, Map<String, String> urlParams) {
-        String version = (String) map.remove("version");
-        if (version == null) {
-            return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, (String) null);
-        }
+//        String version = (String) map.remove("version");
+//        if (version == null) {
+//            return Response.newFixedLengthResponse(Status.BAD_REQUEST, AgentHttpServer.JSON_TYPE, (String) null);
+//        }
         Map<String, String> config = toConfigMap(map);
-        Response response = processConfig(config, urlParams, version);
+        Response response = processConfig(config, urlParams, null);
         if (response != null) {
             return response;
         }

@@ -32,7 +32,8 @@ public class Configs implements Config {
     protected Map<String, String> source;
     protected ConfigNotifier notifier;
 
-    protected Configs() {}
+    protected Configs() {
+    }
 
     public Configs(Map<String, String> source) {
         this.source = new TreeMap<>(source);
@@ -94,6 +95,15 @@ public class Configs implements Config {
         }
     }
 
+    @Override
+    public Integer getInt(String name, int defValue) {
+        Integer anInt = getInt(name);
+        if (anInt == null) {
+            return defValue;
+        }
+        return anInt;
+    }
+
     public Boolean getBooleanNullForUnset(String name) {
         String value = this.source.get(name);
         if (value == null) {
@@ -110,6 +120,15 @@ public class Configs implements Config {
         return value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
     }
 
+    @Override
+    public Boolean getBoolean(String name, boolean defValue) {
+        Boolean aBoolean = getBoolean(name);
+        if (aBoolean == null) {
+            return defValue;
+        }
+        return aBoolean;
+    }
+
     public Double getDouble(String name) {
         String value = this.source.get(name);
         if (value == null) {
@@ -122,6 +141,15 @@ public class Configs implements Config {
         }
     }
 
+    @Override
+    public Double getDouble(String name, double defValue) {
+        Double aDouble = getDouble(name);
+        if (aDouble == null) {
+            return defValue;
+        }
+        return aDouble;
+    }
+
     public Long getLong(String name) {
         String value = this.source.get(name);
         if (value == null) {
@@ -132,6 +160,15 @@ public class Configs implements Config {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public Long getLong(String name, long defValue) {
+        Long aLong = getLong(name);
+        if (aLong == null) {
+            return defValue;
+        }
+        return aLong;
     }
 
     public List<String> getStringList(String name) {

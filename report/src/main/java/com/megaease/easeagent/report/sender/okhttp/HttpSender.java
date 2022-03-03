@@ -58,7 +58,7 @@ public class HttpSender implements Sender {
 
     private static final String ENABLED_KEY = "enabled";
     private static final String URL_KEY = "url";
-    private static final String USER_NAME_KEY = "userName";
+    private static final String USER_NAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
     private static final String GZIP_KEY = "compress";
     private static final String MAX_REQUESTS_KEY = "maxRequests";

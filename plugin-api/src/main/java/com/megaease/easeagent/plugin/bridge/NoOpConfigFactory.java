@@ -60,8 +60,26 @@ public class NoOpConfigFactory implements IConfigFactory {
         }
 
         @Override
+        public Integer getInt(String name, int defValue) {
+            Integer anInt = getInt(name);
+            if (anInt == null) {
+                return defValue;
+            }
+            return anInt;
+        }
+
+        @Override
         public Boolean getBoolean(String name) {
             return false;
+        }
+
+        @Override
+        public Boolean getBoolean(String name, boolean defValue) {
+            Boolean aBoolean = getBoolean(name);
+            if (aBoolean == null) {
+                return defValue;
+            }
+            return aBoolean;
         }
 
         @Override
@@ -75,8 +93,26 @@ public class NoOpConfigFactory implements IConfigFactory {
         }
 
         @Override
+        public Double getDouble(String name, double defValue) {
+            Double aDouble = getDouble(name);
+            if (aDouble == null) {
+                return defValue;
+            }
+            return aDouble;
+        }
+
+        @Override
         public Long getLong(String name) {
             return null;
+        }
+
+        @Override
+        public Long getLong(String name, long defValue) {
+            Long aLong = getLong(name);
+            if (aLong == null) {
+                return defValue;
+            }
+            return aLong;
         }
 
         @Override
