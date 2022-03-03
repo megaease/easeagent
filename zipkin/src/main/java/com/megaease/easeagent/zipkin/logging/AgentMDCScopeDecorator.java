@@ -22,7 +22,6 @@ import brave.internal.CorrelationContext;
 import brave.internal.Nullable;
 import brave.propagation.CurrentTraceContext;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 public class AgentMDCScopeDecorator {
     static final CurrentTraceContext.ScopeDecorator INSTANCE = new BuilderApp().build();

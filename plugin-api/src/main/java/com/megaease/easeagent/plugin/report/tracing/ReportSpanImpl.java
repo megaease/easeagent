@@ -145,7 +145,7 @@ public class ReportSpanImpl implements ReportSpan {
         localEndpoint = builder.localEndpoint;
         remoteEndpoint = builder.remoteEndpoint;
         annotations = builder.annotations;
-        tags = builder.tags == null ? Collections.emptyMap() : new LinkedHashMap<>(builder.tags);
+        tags = builder.tags == null ? Collections.emptyMap() : new TreeMap<>(builder.tags);
         debug = builder.debug;
         shared = builder.shared;
     }

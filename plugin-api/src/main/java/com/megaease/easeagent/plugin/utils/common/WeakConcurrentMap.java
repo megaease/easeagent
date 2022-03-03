@@ -51,7 +51,7 @@ public class WeakConcurrentMap<K, V> extends ReferenceQueue<K> implements Iterab
         if (key == null) throw new NullPointerException("key == null");
         expungeStaleEntries();
 
-        return target.get(key);
+        return target.get(new WrapKeyForGet(key));
     }
 
     /** Replaces the entry with the indicated key and returns the old value or {@code null}. */
@@ -120,7 +120,7 @@ public class WeakConcurrentMap<K, V> extends ReferenceQueue<K> implements Iterab
      *
      * Therefore, we can guarantee that there is no memory leak.
      */
-    static final class WeakKey<T> extends WeakReference<T> {
+    public static final class WeakKey<T> extends WeakReference<T> {
         final int hashCode;
 
         WeakKey(T key, ReferenceQueue<? super T> queue) {
@@ -206,6 +206,29 @@ public class WeakConcurrentMap<K, V> extends ReferenceQueue<K> implements Iterab
         @Override
         public void remove() {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    public static final class WrapKeyForGet {
+        Object key;
+        WrapKeyForGet(Object key) {
+            this.key = key;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.key.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof WeakKey) {
+                WeakKey<?> wk = (WeakKey<?>) o;
+                Object oo = wk.get();
+                return this.key.equals(oo);
+            } else {
+                return this.key.equals(o);
+            }
         }
     }
 }
