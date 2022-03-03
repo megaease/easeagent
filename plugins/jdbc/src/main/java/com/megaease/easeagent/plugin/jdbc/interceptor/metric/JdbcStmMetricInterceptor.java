@@ -30,13 +30,15 @@ import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
+import com.megaease.easeagent.plugin.jdbc.common.SQLCompression;
+import com.megaease.easeagent.plugin.jdbc.common.SQLCompressionFactory;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
 public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
     private static final int maxCacheSize = 1000;
     private static JdbcMetric metric;
-    private static MD5SQLCompression sqlCompression;
+    private static SQLCompression sqlCompression;
     private static Cache<String, String> cache;
 
     @Override
@@ -48,7 +50,7 @@ public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
                     metric = ServiceMetricRegistry.getOrCreate(config,
                         tags,
                         JdbcMetric.METRIC_SUPPLIER);
-                    sqlCompression = MD5SQLCompression.getInstance();
+                    sqlCompression = SQLCompressionFactory.getSqlCompression();
                     cache = CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize).removalListener(metric).build();
 

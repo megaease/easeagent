@@ -34,7 +34,7 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.TestUtils;
-import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
+import com.megaease.easeagent.plugin.jdbc.common.SQLCompressionFactory;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class JdbcStmTracingInterceptorTest {
 
         assertEquals(method, reportSpan.name());
         assertEquals(Span.Kind.CLIENT.name(), reportSpan.kind());
-        assertEquals(MD5SQLCompression.getInstance().compress(sql), reportSpan.tag(JdbcStmTracingInterceptor.SPAN_SQL_QUERY_TAG_NAME));
+        assertEquals(SQLCompressionFactory.getSqlCompression().compress(sql), reportSpan.tag(JdbcStmTracingInterceptor.SPAN_SQL_QUERY_TAG_NAME));
         assertEquals("database", reportSpan.tag(JdbcStmTracingInterceptor.SPAN_LOCAL_COMPONENT_TAG_NAME));
         assertEquals(TestUtils.URI, reportSpan.tag(JdbcStmTracingInterceptor.SPAN_URL));
         assertEquals(Type.DATABASE.getRemoteType(), reportSpan.tag(MiddlewareConstants.TYPE_TAG_NAME));
