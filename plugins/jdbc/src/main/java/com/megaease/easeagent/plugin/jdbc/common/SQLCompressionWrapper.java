@@ -24,7 +24,7 @@ public class SQLCompressionWrapper implements SQLCompression {
 
     public static final SQLCompressionWrapper INSTANCE = new SQLCompressionWrapper();
 
-    private static final String SQL_COMPRESS_ENABLED = "observability.sql.compress.enabled";
+    private static final String SQL_COMPRESS_ENABLED = "plugin.observability.jdbc.sql.compress.enabled";
 
     @Override
     public String compress(String origin) {
