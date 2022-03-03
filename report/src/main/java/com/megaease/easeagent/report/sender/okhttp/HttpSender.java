@@ -58,12 +58,12 @@ public class HttpSender implements Sender {
 
     private static final String ENABLED_KEY = "enabled";
     private static final String URL_KEY = "url";
-    private static final String USER_NAME_KEY = "username";
+    private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
     private static final String GZIP_KEY = "compress";
     private static final String MAX_REQUESTS_KEY = "maxRequests";
 
-    private static final String SERVER_USER_NAME_KEY = join(OUTPUT_SERVER_V2, USER_NAME_KEY);
+    private static final String SERVER_USER_NAME_KEY = join(OUTPUT_SERVER_V2, USERNAME_KEY);
     private static final String SERVER_PASSWORD_KEY = join(OUTPUT_SERVER_V2, PASSWORD_KEY);
     private static final String SERVER_GZIP_KEY = join(OUTPUT_SERVER_V2, GZIP_KEY);
 
@@ -76,7 +76,7 @@ public class HttpSender implements Sender {
 
     private String senderEnabledKey;
     private String urlKey;
-    private String userNameKey;
+    private String usernameKey;
     private String passwordKey;
     private String gzipKey;
     private String maxRequestsKey;
@@ -87,7 +87,7 @@ public class HttpSender implements Sender {
 
     private String url;
     private HttpUrl httpUrl;
-    private String userName;
+    private String username;
     private String password;
 
     private boolean enabled;
@@ -126,7 +126,7 @@ public class HttpSender implements Sender {
     private void updatePrefix(String prefix) {
         senderEnabledKey = join(prefix, ENABLED_KEY);
         urlKey = join(prefix, URL_KEY);
-        userNameKey = join(prefix, USER_NAME_KEY);
+        usernameKey = join(prefix, USERNAME_KEY);
         passwordKey = join(prefix, PASSWORD_KEY);
         gzipKey = join(prefix, GZIP_KEY);
         maxRequestsKey = join(prefix, MAX_REQUESTS_KEY);
@@ -135,7 +135,7 @@ public class HttpSender implements Sender {
     private void extractConfig(Config config) {
         updatePrefix(this.prefix);
         this.url = getUrl(config);
-        this.userName = StringUtils.noEmptyOf(config.getString(userNameKey), config.getString(SERVER_USER_NAME_KEY));
+        this.username = StringUtils.noEmptyOf(config.getString(usernameKey), config.getString(SERVER_USER_NAME_KEY));
         this.password = StringUtils.noEmptyOf(config.getString(passwordKey), config.getString(SERVER_PASSWORD_KEY));
 
         this.tlsEnable = config.getBoolean(TLS_ENABLE);
@@ -163,9 +163,9 @@ public class HttpSender implements Sender {
             }
         }
 
-        this.isAuth = !StringUtils.isEmpty(userName) && !StringUtils.isEmpty(password);
+        this.isAuth = !StringUtils.isEmpty(username) && !StringUtils.isEmpty(password);
         if (isAuth) {
-            this.credential = Credentials.basic(userName, password);
+            this.credential = Credentials.basic(username, password);
         }
     }
 
@@ -212,11 +212,11 @@ public class HttpSender implements Sender {
     public void updateConfigs(Map<String, String> changes) {
         this.config.updateConfigsNotNotify(changes);
 
-        String newUserName = StringUtils.noEmptyOf(config.getString(userNameKey), config.getString(SERVER_USER_NAME_KEY));
+        String newUserName = StringUtils.noEmptyOf(config.getString(usernameKey), config.getString(SERVER_USER_NAME_KEY));
         String newPwd = StringUtils.noEmptyOf(config.getString(passwordKey), config.getString(SERVER_PASSWORD_KEY));
         // check new client
         boolean renewClient = !getUrl(this.config).equals(this.url)
-            || !org.apache.commons.lang3.StringUtils.equals(newUserName, this.userName)
+            || !org.apache.commons.lang3.StringUtils.equals(newUserName, this.username)
             || !org.apache.commons.lang3.StringUtils.equals(newPwd, this.password)
             || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CA_CERT), this.tlsCaCert)
             || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CERT), this.tlsCert)
@@ -255,7 +255,7 @@ public class HttpSender implements Sender {
 
     // different url for different business, so create separate clients with different dispatcher
     private String getClientKey() {
-        return this.url + ":" + this.userName + ":" + this.password;
+        return this.url + ":" + this.username + ":" + this.password;
     }
 
     private void newClient() {

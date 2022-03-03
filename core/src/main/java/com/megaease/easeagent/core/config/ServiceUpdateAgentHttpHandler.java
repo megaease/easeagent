@@ -30,7 +30,7 @@ public class ServiceUpdateAgentHttpHandler extends ConfigsUpdateAgentHttpHandler
 
     @Override
     public String getPath() {
-        return "/config-service";
+        return "/config";
     }
 
     @Override

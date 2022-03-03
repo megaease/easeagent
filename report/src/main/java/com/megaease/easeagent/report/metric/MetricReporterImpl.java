@@ -25,11 +25,11 @@ import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import com.megaease.easeagent.plugin.report.ByteWrapper;
 import com.megaease.easeagent.plugin.report.EncodedData;
-import com.megaease.easeagent.report.OutputProperties;
 import com.megaease.easeagent.report.ReportConfigChange;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import com.megaease.easeagent.report.util.Utils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,14 +40,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.megaease.easeagent.config.report.ReportConfigConst.METRIC_V2;
 import static com.megaease.easeagent.config.report.ReportConfigConst.OUTPUT_SERVER_V2;
 
+@Slf4j
 public class MetricReporterImpl implements MetricReporter {
     private final ConcurrentHashMap<String, DefaultMetricReporter> reporters;
-    private final OutputProperties outputProperties;
     private final Config metricConfig;
 
     public MetricReporterImpl(Config configs) {
         this.reporters = new ConcurrentHashMap<>();
-        outputProperties = Utils.extractOutputProperties(configs);
         this.metricConfig = configs;
         configs.addChangeListener(this);
     }
@@ -115,7 +114,7 @@ public class MetricReporterImpl implements MetricReporter {
             try {
                 sender.send(new ByteWrapper(context.getBytes())).execute();
             } catch (IOException e) {
-                // ignored
+                log.warn("send error. {}", e.getMessage());
             }
         }
 
@@ -124,7 +123,7 @@ public class MetricReporterImpl implements MetricReporter {
             try {
                 sender.send(encodedData).execute();
             } catch (IOException e) {
-                // ignored
+                log.warn("send error. {}", e.getMessage());
             }
         }
 
