@@ -57,6 +57,11 @@ public class SenderConfigDecorator
     }
 
     @Override
+    public String getPrefix() {
+        return this.prefix;
+    }
+
+    @Override
     public void init(Config config, String prefix) {
         this.packer = ReporterRegistry.getEncoder(config.getString(this.encoderKey));
         this.packer.init(this.config);

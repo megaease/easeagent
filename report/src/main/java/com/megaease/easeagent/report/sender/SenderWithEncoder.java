@@ -34,4 +34,11 @@ public interface SenderWithEncoder extends Sender {
      * @throws IllegalStateException if {@link #close() close} was called.
      */
     Call<Void> send(List<EncodedData> encodedData);
+
+
+    /**
+     * return sender prefix, eg.tracing sender: reporter.tracing.sender
+     * @return  sender prefix
+     */
+    String getPrefix();
 }
