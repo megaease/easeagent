@@ -25,10 +25,10 @@ HTTP Request schema describes key metrics of service APIs, which include:
 | Metric Name                        |  Type   | Description                                                                                            |
 |:-----------------------------------|:-------:|:-------------------------------------------------------------------------------------------------------|
 | application_http_request_cnt       | integer | The total count of the request executed                                                                |
+| application_http_request_errcnt    | integer | The total error count of the request executed                                                          |
 | application_http_request_m1        | double  | The HTTP request executions per second (exponentially-weighted moving average) in last 1 minute        |
 | application_http_request_m5        | double  | The HTTP request executions per second (exponentially-weighted moving average) in last 5 minute.       |
 | application_http_request_m15       | double  | The HTTP request executions per second (exponentially-weighted moving average) in last 15 minute.      |
-| application_http_request_errcnt    | integer | The total error count of the request executed                                                          |
 | application_http_request_m1err     | double  | The HTTP error request executions per second (exponentially-weighted moving average) in last 1 minute  |
 | application_http_request_m5err     | double  | The HTTP error request executions per second (exponentially-weighted moving average) in last 5 minute. |
 | application_http_request_m15err    | double  | The HTTP error request executions per second (exponentially-weighted moving average) in last 15 minute |
@@ -52,7 +52,7 @@ HTTP Request schema describes key metrics of service APIs, which include:
 
 ### JDBC Statement
 JDBC Statement schema describes key metrics of JDBC SQL Statement, which include:
-* Execution count (cnt)
+* Execution count (cnt, errcnt)
 * Throughput (m1, m5, m15)
 * Error throughput (m1err, m5err, m15err)
 * Latency (p25, p50, p75, p95, p98, p99, p999)
@@ -61,6 +61,7 @@ JDBC Statement schema describes key metrics of JDBC SQL Statement, which include
 | Metric Name                       |  Type   | Description                                                                                           |
 |:----------------------------------|:-------:|:------------------------------------------------------------------------------------------------------|
 | application_jdbc_statement_cnt    | integer | The total count of JDBC method executed                                                               |
+| application_jdbc_statement_errcnt | integer | The total error count of JDBC method executed                                                         |
 | application_jdbc_statement_m1     | double  | The JDBC method executions per second (exponentially-weighted moving average) in last 1 minute.       |
 | application_jdbc_statement_m5     | double  | The JDBC method executions per second (exponentially-weighted moving average) in last 5 minutes.      |
 | application_jdbc_statement_m15    | double  | The JDBC method executions per second (exponentially-weighted moving average) in last 15 minutes.     |
@@ -86,7 +87,7 @@ JDBC Statement schema describes key metrics of JDBC SQL Statement, which include
 
 ### JDBC Connection
 JDBC Connection schema describes key metrics of Getting Connection, which include:
-* Execution count (cnt)
+* Execution count (cnt, errcnt)
 * Throughput (m1, m5, m15)
 * Error throughput (m1err, m5err, m15err)
 * Latency (p25, p50, p75, p95, p98, p99, p999)
@@ -95,6 +96,7 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 | Metric Name                        |  Type   | Description                                                                                               |
 |:-----------------------------------|:-------:|:----------------------------------------------------------------------------------------------------------|
 | application_jdbc_connection_cnt    | integer | The total number of database connections                                                                  |
+| application_jdbc_connection_errcnt | integer | The total error number of database connections                                                            |
 | application_jdbc_connection_m1     | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 1 minute.    |
 | application_jdbc_connection_m5     | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 5 minutes.   |
 | application_jdbc_connection_m15    | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 15 minutes.  |
