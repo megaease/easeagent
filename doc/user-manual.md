@@ -420,9 +420,9 @@ HTTP Request schema describes key metrics of service APIs, which include:
 | m5               |double| The HTTP request executions per second (exponentially-weighted moving average) in last 5 minute. |
 | m15              |double| The HTTP request executions per second (exponentially-weighted moving average) in last 15 minute. |
 | errcnt |integer| The total error count of the request executed |
-| m1err         |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 1 minute |
-| m5err         |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 5 minute. |
-| m15err        |integer| The HTTP error request executions per second (exponentially-weighted moving average) in last 15 minute |
+| m1err         |double| The HTTP error request executions per second (exponentially-weighted moving average) in last 1 minute |
+| m5err         |double| The HTTP error request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15err        |double| The HTTP error request executions per second (exponentially-weighted moving average) in last 15 minute |
 | m1errpct      |double| error percentage in last 1 minute |
 | m5errpct      |double| error percentage in last 5 minute |
 | m15errpct     |double| error percentage in last 15 minute |
@@ -504,6 +504,7 @@ JVM Memory schema describes key metrics of Java memory usage, which include:
 
 | Field | Type | Description |
 | :------------------ | :-----: | :----- |
+| resource   |  String | memory pool name |
 | bytes-init | integer | The value represents the initial amount of memory in bytes unit that the JVM requests from the operating system for memory management during startup. The JVM may request additional memory from the operating system and may also release memory to the system over time. The value of init may be undefined (value -1). |
 | bytes-used | integer | The value represents the amount of memory currently used in bytes unit. |
 | bytes-committed | integer | The value represents the amount of memory in bytes unit that is guaranteed to be available for use by the JVM. The amount of committed memory may change over time (increase or decrease). The JVM may release memory to the system and committed could be less than init. Value committed will always be greater than or equal to used. |
@@ -517,6 +518,7 @@ JVM GC schema describes key metrics of JVM garbage collection, which include:
 
 | Field | Type | Description |
 | :------------------ | :-----: | :----- |
+| resource              | string  | gc name     |
 | total_collection_time | integer |The value represents the total time for garbage collection operation in millisecond unit. |
 | times                 | integer |  The value represents the total garbage collection times. |
 | times_rate            | integer |  The number of gc times per second.                           |
@@ -586,15 +588,15 @@ RabbitMQ Producer schema describes key metrics of RabbitMQ client publishing mes
 |prodrm1err|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (producer)|
 |prodrm5err|double|The executions per second (exponentially-weighted moving average) in last 5 minute (producer)|
 |prodrm5err|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (producer)|
-|min|double|The http-request minimal execution duration in milliseconds.|
-|max|double|The http-request maximal execution duration in milliseconds.|
-|mean|double|The http-request mean execution duration in milliseconds.|
-|p25|double|TP25: The http-request execution duration in milliseconds for 25% user.|
-|p50|double|TP50: The http-request execution duration in milliseconds for 50% user.|
-|p75|double|TP75: The http-request execution duration in milliseconds for 75% user.|
-|p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
-|p98|double|TP98: The http-request execution duration in milliseconds for 98% user.|
-|p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
+|min|double|The producer minimal execution duration in milliseconds.|
+|max|double|The producer maximal execution duration in milliseconds.|
+|mean|double|The producer mean execution duration in milliseconds.|
+|p25|double|TP25: The producer execution duration in milliseconds for 25% user.|
+|p50|double|TP50: The producer execution duration in milliseconds for 50% user.|
+|p75|double|TP75: The producer execution duration in milliseconds for 75% user.|
+|p95|double|TP95: The producer execution duration in milliseconds for 95% user.|
+|p98|double|TP98: The producer execution duration in milliseconds for 98% user.|
+|p99|double|TP99: The producer execution duration in milliseconds for 99% user.|
 |p999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
 
 #### RabbitMQ Consumer
@@ -606,20 +608,47 @@ RabbitMQ Consumer schema describes key metrics of RabbitMQ client consuming mess
 
 | Field               |  Type   | Description |
 | :------------------ | :-----: | :---------- |
-|resource|string|rabbitmq queue| rabbit queue |
+|resource|string|rabbitmq routingKey|
 |queue_m1_rate|double|The executions of queue per second (exponentially-weighted moving average) in last 1 minute |
 |queue_m5_rate|double|The executions of queue per second (exponentially-weighted moving average) in last 5 minute |
 |queue_m15_rate|double|The executionsof queue per second (exponentially-weighted moving average) in last 15 minute |
 |queue_m1_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (queue)|
 |queue_m5_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 5 minute (queue)|
 |queue_m15_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (queue)|
-|min|double|The http-request minimal execution duration in milliseconds.|
-|max|double|The http-request maximal execution duration in milliseconds.|
-|mean|double|The http-request mean execution duration in milliseconds.|
-|p25|double|TP25: The http-request execution duration in milliseconds for 25% user.|
-|p50|double|TP50: The http-request execution duration in milliseconds for 50% user.|
-|p75|double|TP75: The http-request execution duration in milliseconds for 75% user.|
-|p95|double|TP95: The http-request execution duration in milliseconds for 95% user.|
-|p98|double|TP98: The http-request execution duration in milliseconds for 98% user.|
-|p99|double|TP99: The http-request execution duration in milliseconds for 99% user.|
+|min|double|The consumer minimal execution duration in milliseconds.|
+|max|double|The consumer maximal execution duration in milliseconds.|
+|mean|double|The consumer mean execution duration in milliseconds.|
+|p25|double|TP25: The consumer execution duration in milliseconds for 25% user.|
+|p50|double|TP50: The consumer execution duration in milliseconds for 50% user.|
+|p75|double|TP75: The consumer execution duration in milliseconds for 75% user.|
+|p95|double|TP95: The consumer execution duration in milliseconds for 95% user.|
+|p98|double|TP98: The consumer execution duration in milliseconds for 98% user.|
+|p99|double|TP99: The consumer execution duration in milliseconds for 99% user.|
+|p999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
+
+#### Spring AMQP on Message Listener
+Message Listener schema describes key metrics of Spring AMQP RabbitMQ Message Queue, which include:
+* Throughput (queue_m1_rate, queue_m5_rate, queue_m15_rate)
+* Error throughput (queue_m1_error_rate, queue_m5_error_rate, queue_m15_error_rate)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99)
+
+| Field               |  Type   | Description |
+| :------------------ | :-----: | :---------- |
+|resource|string|rabbitmq queue|
+|queue_m1_rate|double|The executions of queue per second (exponentially-weighted moving average) in last 1 minute |
+|queue_m5_rate|double|The executions of queue per second (exponentially-weighted moving average) in last 5 minute |
+|queue_m15_rate|double|The executionsof queue per second (exponentially-weighted moving average) in last 15 minute |
+|queue_m1_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 1 minute (queue)|
+|queue_m5_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 5 minute (queue)|
+|queue_m15_error_rate|double|The error executions per second (exponentially-weighted moving average) in last 15 minute (queue)|
+|min|double|The AMQP Message Listener minimal execution duration in milliseconds.|
+|max|double|The AMQP Message Listener maximal execution duration in milliseconds.|
+|mean|double|The AMQP Message Listener mean execution duration in milliseconds.|
+|p25|double|TP25: The AMQP Message Listener execution duration in milliseconds for 25% user.|
+|p50|double|TP50: The AMQP Message Listener execution duration in milliseconds for 50% user.|
+|p75|double|TP75: The AMQP Message Listener execution duration in milliseconds for 75% user.|
+|p95|double|TP95: The AMQP Message Listener execution duration in milliseconds for 95% user.|
+|p98|double|TP98: The AMQP Message Listener execution duration in milliseconds for 98% user.|
+|p99|double|TP99: The AMQP Message Listener execution duration in milliseconds for 99% user.|
 |p999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|

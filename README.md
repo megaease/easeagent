@@ -194,7 +194,9 @@ $ for i in {1..1000}; do curl -v http://127.0.0.1:18888/web_client;sleep 0.1; do
 
 ```
 
-For metric name and label see: [PrometheusExports](./doc/metric-api.md#7.PrometheusExports)
+For metric name and label rules see: [PrometheusExports](./doc/metric-api.md#7.PrometheusExports)
+
+For Prometheus Metric Schedule: [Prometheus Metric](./doc/prometheus-metric-schedule.md)
 
 ### 7. Test Data
 * Tracing  

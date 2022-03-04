@@ -23,7 +23,7 @@ These interfaces are related to business.
 We have briefly categorized common business types.
 
 |name           |Description                                                                                           |
-|---------------|------------------------------------------------------------------------------------------------------|
+|:-------------:|:----------------------------------------------------------------------------------------------------:|
 |DEFAULT        |Default,no metric with error                                                                          |
 |ERROR          |Metric with error                                                                                     |
 |CHANNEL        |The metric of the connection channel, for rabbitmq.                                                   |
@@ -454,7 +454,7 @@ Except `category`, `type`, `MetricField.field` and `value`, other fields will be
 By default, there will be the following labels.
 
 |label name           |label value                                                                        |Description                                                    |
-|---------------------|-----------------------------------------------------------------------------------|---------------------------------------------------------------|
+|:-------------------:|:---------------------------------------------------------------------------------:|:-------------------------------------------------------------:|
 |MetricSubType        |enum: `DEFAULT,ERROR,CHANNEL,CONSUMER,PRODUCER,CONSUMER_ERROR,PRODUCER_ERROR,NONE` |The enum MetricSubType value.                                  |
 |MetricType           |enum: `TimerType,HistogramType,MeterType,CounterType,GaugeType`                    |The Metric Type by metric calculate.                           |
 |host_ipv4            |String, xxx.xxx.xxx.xx                                                             |The ipv4 by host.                                              |
