@@ -1,4 +1,4 @@
-#  Metric API
+# Metric API
 
 In Easeagent, Metric is inspired by Dropwizard, but Dropwizard is just the basis of Metric.
 
@@ -16,38 +16,22 @@ These interfaces are related to business.
 ![image](./images/Metric-Class-UML.png)
 
 
-### 1. MetricValueFetcher
+### 1. MetricSubType
 
-[com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricValueFetcher.java)
+[com.megaease.easeagent.plugin.api.metric.name.MetricSubType](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricSubType.java)
 
-Metric has different types, and each type can calculate different data.
+We have briefly categorized common business types.
 
-For example: Counter can only get Count, Timer can get Max, Mean, Min, P95 ...
-
-Regarding the value that the type can calculate, we have encapsulated it:
-
-```java
-public enum MetricValueFetcher {
-    CountingCount(Counter::getCount, Counter.class),
-    SnapshotMaxValue(Snapshot::getMax, Snapshot.class),
-    SnapshotMeanValue(Snapshot::getMean, Snapshot.class),
-    SnapshotMinValue(Snapshot::getMin, Snapshot.class),
-    Snapshot25Percentile(s -> s.getValue(0.25), Snapshot.class),
-    SnapshotMedianValue(Snapshot::getMedian, Snapshot.class),
-    Snapshot50PercentileValue(Snapshot::getMedian, Snapshot.class),
-    Snapshot75PercentileValue(Snapshot::get75thPercentile, Snapshot.class),
-    Snapshot95PercentileValue(Snapshot::get95thPercentile, Snapshot.class),
-    Snapshot98PercentileValue(Snapshot::get98thPercentile, Snapshot.class),
-    Snapshot99PercentileValue(Snapshot::get99thPercentile, Snapshot.class),
-    Snapshot999PercentileValue(Snapshot::get999thPercentile, Snapshot.class),
-    MeteredM1Rate(Meter::getOneMinuteRate, Meter.class),
-    MeteredM1RateIgnoreZero(Meter::getOneMinuteRate, Meter.class, aDouble -> aDouble),
-    MeteredM5Rate(Meter::getFiveMinuteRate, Meter.class),
-    MeteredM15Rate(Meter::getFifteenMinuteRate, Meter.class),
-    MeteredMeanRate(Meter::getMeanRate, Meter.class),
-    MeteredCount(Meter::getCount, Meter.class);
-}
-```
+|name           |Description                                                                                           |
+|---------------|------------------------------------------------------------------------------------------------------|
+|DEFAULT        |Default,no metric with error                                                                          |
+|ERROR          |Metric with error                                                                                     |
+|CHANNEL        |The metric of the connection channel, for rabbitmq.                                                   |
+|CONSUMER       |The metric of the consumer of the data queue, for messaging kafka/rabbitmq consumer, etc.             |
+|PRODUCER       |The metric of the producer of the data queue, for messaging kafka/rabbitmq producer, etc.             |
+|CONSUMER_ERROR |The error metric of the consumer of the data queue, for messaging kafka/rabbitmq consumer error, etc. |
+|PRODUCER_ERROR |The error metric of the producer of the data queue, for messaging kafka/rabbitmq producer error, etc. |
+|NONE           |Unknown type                                                                                          |
 
 ### 2. MetricField
 
@@ -147,7 +131,40 @@ public enum MetricField {
 }
 ```
 
-### 3. NameFactory
+### 3.MetricValueFetcher
+
+[com.megaease.easeagent.plugin.api.metric.name.MetricValueFetcher](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/MetricValueFetcher.java)
+
+Metric has different types, and each type can calculate different data.
+
+For example: Counter can only get Count, Timer can get Max, Mean, Min, P95 ...
+
+Regarding the value that the type can calculate, we have encapsulated it:
+
+```java
+public enum MetricValueFetcher {
+    CountingCount(Counter::getCount, Counter.class),
+    SnapshotMaxValue(Snapshot::getMax, Snapshot.class),
+    SnapshotMeanValue(Snapshot::getMean, Snapshot.class),
+    SnapshotMinValue(Snapshot::getMin, Snapshot.class),
+    Snapshot25Percentile(s -> s.getValue(0.25), Snapshot.class),
+    SnapshotMedianValue(Snapshot::getMedian, Snapshot.class),
+    Snapshot50PercentileValue(Snapshot::getMedian, Snapshot.class),
+    Snapshot75PercentileValue(Snapshot::get75thPercentile, Snapshot.class),
+    Snapshot95PercentileValue(Snapshot::get95thPercentile, Snapshot.class),
+    Snapshot98PercentileValue(Snapshot::get98thPercentile, Snapshot.class),
+    Snapshot99PercentileValue(Snapshot::get99thPercentile, Snapshot.class),
+    Snapshot999PercentileValue(Snapshot::get999thPercentile, Snapshot.class),
+    MeteredM1Rate(Meter::getOneMinuteRate, Meter.class),
+    MeteredM1RateIgnoreZero(Meter::getOneMinuteRate, Meter.class, aDouble -> aDouble),
+    MeteredM5Rate(Meter::getFiveMinuteRate, Meter.class),
+    MeteredM15Rate(Meter::getFifteenMinuteRate, Meter.class),
+    MeteredMeanRate(Meter::getMeanRate, Meter.class),
+    MeteredCount(Meter::getCount, Meter.class);
+}
+```
+
+### 4. NameFactory
 
 [com.megaease.easeagent.plugin.api.metric.name.NameFactory](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/metric/name/NameFactory.java)
 
@@ -417,3 +434,98 @@ public class MD5ReportConsumer {
     }
 }
 ```
+
+### 7. Prometheus Exports
+
+According to EaseAgent naming standard and calculation value rules, we have redefined Prometheus Exports.
+
+##### About metric name
+
+For better readability, we get the `category` and `type` from `Tags`, and add `MetricField.field` as the metric name
+
+Name format: `${category}_${type}_${MetricField.field}`
+
+Example: `application_http_request_m1`
+
+##### About metric label
+
+Except `category`, `type`, `MetricField.field` and `value`, other fields will be exported in the form of labels.
+ 
+By default, there will be the following labels.
+
+|label name           |label value                                                                        |Description                                                    |
+|---------------------|-----------------------------------------------------------------------------------|---------------------------------------------------------------|
+|MetricSubType        |enum: `DEFAULT,ERROR,CHANNEL,CONSUMER,PRODUCER,CONSUMER_ERROR,PRODUCER_ERROR,NONE` |The enum MetricSubType value.                                  |
+|MetricType           |enum: `TimerType,HistogramType,MeterType,CounterType,GaugeType`                    |The Metric Type by metric calculate.                           |
+|host_ipv4            |String, xxx.xxx.xxx.xx                                                             |The ipv4 by host.                                              |
+|host_name            |String                                                                             |host name.                                                     |
+|service              |String                                                                             |The `name` read from the configuration. for you service name.  |
+|system               |String                                                                             |The `system` read from the configuration. for you system name. |
+|${Tags.keyFieldName} |${metricKey}                                                                       |The metric label by metric key.                                |
+|${Tags.tags().key}   |${Tags.tags().value}                                                               |Your custom label, which comes from `Tags`                     |
+
+##### About metric value
+
+Under normal circumstances, each metric name should correspond to a calculation method.
+
+Example :
+
+Metric name is `application_http_request_m1`, the value is `1.0`, which is the weighted average QPS of the last minute calculated.
+
+It is calculated using `Meter::getOneMinuteRate`. Its corresponding `MetricValueFetcher` is `MeteredM1RateIgnoreZero`.
+
+```java
+public class M1MetricCollect {
+    static final M1Metric m1Metric;
+
+    static {
+        IPluginConfig config = EaseAgent.getConfig("observability", "collectM1", ConfigConst.PluginID.METRIC);
+        Tags tags = new Tags("application", "http-request", "url").put("city", "beijing");
+        ServiceMetricSupplier<M1Metric> m1MetricSupplier = new ServiceMetricSupplier<M1Metric>() {
+            @Override
+            public NameFactory newNameFactory() {
+                return NameFactory.createBuilder()
+                    .meterType(MetricSubType.DEFAULT, ImmutableMap.<MetricField, MetricValueFetcher>builder()
+                        .put(MetricField.M1_RATE, MetricValueFetcher.MeteredM1RateIgnoreZero)
+                        .build())
+                    .build();
+            }
+
+            @Override
+            public M1Metric newInstance(MetricRegistry metricRegistry, NameFactory nameFactory) {
+                return new M1Metric(metricRegistry, nameFactory);
+            }
+        };
+
+        m1Metric = EaseAgent.getOrCreateServiceMetric(config, tags, m1MetricSupplier);
+    }
+
+    public void collectM1() {
+        String url = "GET /web_client";
+        for (int i = 0; i < 100; i++) {
+            m1Metric.collectMetric(url);
+        }
+    }
+
+    public static class M1Metric extends ServiceMetric {
+
+        public M1Metric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
+            super(metricRegistry, nameFactory);
+        }
+
+        public void collectMetric(String key) {
+            final Meter meter = meter(key, MetricSubType.DEFAULT);
+            meter.mark();
+        }
+    }
+}
+```
+
+The above example will export metrics like the following
+
+name and label: `application_http_request_m1{MetricSubType="DEFAULT",MetricType="MeterType",city="beijing",host_ipv4="10.127.48.163",host_name="MacBook-Pro.local",service="demo-service",system="demo-system",url="GET /web_client"}`
+
+value : `90.0` 
+ 
+![image](./images/prometheus-demo.jpg)
+
