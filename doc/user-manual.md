@@ -6,7 +6,7 @@
     - [Getting the configuration file](#getting-the-configuration-file)
     - [Global Configuration](#global-configuration)
       - [Internal HTTP Server](#internal-http-server)
-      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server:-kafka-and-http/zipkin-server)
+      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server-kafka-and-httpzipkin-server)
       - [Progress Configuration](#progress-configuration)
         - [Forwarded headers config](#forwarded-headers-config)
         - [Tracing config](#tracing-config)
@@ -367,6 +367,10 @@ EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing lo
 
 ## Metric
 EaseAgent use [io.dropwizard.metrics](https://github.com/dropwizard/metrics) to collect metric information.
+
+Prometheus Metric Schedule: [Prometheus Metric](./prometheus-metric-schedule.md)
+
+Prometheus Exports Rules: [Prometheus Exports](./metric-api.md#7prometheusexports)
 
 
 ### Metric Field

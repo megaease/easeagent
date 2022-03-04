@@ -1,5 +1,7 @@
 # Prometheus Metric Schedule
 
+Prometheus Exports Rules: [Prometheus Exports](./metric-api.md#7prometheusexports)
+
 ## Common label
 
 | label name    | Description                                                                                                |
