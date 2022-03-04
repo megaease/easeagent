@@ -437,9 +437,9 @@ public class MD5ReportConsumer {
 
 ### 7.PrometheusExports
 
-According to EaseAgent naming standard and calculation value rules, we have redefined Prometheus Exports.
+We have redefined Prometheus Exports according to the following naming standard and statistics rules.
 
-##### About metric name
+#### Metric Name
 
 For better readability, we get the `category` and `type` from `Tags`, and add `MetricField.field` as the metric name
 
@@ -447,7 +447,7 @@ Name format: `${category}_${type}_${MetricField.field}`
 
 Example: `application_http_request_m1`
 
-##### About metric label
+##### Metric Label
 
 Except `category`, `type`, `MetricField.field` and `value`, other fields will be exported in the form of labels.
  
@@ -464,7 +464,7 @@ By default, there will be the following labels.
 |${Tags.keyFieldName} |${metricKey}                                                                       |The metric label by metric key.                                |
 |${Tags.tags().key}   |${Tags.tags().value}                                                               |Your custom label, which comes from `Tags`                     |
 
-##### About metric value
+##### Metric Value
 
 Under normal circumstances, each metric name should correspond to a calculation method.
 
