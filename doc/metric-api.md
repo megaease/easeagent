@@ -22,16 +22,16 @@ These interfaces are related to business.
 
 We have briefly categorized common business types.
 
-|name           |Description                                                                                           |
-|:-------------:|:----------------------------------------------------------------------------------------------------:|
-|DEFAULT        |Default,no metric with error                                                                          |
-|ERROR          |Metric with error                                                                                     |
-|CHANNEL        |The metric of the connection channel, for rabbitmq.                                                   |
-|CONSUMER       |The metric of the consumer of the data queue, for messaging kafka/rabbitmq consumer, etc.             |
-|PRODUCER       |The metric of the producer of the data queue, for messaging kafka/rabbitmq producer, etc.             |
-|CONSUMER_ERROR |The error metric of the consumer of the data queue, for messaging kafka/rabbitmq consumer error, etc. |
-|PRODUCER_ERROR |The error metric of the producer of the data queue, for messaging kafka/rabbitmq producer error, etc. |
-|NONE           |Unknown type                                                                                          |
+| name           | Description                                                                                           |
+|:---------------|:------------------------------------------------------------------------------------------------------|
+| DEFAULT        | Default,no metric with error                                                                          |
+| ERROR          | Metric with error                                                                                     |
+| CHANNEL        | The metric of the connection channel, for rabbitmq.                                                   |
+| CONSUMER       | The metric of the consumer of the data queue, for messaging kafka/rabbitmq consumer, etc.             |
+| PRODUCER       | The metric of the producer of the data queue, for messaging kafka/rabbitmq producer, etc.             |
+| CONSUMER_ERROR | The error metric of the consumer of the data queue, for messaging kafka/rabbitmq consumer error, etc. |
+| PRODUCER_ERROR | The error metric of the producer of the data queue, for messaging kafka/rabbitmq producer error, etc. |
+| NONE           | Unknown type                                                                                          |
 
 ### 2. MetricField
 
@@ -453,22 +453,22 @@ Except `category`, `type`, `MetricField.field` and `value`, other fields will be
  
 By default, there will be the following labels.
 
-|label name           |label value                                                                        |Description                                                    |
-|:-------------------:|:---------------------------------------------------------------------------------:|:-------------------------------------------------------------:|
-|MetricSubType        |enum: `DEFAULT,ERROR,CHANNEL,CONSUMER,PRODUCER,CONSUMER_ERROR,PRODUCER_ERROR,NONE` |The enum MetricSubType value.                                  |
-|MetricType           |enum: `TimerType,HistogramType,MeterType,CounterType,GaugeType`                    |The Metric Type by metric calculate.                           |
-|host_ipv4            |String, xxx.xxx.xxx.xx                                                             |The ipv4 by host.                                              |
-|host_name            |String                                                                             |host name.                                                     |
-|service              |String                                                                             |The `name` read from the configuration. for you service name.  |
-|system               |String                                                                             |The `system` read from the configuration. for you system name. |
-|${Tags.keyFieldName} |${metricKey}                                                                       |The metric label by metric key.                                |
-|${Tags.tags().key}   |${Tags.tags().value}                                                               |Your custom label, which comes from `Tags`                     |
+| label name           | label value            | Description                                                                                                |
+|:---------------------|:-----------------------|:-----------------------------------------------------------------------------------------------------------|
+| MetricSubType        | enum                   | The enum MetricSubType value: `DEFAULT,ERROR,CHANNEL,CONSUMER,PRODUCER,CONSUMER_ERROR,PRODUCER_ERROR,NONE` |
+| MetricType           | enum                   | The Metric Type by metric calculate: `TimerType,HistogramType,MeterType,CounterType,GaugeType`             |
+| host_ipv4            | String, xxx.xxx.xxx.xx | The ipv4 by host.                                                                                          |
+| host_name            | String                 | host name.                                                                                                 |
+| service              | String                 | The `name` read from the configuration. for you service name.                                              |
+| system               | String                 | The `system` read from the configuration. for you system name.                                             |
+| ${Tags.keyFieldName} | ${metricKey}           | The metric label by metric key.                                                                            |
+| ${Tags.tags().key}   | ${Tags.tags().value}   | Your custom label, which comes from `Tags`                                                                 |
 
 ##### Metric Value
 
 Under normal circumstances, each metric name should correspond to a calculation method.
 
-Example :
+##### Example :
 
 Metric name is `application_http_request_m1`, the value is `1.0`, which is the weighted average QPS of the last minute calculated.
 
@@ -523,9 +523,13 @@ public class M1MetricCollect {
 
 The above example will export metrics like the following
 
-name and label: `application_http_request_m1{MetricSubType="DEFAULT",MetricType="MeterType",city="beijing",host_ipv4="10.127.48.163",host_name="MacBook-Pro.local",service="demo-service",system="demo-system",url="GET /web_client"}`
+Name and Label: 
 
-value : `90.0` 
+`application_http_request_m1{MetricSubType="DEFAULT",MetricType="MeterType",city="beijing",host_ipv4="10.127.48.163",host_name="MacBook-Pro.local",service="demo-service",system="demo-system",url="GET /web_client"}`
+
+value : 
+
+`90.0` 
  
 ![image](./images/prometheus-demo.jpg)
 
