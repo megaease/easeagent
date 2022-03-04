@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricSupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.enums.Order;
 
 public abstract class ElasticsearchBaseMetricsInterceptor extends ElasticsearchBaseInterceptor {
@@ -32,7 +34,9 @@ public abstract class ElasticsearchBaseMetricsInterceptor extends ElasticsearchB
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         super.init(config, className, methodName, methodDescriptor);
-        this.elasticsearchMetric = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "elasticsearch", "index"), new ServiceMetricSupplier<ElasticsearchMetric>() {
+        Tags tags = new Tags("application", "elasticsearch", "index");
+        RedirectProcessor.setTagsIfRedirected(Redirect.ELASTICSEARCH, tags);
+        this.elasticsearchMetric = ServiceMetricRegistry.getOrCreate(config, tags, new ServiceMetricSupplier<ElasticsearchMetric>() {
             @Override
             public NameFactory newNameFactory() {
                 return ElasticsearchMetric.nameFactory();

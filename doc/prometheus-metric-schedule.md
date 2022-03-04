@@ -307,3 +307,37 @@ Message Listener schema describes key metrics of Spring AMQP RabbitMQ Message Qu
 |:-----------|:---------:|:---------------|
 | resource   |   true    | rabbitmq queue |
 
+
+### Elasticsearch
+Elasticsearch schema describes key metrics of Elasticsearch client invoking, which include:
+* Total execution count (cnt, errcnt)
+* Throughput (m1, m5, m15, mean_rate)
+* Error throughput (m1err, m5err, m15err)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99)
+
+| Metric Name                         |  Type   | Description                                                                                                     |
+|:------------------------------------|:-------:|:----------------------------------------------------------------------------------------------------------------|
+| application_elasticsearch_cnt       | integer | The total count of the request executed                                                                         |
+| application_elasticsearch_m1        | double  | The Elasticsearch request executions per second (exponentially-weighted moving average) in last 1 minute        |
+| application_elasticsearch_m5        | double  | The Elasticsearch request executions per second (exponentially-weighted moving average) in last 5 minute.       |
+| application_elasticsearch_m15       | double  | The Elasticsearch request executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| application_elasticsearch_mean_rate | double  | The Elasticsearch request executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| application_elasticsearch_errcnt    | integer | The total error count of the request executed                                                                   |
+| application_elasticsearch_m1err     | double  | The Elasticsearch error request executions per second (exponentially-weighted moving average) in last 1 minute  |
+| application_elasticsearch_m5err     | double  | The Elasticsearch error request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| application_elasticsearch_m15err    | double  | The Elasticsearch error request executions per second (exponentially-weighted moving average) in last 15 minute |
+| application_elasticsearch_min       | double  | The Elasticsearch minimal execution duration in milliseconds.                                                   |
+| application_elasticsearch_max       | double  | The Elasticsearch maximal execution duration in milliseconds.                                                   |
+| application_elasticsearch_mean      | double  | The Elasticsearch mean execution duration in milliseconds.                                                      |
+| application_elasticsearch_p25       | double  | TP25: The Elasticsearch execution duration in milliseconds for 25% user.                                        |
+| application_elasticsearch_p50       | double  | TP50: The Elasticsearch execution duration in milliseconds for 50% user.                                        |
+| application_elasticsearch_p75       | double  | TP75: The Elasticsearch execution duration in milliseconds for 75% user.                                        |
+| application_elasticsearch_p95       | double  | TP95: The Elasticsearch execution duration in milliseconds for 95% user.                                        |
+| application_elasticsearch_p98       | double  | TP98: The Elasticsearch execution duration in milliseconds for 98% user.                                        |
+| application_elasticsearch_p99       | double  | TP99: The Elasticsearch execution duration in milliseconds for 99% user.                                        |
+
+#### Dedicated label
+| Label Name | Essential | Description                  |
+|:-----------|:---------:|:-----------------------------|
+| index      |   true    | The Elasticsearch index name |

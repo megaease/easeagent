@@ -652,3 +652,34 @@ Message Listener schema describes key metrics of Spring AMQP RabbitMQ Message Qu
 |p98|double|TP98: The AMQP Message Listener execution duration in milliseconds for 98% user.|
 |p99|double|TP99: The AMQP Message Listener execution duration in milliseconds for 99% user.|
 |p999|double|TP99.9: The execution duration in milliseconds for 99.9% user.|
+
+#### Elasticsearch
+Elasticsearch schema describes key metrics of Elasticsearch client invoking, which include:
+* Total execution count (cnt, errcnt)
+* Throughput (m1, m5, m15, mean_rate)
+* Error throughput (m1err, m5err, m15err)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99)
+
+| Field               |  Type   | Description |
+| :------------------ | :-----: | :---------- |
+|index|string|The Elasticsearch index name|
+| cnt       |integer| The total count of the request executed |
+| m1               |double| The Elasticsearch request executions per second (exponentially-weighted moving average) in last 1 minute |
+| m5               |double| The Elasticsearch request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15              |double| The Elasticsearch request executions per second (exponentially-weighted moving average) in last 15 minute. |
+| mean_rate              |double| The Elasticsearch request executions per second (exponentially-weighted moving average) in last 15 minute. |
+| errcnt |integer| The total error count of the request executed |
+| m1err         |double| The Elasticsearch error request executions per second (exponentially-weighted moving average) in last 1 minute |
+| m5err         |double| The Elasticsearch error request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15err        |double| The Elasticsearch error request executions per second (exponentially-weighted moving average) in last 15 minute |
+|min|double|The Elasticsearch minimal execution duration in milliseconds.|
+|max|double|The Elasticsearch maximal execution duration in milliseconds.|
+|mean|double|The Elasticsearch mean execution duration in milliseconds.|
+|p25|double|TP25: The Elasticsearch execution duration in milliseconds for 25% user.|
+|p50|double|TP50: The Elasticsearch execution duration in milliseconds for 50% user.|
+|p75|double|TP75: The Elasticsearch execution duration in milliseconds for 75% user.|
+|p95|double|TP95: The Elasticsearch execution duration in milliseconds for 95% user.|
+|p98|double|TP98: The Elasticsearch execution duration in milliseconds for 98% user.|
+|p99|double|TP99: The Elasticsearch execution duration in milliseconds for 99% user.|
+
