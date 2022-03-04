@@ -194,6 +194,8 @@ $ for i in {1..1000}; do curl -v http://127.0.0.1:18888/web_client;sleep 0.1; do
 
 ```
 
+For metric name and label see: [PrometheusExports](./doc/metric-api.md#7.PrometheusExports)
+
 ### 7. Test Data
 * Tracing  
 If the tracing data is send to console, there would be some tracing log in console like this:
