@@ -30,6 +30,7 @@ import com.megaease.easeagent.plugin.api.config.IConfigFactory;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.sun.net.httpserver.HttpServer;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -39,7 +40,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +76,7 @@ public class HttpServerTest {
         return runUpHttpServer(port);
     }
 
-    private static int getPort() throws IOException {
+    private static int getPort() {
         Random random = new Random();
         for (int i = 0; i < 4; i++) {
             int port = 8000 + random.nextInt(1000);
@@ -84,15 +87,14 @@ public class HttpServerTest {
         throw new RuntimeException("can not found port for test.");
     }
 
-    private static boolean isPortUsing(int port) throws UnknownHostException {
-        boolean flag = false;
-        InetAddress theAddress = InetAddress.getLocalHost();
+    private static boolean isPortUsing(int port) {
         try {
-            new Socket(theAddress, port);
-            flag = true;
+            HttpServer httpServer = HttpServer.create(new InetSocketAddress(port), 0);
+            httpServer.stop(0);
+            return false;
         } catch (IOException e) {
+            return true;
         }
-        return flag;
     }
 
     private static String runUpHttpServer(int port) {
