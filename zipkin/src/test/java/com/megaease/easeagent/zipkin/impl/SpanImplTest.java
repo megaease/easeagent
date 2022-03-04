@@ -244,11 +244,9 @@ public class SpanImplTest {
         MockReport.setMockSpanReport(mockAtomicReferenceReport);
         eSpan.abandon();
         assertNull(MockReport.getLastSpan());
-        assertNull(MockReport.getLastSkipSpan());
         MockReport.cleanSkipSpan();
         eSpan.flush();
         assertNull(MockReport.getLastSpan());
-        assertNull(MockReport.getLastSkipSpan());
     }
 
     @Test
