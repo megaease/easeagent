@@ -13,11 +13,11 @@ ARG      SERVER3
 COPY     ./ /easeagent/
 WORKDIR  /easeagent
 
-RUN     /bin/rewrite-settings.sh &&  cd /easeagent/ && mvn clean package -am -pl build && cd build/target/ && jar xf easeagent.jar log4j2.xml
+RUN     /bin/rewrite-settings.sh &&  cd /easeagent/ && mvn clean package && cd build/target/ && jar xf easeagent.jar easeagent-log4j2.xml
 
 FROM alpine:latest
 RUN apk --no-cache add curl wget
 
 
 COPY --from=builder /easeagent/build/target/easeagent-dep.jar   /easeagent-volume/easeagent.jar
-COPY --from=builder /easeagent/build/target/log4j2.xml   /easeagent-volume/log4j2.xml
+COPY --from=builder /easeagent/build/target/easeagent-log4j2.xml   /easeagent-volume/easeagent-log4j2.xml
