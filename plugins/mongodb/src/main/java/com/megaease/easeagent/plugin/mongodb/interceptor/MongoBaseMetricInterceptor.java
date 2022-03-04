@@ -23,6 +23,8 @@ import com.megaease.easeagent.plugin.api.metric.ServiceMetricRegistry;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetricSupplier;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.api.middleware.Redirect;
+import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.enums.Order;
 
 
@@ -32,7 +34,9 @@ public abstract class MongoBaseMetricInterceptor extends MongoBaseInterceptor {
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         super.init(config, className, methodName, methodDescriptor);
-        mongoMetric = ServiceMetricRegistry.getOrCreate(config, new Tags("application", "mongodb", "operation"), new ServiceMetricSupplier<MongoMetric>() {
+        Tags tags = new Tags("application", "mongodb", "operation");
+        RedirectProcessor.setTagsIfRedirected(Redirect.MONGODB, tags);
+        mongoMetric = ServiceMetricRegistry.getOrCreate(config, tags, new ServiceMetricSupplier<MongoMetric>() {
             @Override
             public NameFactory newNameFactory() {
                 return MongoMetric.nameFactory();
