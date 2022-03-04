@@ -487,7 +487,7 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 
 | Field  |  Type   | Description                                                                                               |
 |:-------|:-------:|:----------------------------------------------------------------------------------------------------------|
-| url    | string  | The total number of database connections                                                                  |
+| url    | string  | The url of database connections                                                                           |
 | cnt    | integer | The total number of database connections                                                                  |
 | cnt    | integer | The total error number of database connections                                                            |
 | m1     | double  | The JDBC connection establishment per second (exponentially-weighted moving average) in last 1 minute.    |

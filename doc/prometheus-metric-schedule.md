@@ -119,7 +119,7 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 #### Dedicated label
 | Label Name | Essential | Description                              |
 |:-----------|:---------:|:-----------------------------------------|
-| url        |   true    | The total number of database connections |
+| url        |   true    | The url of database connections          |
 
 
 ### JVM Memory
