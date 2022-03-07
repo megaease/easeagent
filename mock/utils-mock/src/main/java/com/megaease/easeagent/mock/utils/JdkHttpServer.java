@@ -118,6 +118,7 @@ public class JdkHttpServer {
     }
 
     public static class Builder {
+        private int tryPortNum = 4;
         private int port = 0;
         private String path;
         private Consumer<Headers> headersConsumer;
@@ -143,14 +144,31 @@ public class JdkHttpServer {
             return this;
         }
 
-        public JdkHttpServer build() throws IOException {
-            int p = port;
-            if (p <= 0) {
-                DatagramSocket s = new DatagramSocket(0);
-                p = s.getLocalPort();
+        public void setTryPortNum(int tryPortNum) {
+            this.tryPortNum = tryPortNum;
+        }
+
+        private HttpServer buildHttpServer() throws IOException {
+            if (0 < port) {
+                return HttpServer.create(new InetSocketAddress(port), 0);
             }
+            IOException ioException = null;
+            for (int i = 0; i < tryPortNum; i++) {
+                try {
+                    DatagramSocket s = new DatagramSocket(0);
+                    int p = s.getLocalPort();
+                    return HttpServer.create(new InetSocketAddress(p), 0);
+                } catch (IOException e) {
+                    ioException = e;
+                }
+            }
+            throw ioException;
+        }
+
+        public JdkHttpServer build() throws IOException {
+            HttpServer httpServer = buildHttpServer();
+            int p = httpServer.getAddress().getPort();
             String httpPath = path == null ? "/example" : path;
-            HttpServer httpServer = HttpServer.create(new InetSocketAddress(port), 0);
             JdkHttpServer jdkHttpServer = new JdkHttpServer(p, httpServer, httpPath);
             jdkHttpServer.setHeadersConsumer(headersConsumer);
             jdkHttpServer.setExchangeConsumer(exchangeConsumer);
