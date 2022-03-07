@@ -84,7 +84,7 @@ JDBC Statement schema describes key metrics of JDBC SQL Statement, which include
 #### Dedicated label
 | Label Name | Essential |           Value Example            | Description                                                                                                                                                                                                                                         |
 |:-----------|:---------:|:----------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| signature  |   true    | "440580e6c3215eceb4ef992d60adde9a" | Executed JDBC method signature. By default, It is md5 of sql like "select * from data". It can be restored to sql by turning off the switch: `plugin.observability.jdbc.sql.compress.enabled=false`. [Details](./user-manual.md#tracing-and-metric) |
+| signature  |   true    | "440580e6c3215eceb4ef992d60adde9a" | Executed JDBC method signature. By default, It is an MD5 of SQL like "select * from data". It can be SQL statement via turning off the switch: `plugin.observability.jdbc.sql.compress.enabled=false`. [Details](./user-manual.md#tracing-and-metric) |
 
 
 ### JDBC Connection
