@@ -4,14 +4,14 @@ Prometheus Exports Rules: [Prometheus Exports](./metric-api.md#7prometheusexport
 
 ## Common label
 
-| label name    |    Value Example    | Description                                                                                                |
-|:--------------|:-------------------:|:-----------------------------------------------------------------------------------------------------------|
-| MetricSubType |      `DEFAULT`      | The enum MetricSubType value: `DEFAULT,ERROR,CHANNEL,CONSUMER,PRODUCER,CONSUMER_ERROR,PRODUCER_ERROR,NONE` |
-| MetricType    |    `CounterType`    | The Metric Type by metric calculate: `TimerType,HistogramType,MeterType,CounterType,GaugeType`             |
-| host_ipv4     |   `10.127.48.163`   | The ipv4 by host: xxx.xxx.xxx.xx                                                                           |
-| host_name     | `MacBook-Pro.local` | host name.                                                                                                 |
-| service       |     `demo-name`     | The `name` read from the configuration. for you service name.                                              |
-| system        |    `demo-system`    | The `system` read from the configuration. for you system name.                                             |
+| label name    |    Value Example    | Description                                                                                                       |
+|:--------------|:-------------------:|:------------------------------------------------------------------------------------------------------------------|
+| MetricSubType |      `DEFAULT`      | The enum MetricSubType value: `DEFAULT, ERROR, CHANNEL, CONSUMER, PRODUCER, CONSUMER_ERROR, PRODUCER_ERROR, NONE` |
+| MetricType    |    `CounterType`    | The Metric Type by metric calculate: `TimerType, HistogramType, MeterType, CounterType, GaugeType`                |
+| host_ipv4     |   `10.127.48.163`   | The ipv4 by host: xxx.xxx.xxx.xx                                                                                  |
+| host_name     | `MacBook-Pro.local` | host name.                                                                                                        |
+| service       |     `demo-name`     | The `name` read from the configuration. for you service name.                                                     |
+| system        |    `demo-system`    | The `system` read from the configuration. for you system name.                                                    |
 
 ## Metric Schedule
 
