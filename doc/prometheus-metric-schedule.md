@@ -4,14 +4,14 @@ Prometheus Exports Rules: [Prometheus Exports](./metric-api.md#7prometheusexport
 
 ## Common label
 
-| label name    | Description                                                                                                |
-|:--------------|:-----------------------------------------------------------------------------------------------------------|
-| MetricSubType | The enum MetricSubType value：`DEFAULT,ERROR,CHANNEL,CONSUMER,PRODUCER,CONSUMER_ERROR,PRODUCER_ERROR,NONE` |
-| MetricType    | The Metric Type by metric calculate: `TimerType,HistogramType,MeterType,CounterType,GaugeType`             |
-| host_ipv4     | The ipv4 by host: xxx.xxx.xxx.xx                                                                           |
-| host_name     | host name.                                                                                                 |
-| service       | The `name` read from the configuration. for you service name.                                              |
-| system        | The `system` read from the configuration. for you system name.                                             |
+| label name    |    Value Example    | Description                                                                                                |
+|:--------------|:-------------------:|:-----------------------------------------------------------------------------------------------------------|
+| MetricSubType |      "DEFAULT"      | The enum MetricSubType value: `DEFAULT,ERROR,CHANNEL,CONSUMER,PRODUCER,CONSUMER_ERROR,PRODUCER_ERROR,NONE` |
+| MetricType    |    "CounterType"    | The Metric Type by metric calculate: `TimerType,HistogramType,MeterType,CounterType,GaugeType`             |
+| host_ipv4     |   "10.127.48.163"   | The ipv4 by host: xxx.xxx.xxx.xx                                                                           |
+| host_name     | "MacBook-Pro.local" | host name.                                                                                                 |
+| service       |     "demo-name"     | The `name` read from the configuration. for you service name.                                              |
+| system        |    "demo-system"    | The `system` read from the configuration. for you system name.                                             |
 
 ## Metric Schedule
 
@@ -48,9 +48,9 @@ HTTP Request schema describes key metrics of service APIs, which include:
 | application_http_request_p99       | double  | TP99: The http-request execution duration in milliseconds for 99% user.                                |
 
 #### Dedicated label
-| Label Name | Essential | Description            |
-|:-----------|:---------:|:-----------------------|
-| url        |   true    | the URL of the request |
+| Label Name | Essential |   Value Example   | Description            |
+|:-----------|:---------:|:-----------------:|:-----------------------|
+| url        |   true    | "GET /web_client" | the URL of the request |
 
 ### JDBC Statement
 JDBC Statement schema describes key metrics of JDBC SQL Statement, which include:
@@ -82,9 +82,9 @@ JDBC Statement schema describes key metrics of JDBC SQL Statement, which include
 | application_jdbc_statement_p999   | double  | TP99.9: The JDBC method execution duration in milliseconds for 99.9% user.                            |
 
 #### Dedicated label
-| Label Name | Essential | Description                     |
-|:-----------|:---------:|:--------------------------------|
-| signature  |   true    | Executed JDBC method signature. |
+| Label Name | Essential |           Value Example            | Description                                                                                                                                                                                                                                         |
+|:-----------|:---------:|:----------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| signature  |   true    | "440580e6c3215eceb4ef992d60adde9a" | Executed JDBC method signature. By default, It is md5 of sql like "select * from data". It can be restored to sql by turning off the switch: `plugin.observability.jdbc.sql.compress.enabled=false`. [Details](./user-manual.md#tracing-and-metric) |
 
 
 ### JDBC Connection
@@ -117,9 +117,9 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 | application_jdbc_connection_p999   | double  | TP99.9: The JDBC connection establishment duration in milliseconds for 99.9% user.                        |
 
 #### Dedicated label
-| Label Name | Essential | Description                              |
-|:-----------|:---------:|:-----------------------------------------|
-| url        |   true    | The url of database connections          |
+| Label Name | Essential |    Value Example     | Description                     |
+|:-----------|:---------:|:--------------------:|:--------------------------------|
+| url        |   true    | "jdbc:hsqldb:mem:7e" | The url of database connections |
 
 
 ### JVM Memory
@@ -138,9 +138,9 @@ JVM Memory schema describes key metrics of Java memory usage, which include:
 | application_jvm_memory_bytes_max       | integer | The value represents the maximum amount of memory in bytes unit that can be used for memory management. Its value may be undefined (value -1). The maximum amount of memory may change over time if defined. The amount of used and committed memory will always be less than or equal to max if max is defined. A memory allocation may fail if it attempts to increase the used memory such that used > committed even if used <= max would still be true (for example, when the system is low on virtual memory). |
 
 #### Dedicated label
-| Label Name | Essential | Description      |
-|:-----------|:---------:|:-----------------|
-| resource   |   true    | memory pool name |
+| Label Name | Essential | Value Example      | Description                                                                                                                                                                                                    |
+|:-----------|:---------:|:-------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| resource   |   true    | "pools.G1-Old-Gen" | Memory pool name. The Java virtual machine can have one or more memory pools. Reference list: [Platform](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/api-platform.html) |
 
 
 ### JVM GC
@@ -156,9 +156,9 @@ JVM GC schema describes key metrics of JVM garbage collection, which include:
 | application_jvm_gc_times_rate            | integer | The number of gc times per second.                                                        |
 
 #### Dedicated label
-| Label Name | Essential | Description |
-|:-----------|:---------:|:------------|
-| resource   |   true    | gc name     |
+| Label Name | Essential |     Value Example     | Description                                                                                                                                                                                                                                                                                                                                          |
+|:-----------|:---------:|:---------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| resource   |   true    | "G1 Young Generation" | GC name. Different JVM startup arguments will have different GC. Reference: [GC tuning](https://docs.oracle.com/en/java/javase/17/gctuning/introduction-garbage-collection-tuning.html#GUID-326EB4CF-8C8C-4267-8355-21AB04F0D304) , [Platform](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.0/rest-reference/api-platform.html) |
 
 
 ### Kafka Client
@@ -210,9 +210,9 @@ Kafka Client schema describes key metrics of Kafka client invoking, which includ
 | application_kafka_consrp999  | double | TP99.9: The execution duration in milliseconds for 99.9% user.                                       |
 
 #### Dedicated label
-| Label Name | Essential | Description |
-|:-----------|:---------:|:------------|
-| resource   |   true    | topic name  |
+| Label Name | Essential | Value Example | Description |
+|:-----------|:---------:|:-------------:|:------------|
+| resource   |   true    |     "log"     | topic name  |
 
 
 ### RabbitMQ Producer
@@ -242,9 +242,9 @@ RabbitMQ Producer schema describes key metrics of RabbitMQ client publishing mes
 | application_rabbitmq_ex_ro_p999       | double | TP99.9: The execution duration in milliseconds for 99.9% user.                                       |
 
 #### Dedicated label
-| Label Name | Essential | Description                      |
-|:-----------|:---------:|:---------------------------------|
-| resource   |   true    | rabbitmq exchange and routingkey |
+| Label Name | Essential |    Value Example     | Description                        |
+|:-----------|:---------:|:--------------------:|:-----------------------------------|
+| resource   |   true    | "myExchange-myQueue" | rabbitmq ${exchange}-${routingkey} |
 
 
 ### RabbitMQ Consumer
@@ -274,9 +274,9 @@ RabbitMQ Consumer schema describes key metrics of RabbitMQ client consuming mess
 | application_rabbitmq_consumer_p999                 | double | TP99.9: The execution duration in milliseconds for 99.9% user.                                    |
 
 #### Dedicated label
-| Label Name | Essential | Description         |
-|:-----------|:---------:|:--------------------|
-| resource   |   true    | rabbitmq routingKey |
+| Label Name | Essential | Value Example | Description         |
+|:-----------|:---------:|:-------------:|:--------------------|
+| resource   |   true    |   "myQueue"   | rabbitmq routingKey |
 
 
 ### Spring AMQP on Message Listener
@@ -307,9 +307,9 @@ Message Listener schema describes key metrics of Spring AMQP RabbitMQ Message Qu
 | application_rabbitmq_queue_p999                 | double | TP99.9: The execution duration in milliseconds for 99.9% user.                                    |
 
 #### Dedicated label
-| Label Name | Essential | Description    |
-|:-----------|:---------:|:---------------|
-| resource   |   true    | rabbitmq queue |
+| Label Name | Essential | Value Example | Description    |
+|:-----------|:---------:|:-------------:|:---------------|
+| resource   |   true    |   "myQueue"   | rabbitmq queue |
 
 
 ### Elasticsearch
@@ -345,9 +345,9 @@ Elasticsearch schema describes key metrics of Elasticsearch client invoking, whi
 | application_elasticsearch_p99       | double  | TP99: The Elasticsearch execution duration in milliseconds for 99% user.                                        |
 
 #### Dedicated label
-| Label Name | Essential | Description                  |
-|:-----------|:---------:|:-----------------------------|
-| index      |   true    | The Elasticsearch index name |
+| Label Name | Essential |      Value Example       | Description                  |
+|:-----------|:---------:|:------------------------:|:-----------------------------|
+| index      |   true    | "log-tracing-2022.01.11" | The Elasticsearch index name |
 
 
 ### MongoDB
@@ -383,6 +383,6 @@ MongoDB schema describes key metrics of MongoDB client invoking, which include:
 | application_mongodb_p99       | double  | TP99: The MongoDB execution duration in milliseconds for 99% user.                                        |
 
 #### Dedicated label
-| Label Name | Essential | Description                      |
-|:-----------|:---------:|:---------------------------------|
-| operation  |   true    | The MongoDB request command name |
+| Label Name | Essential | Value Example | Description                                                                                                                            |
+|:-----------|:---------:|:-------------:|:---------------------------------------------------------------------------------------------------------------------------------------|
+| operation  |   true    |   "insert"    | The MongoDB request command name: insert, update or find etc. Reference: [Command](https://docs.mongodb.com/manual/reference/command/) |
