@@ -49,7 +49,9 @@ An agent component for Java system.
         * `HTTP Servlet`、`HTTP Filter`
         * `Spring Boot 2.2.x`: `WebClient` 、 `RestTemplate`、`FeignClient`
         * `RabbitMQ Client 5.x`、 `Kafka Client 2.4.x`
-        * `Jedis 3.5.x`、 `Lettuce 5.3.x`
+        * `Jedis 3.5.x`、 `Lettuce 5.3.x (sync、async)`
+        * `elasticsearch client >= 7.x (sync、async)`
+        * `mongodb client >=4.0.x (sync、async)`
     * Collecting Access Logs.
         * `HTTP Servlet`、`HTTP Filter`
         * `Spring Cloud Gateway`
