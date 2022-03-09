@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.report.async;
+package com.megaease.easeagent.report.async.trace;
 
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.Encoder;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
+import com.megaease.easeagent.report.async.AsyncProps;
 import com.megaease.easeagent.report.async.zipkin.AgentBufferNextMessage;
 import com.megaease.easeagent.report.async.zipkin.AgentByteBoundedQueue;
 import com.megaease.easeagent.report.encoder.PackedMessage;
@@ -51,15 +52,17 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
     private static final String NAME_PREFIX = "AsyncReporter";
 
     final AtomicBoolean closed = new AtomicBoolean(false);
-    final Encoder<S> encoder;
+    SenderWithEncoder sender;
+    Encoder<S> encoder;
+
     AgentByteBoundedQueue<S> pending;
     final int messageMaxBytes;
     long messageTimeoutNanos;
     final long closeTimeoutNanos;
     final CountDownLatch close;
     final ReporterMetrics metrics;
-    SenderWithEncoder sender;
-    TraceAsyncProps traceProperties;
+    AsyncProps traceProperties;
+
     ThreadFactory threadFactory;
 
     /*
@@ -69,7 +72,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
 
     List<Thread> flushThreads;
 
-    SDKAsyncReporter(Builder builder, Encoder<S> encoder, TraceAsyncProps traceProperties) {
+    SDKAsyncReporter(Builder builder, Encoder<S> encoder, AsyncProps traceProperties) {
         this.pending = new AgentByteBoundedQueue<>(builder.queuedMaxItems, builder.queuedMaxBytes);
         this.sender = builder.sender;
         this.messageMaxBytes = builder.messageMaxBytes;
@@ -82,7 +85,7 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
     }
 
     public static SDKAsyncReporter<ReportSpan> builderSDKAsyncReporter(SenderWithEncoder sender,
-                                                                       TraceAsyncProps traceProperties,
+                                                                       AsyncProps traceProperties,
                                                                        GlobalExtrasSupplier extrasSupplier) {
         final SDKAsyncReporter<ReportSpan> reporter = new Builder(sender, traceProperties)
             .globalExtractor(extrasSupplier)
@@ -104,9 +107,10 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
     //modify sender
     public void setSender(SenderWithEncoder sender) {
         this.sender = sender;
+        this.encoder = sender.getEncoder();
     }
 
-    public void setTraceProperties(TraceAsyncProps traceProperties) {
+    public void setTraceProperties(AsyncProps traceProperties) {
         this.traceProperties = traceProperties;
     }
 
@@ -294,26 +298,24 @@ public class SDKAsyncReporter<S> extends AsyncReporter<S> {
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         ReporterMetrics metrics = ReporterMetrics.NOOP_METRICS;
         int messageMaxBytes;
-        long messageTimeoutNanos = TimeUnit.SECONDS.toNanos(1);
+        long messageTimeoutNanos;
         long closeTimeoutNanos = TimeUnit.SECONDS.toNanos(1);
-        int queuedMaxItems = 10000;
-        int queuedMaxBytes = onePercentOfMemory();
-        TraceAsyncProps props;
+        int queuedMaxItems;
+        int queuedMaxBytes;
+        AsyncProps props;
         GlobalExtrasSupplier globalExtrasSupplier;
 
-        static int onePercentOfMemory() {
-            long result = (long) (Runtime.getRuntime().totalMemory() * 0.01);
-            // don't overflow in the rare case 1% of memory is larger than 2 GiB!
-            return (int) Math.max(Math.min(Integer.MAX_VALUE, result), Integer.MIN_VALUE);
-        }
 
-        Builder(SenderWithEncoder sender, TraceAsyncProps traceProperties) {
+        Builder(SenderWithEncoder sender, AsyncProps traceProperties) {
             if (sender == null) {
                 throw new NullPointerException("sender == null");
             }
             this.props = traceProperties;
             this.sender = sender;
             this.messageMaxBytes = traceProperties.getMessageMaxBytes();
+            this.queuedMaxItems = traceProperties.getQueuedMaxItems();
+            this.messageTimeoutNanos = TimeUnit.MILLISECONDS.toNanos(traceProperties.getMessageTimeout());
+            this.queuedMaxBytes = traceProperties.getQueuedMaxSize();
         }
 
         /**

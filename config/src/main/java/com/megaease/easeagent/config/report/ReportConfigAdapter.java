@@ -44,8 +44,10 @@ public class ReportConfigAdapter {
         // default config
         cfg.put(TRACE_ENCODER, NoNull.of(cfg.get(TRACE_ENCODER), SPAN_JSON_ENCODER_NAME));
         cfg.put(METRIC_ENCODER, NoNull.of(cfg.get(METRIC_ENCODER), METRIC_JSON_ENCODER_NAME));
+        cfg.put(LOG_ENCODER, NoNull.of(cfg.get(LOG_ENCODER), LOG_JSON_ENCODER_NAME));
         cfg.put(TRACE_SENDER_NAME, NoNull.of(cfg.get(TRACE_SENDER_NAME), CONSOLE_SENDER_NAME));
         cfg.put(METRIC_SENDER_NAME, NoNull.of(cfg.get(METRIC_SENDER_NAME), CONSOLE_SENDER_NAME));
+        cfg.put(LOG_SENDER_NAME, NoNull.of(cfg.get(LOG_SENDER_NAME), CONSOLE_SENDER_NAME));
 
         return cfg;
     }

@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.report.metric;
+package com.megaease.easeagent.plugin.report.metric;
 
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 
-public interface MetricReporter extends ConfigChangeListener {
+/**
+ * Metric plugin get reporter from metricReporterFactory
+ */
+public interface MetricReporterFactory {
     Reporter reporter(IPluginConfig config);
 }

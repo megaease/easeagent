@@ -77,6 +77,7 @@ public interface MetricProps {
             // low priority: global level
             Map<String, String> pCfg = ConfigUtils.extractByPrefix(reportConfig, REPORT);
             pCfg.putAll(ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_SENDER, senderPrefix));
+            pCfg.putAll(ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_ENCODER, getEncoderKey(senderPrefix)));
 
             // high priority: override by plugin level config
             pluginConfig.keySet().forEach(key -> pCfg.put(join(senderPrefix, key), pluginConfig.getString(key)));
@@ -177,6 +178,15 @@ public interface MetricProps {
 
         private String generatePrefix() {
             return "reporter.metric." + this.name + ".sender";
+        }
+
+        private static String getEncoderKey(String cfgPrefix) {
+            int idx = cfgPrefix.lastIndexOf('.');
+            if (idx == 0) {
+                return ENCODER_KEY;
+            } else {
+                return cfgPrefix.substring(0, idx + 1) + ENCODER_KEY;
+            }
         }
     }
 }

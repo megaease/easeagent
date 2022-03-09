@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.tools.metrics;
 
 import com.megaease.easeagent.plugin.api.ProgressFields;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.utils.SystemClock;
@@ -31,31 +32,31 @@ import java.util.Map;
 
 public class HttpLog {
 
-    public RequestInfo prepare(String system, String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
-        RequestInfo requestInfo = prepare(system, serviceName, beginTime, serverInfo);
+    public AccessLogInfo prepare(String system, String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
+        AccessLogInfo accessLogInfo = prepare(system, serviceName, beginTime, serverInfo);
         if (span == null) {
-            return requestInfo;
+            return accessLogInfo;
         }
-        requestInfo.setTraceId(span.traceIdString());
-        requestInfo.setSpanId(span.spanIdString());
-        requestInfo.setParentSpanId(span.parentIdString());
-        return requestInfo;
+        accessLogInfo.setTraceId(span.traceIdString());
+        accessLogInfo.setSpanId(span.spanIdString());
+        accessLogInfo.setParentSpanId(span.parentIdString());
+        return accessLogInfo;
     }
 
-    private RequestInfo prepare(String system, String serviceName, Long beginTime, AccessLogServerInfo serverInfo) {
-        RequestInfo requestInfo = new RequestInfo();
-        requestInfo.setSystem(system);
-        requestInfo.setService(serviceName);
-        requestInfo.setHostName(HostAddress.localhost());
-        requestInfo.setHostIpv4(HostAddress.getHostIpv4());
-        requestInfo.setUrl(serverInfo.getMethod() + " " + serverInfo.getRequestURI());
-        requestInfo.setMethod(serverInfo.getMethod());
-        requestInfo.setHeaders(serverInfo.findHeaders());
-        requestInfo.setBeginTime(beginTime);
-        requestInfo.setQueries(getQueries(serverInfo));
-        requestInfo.setClientIP(serverInfo.getClientIP());
-        requestInfo.setBeginCpuTime(System.nanoTime());
-        return requestInfo;
+    private AccessLogInfo prepare(String system, String serviceName, Long beginTime, AccessLogServerInfo serverInfo) {
+        AccessLogInfo accessLogInfo = new AccessLogInfo();
+        accessLogInfo.setSystem(system);
+        accessLogInfo.setService(serviceName);
+        accessLogInfo.setHostName(HostAddress.localhost());
+        accessLogInfo.setHostIpv4(HostAddress.getHostIpv4());
+        accessLogInfo.setUrl(serverInfo.getMethod() + " " + serverInfo.getRequestURI());
+        accessLogInfo.setMethod(serverInfo.getMethod());
+        accessLogInfo.setHeaders(serverInfo.findHeaders());
+        accessLogInfo.setBeginTime(beginTime);
+        accessLogInfo.setQueries(getQueries(serverInfo));
+        accessLogInfo.setClientIP(serverInfo.getClientIP());
+        accessLogInfo.setBeginCpuTime(System.nanoTime());
+        return accessLogInfo;
     }
 
     private Map<String, String> getQueries(AccessLogServerInfo serverInfo) {
@@ -70,20 +71,26 @@ public class HttpLog {
         return queries;
     }
 
-    public String getLogString(RequestInfo requestInfo, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
-        requestInfo.setStatusCode(serverInfo.getStatusCode());
+    public String getLogString(AccessLogInfo accessLogInfo, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
+        this.finish(accessLogInfo, success, beginTime, serverInfo);
+
+        List<AccessLogInfo> list = new ArrayList<>(1);
+        list.add(accessLogInfo);
+
+        return JsonUtil.toJson(list);
+    }
+
+
+    public void finish(AccessLogInfo accessLogInfo, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
+        accessLogInfo.setStatusCode(serverInfo.getStatusCode());
         if (!success) {
-            requestInfo.setStatusCode("500");
+            accessLogInfo.setStatusCode("500");
         }
-        Long now = SystemClock.now();
-        requestInfo.setTimestamp(now);
-        requestInfo.setRequestTime(now - beginTime);
-        requestInfo.setCpuElapsedTime(System.nanoTime() - requestInfo.getBeginCpuTime());
-        requestInfo.setResponseSize(serverInfo.getResponseBufferSize());
-        requestInfo.setMatchUrl(serverInfo.getMatchURL());
-        List<RequestInfo> list = new ArrayList<>(1);
-        list.add(requestInfo);
-        String logString = JsonUtil.toJson(list);
-        return logString;
+        long now = SystemClock.now();
+        accessLogInfo.setTimestamp(now);
+        accessLogInfo.setRequestTime(now - beginTime);
+        accessLogInfo.setCpuElapsedTime(System.nanoTime() - accessLogInfo.getBeginCpuTime());
+        accessLogInfo.setResponseSize(serverInfo.getResponseBufferSize());
+        accessLogInfo.setMatchUrl(serverInfo.getMatchURL());
     }
 }

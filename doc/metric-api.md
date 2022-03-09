@@ -403,7 +403,7 @@ The standard of EaseMonitor is to use json format, if unnecessary, please use js
 
 [com.megaease.easeagent.plugin.api.Reporter](../plugin-api/src/main/java/com/megaease/easeagent/plugin/api/Reporter.java)
 
-[com.megaease.easeagent.plugin.bridge.EaseAgent.metricReporter](../plugin-api/src/main/java/com/megaease/easeagent/plugin/bridge/EaseAgent.java)
+[com.megaease.easeagent.plugin.bridge.EaseAgent.metricReporterFactory](../plugin-api/src/main/java/com/megaease/easeagent/plugin/bridge/EaseAgent.java)
 
 The obtained Reporter is a singleton, and the key of the singleton is `namespace`.
 
@@ -417,7 +417,7 @@ public class MD5ReportConsumer {
     private final Reporter reporter;
     public MD5ReportConsumer() {
         this.config = AutoRefreshRegistry.getOrCreate("observability", "md5Dictionary", "metric");
-        this.reporter = EaseAgent.metricReporter(config);
+        this.reporter = EaseAgent.metricReporterFactory(config);
     }
 
     

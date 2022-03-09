@@ -18,17 +18,18 @@
 package com.megaease.easeagent.report;
 
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.report.ReportConfigAdapter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.config.report.ReportConfigAdapter;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
+import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
-import com.megaease.easeagent.report.metric.MetricReporter;
-import com.megaease.easeagent.report.metric.MetricReporterImpl;
+import com.megaease.easeagent.report.async.log.LogReporter;
+import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
+import com.megaease.easeagent.report.metric.MetricReporterFactoryImpl;
 import com.megaease.easeagent.report.plugin.ReporterLoader;
 import com.megaease.easeagent.report.trace.TraceReport;
-
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -40,13 +41,15 @@ import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 @Slf4j
 public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
     private final TraceReport traceReport;
-    private final MetricReporter metricReporter;
+    private final MetricReporterFactory metricReporterFactory;
+    private final LogReporter logReporter;
     private final Config reportConfig;
 
     DefaultAgentReport(Config config) {
         this.reportConfig = new Configs(ReportConfigAdapter.extractReporterConfig(config));
         this.traceReport = new TraceReport(this.reportConfig);
-        this.metricReporter = MetricReporterImpl.create(this.reportConfig);
+        this.logReporter = new LogReporter(this.reportConfig);
+        this.metricReporterFactory = MetricReporterFactoryImpl.create(this.reportConfig);
         config.addChangeListener(this);
     }
 
@@ -61,8 +64,13 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
     }
 
     @Override
-    public MetricReporter metricReporter() {
-        return this.metricReporter;
+    public void report(AccessLogInfo log) {
+        this.logReporter.report(log);
+    }
+
+    @Override
+    public MetricReporterFactory metricReporter() {
+        return this.metricReporterFactory;
     }
 
     @Override

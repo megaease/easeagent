@@ -17,7 +17,7 @@
 
 package com.megaease.easeagent.mock.report;
 
-import com.megaease.easeagent.report.AgentReport;
+import com.megaease.easeagent.plugin.report.AgentReport;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;

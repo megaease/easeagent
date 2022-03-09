@@ -21,6 +21,7 @@ import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
+import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -31,7 +32,7 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import easeagent.plugin.spring.gateway.AccessPlugin;
@@ -64,12 +65,12 @@ public class GatewayAccessLogInterceptorTest {
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
-        RequestInfo requestInfo = (RequestInfo) mockServerWebExchange.getAttributes().get(RequestInfo.class.getName());
-        assertNotNull(requestInfo);
-        verify(requestInfo, TimeUtils.startTime(context, startTime));
-        assertNull(requestInfo.getTraceId());
-        assertNull(requestInfo.getSpanId());
-        assertNull(requestInfo.getParentSpanId());
+        AccessLogInfo accessLogInfo = (AccessLogInfo) mockServerWebExchange.getAttributes().get(AccessLogInfo.class.getName());
+        assertNotNull(accessLogInfo);
+        verify(accessLogInfo, TimeUtils.startTime(context, startTime));
+        assertNull(accessLogInfo.getTraceId());
+        assertNull(accessLogInfo.getSpanId());
+        assertNull(accessLogInfo.getParentSpanId());
 
         mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
@@ -78,32 +79,33 @@ public class GatewayAccessLogInterceptorTest {
         Span span = requestContext.span();
         try (Scope ignored = requestContext.scope()) {
             interceptor.before(methodInfo, context);
-            requestInfo = (RequestInfo) mockServerWebExchange.getAttributes().get(RequestInfo.class.getName());
-            assertNotNull(requestInfo);
-            verify(requestInfo, TimeUtils.startTime(context, startTime));
-            assertEquals(span.traceIdString(), requestInfo.getTraceId());
-            assertEquals(span.spanIdString(), requestInfo.getSpanId());
-            assertEquals(span.parentIdString(), requestInfo.getParentSpanId());
+            accessLogInfo = (AccessLogInfo) mockServerWebExchange.getAttributes().get(AccessLogInfo.class.getName());
+            assertNotNull(accessLogInfo);
+            verify(accessLogInfo, TimeUtils.startTime(context, startTime));
+            assertEquals(span.traceIdString(), accessLogInfo.getTraceId());
+            assertEquals(span.spanIdString(), accessLogInfo.getSpanId());
+            assertEquals(span.parentIdString(), accessLogInfo.getParentSpanId());
         }
     }
 
 
-    public void verify(RequestInfo requestInfo, long startTime) {
-        assertEquals("test-gateway-system", requestInfo.getSystem());
-        assertEquals("test-gateway-service", requestInfo.getService());
-        assertEquals(HostAddress.localhost(), requestInfo.getHostName());
-        assertEquals(HostAddress.getHostIpv4(), requestInfo.getHostIpv4());
-        assertEquals("GET http://192.168.0.12:8080/test?a=b", requestInfo.getUrl());
-        assertEquals("GET", requestInfo.getMethod());
-        assertEquals(TestConst.FORWARDED_VALUE, requestInfo.getHeaders().get(TestConst.FORWARDED_NAME));
-        assertEquals(startTime, requestInfo.getBeginTime());
-        assertEquals("b", requestInfo.getQueries().get("a"));
-        assertEquals(TestConst.FORWARDED_VALUE, requestInfo.getClientIP());
-        assertTrue(requestInfo.getBeginCpuTime() > 0);
+    public void verify(AccessLogInfo accessLogInfo, long startTime) {
+        assertEquals("test-gateway-system", accessLogInfo.getSystem());
+        assertEquals("test-gateway-service", accessLogInfo.getService());
+        assertEquals(HostAddress.localhost(), accessLogInfo.getHostName());
+        assertEquals(HostAddress.getHostIpv4(), accessLogInfo.getHostIpv4());
+        assertEquals("GET http://192.168.0.12:8080/test?a=b", accessLogInfo.getUrl());
+        assertEquals("GET", accessLogInfo.getMethod());
+        assertEquals(TestConst.FORWARDED_VALUE, accessLogInfo.getHeaders().get(TestConst.FORWARDED_NAME));
+        assertEquals(startTime, accessLogInfo.getBeginTime());
+        assertEquals("b", accessLogInfo.getQueries().get("a"));
+        assertEquals(TestConst.FORWARDED_VALUE, accessLogInfo.getClientIP());
+        assertTrue(accessLogInfo.getBeginCpuTime() > 0);
     }
 
     @Test
     public void after() throws InterruptedException {
+        EaseAgent.agentReport = MockReport.getAgentReport();
         GatewayAccessLogInterceptor interceptor = new GatewayAccessLogInterceptor();
         InterceptorTestUtils.init(interceptor, new AccessPlugin());
         Context context = EaseAgent.getContext();
@@ -117,20 +119,13 @@ public class GatewayAccessLogInterceptorTest {
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
         AgentMono agentMono = (AgentMono) methodInfo.getRetValue();
         TagVerifier tagVerifier = new TagVerifier().add("type", "access-log").add("system", "test-gateway-system");
-        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        // LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
         Thread thread = new Thread(() -> agentMono.getFinish().accept(agentMono.getMethodInfo(), agentMono.getAsyncContext()));
         thread.start();
         thread.join();
-        RequestInfo requestInfo = getRequestInfo(lastJsonReporter);
-        verify(requestInfo, start);
+        AccessLogInfo accessLogInfo = MockEaseAgent.getLastLog();
+        verify(accessLogInfo, start);
     }
-
-    private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
-        String result = JsonUtil.toJson(lastJsonReporter.getLastOnlyOne());
-        assertNotNull(result);
-        return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
-    }
-
 
     @Test
     public void serverInfo() {

@@ -21,12 +21,13 @@ import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
-import com.megaease.easeagent.report.AgentReport;
-import com.megaease.easeagent.report.metric.MetricReporter;
+import com.megaease.easeagent.plugin.report.AgentReport;
+import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import org.junit.Test;
 
 import java.util.List;
@@ -42,12 +43,17 @@ public class MetricProviderImplTest {
         METRIC_PROVIDER.setAgentReport(new AgentReport() {
             @Override
             public void report(ReportSpan span) {
-
+                // skip
             }
 
             @Override
-            public MetricReporter metricReporter() {
-                return new MetricReporter() {
+            public void report(AccessLogInfo log) {
+                // skip
+            }
+
+            @Override
+            public MetricReporterFactory metricReporter() {
+                return new MetricReporterFactory() {
                     @Override
                     public Reporter reporter(IPluginConfig config) {
                         return new Reporter() {
@@ -61,11 +67,6 @@ public class MetricProviderImplTest {
 
                             }
                         };
-                    }
-
-                    @Override
-                    public void onChange(List<ChangeItem> list) {
-
                     }
                 };
             }

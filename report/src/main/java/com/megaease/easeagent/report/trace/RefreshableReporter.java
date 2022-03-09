@@ -19,9 +19,10 @@ package com.megaease.easeagent.report.trace;
 
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
+import com.megaease.easeagent.report.async.trace.TraceAsyncProps;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
-import com.megaease.easeagent.report.async.SDKAsyncReporter;
-import com.megaease.easeagent.report.async.TraceAsyncProps;
+import com.megaease.easeagent.report.async.trace.SDKAsyncReporter;
+import com.megaease.easeagent.report.async.AsyncProps;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import zipkin2.reporter.Reporter;
 
@@ -38,10 +39,10 @@ import static com.megaease.easeagent.config.report.ReportConfigConst.TRACE_SENDE
  */
 public class RefreshableReporter<S> implements Reporter<S> {
     private final SDKAsyncReporter<S> asyncReporter;
-    private TraceAsyncProps traceProperties;
+    private AsyncProps traceProperties;
 
     public RefreshableReporter(SDKAsyncReporter<S> reporter,
-                               TraceAsyncProps traceProperties) {
+                               AsyncProps traceProperties) {
         this.asyncReporter = reporter;
         this.traceProperties = traceProperties;
     }
@@ -74,9 +75,9 @@ public class RefreshableReporter<S> implements Reporter<S> {
             asyncReporter.setSender(sender);
         }
 
-        traceProperties = TraceAsyncProps.newDefault(EaseAgent.getConfig());
+        traceProperties = new TraceAsyncProps(EaseAgent.getConfig());
         asyncReporter.closeFlushThread();
-        asyncReporter.setPending(traceProperties.getQueuedMaxSpans(), traceProperties.getQueuedMaxSize());
+        asyncReporter.setPending(traceProperties.getQueuedMaxItems(), traceProperties.getQueuedMaxSize());
         asyncReporter.setMessageTimeoutNanos(messageTimeout(traceProperties.getMessageTimeout()));
         asyncReporter.startFlushThread(); // start thread
     }

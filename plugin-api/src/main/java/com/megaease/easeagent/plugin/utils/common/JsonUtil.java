@@ -37,6 +37,7 @@ public class JsonUtil {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
+    // expensive call
     public static String toJson(Object obj) {
         try {
             return mapper.writeValueAsString(obj);

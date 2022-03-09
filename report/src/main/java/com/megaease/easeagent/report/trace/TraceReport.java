@@ -24,8 +24,9 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
-import com.megaease.easeagent.report.async.SDKAsyncReporter;
-import com.megaease.easeagent.report.async.TraceAsyncProps;
+import com.megaease.easeagent.report.async.trace.SDKAsyncReporter;
+import com.megaease.easeagent.report.async.AsyncProps;
+import com.megaease.easeagent.report.async.trace.TraceAsyncProps;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
@@ -45,7 +46,7 @@ public class TraceReport {
     private RefreshableReporter<ReportSpan> initSpanRefreshableReporter(Config configs) {
         SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.TRACE_SENDER, configs);
 
-        TraceAsyncProps traceProperties = TraceAsyncProps.newDefault(configs);
+        AsyncProps traceProperties = new TraceAsyncProps(configs);
 
         GlobalExtrasSupplier extrasSupplier = new GlobalExtrasSupplier() {
             final AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(configs, ConfigConst.SERVICE_NAME, Config::getString);
