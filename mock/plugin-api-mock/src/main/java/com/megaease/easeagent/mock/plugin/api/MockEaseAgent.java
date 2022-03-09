@@ -25,6 +25,7 @@ import com.megaease.easeagent.mock.plugin.api.utils.ContextUtils;
 import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.report.MockSpanReport;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 
@@ -72,7 +73,7 @@ public class MockEaseAgent {
     /**
      * get last Span from Report cache
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter#getLastSpan
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter#getLastSpan
      *
      * <pre>${@code
      *         Span span = EaseAgent.getContext().nextSpan();
@@ -90,7 +91,7 @@ public class MockEaseAgent {
     /**
      * clean last Span cache from Report
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter#cleanLastSpan
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter#cleanLastSpan
      *
      * <pre>${@code
      *         Span span = EaseAgent.getContext().nextSpan();
@@ -106,9 +107,29 @@ public class MockEaseAgent {
     }
 
     /**
+     * get last Log from Report cache
+     *
+     * <pre>${@code
+     *         EaseAgent.getAgentReport().report(log);
+     *         assertNotNull(MockEaseAgent.getLastLog());
+     * }</pre>
+     * @return Access Log
+     */
+    public static AccessLogInfo getLastLog() {
+        return MockReport.getLastLog();
+    }
+
+    /**
+     * clean last Span cache from Report
+     */
+    public static void clearLastLog() {
+        MockReport.cleanLastLog();
+    }
+
+    /**
      * set MockSpanReport for receive all finish Span
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter#setMockSpanReport
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter#setMockSpanReport
      *
      * <pre>${@code
      *         List<ReportSpan> spans = new ArrayList<>();
@@ -128,11 +149,10 @@ public class MockEaseAgent {
         MockReport.setMockSpanReport(mockSpanReport);
     }
 
-
     /**
      * create and get ${@link LastJsonReporter}  for metric by filter
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter#lastMetricJsonReporter
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter#lastMetricJsonReporter
      *
      * <pre>${@code
      *         //Interceptor init
@@ -165,7 +185,7 @@ public class MockEaseAgent {
     /**
      * get all Configs for unit test
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter#getConfigs
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter#getConfigs
      *
      * <pre>${@code
      *         Configs configs = MockEaseAgent.getConfigs();
@@ -182,7 +202,7 @@ public class MockEaseAgent {
     /**
      * reset all of context: metric, tracing, redirect etc.
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter
      *
      * <pre>${@code
      *          Context context = EaseAgent.getContext();
@@ -213,7 +233,7 @@ public class MockEaseAgent {
 
     /**
      * clean all metric
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter
      *
      * <pre>${@code
      *         //inc 1
@@ -239,7 +259,7 @@ public class MockEaseAgent {
     /**
      * clean MetricRegistry's metrics
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter
      * <pre>${@code
      *         //inc 1
      *         metricRegistry.counter(nameFactory.counterName(key, MetricSubType.DEFAULT)).inc();
@@ -266,7 +286,7 @@ public class MockEaseAgent {
     /**
      * clean ServiceMetric's metrics
      * <p>
-     * see com.megaease.easeagent.mock.plugin.api.damo.MockEaseAgentTest#lastMetricJsonReporter
+     * see com.megaease.easeagent.mock.plugin.api.demo.MockEaseAgentTest#lastMetricJsonReporter
      *
      * <pre>${@code
      *         ServiceMetric serviceMetric = new ServiceMetric(metricRegistry, nameFactory) {

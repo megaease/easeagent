@@ -32,6 +32,7 @@ public enum Order {
     TRACING_INIT(21, ConfigConst.PluginID.TRACING_INIT),
     TRACING(100, ConfigConst.PluginID.TRACING),
     METRIC(200, ConfigConst.PluginID.METRIC),
+    LOG(201, ConfigConst.PluginID.LOG),
     LOW(210, "low"),
     LOWEST(255, "lowest");
 

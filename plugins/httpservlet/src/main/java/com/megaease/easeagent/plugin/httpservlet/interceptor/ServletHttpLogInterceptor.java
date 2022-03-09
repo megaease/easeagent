@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.httpservlet.interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -31,22 +30,19 @@ import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterPoints;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
-import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@AdviceTo(value = DoFilterPoints.class, qualifier = "default", plugin = AccessPlugin.class)
+@AdviceTo(value = DoFilterPoints.class, plugin = AccessPlugin.class)
 public class ServletHttpLogInterceptor extends BaseServletInterceptor {
     private static final String BEFORE_MARK = ServletHttpLogInterceptor.class.getName() + "$BeforeMark";
     private static final String AFTER_MARK = ServletHttpLogInterceptor.class.getName() + "$AfterMark";
     private final HttpLog httpLog = new HttpLog();
 
-    private static Reporter reportConsumer;
-
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
-        reportConsumer = EaseAgent.metricReporter(config);
     }
 
     public AccessLogServerInfo serverInfo(HttpServletRequest request, HttpServletResponse response) {
@@ -86,8 +82,8 @@ public class ServletHttpLogInterceptor extends BaseServletInterceptor {
         Long beginTime = ServletUtils.startTime(httpServletRequest);
         Span span = getSpan(httpServletRequest, context);
         AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
-        RequestInfo requestInfo = this.httpLog.prepare(getSystem(), getServiceName(), beginTime, span, serverInfo);
-        httpServletRequest.setAttribute(RequestInfo.class.getName(), requestInfo);
+        AccessLogInfo accessLogInfo = this.httpLog.prepare(getSystem(), getServiceName(), beginTime, span, serverInfo);
+        httpServletRequest.setAttribute(AccessLogInfo.class.getName(), accessLogInfo);
     }
 
     @Override
@@ -98,10 +94,10 @@ public class ServletHttpLogInterceptor extends BaseServletInterceptor {
     @Override
     void internalAfter(Throwable throwable, String key, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, long start) {
         Long beginTime = ServletUtils.startTime(httpServletRequest);
-        RequestInfo requestInfo = (RequestInfo) httpServletRequest.getAttribute(RequestInfo.class.getName());
+        AccessLogInfo accessLogInfo = (AccessLogInfo) httpServletRequest.getAttribute(AccessLogInfo.class.getName());
         AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
-        String logString = this.httpLog.getLogString(requestInfo, throwable == null, beginTime, serverInfo);
-        reportConsumer.report(logString);
+        this.httpLog.finish(accessLogInfo, throwable == null, beginTime, serverInfo);
+        EaseAgent.agentReport.report(accessLogInfo);
     }
 
     @Override

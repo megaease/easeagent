@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.httpservlet.interceptor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
+import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -29,7 +30,7 @@ import com.megaease.easeagent.plugin.httpservlet.AccessPlugin;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
-import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import org.junit.Test;
@@ -42,15 +43,6 @@ import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class ServletHttpLogInterceptorTest {
-
-    @Test
-    public void init() {
-        ServletHttpLogInterceptor servletHttpLogInterceptor = new ServletHttpLogInterceptor();
-        AccessPlugin accessPlugin = new AccessPlugin();
-        IPluginConfig iPluginConfig = EaseAgent.getConfig(accessPlugin.getDomain(), accessPlugin.getNamespace(), servletHttpLogInterceptor.getType());
-        servletHttpLogInterceptor.init(iPluginConfig, "", "", "");
-        assertNotNull(AgentFieldReflectAccessor.getFieldValue(servletHttpLogInterceptor, "reportConsumer"));
-    }
 
     @Test
     public void serverInfo() {
@@ -66,19 +58,19 @@ public class ServletHttpLogInterceptorTest {
         internalAfter();
     }
 
-    public void verify(RequestInfo requestInfo, long startTime) {
-        assertEquals(EaseAgent.getConfig("system"), requestInfo.getSystem());
-        assertEquals(EaseAgent.getConfig("name"), requestInfo.getService());
-        assertEquals(HostAddress.localhost(), requestInfo.getHostName());
-        assertEquals(HostAddress.getHostIpv4(), requestInfo.getHostIpv4());
-        assertEquals(TestConst.METHOD + " " + TestConst.URL, requestInfo.getUrl());
-        assertEquals(TestConst.METHOD, requestInfo.getMethod());
-        assertEquals(TestConst.FORWARDED_VALUE, requestInfo.getHeaders().get(TestConst.FORWARDED_NAME));
-        assertEquals(startTime, requestInfo.getBeginTime());
-        assertEquals("10", requestInfo.getQueries().get("q1"));
-        assertEquals("testq", requestInfo.getQueries().get("q2"));
-        assertEquals(TestConst.FORWARDED_VALUE, requestInfo.getClientIP());
-        assertTrue(requestInfo.getBeginCpuTime() > 0);
+    public void verify(AccessLogInfo accessLogInfo, long startTime) {
+        assertEquals(EaseAgent.getConfig("system"), accessLogInfo.getSystem());
+        assertEquals(EaseAgent.getConfig("name"), accessLogInfo.getService());
+        assertEquals(HostAddress.localhost(), accessLogInfo.getHostName());
+        assertEquals(HostAddress.getHostIpv4(), accessLogInfo.getHostIpv4());
+        assertEquals(TestConst.METHOD + " " + TestConst.URL, accessLogInfo.getUrl());
+        assertEquals(TestConst.METHOD, accessLogInfo.getMethod());
+        assertEquals(TestConst.FORWARDED_VALUE, accessLogInfo.getHeaders().get(TestConst.FORWARDED_NAME));
+        assertEquals(startTime, accessLogInfo.getBeginTime());
+        assertEquals("10", accessLogInfo.getQueries().get("q1"));
+        assertEquals("testq", accessLogInfo.getQueries().get("q2"));
+        assertEquals(TestConst.FORWARDED_VALUE, accessLogInfo.getClientIP());
+        assertTrue(accessLogInfo.getBeginCpuTime() > 0);
     }
 
     @Test
@@ -87,14 +79,15 @@ public class ServletHttpLogInterceptorTest {
         assertNotNull(servletHttpLogInterceptor.getAfterMark());
     }
 
-    private RequestInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
+    private AccessLogInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
         String result = JsonUtil.toJson(lastJsonReporter.getLastOnlyOne());
         assertNotNull(result);
-        return JsonUtil.toObject(result, RequestInfo.TYPE_REFERENCE);
+        return JsonUtil.toObject(result, AccessLogInfo.TYPE_REFERENCE);
     }
 
     @Test
     public void internalAfter() throws JsonProcessingException {
+        EaseAgent.agentReport = MockReport.getAgentReport();
         MockHttpServletRequest httpServletRequest = TestServletUtils.buildMockRequest();
         HttpServletResponse response = TestServletUtils.buildMockResponse();
         ServletHttpLogInterceptor servletHttpLogInterceptor = new ServletHttpLogInterceptor();
@@ -104,18 +97,19 @@ public class ServletHttpLogInterceptorTest {
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
         servletHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getContext());
-        Object requestInfoO = httpServletRequest.getAttribute(RequestInfo.class.getName());
+        Object requestInfoO = httpServletRequest.getAttribute(AccessLogInfo.class.getName());
         assertNotNull(requestInfoO);
-        assertTrue(requestInfoO instanceof RequestInfo);
-        RequestInfo requestInfo = (RequestInfo) requestInfoO;
+        assertTrue(requestInfoO instanceof AccessLogInfo);
+        AccessLogInfo accessLogInfo = (AccessLogInfo) requestInfoO;
         long start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
-        verify(requestInfo, start);
+        verify(accessLogInfo, start);
         LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(stringObjectMap -> {
             Object type = stringObjectMap.get("type");
             return type instanceof String && "access-log".equals(type);
         });
         servletHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        RequestInfo info = getRequestInfo(lastJsonReporter);
+        // AccessLogInfo info = getRequestInfo(lastJsonReporter);
+        AccessLogInfo info = MockEaseAgent.getLastLog();
         verify(info, start);
         assertEquals("200", info.getStatusCode());
 
@@ -125,7 +119,8 @@ public class ServletHttpLogInterceptorTest {
         methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).throwable(new RuntimeException("test error")).build();
         servletHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         servletHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        info = getRequestInfo(lastJsonReporter);
+        // info = getRequestInfo(lastJsonReporter);
+        info = MockEaseAgent.getLastLog();
         start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
         verify(info, start);
         assertEquals("500", info.getStatusCode());

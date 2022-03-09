@@ -24,12 +24,13 @@ import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
-import com.megaease.easeagent.report.AgentReport;
+import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.report.DefaultAgentReport;
-import com.megaease.easeagent.report.metric.MetricReporter;
+import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import com.megaease.easeagent.report.util.SpanUtils;
 
 import javax.annotation.Nonnull;
@@ -43,6 +44,7 @@ public class MockReport {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockReport.class);
     private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(MockConfig.getCONFIGS()));
 
+    private static final AtomicReference<AccessLogInfo> LAST_LOG = new AtomicReference<>();
     private static final AtomicReference<ReportSpan> LAST_SPAN = new AtomicReference<>();
     private static final AtomicReference<ReportSpan> LAST_SKIP_SPAN = new AtomicReference<>();
     private static volatile MetricFlushable metricFlushable;
@@ -99,11 +101,11 @@ public class MockReport {
 
     static class MockAgentReport implements AgentReport {
         private final AgentReport agentReport;
-        private final MockMetricReporter pluginMetricReporter;
+        private final MockMetricReporterFactory pluginMetricReporter;
 
         MockAgentReport(AgentReport agentReport) {
             this.agentReport = agentReport;
-            this.pluginMetricReporter = new MockMetricReporter(agentReport.metricReporter());
+            this.pluginMetricReporter = new MockMetricReporterFactory(agentReport.metricReporter());
         }
 
         @Override
@@ -132,26 +134,27 @@ public class MockReport {
         }
 
         @Override
-        public MetricReporter metricReporter() {
+        public void report(AccessLogInfo log) {
+            // this.agentReport.report(log);
+            LAST_LOG.set(log);
+        }
+
+        @Override
+        public MetricReporterFactory metricReporter() {
             return pluginMetricReporter;
         }
     }
 
-    static class MockMetricReporter implements MetricReporter {
-        private final MetricReporter metricReporter;
+    static class MockMetricReporterFactory implements MetricReporterFactory {
+        private final MetricReporterFactory metricReporterFactory;
 
-        MockMetricReporter(@Nonnull MetricReporter metricReporter) {
-            this.metricReporter = metricReporter;
+        MockMetricReporterFactory(@Nonnull MetricReporterFactory metricReporterFactory) {
+            this.metricReporterFactory = metricReporterFactory;
         }
 
         @Override
         public Reporter reporter(IPluginConfig config) {
-            return new MockReporter(metricReporter.reporter(config));
-        }
-
-        @Override
-        public void onChange(List<ChangeItem> list) {
-            //ignored
+            return new MockReporter(metricReporterFactory.reporter(config));
         }
     }
 
@@ -188,6 +191,14 @@ public class MockReport {
 
     public static void cleanLastSpan() {
         LAST_SPAN.set(null);
+    }
+
+    public static AccessLogInfo getLastLog() {
+        return LAST_LOG.get();
+    }
+
+    public static void cleanLastLog() {
+        LAST_LOG.set(null);
     }
 
     public static ReportSpan getLastSkipSpan() {

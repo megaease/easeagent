@@ -28,6 +28,7 @@ import com.megaease.easeagent.plugin.api.logging.Mdc;
 import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
+import com.megaease.easeagent.plugin.report.AgentReport;
 
 import java.util.function.Supplier;
 
@@ -41,8 +42,13 @@ public final class EaseAgent {
     public static volatile ILoggerFactory loggerFactory = NoOpLoggerFactory.INSTANCE;
     public static volatile Mdc loggerMdc = NoOpLoggerFactory.NO_OP_MDC_INSTANCE;
     public static volatile IConfigFactory configFactory = new NoOpConfigFactory();
+    public static volatile AgentReport agentReport = new NoOpAgentReporter();
 
     public static volatile IDispatcher dispatcher = new NoOpDispatcher();
+
+    public static AgentReport getAgentReport() {
+        return agentReport;
+    }
 
     /**
      * @see ILoggerFactory#getLogger(Class)

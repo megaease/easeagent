@@ -34,7 +34,7 @@ import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.bean.BeanProvider;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.report.AgentReport;
+import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.DefaultAgentReport;
 import lombok.SneakyThrows;
@@ -115,6 +115,7 @@ public class Bootstrap {
         // reporter
         final AgentReport agentReport = DefaultAgentReport.create(conf);
         GlobalAgentHolder.setAgentReport(agentReport);
+        EaseAgent.agentReport = agentReport;
 
         // load plugins
         AgentBuilder builder = getAgentBuilder(conf, false);

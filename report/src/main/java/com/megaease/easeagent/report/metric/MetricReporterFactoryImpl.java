@@ -19,12 +19,10 @@ package com.megaease.easeagent.report.metric;
 
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.ChangeItem;
-import com.megaease.easeagent.plugin.api.config.Config;
-import com.megaease.easeagent.plugin.api.config.IPluginConfig;
-import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.*;
 import com.megaease.easeagent.plugin.report.ByteWrapper;
 import com.megaease.easeagent.plugin.report.EncodedData;
+import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import com.megaease.easeagent.report.ReportConfigChange;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
@@ -41,18 +39,18 @@ import static com.megaease.easeagent.config.report.ReportConfigConst.METRIC_V2;
 import static com.megaease.easeagent.config.report.ReportConfigConst.OUTPUT_SERVER_V2;
 
 @Slf4j
-public class MetricReporterImpl implements MetricReporter {
+public class MetricReporterFactoryImpl implements MetricReporterFactory, ConfigChangeListener {
     private final ConcurrentHashMap<String, DefaultMetricReporter> reporters;
     private final Config metricConfig;
 
-    public MetricReporterImpl(Config configs) {
+    public MetricReporterFactoryImpl(Config configs) {
         this.reporters = new ConcurrentHashMap<>();
         this.metricConfig = configs;
         configs.addChangeListener(this);
     }
 
-    public static MetricReporter create(Config config) {
-        return new MetricReporterImpl(config);
+    public static MetricReporterFactory create(Config config) {
+        return new MetricReporterFactoryImpl(config);
     }
 
     @Override

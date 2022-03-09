@@ -30,7 +30,7 @@ import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
-import com.megaease.easeagent.plugin.tools.metrics.RequestInfo;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import easeagent.plugin.spring.gateway.AccessPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
@@ -57,9 +57,9 @@ public class GatewayAccessLogInterceptor implements Interceptor {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         Long beginTime = startTime(context, START_TIME);
-        RequestInfo requestInfo = this.httpLog.prepare(getSystem(),
+        AccessLogInfo accessLogInfo = this.httpLog.prepare(getSystem(),
             getServiceName(), beginTime, getSpan(exchange), serverInfo);
-        exchange.getAttributes().put(RequestInfo.class.getName(), requestInfo);
+        exchange.getAttributes().put(AccessLogInfo.class.getName(), accessLogInfo);
     }
 
     @Override
@@ -84,14 +84,18 @@ public class GatewayAccessLogInterceptor implements Interceptor {
 
     private void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-        RequestInfo requestInfo = exchange.getAttribute(RequestInfo.class.getName());
-        if (requestInfo == null) {
+        AccessLogInfo accessLogInfo = exchange.getAttribute(AccessLogInfo.class.getName());
+        if (accessLogInfo == null) {
             return;
         }
         Long beginTime = ctx.get(START_TIME);
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
-        String logString = this.httpLog.getLogString(requestInfo, methodInfo.isSuccess(), beginTime, serverInfo);
+        this.httpLog.finish(accessLogInfo, methodInfo.isSuccess(), beginTime, serverInfo);
+        EaseAgent.getAgentReport().report(accessLogInfo);
+        /*
+        String logString = this.httpLog.getLogString(accessLogInfo, methodInfo.isSuccess(), beginTime, serverInfo);
         reportConsumer.report(logString);
+        */
     }
 
     AccessLogServerInfo serverInfo(ServerWebExchange exchange) {

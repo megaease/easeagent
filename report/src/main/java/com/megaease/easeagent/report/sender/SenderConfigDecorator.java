@@ -77,7 +77,7 @@ public class SenderConfigDecorator
     public Call<Void> send(List<EncodedData> encodedData) {
         EncodedData data = this.packer.encodeList(encodedData);
         if (log.isDebugEnabled()) {
-            log.debug("Span:{}", new String(data.getData()));
+            log.debug(new String(data.getData()));
         }
         return send(data);
     }
@@ -128,10 +128,11 @@ public class SenderConfigDecorator
     }
 
     private static String getEncoderKey(String cfgPrefix) {
-        if (cfgPrefix.startsWith(TRACE_SENDER)) {
-            return TRACE_ENCODER;
+        int idx = cfgPrefix.lastIndexOf('.');
+        if (idx == 0) {
+            return ENCODER_KEY;
         } else {
-            return METRIC_ENCODER;
+            return cfgPrefix.substring(0, idx + 1) + ENCODER_KEY;
         }
     }
 

@@ -22,6 +22,7 @@ import com.megaease.easeagent.config.GlobalConfigs;
 import com.megaease.easeagent.config.PluginConfig;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import com.megaease.easeagent.report.DefaultAgentReport;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import org.junit.Assert;
@@ -32,7 +33,7 @@ import java.util.Map;
 
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
-public class MetricReporterTest {
+public class MetricReporterFactoryTest {
     @Test
     public void global_config_test() {
         Map<String, String> cfgMap = new HashMap<>();
@@ -48,7 +49,7 @@ public class MetricReporterTest {
         Configs config = new GlobalConfigs(cfgMap);
 
         DefaultAgentReport agentReport = (DefaultAgentReport)DefaultAgentReport.create(config);
-        MetricReporter metricReporter = agentReport.metricReporter();
+        MetricReporterFactory metricReporterFactory = agentReport.metricReporter();
 
         // --- generate plugin config
         HashMap<String, String> globalConfig = new HashMap<>();
@@ -64,8 +65,8 @@ public class MetricReporterTest {
         PluginConfig pluginConfig = PluginConfig.build("observability", "metric",
             globalConfig, testNamespace, coverConfig, null);
 
-        Reporter reporter = metricReporter.reporter(pluginConfig);
-        MetricReporterImpl.DefaultMetricReporter dReporter = (MetricReporterImpl.DefaultMetricReporter) reporter;
+        Reporter reporter = metricReporterFactory.reporter(pluginConfig);
+        MetricReporterFactoryImpl.DefaultMetricReporter dReporter = (MetricReporterFactoryImpl.DefaultMetricReporter) reporter;
         String prefix = dReporter.getMetricProps().getSenderPrefix();
         Config cfg = dReporter.getReporterConfig();
         Assert.assertEquals("console", cfg.getString(join(prefix, NAME_KEY)));

@@ -19,7 +19,7 @@ package com.megaease.easeagent.core;
 
 import com.megaease.easeagent.config.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
-import com.megaease.easeagent.report.AgentReport;
+import com.megaease.easeagent.plugin.report.AgentReport;
 
 public class GlobalAgentHolder {
     private static WrappedConfigManager wrappedConfigManager;

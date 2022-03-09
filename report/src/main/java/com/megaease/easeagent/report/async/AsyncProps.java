@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +13,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
+package com.megaease.easeagent.report.async;
 
-package com.megaease.easeagent.report;
+public interface AsyncProps {
+    int getReportThread();
 
-import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
-import com.megaease.easeagent.report.metric.MetricReporter;
+    int getQueuedMaxItems();
 
-public interface AgentReport {
-    void report(ReportSpan span);
+    long getMessageTimeout();
 
-    MetricReporter metricReporter();
+    int getQueuedMaxSize();
+
+    int getMessageMaxBytes();
+
+    static int onePercentOfMemory() {
+        long result = (long) (Runtime.getRuntime().totalMemory() * 0.01);
+        // don't overflow in the rare case 1% of memory is larger than 2 GiB!
+        return (int) Math.max(Math.min(Integer.MAX_VALUE, result), Integer.MIN_VALUE);
+    }
 }

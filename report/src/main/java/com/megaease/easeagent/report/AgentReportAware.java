@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.report;
 
+import com.megaease.easeagent.plugin.report.AgentReport;
+
 public interface AgentReportAware {
     void setAgentReport(AgentReport report);
 }

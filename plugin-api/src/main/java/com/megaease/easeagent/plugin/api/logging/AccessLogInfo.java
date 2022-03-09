@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.tools.metrics;
+package com.megaease.easeagent.plugin.api.logging;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.megaease.easeagent.plugin.report.EncodedData;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,8 +28,8 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-public class RequestInfo {
-    public static final TypeReference<RequestInfo> TYPE_REFERENCE = new TypeReference<RequestInfo>() {
+public class AccessLogInfo {
+    public static final TypeReference<AccessLogInfo> TYPE_REFERENCE = new TypeReference<AccessLogInfo>() {
     };
 
     @JsonProperty("span_id")
@@ -85,4 +87,7 @@ public class RequestInfo {
     private Map<String, String> queries;
 
     private long timestamp;
+
+    @JsonIgnore
+    private EncodedData encodedData;
 }
