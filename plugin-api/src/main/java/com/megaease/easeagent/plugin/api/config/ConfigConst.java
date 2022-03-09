@@ -158,6 +158,7 @@ public interface ConfigConst {
         String TRACING_INIT = "tracingInit";
         String TRACING = "tracing";
         String METRIC = "metric";
+        String LOG = "access-log";
         String REDIRECT = "redirect";
         String FORWARDED = "forwarded";
     }

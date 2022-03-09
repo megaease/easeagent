@@ -69,7 +69,7 @@ $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -Deaseagent.config.path=${E
 EaseAgent opens port `9900` by default to receive configuration change notifications and Prometheus requests.
 
 | Key                        | Default Value | Description                                                                                                                                                                                                                                                                             |
-|----------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `easeagent.server.enabled` | true          | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override. |
 | `easeagent.server.port`    | 9900          | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override.                                                                                                                                                                                  |
 
@@ -77,14 +77,14 @@ EaseAgent opens port `9900` by default to receive configuration change notificat
 Tracing and metric data can be output to kafka server.
 
 | Key                                     | Default Value  | Description                                                                  |
-|-----------------------------------------|----------------|------------------------------------------------------------------------------|
+| --------------------------------------- | -------------- | ---------------------------------------------------------------------------- |
 | `reporter.outputServer.bootstrapServer` | 127.0.0.1:9092 | Kafka server host and port. Tracing and metric data will be output to kafka. |
 | `reporter.outputServer.timeout`         | 10000          | Connect timeout. Time Unit: millisecond.                                     |
 
 Global configuration for tracing output
 
 | Key                                  | Default Value                          | Description                                                                                                                             |
-|--------------------------------------|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------ | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `reporter.tracing.sender.appendType` | console                                | `console` : output tracing to console; `kafka` : output tracing to kafka output server; `http`: send data to http server(zipkin) server |
 | `reporter.tracing.sender.url`        | [http://localhost:9411/api/v2/spans]() | Zipkin(HTTP) server url, only available when `reporter.tracing.sender.appendType=http`                                                  |
 | `reporter.tracing.sender.topic`      | log-tracing                            | kafka topic, only available when `reporter.tracing.sender.appendType=kafka`                                                             |
@@ -93,12 +93,32 @@ Global configuration for tracing output
 Following tracing sender configuration items:
 
 | Key                                        | Default Value | Description                                                                                                                                                                            |
-|--------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `reporter.tracings.output.enabled`         | true          | `true`: enable output tracing data;<br /> `false`: disable all tracing data output                                                                                                     |
 | `reporter.tracings.output.messageMaxBytes` | 999900        | Maximum bytes sendable per message including encoding overhead.                                                                                                                        |
 | `reporter.tracings.output.queuedMaxSpans`  | 1000          | Maximum backlog of spans reported before sent.                                                                                                                                         |
 | `reporter.tracings.output.queuedMaxSize`   | 1000000       | Maximum backlog of span bytes reported before sent.                                                                                                                                    |
 | `reporter.tracings.output.messageTimeout`  | 1000          | Spans are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent span is reported, which ensures that spans are not stuck in an incomplete message. |
+
+
+Configuration for access log output are similar to tracing:
+
+| Key                              | Default Value    | Description                                                                                                                     |
+| -------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `reporter.log.sender.appendType` | console          | `console` : output log to console; `kafka` : output log to kafka output server; `http`: send data to http server(zipkin) server |
+| `reporter.log.sender.url`        | /application-log | HTTP server url, only available when `reporter.log.sender.appendType=http`                                              |
+| `reporter.log.sender.topic`      | applicaton-log   | kafka topic, only available when `reporter.log.sender.appendType=kafka`                                                         |
+
+
+| Key                                   | Default Value | Description                                                                                                                                                                         |
+| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reporter.log.output.enabled`         | true          | `true`: enable output log data;<br /> `false`: disable all log data output                                                                                                          |
+| `reporter.log.output.messageMaxBytes` | 999900        | Maximum bytes sendable per message including encoding overhead.                                                                                                                     |
+| `reporter.log.output.queuedMaxLogs`   | 1000          | Maximum backlog of logs reported before sent.                                                                                                                                       |
+| `reporter.log.output.queuedMaxSize`   | 1000000       | Maximum backlog of log bytes reported before sent.                                                                                                                                  |
+| `reporter.log.output.messageTimeout`  | 1000          | Logs are bundled into messages, up to `messageMaxBytes`. This timeout starts when the first unsent log is reported, which ensures that logs are not stuck in an incomplete message. |
+
+
 
 #### Progress Configuration
 
@@ -199,7 +219,7 @@ The following sections describe the metric and tracing configuration items,  as 
 #### Tracing and Metric
 
 | Key                                             | Default Value     | Description                                                                                                                                                                                                       |
-|-------------------------------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `plugin.observability.global.tracing.enabled`   | true              | Enable all tracing collection. `false`: Disable all tracing collection.                                                                                                                                           |
 | `plugin.observability.global.metric.enabled`    | true              | Enable all metrics collection. `false`: Disable all metrics collection.                                                                                                                                           |
 | `plugin.observability.global.metric.interval`   | 30                | Time interval between two outputs. Time Unit: second.                                                                                                                                                             |
@@ -210,7 +230,7 @@ The following sections describe the metric and tracing configuration items,  as 
 Supported components and corresponding namespaces:
 
 | Plugin/Components | Namespace        | Description                                                                                                                                                                                                                                                                                                                                                                |
-|-------------------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | httpservlet       | `httpServlet`    | Http Request Metric                                                                                                                                                                                                                                                                                                                                                        |
 | spring-gateway    | `springGateway`  | Http Request Metric                                                                                                                                                                                                                                                                                                                                                        |
 | jdbcConnection    | `jdbcConnection` | JDBC Connection Metric                                                                                                                                                                                                                                                                                                                                                     |
@@ -235,7 +255,7 @@ plugin.integrability.global.redirect.enabled=true
 Supported components/plugins and corresponding namespaces:
 
 | Plugin/Components | Namespace       | Description               |
-|-------------------|-----------------|---------------------------|
+| ----------------- | --------------- | ------------------------- |
 | jdbc              | `jdbc`          | Database Redirection      |
 | redis             | `redis`         | Redis Redirection         |
 | kafka             | `kafka`         | Kafka Redirection         |
@@ -328,7 +348,7 @@ EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing lo
 
 ### Tracing Component
 | Component Type | Component                                    | Reference                                                                                                                                                                                                                   |
-|----------------|----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | HTTP Client    | `RestTemplate`、 `WebClient`、 `FeignClient` | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                                                                                          |
 | HTTP Server    | `Servlet`、`Filter`                          | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                                                                                          |
 | DataBase       | `JDBC`                                       | [Brave](https://github.com/openzipkin/brave/tree/master/brave)                                                                                                                                                              |
@@ -340,7 +360,7 @@ EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing lo
 
 #### JDBC
 | Tag             | Description                                                            |
-|-----------------|------------------------------------------------------------------------|
+| --------------- | ---------------------------------------------------------------------- |
 | sql             | Sql text in user application                                           |
 | local-component | Default value = 'database'                                             |
 | url             | Connection information. Example: `jdbc:mysql://localhost:3306/db_demo` |
@@ -348,19 +368,19 @@ EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing lo
 
 #### Cache
 | Tag          | Description                           |
-|--------------|---------------------------------------|
+| ------------ | ------------------------------------- |
 | redis.method | Redis command. Example: `MGET`、`GET` |
 
 #### RabbitMQ Producer And Consumer
 | Tag                | Description         |
-|--------------------|---------------------|
+| ------------------ | ------------------- |
 | rabbit.exchange    | RabbitMQ exchange   |
 | rabbit.routing_key | RabbitMQ routingKey |
 | rabbit.queue       | RabbitMQ routingKey |
 
 #### Kafka Producer And Consumer
 | Tag          | Description               |
-|--------------|---------------------------|
+| ------------ | ------------------------- |
 | kafka.key    | Kafka consumer record Key |
 | kafka.topic  | Kafka topic               |
 | kafka.broker | Kafka url                 |
@@ -424,7 +444,7 @@ HTTP Request schema describes key metrics of service APIs, which include:
 * Execution duration (min, mean, max)
 
 | Field     |  Type   | Description                                                                                            |
-|:----------|:-------:|:-------------------------------------------------------------------------------------------------------|
+| :-------- | :-----: | :----------------------------------------------------------------------------------------------------- |
 | url       | string  | the URL of the request                                                                                 |
 | cnt       | integer | The total count of the request executed                                                                |
 | errcnt    | integer | The total error count of the request executed                                                          |
@@ -456,7 +476,7 @@ JDBC Statement schema describes key metrics of JDBC SQL Statement, which include
 * Execution duration (min, mean, max)
 
 | Field     |  Type   | Description                                                                                           |
-|:----------|:-------:|:------------------------------------------------------------------------------------------------------|
+| :-------- | :-----: | :---------------------------------------------------------------------------------------------------- |
 | signature | string  | Executed JDBC method signature.                                                                       |
 | cnt       | integer | The total count of JDBC method executed                                                               |
 | errcnt    | integer | The total error count of JDBC method executed                                                         |
@@ -486,7 +506,7 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 * Execution duration (min, mean, max)
 
 | Field  |  Type   | Description                                                                                               |
-|:-------|:-------:|:----------------------------------------------------------------------------------------------------------|
+| :----- | :-----: | :-------------------------------------------------------------------------------------------------------- |
 | url    | string  | The url of database connections                                                                           |
 | cnt    | integer | The total number of database connections                                                                  |
 | errcnt | integer | The total error number of database connections                                                            |
@@ -516,7 +536,7 @@ JVM Memory schema describes key metrics of Java memory usage, which include:
 
 
 | Field           |  Type   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-|:----------------|:-------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :-------------- | :-----: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | resource        | String  | memory pool name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | bytes-init      | integer | The value represents the initial amount of memory in bytes unit that the JVM requests from the operating system for memory management during startup. The JVM may request additional memory from the operating system and may also release memory to the system over time. The value of init may be undefined (value -1).                                                                                                                                                                                            |
 | bytes-used      | integer | The value represents the amount of memory currently used in bytes unit.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -530,7 +550,7 @@ JVM GC schema describes key metrics of JVM garbage collection, which include:
 * times_rate
 
 | Field                 |  Type   | Description                                                                               |
-|:----------------------|:-------:|:------------------------------------------------------------------------------------------|
+| :-------------------- | :-----: | :---------------------------------------------------------------------------------------- |
 | resource              | string  | gc name                                                                                   |
 | total_collection_time | integer | The value represents the total time for garbage collection operation in millisecond unit. |
 | times                 | integer | The value represents the total garbage collection times.                                  |
@@ -550,7 +570,7 @@ Kafka Client schema describes key metrics of Kafka client invoking, which includ
   * Latency (consrp25, consrp50, consrp75, consrp95, consrp98, consrp99, consrp999)
 
 | Field      |  Type  | Description                                                                                          |
-|:-----------|:------:|:-----------------------------------------------------------------------------------------------------|
+| :--------- | :----: | :--------------------------------------------------------------------------------------------------- |
 | resource   | string | topic name                                                                                           |
 | prodrm1    | double | The executions per second (exponentially-weighted moving average) in last 1 minute (producer)        |
 | prodrm5    | double | The executions per second (exponentially-weighted moving average) in last 5 minute (producer)        |
@@ -593,7 +613,7 @@ RabbitMQ Producer schema describes key metrics of RabbitMQ client publishing mes
 * Latency (p25, p50, p75, p95, p98, p99)
 
 | Field      |  Type  | Description                                                                                          |
-|:-----------|:------:|:-----------------------------------------------------------------------------------------------------|
+| :--------- | :----: | :--------------------------------------------------------------------------------------------------- |
 | resource   | string | rabbitmq exchange or routingkey                                                                      |
 | prodrm1    | double | The executions of producer per second (exponentially-weighted moving average) in last 1 minute       |
 | prodrm5    | double | The executions of producer per second (exponentially-weighted moving average) in last 5 minute       |
@@ -620,7 +640,7 @@ RabbitMQ Consumer schema describes key metrics of RabbitMQ client consuming mess
 * Latency (p25, p50, p75, p95, p98, p99)
 
 | Field                |  Type  | Description                                                                                       |
-|:---------------------|:------:|:--------------------------------------------------------------------------------------------------|
+| :------------------- | :----: | :------------------------------------------------------------------------------------------------ |
 | resource             | string | rabbitmq routingKey                                                                               |
 | queue_m1_rate        | double | The executions of queue per second (exponentially-weighted moving average) in last 1 minute       |
 | queue_m5_rate        | double | The executions of queue per second (exponentially-weighted moving average) in last 5 minute       |
@@ -647,7 +667,7 @@ Message Listener schema describes key metrics of Spring AMQP RabbitMQ Message Qu
 * Latency (p25, p50, p75, p95, p98, p99)
 
 | Field                |  Type  | Description                                                                                       |
-|:---------------------|:------:|:--------------------------------------------------------------------------------------------------|
+| :------------------- | :----: | :------------------------------------------------------------------------------------------------ |
 | resource             | string | rabbitmq queue                                                                                    |
 | queue_m1_rate        | double | The executions of queue per second (exponentially-weighted moving average) in last 1 minute       |
 | queue_m5_rate        | double | The executions of queue per second (exponentially-weighted moving average) in last 5 minute       |
@@ -675,7 +695,7 @@ Elasticsearch schema describes key metrics of Elasticsearch client invoking, whi
 * Latency (p25, p50, p75, p95, p98, p99)
 
 | Field     |  Type   | Description                                                                                                     |
-|:----------|:-------:|:----------------------------------------------------------------------------------------------------------------|
+| :-------- | :-----: | :-------------------------------------------------------------------------------------------------------------- |
 | index     | string  | The Elasticsearch index name                                                                                    |
 | cnt       | integer | The total count of the request executed                                                                         |
 | errcnt    | integer | The total error count of the request executed                                                                   |
@@ -708,7 +728,7 @@ MongoDB schema describes key metrics of MongoDB client invoking, which include:
 * Latency (p25, p50, p75, p95, p98, p99)
 
 | Field     |  Type   | Description                                                                                               |
-|:----------|:-------:|:----------------------------------------------------------------------------------------------------------|
+| :-------- | :-----: | :-------------------------------------------------------------------------------------------------------- |
 | operation | string  | The MongoDB request command name                                                                          |
 | cnt       | integer | The total count of the request executed                                                                   |
 | errcnt    | integer | The total error count of the request executed                                                             |
