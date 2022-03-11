@@ -36,13 +36,13 @@ public class ReportConfigConst {
 
     static final String DELIMITER = ".";
     public static final String TOPIC_KEY = "topic";
-    public static final String APPENDER_KEY = "appenderName";
+    public static final String LOG_APPENDER_KEY = "appenderName";
 
     public static final String ENABLED_KEY = "enabled";
     public static final String SENDER_KEY = "sender";
     public static final String ENCODER_KEY = "encoder";
     public static final String ASYNC_KEY = "output";
-    public static final String NAME_KEY = "appendType";
+    public static final String APPEND_TYPE_KEY = "appendType";
     public static final String INTERVAL_KEY = "interval";
 
     public static final String ASYNC_THREAD_KEY = "reportThread";
@@ -82,7 +82,7 @@ public class ReportConfigConst {
     public static final String METRIC_ASYNC = join(METRIC_V2, ASYNC_KEY);
 
     // -------- lv4  --------
-    public static final String LOG_SENDER_NAME = join(LOG_SENDER, NAME_KEY);
+    public static final String LOG_SENDER_NAME = join(LOG_SENDER, APPEND_TYPE_KEY);
     public static final String LOG_SENDER_ENABLED_V2 = join(LOG_SENDER, ENABLED_KEY);
     public static final String LOG_SENDER_TOPIC_V2 = join(LOG_SENDER, TOPIC_KEY);
 
@@ -92,7 +92,7 @@ public class ReportConfigConst {
     public static final String LOG_ASYNC_QUEUED_MAX_LOGS = join(LOG_ASYNC, "queuedMaxLogs");
     public static final String LOG_ASYNC_QUEUED_MAX_SIZE = join(LOG_ASYNC, ASYNC_QUEUE_MAX_SIZE_KEY);
 
-    public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, NAME_KEY);
+    public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, APPEND_TYPE_KEY);
     public static final String TRACE_SENDER_ENABLED_V2 = join(TRACE_SENDER, ENABLED_KEY);
     public static final String TRACE_SENDER_TOPIC_V2 = join(TRACE_SENDER, TOPIC_KEY);
 
@@ -102,10 +102,10 @@ public class ReportConfigConst {
     public static final String TRACE_ASYNC_QUEUED_MAX_SPANS_V2 = join(TRACE_ASYNC, "queuedMaxSpans");
     public static final String TRACE_ASYNC_QUEUED_MAX_SIZE_V2 = join(TRACE_ASYNC, ASYNC_QUEUE_MAX_SIZE_KEY);
 
-    public static final String METRIC_SENDER_NAME = join(METRIC_SENDER, NAME_KEY);
+    public static final String METRIC_SENDER_NAME = join(METRIC_SENDER, APPEND_TYPE_KEY);
     public static final String METRIC_SENDER_ENABLED = join(METRIC_SENDER, ENABLED_KEY);
     public static final String METRIC_SENDER_TOPIC = join(METRIC_SENDER, TOPIC_KEY);
-    public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, APPENDER_KEY);
+    public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, LOG_APPENDER_KEY);
 
     public static final String METRIC_ASYNC_INTERVAL = join(METRIC_ASYNC, INTERVAL_KEY);
 
@@ -141,7 +141,7 @@ public class ReportConfigConst {
     public static final String GLOBAL_METRIC = "plugin.observability.global.metric";
     public static final String GLOBAL_METRIC_ENABLED = join(GLOBAL_METRIC, ENABLED_KEY);
     public static final String GLOBAL_METRIC_TOPIC = join(GLOBAL_METRIC, TOPIC_KEY);
-    public static final String GLOBAL_METRIC_APPENDER = join(GLOBAL_METRIC, NAME_KEY);
+    public static final String GLOBAL_METRIC_APPENDER = join(GLOBAL_METRIC, APPEND_TYPE_KEY);
 
     public static String join(String... texts) {
         return String.join(DELIMITER, texts);

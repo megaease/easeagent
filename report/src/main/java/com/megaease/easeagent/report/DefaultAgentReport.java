@@ -24,33 +24,32 @@ import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.report.AgentReport;
+import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.async.log.LogReporter;
-import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import com.megaease.easeagent.report.metric.MetricReporterFactoryImpl;
 import com.megaease.easeagent.report.plugin.ReporterLoader;
 import com.megaease.easeagent.report.trace.TraceReport;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 @Slf4j
 public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
     private final TraceReport traceReport;
     private final MetricReporterFactory metricReporterFactory;
     private final LogReporter logReporter;
+    private final Config config;
     private final Config reportConfig;
 
     DefaultAgentReport(Config config) {
+        this.config = config;
         this.reportConfig = new Configs(ReportConfigAdapter.extractReporterConfig(config));
         this.traceReport = new TraceReport(this.reportConfig);
         this.logReporter = new LogReporter(this.reportConfig);
         this.metricReporterFactory = MetricReporterFactoryImpl.create(this.reportConfig);
-        config.addChangeListener(this);
+        this.config.addChangeListener(this);
     }
 
     public static AgentReport create(Configs config) {
@@ -75,24 +74,7 @@ public class DefaultAgentReport implements AgentReport, ConfigChangeListener {
 
     @Override
     public void onChange(List<ChangeItem> list) {
-        Map<String, String> changes = filterChanges(list);
-        if (changes.isEmpty()) {
-            return;
-        }
+        Map<String, String> changes = ReportConfigAdapter.extractReporterConfig(this.config);
         this.reportConfig.updateConfigs(changes);
-    }
-
-    private Map<String, String> filterChanges(List<ChangeItem> list) {
-        Map<String, String> cfg = new HashMap<>();
-        list.stream()
-            .filter(one -> {
-                String name = one.getFullName();
-                return name.startsWith(OUTPUT_SERVER_V1)
-                    || name.startsWith(TRACE_OUTPUT_V1)
-                    || name.startsWith(GLOBAL_METRIC)
-                    || name.startsWith(REPORT);
-            }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
-
-        return cfg;
     }
 }

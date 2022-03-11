@@ -20,16 +20,19 @@ package com.megaease.easeagent.report.metric;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.GlobalConfigs;
 import com.megaease.easeagent.config.PluginConfig;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 public class MetricPropsTest {
     @Test
     public void test_plugin_props() {
+        String testNamespace = "test";
         // test console
         HashMap<String, String> globalConfig = new HashMap<>();
         globalConfig.put("interval", "30");
@@ -42,23 +45,45 @@ public class MetricPropsTest {
         coverConfig.put("appendType", "kafka");
 
         PluginConfig pluginConfig = PluginConfig.build("observability", "metric",
-            globalConfig, "test", coverConfig, null);
+            globalConfig, testNamespace, coverConfig, null);
 
-        MetricProps props = MetricProps.newDefault(pluginConfig, new GlobalConfigs(globalConfig));
+        Map<String, String> cfgMap = new HashMap<>();
+
+        cfgMap.put("reporter.outputServer.bootstrapServer", "http://127.0.0.1:8080/report");
+        cfgMap.put("plugin.observability.global.metric.enabled", "true");
+        cfgMap.put("plugin.observability.global.metric.interval", "30");
+        cfgMap.put("plugin.observability.global.metric.topic", "application-meter");
+        cfgMap.put("plugin.observability.global.metric.appendType", CONSOLE_SENDER_NAME);
+
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.topic", "test-meter");
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.appendType", "kafka");
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.interval", "30");
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.enabled", "true");
+
+        cfgMap.put("reporter.outputServer.appendType", "http");
+
+        MetricProps props = MetricProps.newDefault(pluginConfig, new GlobalConfigs(cfgMap));
         Configs reportConfigs = props.asReportConfig();
         String prefix = props.getSenderPrefix();
 
-        Assert.assertEquals(CONSOLE_SENDER_NAME, reportConfigs.getString(join(prefix, NAME_KEY)));
-        Assert.assertEquals("30", reportConfigs.getString(join(prefix, INTERVAL_KEY)));
+        // test kafka sender / topic / interval
+        Assert.assertEquals(METRIC_KAFKA_SENDER_NAME, reportConfigs.getString(join(prefix, APPEND_TYPE_KEY)));
+
+        Assert.assertEquals("30",
+            reportConfigs.getString(join(StringUtils.replaceSuffix(prefix, ASYNC_KEY), INTERVAL_KEY)));
+
         Assert.assertEquals("test-meter", reportConfigs.getString(join(prefix, TOPIC_KEY)));
 
-        // test kafka
-        globalConfig.put("observability.outputServer.bootstrapServer", "127.0.0.1:9092");
-        pluginConfig = PluginConfig.build("observability", "metric",
-            globalConfig, "test", coverConfig, null);
-
-        props = MetricProps.newDefault(pluginConfig, new GlobalConfigs(globalConfig));
+        // test console
+        cfgMap.remove("plugin.observability." + testNamespace + ".metric.appendType");
+        props = MetricProps.newDefault(pluginConfig, new GlobalConfigs(cfgMap));
         reportConfigs = props.asReportConfig();
-        Assert.assertEquals(METRIC_KAFKA_SENDER_NAME, reportConfigs.getString(join(prefix, NAME_KEY)));
+        Assert.assertEquals(CONSOLE_SENDER_NAME, reportConfigs.getString(join(prefix, APPEND_TYPE_KEY)));
+
+        // test http
+        cfgMap.remove("plugin.observability.global.metric.appendType");
+        props = MetricProps.newDefault(pluginConfig, new GlobalConfigs(cfgMap));
+        reportConfigs = props.asReportConfig();
+        Assert.assertEquals(ZIPKIN_SENDER_NAME, reportConfigs.getString(join(prefix, APPEND_TYPE_KEY)));
     }
 }

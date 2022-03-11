@@ -27,9 +27,11 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
+    Configs originalConfig;
 
     public GlobalConfigs(Map<String, String> source) {
         super();
+        this.originalConfig = new Configs(source);
         // reporter adapter
         Map<String, String> map = new TreeMap<>(source);
         ReportConfigAdapter.convertConfig(map);
@@ -38,13 +40,28 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
         this.notifier = new ConfigNotifier("");
     }
 
+    public Configs getOriginalConfig() {
+        return this.originalConfig;
+    }
+
+    @Override
+    public void updateConfigsNotNotify(Map<String, String> changes) {
+        // update original config
+        this.originalConfig.updateConfigsNotNotify(changes);
+        super.updateConfigsNotNotify(changes);
+    }
+
     @Override
     public void updateConfigs(Map<String, String> changes) {
-        // report adapter
-        Map<String, String> changesMap = new HashMap<>(changes);
-        ReportConfigAdapter.convertConfig(changesMap);
+        // update original config
+        Map<String, String> newGlobalCfg = new TreeMap<>(this.originalConfig.getConfigs());
+        newGlobalCfg.putAll(changes);
+        this.originalConfig.updateConfigsNotNotify(changes);
 
-        super.updateConfigs(changesMap);
+        // report adapter
+        ReportConfigAdapter.convertConfig(newGlobalCfg);
+
+        super.updateConfigs(newGlobalCfg);
     }
 
     @Override

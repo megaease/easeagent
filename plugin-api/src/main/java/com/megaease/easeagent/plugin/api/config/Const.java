@@ -24,5 +24,6 @@ public interface Const {
     int METRIC_DEFAULT_INTERVAL = 30;
     String METRIC_DEFAULT_INTERVAL_UNIT = "SECONDS";
     String METRIC_DEFAULT_TOPIC = "application-meter";
-    String METRIC_DEFAULT_APPEND_TYPE = "console";
+
+    String DEFAULT_APPEND_TYPE = "console";
 }

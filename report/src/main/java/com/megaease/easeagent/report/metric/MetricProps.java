@@ -30,6 +30,7 @@ import com.megaease.easeagent.report.sender.metric.MetricKafkaSender;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.megaease.easeagent.config.report.ReportConfigAdapter.getDefaultAppender;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 public interface MetricProps {
@@ -66,27 +67,32 @@ public interface MetricProps {
         private int interval;
         private final Config config;
         private final String senderPrefix;
+        private final String asyncPrefix;
         private final Map<String, String> pluginConfigMap;
 
         public Default(Config reportConfig, IPluginConfig pluginConfig) {
             this.config = reportConfig;
             this.name = pluginConfig.namespace();
-            this.enabled = pluginConfig.enabled();
             this.senderPrefix = generatePrefix();
+            this.asyncPrefix = getAsyncPrefix(this.senderPrefix);
+
+            this.enabled = reportConfig.getBoolean(OUTPUT_SERVERS_ENABLE)
+                && reportConfig.getBoolean(METRIC_SENDER_ENABLED)
+                && reportConfig.getBoolean(join(this.senderPrefix, ENABLED_KEY));
 
             // low priority: global level
             Map<String, String> pCfg = ConfigUtils.extractByPrefix(reportConfig, REPORT);
             pCfg.putAll(ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_SENDER, senderPrefix));
             pCfg.putAll(ConfigUtils.extractAndConvertPrefix(pCfg, METRIC_ENCODER, getEncoderKey(senderPrefix)));
 
-            // high priority: override by plugin level config
-            pluginConfig.keySet().forEach(key -> pCfg.put(join(senderPrefix, key), pluginConfig.getString(key)));
+            this.senderName = NoNull.of(pCfg.get(join(senderPrefix, APPEND_TYPE_KEY)),
+                getDefaultAppender(reportConfig.getConfigs()));
 
-            this.senderName = NoNull.of(pCfg.get(join(senderPrefix, NAME_KEY)), Const.METRIC_DEFAULT_APPEND_TYPE);
             this.topic = NoNull.of(pCfg.get(join(senderPrefix, TOPIC_KEY)), Const.METRIC_DEFAULT_TOPIC);
-            if (pCfg.get(join(senderPrefix, INTERVAL_KEY)) != null) {
+
+            if (pCfg.get(join(asyncPrefix, INTERVAL_KEY)) != null) {
                 try {
-                    this.interval = Integer.parseInt(pCfg.get(join(senderPrefix, INTERVAL_KEY)));
+                    this.interval = Integer.parseInt(pCfg.get(join(asyncPrefix, INTERVAL_KEY)));
                 } catch (NumberFormatException e) {
                     this.interval = Const.METRIC_DEFAULT_INTERVAL;
                 }
@@ -94,9 +100,9 @@ public interface MetricProps {
                 this.interval = Const.METRIC_DEFAULT_INTERVAL;
             }
             checkSenderName();
-            pCfg.put(join(senderPrefix, NAME_KEY), this.senderName);
-            pCfg.put(join(senderPrefix, APPENDER_KEY), this.name);
-            pCfg.put(join(senderPrefix, INTERVAL_KEY), Integer.toString(this.interval));
+            pCfg.put(join(senderPrefix, APPEND_TYPE_KEY), this.senderName);
+            pCfg.put(join(senderPrefix, LOG_APPENDER_KEY), this.name);
+            pCfg.put(join(asyncPrefix, INTERVAL_KEY), Integer.toString(this.interval));
 
             this.pluginConfigMap = pCfg;
         }
@@ -104,11 +110,12 @@ public interface MetricProps {
         public Default(Config reportConfig, String prefix) {
             this.config = reportConfig;
             this.senderPrefix = prefix;
-            this.name = this.config.getString(join(this.senderPrefix, APPENDER_KEY));
+            this.asyncPrefix = getAsyncPrefix(prefix);
+            this.name = this.config.getString(join(this.senderPrefix, LOG_APPENDER_KEY));
             this.enabled = this.config.getBoolean(join(this.senderPrefix, ENABLED_KEY));
-            this.senderName = this.config.getString(join(this.senderPrefix, NAME_KEY));
+            this.senderName = this.config.getString(join(this.senderPrefix, APPEND_TYPE_KEY));
             this.topic = this.config.getString(join(this.senderPrefix, TOPIC_KEY));
-            this.interval = this.config.getInt(join(this.senderPrefix, INTERVAL_KEY));
+            this.interval = this.config.getInt(join(this.asyncPrefix, INTERVAL_KEY));
 
             checkSenderName();
             this.pluginConfigMap = new HashMap<>(this.config.getConfigs());
@@ -181,12 +188,11 @@ public interface MetricProps {
         }
 
         private static String getEncoderKey(String cfgPrefix) {
-            int idx = cfgPrefix.lastIndexOf('.');
-            if (idx == 0) {
-                return ENCODER_KEY;
-            } else {
-                return cfgPrefix.substring(0, idx + 1) + ENCODER_KEY;
-            }
+            return StringUtils.replaceSuffix(cfgPrefix, ENCODER_KEY);
+        }
+
+        private static String getAsyncPrefix(String cfgPrefix) {
+            return StringUtils.replaceSuffix(cfgPrefix, ASYNC_KEY);
         }
     }
 }
