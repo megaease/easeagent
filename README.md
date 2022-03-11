@@ -21,6 +21,7 @@ An agent component for Java system.
   - [User Manual](#user-manual)
   - [Enhance Plugin Development Guide](#enhance-plugin-development-guide)
   - [Report Plugin Development Guide](#report-plugin-development-guide)
+  - [Community](#community)
   - [Licenses](#licenses)
 
 ## Overview
@@ -225,6 +226,15 @@ Refer to [Plugin Development Guide](./doc/development-guide.md).
 Report plugin enable user report tracing/metric data to different kind of backend in different format.
 
 Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
+
+## Community
+[Github issues](https://github.com/megaease/easeagent/issues)  
+
+If you have any questions, welcome to discuss in our community. welcome to join!
+
+|               Slack Channel                |
+|:------------------------------------------:|
+| ![Slack](./doc/images/slack_community.jpg) |
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
