@@ -89,7 +89,7 @@ public class SenderConfigDecorator
 
     @Override
     public void updateConfigs(Map<String, String> changes) {
-        String name = changes.get(join(this.prefix, NAME_KEY));
+        String name = changes.get(join(this.prefix, APPEND_TYPE_KEY));
         if (name == null || name.equals(name())) {
             this.sender.updateConfigs(changes);
         } else {

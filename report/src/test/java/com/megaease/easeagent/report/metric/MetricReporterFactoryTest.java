@@ -44,7 +44,13 @@ public class MetricReporterFactoryTest {
         cfgMap.put("plugin.observability.global.metric.interval", "30");
         cfgMap.put("plugin.observability.global.metric.topic", "application-meter");
         cfgMap.put("plugin.observability.global.metric.appendType", "kafka");
-        cfgMap.put("plugin.observability.access.metric.topic", "application-log");
+
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.topic", "test-meter");
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.appendType", "console");
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.interval", "30");
+        cfgMap.put("plugin.observability." + testNamespace + ".metric.enabled", "true");
+
+        cfgMap.put("reporter.outputServer.appendType", "http");
 
         Configs config = new GlobalConfigs(cfgMap);
 
@@ -59,7 +65,7 @@ public class MetricReporterFactoryTest {
 
         HashMap<String, String> coverConfig = new HashMap<>();
         coverConfig.put("interval", "30");
-        coverConfig.put("topic", "test-meter");
+        coverConfig.put("topic", "xxx-meter");
         coverConfig.put("appendType", "console");
 
         PluginConfig pluginConfig = PluginConfig.build("observability", "metric",
@@ -68,31 +74,23 @@ public class MetricReporterFactoryTest {
         Reporter reporter = metricReporterFactory.reporter(pluginConfig);
         MetricReporterFactoryImpl.DefaultMetricReporter dReporter = (MetricReporterFactoryImpl.DefaultMetricReporter) reporter;
         String prefix = dReporter.getMetricProps().getSenderPrefix();
-        Config cfg = dReporter.getReporterConfig();
-        Assert.assertEquals("console", cfg.getString(join(prefix, NAME_KEY)));
+
+        Config cfg = dReporter.getMetricConfig();
+        Assert.assertEquals("console", cfg.getString(join(prefix, APPEND_TYPE_KEY)));
         Assert.assertEquals("test-meter", cfg.getString(join(prefix, TOPIC_KEY)));
 
         // change topic
         Map<String, String> changes = new HashMap<>();
         changes.put("plugin.observability.global.metric.topic", "tom");
         changes.put(join(join("plugin.observability", testNamespace), "metric.topic"), "john");
-        coverConfig.put(TOPIC_KEY, "john");
-        PluginConfig npCfg = PluginConfig.build("observability", "metric",
-            globalConfig, testNamespace, coverConfig, null);
 
         config.updateConfigs(changes);
-        dReporter.onChange(pluginConfig, npCfg);
-        pluginConfig = npCfg;
-
+        // dReporter.onChange(pluginConfig, npCfg);
         Assert.assertEquals("john", cfg.getString(join(prefix, TOPIC_KEY)));
 
         // change sender
         changes.put(join(join("plugin.observability", testNamespace), "metric.appendType"), "http");
-        coverConfig.put(NAME_KEY, "http");
-        npCfg = PluginConfig.build("observability", "metric",
-            globalConfig, testNamespace, coverConfig, null);
         config.updateConfigs(changes);
-        dReporter.onChange(pluginConfig, npCfg);
         SenderWithEncoder sender = dReporter.getSender();
         Assert.assertEquals("http", sender.name());
     }

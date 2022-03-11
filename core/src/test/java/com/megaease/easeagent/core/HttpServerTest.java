@@ -85,14 +85,23 @@ public class HttpServerTest {
     }
 
     private static boolean isPortUsing(int port) throws UnknownHostException {
-        boolean flag = false;
-        InetAddress theAddress = InetAddress.getLocalHost();
+        ServerSocket s = null;
         try {
-            new Socket(theAddress, port);
-            flag = true;
+            s = new ServerSocket(port);
         } catch (IOException e) {
+            if (e instanceof BindException) {
+                return true;
+            }
+        } finally {
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (Exception e) {
+                    // ignored
+                }
+            }
         }
-        return flag;
+        return false;
     }
 
     private static String runUpHttpServer(int port) {

@@ -232,4 +232,13 @@ public class StringUtils {
         }
         return str.split(separatorChars);
     }
+
+    public static String replaceSuffix(String origin, String suffix) {
+        int idx = origin.lastIndexOf('.');
+        if (idx == 0) {
+            return suffix;
+        } else {
+            return origin.substring(0, idx + 1) + suffix;
+        }
+    }
 }

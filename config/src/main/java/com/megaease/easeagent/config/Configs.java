@@ -45,7 +45,7 @@ public class Configs implements Config {
     }
 
     public void updateConfigs(Map<String, String> changes) {
-        Map<String, String> dump = new HashMap<>(this.source);
+        Map<String, String> dump = new TreeMap<>(this.source);
         List<ChangeItem> items = new LinkedList<>();
         changes.forEach((name, value) -> {
             String old = dump.get(name);
@@ -67,7 +67,7 @@ public class Configs implements Config {
 
     @Override
     public Map<String, String> getConfigs() {
-        return new HashMap<>(this.source);
+        return new TreeMap<>(this.source);
     }
 
     public String toPrettyDisplay() {

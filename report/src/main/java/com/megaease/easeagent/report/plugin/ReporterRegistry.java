@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import static com.megaease.easeagent.config.report.ReportConfigConst.NAME_KEY;
+import static com.megaease.easeagent.config.report.ReportConfigConst.APPEND_TYPE_KEY;
 import static com.megaease.easeagent.config.report.ReportConfigConst.join;
 
 public class ReporterRegistry {
@@ -74,9 +74,9 @@ public class ReporterRegistry {
     }
 
     public static SenderWithEncoder getSender(String prefix, Config config) {
-        String name = config.getString(join(prefix, NAME_KEY));
+        String name = config.getString(join(prefix, APPEND_TYPE_KEY));
         if (name == null) {
-            logger.warn("Can not find sender name for:{}", join(prefix, NAME_KEY));
+            logger.warn("Can not find sender name for:{}", join(prefix, APPEND_TYPE_KEY));
         }
         SenderWithEncoder sender = new SenderConfigDecorator(prefix, getSender(name), config);
         sender.init(config, prefix);

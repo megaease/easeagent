@@ -135,7 +135,7 @@ public class ConfigUtils {
     }
 
     /**
-     * Convert config item with a fromPrefix to toPrefix for configuration Compatibility
+     * extract config item with a fromPrefix to and convert the prefix to 'toPrefix' for configuration Compatibility
      *
      * @param cfg config source map
      * @param fromPrefix from
@@ -153,11 +153,9 @@ public class ConfigUtils {
                 convert.put(key, value);
             }
         });
-        keys.forEach(cfg::remove);
 
         // override, new configuration KV override previous KV
         convert.putAll(extractByPrefix(cfg, toPrefix));
-        cfg.putAll(convert);
 
         return convert;
     }
