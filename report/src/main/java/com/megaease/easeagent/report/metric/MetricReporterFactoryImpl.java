@@ -17,13 +17,14 @@
 
 package com.megaease.easeagent.report.metric;
 
-import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.*;
+import com.megaease.easeagent.plugin.api.config.ChangeItem;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.report.ByteWrapper;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
-import com.megaease.easeagent.report.ReportConfigChange;
 import com.megaease.easeagent.report.plugin.ReporterRegistry;
 import com.megaease.easeagent.report.sender.SenderWithEncoder;
 import com.megaease.easeagent.report.util.Utils;
@@ -34,9 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.megaease.easeagent.config.report.ReportConfigConst.METRIC_V2;
-import static com.megaease.easeagent.config.report.ReportConfigConst.OUTPUT_SERVER_V2;
 
 @Slf4j
 public class MetricReporterFactoryImpl implements MetricReporterFactory, ConfigChangeListener {
@@ -76,35 +74,30 @@ public class MetricReporterFactoryImpl implements MetricReporterFactory, ConfigC
         if (changes.isEmpty()) {
             return;
         }
-
-        reporters.forEachValue(1, reporter -> reporter.updateConfigs(changes));
+        this.reportConfig.updateConfigs(changes);
     }
 
-    // global outputServer config
-    // and all other metric related config have been convert to keys-value,
-    // each key startWith METRIC_V2
     private Map<String, String> filterChanges(List<ChangeItem> list) {
         Map<String, String> cfg = new HashMap<>();
-        list.stream()
-            .filter(one -> {
-                String name = one.getFullName();
-                return name.startsWith(OUTPUT_SERVER_V2)
-                    || name.startsWith(METRIC_V2);
-            }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
+        list.forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
 
         return cfg;
     }
 
-    public class DefaultMetricReporter implements Reporter, ReportConfigChange {
+    public static class DefaultMetricReporter implements Reporter, ConfigChangeListener {
         private MetricProps metricProps;
         private SenderWithEncoder sender;
-        private IPluginConfig pluginConfig;
+        private final IPluginConfig pluginConfig;
+        private final Config reportConfig;
         private final Config metricConfig;
 
-        public DefaultMetricReporter(IPluginConfig pluginConfig, Config config) {
+        public DefaultMetricReporter(IPluginConfig pluginConfig, Config reportConfig) {
             this.pluginConfig = pluginConfig;
 
-            this.metricProps = Utils.extractMetricProps(pluginConfig, config);
+            this.reportConfig = reportConfig;
+            this.reportConfig.addChangeListener(this);
+
+            this.metricProps = Utils.extractMetricProps(this.pluginConfig, reportConfig);
             this.metricConfig = this.metricProps.asReportConfig();
 
             this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), this.metricConfig);
@@ -127,21 +120,6 @@ public class MetricReporterFactoryImpl implements MetricReporterFactory, ConfigC
             }
         }
 
-        @Override
-        public void updateConfigs(Map<String, String> changes) {
-            Map<String, String> nCfg = this.metricConfig.getConfigs();
-            nCfg.putAll(changes);
-
-            String senderName = this.metricProps.getSenderName();
-            this.metricProps = Utils.extractMetricProps(pluginConfig, new Configs(nCfg));
-
-            this.metricConfig.updateConfigs(this.metricProps.asReportConfig().getConfigs());
-
-            if (!metricProps.getSenderName().equals(senderName)) {
-                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), this.metricConfig);
-            }
-        }
-
         public Config getMetricConfig() {
             return this.metricConfig;
         }
@@ -152,6 +130,23 @@ public class MetricReporterFactoryImpl implements MetricReporterFactory, ConfigC
 
         public SenderWithEncoder getSender() {
             return this.sender;
+        }
+
+        @Override
+        public void onChange(List<ChangeItem> list) {
+            if (list.isEmpty()) {
+                return;
+            }
+
+            String senderName = this.metricProps.getSenderName();
+            this.metricProps = Utils.extractMetricProps(pluginConfig, this.reportConfig);
+            Config changedConfig = this.metricProps.asReportConfig();
+
+            this.metricConfig.updateConfigs(changedConfig.getConfigs());
+
+            if (!metricProps.getSenderName().equals(senderName)) {
+                this.sender = ReporterRegistry.getSender(this.metricProps.getSenderPrefix(), this.metricConfig);
+            }
         }
     }
 }

@@ -118,7 +118,7 @@ public class ReportConfigAdapter {
             } else {
                 outputCfg.put(join(TRACE_SENDER, "url"), url);
             }
-        } else if (StringUtils.isEmpty(target)) {
+        } else if (!StringUtils.isEmpty(target)) {
             outputCfg.put(TRACE_SENDER_NAME, CONSOLE_SENDER_NAME);
             log.info("Unsupported output configuration item:{}={}", TRACE_OUTPUT_TARGET_V1, target);
         }
