@@ -23,7 +23,7 @@ $ java -jar spring-petclinic-config-server/target/spring-petclinic-config-server
 # Open another console
 $ java -jar spring-petclinic-discovery-server/target/spring-petclinic-discovery-server-2.4.2.jar
 
-# Open another console
+# Run Spring Cloud Application - Vets Service
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ cp $EASE_AGENT_PATH/agent.properties $EASE_AGENT_PATH/vets-agent.properties
 $ # vi $EASE_AGENT_PATH/vets-agent.properties replease name to "petclinic-vets-service"
