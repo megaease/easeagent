@@ -94,21 +94,23 @@ An agent component for Java system.
 
 ### Get And Set Environment Variable
 
-download easeagent or build easeagent from source then set $EASE_AGENT_PATH
-#### Download
+Setup Environment Variable and then download the latest release easeagent.jar or build easeagent from the source.
+
+#### Setup Environment Variable
 ```
 $ cd ~/easeagent #[Replace with agent path]
 $ export EASE_AGENT_PATH=`pwd` # export EASE_AGENT_PATH=[Replace with agent path]
 $ mkdir plugins
 ```
 
+#### Download
 Download `easeagent.jar` from releases [releases](https://github.com/megaease/easeagent/releases).
 
 ```
 $ curl -Lk https://github.com/megaease/easeagent/releases/latest/download/easeagent.jar -O
 ```
 
-#### Build From Source
+#### Build From the Source
 
 You need Java 1.8+ and git:
 
@@ -130,14 +132,17 @@ $ cd $EASE_AGENT_PATH
 $ jar xf easeagent.jar agent.properties easeagent-log4j2.xml
 ```
 
-By default, there is an agent.properties configuration , which is configured to print all information to the console.
+By default, there is an agent.properties configuration file, which is configured to print all output data to the console.
 
 ### Monitor Spring Petclinic
-
-Download and init project then start it. You need git and docker:
+#### Prerequisites
+- Make sure you have installed the docker, docker-compose in your environment.
+- Make sure your docker version is higher than v19.+.
+- Make sure your docker-compose version is higher than v2.+.
 
 [Project Details](https://github.com/megaease/easeagent-spring-petclinic)
 
+#### Initialize and Start the project
 ```
 $ git clone https://github.com/megaease/easeagent-spring-petclinic.git
 $ cd easeagent-spring-petclinic
@@ -147,11 +152,11 @@ $ ./spring-petclinic.sh start
 ```
 
 > The script will download the easeagent v2.1.0 release from the Github release page. 
-> If you want to use your own built EaseAgent, copy it to directory: `easeagent/downloaded`
+> If you want to use your own built EaseAgent, copy it to the directory: `easeagent/downloaded`
 >> ```$ cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent-v2.1.0.jar``` 
 
 
-It requires docker to pull images from the docker server, be patient. 
+It requires `Docker` to pull images from the docker server, be patient. 
 
 Open Browser to visit grafana UI: [http://localhost:3000](http://localhost:3000).
 
@@ -168,27 +173,27 @@ If you want to check the tracing data, you could click the explore in the left m
 
 ![tracing](doc/images/grafana-tracing.png)
 
-#### Build Own Spring Petclinic
+#### Build Spring Petclinic
 
 [Spring Petclinic Demo](doc/spring-petclinic-demo.md)
 
-### Add Plugin Demo
-[Add Plugin For EaseAgent Demo](doc/add-plugin-demo.md)
+### Add a Enhancement Plugin
+[Add a Demo Plugin to EaseAgent](doc/add-plugin-demo.md)
 
 ## User Manual
 For more information, please refer to the [User Manual](./doc/user-manual.md).
 
-## Enhance Plugin Development Guide
+## Enhancement Plugin Development Guide
 Refer to [Plugin Development Guide](./doc/development-guide.md).
 
 ## Report Plugin Development Guide
-Report plugin enable user report tracing/metric data to different kind of backend in different format.
+Report plugin enables user report tracing/metric data to different kinds of backend in a different format.
 
 Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
 
 ## Community
 
-* [Github issues](https://github.com/megaease/easeagent/issues)
+* [Github Issues](https://github.com/megaease/easeagent/issues)
 * [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue and development.
 * [MegaEase on Twitter](https://twitter.com/megaease)
 
