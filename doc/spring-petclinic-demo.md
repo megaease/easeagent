@@ -2,7 +2,7 @@
 
 You need Java 1.8+ and easeagent:
 
-If you don't already have easeagent, get it and set $EASE_AGENT_PATH: [EaseAgent](../README.md#get-and-set-environment-variable)
+If you haven't `easeagent`, get it and set $EASE_AGENT_PATH: [EaseAgent](../README.md#get-and-set-environment-variable)
 
 ### Step 1
 Building the demo application.
