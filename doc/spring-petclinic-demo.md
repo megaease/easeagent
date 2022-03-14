@@ -20,7 +20,7 @@ Run the demo application with EaseAgent.
 # Run Spring Cloud Config Server
 $ java -jar spring-petclinic-config-server/target/spring-petclinic-config-server-2.4.2.jar
 
-# Open another console
+# Run Spring Cloud Service Discovery Server
 $ java -jar spring-petclinic-discovery-server/target/spring-petclinic-discovery-server-2.4.2.jar
 
 # Run Spring Cloud Application - Vets Service
