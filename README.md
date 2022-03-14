@@ -146,15 +146,13 @@ By default, there is an agent.properties configuration file, which is configured
 ```
 $ git clone https://github.com/megaease/easeagent-spring-petclinic.git
 $ cd easeagent-spring-petclinic
-$ git checkout v2.1.0
 $ git submodule update --init
 $ ./spring-petclinic.sh start
 ```
 
-> The script will download the easeagent v2.1.0 release from the Github release page. 
-> If you want to use your own built EaseAgent, copy it to the directory: `easeagent/downloaded`
->> ```$ cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent-v2.1.0.jar``` 
-
+> The script will download the easeagent release from the Github release latest. 
+> If you want to use your own built EaseAgent, copy it to directory: `easeagent/downloaded`
+>> ```$ cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent.jar``` 
 
 It requires `Docker` to pull images from the docker server, be patient. 
 
