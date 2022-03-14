@@ -165,8 +165,8 @@ If you want to check the tracing data, you could click the explore in the left m
 
 [Spring Petclinic Demo](doc/spring-petclinic-demo.md)
 
-### Simple Demo
-[Simple Demo](doc/simple-demo.md)
+### Add Plugin Demo
+[Add Plugin For EaseAgent Demo](doc/add-plugin-demo.md)
 
 ## User Manual
 For more information, please refer to the [User Manual](./doc/user-manual.md).
