@@ -187,13 +187,13 @@ Report plugin enable user report tracing/metric data to different kind of backen
 Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
 
 ## Community
-[Github issues](https://github.com/megaease/easeagent/issues)  
+
+* [Github issues](https://github.com/megaease/easeagent/issues)
+* [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue and development.
+* [MegaEase on Twitter](https://twitter.com/megaease)
 
 If you have any questions, welcome to discuss in our community. welcome to join!
 
-|              Slack Channel               |
-|:----------------------------------------:|
-| ![Slack](doc/images/slack-community.jpg) |
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
