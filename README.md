@@ -9,18 +9,19 @@ An agent component for Java system.
   - [Architecture Diagram](#architecture-diagram)
       - [Description](#description)
   - [QuickStart](#quickstart)
-    - [Download](#download)
-    - [Build From Source](#build-from-source)
-    - [1. Get Configuration file](#1-get-configuration-file)
-    - [2. Modify Configuration](#2-modify-configuration)
-    - [3. Building the demo application and simple plugin.](#3-building-the-demo-application-and-simple-plugin)
-    - [4. Copy simple plugin to `plugins` directory](#4-copy-simple-plugin-to-plugins-directory)
-    - [5. Run the demo application with EaseAgent.](#5-run-the-demo-application-with-easeagent)
-    - [6. Integrate with Prometheus](#6-integrate-with-prometheus)
-    - [7. Test Data](#7-test-data)
+    - [Get And Set Environment Variable](#get-and-set-environment-variable)
+      - [Download](#download)
+      - [Build From Source](#build-from-source)
+      - [Get Configuration file](#get-configuration-file)
+    - [Monitor Spring Petclinic](#monitor-spring-petclinic)
+      - [Metric](#metric)
+      - [Tracing](#tracing)
+      - [Build Own Spring Petclinic](#build-own-spring-petclinic)
+    - [Add Plugin Demo](#add-plugin-demo)
   - [User Manual](#user-manual)
   - [Enhance Plugin Development Guide](#enhance-plugin-development-guide)
   - [Report Plugin Development Guide](#report-plugin-development-guide)
+  - [Community](#community)
   - [Licenses](#licenses)
 
 ## Overview
@@ -50,14 +51,21 @@ An agent component for Java system.
         * `Spring Boot 2.2.x`: `WebClient` 、 `RestTemplate`、`FeignClient`
         * `RabbitMQ Client 5.x`、 `Kafka Client 2.4.x`
         * `Jedis 3.5.x`、 `Lettuce 5.3.x (sync、async)`
-        * `elasticsearch client >= 7.x (sync、async)`
-        * `mongodb client >=4.0.x (sync、async)`
+        * `ElasticSearch Client >= 7.x (sync、async)`
+        * `Mongodb Client >=4.0.x (sync、async)`
     * Collecting Access Logs.
         * `HTTP Servlet`、`HTTP Filter`
         * `Spring Cloud Gateway`
     * Instrumenting the `traceId` and `spanId` into user application logging automatically
     * Supplying the `health check` endpoint
     * Supplying the `readiness check` endpoint for `SpringBoot2.2.x`
+    
+*  Data Reports
+    * Console Reporter.
+    * Prometheus Exports.
+    * Http Reporter.
+    * Kafka Reporter.
+    * Custom Reporter.
 
 * Easy to Extend
     * Simple and clear Plugin Interface, creating a plugin as few as three classes.
@@ -84,147 +92,111 @@ An agent component for Java system.
 
 ## QuickStart
 
-### Download
+### Get And Set Environment Variable
+
+Setup Environment Variable and then download the latest release easeagent.jar or build easeagent from the source.
+
+#### Setup Environment Variable
+```
+$ cd ~/easeagent #[Replace with agent path]
+$ export EASE_AGENT_PATH=`pwd` # export EASE_AGENT_PATH=[Replace with agent path]
+$ mkdir plugins
+```
+
+#### Download
 Download `easeagent.jar` from releases [releases](https://github.com/megaease/easeagent/releases).
 
-or
-
 ```
-$ curl -Lk https://github.com/megaease/easeagent/releases/download/{tag}/easeagent.jar -O
+$ curl -Lk https://github.com/megaease/easeagent/releases/latest/download/easeagent.jar -O
 ```
 
-### Build From Source
+#### Build From the Source
+
+You need Java 1.8+ and git:
+
 Download EaseAgent with `git clone https://github.com/megaease/easeagent.git`.
 ```
 $ cd easeagent
-$ mvn clean package 
+$ mvn clean package -Dmaven.test.skip
+$ cp ./build/target/easeagent-dep.jar $EASE_AGENT_PATH/easeagent.jar
 ```
 The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
 
 > Windows platform user please make sure git `core.autocrlf` is set to false before git clone.
 > You can use `git config --global core.autocrlf false` to modify `core.autocrlf`.
 
-### 1. Get Configuration file
+#### Get Configuration file
 Extracting the default configuration file.
 ```
+$ cd $EASE_AGENT_PATH
 $ jar xf easeagent.jar agent.properties easeagent-log4j2.xml
 ```
 
-### 2. Modify Configuration
-* Modify service name, default configuration is `demo-service`.
-```
-name=[app-name]
-```
-* Modify kafka server config, default configuration is `127.0.0.1:9092`.
-Both `tracing` data and `metric` data will be send to kafka server by default configuration.
-```
-observability.outputServer.bootstrapServer = [ip:port]
-```
+By default, there is an agent.properties configuration file, which is configured to print all output data to the console.
 
-* Modify output configuration, if you want to watch log information in console.
-```
-# metric output
-observability.metrics.[xxxx].appendType=console
+### Monitor Spring Petclinic
+#### Prerequisites
+- Make sure you have installed the docker, docker-compose in your environment.
+- Make sure your docker version is higher than v19.+.
+- Make sure your docker-compose version is higher than v2.+.
 
-# tracings output to console
-observability.tracings.output.target=system
-observability.tracings.output.enabled=false
-```
-If you want to watch tracing information only in console, comment out the outputServer configuration and set target to 'system':
-```
-# observability.outputServer.bootstrapServer=127.0.0.1:9092
-# observability.outputServer.timeout=10000
-# observability.outputServer.enabled=true
+[Project Details](https://github.com/megaease/easeagent-spring-petclinic)
 
-observability.tracings.output.target=system
-
+#### Initialize and Start the project
+```
+$ git clone https://github.com/megaease/easeagent-spring-petclinic.git
+$ cd easeagent-spring-petclinic
+$ git submodule update --init
+$ ./spring-petclinic.sh start
 ```
 
-* Sending tracing data to zipkin server
-```
-# [zipkin]: send data to zipkin server
-# [system]: send data to kafka
-observability.tracings.output.target=zipkin
-observability.tracings.output.target.zipkinUrl=http://localhost:9411/api/v2/spans
-```
+> The script will download the easeagent release from the Github release latest. 
+> If you want to use your own built EaseAgent, copy it to directory: `easeagent/downloaded`
+>> ```$ cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent.jar``` 
 
-### 3. Building the demo application and simple plugin.
-```
-$ git clone https://github.com/megaease/easeagent-test-demo.git
-$ cd spring-web
-$ mvn clean package
+It requires `Docker` to pull images from the docker server, be patient. 
 
-$ cd simple-plugin
-$ mvn clean package
-```
-There is an agent.properties configuration file in the demo directory, which is configured to print all information to the console.
-If you want to print all information to console, then you can use this configuration file.
+Open Browser to visit grafana UI: [http://localhost:3000](http://localhost:3000).
 
-### 4. Copy simple plugin to `plugins` directory
-There is a [simple plugin](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin) which only for demonstrating the use of the plugin. 
-The compiled simple plugin JAR package should be copy to the `plugins` directory located in `EASE_AGENT_PATH`, and if the directory is not exsist, it need to be created.
+#### Metric
+Click the `search dashboards`, the first icon in the left menu bar. Choose the `spring-petclinic-easeagent` to open the dashboard we prepare for you.
 
-```
-$ export EASE_AGENT_PATH=[Replace with agent path]
-cp target/simple-plugin-1.0.jar $EASE_AGENT_PATH/plugins/
+Prometheus Metric Schedule: [Prometheus Metric](./prometheus-metric-schedule.md)
 
-```
+![metric](doc/images/grafana-metric.png)
 
-### 5. Run the demo application with EaseAgent.
-```
-# Open another console
-$ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
+#### Tracing
 
-```
+If you want to check the tracing data, you could click the explore in the left menu bar. Click the Search - beta to switch search mode. Click search query button in the right up corner, there is a list containing many tracing. Chose one to click.
 
-### 6. Integrate with Prometheus
-Adding the following configuration in `prometheus.yml`
-```
-  - job_name: 'spring-web-service'
-    static_configs:
-      - targets: ['localhost:9900']
-    metrics_path: "/prometheus/metrics"
+![tracing](doc/images/grafana-tracing.png)
 
-```
-Start Prometheus
-```
-$ ./prometheus --config.file=prometheus.yml
+#### Build Spring Petclinic
 
-# Open another console, run curl to access the test url for several times.
-$ for i in {1..1000}; do curl -v http://127.0.0.1:18888/web_client;sleep 0.1; done
+[Spring Petclinic Demo](doc/spring-petclinic-demo.md)
 
-```
-
-### 7. Test Data
-* Tracing  
-If the tracing data is send to console, there would be some tracing log in console like this:
-```
-[{"traceId":"5a8800b902703307","parentId":"84c4cba42fb92788","id":"fd00a1705c88cbb2","kind":"SERVER","name":"get","timestamp":1639493283759877,"duration":217545,"shared":true,"localEndpoint":{"serviceName":"demo-service","ipv4":"192.168.0.102"},"remoteEndpoint":{"ipv4":"127.0.0.1","port":55809},"tags":{"http.method":"GET","http.path":"/hello","http.route":"/hello","i":"ServerName.local"},"type":"log-tracing","service":"demo-service","system":"demo-system"},{"traceId":"5a8800b902703307","id":"5a8800b902703307","kind":"SERVER","name":"get","timestamp":1639493283753466,"duration":228827,"localEndpoint":{"serviceName":"demo-service","ipv4":"192.168.0.102"},"remoteEndpoint":{"ipv4":"127.0.0.1","port":55851},"tags":{"http.method":"GET","http.path":"/web_client","i":"ServerName.local"},"type":"log-tracing","service":"demo-service","system":"demo-system"}]
-
-...
-
-```
-* Metric
-
-Open Browser to visit [http://localhost:9090](http://localhost:9090).
-
-Prometheus Metric Schedule: [Prometheus Metric](./doc/prometheus-metric-schedule.md)
-
-search `application_http_request_m1{url="GET /web_client"}`. You will see as following.
-
-![image](./doc/images/prometheus-demo.jpg)
+### Add a Enhancement Plugin
+[Add a Demo Plugin to EaseAgent](doc/add-plugin-demo.md)
 
 ## User Manual
 For more information, please refer to the [User Manual](./doc/user-manual.md).
 
-## Enhance Plugin Development Guide
+## Enhancement Plugin Development Guide
 Refer to [Plugin Development Guide](./doc/development-guide.md).
 
 ## Report Plugin Development Guide
-Report plugin enable user report tracing/metric data to different kind of backend in different format.
+Report plugin enables user report tracing/metric data to different kinds of backend in a different format.
 
 Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
+
+## Community
+
+* [Github Issues](https://github.com/megaease/easeagent/issues)
+* [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue and development.
+* [MegaEase on Twitter](https://twitter.com/megaease)
+
+If you have any questions, welcome to discuss in our community. welcome to join!
+
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
