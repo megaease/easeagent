@@ -9,15 +9,15 @@ An agent component for Java system.
   - [Architecture Diagram](#architecture-diagram)
       - [Description](#description)
   - [QuickStart](#quickstart)
-    - [Download](#download)
-    - [Build From Source](#build-from-source)
-    - [1. Get Configuration file](#1-get-configuration-file)
-    - [2. Modify Configuration](#2-modify-configuration)
-    - [3. Building the demo application and simple plugin.](#3-building-the-demo-application-and-simple-plugin)
-    - [4. Copy simple plugin to `plugins` directory](#4-copy-simple-plugin-to-plugins-directory)
-    - [5. Run the demo application with EaseAgent.](#5-run-the-demo-application-with-easeagent)
-    - [6. Integrate with Prometheus](#6-integrate-with-prometheus)
-    - [7. Test Data](#7-test-data)
+    - [Get And Set Environment Variable](#get-and-set-environment-variable)
+      - [Download](#download)
+      - [Build From Source](#build-from-source)
+      - [Get Configuration file](#get-configuration-file)
+    - [Monitor Spring Petclinic](#monitor-spring-petclinic)
+      - [Metric](#metric)
+      - [Tracing](#tracing)
+      - [Build Own Spring Petclinic](#build-own-spring-petclinic)
+    - [Simple Demo](#simple-demo)
   - [User Manual](#user-manual)
   - [Enhance Plugin Development Guide](#enhance-plugin-development-guide)
   - [Report Plugin Development Guide](#report-plugin-development-guide)
@@ -85,136 +85,84 @@ An agent component for Java system.
 
 ## QuickStart
 
-### Download
-Download `easeagent.jar` from releases [releases](https://github.com/megaease/easeagent/releases).
+### Get And Set Environment Variable
 
-or
+download easeagent or build easeagent from source then set $EASE_AGENT_PATH
+#### Download
+```
+$ cd ~/easeagent #[Replace with agent path]
+$ export EASE_AGENT_PATH=`pwd` # export EASE_AGENT_PATH=[Replace with agent path]
+$ mkdir plugins
+```
+
+Download `easeagent.jar` from releases [releases](https://github.com/megaease/easeagent/releases).
 
 ```
 $ curl -Lk https://github.com/megaease/easeagent/releases/download/{tag}/easeagent.jar -O
 ```
 
-### Build From Source
+#### Build From Source
+
+You need Java 1.8+ and git:
+
 Download EaseAgent with `git clone https://github.com/megaease/easeagent.git`.
 ```
 $ cd easeagent
-$ mvn clean package 
+$ mvn clean package -Dmaven.test.skip
+$ cp ./build/target/easeagent-dep.jar $EASE_AGENT_PATH/easeagent.jar
 ```
 The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
 
 > Windows platform user please make sure git `core.autocrlf` is set to false before git clone.
 > You can use `git config --global core.autocrlf false` to modify `core.autocrlf`.
 
-### 1. Get Configuration file
+#### Get Configuration file
 Extracting the default configuration file.
 ```
+$ cd $EASE_AGENT_PATH
 $ jar xf easeagent.jar agent.properties easeagent-log4j2.xml
 ```
 
-### 2. Modify Configuration
-* Modify service name, default configuration is `demo-service`.
-```
-name=[app-name]
-```
-* Modify kafka server config, default configuration is `127.0.0.1:9092`.
-Both `tracing` data and `metric` data will be send to kafka server by default configuration.
-```
-observability.outputServer.bootstrapServer = [ip:port]
-```
+By default, there is an agent.properties configuration , which is configured to print all information to the console.
 
-* Modify output configuration, if you want to watch log information in console.
-```
-# metric output
-observability.metrics.[xxxx].appendType=console
+### Monitor Spring Petclinic
 
-# tracings output to console
-observability.tracings.output.target=system
-observability.tracings.output.enabled=false
-```
-If you want to watch tracing information only in console, comment out the outputServer configuration and set target to 'system':
-```
-# observability.outputServer.bootstrapServer=127.0.0.1:9092
-# observability.outputServer.timeout=10000
-# observability.outputServer.enabled=true
+Download and init project then start it. You need git and docker:
 
-observability.tracings.output.target=system
+[Project Details](https://github.com/megaease/easeagent-spring-petclinic)
 
 ```
-
-* Sending tracing data to zipkin server
-```
-# [zipkin]: send data to zipkin server
-# [system]: send data to kafka
-observability.tracings.output.target=zipkin
-observability.tracings.output.target.zipkinUrl=http://localhost:9411/api/v2/spans
-```
-
-### 3. Building the demo application and simple plugin.
-```
-$ git clone https://github.com/megaease/easeagent-test-demo.git
-$ cd spring-web
-$ mvn clean package
-
-$ cd simple-plugin
-$ mvn clean package
-```
-There is an agent.properties configuration file in the demo directory, which is configured to print all information to the console.
-If you want to print all information to console, then you can use this configuration file.
-
-### 4. Copy simple plugin to `plugins` directory
-There is a [simple plugin](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin) which only for demonstrating the use of the plugin. 
-The compiled simple plugin JAR package should be copy to the `plugins` directory located in `EASE_AGENT_PATH`, and if the directory is not exsist, it need to be created.
-
-```
-$ export EASE_AGENT_PATH=[Replace with agent path]
-cp target/simple-plugin-1.0.jar $EASE_AGENT_PATH/plugins/
-
+$ git clone https://github.com/megaease/easeagent-spring-petclinic.git
+$ cd easeagent-spring-petclinic
+$ git checkout v2.1.0
+$ mkdir easeagent/downloaded && cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent-v2.1.0.jar
+$ git submodule update --init
+$ ./spring-petclinic.sh start
 ```
 
-### 5. Run the demo application with EaseAgent.
-```
-# Open another console
-$ export EASE_AGENT_PATH=[Replace with agent path]
-$ java "-javaagent:${EASE_AGENT_PATH}/easeagent-dep.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -Deaseagent.server.port=9900 -jar target/spring-web-1.0.jar
+It requires docker to pull images from the docker server, be patient. 
 
-```
+Open Browser to visit grafana UI: [http://localhost:3000](http://localhost:3000).
 
-### 6. Integrate with Prometheus
-Adding the following configuration in `prometheus.yml`
-```
-  - job_name: 'spring-web-service'
-    static_configs:
-      - targets: ['localhost:9900']
-    metrics_path: "/prometheus/metrics"
+#### Metric
+Click the `search dashboards`, the first icon in the left menu bar. Choose the `spring-petclinic-easeagent` to open the dashboard we prepare for you.
 
-```
-Start Prometheus
-```
-$ ./prometheus --config.file=prometheus.yml
+Prometheus Metric Schedule: [Prometheus Metric](./prometheus-metric-schedule.md)
 
-# Open another console, run curl to access the test url for several times.
-$ for i in {1..1000}; do curl -v http://127.0.0.1:18888/web_client;sleep 0.1; done
+![metric](doc/images/grafana-metric.png)
 
-```
+#### Tracing
 
-### 7. Test Data
-* Tracing  
-If the tracing data is send to console, there would be some tracing log in console like this:
-```
-[{"traceId":"5a8800b902703307","parentId":"84c4cba42fb92788","id":"fd00a1705c88cbb2","kind":"SERVER","name":"get","timestamp":1639493283759877,"duration":217545,"shared":true,"localEndpoint":{"serviceName":"demo-service","ipv4":"192.168.0.102"},"remoteEndpoint":{"ipv4":"127.0.0.1","port":55809},"tags":{"http.method":"GET","http.path":"/hello","http.route":"/hello","i":"ServerName.local"},"type":"log-tracing","service":"demo-service","system":"demo-system"},{"traceId":"5a8800b902703307","id":"5a8800b902703307","kind":"SERVER","name":"get","timestamp":1639493283753466,"duration":228827,"localEndpoint":{"serviceName":"demo-service","ipv4":"192.168.0.102"},"remoteEndpoint":{"ipv4":"127.0.0.1","port":55851},"tags":{"http.method":"GET","http.path":"/web_client","i":"ServerName.local"},"type":"log-tracing","service":"demo-service","system":"demo-system"}]
+If you want to check the tracing data, you could click the explore in the left menu bar. Click the Search - beta to switch search mode. Click search query button in the right up corner, there is a list containing many tracing. Chose one to click.
 
-...
+![tracing](doc/images/grafana-tracing.png)
 
-```
-* Metric
+#### Build Own Spring Petclinic
 
-Open Browser to visit [http://localhost:9090](http://localhost:9090).
+[Spring Petclinic Demo](doc/spring-petclinic-demo.md)
 
-Prometheus Metric Schedule: [Prometheus Metric](./doc/prometheus-metric-schedule.md)
-
-search `application_http_request_m1{url="GET /web_client"}`. You will see as following.
-
-![image](./doc/images/prometheus-demo.jpg)
+### Simple Demo
+[Simple Demo](doc/simple-demo.md)
 
 ## User Manual
 For more information, please refer to the [User Manual](./doc/user-manual.md).
@@ -232,9 +180,9 @@ Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
 
 If you have any questions, welcome to discuss in our community. welcome to join!
 
-|               Slack Channel                |
-|:------------------------------------------:|
-| ![Slack](./doc/images/slack_community.jpg) |
+|              Slack Channel               |
+|:----------------------------------------:|
+| ![Slack](doc/images/slack-community.jpg) |
 
 ## Licenses
 EaseAgent is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
