@@ -44,6 +44,7 @@ public class AgentKafkaSender implements Sender {
     Map<String, String> ssl;
     String prefix;
     String topicKey;
+    String topic;
     String maxByteKey;
 
     @Override
@@ -63,7 +64,7 @@ public class AgentKafkaSender implements Sender {
             enabled = checkEnable(config);
         }
         this.topicKey = join(this.prefix, TOPIC_KEY);
-        String topic = config.getString(this.topicKey);
+        this.topic = config.getString(this.topicKey);
 
         this.maxByteKey = StringUtils.replaceSuffix(this.prefix, join(ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY));
         int msgMaxBytes = config.getInt(this.maxByteKey);
@@ -71,7 +72,7 @@ public class AgentKafkaSender implements Sender {
 
         this.sender = SDKKafkaSender.wrap(KafkaSender.newBuilder()
             .bootstrapServers(outputServer)
-            .topic(topic)
+            .topic(this.topic)
             .overrides(ssl)
             .encoding(Encoding.JSON)
             .messageMaxBytes(msgMaxBytes)
