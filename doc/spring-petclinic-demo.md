@@ -17,7 +17,7 @@ export EASE_AGENT_PATH=/Users/beyond/IdeaProjects/easeagent_dir/easeagent/build/
 ### Step 2
 Run the demo application with EaseAgent.
 ```
-# Open another console
+# Run Spring Cloud Config Server
 $ java -jar spring-petclinic-config-server/target/spring-petclinic-config-server-2.4.2.jar
 
 # Open another console
