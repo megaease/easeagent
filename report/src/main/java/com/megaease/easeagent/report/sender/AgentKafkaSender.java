@@ -43,6 +43,8 @@ public class AgentKafkaSender implements Sender {
     SDKKafkaSender sender;
     Map<String, String> ssl;
     String prefix;
+    String topicKey;
+    String maxByteKey;
 
     @Override
     public String name() {
@@ -60,9 +62,11 @@ public class AgentKafkaSender implements Sender {
         } else {
             enabled = checkEnable(config);
         }
+        this.topicKey = join(this.prefix, TOPIC_KEY);
+        String topic = config.getString(this.topicKey);
 
-        String topic = config.getString(TRACE_SENDER_TOPIC_V2);
-        int msgMaxBytes = config.getInt(TRACE_ASYNC_MESSAGE_MAX_BYTES_V2);
+        this.maxByteKey = StringUtils.replaceSuffix(this.prefix, join(ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY));
+        int msgMaxBytes = config.getInt(this.maxByteKey);
         this.ssl = ConfigUtils.extractByPrefix(config, OUTPUT_SERVERS_SSL);
 
         this.sender = SDKKafkaSender.wrap(KafkaSender.newBuilder()
@@ -90,10 +94,11 @@ public class AgentKafkaSender implements Sender {
 
     @Override
     public void updateConfigs(Map<String, String> changes) {
-        String name = changes.get(TRACE_SENDER_NAME);
+        String name = changes.get(join(prefix, APPEND_TYPE_KEY));
         if (StringUtils.isNotEmpty(name) && !SENDER_NAME.equals(name)) {
             try {
                 this.close();
+                return;
             } catch (IOException e) {
                 // ignored
             }
@@ -101,7 +106,7 @@ public class AgentKafkaSender implements Sender {
         boolean refresh = false;
         for (String key : changes.keySet()) {
             if (key.startsWith(OUTPUT_SERVER_V2)
-                || key.startsWith(TRACE_SENDER_TOPIC_V2)) {
+                || key.startsWith(this.topicKey)) {
                 refresh = true;
                 break;
             }
@@ -126,7 +131,7 @@ public class AgentKafkaSender implements Sender {
     }
 
     private boolean checkEnable(Config config) {
-        boolean check = config.getBoolean(TRACE_SENDER_ENABLED_V2);
+        boolean check = config.getBoolean(join(this.prefix, ENABLED_KEY));
         if (check) {
             check = config.getBoolean(OUTPUT_SERVERS_ENABLE);
         } else {
