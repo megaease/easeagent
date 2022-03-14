@@ -17,7 +17,7 @@ An agent component for Java system.
       - [Metric](#metric)
       - [Tracing](#tracing)
       - [Build Own Spring Petclinic](#build-own-spring-petclinic)
-    - [Simple Demo](#simple-demo)
+    - [Add Plugin Demo](#add-plugin-demo)
   - [User Manual](#user-manual)
   - [Enhance Plugin Development Guide](#enhance-plugin-development-guide)
   - [Report Plugin Development Guide](#report-plugin-development-guide)

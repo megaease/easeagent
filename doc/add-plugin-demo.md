@@ -1,4 +1,4 @@
-# Simple Demo
+# Add Plugin Demo
 
 You need Java 1.8+ and easeagent:
 
