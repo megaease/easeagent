@@ -41,7 +41,7 @@ $ cp $EASE_AGENT_PATH/agent.properties $EASE_AGENT_PATH/customers-agent.properti
 $ vi $EASE_AGENT_PATH/customers-agent.properties # replease name to "petclinic-customers-service"
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/customers-agent.properties -Deaseagent.server.port=9902 -jar spring-petclinic-customers-service/target/spring-petclinic-customers-service-2.4.2.jar
 
-# Open another console
+# Run Spring Cloud API Gateway
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ cp $EASE_AGENT_PATH/agent.properties $EASE_AGENT_PATH/api-gateway-agent.properties
 $ vi $EASE_AGENT_PATH/api-gateway-agent.properties # replease name to "petclinic-api-gateway"
