@@ -131,7 +131,7 @@ public class AgentKafkaSender implements Sender {
     }
 
     private boolean checkEnable(Config config) {
-        boolean check = config.getBoolean(join(this.prefix, ENABLED_KEY));
+        boolean check = config.getBoolean(join(this.prefix, ENABLED_KEY), true);
         if (check) {
             check = config.getBoolean(OUTPUT_SERVERS_ENABLE);
         } else {
