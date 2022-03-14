@@ -12,8 +12,6 @@ $ cd spring-petclinic-microservices
 $ mvn -DskipTests=true package
 ```
 
-export EASE_AGENT_PATH=/Users/beyond/IdeaProjects/easeagent_dir/easeagent/build/target
-
 ### Step 2
 Run the demo application with EaseAgent.
 ```

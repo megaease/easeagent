@@ -51,14 +51,21 @@ An agent component for Java system.
         * `Spring Boot 2.2.x`: `WebClient` 、 `RestTemplate`、`FeignClient`
         * `RabbitMQ Client 5.x`、 `Kafka Client 2.4.x`
         * `Jedis 3.5.x`、 `Lettuce 5.3.x (sync、async)`
-        * `elasticsearch client >= 7.x (sync、async)`
-        * `mongodb client >=4.0.x (sync、async)`
+        * `ElasticSearch Client >= 7.x (sync、async)`
+        * `Mongodb Client >=4.0.x (sync、async)`
     * Collecting Access Logs.
         * `HTTP Servlet`、`HTTP Filter`
         * `Spring Cloud Gateway`
     * Instrumenting the `traceId` and `spanId` into user application logging automatically
     * Supplying the `health check` endpoint
     * Supplying the `readiness check` endpoint for `SpringBoot2.2.x`
+    
+* Diversification of reports
+    * Console Reporter.
+    * Prometheus Exports.
+    * Http Reporter.
+    * Kafka Reporter.
+    * Custom Reporter.
 
 * Easy to Extend
     * Simple and clear Plugin Interface, creating a plugin as few as three classes.
