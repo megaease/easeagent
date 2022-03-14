@@ -60,7 +60,7 @@ An agent component for Java system.
     * Supplying the `health check` endpoint
     * Supplying the `readiness check` endpoint for `SpringBoot2.2.x`
     
-* Diversification of reports
+*  Data Reports
     * Console Reporter.
     * Prometheus Exports.
     * Http Reporter.
