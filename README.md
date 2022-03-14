@@ -98,7 +98,7 @@ $ mkdir plugins
 Download `easeagent.jar` from releases [releases](https://github.com/megaease/easeagent/releases).
 
 ```
-$ curl -Lk https://github.com/megaease/easeagent/releases/download/{tag}/easeagent.jar -O
+$ curl -Lk https://github.com/megaease/easeagent/releases/latest/download/easeagent.jar -O
 ```
 
 #### Build From Source
