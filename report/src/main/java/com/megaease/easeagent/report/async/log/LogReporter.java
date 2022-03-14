@@ -53,6 +53,7 @@ public class LogReporter implements ConfigChangeListener {
         SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.LOG_SENDER, configs);
         AsyncProps asyncProperties = new LogAsyncProps(this.config);
         this.asyncReporter = DefaultAsyncReporter.builderAsyncReporter(sender, asyncProperties);
+        this.asyncReporter.startFlushThread();
     }
 
     public void report(AccessLogInfo log) {
@@ -79,7 +80,7 @@ public class LogReporter implements ConfigChangeListener {
     }
 
     public synchronized void refresh(Map<String, String> cfg) {
-        String name = cfg.remove(LOG_SENDER_NAME);
+        String name = cfg.get(LOG_SENDER_NAME);
         SenderWithEncoder sender = asyncReporter.getSender();
         if (sender != null) {
             if (StringUtils.isNotEmpty(name) && !sender.name().equals(name)) {
@@ -88,15 +89,15 @@ public class LogReporter implements ConfigChangeListener {
                 } catch (Exception ignored) {
                     // ignored
                 }
-                sender = ReporterRegistry.getSender(LOG_SENDER, EaseAgent.getConfig());
+                sender = ReporterRegistry.getSender(LOG_SENDER, this.config);
                 asyncReporter.setSender(sender);
             }
         } else {
-            sender = ReporterRegistry.getSender(LOG_SENDER, EaseAgent.getConfig());
+            sender = ReporterRegistry.getSender(LOG_SENDER, this.config);
             asyncReporter.setSender(sender);
         }
 
-        AsyncProps asyncProperties = new LogAsyncProps(EaseAgent.getConfig());
+        AsyncProps asyncProperties = new LogAsyncProps(this.config);
         asyncReporter.closeFlushThread();
         asyncReporter.setPending(asyncProperties.getQueuedMaxItems(), asyncProperties.getQueuedMaxSize());
         asyncReporter.setMessageTimeoutNanos(messageTimeout(asyncProperties.getMessageTimeout()));

@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.report.trace;
 
+import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.async.trace.TraceAsyncProps;
@@ -40,11 +41,13 @@ import static com.megaease.easeagent.config.report.ReportConfigConst.TRACE_SENDE
 public class RefreshableReporter<S> implements Reporter<S> {
     private final SDKAsyncReporter<S> asyncReporter;
     private AsyncProps traceProperties;
+    private Config reportConfig;
 
     public RefreshableReporter(SDKAsyncReporter<S> reporter,
-                               AsyncProps traceProperties) {
+                               Config reportConfig) {
         this.asyncReporter = reporter;
-        this.traceProperties = traceProperties;
+        this.traceProperties = new TraceAsyncProps(reportConfig);
+        this.reportConfig = reportConfig;
     }
 
     /**
@@ -58,7 +61,7 @@ public class RefreshableReporter<S> implements Reporter<S> {
     }
 
     public synchronized void refresh(Map<String, String> cfg) {
-        String name = cfg.remove(TRACE_SENDER_NAME);
+        String name = cfg.get(TRACE_SENDER_NAME);
         SenderWithEncoder sender = asyncReporter.getSender();
         if (sender != null) {
             if (StringUtils.isNotEmpty(name) && !sender.name().equals(name)) {
@@ -67,15 +70,15 @@ public class RefreshableReporter<S> implements Reporter<S> {
                 } catch (Exception ignored) {
                     // ignored
                 }
-                sender = ReporterRegistry.getSender(TRACE_SENDER, EaseAgent.getConfig());
+                sender = ReporterRegistry.getSender(TRACE_SENDER, this.reportConfig);
                 asyncReporter.setSender(sender);
             }
         } else {
-            sender = ReporterRegistry.getSender(TRACE_SENDER, EaseAgent.getConfig());
+            sender = ReporterRegistry.getSender(TRACE_SENDER, this.reportConfig);
             asyncReporter.setSender(sender);
         }
 
-        traceProperties = new TraceAsyncProps(EaseAgent.getConfig());
+        traceProperties = new TraceAsyncProps(this.reportConfig);
         asyncReporter.closeFlushThread();
         asyncReporter.setPending(traceProperties.getQueuedMaxItems(), traceProperties.getQueuedMaxSize());
         asyncReporter.setMessageTimeoutNanos(messageTimeout(traceProperties.getMessageTimeout()));
