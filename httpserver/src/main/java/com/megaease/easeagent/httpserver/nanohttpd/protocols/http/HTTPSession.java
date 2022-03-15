@@ -552,7 +552,7 @@ public class HTTPSession implements IHTTPSession {
      */
     @Override
     @Deprecated
-    public final Map<String, String> getParms() {
+    public final Map<String, String> getParams() {
         Map<String, String> result = new HashMap<String, String>();
         for (String key : this.parms.keySet()) {
             result.put(key, this.parms.get(key).get(0));

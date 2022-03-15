@@ -17,14 +17,13 @@
 
 package com.megaease.easeagent.context.log;
 
-import com.megaease.easeagent.log4j2.MDC;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class LoggerMdcTest {
     LoggerFactoryImpl loggerFactory = LoggerFactoryImpl.build();
-    LoggerMdc mdc = new LoggerMdc(loggerFactory.facotry().mdc());
+    LoggerMdc mdc = new LoggerMdc(loggerFactory.factory().mdc());
 
     @Test
     public void put() {

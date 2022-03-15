@@ -37,8 +37,8 @@ public class LoggerFactoryImplTest {
     }
 
     @Test
-    public void facotry() {
-        AgentLoggerFactory<LoggerImpl> agentLoggerFactory = loggerFactory.facotry();
+    public void factory() {
+        AgentLoggerFactory<LoggerImpl> agentLoggerFactory = loggerFactory.factory();
         assertNotNull(agentLoggerFactory);
         LoggerImpl logger = agentLoggerFactory.getLogger(LoggerFactoryImplTest.class.getName());
         logger.info("aaaa");

@@ -81,7 +81,7 @@ public interface IHTTPSession {
      * @deprecated use {@link #getParameters()} instead.
      */
     @Deprecated
-    Map<String, String> getParms();
+    Map<String, String> getParams();
 
     Map<String, List<String>> getParameters();
 

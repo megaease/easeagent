@@ -404,7 +404,7 @@ public abstract class NanoHTTPD {
      * of the ClientHandler.
      *
      * @param finalAccept
-     *            the socket the cleint is connected to
+     *            the socket the client is connected to
      * @param inputStream
      *            the input stream
      * @return the client handler
@@ -418,7 +418,7 @@ public abstract class NanoHTTPD {
      * provide a subclass of the ServerRunnable.
      *
      * @param timeout
-     *            the socet timeout to use.
+     *            the socket timeout to use.
      * @return the server runnable.
      */
     protected ServerRunnable createServerRunnable(final int timeout) {
@@ -430,14 +430,14 @@ public abstract class NanoHTTPD {
      * name might have been supplied several times, by return lists of values.
      * In general these lists will contain a single element.
      *
-     * @param parms
+     * @param params
      *            original <b>NanoHTTPD</b> parameters values, as passed to the
      *            <code>serve()</code> method.
      * @return a map of <code>String</code> (parameter name) to
      *         <code>List&lt;String&gt;</code> (a list of the values supplied).
      */
-    protected static Map<String, List<String>> decodeParameters(Map<String, String> parms) {
-        return decodeParameters(parms.get(NanoHTTPD.QUERY_STRING_PARAMETER));
+    protected static Map<String, List<String>> decodeParameters(Map<String, String> params) {
+        return decodeParameters(params.get(NanoHTTPD.QUERY_STRING_PARAMETER));
     }
 
     // -------------------------------------------------------------------------------
@@ -454,23 +454,23 @@ public abstract class NanoHTTPD {
      *         <code>List&lt;String&gt;</code> (a list of the values supplied).
      */
     protected static Map<String, List<String>> decodeParameters(String queryString) {
-        Map<String, List<String>> parms = new HashMap<String, List<String>>();
+        Map<String, List<String>> params = new HashMap<String, List<String>>();
         if (queryString != null) {
             StringTokenizer st = new StringTokenizer(queryString, "&");
             while (st.hasMoreTokens()) {
                 String e = st.nextToken();
                 int sep = e.indexOf('=');
                 String propertyName = sep >= 0 ? decodePercent(e.substring(0, sep)).trim() : decodePercent(e).trim();
-                if (!parms.containsKey(propertyName)) {
-                    parms.put(propertyName, new ArrayList<String>());
+                if (!params.containsKey(propertyName)) {
+                    params.put(propertyName, new ArrayList<String>());
                 }
                 String propertyValue = sep >= 0 ? decodePercent(e.substring(sep + 1)) : null;
                 if (propertyValue != null) {
-                    parms.get(propertyName).add(propertyValue);
+                    params.get(propertyName).add(propertyValue);
                 }
             }
         }
-        return parms;
+        return params;
     }
 
     /**
