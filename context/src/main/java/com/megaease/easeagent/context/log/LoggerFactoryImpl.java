@@ -36,7 +36,7 @@ public class LoggerFactoryImpl implements ILoggerFactory {
         return loggerFactory.getLogger(name);
     }
 
-    public AgentLoggerFactory<LoggerImpl> facotry() {
+    public AgentLoggerFactory<LoggerImpl> factory() {
         return loggerFactory;
     }
 

@@ -39,7 +39,7 @@ public class GlobalContextTest {
         initConfigs.put("system", "demo-system");
         Configs configs = new Configs(initConfigs);
         LoggerFactoryImpl loggerFactory = LoggerFactoryImpl.build();
-        globalContext = new GlobalContext(configs, NoOpMetrics.NO_OP_METRIC_SUPPLIER, loggerFactory, new LoggerMdc(loggerFactory.facotry().mdc()));
+        globalContext = new GlobalContext(configs, NoOpMetrics.NO_OP_METRIC_SUPPLIER, loggerFactory, new LoggerMdc(loggerFactory.factory().mdc()));
     }
 
 

@@ -186,7 +186,7 @@ public class RouterNanoHTTPD extends NanoHTTPD {
             text.append(cleanXSS(session.getUri()));
             text.append("</h1><br>");
 
-            Map<String, String> queryParams = session.getParms();
+            Map<String, String> queryParams = session.getParams();
             if (queryParams.size() > 0) {
                 for (Map.Entry<String, String> entry : queryParams.entrySet()) {
                     String key = entry.getKey();

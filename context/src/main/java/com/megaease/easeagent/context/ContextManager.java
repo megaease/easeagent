@@ -67,7 +67,7 @@ public class ContextManager {
         Mdc mdc = NoOpLoggerFactory.NO_OP_MDC_INSTANCE;
         if (loggerFactory != null) {
             iLoggerFactory = loggerFactory;
-            mdc = new LoggerMdc(loggerFactory.facotry().mdc());
+            mdc = new LoggerMdc(loggerFactory.factory().mdc());
         }
         ContextManager contextManager = new ContextManager(conf, pluginConfigManager, iLoggerFactory, mdc);
         EaseAgent.loggerFactory = contextManager.globalContext.getLoggerFactory();
