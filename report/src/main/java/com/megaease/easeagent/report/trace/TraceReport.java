@@ -23,6 +23,7 @@ import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.report.async.trace.SDKAsyncReporter;
 import com.megaease.easeagent.report.async.AsyncProps;
@@ -38,19 +39,20 @@ import java.util.Map;
 public class TraceReport {
     private final RefreshableReporter<ReportSpan> spanRefreshableReporter;
 
-    public TraceReport(Config configs) {
-        spanRefreshableReporter = initSpanRefreshableReporter(configs);
-        configs.addChangeListener(new InternalListener());
+    public TraceReport(Config reportConfig) {
+        spanRefreshableReporter = initSpanRefreshableReporter(reportConfig);
+        reportConfig.addChangeListener(new InternalListener());
     }
 
-    private RefreshableReporter<ReportSpan> initSpanRefreshableReporter(Config configs) {
-        SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.TRACE_SENDER, configs);
+    private RefreshableReporter<ReportSpan> initSpanRefreshableReporter(Config reportConfig) {
+        SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.TRACE_SENDER, reportConfig);
 
-        AsyncProps traceProperties = new TraceAsyncProps(configs);
+        AsyncProps traceProperties = new TraceAsyncProps(reportConfig);
 
         GlobalExtrasSupplier extrasSupplier = new GlobalExtrasSupplier() {
-            final AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(configs, ConfigConst.SERVICE_NAME, Config::getString);
-            final AutoRefreshConfigItem<String> systemName = new AutoRefreshConfigItem<>(configs, ConfigConst.SYSTEM_NAME, Config::getString);
+            Config gConfig = EaseAgent.getConfig();
+            final AutoRefreshConfigItem<String> serviceName = new AutoRefreshConfigItem<>(gConfig, ConfigConst.SERVICE_NAME, Config::getString);
+            final AutoRefreshConfigItem<String> systemName = new AutoRefreshConfigItem<>(gConfig, ConfigConst.SYSTEM_NAME, Config::getString);
 
             @Override
             public String service() {
@@ -68,7 +70,7 @@ public class TraceReport {
 
         reporter.startFlushThread();
 
-        return new RefreshableReporter<>(reporter, traceProperties);
+        return new RefreshableReporter<>(reporter, reportConfig);
     }
 
     public void report(ReportSpan span) {

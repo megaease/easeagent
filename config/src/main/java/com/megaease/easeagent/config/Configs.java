@@ -122,7 +122,7 @@ public class Configs implements Config {
 
     @Override
     public Boolean getBoolean(String name, boolean defValue) {
-        Boolean aBoolean = getBoolean(name);
+        Boolean aBoolean = getBooleanNullForUnset(name);
         if (aBoolean == null) {
             return defValue;
         }

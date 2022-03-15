@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -154,8 +155,11 @@ public class ReportConfigAdapter {
     private static Map<String, String> extractMetricPluginConfig(Map<String, String> srcCfg) {
         final String globalKey = "." + ConfigConst.PLUGIN_GLOBAL + ".";
         final String prefix = join(ConfigConst.PLUGIN, ConfigConst.OBSERVABILITY);
-        Map<String, String> metricConfigs = new HashMap<>();
         int metricKeyLength = ConfigConst.METRIC_SERVICE_ID.length();
+
+        Map<String, String> global = extractGlobalMetricConfig(srcCfg);
+        HashSet<String> namespaces = new HashSet<>();
+        Map<String, String> metricConfigs = new HashMap<>(global);
 
         for (Map.Entry<String, String> e : srcCfg.entrySet()) {
             String key = e.getKey();
@@ -171,7 +175,14 @@ public class ReportConfigAdapter {
             String newKey;
 
             if (namespace.equals(globalKey)) {
-                namespace = ".";
+                continue;
+            } else {
+                if (!namespaces.contains(namespace)) {
+                    namespaces.add(namespace);
+                    Map<String, String> d = extractAndConvertPrefix(global,
+                        METRIC_V2 + ".", METRIC_V2 + namespace);
+                    metricConfigs.putAll(d);
+                }
             }
 
             if (suffix.equals(ENCODER_KEY)) {
@@ -187,10 +198,29 @@ public class ReportConfigAdapter {
             } else {
                 metricConfigs.put(newKey, e.getValue());
             }
-
-
         }
 
         return metricConfigs;
+    }
+
+    private static Map<String, String> extractGlobalMetricConfig(Map<String, String> srcCfg) {
+        final String prefix = join(ConfigConst.PLUGIN, ConfigConst.OBSERVABILITY,
+            ConfigConst.PLUGIN_GLOBAL,
+            ConfigConst.PluginID.METRIC);
+        Map<String, String> global = new TreeMap<>();
+        Map<String, String> extract = extractAndConvertPrefix(srcCfg, prefix, METRIC_SENDER);
+
+        for (Map.Entry<String, String> e : extract.entrySet()) {
+            if (e.getKey().endsWith(ENCODER_KEY)) {
+                global.put(join(METRIC_V2, ENCODER_KEY), e.getValue());
+            } else if (e.getKey().endsWith(INTERVAL_KEY)) {
+                global.put(join(METRIC_ASYNC, INTERVAL_KEY), e.getValue());
+            } else if (e.getKey().endsWith(APPEND_TYPE_KEY) && e.getValue().equals("kafka")) {
+                global.put(e.getKey(), METRIC_KAFKA_SENDER_NAME);
+            } else {
+                global.put(e.getKey(), e.getValue());
+            }
+        }
+        return global;
     }
 }
