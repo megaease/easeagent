@@ -150,9 +150,9 @@ $ git submodule update --init
 $ ./spring-petclinic.sh start
 ```
 
-> The script will download the easeagent release from the Github release latest. 
+> The script will download the easeagent from the Github release latest. 
 > If you want to use your own built EaseAgent, copy it to directory: `easeagent/downloaded`
->> ```$ cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent.jar``` 
+>> ```$ cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent-latest.jar``` 
 
 It requires `Docker` to pull images from the docker server, be patient. 
 

@@ -419,6 +419,8 @@ class Interceptor{
 
 ## Configuration API
 
+[Criteria For Configuring Priorities](./criteria-for-configuring-priorities.md)
+
 Regarding configuration, we have a set of rules to follow. For detailed rules, please see: [Plugin Configuration](#plugin-configuration)
 
 When you want to get your own configuration file in the plugin, you only need to get it from the Context.

@@ -41,6 +41,7 @@
       - [MongoDB](#mongodb)
 
 ## Configuration
+
 The EaseAgent configuration information can be divided into two categories, one is the **global configuration** and the other is the **plugin configuration**.  
 Global configuration include dedicated parameters for controlling metrics and tracing collection behavior via **agent.properties**. These parameters include:
 
@@ -63,6 +64,7 @@ $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -jar user-app.jar
 ```
 
+[Criteria For Configuring Priorities](./criteria-for-configuring-priorities.md)
 
 ### Global Configuration
 #### Internal HTTP Server
