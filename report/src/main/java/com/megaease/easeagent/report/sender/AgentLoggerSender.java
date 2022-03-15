@@ -38,6 +38,7 @@ import java.util.Map;
 public class AgentLoggerSender implements Sender {
     public static final String SENDER_NAME = ReportConfigConst.CONSOLE_SENDER_NAME;
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentLoggerSender.class);
+    private String prefix;
 
     @Override
     public String name() {
@@ -47,6 +48,7 @@ public class AgentLoggerSender implements Sender {
     @Override
     public void init(Config config, String prefix) {
         // ignored
+        this.prefix = prefix;
     }
 
     @Override
