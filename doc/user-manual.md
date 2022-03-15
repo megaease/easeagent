@@ -64,8 +64,6 @@ $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -jar user-app.jar
 ```
 
-[Criteria For Configuring Priorities](./criteria-for-configuring-priorities.md)
-
 ### Global Configuration
 #### Internal HTTP Server
 EaseAgent opens port `9900` by default to receive configuration change notifications and Prometheus requests.

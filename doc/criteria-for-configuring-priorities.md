@@ -1,6 +1,6 @@
 # Criteria For Configuring Priorities
 
-In EaseAgent, there is the configuration of global variables and the configuration of specified plugins.
+In EaseAgent, there are the configuration of global variables and the configuration of specified items.
 
 When a configuration item has more than two different configurations, we need a simple priority standard to manage it.
 
@@ -49,6 +49,7 @@ plugin.observability.httpServlet.metric.topic=application-log
 
 > The configuration meaning of global includes access, and access is only one of global. At this time, we hope that the topic sent by the metric of access should prefer application-log.
 
+
 Why we should prioritize configurations with less coverage?
 
 > When we configure a wide configuration, we mean configure a default value.
@@ -57,3 +58,6 @@ Why we should prioritize configurations with less coverage?
 
 > For this reason, we have chosen this criterion.
 
+## Which configuration is global and which configuration is specific?
+
+The definition of global is distinguished by the location of the configuration in the architecture, which needs to be discussed and confirmed by the MegaEase team.
