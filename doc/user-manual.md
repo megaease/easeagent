@@ -41,7 +41,6 @@
       - [MongoDB](#mongodb)
 
 ## Configuration
-
 The EaseAgent configuration information can be divided into two categories, one is the **global configuration** and the other is the **plugin configuration**.  
 Global configuration include dedicated parameters for controlling metrics and tracing collection behavior via **agent.properties**. These parameters include:
 

@@ -32,8 +32,6 @@ plugin.observability.global.tracing.enabled=true
 * get access metric enabled -> (true && false) -> false;
 * get httpServlet tracing enabled -> global.tracing.enabled = true
 
->  When value is boolean, its meaning is a switch. We want it to be like a light switch: there's a master switch, and then there are switches that control individual bulbs
-
 ### Value isn't a boolean standard
 
 Prefer configurations with small coverage.
@@ -47,8 +45,12 @@ plugin.observability.httpServlet.metric.topic=application-log
 
 * get httpServlet metric topic ->  application-log
 
-> The configuration meaning of global includes access, and access is only one of global. At this time, we hope that the topic sent by the metric of access should prefer application-log.
 
+## FAQ
+
+Why boolean config uses logical AND ?
+
+>  When value is boolean, its meaning is a switch. We want it to be like a light switch: there's a master switch, and then there are switches that control individual bulbs
 
 Why we should prioritize configurations with less coverage?
 
@@ -58,6 +60,6 @@ Why we should prioritize configurations with less coverage?
 
 > For this reason, we have chosen this criterion.
 
-## Which configuration is global and which configuration is specific?
+Which configuration is global and which configuration is specific?
 
-The definition of global is distinguished by the location of the configuration in the architecture, which needs to be discussed and confirmed by the MegaEase team.
+> The definition of global is distinguished by the location of the configuration in the architecture, which needs to be discussed and confirmed by the MegaEase team.
