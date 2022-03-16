@@ -4,13 +4,13 @@
     - [类匹配器](#类匹配器)
     - [方法匹配器](#方法匹配器)
   - [拦截器Interceptor](#拦截器Interceptor)
-  - [配置：AgentPlugin](#配置_AgentPlugin)
+  - [配置：AgentPlugin](#配置：AgentPlugin)
   - [最简单插件](#最简单插件)
     - [Points](#Points)
     - [Interceptor](#Interceptor)
     - [AgentPlugin](#AgentPlugin)
 - [EaseAgent Tracing插件实例](#EaseAgent_Tracing插件实例)
-  - [Span & Trace](#Span_&_Trace)
+  - [Span & Trace](#Span & Trace)
   - [Conetxt](#Conetxt)
   - [HttpServletPlugin](#HttpServletPlugin)
 - [EaseAgent插件调试FAQ](#EaseAgent插件调试FAQ)
@@ -21,7 +21,10 @@
   
 
 # EaseAgent架构
+本文以下内容也可从[视频分享中](https://www.bilibili.com/video/BV1qr4y1B7f2)的37:05开始部分了解到。
+
 EaseAgent 2.0的架构如下图所示，在2.0版本的EaseAgent中，我们引入了增强插件机制，以满足不同业务架构对Agent进行扩展的需求。
+
 
 ![image](../images/EaseAgent-Architecture-v2.0.jpg)
 
@@ -320,6 +323,8 @@ https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin
 
 ### Span & Trace
 ![image](../images/trace-and-span.png)
+Note: Image From Jaeger., Retrieved March 08, 2022, from Architecture., https://www.jaegertracing.io/docs/1.31/architecture
+
 在看具体实现之前，先简要介绍Tracing中的核心概念，Trace和Span。如上图，Trace代表一次完整的业务请求过程，包含多个Span，A-E；一个Span表示完整业务过程中的一个独立业务子单元，如一次数据库请求、方法调用或一次外部请求；Trace仅为逻辑概念，通过Span中的traceId来体现，有多个具有同一traceId的Span组成有向无环图。
 
 我们通过具体的OpenZipkin格式的数据样例，更直观的了解Span概念和接口：
@@ -381,7 +386,7 @@ https://github.com/megaease/easeagent/blob/master/plugins/httpservlet/src/main/j
 ```
 
 # EaseAgent插件调试FAQ
-以上基本涵盖了插件开发的各个方面，以下是插件开发过程中常见的调试问题，以下插件调试FAQ同样可以从[分享视频中](https://www.bilibili.com/video/BV1qr4y1B7f2?spm_id_from=333.999.0.0)的1:05:25 开始的部分了解。
+以上基本涵盖了插件开发的各个方面，以下是插件开发过程中常见的调试问题，以下插件调试FAQ同样可以从[分享视频中](https://www.bilibili.com/video/BV1qr4y1B7f2)的1:05:25 开始的部分了解到。
 
 ## 环境配置
 按照开发手册进行插件开发时，需要调试插件是否正常工作，需要先配置一下调试环境，简要说明如下。
@@ -430,3 +435,8 @@ Profiler工具如Async-profiler、Arthas和VisualVm等。
 * [Github Issues](https://github.com/megaease/easeagent/issues)
 * [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for function requirement, issues, and disscusion.
 * [MegaEase on Twitter](https://twitter.com/megaease)
+
+# 参考
+1. Data model. Data Model · OpenZipkin. (n.d.). Retrieved March 08, 2022, from https://zipkin.io/pages/data_model.html 
+2. Architecture. Jaeger. (n.d.). Retrieved March 08, 2022, from https://www.jaegertracing.io/docs/1.31/architecture 
+3. Oaks, S. (2020). Java performance 2nd Edition. O'Reilly.
