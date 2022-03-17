@@ -32,9 +32,9 @@ public class LogWriter implements WriteBuffer.Writer<AccessLogInfo> {
     static final String SYSTEM_FIELD_NAME = ",\"system\":\"";
     static final String CLIENT_IP_FIELD_NAME = ",\"client_ip\":\"";
     static final String USER_FIELD_NAME = ",\"user\":\"";
-    static final String RESPONSE_SIZE_FIELD_NAME = ",\"response_size\":\"";
-    static final String REQUEST_TIME_FIELD_NAME = ",\"request_time\":\"";
-    static final String CPU_ELAPSED_TIME_FIELD_NAME = ",\"cpuElapsedTime\":\"";
+    static final String RESPONSE_SIZE_FIELD_NAME = ",\"response_size\":";
+    static final String REQUEST_TIME_FIELD_NAME = ",\"request_time\":";
+    static final String CPU_ELAPSED_TIME_FIELD_NAME = ",\"cpuElapsedTime\":";
     static final String URL_FIELD_NAME = ",\"url\":\"";
     static final String METHOD_FIELD_NAME = ",\"method\":\"";
     static final String STATUS_CODE_FIELD_NAME = ",\"status_code\":\"";
@@ -42,7 +42,7 @@ public class LogWriter implements WriteBuffer.Writer<AccessLogInfo> {
     static final String HOST_IPV4_FIELD_NAME = ",\"host_ipv4\":\"";
     static final String CATEGORY_FIELD_NAME = ",\"category\":\"";
     static final String MATCH_URL_FIELD_NAME = ",\"match_url\":\"";
-    static final String TIMESTAMP_FIELD_NAME = ",\"timestamp\":\"";
+    static final String TIMESTAMP_FIELD_NAME = ",\"timestamp\":";
     static final String HEADERS_FIELD_NAME = ",\"headers\":{";
     static final String QUERIES_FIELD_NAME = ",\"queries\":{";
 
@@ -61,13 +61,13 @@ public class LogWriter implements WriteBuffer.Writer<AccessLogInfo> {
         + STATUS_CODE_FIELD_NAME.length() + 1
         + CLIENT_IP_FIELD_NAME.length() + 1
         + USER_FIELD_NAME.length() + 1
-        + RESPONSE_SIZE_FIELD_NAME.length() + 1
-        + REQUEST_TIME_FIELD_NAME.length() + 1
-        + CPU_ELAPSED_TIME_FIELD_NAME.length() + 1
+        + RESPONSE_SIZE_FIELD_NAME.length()
+        + REQUEST_TIME_FIELD_NAME.length()
+        + CPU_ELAPSED_TIME_FIELD_NAME.length()
         + HOST_NAME_FIELD_NAME.length() + 1
         + HOST_IPV4_FIELD_NAME.length() + 1
         + MATCH_URL_FIELD_NAME.length() + 1
-        + TIMESTAMP_FIELD_NAME.length() + 1;
+        + TIMESTAMP_FIELD_NAME.length();
 
 
     @Override
@@ -176,15 +176,12 @@ public class LogWriter implements WriteBuffer.Writer<AccessLogInfo> {
 
         b.writeAscii(RESPONSE_SIZE_FIELD_NAME);
         b.writeAscii(value.getResponseSize());
-        b.writeByte('\"');
 
         b.writeAscii(REQUEST_TIME_FIELD_NAME);
         b.writeAscii(value.getRequestTime());
-        b.writeByte('\"');
 
         b.writeAscii(CPU_ELAPSED_TIME_FIELD_NAME);
         b.writeAscii(value.getCpuElapsedTime());
-        b.writeByte('\"');
 
         b.writeAscii(HOST_NAME_FIELD_NAME);
         b.writeUtf8(JsonEscaper.jsonEscape(value.getHostName()));
@@ -200,7 +197,6 @@ public class LogWriter implements WriteBuffer.Writer<AccessLogInfo> {
 
         b.writeAscii(TIMESTAMP_FIELD_NAME);
         b.writeAscii(value.getTimestamp());
-        b.writeByte('\"');
         b.writeByte(125);
     }
 
