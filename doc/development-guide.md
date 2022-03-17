@@ -36,18 +36,18 @@
 
 ![image](./images/EaseAgent-Architecture-v2.0.jpg)
 
-The core pivot of a Javaagent is the ability to enhance specific methods to implement enhanced business, such as Tracing and Metric business. Therefore, EaseAgent needs an easy to understand and use, efficient and reliable plugin framework that allows users to easily enhance specific methods to achieve business requirements.
+The core pivot of a Javaagent is the ability to enhance specific methods to implement enhanced business, such as Tracing and Metric business. Therefore, EaseAgent needs an easy-to-understand and use, efficient, and reliable plugin framework that allows users to easily enhance specific methods to achieve business requirements.
 
-To make plugin framework easy to understand and use, we have abstracted the plugin into the `three elements`, **Points**, **Interceptor**, and **AgentPlugin**.
+To make the plugin framework easy to understand and use, we have abstracted the plugin into the `three elements`, **Points**, **Interceptor**, and **AgentPlugin**.
 - **Points** is used to define where to enhance.
 - **Interceptor** is used to define what to do at enhanced *Points*.
 - **AgentPlugin** makes the plugin configurable and configuration can be updated dynamically at runtime.
 
-Efficient and reliable, the architecture design need to address two situations.
-- **Multiple plugins perform multiple enhancements to a method**. We let multiple plugin interceptors on the same method form an interceptors Chain. Then, let each method point only enhanced by a simple piece of bytecode, and allocate a unique Id (unique Index) for the enhanced method, which is used as an array index to get the corresponding Interceptors Chains.
+Efficient and reliable, the architecture design needs to address two situations.
+- **Multiple plugins perform multiple enhancements to a method**. We let multiple plugin interceptors on the same method form an interceptors Chain. Then, let each method point only be enhanced by a simple piece of bytecode, and allocate a unique Id (unique Index) for the enhanced method, which is used as an array index to get the corresponding Interceptors Chains.
 - **Plugins can be independent or collaborative**.  In an Interceptors Chain, Interceptors can be scheduled by priorities and a mechanism for exchanging data between interceptors is provided.
 
-Moreover, Interceptors are enhanced to achieve business requirements, we provide a set of API for the most common Tracing and Metric services, so that the enhancement plugin can complete the Tracing and Metric collection requirements quickly with the help of API. The Report component is responsible for formatting the data and uploading it to the back-end server. It can also be customized and extended to meet the needs of different data formats and network architectures.
+Moreover, Interceptors are enhanced to achieve business requirements, we provide a set of APIs for the most common Tracing and Metric services so that the enhancement plugin can complete the Tracing and Metric collection requirements quickly with the help of API. The Report component is responsible for formatting the data and uploading it to the backend server. It can also be customized and extended to meet the needs of different data formats and network architectures.
 
 This document describes how to develop plugins for Easeagent, and it will be divided into the following sections to introduce plugin development.
 1. Plugin structure and examples, the plugin contains three core components, which are the **Points**, **Interceptor**, and **AgentPlugin definition**.
@@ -58,17 +58,17 @@ This document describes how to develop plugins for Easeagent, and it will be div
 6. Debug FAQ
 
 ##  Plugin Structure
-All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains several plugins, eg. a "Tracking Plugin" and a "Metric Plugin".
+All plugin modules are located in the `plugins` folder under the top-level directory of the Easeagent project and a plugin module can contain several plugins, eg. a "Tracking Plugin" and a "Metric Plugin".
 ![image](./images/httpServletPlugin-module.jpg)
 
-As mentioned before, we abstract the plugin into the "three elements" corresponding to three interfaces, **Points**, **Interceptor** and **AgentPlugin**. The development of a plugin is an implementation of these three interfaces, which complete the definition of where to enhanced, what to do at the enhancement point and the configuration of the plugin respectively.
+As mentioned before, we abstract the plugin into the "three elements" corresponding to three interfaces, **Points**, **Interceptor** and **AgentPlugin**. The development of a plugin is an implementation of these three interfaces, which complete the definition of where to enhance, what to do at the enhancement point and the configuration of the plugin respectively.
 
 ### Points
-`Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
-When there is only one methodMatcher in the return set of `getMethodMather()`, the qualifier value defaults to 'default', and there is no need to explicitly assign a value.
+`Points` implementation specifies methods that will be enhanced and if a dynamic private field with access methods for that field is added to instances of matched classes.
+When there is only one `MethodMatcher` in the return set of `getMethodMather()`, the qualifier value defaults to 'default', and there is no need to explicitly assign a value.
 When there are multiple methods in a matched class that require enhancement with different interceptors, a qualifier needs to be assigned to each `MethodMatcher` as the keyword used by different interceptors to bind.
 
-To decouple from ByteBuddy, `ClassMatcher` and `MethodMatcher` are wrapped with reference to the DSL of **ByteBuddy**.
+Decoupled from **ByteBuddy**, the EaseAgent "ClassMatcher" and "MethodMatcher" were designed by learning the ByteBuddy's DSL, instead of using the ByteBuddy interface directly
 
 The DSL of `ClassMatcher` and `MethodMatcher` is described in [Matcher DSL](./matcher-DSL.md)
 ```java
@@ -113,7 +113,7 @@ public interface Points {
     Set<IMethodMatcher> getMethodMatcher();
 
     /**
-     * when return true, the transformer will add a Object field and a accessor
+     * When returning true, the transformer will add an Object field and an accessor
      * The dynamically added member can be accessed by AgentDynamicFieldAccessor:
      *
      * AgentDynamicFieldAccessor.setDynamicFieldValue(instance, value)
@@ -126,16 +126,16 @@ public interface Points {
 ```
 
 ### Interceptor
-Interceptors is the core of implementing specific enhancements.
+`Interceptor` is the core of implementing specific enhancements.
 
-`Interceptor` interface has a name method `getType` and a initialization method `init`.
-- The name will be used as `serviceId` in combination with the `domain` and `namespace` of the binding plugin to get the plugin configuration which will be automatically injected into the `Context`. The description of the plugin configuration can be found in the user manual.
-- The `init` method is invoked during transform, allowing users to initialize static resources of interceptor, and also allowing to load third party classes which can't load by runtime classloader.
+`Interceptor` interface has a name method `getType()` and a initialization method `init`.
+- The name will be used as `type` in combination with the `domain` and `namespace` of the binding plugin to get the plugin configuration which will be automatically injected into the `Context`. The description of plugin configuration will be given in [AgentPlugin](#agentplugin) session.
+- The `init` method is invoked during transform, allowing developers to initialize static resources of an interceptor, and also allowing them to load third party classes which can't load by runtime classloader.
 
 The `before` and `after` methods of the interceptor are invoked when the method being enhanced enters and returns, respectively.
 Both `before` and `after` methods have parameters `MethodInfo` and `Context`.
 - `MethodInfo` contains all method information, including class name, method name, parameters, return value and exception information.
-- `Context` contains the Interceptor configuration that is automatically injected and updated ant other interface that support `tracing`, for details, please refer to the [Tracing API](#tracing-api) section.
+- `Context` contains the Interceptor configuration that is automatically injected and updated and other interfaces that support `tracing`, for details, please refer to the [Tracing API](#tracing-api) section.
 
 ```java
 public interface Interceptor extends Ordered {
@@ -155,8 +155,8 @@ public interface Interceptor extends Ordered {
     /**
      * Interceptor can get interceptor config thought Config API :
      * EaseAgent.configFactory.getConfig
-     * Config API require 3 params: domain, nameSpace, name
-     * domain and namespace are defined by plugin, the third param, name is defined here
+     * Config API requires 3 params: domain, nameSpace, name
+     * domain and namespace are defined by the plugin, the third param, the name is defined here
      *
      * @return name, eg. tracing, metric, etc.
      */
@@ -181,7 +181,7 @@ public interface Interceptor extends Ordered {
 The `Interceptor` interface also includes the `Order` interface that defines the order of the interceptors.
 
 #### Plugin Orchestration
-When several Interceptors are injected into a single enhancement point, the order of execution of the Interceptors are determined by the Order of the Interceptor and the Order of the Plugin the interceptor belongs to.
+When several Interceptors are injected into a single enhancement point, the order of execution of the Interceptors is determined by the Order of the Interceptor and the Order of the Plugin the interceptor belongs to.
 ```
 Effective Order = Interceptor Order << 8 + Plugin Order
 ```
@@ -193,7 +193,7 @@ The `after` method will be invoked in the opposite order as the before method wa
 #### AdviceTo Annotation
 Within a plugin, there may be multiple interceptors, and multiple enhancement points, so which enhancement point is a particular interceptor used for?
 
-This can be specified through the `@AdviceTo` annotation, which is applied on the Interceptor's implementation to specify the enhancement point binding with the Interceptor.
+This can be specified through the `@AdviceTo` annotation, which is applied to the Interceptor's implementation to specify the enhancement point binding with the Interceptor.
 
 
 ```java
@@ -216,28 +216,28 @@ The `@AdviceTo` annotation associates an `Interceptor` to the enhanced `Points` 
 public class ResponseHeaderInterceptor implements Interceptor {
 }
 ```
-The `@AdviceTo` annotation also binds the Interceptor to a specific plugin via `plugin()`, which gives the `Interceptor` the ability to fetch dynamically updated configurations of the plugin. The Interceptor's plugin configuration is accessible via the Context's `getConfig()` method, the details will described in following `AgentPlugin` section.
+The `@AdviceTo` annotation also binds the Interceptor to a specific plugin via `plugin()`, which gives the `Interceptor` the ability to fetch dynamically updated configurations of the plugin. The Interceptor's plugin configuration is accessible via the Context's `getConfig()` method, the details will be described in the following `AgentPlugin` section.
 
 ### AgentPlugin: Plugin Configuration
-Plugin definition, defines what `domain` and `namespace` of this plugin by implement the `AgentPlugin` interface.
+Plugin definition defines what `domain` and `namespace` of this plugin by implementing the `AgentPlugin` interface.
 
 ```java
 public interface AgentPlugin extends Ordered {
     /**
      * define the plugin name, avoiding conflicts with others
-     * it will be use as namespace when get configuration.
+     * it will be used as a namespace when getting the configuration.
      */
     String getNamespace();
 
     /**
      * define the plugin domain,
-     * it will be use to get configuration when loaded:
+     * it will be used to get configuration when loaded:
      */
     String getDomain();
 }
 
 ```
-The `domain` and `namespace` of a plugin determine the configuration prefix for each interceptor bind to the plugin by `@AdviceTo` annotation.
+The `domain` and `namespace` of a plugin determine the configuration prefix for each interceptor bound to the plugin by `@AdviceTo` annotation.
 
 The format of the plugin configuration is defined as follows.
 ```
@@ -256,11 +256,11 @@ value           : true
 
 `[domain]` and `[namespace]` are defined by `AgentPlugin` interface implementations.
 
-The `type` is provided by `Interceptor` interface implementation's `getType()` method, and this method need return a String value like 'tracing', 'metric', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword.
+The `type` is provided by the `Interceptor` interface implementation's `getType()` method, and this method needs to return a String value like 'tracing', 'metric', and 'redirect' which are already defined by Easeagent, or any other user-defined keyword.
 
 This prefix `plugin.[domain].[namespace].[type]` is used to maintained configuration for this `Interceptor`, and in this `Interceptor` developer can get its configuration by the `getConfig()` method of the `Context` param.
 
-The `AgentPlugin` interface also includes the `Order` interface that defines the order of the plugins, which is related to plugin orchestration. Plugin orchestration will be described in [Plugin Orchestration](#plugin-orchestration) section.
+The `AgentPlugin` interface also includes the `Order` interface that defines the order of the plugins, which is related to plugin orchestration. Plugin orchestration will be described in the [Plugin Orchestration](#plugin-orchestration) section.
 
 
 ### A Simple Plugin Example
@@ -284,7 +284,7 @@ This plugin contain only three interface implementations: `AgentPlugin`, `Points
 ```
 
 #### Points of Simple Plugin
-To decouple from ByteBuddy, `ClassMatcher` and `MethodMatcher` are wrapped with reference to the DSL of **ByteBuddy**.
+
 
 ```java
 public class DoFilterPoints implements Points {
@@ -347,7 +347,7 @@ public class SimplePlugin implements AgentPlugin {
 
 #### Test
 1. Compile
-As mention above, the source code is available [here](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin).
+As mentioned above, the source code is available [here](https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin).
 
 ```
 $ git clone git@github.com:megaease/easeagent-test-demo.git
@@ -357,7 +357,7 @@ $
 ```
 
 2. Install Plugin
-This simple plugin is compiled independently of easeagent, so the compiled output plugin jar package `simple-plugin-1.0.0.jar` need to be copied to the **plugins** directory which is at the same level directory as easeagent.jar (create if not existing), to allow easeagent to detect it.
+This simple plugin is compiled independently of easeagent, so the compiled output plugin jar package `simple-plugin-1.0.0.jar` need to be copied to the **plugins** directory which are at the same level directory as easeagent.jar (create if not existing), to allow easeagent to detect it.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ mkdir $EASE_AGENT_PATH/plugins
@@ -366,7 +366,7 @@ $ cp target/simple-plugin-1.0.0.jar $EASE_AGENT_PATH/plugins
 ```
 
 3. Run
-Taking the `spring-web` module under [ease-test-demo](https://github.com/megaease/easeagent-test-demo) as test demo project, run the demo application with the EaseAgent.
+Taking the `spring-web` module under [ease-test-demo](https://github.com/megaease/easeagent-test-demo) as a test demo project, run the demo application with the EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ cd ../
@@ -402,14 +402,14 @@ Gateway Called in employee Service%
 
 ```
 
-In addition to the `easeagent-srv-name` response header, we also see another response header `easeagent-duration` indicating the response time of the request, which is achieved by adding another enhancement points `ResponseProcessPoints` and `ResponseDurationInterceptor`. if interested, please visit source code for details.
+In addition to the `easeagent-srv-name` response header, we also see another response header `easeagent-duration` indicating the response time of the request, which is achieved by adding another enhancement point `ResponseProcessPoints` and `ResponseDurationInterceptor`. if interested, please visit the source code for details.
 ```
 https://github.com/megaease/easeagent-test-demo/tree/master/simple-plugin
 ```
 
 When the plugin is integrated into the `plugins` subdirectory in the easeagent project source tree, it will be compiled into the easeagent-dep.jar package.
 
-In this simple plugin project, the `com.megaease.easeagent:plugin-api` dependency is wrapped in local maven repository which local in `simple-plugin/lib` directory, user can also download Easeagent source tree then install `plugin-api` module.
+In this simple plugin project, the `com.megaease.easeagent:plugin-api` dependency is wrapped in the local maven repository which locates in the `simple-plugin/lib` directory, user can also download the Easeagent source tree then install the `plugin-api` module.
 
 ```
 $ git clone https://github.com/megaease/easeagent.git
@@ -420,7 +420,7 @@ $ mvn clean install
 ## EaseAgent Tracing Plugin of Reality Sample
 We have described the EaseAgent architecture, plugin concepts and design details above, and now we are familiar with three core elements of a plugin through the minimalist Simple plugin example. 
 
-However, in order to develop a practical business plugin, it is necessary to have an understanding of the business API. Next, we outline how to use the Tracing API to complete a Tracing plugin development in combination with the actual Tracing plugin HttpServletPlugin.
+However, to develop a practical business plugin, it is necessary to have an understanding of the business API. Next, we outline how to use the Tracing API to complete a Tracing plugin development in combination with the actual Tracing plugin HttpServletPlugin.
 
 ### Span and Trace
 ![image](./images/trace-and-span.png)
@@ -428,13 +428,13 @@ Note: Image From Jaeger., Retrieved March 08, 2022, from Architecture., https://
 
 Before we look at the concrete implementation, let's briefly introduce the core concepts in Tracing, Trace and Span.
 
-As shown above, a Trace represents a complete transaction, containing multiple Spans, A-E; a Span represents an independent service sub-unit of a complete transaction, such as a database request, a method call or an external request; Trace is a logical concept only, and is represented by the traceId in the Span, and there are multiple Spans with the same traceId forming a directed acyclic graph.
+As shown above, a Trace represents a complete transaction, containing multiple Spans, A-E; a Span represents an independent service sub-unit of a complete transaction, such as a database request, a method call or an external request; Trace is a logical concept only and is represented by the `traceId` in the Span, and there are multiple Spans with the same `traceId` forming a directed acyclic graph.
 
 A more concrete illustration of the Span concept and interface comes from a concrete sample of data in OpenZipkin format.
 ![image](./images/zipkin-span.jpg)
 In the above data, `id` is the unique id of the current `Span`; `traceId` represents the unique id of the `trace` of the current transaction request, often directly using the id of the first Span, like Span-A's id in the above figure; `parentId` represents the id of the parent Span, like B's `parentId` in the above figure is the `id` of Span-A; for more specific details can be found in Openzipkin's documentation.
 
-It is clear that the key point in the development of the Tracing plugin is the generation and reporting of Span. So what interface does EaseAgent use to provide the generation and reporting of Spans?
+The key point in the development of the Tracing plugin is the generation and reporting of Span. So what interface does EaseAgent use to provide the generation and reporting of Spans?
 
 
 ### Context Overview
@@ -460,7 +460,7 @@ public void doBefore(MethodInfo methodInfo, Context context) {
 }
 ```
 
-As you can see from the above code snippet, the `context.serverReceive()` method is called in `before` to create and initialize the Span, and the `HttpUtils::handleReceive()` method is used to make Http request-related injections to the fields in the Span.
+As you can see from the above code snippet, the `context.serverReceive()` method is called in `before` to create and initialize the Span, and the `HttpUtils::handleReceive()` method is used to make HTTP request-related injections to the fields in the Span.
 
 ```java
 @Override
@@ -508,7 +508,7 @@ If you need to print logs in the plugin to the EaseAgent log output, you can use
 Regarding configuration, we have a set of rules to follow. For detailed rules, please see: [Plugin Configuration](#plugin-configuration)
 
 When you want to get your own configuration file in the plugin, you only need to get it from the Context.
-The framework itself will automatically maintain configuration's changes and modifications.
+The framework itself will automatically maintain configuration changes and modifications.
 
 ```java
 class InterceptorImpl  implements Interceptor {
@@ -589,11 +589,11 @@ public class ServiceNameInterceptor implements Interceptor {
 * [Plugin Unit Test](plugin-unit-test.md)
 
 ## EaseAgent Plugin Debug FAQ
-The above basically covers all aspects of plugin development, the following are common debugging issues during plugin development.
+The above covers all aspects of plugin development, the following are common debugging issues during plugin development.
 
 ### Development Environment Configuration
 Debugging environment configuration, briefly described below:
-- Download the EaseAgent source code to the local host and add it to the workspace of the IDE, build and the output located in the source code directory build/target/easeagent-dep.jar, and then create the directory `build/target/plugins`；
+- Download the EaseAgent source code to the localhost and add it to the workspace of the IDE, build and the output located in the source code directory build/target/easeagent-dep.jar, and then create the directory `build/target/plugins`；
 - Add the plugin project (e.g. simple-plugin) to the same workspace and copy the compiled and packaged JAR file to the `build/target/plugins` directory created in the previous step so that the plugin can be loaded.
 - Add the source code of the application (e.g. spring-gateway/employee) to the workspace and configure the JVM options in the Debug menu to start the application with easeagent-dep.jar for debugging later.
   eg.:
@@ -608,18 +608,18 @@ Debugging environment configuration, briefly described below:
   ```
   -Dnet.bytebuddy.dump=/path-to-dump/
   ```
-  The class files of all the enhanced classes will be printed to this directory. Decompile the class files (IDEA can pull them in and open them directly) to see if the corresponding method has the enhanced bytecode to call the EaseAgent method.
+  The class files of all the enhanced classes will be printed in this directory. Decompile the class files (IDEA can pull them in and open them directly) to see if the corresponding method has the enhanced bytecode to call the EaseAgent method.
 
 - If the check confirms that the target method is not enhanced, how do I debug it?
 ![image](./images/enhancement-debug.png)
   There are three key checkpoints: ClassMatchers, MethodMatchers and all other issues.
-  1. All classes that are matched will run into the ForAdviceTransformer::transform(...) method, where conditional breakpoints can be added, then checking ClassMatchers if the breakpoint is not interrupted..
-  2. All methods matched will run into the AdviceRegistry::check(...) method, where conditional breakpoints can be added, then checking MethodMatchers if the breakpoint is not interrupted..
-  3. Set a breakpoint by going back through the breakpoint stack in step 1 and find the the ByteBuddy source code where throw exception when enhance fail, check the cause of the exception.
+  1. All classes that are matched will run into the ForAdviceTransformer::transform(...) method, where conditional breakpoints can be added, then checking ClassMatchers if the breakpoint is not interrupted.
+  2. All methods matched will run into the AdviceRegistry::check(...) method, where conditional breakpoints can be added, then checking MethodMatchers if the breakpoint is not interrupted.
+  3. Set a breakpoint by going back through the breakpoint stack in step 1 and navigating to the **ByteBuddy** source code where throw exception when enhance fail, check the cause of the exception.
 
-  All enhancement failures can be resolved by analyzing at the three breakpoints above.
+  All enhancement failures can be resolved by analyzing the three breakpoints above.
 ### Interceptor Debug
-- Why the Interceptor is not called when the class method has definitely been enhanced?
+- Why the Interceptor is not called when the class method has been enhanced?
   All enhanced methods run into the following two methods.
   ```java
   com.megaease.easeagent.core.plugin.Dispatcher::enter
@@ -647,3 +647,5 @@ Finally, have fun using and extending EaseAgent, and feel free to raise Issues o
 2. Data model. Data Model · OpenZipkin. (n.d.). Retrieved March 08, 2022, from https://zipkin.io/pages/data_model.html 
 3. Architecture. Jaeger. (n.d.). Retrieved March 08, 2022, from https://www.jaegertracing.io/docs/1.31/architecture 
 4. Oaks, S. (2020). Java performance 2nd Edition. O'Reilly.
+
+
