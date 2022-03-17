@@ -61,6 +61,8 @@ This document describes how to develop plugins for Easeagent, and it will be div
 All plugin-modules are locate in the `plugins` folder under the top-level directory of Easeagent project and a plugin-module can contains several plugins, eg. a "Tracking Plugin" and a "Metric Plugin".
 ![image](./images/httpServletPlugin-module.jpg)
 
+As mentioned before, we abstract the plugin into the "three elements" corresponding to three interfaces, **Points**, **Interceptor** and **AgentPlugin**. The development of a plugin is an implementation of these three interfaces, which complete the definition of where to enhanced, what to do at the enhancement point and the configuration of the plugin respectively.
+
 ### Points
 `Points` implementation defines methods to be enhanced and if a dynamic private member with access methods for that member are added to the instance of matched classes.
 When there is only one methodMatcher in the return set of `getMethodMather()`, the qualifier value defaults to 'default', and there is no need to explicitly assign a value.
