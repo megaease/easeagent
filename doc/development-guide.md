@@ -589,7 +589,7 @@ public class ServiceNameInterceptor implements Interceptor {
 * [Plugin Unit Test](plugin-unit-test.md)
 
 ## EaseAgent Plugin Debug FAQ
-The above basically covers all aspects of plugin development, the following are common debugging issues during plugin development, the following plugin debugging FAQ can also be found in the section starting at 1:05:57 in the [video](https://www.youtube.com/watch?v=u6Aoa2roGuA).
+The above basically covers all aspects of plugin development, the following are common debugging issues during plugin development.
 
 ### Development Environment Configuration
 Debugging environment configuration, briefly described below:
@@ -611,6 +611,7 @@ Debugging environment configuration, briefly described below:
   The class files of all the enhanced classes will be printed to this directory. Decompile the class files (IDEA can pull them in and open them directly) to see if the corresponding method has the enhanced bytecode to call the EaseAgent method.
 
 - If the check confirms that the target method is not enhanced, how do I debug it?
+![image](./images/enhancement-debug.png)
   There are three key checkpoints: ClassMatchers, MethodMatchers and all other issues.
   1. All classes that are matched will run into the ForAdviceTransformer::transform(...) method, where conditional breakpoints can be added, then checking ClassMatchers if the breakpoint is not interrupted..
   2. All methods matched will run into the AdviceRegistry::check(...) method, where conditional breakpoints can be added, then checking MethodMatchers if the breakpoint is not interrupted..
@@ -642,6 +643,7 @@ Finally, have fun using and extending EaseAgent, and feel free to raise Issues o
 * [MegaEase on Twitter](https://twitter.com/megaease)
 
 # References
-1. Data model. Data Model · OpenZipkin. (n.d.). Retrieved March 08, 2022, from https://zipkin.io/pages/data_model.html 
-2. Architecture. Jaeger. (n.d.). Retrieved March 08, 2022, from https://www.jaegertracing.io/docs/1.31/architecture 
-3. Oaks, S. (2020). Java performance 2nd Edition. O'Reilly.
+1. Chen, H., Zhao, K., & Zhou, J. (2022). EaseAgent 2.0 Architecture Design and Code Implementation. megaease.com. Retrieved March 9, 2022, from https://www.youtube.com/watch?v=u6Aoa2roGuA 
+2. Data model. Data Model · OpenZipkin. (n.d.). Retrieved March 08, 2022, from https://zipkin.io/pages/data_model.html 
+3. Architecture. Jaeger. (n.d.). Retrieved March 08, 2022, from https://www.jaegertracing.io/docs/1.31/architecture 
+4. Oaks, S. (2020). Java performance 2nd Edition. O'Reilly.
