@@ -1,5 +1,6 @@
 # EaseAgent
-An agent component for Java system.
+
+A lightweight & opening Java Agent for Cloud-Native and APM system
 
 - [EaseAgent](#easeagent)
   - [Overview](#overview)
@@ -10,41 +11,45 @@ An agent component for Java system.
       - [Description](#description)
   - [QuickStart](#quickstart)
     - [Get And Set Environment Variable](#get-and-set-environment-variable)
+      - [Setup Environment Variable](#setup-environment-variable)
       - [Download](#download)
-      - [Build From Source](#build-from-source)
+      - [Build From the Source](#build-from-the-source)
       - [Get Configuration file](#get-configuration-file)
     - [Monitor Spring Petclinic](#monitor-spring-petclinic)
+      - [Prerequisites](#prerequisites)
+      - [Initialize and Start the project](#initialize-and-start-the-project)
       - [Metric](#metric)
       - [Tracing](#tracing)
-      - [Build Own Spring Petclinic](#build-own-spring-petclinic)
-    - [Add Plugin Demo](#add-plugin-demo)
+      - [Build Spring Petclinic](#build-spring-petclinic)
+    - [Add a Enhancement Plugin](#add-a-enhancement-plugin)
   - [User Manual](#user-manual)
-  - [Enhance Plugin Development Guide](#enhance-plugin-development-guide)
+  - [Enhancement Plugin Development Guide](#enhancement-plugin-development-guide)
   - [Report Plugin Development Guide](#report-plugin-development-guide)
   - [Community](#community)
   - [Licenses](#licenses)
 
 ## Overview
-- Easeagent is the underlying component that provides non-intrusive extensions to applications of the Java ecosystem.
-- Non-intrusive application extensions currently include data collection, such as tracing, metric and log collection in the APM application domain; it also includes control-panel extensions, such as redirection plugins, to provide the ability of dynamically modify configuration of the connecting back-end for supporting special scenarios, such as online stress testing in the production environment.
-- In addition, users can extend Easeagent in the form of plugins to support the non-intrusive needs of user-specific scenarios.
+- EaseAgent is the underlying component that provides non-intrusive extensions to applications of the Java ecosystem. 
+- EaseAGent can collect distributed application tracing, metrics, and logs, which could be used in the APM system and improve the observability of a distributed system. for the tracing, EaseAgent follows the [Google Dapper](https://research.google/pubs/pub36356/) paper.
+- EaseAgent also can work with Cloud-Native architecture. For example, it can help Service Mesh (especially for [EaseMesh](https://github.com/megaease/easemesh/) ) to do some control panel work.
+- EaseAgent supports plugins mechanism development, which is easy to extend or add new functionality.
 
 ### Purpose
 - EaseAgent can be a Java agent for APM(Application Performance Management) system.
 - EaseAgent collects the basic metrics and the service tracing logs, which is very helpful for performance analysis and troubleshooting.
 - EaseAgent is compatible with mainstream monitoring ecosystems, such as Kafka, ElasticSearch, Prometheus, Zipkin, etc.
 - EaseAgent majorly focuses on the Spring Boot development environments, but users can support any Java ecosystem applications through plugins.
-- Easeagent can support scenario-specific business requirements through the plugin mechanism, such as traffic redirection, traffic coloring, etc.
+- EaseAgent can support scenario-specific business requirements through the plugin mechanism, such as traffic redirection, traffic coloring, etc.
 
 ### Principles
 - Safe to Java application/service.
 - Instrumenting a Java application in a non-intrusive way.
 - Lightweight and very low CPU, memory, and I/O resource usage.
-- Highly extensible, users can easily do extension through a simple and clear plugin interface.
+- Highly extensible, users can easily do extensions through a simple and clear plugin interface.
 - Design for Micro-Service architecture, collecting the data from a service perspective.
 
 ## Features
-* Easy to use. It is right out of the box for Metirc, Tracing and Logging collecting.
+* Easy to use. It is right out of the box for Metrics, Tracing and Logs collecting.
     * Collecting Metric & Tracing Logs.
         * `JDBC 4.0`
         * `HTTP Servlet`、`HTTP Filter`
@@ -72,7 +77,7 @@ An agent component for Java system.
     * Extremely cleanly packaged `Tracing` and `Metric` API, with a small amount of code to achieve business support.
 
 * Standardization
-    * The tracing data format is fully compatible with the zipkin data format.
+    * The tracing data format is fully compatible with the Zipkin data for
     * Metric data format fully supports integration with Prometheus.
 
 
@@ -82,7 +87,7 @@ An agent component for Java system.
 #### Description
 **Plugin Framework** in `core` module is base on [Byte buddy](https://github.com/raphw/byte-buddy) technology.
 
-1. Easeagent's plugin defines where (which classes and methods) to make enhancements by Points implementation and what to do at the point of enhancement by the implementations of Interceptor.
+1. Easeagent's plugin defines where (which classes and methods) to make enhancements by implementing the `Points`  and what to do at the point of enhancement by implementing the `Interceptor`.
 2. When the program invokes the enhanced method of class defined by Points, the `unique index`(uid) owned by the method will be used as a parameter to call the common interface of `Agent Common Method Advice`, which finds the `Agent Interceptor Chain` by the `Unique Index` and calls the `before` method of each Interceptor in the chain in order of priority.
 3. Normally, both the `Metric Interceptor` and the `Tracing Interceptor` are in the agent interceptor chain and are called sequentially.
 4. According to call the `Metric API` and `Tracing API` in interceptors, the `Metric` and `Tracing` information will be stored in `MetricRegistry` and `Tracing`.
@@ -94,7 +99,7 @@ An agent component for Java system.
 
 ### Get And Set Environment Variable
 
-Setup Environment Variable and then download the latest release easeagent.jar or build easeagent from the source.
+Setup Environment Variable and then download the latest release of `easeagent.jar` or build it from the source.
 
 #### Setup Environment Variable
 ```
@@ -122,7 +127,7 @@ $ cp ./build/target/easeagent-dep.jar $EASE_AGENT_PATH/easeagent.jar
 ```
 The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencies.
 
-> Windows platform user please make sure git `core.autocrlf` is set to false before git clone.
+> For the Windows platform, please make sure git `core.autocrlf` is set to false before git clone.
 > You can use `git config --global core.autocrlf false` to modify `core.autocrlf`.
 
 #### Get Configuration file
@@ -150,11 +155,11 @@ $ git submodule update --init
 $ ./spring-petclinic.sh start
 ```
 
-> The script will download the easeagent from the Github release latest. 
-> If you want to use your own built EaseAgent, copy it to directory: `easeagent/downloaded`
+> The script will download the latest release of EaseAgent. 
+> If you want to use your own built EaseAgent, copy it to the directory: `easeagent/downloaded`
 >> ```$ cp $EASE_AGENT_PATH/easeagent.jar  easeagent/downloaded/easeagent-latest.jar``` 
 
-It requires `Docker` to pull images from the docker server, be patient. 
+It requires `Docker` to pull images from the docker hub, be patient. 
 
 Open Browser to visit grafana UI: [http://localhost:3000](http://localhost:3000).
 
@@ -167,7 +172,7 @@ Prometheus Metric Schedule: [Prometheus Metric](./prometheus-metric-schedule.md)
 
 #### Tracing
 
-If you want to check the tracing data, you could click the explore in the left menu bar. Click the Search - beta to switch search mode. Click search query button in the right up corner, there is a list containing many tracing. Chose one to click.
+If you want to check the tracing-data, you could click the explore in the left menu bar. Click the Search - beta to switch search mode. Click search query button in the right up corner, there is a list containing many tracing. Choose one to click.
 
 ![tracing](doc/images/grafana-tracing.png)
 
@@ -185,7 +190,7 @@ For more information, please refer to the [User Manual](./doc/user-manual.md).
 Refer to [Plugin Development Guide](./doc/development-guide.md).
 
 ## Report Plugin Development Guide
-Report plugin enables user report tracing/metric data to different kinds of backend in a different format.
+Report plugin enables user report tracing/metric data to different kinds of the backend in a different format.
 
 Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
 
@@ -195,7 +200,7 @@ Refer to [Report Plugin Development Guide](./doc/report-development-guide.md)
 * [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue and development.
 * [MegaEase on Twitter](https://twitter.com/megaease)
 
-If you have any questions, welcome to discuss in our community. welcome to join!
+If you have any questions, welcome to discuss them in our community. Welcome to join!
 
 
 ## Licenses
