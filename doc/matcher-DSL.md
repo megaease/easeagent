@@ -16,7 +16,9 @@ The design of this DSL is borrowed from ByteBuddy's class and method matching DS
 ## ClassMatcher
 
 ### Definition
+
 As defined by the JVM Specification for the class structure and the status of the annotations commonly used in Java, the optional elements used for class matching contain:
+
 - Class name.
 - Implementing Interface name.
 - Super class name.
