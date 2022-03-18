@@ -18,6 +18,7 @@
 package com.megaease.easeagent.config;
 
 
+import com.megaease.easeagent.config.yaml.YamlReader;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -27,13 +28,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import static com.megaease.easeagent.config.ValidateUtils.*;
+import static com.megaease.easeagent.config.ValidateUtils.Bool;
+import static com.megaease.easeagent.config.ValidateUtils.HasText;
+import static com.megaease.easeagent.config.ValidateUtils.NumberInt;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
-    private static final String CONFIG_FILE = "agent.properties";
+    private static final String CONFIG_FILE = "agent.yaml";
 
     private static final String AGENT_SERVICE_NAME = "easeagent.name";
     private static final String AGENT_SYSTEM_NAME = "easeagent.system";
@@ -74,10 +82,10 @@ public class ConfigFactory {
         try {
             InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE);
             if (inputStream != null) {
-                final HashMap<String, String> propsMap = extractPropsMap(inputStream);
+                final Map<String, String> propsMap = new YamlReader().load(inputStream).compress();
                 return new GlobalConfigs(propsMap);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.warn("Load config file:{} by classloader:{} failure: {}", CONFIG_FILE, classLoader.toString(), e);
         }
         return new GlobalConfigs(Collections.emptyMap());
@@ -86,7 +94,7 @@ public class ConfigFactory {
     public static Configs loadFromFile(File file) {
         try {
             try (FileInputStream in = new FileInputStream(file)) {
-                HashMap<String, String> map = extractPropsMap(in);
+                Map<String, String> map = new YamlReader().load(in).compress();
                 return new GlobalConfigs(map);
             }
         } catch (IOException e) {
