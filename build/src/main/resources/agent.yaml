@@ -107,7 +107,7 @@ plugin:
 #      tracing:
 #        enabled: true
     # -------------------- request ---------------------
-    ## httpclient tracing, httpclient and httpclient5
+    ## httpclient tracing: httpclient and httpclient5
 #    httpclient:
 #      tracing:
 #        enabled: true

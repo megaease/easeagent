@@ -79,8 +79,7 @@ public class ConfigFactory {
     }
 
     public static GlobalConfigs loadFromClasspath(ClassLoader classLoader) {
-        try {
-            InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE);
+        try (InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE)) {
             if (inputStream != null) {
                 final Map<String, String> propsMap = new YamlReader().load(inputStream).compress();
                 return new GlobalConfigs(propsMap);
@@ -92,11 +91,14 @@ public class ConfigFactory {
     }
 
     public static Configs loadFromFile(File file) {
-        try {
-            try (FileInputStream in = new FileInputStream(file)) {
-                Map<String, String> map = new YamlReader().load(in).compress();
-                return new GlobalConfigs(map);
+        try (FileInputStream in = new FileInputStream(file)) {
+            Map<String, String> map;
+            if (file.getName().contains(".properties")) {
+                map = extractPropsMap(in);
+            } else {
+                map = new YamlReader().load(in).compress();
             }
+            return new GlobalConfigs(map);
         } catch (IOException e) {
             LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
         }
