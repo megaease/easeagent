@@ -39,7 +39,7 @@ public class ElasticsearchCtxUtils {
         HttpEntity entity = request.getEntity();
         Span span = context.nextSpan();
         span.kind(Span.Kind.CLIENT);
-        span.remoteServiceName("Elasticsearch");
+        span.remoteServiceName("elasticsearch");
         span.tag("es.index", getIndex(request.getEndpoint()));
         span.tag("es.operation", request.getMethod() + " " + request.getEndpoint());
         if (entity != null) {
