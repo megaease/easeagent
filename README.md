@@ -77,7 +77,7 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
     * Extremely cleanly packaged `Tracing` and `Metric` API, with a small amount of code to achieve business support.
 
 * Standardization
-    * The tracing data format is fully compatible with the Zipkin data for
+    * The tracing data format is fully compatible with the Zipkin data format.
     * Metric data format fully supports integration with Prometheus.
 
 
