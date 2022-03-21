@@ -42,7 +42,7 @@ import zipkin2.reporter.brave.ConvertZipkinSpanHandler;
 public class TracingProviderImpl implements BeanProvider, AgentReportAware, ConfigAware, AgentInitializingBean, TracingProvider {
     private static final String ENV_ZIPKIN_SERVER_URL = "ZIPKIN_SERVER_URL";
     private Tracing tracing;
-    private ITracing iTracing;
+    private volatile ITracing iTracing;
     private AgentReport agentReport;
     private Config config;
     private AutoRefreshConfigItem<String> serviceName;

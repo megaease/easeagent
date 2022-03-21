@@ -37,7 +37,7 @@ import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 @AdviceTo(value = JdbcStatementAdvice.class, plugin = JdbcDataSourceMetricPlugin.class)
 public class JdbcStmMetricInterceptor implements NonReentrantInterceptor {
     private static final int maxCacheSize = 1000;
-    private static JdbcMetric metric;
+    private static volatile JdbcMetric metric;
     private static SQLCompression sqlCompression;
     private static Cache<String, String> cache;
 

@@ -39,7 +39,7 @@ import java.util.Map;
 @AutoService(Sender.class)
 public class MetricKafkaSender implements Sender {
     public static final String SENDER_NAME = ReportConfigConst.METRIC_KAFKA_SENDER_NAME;
-    private static AppenderManager appenderManager;
+    private static volatile AppenderManager appenderManager;
 
     private OutputProperties outputProperties;
     private MetricProps props;

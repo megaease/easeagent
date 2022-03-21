@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.report.encoder.span.GlobalExtrasSupplier;
 
 public class GlobalExtractor implements GlobalExtrasSupplier {
-    static GlobalExtractor instance;
+    static volatile GlobalExtractor instance;
     final AutoRefreshConfigItem<String> serviceName;
     final AutoRefreshConfigItem<String> systemName;
 
