@@ -27,7 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MockConfig {
-    private static final String MOCK_CONFIG_FILE = "mock_agent.yaml";
+    private static final String MOCK_CONFIG_YAML_FILE = "mock_agent.yaml";
+    private static final String MOCK_CONFIG_PROP_FILE = "mock_agent.properties";
     private static final Configs CONFIGS;
     private static final PluginConfigManager PLUGIN_CONFIG_MANAGER;
 
@@ -43,7 +44,10 @@ public class MockConfig {
         initConfigs.put("plugin.observability.global.metric.enabled", "true");
         CONFIGS = new Configs(initConfigs);
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        URL url = classLoader.getResource(MOCK_CONFIG_FILE);
+        URL url = classLoader.getResource(MOCK_CONFIG_YAML_FILE);
+        if (url == null) {
+             url = classLoader.getResource(MOCK_CONFIG_PROP_FILE);
+        }
         if (url != null) {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(url.getFile()));
             CONFIGS.updateConfigsNotNotify(configsFromOuterFile.getConfigs());

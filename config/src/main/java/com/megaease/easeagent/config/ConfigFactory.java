@@ -41,7 +41,7 @@ import static com.megaease.easeagent.config.ValidateUtils.NumberInt;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
-    private static final String CONFIG_FILE = "agent.yaml";
+    private static final String CONFIG_FILE = "agent.properties";
 
     private static final String AGENT_SERVICE_NAME = "easeagent.name";
     private static final String AGENT_SYSTEM_NAME = "easeagent.system";
@@ -79,12 +79,12 @@ public class ConfigFactory {
     }
 
     public static GlobalConfigs loadFromClasspath(ClassLoader classLoader) {
-        try (InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE)) {
-            if (inputStream != null) {
-                final Map<String, String> propsMap = new YamlReader().load(inputStream).compress();
+        try (InputStream in = classLoader.getResourceAsStream(CONFIG_FILE)) {
+            if (in != null) {
+                final Map<String, String> propsMap = extractPropsMap(in);
                 return new GlobalConfigs(propsMap);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOGGER.warn("Load config file:{} by classloader:{} failure: {}", CONFIG_FILE, classLoader.toString(), e);
         }
         return new GlobalConfigs(Collections.emptyMap());
