@@ -109,7 +109,7 @@ public class YamlReader {
             if (v instanceof List) {
                 String value = ((List<Object>) v).stream()
                     .map(String::valueOf)
-                    .collect(Collectors.joining("."));
+                    .collect(Collectors.joining(","));
 
                 resultMap.put(String.join(".", keyStack), value);
                 keyStack.removeLast();
