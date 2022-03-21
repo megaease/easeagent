@@ -1,9 +1,10 @@
 name: demo-service
 system: demo-system
 
-list:
-    - "a"
-    - "b"
+user:
+    list:
+        - "a"
+        - "b"
 
 ### http server
 easeagent:
