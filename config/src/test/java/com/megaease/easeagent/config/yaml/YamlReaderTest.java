@@ -42,14 +42,12 @@ public class YamlReaderTest {
 
         yamlMap.forEach((k, v) -> {
             Assert.assertTrue(yamlProperties.containsKey(k));
-            String value = yamlProperties.get(k);
-            Assert.assertEquals(v, value);
+            Assert.assertEquals(v, yamlProperties.get(k));
         });
 
         yamlProperties.forEach((k, v) -> {
             Assert.assertTrue(yamlMap.containsKey(k));
-            String value = yamlMap.get(k);
-            Assert.assertEquals(v, value);
+            Assert.assertEquals(v, yamlMap.get(k));
         });
     }
 
