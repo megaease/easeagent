@@ -92,10 +92,10 @@ public class ConfigFactory {
 
     public static Configs loadFromFile(File file) {
         try (FileInputStream in = new FileInputStream(file)) {
-            Map<String, String> map;
-            if (file.getName().contains(".properties")) {
+            Map<String, String> map = Collections.emptyMap();
+            if (file.getName().endsWith(".properties")) {
                 map = extractPropsMap(in);
-            } else {
+            } else if (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml")) {
                 map = new YamlReader().load(in).compress();
             }
             return new GlobalConfigs(map);
