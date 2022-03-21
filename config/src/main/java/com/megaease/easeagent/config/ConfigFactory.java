@@ -41,7 +41,7 @@ import static com.megaease.easeagent.config.ValidateUtils.NumberInt;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
-    private static final String CONFIG_FILE = "agent.yaml";
+    private static final String CONFIG_FILE = "agent.properties";
 
     private static final String AGENT_SERVICE_NAME = "easeagent.name";
     private static final String AGENT_SYSTEM_NAME = "easeagent.system";
