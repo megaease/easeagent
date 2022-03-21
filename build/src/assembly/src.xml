@@ -13,6 +13,7 @@
             <includes>
                 <include>git.properties</include>
                 <include>agent.yaml</include>
+                <include>agent.properties</include>
                 <include>user-minimal-cfg.properties</include>
                 <include>easeagent-log4j2.xml</include>
             </includes>
