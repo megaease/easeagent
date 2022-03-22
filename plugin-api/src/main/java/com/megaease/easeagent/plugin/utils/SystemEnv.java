@@ -42,4 +42,8 @@ public class SystemEnv {
             return value;
         }
     }
+
+    public static void set(String name, String value) {
+        ENVIRONMENTS.put(name, value);
+    }
 }

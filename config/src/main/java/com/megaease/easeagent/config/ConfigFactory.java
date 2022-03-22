@@ -17,37 +17,32 @@
 
 package com.megaease.easeagent.config;
 
-
 import com.megaease.easeagent.config.yaml.YamlReader;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.utils.SystemEnv;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
+import org.yaml.snakeyaml.parser.ParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import static com.megaease.easeagent.config.ValidateUtils.Bool;
-import static com.megaease.easeagent.config.ValidateUtils.HasText;
-import static com.megaease.easeagent.config.ValidateUtils.NumberInt;
+import java.util.*;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
-    private static final String CONFIG_FILE = "agent.properties";
+    private static final String CONFIG_PROP_FILE = "agent.properties";
+    private static final String CONFIG_YAML_FILE = "agent.yaml";
 
     private static final String AGENT_SERVICE_NAME = "easeagent.name";
     private static final String AGENT_SYSTEM_NAME = "easeagent.system";
 
     private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
     private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
+
+    public static final String EASEAGENT_ENV_CONFIG = "EASEAGENT_ENV_CONFIG";
 
     private static final List<String> subEnvKeys = new LinkedList<>();
     private static final List<String> envKeys = new LinkedList<>();
@@ -72,31 +67,65 @@ public class ConfigFactory {
                 fileCfgMap.put(key, value);
             }
         }
+
+        String configEnv = SystemEnv.get(EASEAGENT_ENV_CONFIG);
+        if (StringUtils.isNotEmpty(configEnv)) {
+            Map<String, Object> map = JsonUtil.toMap(configEnv);
+            Map<String, String> strMap = new HashMap<>();
+            if (!map.isEmpty()) {
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    strMap.put(entry.getKey(), entry.getValue().toString());
+                }
+            }
+            fileCfgMap.putAll(strMap);
+        }
+
         return fileCfgMap;
     }
 
     private ConfigFactory() {
     }
 
-    public static GlobalConfigs loadFromClasspath(ClassLoader classLoader) {
-        try (InputStream in = classLoader.getResourceAsStream(CONFIG_FILE)) {
+    private static boolean checkYaml(String filename) {
+        return filename.endsWith(".yaml") || filename.endsWith(".yml");
+    }
+
+    private static GlobalConfigs loadFromClasspath(ClassLoader classLoader, String file) {
+        try (InputStream in = classLoader.getResourceAsStream(file)) {
             if (in != null) {
-                final Map<String, String> propsMap = extractPropsMap(in);
-                return new GlobalConfigs(propsMap);
+                Map<String, String> map;
+                if (checkYaml(file)) {
+                    try {
+                        map = new YamlReader().load(in).compress();
+                    } catch (ParserException e) {
+                        LOGGER.warn("Wrong Yaml format, load config file failure: {}", file);
+                        map = Collections.emptyMap();
+                    }
+                } else {
+                    map = extractPropsMap(in);
+                }
+                return new GlobalConfigs(map);
             }
         } catch (IOException e) {
-            LOGGER.warn("Load config file:{} by classloader:{} failure: {}", CONFIG_FILE, classLoader.toString(), e);
+            LOGGER.warn("Load config file:{} by classloader:{} failure: {}", file, classLoader.toString(), e);
         }
+
         return new GlobalConfigs(Collections.emptyMap());
     }
 
-    public static Configs loadFromFile(File file) {
+    public static GlobalConfigs loadFromFile(File file) {
         try (FileInputStream in = new FileInputStream(file)) {
-            Map<String, String> map = Collections.emptyMap();
-            if (file.getName().endsWith(".properties")) {
+            Map<String, String> map;
+            if (checkYaml(file.getName())) {
+                try {
+                    map = new YamlReader().load(in).compress();
+                } catch (ParserException e) {
+                    LOGGER.warn("Wrong YAML format, load config file failure: {}", file.getAbsolutePath());
+                    map = Collections.emptyMap();
+                }
+            } else {
+                // props file
                 map = extractPropsMap(in);
-            } else if (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml")) {
-                map = new YamlReader().load(in).compress();
             }
             return new GlobalConfigs(map);
         } catch (IOException e) {
@@ -106,12 +135,19 @@ public class ConfigFactory {
     }
 
     public static GlobalConfigs loadConfigs(String pathname, ClassLoader loader) {
-        GlobalConfigs configs = ConfigFactory.loadFromClasspath(loader);
+        // load property configuration file if exist
+        GlobalConfigs configs = ConfigFactory.loadFromClasspath(loader, CONFIG_PROP_FILE);
+
+        // load yaml configuration file if exist
+        GlobalConfigs yConfigs = ConfigFactory.loadFromClasspath(loader, CONFIG_YAML_FILE);
+        configs.updateConfigsNotNotify(yConfigs.getConfigs());
+
         // override by user special config file
         if (StringUtils.isNotEmpty(pathname)) {
             Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
             configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
         }
+
         // check environment cfg override
         configs.updateConfigsNotNotify(updateEnvCfg(configs.getConfigs()));
 
@@ -130,27 +166,5 @@ public class ConfigFactory {
             map.put(one, properties.getProperty(one));
         }
         return map;
-    }
-
-    public static void validConfigs(Configs configs) {
-        //validate serviceName and systemName
-        ValidateUtils.validate(configs, ConfigConst.SERVICE_NAME, HasText);
-        ValidateUtils.validate(configs, ConfigConst.SYSTEM_NAME, HasText);
-        //validate output
-        ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_ENABLED, HasText, Bool);
-        ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_SERVERS, HasText);
-        ValidateUtils.validate(configs, ConfigConst.Observability.OUTPUT_TIMEOUT, HasText, NumberInt);
-        //validate metrics
-        ValidateUtils.validate(configs, ConfigConst.Observability.METRICS_ENABLED, HasText, Bool);
-        //validate trace
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_ENABLED, HasText, Bool);
-        //validate trace output
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_ENABLED, HasText, Bool);
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_MESSAGE_MAX_BYTES, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_MESSAGE_TIMEOUT, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SIZE, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_QUEUED_MAX_SPANS, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_REPORT_THREAD, HasText, NumberInt);
-        ValidateUtils.validate(configs, ConfigConst.Observability.TRACE_OUTPUT_TOPIC, HasText);
     }
 }
