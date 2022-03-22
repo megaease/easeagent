@@ -90,22 +90,28 @@ public class ConfigFactory {
         return filename.endsWith(".yaml") || filename.endsWith(".yml");
     }
 
+    private static GlobalConfigs loadFromStream(InputStream in, String filename) throws IOException {
+        if (in != null) {
+            Map<String, String> map;
+            if (checkYaml(filename)) {
+                try {
+                    map = new YamlReader().load(in).compress();
+                } catch (ParserException e) {
+                    LOGGER.warn("Wrong Yaml format, load config file failure: {}", filename);
+                    map = Collections.emptyMap();
+                }
+            } else {
+                map = extractPropsMap(in);
+            }
+            return new GlobalConfigs(map);
+        } else {
+            return new GlobalConfigs(Collections.emptyMap());
+        }
+    }
+
     private static GlobalConfigs loadFromClasspath(ClassLoader classLoader, String file) {
         try (InputStream in = classLoader.getResourceAsStream(file)) {
-            if (in != null) {
-                Map<String, String> map;
-                if (checkYaml(file)) {
-                    try {
-                        map = new YamlReader().load(in).compress();
-                    } catch (ParserException e) {
-                        LOGGER.warn("Wrong Yaml format, load config file failure: {}", file);
-                        map = Collections.emptyMap();
-                    }
-                } else {
-                    map = extractPropsMap(in);
-                }
-                return new GlobalConfigs(map);
-            }
+            return loadFromStream(in, file);
         } catch (IOException e) {
             LOGGER.warn("Load config file:{} by classloader:{} failure: {}", file, classLoader.toString(), e);
         }
@@ -115,19 +121,7 @@ public class ConfigFactory {
 
     public static GlobalConfigs loadFromFile(File file) {
         try (FileInputStream in = new FileInputStream(file)) {
-            Map<String, String> map;
-            if (checkYaml(file.getName())) {
-                try {
-                    map = new YamlReader().load(in).compress();
-                } catch (ParserException e) {
-                    LOGGER.warn("Wrong YAML format, load config file failure: {}", file.getAbsolutePath());
-                    map = Collections.emptyMap();
-                }
-            } else {
-                // props file
-                map = extractPropsMap(in);
-            }
-            return new GlobalConfigs(map);
+            return loadFromStream(in, file.getAbsolutePath());
         } catch (IOException e) {
             LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
         }
