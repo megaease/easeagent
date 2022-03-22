@@ -43,7 +43,7 @@ public class YamlReader {
     }
 
     public YamlReader() {
-
+        // ignored
     }
 
     public YamlReader load(InputStream in) {
@@ -120,5 +120,4 @@ public class YamlReader {
             keyStack.removeLast();
         });
     }
-
 }
