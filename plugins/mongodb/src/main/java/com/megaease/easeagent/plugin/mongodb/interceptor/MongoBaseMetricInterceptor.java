@@ -34,7 +34,7 @@ public abstract class MongoBaseMetricInterceptor extends MongoBaseInterceptor {
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
         super.init(config, className, methodName, methodDescriptor);
-        Tags tags = new Tags("application", "mongodb", "operation");
+        Tags tags = new Tags("application", "mongodbclient", "operation");
         RedirectProcessor.setTagsIfRedirected(Redirect.MONGODB, tags);
         mongoMetric = ServiceMetricRegistry.getOrCreate(config, tags, new ServiceMetricSupplier<MongoMetric>() {
             @Override
