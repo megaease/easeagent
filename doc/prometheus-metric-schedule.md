@@ -358,29 +358,29 @@ MongoDB schema describes key metrics of MongoDB client invoking, which include:
 * Execution duration (min, mean, max)
 * Latency (p25, p50, p75, p95, p98, p99)
 
-| Metric Name                   |  Type   | Description                                                                                               |
-|:------------------------------|:-------:|:----------------------------------------------------------------------------------------------------------|
-| application_mongodb_cnt       | integer | The total count of the request executed                                                                   |
-| application_mongodb_errcnt    | integer | The total error count of the request executed                                                             |
-| application_mongodb_m1cnt     | integer | The total count of the request executed in last 1 minute                                                  |
-| application_mongodb_m5cnt     | integer | The total count of the request executed in last 5 minute                                                  |
-| application_mongodb_m15cnt    | integer | The total count of the request executed in last 15 minute                                                 |
-| application_mongodb_m1        | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 1 minute        |
-| application_mongodb_m5        | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 5 minute.       |
-| application_mongodb_m15       | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 15 minute.      |
-| application_mongodb_mean_rate | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 15 minute.      |
-| application_mongodb_m1err     | double  | The MongoDB error request executions per second (exponentially-weighted moving average) in last 1 minute  |
-| application_mongodb_m5err     | double  | The MongoDB error request executions per second (exponentially-weighted moving average) in last 5 minute. |
-| application_mongodb_m15err    | double  | The MongoDB error request executions per second (exponentially-weighted moving average) in last 15 minute |
-| application_mongodb_min       | double  | The MongoDB minimal execution duration in milliseconds.                                                   |
-| application_mongodb_max       | double  | The MongoDB maximal execution duration in milliseconds.                                                   |
-| application_mongodb_mean      | double  | The MongoDB mean execution duration in milliseconds.                                                      |
-| application_mongodb_p25       | double  | TP25: The MongoDB execution duration in milliseconds for 25% user.                                        |
-| application_mongodb_p50       | double  | TP50: The MongoDB execution duration in milliseconds for 50% user.                                        |
-| application_mongodb_p75       | double  | TP75: The MongoDB execution duration in milliseconds for 75% user.                                        |
-| application_mongodb_p95       | double  | TP95: The MongoDB execution duration in milliseconds for 95% user.                                        |
-| application_mongodb_p98       | double  | TP98: The MongoDB execution duration in milliseconds for 98% user.                                        |
-| application_mongodb_p99       | double  | TP99: The MongoDB execution duration in milliseconds for 99% user.                                        |
+| Metric Name                         |  Type   | Description                                                                                               |
+|:------------------------------------|:-------:|:----------------------------------------------------------------------------------------------------------|
+| application_mongodbclient_cnt       | integer | The total count of the request executed                                                                   |
+| application_mongodbclient_errcnt    | integer | The total error count of the request executed                                                             |
+| application_mongodbclient_m1cnt     | integer | The total count of the request executed in last 1 minute                                                  |
+| application_mongodbclient_m5cnt     | integer | The total count of the request executed in last 5 minute                                                  |
+| application_mongodbclient_m15cnt    | integer | The total count of the request executed in last 15 minute                                                 |
+| application_mongodbclient_m1        | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 1 minute        |
+| application_mongodbclient_m5        | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 5 minute.       |
+| application_mongodbclient_m15       | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| application_mongodbclient_mean_rate | double  | The MongoDB request executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| application_mongodbclient_m1err     | double  | The MongoDB error request executions per second (exponentially-weighted moving average) in last 1 minute  |
+| application_mongodbclient_m5err     | double  | The MongoDB error request executions per second (exponentially-weighted moving average) in last 5 minute. |
+| application_mongodbclient_m15err    | double  | The MongoDB error request executions per second (exponentially-weighted moving average) in last 15 minute |
+| application_mongodbclient_min       | double  | The MongoDB minimal execution duration in milliseconds.                                                   |
+| application_mongodbclient_max       | double  | The MongoDB maximal execution duration in milliseconds.                                                   |
+| application_mongodbclient_mean      | double  | The MongoDB mean execution duration in milliseconds.                                                      |
+| application_mongodbclient_p25       | double  | TP25: The MongoDB execution duration in milliseconds for 25% user.                                        |
+| application_mongodbclient_p50       | double  | TP50: The MongoDB execution duration in milliseconds for 50% user.                                        |
+| application_mongodbclient_p75       | double  | TP75: The MongoDB execution duration in milliseconds for 75% user.                                        |
+| application_mongodbclient_p95       | double  | TP95: The MongoDB execution duration in milliseconds for 95% user.                                        |
+| application_mongodbclient_p98       | double  | TP98: The MongoDB execution duration in milliseconds for 98% user.                                        |
+| application_mongodbclient_p99       | double  | TP99: The MongoDB execution duration in milliseconds for 99% user.                                        |
 
 #### Dedicated label
 | Label Name | Essential | Value Example | Description                                                                                                                            |
