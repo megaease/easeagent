@@ -18,6 +18,7 @@
 package com.megaease.easeagent.config;
 
 
+import com.megaease.easeagent.config.yaml.YamlReader;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -27,9 +28,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import static com.megaease.easeagent.config.ValidateUtils.*;
+import static com.megaease.easeagent.config.ValidateUtils.Bool;
+import static com.megaease.easeagent.config.ValidateUtils.HasText;
+import static com.megaease.easeagent.config.ValidateUtils.NumberInt;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
@@ -71,10 +79,9 @@ public class ConfigFactory {
     }
 
     public static GlobalConfigs loadFromClasspath(ClassLoader classLoader) {
-        try {
-            InputStream inputStream = classLoader.getResourceAsStream(CONFIG_FILE);
-            if (inputStream != null) {
-                final HashMap<String, String> propsMap = extractPropsMap(inputStream);
+        try (InputStream in = classLoader.getResourceAsStream(CONFIG_FILE)) {
+            if (in != null) {
+                final Map<String, String> propsMap = extractPropsMap(in);
                 return new GlobalConfigs(propsMap);
             }
         } catch (IOException e) {
@@ -84,11 +91,14 @@ public class ConfigFactory {
     }
 
     public static Configs loadFromFile(File file) {
-        try {
-            try (FileInputStream in = new FileInputStream(file)) {
-                HashMap<String, String> map = extractPropsMap(in);
-                return new GlobalConfigs(map);
+        try (FileInputStream in = new FileInputStream(file)) {
+            Map<String, String> map = Collections.emptyMap();
+            if (file.getName().endsWith(".properties")) {
+                map = extractPropsMap(in);
+            } else if (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml")) {
+                map = new YamlReader().load(in).compress();
             }
+            return new GlobalConfigs(map);
         } catch (IOException e) {
             LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
         }

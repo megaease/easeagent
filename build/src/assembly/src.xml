@@ -12,6 +12,7 @@
             <outputDirectory/>
             <includes>
                 <include>git.properties</include>
+                <include>agent.yaml</include>
                 <include>agent.properties</include>
                 <include>user-minimal-cfg.properties</include>
                 <include>easeagent-log4j2.xml</include>
@@ -55,7 +56,7 @@
                 <include>*.jar</include>
             </includes>
         </fileSet>
-        
+
         <fileSet>
             <directory>${project.basedir}/target/boot/</directory>
             <outputDirectory>boot</outputDirectory>

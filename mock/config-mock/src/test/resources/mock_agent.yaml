@@ -1,0 +1,4 @@
+test:
+    mock:
+        key: true
+        keyStr: testValue

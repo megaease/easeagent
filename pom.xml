@@ -82,6 +82,7 @@
         <version.prometheus>0.10.0</version.prometheus>
         <version.sparkjava>2.9.2</version.sparkjava>
         <version.httpclient>4.5.13</version.httpclient>
+        <version.yaml>1.30</version.yaml>
     </properties>
 
     <dependencies>
@@ -403,6 +404,12 @@
                 <groupId>org.apache.httpcomponents.client5</groupId>
                 <artifactId>httpclient5</artifactId>
                 <version>5.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${version.yaml}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
