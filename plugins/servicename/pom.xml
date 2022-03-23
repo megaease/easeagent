@@ -29,16 +29,6 @@
     <artifactId>servicename</artifactId>
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>plugin-api</artifactId>
             <scope>provided</scope>
@@ -62,6 +52,16 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>plugin-api-mock</artifactId>
