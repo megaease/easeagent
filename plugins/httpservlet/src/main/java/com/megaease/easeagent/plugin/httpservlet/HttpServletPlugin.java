@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.httpservlet;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.Namespace.HTTP_SERVLET;
 
@@ -31,5 +32,10 @@ public class HttpServletPlugin implements AgentPlugin {
     @Override
     public String getDomain() {
         return ConfigConst.OBSERVABILITY;
+    }
+
+    @Override
+    public int order() {
+        return Order.HIGH.getOrder();
     }
 }

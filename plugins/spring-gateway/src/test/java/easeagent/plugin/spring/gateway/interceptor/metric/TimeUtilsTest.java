@@ -31,21 +31,21 @@ public class TimeUtilsTest {
     @Test
     public void startTime() throws InterruptedException {
         Object key = new Object();
-        long startTime = TimeUtils.startTime(EaseAgent.getContext(), key);
+        long startTime = TimeUtils.startTime(EaseAgent.getOrCreateTracingContext(), key);
         Thread.sleep(10);
-        assertEquals(startTime, TimeUtils.startTime(EaseAgent.getContext(), key));
+        assertEquals(startTime, TimeUtils.startTime(EaseAgent.getOrCreateTracingContext(), key));
         Object key2 = new Object();
-        assertNotEquals(startTime, TimeUtils.startTime(EaseAgent.getContext(), key2));
+        assertNotEquals(startTime, TimeUtils.startTime(EaseAgent.getOrCreateTracingContext(), key2));
     }
 
     @Test
     public void removeStartTime() throws InterruptedException {
         Object key = new Object();
-        long startTime = TimeUtils.startTime(EaseAgent.getContext(), key);
-        Long startObj = TimeUtils.removeStartTime(EaseAgent.getContext(), key);
+        long startTime = TimeUtils.startTime(EaseAgent.getOrCreateTracingContext(), key);
+        Long startObj = TimeUtils.removeStartTime(EaseAgent.getOrCreateTracingContext(), key);
         assertNotNull(startObj);
         assertEquals(startTime, (long) startObj);
         Thread.sleep(10);
-        assertNotEquals(startTime, TimeUtils.startTime(EaseAgent.getContext(), key));
+        assertNotEquals(startTime, TimeUtils.startTime(EaseAgent.getOrCreateTracingContext(), key));
     }
 }

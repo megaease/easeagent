@@ -102,7 +102,12 @@ public class ServletHttpLogInterceptor extends BaseServletInterceptor {
 
     @Override
     public String getType() {
+        // xxx change to LOG?
         return Order.METRIC.getName();
     }
 
+    @Override
+    public int order() {
+        return Order.TRACING_APPEND.getOrder();
+    }
 }

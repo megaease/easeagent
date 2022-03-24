@@ -35,14 +35,14 @@ public class RunnableInterceptorTest {
 
     @Test
     public void before() throws InterruptedException {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         final Span span = context.nextSpan();
         span.start();
         span.cacheScope();
         RunnableInterceptor runnableInterceptor = new RunnableInterceptor();
         AtomicInteger run = new AtomicInteger();
         Runnable runnable = () -> {
-            Context runCont = EaseAgent.getContext();
+            Context runCont = EaseAgent.getOrCreateTracingContext();
             assertTrue(runCont.currentTracing().hasCurrentSpan());
             Span span1 = runCont.nextSpan();
             assertEquals(span.traceId(), span1.traceId());

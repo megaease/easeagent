@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.okhttp.interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -44,5 +45,10 @@ public class OkHttpForwardedInterceptor implements Interceptor {
     @Override
     public String getType() {
         return ConfigConst.PluginID.FORWARDED;
+    }
+
+    @Override
+    public int order() {
+        return Order.FORWARDED.getOrder();
     }
 }

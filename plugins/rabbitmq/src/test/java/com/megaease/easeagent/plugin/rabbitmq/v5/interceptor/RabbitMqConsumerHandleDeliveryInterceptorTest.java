@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -37,7 +36,7 @@ public class RabbitMqConsumerHandleDeliveryInterceptorTest {
         String data = "192.168.0.13:2222";
         mockConsumer.setEaseAgent$$DynamicField$$Data(data);
         MethodInfo methodInfo = MethodInfo.builder().invoker(mockConsumer).args(new Object[]{null, null, properties}).build();
-        interceptor.before(methodInfo, EaseAgent.getContext());
+        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals(data, properties.getHeaders().get(ContextCons.MQ_URI));
 
     }

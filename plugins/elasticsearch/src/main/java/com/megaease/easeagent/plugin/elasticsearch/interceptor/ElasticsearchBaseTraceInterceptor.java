@@ -25,4 +25,9 @@ public abstract class ElasticsearchBaseTraceInterceptor extends ElasticsearchBas
     public String getType() {
         return Order.TRACING.getName();
     }
+
+    @Override
+    public int order() {
+        return Order.TRACING_APPEND.getOrder();
+    }
 }

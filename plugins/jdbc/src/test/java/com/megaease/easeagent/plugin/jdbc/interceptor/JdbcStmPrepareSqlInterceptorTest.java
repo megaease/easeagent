@@ -38,7 +38,7 @@ public class JdbcStmPrepareSqlInterceptorTest {
     @Test
     public void doBefore() {
         JdbcStmPrepareSqlInterceptor interceptor = new JdbcStmPrepareSqlInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockJDBCStatement mockJDBCStatement = mock(MockJDBCStatement.class);
         SqlInfo sqlInfo = new SqlInfo(null);
         when(mockJDBCStatement.getEaseAgent$$DynamicField$$Data()).thenReturn(sqlInfo);

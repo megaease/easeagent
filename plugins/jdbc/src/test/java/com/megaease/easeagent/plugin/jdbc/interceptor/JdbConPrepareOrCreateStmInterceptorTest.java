@@ -52,13 +52,13 @@ public class JdbConPrepareOrCreateStmInterceptorTest {
         Statement statement = mock(Statement.class);
         Connection connection = TestUtils.mockConnection();
         MethodInfo methodInfo = MethodInfo.builder().invoker(connection).retValue(statement).method("").build();
-        interceptor.doBefore(methodInfo, EaseAgent.getContext());
+        interceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         MockJDBCStatement mockJDBCStatement = mock(MockJDBCStatement.class);
         doCallRealMethod().when(mockJDBCStatement).setEaseAgent$$DynamicField$$Data(any());
         doCallRealMethod().when(mockJDBCStatement).getEaseAgent$$DynamicField$$Data();
         methodInfo = MethodInfo.builder().invoker(connection).retValue(mockJDBCStatement).method("").build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         SqlInfo sqlInfo = AgentDynamicFieldAccessor.getDynamicFieldValue(mockJDBCStatement);
         assertNotNull(sqlInfo);
         assertTrue(sqlInfo.getSqlList().isEmpty());
@@ -68,13 +68,13 @@ public class JdbConPrepareOrCreateStmInterceptorTest {
         String sql = "select * from data";
         methodInfo = MethodInfo.builder().invoker(connection).retValue(mockJDBCStatement)
             .method("prepareA").args(new Object[]{sql}).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         sqlInfo = AgentDynamicFieldAccessor.getDynamicFieldValue(mockJDBCStatement);
         assertNotNull(sqlInfo);
         assertEquals(1, sqlInfo.getSqlList().size());
         assertEquals(sql, sqlInfo.getSqlList().get(0));
 
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         sqlInfo = AgentDynamicFieldAccessor.getDynamicFieldValue(mockJDBCStatement);
         assertNotNull(sqlInfo);
         assertEquals(1, sqlInfo.getSqlList().size());

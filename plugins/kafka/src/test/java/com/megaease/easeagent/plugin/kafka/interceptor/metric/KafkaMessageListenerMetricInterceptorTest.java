@@ -46,7 +46,7 @@ public class KafkaMessageListenerMetricInterceptorTest {
     @Test
     public void doBefore() {
         KafkaMessageListenerMetricInterceptor interceptor = new KafkaMessageListenerMetricInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         context.remove(KafkaMessageListenerMetricInterceptor.START);
 
         interceptor.doBefore(null, context);
@@ -62,7 +62,7 @@ public class KafkaMessageListenerMetricInterceptorTest {
         KafkaMessageListenerMetricInterceptor interceptor = new KafkaMessageListenerMetricInterceptor();
         KafkaMetricTest.init(interceptor);
 
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         context.remove(KafkaMessageListenerMetricInterceptor.START);
 
         interceptor.doBefore(null, context);
@@ -70,7 +70,7 @@ public class KafkaMessageListenerMetricInterceptorTest {
         ConsumerRecord<String, String> record = KafkaConsumerMetricInterceptorTest.record(topic, 0);
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{record}).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         LastJsonReporter lastJsonReporter = KafkaMetricTest.lastMetricSupplier(topic);
         lastJsonReporter.clean();
@@ -79,7 +79,7 @@ public class KafkaMessageListenerMetricInterceptorTest {
 
         interceptor.doBefore(null, context);
         methodInfo = MethodInfo.builder().args(new Object[]{record}).throwable(new RuntimeException("error")).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         lastJsonReporter.clean();
         metric = KafkaMetricTest.waitOne(lastJsonReporter);
         assertEquals(2, metric.get(MetricField.EXECUTION_CONSUMER_COUNT.getField()));

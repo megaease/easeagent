@@ -25,7 +25,7 @@ import com.megaease.easeagent.plugin.bridge.NoOpIPluginConfig;
  * Subtype of {@link Context} and {@link TracingContext} which can push and pop Config.
  */
 @SuppressWarnings("unused")
-public interface InitializeContext extends Context, TracingContext {
+public interface InitializeContext extends TracingContext {
 
     /**
      * Pushes a Config onto the top of session context config stack.

@@ -50,7 +50,7 @@ public class KafkaProducerDoSendInterceptorTest {
 
 
     Span finishSpan() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Span span = context.remove(KafkaProducerDoSendInterceptor.SPAN);
         span.finish();
         context.<Scope>remove(KafkaProducerDoSendInterceptor.SCOPE).close();
@@ -71,7 +71,7 @@ public class KafkaProducerDoSendInterceptorTest {
     public void doBefore() {
         KafkaProducerDoSendInterceptor interceptor = new KafkaProducerDoSendInterceptor();
         MockKafkaProducer kafkaProducer = MockKafkaProducer.buildOne();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
 
         ProducerRecord record = new ProducerRecord<>(topic, key, value);
         MethodInfo methodInfo = MethodInfo.builder().invoker(kafkaProducer).args(new Object[]{record, null}).build();
@@ -87,7 +87,7 @@ public class KafkaProducerDoSendInterceptorTest {
 
         record = new ProducerRecord<>(topic, value);
         methodInfo = MethodInfo.builder().invoker(kafkaProducer).args(new Object[]{record, null}).build();
-        context = EaseAgent.getContext();
+        context = EaseAgent.getOrCreateTracingContext();
         interceptor.doBefore(methodInfo, context);
 
         assertTrue(context.currentTracing().hasCurrentSpan());
@@ -101,7 +101,7 @@ public class KafkaProducerDoSendInterceptorTest {
 
         record = new ProducerRecord<>(topic, value);
         methodInfo = MethodInfo.builder().invoker(kafkaProducer).args(new Object[]{record, null}).build();
-        context = EaseAgent.getContext();
+        context = EaseAgent.getOrCreateTracingContext();
         interceptor.doBefore(methodInfo, context);
         assertTrue(context.currentTracing().hasCurrentSpan());
         finishSpan();
@@ -119,13 +119,13 @@ public class KafkaProducerDoSendInterceptorTest {
             props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
             props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
             MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{props}).build();
-            kafkaAbstractConfigConstructInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+            kafkaAbstractConfigConstructInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
 
             MockKafkaProducer kafkaProducer = new MockKafkaProducer(props);
             kafkaProducer.setEaseAgent$$DynamicField$$Data(props.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
 
             KafkaProducerDoSendInterceptor interceptor = new KafkaProducerDoSendInterceptor();
-            Context context = EaseAgent.getContext();
+            Context context = EaseAgent.getOrCreateTracingContext();
 
             ProducerRecord record = new ProducerRecord<>(topic, key, value);
             methodInfo = MethodInfo.builder().invoker(kafkaProducer).args(new Object[]{record, null}).build();
@@ -141,7 +141,7 @@ public class KafkaProducerDoSendInterceptorTest {
     @Test
     public void doAfter() {
         KafkaProducerDoSendInterceptor interceptor = new KafkaProducerDoSendInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockKafkaProducer kafkaProducer = MockKafkaProducer.buildOne();
 
         interceptor.doAfter(null, context);

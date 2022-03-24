@@ -36,7 +36,7 @@ public class MongoTraceCommandListener extends MongoBaseTraceCommandListener {
     @Override
     public void commandStarted(CommandStartedEvent event) {
 //        LOGGER.warn("commandStarted trace");
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         TraceHelper.commandStarted(context, this.config, event);
     }
 
@@ -44,14 +44,14 @@ public class MongoTraceCommandListener extends MongoBaseTraceCommandListener {
     @Override
     public void commandSucceeded(CommandSucceededEvent event) {
 //        LOGGER.warn("commandSucceeded trace");
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         TraceHelper.commandSucceeded(context, event);
     }
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
 //        LOGGER.warn("commandFailed trace");
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         TraceHelper.commandFailed(context, event);
     }
 

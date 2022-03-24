@@ -38,14 +38,14 @@ public class FeignLoadBalancerInterceptorTest {
     public void before() throws URISyntaxException {
         FeignLoadBalancerInterceptor interceptor = new FeignLoadBalancerInterceptor();
         BaseServiceNameInterceptorTest.initInterceptor(interceptor);
-        EaseAgent.getContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
+        EaseAgent.getOrCreateTracingContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
 
         Object ribbonRequest = MockRibbonRequest.createRibbonRequest();
         DefaultClientConfigImpl defaultClientConfig = new DefaultClientConfigImpl();
         String serviceName = "testServiceName";
         defaultClientConfig.setClientName(serviceName);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{ribbonRequest, defaultClientConfig}).build();
-        interceptor.before(methodInfo, EaseAgent.getContext());
+        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         Request request = MockRibbonRequest.getRequest(methodInfo.getArgs()[0]);
         CheckUtils.check(name -> {

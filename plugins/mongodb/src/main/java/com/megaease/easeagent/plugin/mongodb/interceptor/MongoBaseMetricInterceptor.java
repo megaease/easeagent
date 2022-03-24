@@ -57,4 +57,9 @@ public abstract class MongoBaseMetricInterceptor extends MongoBaseInterceptor {
     public String getType() {
         return Order.METRIC.getName();
     }
+
+    @Override
+    public int order() {
+        return Order.METRIC.getOrder();
+    }
 }

@@ -20,6 +20,9 @@ package com.megaease.easeagent.core.instrument;
 import com.megaease.easeagent.plugin.bridge.NoOpContext;
 
 public class TestContext extends NoOpContext.NoopContext {
+    public TestContext(boolean b) {
+    }
+
     @Override
     public boolean isNoop() {
         return false;

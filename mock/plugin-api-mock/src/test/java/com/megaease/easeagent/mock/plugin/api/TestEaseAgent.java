@@ -35,9 +35,9 @@ import static org.junit.Assert.*;
 public class TestEaseAgent {
     @Test
     public void testEaseAgent() {
-        assertNotNull(EaseAgent.contextSupplier);
-        assertNotNull(EaseAgent.contextSupplier.get());
-        assertFalse(EaseAgent.contextSupplier.get().isNoop());
+        assertNotNull(EaseAgent.initializeContextSupplier);
+        assertNotNull(EaseAgent.getOrCreateTracingContext());
+        assertFalse(EaseAgent.getOrCreateTracingContext().isNoop());
         assertNotNull(EaseAgent.configFactory);
         assertNotNull(EaseAgent.configFactory.getConfig("name"));
         IPluginConfig config = EaseAgent.configFactory.getConfig("test1", "test2", "test3");

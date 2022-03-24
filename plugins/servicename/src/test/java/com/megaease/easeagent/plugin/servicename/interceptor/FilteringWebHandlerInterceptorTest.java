@@ -40,25 +40,25 @@ public class FilteringWebHandlerInterceptorTest {
     public void before() throws URISyntaxException {
         FilteringWebHandlerInterceptor interceptor = new FilteringWebHandlerInterceptor();
         BaseServiceNameInterceptorTest.initInterceptor(interceptor);
-        EaseAgent.getContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
+        EaseAgent.getOrCreateTracingContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
 
         MockServerWebExchange mockServerWebExchange = buildMockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
-        interceptor.before(methodInfo, EaseAgent.getContext());
+        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(header(mockServerWebExchange, FilteringWebHandlerInterceptor.config.getPropagateHead()));
 
         mockServerWebExchange = buildMockServerWebExchange();
         Route route = new MockRouteBuilder().uri(new URI("http://127.0.0.1:8080")).id("1").build();
         mockServerWebExchange.getAttributes().put(Const.SERVER_WEB_EXCHANGE_ROUTE_ATTRIBUTE, route);
         methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
-        interceptor.before(methodInfo, EaseAgent.getContext());
+        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(header(mockServerWebExchange, FilteringWebHandlerInterceptor.config.getPropagateHead()));
 
         mockServerWebExchange = buildMockServerWebExchange();
         route = new MockRouteBuilder().uri(new URI("lb://127.0.0.1:8080")).id("11").build();
         mockServerWebExchange.getAttributes().put(Const.SERVER_WEB_EXCHANGE_ROUTE_ATTRIBUTE, route);
         methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
-        interceptor.before(methodInfo, EaseAgent.getContext());
+        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals("127.0.0.1", header(mockServerWebExchange, FilteringWebHandlerInterceptor.config.getPropagateHead()));
 
     }

@@ -17,10 +17,13 @@
 
 package com.megaease.easeagent.core.plugin.matcher;
 
+import com.megaease.easeagent.core.plugin.Dispatcher;
 import com.megaease.easeagent.core.plugin.interceptor.InterceptorPluginDecorator;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
@@ -59,7 +62,7 @@ public class MethodTransformation {
 
         List<Interceptor> interceptors = suppliers.stream()
             .map(Supplier::get)
-            .sorted(Comparator.comparing(Ordered::order).reversed())
+            .sorted(Comparator.comparing(Ordered::order))
             .collect(Collectors.toList());
 
         interceptors.forEach(i -> {
@@ -69,6 +72,10 @@ public class MethodTransformation {
                 try {
                     interceptor.init(interceptor.getConfig(), type, method, methodDescription);
                     interceptor.init(interceptor.getConfig(), uniqueIndex);
+                    // tracing root interceptor
+                    if ( Order.TRACING.getOrder() == interceptor.order() >> 8) {
+                        Dispatcher.setTracingRoot(uniqueIndex);
+                    }
                 } catch (Exception e) {
                     log.error("Interceptor init fail: {}::{}, {}", type, method, interceptor.getClass().getSimpleName());
                 }

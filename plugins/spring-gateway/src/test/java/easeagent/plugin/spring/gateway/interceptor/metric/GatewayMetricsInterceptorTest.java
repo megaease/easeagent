@@ -61,7 +61,7 @@ public class GatewayMetricsInterceptorTest {
     @Test
     public void before() {
         GatewayMetricsInterceptor interceptor = new GatewayMetricsInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         interceptor.before(null, context);
         assertNotNull(context.get(startTime));
     }
@@ -74,7 +74,7 @@ public class GatewayMetricsInterceptorTest {
     public void after() throws InterruptedException {
         GatewayMetricsInterceptor interceptor = new GatewayMetricsInterceptor();
         InterceptorTestUtils.init(interceptor, new SpringGatewayPlugin());
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         interceptor.before(null, context);
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();

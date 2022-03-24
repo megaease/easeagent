@@ -54,7 +54,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void before() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Message message = buildMessage(context);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{message}).build();
         interceptor.before(methodInfo, context);
@@ -84,7 +84,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void after() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Message message = buildMessage(context);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{message}).build();
         interceptor.before(methodInfo, context);
@@ -126,7 +126,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void before4Single() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Message message = buildMessage(context);
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{message}).build();
@@ -140,7 +140,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void before4List() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         int count = 5;
         List<Message> messages = new ArrayList<>();
         for (int i = 0; i < count; i++) {
@@ -168,7 +168,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void processMessageBefore() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Message message = buildMessage(context);
 
         interceptor.processMessageBefore(message, context, 0);
@@ -198,7 +198,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void after4Single() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Message message = buildMessage(context);
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{message}).build();
@@ -211,7 +211,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void after4List() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         int count = 5;
         List<Message> messages = new ArrayList<>();
         for (int i = 0; i < count; i++) {
@@ -228,7 +228,7 @@ public class RabbitMqOnMessageTracingInterceptorTest {
     @Test
     public void processMessageAfter() {
         RabbitMqOnMessageTracingInterceptor interceptor = new RabbitMqOnMessageTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Message message = buildMessage(context);
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{message}).build();

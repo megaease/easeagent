@@ -17,14 +17,13 @@
 
 package com.megaease.easeagent.plugin;
 
-import com.megaease.easeagent.plugin.enums.Order;
-
 public interface Ordered {
     /**
-     * Higher values are operated later
-     * For example: a interceptor with order=1 will called after an interceptor with order=0.
+     * Higher values operate later
+     * For example: an interceptor with order=1 will be called after an interceptor with order=0.
+     *
+     * {@link com.megaease.easeagent.plugin.enums.Order} has predefined kinds of priorities
+     *
      */
-    default int order() {
-        return Order.HIGH.getOrder();
-    }
+    int order();
 }

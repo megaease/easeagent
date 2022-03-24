@@ -33,6 +33,8 @@ public final class Dispatcher {
 
     static AgentArray<AgentInterceptorChain> chains = new AgentArray<>();
 
+    static AgentArray<Boolean> tracingRoot = new AgentArray<>();
+
     /**
      * for chains only modified during related class loading process,
      * so it doesn't need to consider updating process
@@ -63,5 +65,17 @@ public final class Dispatcher {
 
     public static boolean updateChain(int index, AgentInterceptorChain chain) {
         return chains.replace(index, chain) != null;
+    }
+
+    public static void setTracingRoot(int index) {
+        tracingRoot.putIfAbsent(index, true);
+    }
+
+    public static boolean isTracingRoot(int index) {
+        Boolean root = tracingRoot.getUncheck(index);
+        if (root == null) {
+            return false;
+        }
+        return root;
     }
 }

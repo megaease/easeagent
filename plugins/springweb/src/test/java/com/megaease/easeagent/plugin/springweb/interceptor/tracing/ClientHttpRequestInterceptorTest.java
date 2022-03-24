@@ -51,7 +51,7 @@ public class ClientHttpRequestInterceptorTest {
         ClientHttpResponse clientHttpResponse = SimpleClientHttpResponseFactory.createMockResponse(url);
         MethodInfo.MethodInfoBuilder methodInfoBuilder = MethodInfo.builder();
         MethodInfo methodInfo = methodInfoBuilder.invoker(request).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         ClientHttpRequestInterceptor clientHttpRequestInterceptor = new ClientHttpRequestInterceptor();
         MockEaseAgent.cleanLastSpan();
 
@@ -99,7 +99,7 @@ public class ClientHttpRequestInterceptorTest {
         ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         ClientHttpRequest request = requestFactory.createRequest(new URI("http://127.0.0.1:8080/test"), HttpMethod.GET);
         MethodInfo methodInfo = MethodInfo.builder().invoker(request).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
 
         ClientHttpRequestInterceptor clientHttpRequestInterceptor = new ClientHttpRequestInterceptor();
         HttpRequest httpRequest = clientHttpRequestInterceptor.getRequest(methodInfo, context);
@@ -118,7 +118,7 @@ public class ClientHttpRequestInterceptorTest {
         MethodInfo methodInfo = methodInfoBuilder.build();
 
         ClientHttpRequestInterceptor clientHttpRequestInterceptor = new ClientHttpRequestInterceptor();
-        HttpResponse httpResponse = clientHttpRequestInterceptor.getResponse(methodInfo, EaseAgent.getContext());
+        HttpResponse httpResponse = clientHttpRequestInterceptor.getResponse(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals("GET", httpResponse.method());
         assertNull(httpResponse.route());
         assertNull(httpResponse.maybeError());
@@ -126,7 +126,7 @@ public class ClientHttpRequestInterceptorTest {
 
         RuntimeException runtimeException = new RuntimeException("test error");
         methodInfoBuilder.throwable(runtimeException);
-        httpResponse = clientHttpRequestInterceptor.getResponse(methodInfoBuilder.build(), EaseAgent.getContext());
+        httpResponse = clientHttpRequestInterceptor.getResponse(methodInfoBuilder.build(), EaseAgent.getOrCreateTracingContext());
         assertEquals(runtimeException, httpResponse.maybeError());
 
 

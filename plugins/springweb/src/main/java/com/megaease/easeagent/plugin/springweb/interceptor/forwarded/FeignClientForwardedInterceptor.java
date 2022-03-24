@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.trace.Setter;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.springweb.ForwardedPlugin;
@@ -46,6 +47,10 @@ public class FeignClientForwardedInterceptor implements Interceptor {
         return ConfigConst.PluginID.FORWARDED;
     }
 
+    @Override
+    public int order() {
+        return Order.FORWARDED.getOrder();
+    }
 
     static class FeignClientRequest implements Setter {
         private final Request request;

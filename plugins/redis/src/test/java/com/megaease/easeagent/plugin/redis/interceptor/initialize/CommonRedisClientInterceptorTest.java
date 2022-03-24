@@ -41,19 +41,19 @@ public class CommonRedisClientInterceptorTest {
         CommonRedisClientInterceptor commonRedisClientInterceptor = new CommonRedisClientInterceptor();
         RedisClusterClient redisClusterClient = RedisClusterClient.create(RedisURI.create("127.0.0.1", 111));
         MethodInfo methodInfo = MethodInfo.builder().invoker(redisClusterClient).retValue(null).throwable(new RuntimeException()).build();
-        commonRedisClientInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        commonRedisClientInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(methodInfo.getRetValue());
 
         CompletableFuture completableFuture = CompletableFuture.completedFuture("testCompletableFuture");
         methodInfo = MethodInfo.builder().invoker(redisClusterClient).retValue(completableFuture).build();
-        commonRedisClientInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        commonRedisClientInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertTrue(methodInfo.getRetValue() instanceof CompletableFutureWrapper);
 
         RedisClient redisClient = RedisClient.create(RedisURI.create("127.0.0.1", 111));
         DatagramSocket s = new DatagramSocket(0);
         ConnectionFuture connectionFuture = ConnectionFuture.completed(new InetSocketAddress(s.getLocalPort()), "test");
         methodInfo = MethodInfo.builder().invoker(redisClient).retValue(connectionFuture).build();
-        commonRedisClientInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        commonRedisClientInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertTrue(methodInfo.getRetValue() instanceof ConnectionFutureWrapper);
         redisClient.shutdown();
         redisClusterClient.shutdown();
@@ -66,7 +66,7 @@ public class CommonRedisClientInterceptorTest {
         DatagramSocket s = new DatagramSocket(0);
         ConnectionFuture connectionFuture = ConnectionFuture.completed(new InetSocketAddress(s.getLocalPort()), "test");
         MethodInfo methodInfo = MethodInfo.builder().invoker(redisClient).retValue(connectionFuture).build();
-        commonRedisClientInterceptor.processRedisClient(methodInfo, EaseAgent.getContext());
+        commonRedisClientInterceptor.processRedisClient(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertTrue(methodInfo.getRetValue() instanceof ConnectionFutureWrapper);
         redisClient.shutdown();
     }
@@ -77,7 +77,7 @@ public class CommonRedisClientInterceptorTest {
         RedisClusterClient redisClusterClient = RedisClusterClient.create(RedisURI.create("127.0.0.1", 111));
         CompletableFuture completableFuture = CompletableFuture.completedFuture("testCompletableFuture");
         MethodInfo methodInfo = MethodInfo.builder().invoker(redisClusterClient).retValue(completableFuture).build();
-        commonRedisClientInterceptor.processRedisClusterClient(methodInfo, EaseAgent.getContext());
+        commonRedisClientInterceptor.processRedisClusterClient(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertTrue(methodInfo.getRetValue() instanceof CompletableFutureWrapper);
         redisClusterClient.shutdown();
     }

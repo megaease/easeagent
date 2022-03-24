@@ -27,7 +27,6 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
@@ -50,14 +49,14 @@ public class AgentMonoTest {
         };
 
         MethodInfo methodInfo = MethodInfo.builder().build();
-        AgentMono agentMono = new AgentMono(mono, methodInfo, EaseAgent.getContext().exportAsync(), null);
+        AgentMono agentMono = new AgentMono(mono, methodInfo, EaseAgent.getOrCreateTracingContext().exportAsync(), null);
         agentMono.subscribe(new MockCoreSubscriber());
         assertTrue(ran.get());
     }
 
     @Test
     public void testImportToCurrent() throws InterruptedException {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Span span = context.nextSpan();
         Thread thread;
         try (Scope ignored4 = span.maybeScope()) {
@@ -65,7 +64,7 @@ public class AgentMonoTest {
             AsyncContext asyncContext2 = context.exportAsync();
             AsyncContext asyncContext3 = context.exportAsync();
             thread = new Thread(() -> {
-                Context asyncContext = EaseAgent.getContext();
+                Context asyncContext = EaseAgent.getOrCreateTracingContext();
                 assertFalse(asyncContext.currentTracing().hasCurrentSpan());
                 try (Cleaner ignored = asyncContext1.importToCurrent()) {
                     assertTrue(asyncContext.currentTracing().hasCurrentSpan());

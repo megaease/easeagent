@@ -47,7 +47,7 @@ public class MockEaseAgentTest {
 
     @Test
     public void getLastSpan() {
-        Span span = EaseAgent.getContext().nextSpan();
+        Span span = EaseAgent.getOrCreateTracingContext().nextSpan();
         span.start().finish();
         assertNotNull(MockEaseAgent.getLastSpan());
         SpanTestUtils.sameId(span, MockEaseAgent.getLastSpan());
@@ -55,7 +55,7 @@ public class MockEaseAgentTest {
 
     @Test
     public void cleanLastSpan() {
-        Span span = EaseAgent.getContext().nextSpan();
+        Span span = EaseAgent.getOrCreateTracingContext().nextSpan();
         span.start().finish();
         assertNotNull(MockEaseAgent.getLastSpan());
         SpanTestUtils.sameId(span, MockEaseAgent.getLastSpan());
@@ -67,9 +67,9 @@ public class MockEaseAgentTest {
     public void setMockSpanReport() {
         List<ReportSpan> spans = new ArrayList<>();
         MockEaseAgent.setMockSpanReport(spans::add);
-        Span span1 = EaseAgent.getContext().nextSpan();
+        Span span1 = EaseAgent.getOrCreateTracingContext().nextSpan();
         span1.start().finish();
-        Span span2 = EaseAgent.getContext().nextSpan();
+        Span span2 = EaseAgent.getOrCreateTracingContext().nextSpan();
         span2.start().finish();
         assertEquals(2, spans.size());
         SpanTestUtils.sameId(span1, spans.get(0));
@@ -164,7 +164,7 @@ public class MockEaseAgentTest {
 
     @Test
     public void resetAll() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         String key = "testKey";
         context.put(key, "value");
         assertNotNull(context.get(key));

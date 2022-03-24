@@ -53,6 +53,6 @@ public class MockContextManager {
     }
 
     public static Context getContext() {
-        return EaseAgent.getContext();
+        return EaseAgent.getOrCreateTracingContext();
     }
 }

@@ -44,7 +44,7 @@ public class OkHttpForwardedInterceptorTest {
         OkHttpClient client = new OkHttpClient();
         Call call = client.newCall(request);
         MethodInfo methodInfo = MethodInfo.builder().invoker(call).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         okHttpForwardedInterceptor.before(methodInfo, context);
         assertNull(call.request().header(TestConst.FORWARDED_NAME));
         context.put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);

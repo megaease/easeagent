@@ -18,7 +18,7 @@
 package com.megaease.easeagent.mock.metrics;
 
 import com.megaease.easeagent.metrics.AutoRefreshReporter;
-import com.megaease.easeagent.metrics.MetricBeanProvider;
+import com.megaease.easeagent.metrics.MetricBeanProviderImpl;
 import com.megaease.easeagent.metrics.MetricProviderImpl;
 import com.megaease.easeagent.metrics.jvm.JvmBeanProvider;
 import com.megaease.easeagent.mock.config.MockConfig;
@@ -26,7 +26,7 @@ import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.utils.MockProvider;
 
 public class MockMetricProvider implements MockProvider {
-    private static final MetricBeanProvider METRIC_PROVIDER = new MetricBeanProvider();
+    private static final MetricBeanProviderImpl METRIC_PROVIDER = new MetricBeanProviderImpl();
     private static final JvmBeanProvider JVM_METRIC_PROVIDER = new JvmBeanProvider();
 
     static {
@@ -36,7 +36,7 @@ public class MockMetricProvider implements MockProvider {
         MockReport.setMetricFlushable(MockMetricProvider::flush);
     }
 
-    public static MetricBeanProvider getMetricProvider() {
+    public static MetricBeanProviderImpl getMetricProvider() {
         return METRIC_PROVIDER;
     }
 

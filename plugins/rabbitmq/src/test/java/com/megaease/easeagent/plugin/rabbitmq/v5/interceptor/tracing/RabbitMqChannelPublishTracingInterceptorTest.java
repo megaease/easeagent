@@ -33,7 +33,6 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.rabbitmq.TestUtils;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Envelope;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +44,7 @@ public class RabbitMqChannelPublishTracingInterceptorTest {
     @Test
     public void before() {
         RabbitMqChannelPublishTracingInterceptor interceptor = new RabbitMqChannelPublishTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         String uri = "192.168.0.13:2222";
         context.put(ContextCons.MQ_URI, uri);
         String exchange = "testExchange";
@@ -107,7 +106,7 @@ public class RabbitMqChannelPublishTracingInterceptorTest {
     @Test
     public void order() {
         RabbitMqChannelPublishTracingInterceptor interceptor = new RabbitMqChannelPublishTracingInterceptor();
-        assertEquals(Order.HIGHEST.getOrder(), interceptor.order());
+        assertEquals(Order.TRACING.getOrder(), interceptor.order());
     }
 
     @Test

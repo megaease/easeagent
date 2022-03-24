@@ -22,6 +22,7 @@ import com.megaease.easeagent.core.plugin.CommonInlineAdvice;
 import com.megaease.easeagent.core.plugin.PluginLoader;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.utils.AgentAttachmentRule;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -147,6 +148,11 @@ public class StaticMethodTransformTest extends TransformTestBase {
         @Override
         public void after(MethodInfo methodInfo, Context context) {
             Foo.clazzInitString = BAR;
+        }
+
+        @Override
+        public int order() {
+            return Order.HIGH.getOrder();
         }
     }
 

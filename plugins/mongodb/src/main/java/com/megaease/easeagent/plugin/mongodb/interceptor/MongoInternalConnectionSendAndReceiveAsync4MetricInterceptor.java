@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.mongodb.interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
-import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -52,6 +51,11 @@ public class MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor implem
         return Order.METRIC.getName();
     }
 
+    @Override
+    public int order() {
+        return Order.METRIC.getOrder();
+    }
+
     public static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
 
 //        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
@@ -68,7 +72,7 @@ public class MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor implem
         public void onResult(T result, Throwable t) {
 //            LOGGER.info("SingleResultCallbackProxy onResult metric");
             this.delegate.onResult(result, t);
-            Context context = EaseAgent.getContext();
+            Context context = EaseAgent.getOrCreateTracingContext();
             CommandEvent event = context.get(MongoUtils.EVENT_KEY);
             if (event == null) {
                 return;

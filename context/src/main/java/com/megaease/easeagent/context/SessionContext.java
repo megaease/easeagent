@@ -266,14 +266,12 @@ public class SessionContext implements InitializeContext {
 
     @Override
     public void consumerInject(Span span, MessagingRequest request) {
-        @SuppressWarnings("unchecked")
         Injector<MessagingRequest> injector = tracing.messagingTracing().consumerInjector();
         injector.inject(span, request);
     }
 
     @Override
     public void producerInject(Span span, MessagingRequest request) {
-        @SuppressWarnings("unchecked")
         Injector<MessagingRequest> injector = tracing.messagingTracing().producerInjector();
         injector.inject(span, request);
     }

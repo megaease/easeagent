@@ -36,7 +36,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -54,8 +53,8 @@ public class RabbitMqOnMessageMetricInterceptorTest {
     @Test
     public void before() {
         RabbitMqOnMessageMetricInterceptor interceptor = new RabbitMqOnMessageMetricInterceptor();
-        interceptor.before(null, EaseAgent.getContext());
-        assertNotNull(EaseAgent.getContext().get(START_KEY));
+        interceptor.before(null, EaseAgent.getOrCreateTracingContext());
+        assertNotNull(EaseAgent.getOrCreateTracingContext().get(START_KEY));
     }
 
     @Test
@@ -70,7 +69,7 @@ public class RabbitMqOnMessageMetricInterceptorTest {
         messageProperties.setHeader(ContextCons.MQ_URI, testMqUri);
         Message message = new Message("testBody".getBytes(), messageProperties);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{message}).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         context.put(START_KEY, System.currentTimeMillis() - 100);
         interceptor.after(methodInfo, context);
 

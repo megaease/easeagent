@@ -37,16 +37,16 @@ public class JedisConstructorInterceptorTest {
         JedisConstructorInterceptor jedisConstructorInterceptor = new JedisConstructorInterceptor();
         RedisUtils.mockRedirect(() -> {
             MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{"192.10.0.1"}).build();
-            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getContext());
+            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
             assertEquals(TestConst.REDIRECT_HOST, methodInfo.getArgs()[0]);
 
             methodInfo = MethodInfo.builder().args(new Object[]{"192.10.0.1", 100}).build();
-            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getContext());
+            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
             assertEquals(TestConst.REDIRECT_HOST, methodInfo.getArgs()[0]);
             assertEquals(TestConst.REDIRECT_PORT, methodInfo.getArgs()[1]);
 
             methodInfo = MethodInfo.builder().args(new Object[]{new HostAndPort("12.0.0.0", 10)}).build();
-            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getContext());
+            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
             Object o = methodInfo.getArgs()[0];
             assertTrue(o instanceof HostAndPort);
             HostAndPort hostAndPort = (HostAndPort) o;
@@ -54,7 +54,7 @@ public class JedisConstructorInterceptorTest {
             assertEquals(TestConst.REDIRECT_PORT, hostAndPort.getPort());
 
             methodInfo = MethodInfo.builder().args(new Object[]{new JedisShardInfo("12.0.0.0", 10)}).build();
-            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getContext());
+            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
             o = methodInfo.getArgs()[0];
             assertTrue(o instanceof JedisShardInfo);
             JedisShardInfo jedisShardInfo = (JedisShardInfo) o;
@@ -62,7 +62,7 @@ public class JedisConstructorInterceptorTest {
             assertEquals(TestConst.REDIRECT_PORT, jedisShardInfo.getPort());
 
             methodInfo = MethodInfo.builder().args(new Object[]{new DefaultJedisSocketFactory("12.0.0.0", 10, 5000, 5000, false, null, null, null)}).build();
-            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getContext());
+            jedisConstructorInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
             o = methodInfo.getArgs()[0];
             assertTrue(o instanceof JedisSocketFactory);
             JedisSocketFactory jedisSocketFactory = (JedisSocketFactory) o;

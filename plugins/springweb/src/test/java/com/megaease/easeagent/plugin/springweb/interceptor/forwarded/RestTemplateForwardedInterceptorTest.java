@@ -46,7 +46,7 @@ public class RestTemplateForwardedInterceptorTest {
         RestTemplateForwardedInterceptor restTemplateForwardedInterceptor = new RestTemplateForwardedInterceptor();
 
         MethodInfo methodInfo = MethodInfo.builder().invoker(request).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         restTemplateForwardedInterceptor.before(methodInfo, context);
         assertNull(request.getHeaders().getFirst(TestConst.FORWARDED_NAME));
         context.put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);

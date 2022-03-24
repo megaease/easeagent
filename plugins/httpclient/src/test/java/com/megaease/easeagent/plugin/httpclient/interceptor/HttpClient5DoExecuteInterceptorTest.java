@@ -37,7 +37,7 @@ public class HttpClient5DoExecuteInterceptorTest {
 
     @Test
     public void before() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         HttpGet httpGet = new HttpGet("http://127.0.0.1:8080");
         BasicHttpResponse basicHttpResponse = new BasicHttpResponse(200);
         basicHttpResponse.setHeader(TestConst.RESPONSE_TAG_NAME, TestConst.RESPONSE_TAG_VALUE);
@@ -72,7 +72,7 @@ public class HttpClient5DoExecuteInterceptorTest {
 
     @Test
     public void getRequest() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         HttpGet httpGet = new HttpGet("http://127.0.0.1:8080");
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpGet}).build();
 
@@ -84,7 +84,7 @@ public class HttpClient5DoExecuteInterceptorTest {
 
     @Test
     public void getResponse() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         HttpGet httpGet = new HttpGet("http://127.0.0.1:8080");
         BasicHttpResponse basicHttpResponse = new BasicHttpResponse(200);
         basicHttpResponse.setHeader("aa", "bb");

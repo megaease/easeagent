@@ -85,14 +85,14 @@ public class GatewayServerTracingInterceptor implements Interceptor {
 
     void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
         try (Cleaner ignored = ctx.importToCurrent()) {
-            RequestContext pCtx = EaseAgent.getContext().get(SPAN_CONTEXT_KEY);
+            RequestContext pCtx = EaseAgent.getOrCreateTracingContext().get(SPAN_CONTEXT_KEY);
             ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
             BiConsumer<ServerWebExchange, MethodInfo> consumer = exchange.getAttribute(GatewayCons.CLIENT_RECEIVE_CALLBACK_KEY);
             if (consumer != null) {
                 consumer.accept(exchange, methodInfo);
             }
 
-            FluxHttpServerRequest httpServerRequest = EaseAgent.getContext().get(FluxHttpServerRequest.class);
+            FluxHttpServerRequest httpServerRequest = EaseAgent.getOrCreateTracingContext().get(FluxHttpServerRequest.class);
             PathPattern bestPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
             String route = null;
             if (bestPattern != null) {

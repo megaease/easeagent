@@ -38,7 +38,7 @@ public class HttpClient5AsyncForwardedInterceptorTest {
         SimpleRequestProducer simpleRequestProducer = SimpleRequestProducer.create(simpleHttpRequest);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{simpleRequestProducer}).build();
         HttpClient5AsyncForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpClient5AsyncForwardedInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         httpClientDoExecuteForwardedInterceptor.before(methodInfo, context);
         assertNull(simpleHttpRequest.getFirstHeader(TestConst.FORWARDED_NAME));
         context.put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);

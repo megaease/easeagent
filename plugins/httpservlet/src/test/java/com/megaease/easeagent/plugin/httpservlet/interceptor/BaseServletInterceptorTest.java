@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class BaseServletInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
 
         MockBaseServletInterceptor mockBaseServletInterceptor = new MockBaseServletInterceptor();
-        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNotNull(httpServletRequest.getAttribute(ServletUtils.START_TIME));
     }
 
@@ -78,9 +79,9 @@ public class BaseServletInterceptorTest {
         mockBaseServletInterceptor.key = TestConst.METHOD + " " + TestConst.ROUTE;
         mockBaseServletInterceptor.httpServletRequest = httpServletRequest;
         mockBaseServletInterceptor.httpServletResponse = response;
-        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         mockBaseServletInterceptor.start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
-        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertTrue(mockBaseServletInterceptor.isRan.get());
     }
 
@@ -114,11 +115,11 @@ public class BaseServletInterceptorTest {
         mockBaseServletInterceptor.httpServletResponse = response;
         mockBaseServletInterceptor.throwable = error;
 
-        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         mockBaseServletInterceptor.start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
         httpServletRequest.setAsyncSupported(true);
         final AsyncContext asyncContext = httpServletRequest.startAsync(httpServletRequest, response);
-        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         Thread thread = new Thread(() -> asyncContextConsumer.accept(asyncContext));
         thread.start();
@@ -134,6 +135,11 @@ public class BaseServletInterceptorTest {
         private HttpServletRequest httpServletRequest;
         private HttpServletResponse httpServletResponse;
         private long start;
+
+        @Override
+        public int order() {
+            return Order.HIGH.getOrder();
+        }
 
 
         @Override

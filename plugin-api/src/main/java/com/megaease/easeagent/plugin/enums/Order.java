@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.enums;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 /**
- * Priority definition, lower value with higher priority
+ * Priority definition, lower value with higher priority.
  * Higher priority interceptor run enter before lower ones
  * but exit after lower priority interceptors.
  */
@@ -29,8 +29,18 @@ public enum Order {
     HIGHEST(10, "highest"),
     REDIRECT(19, ConfigConst.PluginID.REDIRECT),
     HIGH(20, "high"),
-    TRACING_INIT(21, ConfigConst.PluginID.TRACING_INIT),
+    FORWARDED(30, ConfigConst.PluginID.FORWARDED),
+    TRACING_INIT(90, ConfigConst.PluginID.TRACING_INIT),
+    /**
+     * if there is not tracing started, start a new tracing
+     * if there is tracing started, append span to current tracing
+     */
     TRACING(100, ConfigConst.PluginID.TRACING),
+    /**
+     * if there is not tracing started, don't generate root span
+     * if there is tracing started, append span to current tracing
+     */
+    TRACING_APPEND(101, ConfigConst.PluginID.TRACING),
     METRIC(200, ConfigConst.PluginID.METRIC),
     LOG(201, ConfigConst.PluginID.LOG),
     LOW(210, "low"),

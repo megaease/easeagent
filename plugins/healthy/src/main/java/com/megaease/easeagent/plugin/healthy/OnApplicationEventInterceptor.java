@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.healthy;
 
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
@@ -46,5 +47,10 @@ public class OnApplicationEventInterceptor implements Interceptor {
     @Override
     public String getType() {
         return "healthReady";
+    }
+
+    @Override
+    public int order() {
+        return Order.HIGH.getOrder();
     }
 }

@@ -25,7 +25,6 @@ import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.httpservlet.AccessPlugin;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -96,7 +95,7 @@ public class ServletHttpLogInterceptorTest {
         servletHttpLogInterceptor.init(iPluginConfig, "", "", "");
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
-        servletHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        servletHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         Object requestInfoO = httpServletRequest.getAttribute(AccessLogInfo.class.getName());
         assertNotNull(requestInfoO);
         assertTrue(requestInfoO instanceof AccessLogInfo);
@@ -107,7 +106,7 @@ public class ServletHttpLogInterceptorTest {
             Object type = stringObjectMap.get("type");
             return type instanceof String && "access-log".equals(type);
         });
-        servletHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        servletHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         // AccessLogInfo info = getRequestInfo(lastJsonReporter);
         AccessLogInfo info = MockEaseAgent.getLastLog();
         verify(info, start);
@@ -117,8 +116,8 @@ public class ServletHttpLogInterceptorTest {
         httpServletRequest = TestServletUtils.buildMockRequest();
         response = TestServletUtils.buildMockResponse();
         methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).throwable(new RuntimeException("test error")).build();
-        servletHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getContext());
-        servletHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        servletHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        servletHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         // info = getRequestInfo(lastJsonReporter);
         info = MockEaseAgent.getLastLog();
         start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);

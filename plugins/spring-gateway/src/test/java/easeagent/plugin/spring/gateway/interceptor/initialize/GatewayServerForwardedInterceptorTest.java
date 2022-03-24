@@ -39,7 +39,7 @@ public class GatewayServerForwardedInterceptorTest {
     public void doBefore() {
         GatewayServerForwardedInterceptor interceptor = new GatewayServerForwardedInterceptor();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.build(builder().header(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE));
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.doBefore(methodInfo, context);
         assertEquals(TestConst.FORWARDED_VALUE, context.get(TestConst.FORWARDED_NAME));

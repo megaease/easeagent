@@ -40,7 +40,7 @@ public class FeignClientForwardedInterceptorTest {
         FeignClientForwardedInterceptor feignClientForwardedInterceptor = new FeignClientForwardedInterceptor();
         Request request = RequestUtils.buildFeignClient();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{request}).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         feignClientForwardedInterceptor.before(methodInfo, context);
         assertNull(header(request, TestConst.FORWARDED_NAME));
         context.put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);

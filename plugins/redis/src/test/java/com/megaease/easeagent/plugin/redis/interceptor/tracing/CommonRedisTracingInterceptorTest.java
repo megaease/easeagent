@@ -45,7 +45,7 @@ public class CommonRedisTracingInterceptorTest {
     @Test
     public void doBefore() {
         MockCommonRedisTracingInterceptor commonRedisTracingInterceptor = new MockCommonRedisTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         commonRedisTracingInterceptor.doBefore(null, context);
         assertFalse(commonRedisTracingInterceptor.ran.get());
         Span span = context.nextSpan().start();
@@ -61,7 +61,7 @@ public class CommonRedisTracingInterceptorTest {
     @Test
     public void getEnterKey() {
         CommonRedisTracingInterceptor commonRedisTracingInterceptor = new MockCommonRedisTracingInterceptor();
-        assertSame(ENTER, commonRedisTracingInterceptor.getEnterKey(null, EaseAgent.getContext()));
+        assertSame(ENTER, commonRedisTracingInterceptor.getEnterKey(null, EaseAgent.getOrCreateTracingContext()));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class CommonRedisTracingInterceptorTest {
     @Test
     public void startTracing() {
         CommonRedisTracingInterceptor commonRedisTracingInterceptor = new MockCommonRedisTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
 
         commonRedisTracingInterceptor.startTracing(context, name, null, null);
         Span span = context.get(SPAN_KEY);
@@ -114,7 +114,7 @@ public class CommonRedisTracingInterceptorTest {
     @Test
     public void finishTracing() {
         CommonRedisTracingInterceptor commonRedisTracingInterceptor = new MockCommonRedisTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         commonRedisTracingInterceptor.finishTracing(null, context);
         Span span = context.nextSpan().start();
         String name = "test_redis_span";

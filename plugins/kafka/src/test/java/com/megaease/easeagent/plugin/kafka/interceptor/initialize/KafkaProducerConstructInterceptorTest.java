@@ -48,7 +48,7 @@ public class KafkaProducerConstructInterceptorTest {
 
 
         MethodInfo methodInfo = MethodInfo.builder().invoker(mockKafkaProducer).args(new Object[]{config}).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals(TestConst.URIS, mockKafkaProducer.getEaseAgent$$DynamicField$$Data());
 
         Properties props = new Properties();
@@ -58,7 +58,7 @@ public class KafkaProducerConstructInterceptorTest {
         mockKafkaProducer = new MockKafkaProducer(props);
 
         methodInfo = MethodInfo.builder().invoker(mockKafkaProducer).args(new Object[]{props}).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals(TestConst.URIS, mockKafkaProducer.getEaseAgent$$DynamicField$$Data());
 
     }

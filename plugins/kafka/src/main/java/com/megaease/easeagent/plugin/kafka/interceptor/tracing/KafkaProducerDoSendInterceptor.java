@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
@@ -85,5 +86,10 @@ public class KafkaProducerDoSendInterceptor implements NonReentrantInterceptor {
             scope.close();
         }
 
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 }

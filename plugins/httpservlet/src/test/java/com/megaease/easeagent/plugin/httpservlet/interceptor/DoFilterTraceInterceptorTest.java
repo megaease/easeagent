@@ -53,22 +53,22 @@ public class DoFilterTraceInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
 
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
-        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         Object o = httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
         assertNotNull(o);
         assertTrue(o instanceof RequestContext);
-        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         Object o2 = httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
         assertNotNull(o2);
         assertSame(o, o2);
-        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertNull(mockSpan.parentId());
         checkServerSpan(mockSpan);
 
         MockEaseAgent.cleanLastSpan();
-        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(MockEaseAgent.getLastSpan());
     }
 
@@ -89,8 +89,8 @@ public class DoFilterTraceInterceptorTest {
         String errorInfo = "test error";
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).throwable(new RuntimeException(errorInfo)).build();
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
-        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
-        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(Span.Kind.SERVER.name(), mockSpan.kind());
@@ -102,7 +102,7 @@ public class DoFilterTraceInterceptorTest {
     @Test
     public void testHasPassHeader() {
         MockHttpServletRequest httpServletRequest = TestServletUtils.buildMockRequest();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         RequestContext requestContext = context.clientRequest(new MockClientRequest(httpServletRequest::addHeader));
         requestContext.scope().close();
         assertFalse(context.currentTracing().hasCurrentSpan());
@@ -110,8 +110,8 @@ public class DoFilterTraceInterceptorTest {
         HttpServletResponse response = TestServletUtils.buildMockResponse();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
-        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
-        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         assertNotNull(mockSpan);
         assertEquals(requestContext.span().traceIdString(), mockSpan.traceId());
@@ -153,10 +153,10 @@ public class DoFilterTraceInterceptorTest {
         HttpServletResponse response = TestServletUtils.buildMockResponse();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
         DoFilterTraceInterceptor doFilterTraceInterceptor = new DoFilterTraceInterceptor();
-        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         httpServletRequest.setAsyncSupported(true);
         final AsyncContext asyncContext = httpServletRequest.startAsync(httpServletRequest, response);
-        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        doFilterTraceInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         MockEaseAgent.cleanLastSpan();
         Thread thread = new Thread(() -> asyncContextConsumer.accept(asyncContext));

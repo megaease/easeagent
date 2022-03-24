@@ -38,7 +38,7 @@ public class FeignBlockingLoadBalancerClientInterceptorTest {
     public void before() {
         FeignBlockingLoadBalancerClientInterceptor interceptor = new FeignBlockingLoadBalancerClientInterceptor();
         BaseServiceNameInterceptorTest.initInterceptor(interceptor);
-        EaseAgent.getContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
+        EaseAgent.getOrCreateTracingContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
 
 
         RequestTemplate requestTemplate = new RequestTemplate();
@@ -53,7 +53,7 @@ public class FeignBlockingLoadBalancerClientInterceptorTest {
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{request}).build();
 
-        interceptor.before(methodInfo, EaseAgent.getContext());
+        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         Request newRequest = (Request) methodInfo.getArgs()[0];
         CheckUtils.check(name -> {

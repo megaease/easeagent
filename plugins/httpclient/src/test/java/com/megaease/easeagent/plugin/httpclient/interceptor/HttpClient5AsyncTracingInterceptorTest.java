@@ -53,7 +53,7 @@ public class HttpClient5AsyncTracingInterceptorTest {
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Span span = context.nextSpan();
         try (Scope scope = span.maybeScope()) {
             mockSpan = runOne(httpResponseFutureCallback -> {
@@ -96,10 +96,10 @@ public class HttpClient5AsyncTracingInterceptorTest {
         }).build();
         MockEaseAgent.cleanLastSpan();
         HttpClient5AsyncTracingInterceptor httpClient5AsyncTracingInterceptor = new HttpClient5AsyncTracingInterceptor();
-        httpClient5AsyncTracingInterceptor.doBefore(methodInfo, EaseAgent.getContext());
-        assertNotNull(EaseAgent.getContext().get(HttpClient5AsyncTracingInterceptor.class));
-        httpClient5AsyncTracingInterceptor.doAfter(methodInfo, EaseAgent.getContext());
-        assertNull(EaseAgent.getContext().get(HttpClient5AsyncTracingInterceptor.class));
+        httpClient5AsyncTracingInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        assertNotNull(EaseAgent.getOrCreateTracingContext().get(HttpClient5AsyncTracingInterceptor.class));
+        httpClient5AsyncTracingInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        assertNull(EaseAgent.getOrCreateTracingContext().get(HttpClient5AsyncTracingInterceptor.class));
         AtomicReference<FutureCallback<HttpResponse>> newCallBack = new AtomicReference<>();
         for (Object o : methodInfo.getArgs()) {
             if (o instanceof FutureCallback) {

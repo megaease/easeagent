@@ -45,7 +45,7 @@ public class RabbitMqConsumerTracingInterceptorTest {
     @Test
     public void before() {
         RabbitMqConsumerTracingInterceptor interceptor = new RabbitMqConsumerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         String uri = "192.168.0.13:2222";
         context.put(ContextCons.MQ_URI, uri);
         String exchange = "testExchange";

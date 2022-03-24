@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.elasticsearch;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 
 public class ElasticsearchRedirectPlugin implements AgentPlugin {
     @Override
@@ -31,4 +32,8 @@ public class ElasticsearchRedirectPlugin implements AgentPlugin {
         return ConfigConst.INTEGRABILITY;
     }
 
+    @Override
+    public int order() {
+        return Order.REDIRECT.getOrder();
+    }
 }

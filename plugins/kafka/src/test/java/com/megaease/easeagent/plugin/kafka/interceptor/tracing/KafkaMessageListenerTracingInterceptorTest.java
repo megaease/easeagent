@@ -62,7 +62,7 @@ public class KafkaMessageListenerTracingInterceptorTest {
     @Test
     public void doBefore() {
         KafkaMessageListenerTracingInterceptor interceptor = new KafkaMessageListenerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockKafkaConsumer kafkaConsumer = MockKafkaConsumer.buildOne();
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{createConsumerRecord(kafkaConsumer)}).build();
@@ -74,7 +74,7 @@ public class KafkaMessageListenerTracingInterceptorTest {
     @Test
     public void doBeforeRedirected() {
         KafkaAbstractConfigConstructInterceptor kafkaAbstractConfigConstructInterceptor = new KafkaAbstractConfigConstructInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         KafkaTestUtils.mockRedirect(() -> {
             Properties props = new Properties();
             props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, TestConst.URIS);
@@ -82,7 +82,7 @@ public class KafkaMessageListenerTracingInterceptorTest {
             props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
             MethodInfo constructMethodInfo = MethodInfo.builder().args(new Object[]{props}).build();
-            kafkaAbstractConfigConstructInterceptor.doBefore(constructMethodInfo, EaseAgent.getContext());
+            kafkaAbstractConfigConstructInterceptor.doBefore(constructMethodInfo, EaseAgent.getOrCreateTracingContext());
 
             MockKafkaConsumer kafkaConsumer = new MockKafkaConsumer(props);
             kafkaConsumer.setEaseAgent$$DynamicField$$Data(props.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
@@ -101,7 +101,7 @@ public class KafkaMessageListenerTracingInterceptorTest {
     @Test
     public void doAfter() {
         KafkaMessageListenerTracingInterceptor interceptor = new KafkaMessageListenerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockEaseAgent.cleanLastSpan();
         interceptor.doAfter(null, context);
         assertNull(MockEaseAgent.getLastSpan());

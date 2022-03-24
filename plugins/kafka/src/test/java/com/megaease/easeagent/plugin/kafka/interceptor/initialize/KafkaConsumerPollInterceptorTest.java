@@ -46,7 +46,7 @@ public class KafkaConsumerPollInterceptorTest {
         assertNull(mockConsumerRecord.getEaseAgent$$DynamicField$$Data());
 
         MethodInfo methodInfo = MethodInfo.builder().invoker(kafkaConsumer).retValue(consumerRecords).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNotNull(mockConsumerRecord.getEaseAgent$$DynamicField$$Data());
         assertEquals(kafkaConsumer.getEaseAgent$$DynamicField$$Data(), mockConsumerRecord.getEaseAgent$$DynamicField$$Data());
 

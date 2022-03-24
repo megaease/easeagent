@@ -56,7 +56,7 @@ public class RabbitMqProducerMetricInterceptorTest {
     public void after() {
         RabbitMqProducerMetricInterceptor interceptor = new RabbitMqProducerMetricInterceptor();
         InterceptorTestUtils.init(interceptor, new RabbitMqPlugin());
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         ContextUtils.setBeginTime(context);
 
         String exchange = "testExchange";

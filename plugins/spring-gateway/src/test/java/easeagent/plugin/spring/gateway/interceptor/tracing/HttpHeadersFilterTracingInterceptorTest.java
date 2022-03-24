@@ -18,7 +18,6 @@
 package easeagent.plugin.spring.gateway.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -26,7 +25,6 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import easeagent.plugin.spring.gateway.TestServerWebExchangeUtils;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
-import org.bouncycastle.cert.ocsp.Req;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.HttpHeaders;
@@ -45,7 +43,7 @@ public class HttpHeadersFilterTracingInterceptorTest {
 
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{null, mockServerWebExchange}).retValue(new HttpHeaders()).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(mockServerWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY));
 
 
@@ -55,7 +53,7 @@ public class HttpHeadersFilterTracingInterceptorTest {
         RequestContext requestContext = GatewayServerTracingInterceptorTest.beforeGatewayServerTracing(mockServerWebExchange);
         Span span = requestContext.span();
         try (Scope ignored = requestContext.scope()) {
-            interceptor.doAfter(methodInfo, EaseAgent.getContext());
+            interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
             RequestContext clientContext = mockServerWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
             HttpHeaders ret = (HttpHeaders) methodInfo.getRetValue();
             Collection<String> headers = ret.toSingleValueMap().values();

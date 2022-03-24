@@ -23,6 +23,7 @@ import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
@@ -40,6 +41,11 @@ public class InterceptorTest {
         final Object key = new Object();
         Interceptor interceptor = new Interceptor() {
             @Override
+            public int order() {
+                return Order.HIGH.getOrder();
+            }
+
+            @Override
             public void before(MethodInfo methodInfo, Context context) {
                 Span span = context.nextSpan();
                 span.start();
@@ -52,7 +58,7 @@ public class InterceptorTest {
                 span.finish();
             }
         };
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         interceptor.before(null, context);
         Span span = context.get(key);
         assertNotNull(span);

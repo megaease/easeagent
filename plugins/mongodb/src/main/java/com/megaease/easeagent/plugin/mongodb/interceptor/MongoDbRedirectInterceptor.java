@@ -50,5 +50,8 @@ public class MongoDbRedirectInterceptor implements Interceptor {
         return Order.REDIRECT.getName();
     }
 
-
+    @Override
+    public int order() {
+        return Order.REDIRECT.getOrder();
+    }
 }

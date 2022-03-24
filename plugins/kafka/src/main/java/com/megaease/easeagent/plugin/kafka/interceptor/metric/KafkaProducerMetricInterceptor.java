@@ -67,6 +67,11 @@ public class KafkaProducerMetricInterceptor implements NonReentrantInterceptor {
         return Order.METRIC.getName();
     }
 
+    @Override
+    public int order() {
+        return Order.METRIC.getOrder();
+    }
+
     public static KafkaMetric getKafkaMetric() {
         return kafkaMetric;
     }

@@ -77,4 +77,8 @@ public class SpringElasticsearchInterceptor implements NonReentrantInterceptor {
         return Order.REDIRECT.getName();
     }
 
+    @Override
+    public int order() {
+        return Order.REDIRECT.getOrder();
+    }
 }

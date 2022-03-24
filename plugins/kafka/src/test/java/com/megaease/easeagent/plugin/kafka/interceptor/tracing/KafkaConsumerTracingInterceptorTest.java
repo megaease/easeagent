@@ -55,15 +55,15 @@ public class KafkaConsumerTracingInterceptorTest {
 
         MethodInfo methodInfo = MethodInfo.builder().invoker(kafkaConsumer).throwable(new RuntimeException("testError")).build();
         MockEaseAgent.cleanLastSpan();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(MockEaseAgent.getLastSpan());
 
         methodInfo = MethodInfo.builder().invoker(kafkaConsumer).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(MockEaseAgent.getLastSpan());
 
         methodInfo = MethodInfo.builder().invoker(kafkaConsumer).retValue(new ConsumerRecords<>(Collections.emptyMap())).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(MockEaseAgent.getLastSpan());
 
 
@@ -73,7 +73,7 @@ public class KafkaConsumerTracingInterceptorTest {
         );
 
         methodInfo = MethodInfo.builder().invoker(kafkaConsumer).retValue(consumerRecords).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         ReportSpan mockSpan = MockEaseAgent.getLastSpan();
         checkBaseInfo(mockSpan, topic, (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data());
 
@@ -108,7 +108,7 @@ public class KafkaConsumerTracingInterceptorTest {
             Collections.singletonMap(new TopicPartition(topic, 1),
                 Collections.singletonList(record(topic, 0)))
         );
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         checkBaseInfo(Objects.requireNonNull(MockEaseAgent.getLastSpan()), topic, uri);
 
         List<ReportSpan> mockSpans = new ArrayList<>();
@@ -117,12 +117,12 @@ public class KafkaConsumerTracingInterceptorTest {
             Collections.singletonMap(new TopicPartition(topic, 1),
                 tenRecords(topic)
             ));
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         assertEquals(1, mockSpans.size());
         checkBaseInfo(mockSpans.get(0), topic, uri);
         mockSpans.clear();
 
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         assertEquals(10, mockSpans.size());
         for (ReportSpan mockSpan : mockSpans) {
             checkBaseInfo(mockSpan, topic, uri);
@@ -136,7 +136,7 @@ public class KafkaConsumerTracingInterceptorTest {
                 tenRecords(topic)
             ));
         interceptor.singleRootSpanOnReceiveBatch = false;
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         assertEquals(10, mockSpans.size());
         for (ReportSpan mockSpan : mockSpans) {
             checkBaseInfo(mockSpan, topic, uri);
@@ -178,19 +178,19 @@ public class KafkaConsumerTracingInterceptorTest {
 
         String uri = (String) kafkaConsumer.getEaseAgent$$DynamicField$$Data();
         ConsumerRecords<String, String> consumerRecords = new ConsumerRecords<>(records);
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         assertEquals(2, mockSpans.size());
         checkTowTopicMockSpans(mockSpans, uri);
         mockSpans.clear();
 
 
         consumerRecords = new ConsumerRecords<>(towTopicAndTenRecords());
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         assertEquals(2, mockSpans.size());
         checkTowTopicMockSpans(mockSpans, uri);
         mockSpans.clear();
 
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         assertEquals(10, mockSpans.size());
         checkTowTopicMockSpans(mockSpans, uri);
         mockSpans.clear();
@@ -199,7 +199,7 @@ public class KafkaConsumerTracingInterceptorTest {
         MockEaseAgent.setMockSpanReport(mockSpans::add);
         consumerRecords = new ConsumerRecords<>(towTopicAndTenRecords());
         interceptor.singleRootSpanOnReceiveBatch = false;
-        interceptor.afterPoll(EaseAgent.getContext(), consumerRecords, uri);
+        interceptor.afterPoll(EaseAgent.getOrCreateTracingContext(), consumerRecords, uri);
         assertEquals(10, mockSpans.size());
         checkTowTopicMockSpans(mockSpans, uri);
         mockSpans.clear();
@@ -216,7 +216,7 @@ public class KafkaConsumerTracingInterceptorTest {
     @Test
     public void setConsumerSpan() {
         KafkaConsumerTracingInterceptor interceptor = new KafkaConsumerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         Span span = context.nextSpan().start();
         String topic = "testTopic";
         String uri = "testUri";
@@ -233,7 +233,7 @@ public class KafkaConsumerTracingInterceptorTest {
             props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
             MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{props}).build();
-            kafkaAbstractConfigConstructInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+            kafkaAbstractConfigConstructInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
 
             MockKafkaConsumer kafkaConsumer = new MockKafkaConsumer(props);
             kafkaConsumer.setEaseAgent$$DynamicField$$Data(props.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));

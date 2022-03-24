@@ -55,7 +55,7 @@ public class MongoReactiveTraceTest extends MongoBaseTest {
 
     @Test
     public void performSuccess() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{null, null, null, mock(SingleResultCallback.class)}).build();
         interceptor.before(methodInfo, context);
 
@@ -73,7 +73,7 @@ public class MongoReactiveTraceTest extends MongoBaseTest {
 
     @Test
     public void performOpFail() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{null, null, null, mock(SingleResultCallback.class)}).build();
         interceptor.before(methodInfo, context);
 
@@ -97,7 +97,7 @@ public class MongoReactiveTraceTest extends MongoBaseTest {
 
     @Test
     public void performOpFail2() {
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{null, null, null, mock(SingleResultCallback.class)}).build();
         interceptor.before(methodInfo, context);
 

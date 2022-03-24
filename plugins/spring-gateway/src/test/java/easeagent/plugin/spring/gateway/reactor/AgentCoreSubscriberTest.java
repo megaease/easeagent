@@ -25,8 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.reactivestreams.Subscription;
 
-import java.util.function.BiConsumer;
-
 import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
@@ -71,7 +69,7 @@ public class AgentCoreSubscriberTest {
     public void onError() {
         MockCoreSubscriber mockCoreSubscriber = new MockCoreSubscriber();
         MethodInfo errorMethodInfo = MethodInfo.builder().build();
-        AsyncContext errorAsyncContext = EaseAgent.getContext().exportAsync();
+        AsyncContext errorAsyncContext = EaseAgent.getOrCreateTracingContext().exportAsync();
         RuntimeException runtimeException = new RuntimeException();
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, errorMethodInfo, errorAsyncContext, (methodInfo, asyncContext) -> {
             assertNotNull(methodInfo);
@@ -89,7 +87,7 @@ public class AgentCoreSubscriberTest {
     public void onComplete() {
         MockCoreSubscriber mockCoreSubscriber = new MockCoreSubscriber();
         MethodInfo completeMethodInfo = MethodInfo.builder().build();
-        AsyncContext completeAsyncContext = EaseAgent.getContext().exportAsync();
+        AsyncContext completeAsyncContext = EaseAgent.getOrCreateTracingContext().exportAsync();
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, completeMethodInfo, completeAsyncContext, (methodInfo, asyncContext) -> {
             assertNotNull(methodInfo);
             assertNotNull(asyncContext);

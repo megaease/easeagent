@@ -1,2 +1,2 @@
-com.megaease.easeagent.metrics.MetricBeanProvider
+com.megaease.easeagent.metrics.MetricBeanProviderImpl
 com.megaease.easeagent.metrics.jvm.JvmBeanProvider

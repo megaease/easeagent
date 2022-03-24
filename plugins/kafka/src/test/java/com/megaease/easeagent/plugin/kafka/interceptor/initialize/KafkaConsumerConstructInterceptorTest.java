@@ -48,18 +48,18 @@ public class KafkaConsumerConstructInterceptorTest {
 
 
         MethodInfo methodInfo = MethodInfo.builder().invoker(mockDynamicFieldAccessor).args(new Object[]{config}).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals(TestConst.URIS, mockDynamicFieldAccessor.getEaseAgent$$DynamicField$$Data());
 
         ConsumerConfig consumerConfig = new ConsumerConfig(config);
         methodInfo = MethodInfo.builder().invoker(mockDynamicFieldAccessor).args(new Object[]{consumerConfig}).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals(TestConst.URIS, mockDynamicFieldAccessor.getEaseAgent$$DynamicField$$Data());
 
 
         Map emptyConfig = new HashMap();
         methodInfo = MethodInfo.builder().invoker(mockDynamicFieldAccessor).args(new Object[]{emptyConfig}).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertNull(mockDynamicFieldAccessor.getEaseAgent$$DynamicField$$Data());
 
     }

@@ -57,7 +57,7 @@ public class JdbcStmTracingInterceptorTest {
     @Test
     public void doBefore() throws SQLException {
         JdbcStmTracingInterceptor interceptor = new JdbcStmTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         InterceptorTestUtils.init(interceptor, new JdbcTracingPlugin());
         String method = "test_method";
         MethodInfo methodInfo = MethodInfo.builder().method(method).build();
@@ -101,7 +101,7 @@ public class JdbcStmTracingInterceptorTest {
     public void doAfter() throws SQLException {
         JdbcStmTracingInterceptor interceptor = new JdbcStmTracingInterceptor();
         InterceptorTestUtils.init(interceptor, new JdbcTracingPlugin());
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         String method = "test_method";
         MethodInfo methodInfo = MethodInfo.builder().method(method).build();
         SqlInfo sqlInfo = new SqlInfo(TestUtils.mockConnection());
@@ -137,6 +137,6 @@ public class JdbcStmTracingInterceptorTest {
     @Test
     public void order() {
         JdbcStmTracingInterceptor interceptor = new JdbcStmTracingInterceptor();
-        assertEquals(Order.TRACING.getOrder(), interceptor.order());
+        assertEquals(Order.TRACING_APPEND.getOrder(), interceptor.order());
     }
 }

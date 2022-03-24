@@ -76,14 +76,14 @@ public class DoFilterMetricInterceptorTest {
         doFilterMetricInterceptor.init(iPluginConfig, "", "", "");
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
-        doFilterMetricInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        doFilterMetricInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
         TagVerifier tagVerifier = new TagVerifier()
             .add("category", "application")
             .add("type", "http-request")
             .add("url", TestConst.METHOD + " " + TestConst.ROUTE);
         LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
 
-        doFilterMetricInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        doFilterMetricInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
         Map<String, Object> metric = getMetric(lastJsonReporter);
 
         assertEquals(1, (int) metric.get("cnt"));
@@ -94,8 +94,8 @@ public class DoFilterMetricInterceptorTest {
         httpServletRequest = TestServletUtils.buildMockRequest();
         response = TestServletUtils.buildMockResponse();
         methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).throwable(new RuntimeException("test error")).build();
-        doFilterMetricInterceptor.doBefore(methodInfo, EaseAgent.getContext());
-        doFilterMetricInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        doFilterMetricInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        doFilterMetricInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         metric = getMetric(lastJsonReporter);
         assertEquals(1, (int) metric.get("cnt"));

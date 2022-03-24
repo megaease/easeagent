@@ -95,7 +95,7 @@ public class InterceptorPluginDecorator implements Interceptor {
     public int order() {
         int pluginOrder = this.plugin.order();
         int interceptorOrder = this.interceptor.order();
-        return interceptorOrder << 8 + pluginOrder;
+        return (interceptorOrder << 8) + pluginOrder;
     }
 
     public static Supplier<Interceptor> getInterceptorSupplier(final AgentPlugin plugin, final Supplier<Interceptor> supplier) {

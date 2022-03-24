@@ -46,7 +46,7 @@ public class FeignClientTracingInterceptorTest {
         MethodInfo.MethodInfoBuilder methodInfoBuilder = MethodInfo.builder();
         MethodInfo methodInfo = methodInfoBuilder.args(new Object[]{request}).build();
 
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         FeignClientTracingInterceptor feignClientTracingInterceptor = new FeignClientTracingInterceptor();
         MockEaseAgent.cleanLastSpan();
 
@@ -93,7 +93,7 @@ public class FeignClientTracingInterceptorTest {
     public void getRequest() {
         Request request = RequestUtils.buildFeignClient();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{request}).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         FeignClientTracingInterceptor feignClientTracingInterceptor = new FeignClientTracingInterceptor();
         HttpRequest httpRequest = feignClientTracingInterceptor.getRequest(methodInfo, context);
         assertEquals(com.megaease.easeagent.plugin.api.trace.Span.Kind.CLIENT, httpRequest.kind());
@@ -111,7 +111,7 @@ public class FeignClientTracingInterceptorTest {
         MethodInfo methodInfo = methodInfoBuilder.build();
 
         FeignClientTracingInterceptor feignClientTracingInterceptor = new FeignClientTracingInterceptor();
-        HttpResponse httpResponse = feignClientTracingInterceptor.getResponse(methodInfo, EaseAgent.getContext());
+        HttpResponse httpResponse = feignClientTracingInterceptor.getResponse(methodInfo, EaseAgent.getOrCreateTracingContext());
         assertEquals("GET", httpResponse.method());
         assertNull(httpResponse.route());
         assertNull(httpResponse.maybeError());
@@ -119,7 +119,7 @@ public class FeignClientTracingInterceptorTest {
 
         RuntimeException runtimeException = new RuntimeException("test error");
         methodInfoBuilder.throwable(runtimeException);
-        httpResponse = feignClientTracingInterceptor.getResponse(methodInfoBuilder.build(), EaseAgent.getContext());
+        httpResponse = feignClientTracingInterceptor.getResponse(methodInfoBuilder.build(), EaseAgent.getOrCreateTracingContext());
         assertEquals(runtimeException, httpResponse.maybeError());
     }
 }

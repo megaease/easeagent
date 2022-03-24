@@ -50,6 +50,11 @@ public class MongoInternalConnectionSendAndReceiveAsync4TraceInterceptor impleme
         return Order.TRACING.getName();
     }
 
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
+    }
+
     public static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {
 
         //        private static final Logger LOGGER = LoggerFactory.getLogger(SingleResultCallbackProxy.class);
@@ -65,7 +70,7 @@ public class MongoInternalConnectionSendAndReceiveAsync4TraceInterceptor impleme
         public void onResult(T result, Throwable t) {
 //            LOGGER.info("SingleResultCallbackProxy onResult trace");
             this.delegate.onResult(result, t);
-            Context context = EaseAgent.getContext();
+            Context context = EaseAgent.getOrCreateTracingContext();
             CommandEvent event = context.get(MongoUtils.EVENT_KEY);
             if (event == null) {
                 return;

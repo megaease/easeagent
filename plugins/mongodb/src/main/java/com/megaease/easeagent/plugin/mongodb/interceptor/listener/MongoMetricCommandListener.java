@@ -37,21 +37,21 @@ public class MongoMetricCommandListener extends MongoBaseMetricCommandListener {
     @Override
     public void commandStarted(CommandStartedEvent event) {
 //        LOGGER.warn("commandStarted metric");
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MetricHelper.commandStarted(context, event);
     }
 
     @Override
     public void commandSucceeded(CommandSucceededEvent event) {
 //        LOGGER.warn("commandSucceeded metric");
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MetricHelper.commandSucceeded(context, config, this.mongoMetric, event);
     }
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
 //        LOGGER.warn("commandFailed metric");
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MetricHelper.commandFailed(context, config, this.mongoMetric, event);
     }
 

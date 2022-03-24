@@ -48,7 +48,7 @@ public class GatewayServerTracingInterceptorTest {
     @Test
     public void before() {
         GatewayServerTracingInterceptor interceptor = new GatewayServerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
@@ -81,7 +81,7 @@ public class GatewayServerTracingInterceptorTest {
     @Test
     public void after() {
         GatewayServerTracingInterceptor interceptor = new GatewayServerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
@@ -113,7 +113,7 @@ public class GatewayServerTracingInterceptorTest {
     @Test
     public void finishCallback() throws InterruptedException {
         GatewayServerTracingInterceptor interceptor = new GatewayServerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
@@ -138,7 +138,7 @@ public class GatewayServerTracingInterceptorTest {
 
     public static RequestContext beforeGatewayServerTracing(MockServerWebExchange mockServerWebExchange) {
         GatewayServerTracingInterceptor interceptor = new GatewayServerTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
         assertNotNull(context.get(GatewayServerTracingInterceptor.SPAN_CONTEXT_KEY));

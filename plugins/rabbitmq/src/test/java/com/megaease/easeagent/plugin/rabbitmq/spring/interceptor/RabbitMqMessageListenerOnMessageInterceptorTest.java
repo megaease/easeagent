@@ -43,7 +43,7 @@ public class RabbitMqMessageListenerOnMessageInterceptorTest {
         messageProperties.setHeader(ContextCons.MQ_URI, testMqUri);
         Message message = new Message("testBody".getBytes(), messageProperties);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{message}).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         interceptor.before(methodInfo, context);
         assertEquals(testMqUri, context.get(ContextCons.MQ_URI));
         context.remove(ContextCons.MQ_URI);

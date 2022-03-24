@@ -152,7 +152,7 @@ public class KafkaMetricTest {
             config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, TestConst.URIS);
 
             MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{config}).build();
-            interceptor.doBefore(methodInfo, EaseAgent.getContext());
+            interceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
 
             String testTagKey = "tagKey";
             String testTagValue = "tagValue";

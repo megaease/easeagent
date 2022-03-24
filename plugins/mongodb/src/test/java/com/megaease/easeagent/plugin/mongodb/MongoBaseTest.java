@@ -63,14 +63,14 @@ public class MongoBaseTest {
 
     @Before
     public void before() {
-        EaseAgent.initializeContextSupplier.get().clear();
+        EaseAgent.initializeContextSupplier.getContext(true).clear();
         config = new AutoRefreshPluginConfigImpl();
         IPluginConfig iPluginConfig = mock(IPluginConfig.class);
         when(iPluginConfig.enabled()).thenReturn(true);
         when(iPluginConfig.namespace()).thenReturn("mongodb");
         when(iPluginConfig.domain()).thenReturn("observability");
         config.onChange(null, iPluginConfig);
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         ContextUtils.setBeginTime(context);
         MockEaseAgent.cleanLastSpan();
         clusterId = new ClusterId("local-cluster");

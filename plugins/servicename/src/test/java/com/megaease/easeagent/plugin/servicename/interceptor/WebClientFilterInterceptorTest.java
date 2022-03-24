@@ -35,14 +35,14 @@ public class WebClientFilterInterceptorTest {
     public void before() throws URISyntaxException {
         WebClientFilterInterceptor interceptor = new WebClientFilterInterceptor();
         BaseServiceNameInterceptorTest.initInterceptor(interceptor);
-        EaseAgent.getContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
+        EaseAgent.getOrCreateTracingContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
 
         String host = "TEST-SERVER";
         ClientRequest clientRequest = MockClientRequest.build(new URI("http://" + host));
 
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).build();
 
-        interceptor.before(methodInfo, EaseAgent.getContext());
+        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
 
         ClientRequest newRequest = (ClientRequest) methodInfo.getArgs()[0];
         CheckUtils.check(name -> newRequest.headers().getFirst(name), host);

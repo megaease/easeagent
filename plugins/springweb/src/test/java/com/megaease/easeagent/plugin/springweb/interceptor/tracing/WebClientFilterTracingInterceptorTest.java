@@ -58,7 +58,7 @@ public class WebClientFilterTracingInterceptorTest {
     @Test
     public void doBefore() throws URISyntaxException {
         WebClientFilterTracingInterceptor interceptor = new WebClientFilterTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         URI uri = new URI(url);
         ClientRequest clientRequest = MockClientRequest.build(uri);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).build();
@@ -94,7 +94,7 @@ public class WebClientFilterTracingInterceptorTest {
     @Test
     public void doAfter() throws URISyntaxException {
         WebClientFilterTracingInterceptor interceptor = new WebClientFilterTracingInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         URI uri = new URI(url);
         ClientRequest clientRequest = MockClientRequest.build(uri);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();

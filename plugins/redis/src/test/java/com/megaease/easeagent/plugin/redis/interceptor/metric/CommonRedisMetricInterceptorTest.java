@@ -53,7 +53,7 @@ public class CommonRedisMetricInterceptorTest {
     @Test
     public void doBefore() {
         MockCommonRedisMetricInterceptor commonRedisMetricInterceptor = new MockCommonRedisMetricInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         commonRedisMetricInterceptor.doBefore(null, context);
         assertNotNull(context.get(START));
         context.remove(START);
@@ -66,7 +66,7 @@ public class CommonRedisMetricInterceptorTest {
     @Test
     public void doAfter() throws InterruptedException {
         MockCommonRedisMetricInterceptor commonRedisMetricInterceptor = new MockCommonRedisMetricInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         RedisPlugin redisPlugin = new RedisPlugin();
         IPluginConfig iPluginConfig = EaseAgent.getConfig(redisPlugin.getDomain(), redisPlugin.getNamespace(), commonRedisMetricInterceptor.getType());
         commonRedisMetricInterceptor.init(iPluginConfig, "", "", "");

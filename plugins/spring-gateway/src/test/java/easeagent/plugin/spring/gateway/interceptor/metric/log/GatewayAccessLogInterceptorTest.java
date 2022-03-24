@@ -22,7 +22,6 @@ import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
 import com.megaease.easeagent.mock.report.MockReport;
-import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
@@ -34,7 +33,6 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.utils.common.HostAddress;
-import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import easeagent.plugin.spring.gateway.AccessPlugin;
 import easeagent.plugin.spring.gateway.TestConst;
 import easeagent.plugin.spring.gateway.TestServerWebExchangeUtils;
@@ -61,7 +59,7 @@ public class GatewayAccessLogInterceptorTest {
     @Test
     public void before() {
         GatewayAccessLogInterceptor interceptor = new GatewayAccessLogInterceptor();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
@@ -108,7 +106,7 @@ public class GatewayAccessLogInterceptorTest {
         EaseAgent.agentReport = MockReport.getAgentReport();
         GatewayAccessLogInterceptor interceptor = new GatewayAccessLogInterceptor();
         InterceptorTestUtils.init(interceptor, new AccessPlugin());
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);

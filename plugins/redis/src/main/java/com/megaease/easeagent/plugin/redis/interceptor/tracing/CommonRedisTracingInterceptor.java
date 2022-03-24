@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
@@ -48,6 +49,11 @@ public abstract class CommonRedisTracingInterceptor implements NonReentrantInter
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
         this.finishTracing(methodInfo.getThrowable(), context);
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 
     public abstract void doTraceBefore(MethodInfo methodInfo, Context context);

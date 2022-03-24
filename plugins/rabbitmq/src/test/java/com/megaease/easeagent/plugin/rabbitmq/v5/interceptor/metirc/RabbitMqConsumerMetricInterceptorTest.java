@@ -52,8 +52,8 @@ public class RabbitMqConsumerMetricInterceptorTest {
     @Test
     public void before() {
         RabbitMqConsumerMetricInterceptor interceptor = new RabbitMqConsumerMetricInterceptor();
-        interceptor.before(null, EaseAgent.getContext());
-        assertNotNull(EaseAgent.getContext().get(START_KEY));
+        interceptor.before(null, EaseAgent.getOrCreateTracingContext());
+        assertNotNull(EaseAgent.getOrCreateTracingContext().get(START_KEY));
 
     }
 
@@ -65,7 +65,7 @@ public class RabbitMqConsumerMetricInterceptorTest {
         String queue = "testRabbitMqConsumerMetricInterceptorConsumerQueue";
         Envelope envelope = new Envelope(0, false, "", queue);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{null, envelope}).build();
-        Context context = EaseAgent.getContext();
+        Context context = EaseAgent.getOrCreateTracingContext();
         context.put(START_KEY, System.currentTimeMillis() - 100);
         interceptor.after(methodInfo, context);
 
