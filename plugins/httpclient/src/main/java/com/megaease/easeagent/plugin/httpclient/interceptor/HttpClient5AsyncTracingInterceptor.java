@@ -37,7 +37,7 @@ import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 
 import java.net.URISyntaxException;
 
-@AdviceTo(value = HttpClient5AsyncAdvice.class, qualifier = "default", plugin = HttpClientPlugin.class)
+@AdviceTo(value = HttpClient5AsyncAdvice.class, plugin = HttpClientPlugin.class)
 public class HttpClient5AsyncTracingInterceptor implements NonReentrantInterceptor {
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
