@@ -49,7 +49,7 @@ public class BaseServletInterceptorTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
 
         MockBaseServletInterceptor mockBaseServletInterceptor = new MockBaseServletInterceptor();
-        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         assertNotNull(httpServletRequest.getAttribute(ServletUtils.START_TIME));
     }
 
@@ -79,9 +79,9 @@ public class BaseServletInterceptorTest {
         mockBaseServletInterceptor.key = TestConst.METHOD + " " + TestConst.ROUTE;
         mockBaseServletInterceptor.httpServletRequest = httpServletRequest;
         mockBaseServletInterceptor.httpServletResponse = response;
-        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         mockBaseServletInterceptor.start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
-        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getContext());
         assertTrue(mockBaseServletInterceptor.isRan.get());
     }
 
@@ -115,11 +115,11 @@ public class BaseServletInterceptorTest {
         mockBaseServletInterceptor.httpServletResponse = response;
         mockBaseServletInterceptor.throwable = error;
 
-        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+        mockBaseServletInterceptor.doBefore(methodInfo, EaseAgent.getContext());
         mockBaseServletInterceptor.start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
         httpServletRequest.setAsyncSupported(true);
         final AsyncContext asyncContext = httpServletRequest.startAsync(httpServletRequest, response);
-        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        mockBaseServletInterceptor.doAfter(methodInfo, EaseAgent.getContext());
 
         Thread thread = new Thread(() -> asyncContextConsumer.accept(asyncContext));
         thread.start();

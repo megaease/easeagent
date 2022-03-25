@@ -35,7 +35,7 @@ import com.megaease.easeagent.plugin.report.AgentReport;
  */
 public final class EaseAgent {
     public static MetricRegistrySupplier metricRegistrySupplier = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
-    public static IContextManager initializeContextSupplier = (root) -> NoOpContext.NO_OP_CONTEXT;
+    public static IContextManager initializeContextSupplier = () -> NoOpContext.NO_OP_CONTEXT;
     public static ILoggerFactory loggerFactory = NoOpLoggerFactory.INSTANCE;
     public static Mdc loggerMdc = NoOpLoggerFactory.NO_OP_MDC_INSTANCE;
     public static IConfigFactory configFactory = new NoOpConfigFactory();
@@ -113,16 +113,7 @@ public final class EaseAgent {
     /**
      * @return current tracing {@link Context} for session
      */
-    public static Context getOrCreateTracingContext() {
-        return initializeContextSupplier.getContext(true);
-    }
-
-    /**
-     * @return return current tracing context if already created,
-     * or create a context with {@link com.megaease.easeagent.plugin.bridge.NoOpTracer.NoopTracing} tracing,
-     * span will not generate.
-     */
-    public static Context getOrCreateContext() {
-        return initializeContextSupplier.getContext(false);
+    public static Context getContext() {
+        return initializeContextSupplier.getContext();
     }
 }

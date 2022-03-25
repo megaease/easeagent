@@ -84,7 +84,7 @@ public class WebClientFilterForwardedInterceptorTest {
         assertTrue(mockExchangeFunction.ran.get());
         assertSame(clientRequest, mockExchangeFunction.clientRequest);
 
-        EaseAgent.getOrCreateTracingContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
+        EaseAgent.getContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
         mockExchangeFunction = new MockExchangeFunction();
         webClientForwardedFilter.filter(clientRequest, mockExchangeFunction);
         assertTrue(mockExchangeFunction.ran.get());

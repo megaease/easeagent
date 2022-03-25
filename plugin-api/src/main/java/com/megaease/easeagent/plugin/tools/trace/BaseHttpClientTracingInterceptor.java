@@ -50,7 +50,6 @@ public abstract class BaseHttpClientTracingInterceptor implements NonReentrantIn
 
     @Override
     public int order() {
-        // return Order.TRACING_APPEND.getOrder();
         return Order.TRACING.getOrder();
     }
 

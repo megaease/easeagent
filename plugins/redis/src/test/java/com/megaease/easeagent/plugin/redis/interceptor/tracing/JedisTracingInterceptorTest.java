@@ -39,7 +39,7 @@ public class JedisTracingInterceptorTest {
     @Test
     public void doTraceBefore() {
         JedisTracingInterceptor jedisTracingInterceptor = new JedisTracingInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder().invoker("tttt").method("get").build();
         jedisTracingInterceptor.doTraceBefore(methodInfo, context);
         Span span = context.remove(CommonRedisTracingInterceptorTest.SPAN_KEY);

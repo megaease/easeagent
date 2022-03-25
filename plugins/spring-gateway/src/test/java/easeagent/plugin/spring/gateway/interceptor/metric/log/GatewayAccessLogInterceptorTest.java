@@ -59,7 +59,7 @@ public class GatewayAccessLogInterceptorTest {
     @Test
     public void before() {
         GatewayAccessLogInterceptor interceptor = new GatewayAccessLogInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
@@ -106,7 +106,7 @@ public class GatewayAccessLogInterceptorTest {
         EaseAgent.agentReport = MockReport.getAgentReport();
         GatewayAccessLogInterceptor interceptor = new GatewayAccessLogInterceptor();
         InterceptorTestUtils.init(interceptor, new AccessPlugin());
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);

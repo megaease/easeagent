@@ -34,7 +34,7 @@ public class HttpClientDoExecuteForwardedInterceptorTest {
 
     @Test
     public void before() {
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         HttpGet httpGet = new HttpGet();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpGet}).build();
         HttpClientDoExecuteForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpClientDoExecuteForwardedInterceptor();

@@ -66,7 +66,7 @@ public class JdbcStmMetricInterceptorTest {
         JdbcStmMetricInterceptor interceptor = new JdbcStmMetricInterceptor();
         InterceptorTestUtils.init(interceptor, new JdbcDataSourceMetricPlugin());
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);
         SqlInfo sqlInfo = new SqlInfo(TestUtils.mockConnection());
         String sql = "select * from data";

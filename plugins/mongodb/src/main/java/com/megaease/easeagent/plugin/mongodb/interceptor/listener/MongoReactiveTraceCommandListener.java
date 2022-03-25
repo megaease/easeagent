@@ -38,7 +38,7 @@ public class MongoReactiveTraceCommandListener extends MongoBaseTraceCommandList
     @Override
     public void commandStarted(CommandStartedEvent event) {
 //        LOGGER.warn("reactive commandStarted trace");
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         TraceHelper.commandStarted(context, this.config, event);
         MongoCtx mongoCtx = MongoCtx.getOrCreate(context);
         mongoCtx.put(MongoUtils.CONFIG, this.config);
@@ -49,14 +49,14 @@ public class MongoReactiveTraceCommandListener extends MongoBaseTraceCommandList
     @Override
     public void commandSucceeded(CommandSucceededEvent event) {
 //        LOGGER.warn("reactive commandSucceeded trace");
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         context.put(MongoUtils.EVENT_KEY, event);
     }
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
 //        LOGGER.warn("reactive commandFailed trace");
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         context.put(MongoUtils.EVENT_KEY, event);
     }
 

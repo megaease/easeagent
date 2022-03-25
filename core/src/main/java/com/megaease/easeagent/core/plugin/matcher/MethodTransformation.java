@@ -72,10 +72,6 @@ public class MethodTransformation {
                 try {
                     interceptor.init(interceptor.getConfig(), type, method, methodDescription);
                     interceptor.init(interceptor.getConfig(), uniqueIndex);
-                    // tracing root interceptor
-                    if ( Order.TRACING.getOrder() == interceptor.order() >> 8) {
-                        Dispatcher.setTracingRoot(uniqueIndex);
-                    }
                 } catch (Exception e) {
                     log.error("Interceptor init fail: {}::{}, {}", type, method, interceptor.getClass().getSimpleName());
                 }

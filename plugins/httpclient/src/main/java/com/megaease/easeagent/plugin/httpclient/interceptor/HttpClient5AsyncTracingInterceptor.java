@@ -69,7 +69,6 @@ public class HttpClient5AsyncTracingInterceptor implements NonReentrantIntercept
 
     @Override
     public int order() {
-        // return Order.TRACING_APPEND.getOrder();
         return Order.TRACING.getOrder();
     }
 

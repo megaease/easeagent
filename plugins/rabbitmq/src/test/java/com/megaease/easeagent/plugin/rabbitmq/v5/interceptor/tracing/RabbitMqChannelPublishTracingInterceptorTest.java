@@ -44,7 +44,7 @@ public class RabbitMqChannelPublishTracingInterceptorTest {
     @Test
     public void before() {
         RabbitMqChannelPublishTracingInterceptor interceptor = new RabbitMqChannelPublishTracingInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         String uri = "192.168.0.13:2222";
         context.put(ContextCons.MQ_URI, uri);
         String exchange = "testExchange";

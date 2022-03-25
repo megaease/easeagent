@@ -58,7 +58,7 @@ public abstract class ElasticsearchBaseTest {
 
     @Before
     public void before() {
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);
 
         request = new Request("GET", "/" + index + "/_search");

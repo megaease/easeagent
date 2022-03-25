@@ -41,7 +41,7 @@ public class TraceHelperTest extends MongoBaseTest {
         BsonDocument bsonDocument = new BsonDocument();
         bsonDocument.put("collection", new BsonString(collection));
         CommandSucceededEvent succeededEvent = new CommandSucceededEvent(this.requestId, this.connectionDescription, this.cmdName, bsonDocument, 10);
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         TraceHelper.commandStarted(context, this.config, this.startedEvent);
         TraceHelper.commandSucceeded(context, succeededEvent);
         this.assertTrace(true, null);
@@ -58,7 +58,7 @@ public class TraceHelperTest extends MongoBaseTest {
         bsonDocument.put("collection", new BsonString(collection));
         bsonDocument.put("writeErrors", bsonValues);
         CommandSucceededEvent succeededEvent = new CommandSucceededEvent(this.requestId, this.connectionDescription, this.cmdName, bsonDocument, 10);
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         TraceHelper.commandStarted(context, this.config, this.startedEvent);
         TraceHelper.commandSucceeded(context, succeededEvent);
         this.assertTrace(false, errMsg);
@@ -67,7 +67,7 @@ public class TraceHelperTest extends MongoBaseTest {
     @Test
     public void performOpFail2() {
         CommandFailedEvent failedEvent = new CommandFailedEvent(this.requestId, this.connectionDescription, this.cmdName, 10, new RuntimeException(this.errMsg));
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         TraceHelper.commandStarted(context, this.config, this.startedEvent);
         TraceHelper.commandFailed(context, failedEvent);
         this.assertTrace(false, errMsg);

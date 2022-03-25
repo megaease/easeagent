@@ -39,7 +39,7 @@ public class LoadBalancerFeignClientInterceptorTest {
         String clientName = "testClientName";
         assertNull(iClientConfig.getClientName());
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{null, clientName}).retValue(iClientConfig).build();
-        loadBalancerFeignClientInterceptor.after(methodInfo, EaseAgent.getOrCreateTracingContext());
+        loadBalancerFeignClientInterceptor.after(methodInfo, EaseAgent.getContext());
         assertEquals(clientName, iClientConfig.getClientName());
     }
 

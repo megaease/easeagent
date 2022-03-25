@@ -39,7 +39,7 @@ public class MongoReactiveMetricCommandListener extends MongoBaseMetricCommandLi
     @Override
     public void commandStarted(CommandStartedEvent event) {
 //        LOGGER.warn("reactive commandStarted metric");
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MongoCtx mongoCtx = MongoCtx.getOrCreate(context);
         MetricHelper.commandStarted(context, event);
         mongoCtx.put(MongoUtils.METRIC, this.mongoMetric);
@@ -49,14 +49,14 @@ public class MongoReactiveMetricCommandListener extends MongoBaseMetricCommandLi
     @Override
     public void commandSucceeded(CommandSucceededEvent event) {
 //        LOGGER.warn("reactive commandSucceeded metric");
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         context.put(MongoUtils.EVENT_KEY, event);
     }
 
     @Override
     public void commandFailed(CommandFailedEvent event) {
 //        LOGGER.warn("reactive commandFailed metric");
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         context.put(MongoUtils.EVENT_KEY, event);
     }
 

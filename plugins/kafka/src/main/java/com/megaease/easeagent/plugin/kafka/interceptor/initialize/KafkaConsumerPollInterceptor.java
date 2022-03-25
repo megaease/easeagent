@@ -44,7 +44,6 @@ public class KafkaConsumerPollInterceptor implements NonReentrantInterceptor {
         }
     }
 
-
     @Override
     public int order() {
         return Order.TRACING_INIT.getOrder();

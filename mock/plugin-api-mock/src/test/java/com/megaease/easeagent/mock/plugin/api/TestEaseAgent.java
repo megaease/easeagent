@@ -36,8 +36,8 @@ public class TestEaseAgent {
     @Test
     public void testEaseAgent() {
         assertNotNull(EaseAgent.initializeContextSupplier);
-        assertNotNull(EaseAgent.getOrCreateTracingContext());
-        assertFalse(EaseAgent.getOrCreateTracingContext().isNoop());
+        assertNotNull(EaseAgent.getContext());
+        assertFalse(EaseAgent.getContext().isNoop());
         assertNotNull(EaseAgent.configFactory);
         assertNotNull(EaseAgent.configFactory.getConfig("name"));
         IPluginConfig config = EaseAgent.configFactory.getConfig("test1", "test2", "test3");

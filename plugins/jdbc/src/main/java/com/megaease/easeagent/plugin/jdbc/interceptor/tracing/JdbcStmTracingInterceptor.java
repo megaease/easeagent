@@ -115,6 +115,6 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
 
     @Override
     public int order() {
-        return Order.TRACING_APPEND.getOrder();
+        return Order.TRACING.getOrder();
     }
 }

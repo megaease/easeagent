@@ -46,7 +46,7 @@ public class AgentCoreSubscriberTest {
 
     private AgentCoreSubscriber createOne(MockCoreSubscriber mockCoreSubscriber) throws URISyntaxException {
         WebClientFilterTracingInterceptor interceptor = new WebClientFilterTracingInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         URI uri = new URI(url);
         ClientRequest clientRequest = MockClientRequest.build(uri);
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
@@ -107,7 +107,7 @@ public class AgentCoreSubscriberTest {
         MockCoreSubscriber mockCoreSubscriber = new MockCoreSubscriber();
         String errorInfo = "test error";
         WebClientFilterTracingInterceptor interceptor = new WebClientFilterTracingInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
 
         URI uri = new URI(url);
         ClientRequest clientRequest = MockClientRequest.build(uri);
@@ -143,7 +143,7 @@ public class AgentCoreSubscriberTest {
     public void onComplete() throws URISyntaxException {
         MockCoreSubscriber mockCoreSubscriber = new MockCoreSubscriber();
         WebClientFilterTracingInterceptor interceptor = new WebClientFilterTracingInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
 
         URI uri = new URI(url);
         ClientRequest clientRequest = MockClientRequest.build(uri);

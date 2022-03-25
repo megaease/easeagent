@@ -41,7 +41,7 @@ public class RabbitMqChannelConsumerDeliveryInterceptorTest {
         String data = "192.168.0.13:2222";
         mockConsumer.setEaseAgent$$DynamicField$$Data(data);
         MethodInfo methodInfo = MethodInfo.builder().invoker(mockConsumer).args(new Object[]{null, null, properties}).build();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.before(methodInfo, context);
         assertEquals(data, context.get(ContextCons.MQ_URI));
         assertEquals(data, properties.getHeaders().get(ContextCons.MQ_URI));

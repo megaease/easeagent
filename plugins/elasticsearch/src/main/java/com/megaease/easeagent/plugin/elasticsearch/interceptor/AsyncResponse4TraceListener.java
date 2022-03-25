@@ -55,7 +55,7 @@ public class AsyncResponse4TraceListener implements ResponseListener {
 
     private void process(Response response, Exception exception) {
         try (Cleaner ignored = asyncContext.importToCurrent()) {
-            Context context = EaseAgent.getOrCreateTracingContext();
+            Context context = EaseAgent.getContext();
             ElasticsearchCtxUtils.finishSpan(response, exception, context);
         }
     }

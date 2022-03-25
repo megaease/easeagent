@@ -72,7 +72,7 @@ public class MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor implem
         public void onResult(T result, Throwable t) {
 //            LOGGER.info("SingleResultCallbackProxy onResult metric");
             this.delegate.onResult(result, t);
-            Context context = EaseAgent.getOrCreateTracingContext();
+            Context context = EaseAgent.getContext();
             CommandEvent event = context.get(MongoUtils.EVENT_KEY);
             if (event == null) {
                 return;

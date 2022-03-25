@@ -34,14 +34,14 @@ public class RestTemplateInterceptInterceptorTest {
     public void before() throws URISyntaxException {
         RestTemplateInterceptInterceptor interceptor = new RestTemplateInterceptInterceptor();
         BaseServiceNameInterceptorTest.initInterceptor(interceptor);
-        EaseAgent.getOrCreateTracingContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
+        EaseAgent.getContext().put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);
 
         MockClientHttpRequest httpRequest = new MockClientHttpRequest();
         String host = "TEST-SERVER";
         httpRequest.setURI(new URI("http://" + host));
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpRequest}).build();
 
-        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.before(methodInfo, EaseAgent.getContext());
 
         MockClientHttpRequest newRequest = (MockClientHttpRequest) methodInfo.getArgs()[0];
         CheckUtils.check(name -> newRequest.getHeaders().getFirst(name), host);

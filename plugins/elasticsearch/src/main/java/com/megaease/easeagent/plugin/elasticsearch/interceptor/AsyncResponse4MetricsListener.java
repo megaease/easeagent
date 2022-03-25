@@ -61,7 +61,7 @@ public class AsyncResponse4MetricsListener implements ResponseListener {
 
     private void process(Response response, Exception exception) {
         try (Cleaner ignored = asyncContext.importToCurrent()) {
-            Context context = EaseAgent.getOrCreateTracingContext();
+            Context context = EaseAgent.getContext();
             Request request = context.get(REQUEST);
             long duration = ContextUtils.getDuration(context);
             boolean success = ElasticsearchCtxUtils.checkSuccess(response, exception);

@@ -37,7 +37,7 @@ public class TraceCallbackTest {
 
     @Test
     public void onCompletion() throws InterruptedException {
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         Span span = context.nextSpan().start();
         TraceCallback traceCallback = new TraceCallback(span, null);
         traceCallback.onCompletion(null, null);
@@ -58,7 +58,7 @@ public class TraceCallbackTest {
         AtomicBoolean ran = new AtomicBoolean(false);
         span = context.nextSpan().start();
         final TraceCallback traceCallbackAsync = new TraceCallback(span, (metadata, exception) -> {
-            assertTrue(EaseAgent.getOrCreateTracingContext().currentTracing().hasCurrentSpan());
+            assertTrue(EaseAgent.getContext().currentTracing().hasCurrentSpan());
             ran.set(true);
         });
         Thread thread = new Thread(() -> traceCallbackAsync.onCompletion(null, null));

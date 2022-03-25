@@ -27,7 +27,7 @@ public class BridgeDispatcher implements IDispatcher {
     @Override
     public void enter(int chainIndex, MethodInfo info) {
         InitializeContext context = EaseAgent.initializeContextSupplier
-            .getContext(Dispatcher.isTracingRoot(chainIndex));
+            .getContext();
         if (context.isNoop()) {
             return;
         }

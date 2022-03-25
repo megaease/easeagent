@@ -33,7 +33,7 @@ public class RedisPropertiesClusterSetNodesInterceptorTest {
         RedisPropertiesClusterSetNodesInterceptor redisPropertiesClusterSetNodesInterceptor = new RedisPropertiesClusterSetNodesInterceptor();
         RedisUtils.mockRedirect(() -> {
             MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{"12.0.0.1:9999"}).build();
-            redisPropertiesClusterSetNodesInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+            redisPropertiesClusterSetNodesInterceptor.before(methodInfo, EaseAgent.getContext());
             assertEquals(String.format("%s:%s", TestConst.REDIRECT_HOST, TestConst.REDIRECT_PORT), methodInfo.getArgs()[0]);
         });
     }

@@ -43,7 +43,7 @@ public class ElasticsearchPerformRequestAsyncMetricsInterceptorTest extends Elas
             .args(new Object[]{request, responseListener})
             .build();
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.init(config, "", "", "");
         interceptor.before(methodInfo, context);
         AsyncResponse4MetricsListener traceListener = (AsyncResponse4MetricsListener) methodInfo.getArgs()[1];
@@ -61,7 +61,7 @@ public class ElasticsearchPerformRequestAsyncMetricsInterceptorTest extends Elas
             .args(new Object[]{request, responseListener})
             .build();
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.init(config, "", "", "");
         interceptor.before(methodInfo, context);
         AsyncResponse4MetricsListener traceListener = (AsyncResponse4MetricsListener) methodInfo.getArgs()[1];
@@ -78,7 +78,7 @@ public class ElasticsearchPerformRequestAsyncMetricsInterceptorTest extends Elas
             .args(new Object[]{request, responseListener})
             .build();
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.init(config, "", "", "");
         interceptor.before(methodInfo, context);
         AsyncResponse4MetricsListener traceListener = (AsyncResponse4MetricsListener) methodInfo.getArgs()[1];

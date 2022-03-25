@@ -58,7 +58,7 @@ public class InterceptorTest {
                 span.finish();
             }
         };
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.before(null, context);
         Span span = context.get(key);
         assertNotNull(span);

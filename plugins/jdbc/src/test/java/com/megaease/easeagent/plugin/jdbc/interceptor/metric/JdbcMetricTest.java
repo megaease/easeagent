@@ -102,7 +102,7 @@ public class JdbcMetricTest {
     @Test
     public void collectMetric() {
         JdbcMetric jdbcMetric = get();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);
         jdbcMetric.collectMetric(TestUtils.URI, true, context);
         TagVerifier tagVerifier = TagVerifier.build(JdbcMetric.newConnectionTags(), TestUtils.URI);
@@ -124,7 +124,7 @@ public class JdbcMetricTest {
     @Test
     public void onRemoval() {
         JdbcMetric jdbcMetric = get();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);
         jdbcMetric.collectMetric(TestUtils.URI, true, context);
         TagVerifier tagVerifier = TagVerifier.build(JdbcMetric.newConnectionTags(), TestUtils.URI);

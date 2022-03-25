@@ -50,7 +50,7 @@ public class RabbitMqChannelPublishInterceptorTest {
         when(connection.getAddress()).thenReturn(inetAddress);
         when(connection.getPort()).thenReturn(port);
         MethodInfo methodInfo = MethodInfo.builder().invoker(channel).args(new Object[]{null, null, null, null, null}).build();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.before(methodInfo, context);
         assertNotNull(methodInfo.getArgs()[4]);
         assertEquals(host + ":" + port, context.get(ContextCons.MQ_URI));

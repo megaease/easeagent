@@ -44,7 +44,7 @@ public class ElasticsearchPerformRequestTraceInterceptorTest extends Elasticsear
             .retValue(this.successResponse)
             .build();
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.before(methodInfo, context);
         interceptor.after(methodInfo, context);
         this.assertTrace(true, null);
@@ -59,7 +59,7 @@ public class ElasticsearchPerformRequestTraceInterceptorTest extends Elasticsear
             .retValue(this.failResponse)
             .build();
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.before(methodInfo, context);
         interceptor.after(methodInfo, context);
         this.assertTrace(false, "500");
@@ -75,7 +75,7 @@ public class ElasticsearchPerformRequestTraceInterceptorTest extends Elasticsear
             .throwable(new RuntimeException(errMsg))
             .build();
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         interceptor.before(methodInfo, context);
         interceptor.after(methodInfo, context);
         this.assertTrace(false, errMsg);

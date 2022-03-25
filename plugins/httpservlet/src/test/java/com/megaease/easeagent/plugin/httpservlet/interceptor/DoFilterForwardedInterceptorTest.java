@@ -36,10 +36,10 @@ public class DoFilterForwardedInterceptorTest {
         HttpServletRequest httpServletRequest = TestServletUtils.buildMockRequest();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest}).build();
         DoFilterForwardedInterceptor doFilterForwardedInterceptor = new DoFilterForwardedInterceptor();
-        doFilterForwardedInterceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
-        assertEquals(TestConst.FORWARDED_VALUE, EaseAgent.getOrCreateTracingContext().get(TestConst.FORWARDED_NAME));
-        doFilterForwardedInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
-        assertNull(EaseAgent.getOrCreateTracingContext().get(TestConst.FORWARDED_NAME));
+        doFilterForwardedInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        assertEquals(TestConst.FORWARDED_VALUE, EaseAgent.getContext().get(TestConst.FORWARDED_NAME));
+        doFilterForwardedInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        assertNull(EaseAgent.getContext().get(TestConst.FORWARDED_NAME));
     }
 
     @Test

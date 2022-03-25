@@ -37,7 +37,7 @@ public class ElasticsearchPerformRequestAsyncTraceInterceptorTest extends Elasti
 
     @Test
     public void performSuccess() {
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(this)
             .method("perform")
@@ -51,7 +51,7 @@ public class ElasticsearchPerformRequestAsyncTraceInterceptorTest extends Elasti
 
     @Test
     public void performFail() {
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(this)
             .method("perform")
@@ -65,7 +65,7 @@ public class ElasticsearchPerformRequestAsyncTraceInterceptorTest extends Elasti
 
     @Test
     public void performFailThrowable() {
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(this)
             .method("perform")

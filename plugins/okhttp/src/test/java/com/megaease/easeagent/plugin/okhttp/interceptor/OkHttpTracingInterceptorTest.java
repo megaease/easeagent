@@ -42,7 +42,7 @@ public class OkHttpTracingInterceptorTest {
         Call call = OkHttpTestUtils.buildCall();
         MethodInfo.MethodInfoBuilder methodInfoBuilder = MethodInfo.builder().invoker(call);
         MethodInfo methodInfo = methodInfoBuilder.build();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         OkHttpTracingInterceptor okHttpTracingInterceptor = new OkHttpTracingInterceptor();
         MockEaseAgent.cleanLastSpan();
 
@@ -98,7 +98,7 @@ public class OkHttpTracingInterceptorTest {
         Call call = OkHttpTestUtils.buildCall();
 
         MethodInfo methodInfo = MethodInfo.builder().invoker(call).build();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         OkHttpTracingInterceptor okHttpTracingInterceptor = new OkHttpTracingInterceptor();
         HttpRequest request = okHttpTracingInterceptor.getRequest(methodInfo, context);
         assertEquals(com.megaease.easeagent.plugin.api.trace.Span.Kind.CLIENT, request.kind());
@@ -115,9 +115,9 @@ public class OkHttpTracingInterceptorTest {
         MethodInfo methodInfo = methodInfoBuilder.build();
 
         OkHttpTracingInterceptor okHttpTracingInterceptor = new OkHttpTracingInterceptor();
-        EaseAgent.getOrCreateTracingContext().put(OkHttpTracingInterceptor.METHOD_KEY, call.request().method());
+        EaseAgent.getContext().put(OkHttpTracingInterceptor.METHOD_KEY, call.request().method());
 
-        HttpResponse httpResponse = okHttpTracingInterceptor.getResponse(methodInfo, EaseAgent.getOrCreateTracingContext());
+        HttpResponse httpResponse = okHttpTracingInterceptor.getResponse(methodInfo, EaseAgent.getContext());
         assertEquals("GET", httpResponse.method());
         assertNull(httpResponse.route());
         assertNull(httpResponse.maybeError());
@@ -125,7 +125,7 @@ public class OkHttpTracingInterceptorTest {
 
         RuntimeException runtimeException = new RuntimeException("test error");
         methodInfoBuilder.throwable(runtimeException);
-        httpResponse = okHttpTracingInterceptor.getResponse(methodInfoBuilder.build(), EaseAgent.getOrCreateTracingContext());
+        httpResponse = okHttpTracingInterceptor.getResponse(methodInfoBuilder.build(), EaseAgent.getContext());
         assertEquals(runtimeException, httpResponse.maybeError());
     }
 }

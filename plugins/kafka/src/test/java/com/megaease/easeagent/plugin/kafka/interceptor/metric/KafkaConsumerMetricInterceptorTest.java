@@ -57,13 +57,13 @@ public class KafkaConsumerMetricInterceptorTest {
 
         String topic = "testTopic1";
         MethodInfo methodInfo = MethodInfo.builder().throwable(new RuntimeException("testError")).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getContext());
 
         methodInfo = MethodInfo.builder().build();
-        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getContext());
 
         methodInfo = MethodInfo.builder().retValue(new ConsumerRecords<>(Collections.emptyMap())).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getContext());
 
         ConsumerRecords<String, String> consumerRecords = new ConsumerRecords<>(
             Collections.singletonMap(new TopicPartition(topic, 1),
@@ -71,7 +71,7 @@ public class KafkaConsumerMetricInterceptorTest {
         );
 
         methodInfo = MethodInfo.builder().retValue(consumerRecords).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getContext());
 
 
         LastJsonReporter lastJsonReporter = KafkaMetricTest.lastMetricSupplier(topic);

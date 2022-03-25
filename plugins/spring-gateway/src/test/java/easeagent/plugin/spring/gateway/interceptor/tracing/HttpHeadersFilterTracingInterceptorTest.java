@@ -43,7 +43,7 @@ public class HttpHeadersFilterTracingInterceptorTest {
 
         MockServerWebExchange mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{null, mockServerWebExchange}).retValue(new HttpHeaders()).build();
-        interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.doAfter(methodInfo, EaseAgent.getContext());
         assertNull(mockServerWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY));
 
 
@@ -53,7 +53,7 @@ public class HttpHeadersFilterTracingInterceptorTest {
         RequestContext requestContext = GatewayServerTracingInterceptorTest.beforeGatewayServerTracing(mockServerWebExchange);
         Span span = requestContext.span();
         try (Scope ignored = requestContext.scope()) {
-            interceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+            interceptor.doAfter(methodInfo, EaseAgent.getContext());
             RequestContext clientContext = mockServerWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY);
             HttpHeaders ret = (HttpHeaders) methodInfo.getRetValue();
             Collection<String> headers = ret.toSingleValueMap().values();

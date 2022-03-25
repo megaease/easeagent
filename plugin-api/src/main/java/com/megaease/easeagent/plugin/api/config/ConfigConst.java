@@ -155,9 +155,7 @@ public interface ConfigConst {
     }
 
     interface PluginID {
-        String TRACING_INIT = "tracingInit";
         String TRACING = "tracing";
-        String TRACING_APPEND = "tracingAppend";
         String METRIC = "metric";
         String LOG = "access-log";
         String REDIRECT = "redirect";

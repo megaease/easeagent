@@ -36,7 +36,7 @@ public class HttpClient5DoExecuteForwardedInterceptorTest {
         HttpGet httpGet = new HttpGet("http://127.0.0.1:8080");
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpGet}).build();
         HttpClient5DoExecuteForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpClient5DoExecuteForwardedInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         httpClientDoExecuteForwardedInterceptor.before(methodInfo, context);
         assertNull(httpGet.getFirstHeader(TestConst.FORWARDED_NAME));
         context.put(TestConst.FORWARDED_NAME, TestConst.FORWARDED_VALUE);

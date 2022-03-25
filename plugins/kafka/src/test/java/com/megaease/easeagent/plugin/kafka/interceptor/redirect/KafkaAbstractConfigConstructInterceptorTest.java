@@ -44,13 +44,13 @@ public class KafkaAbstractConfigConstructInterceptorTest {
             config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, TestConst.URIS);
 
             MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{config}).build();
-            interceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+            interceptor.doBefore(methodInfo, EaseAgent.getContext());
             assertEquals(TestConst.REDIRECT_URIS, config.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
 
             Properties props = new Properties();
             props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, TestConst.URIS);
             methodInfo = MethodInfo.builder().args(new Object[]{config}).build();
-            interceptor.doBefore(methodInfo, EaseAgent.getOrCreateTracingContext());
+            interceptor.doBefore(methodInfo, EaseAgent.getContext());
             assertEquals(TestConst.REDIRECT_URIS, config.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG));
         });
     }

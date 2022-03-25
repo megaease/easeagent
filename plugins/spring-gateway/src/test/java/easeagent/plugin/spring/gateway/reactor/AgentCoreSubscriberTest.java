@@ -69,7 +69,7 @@ public class AgentCoreSubscriberTest {
     public void onError() {
         MockCoreSubscriber mockCoreSubscriber = new MockCoreSubscriber();
         MethodInfo errorMethodInfo = MethodInfo.builder().build();
-        AsyncContext errorAsyncContext = EaseAgent.getOrCreateTracingContext().exportAsync();
+        AsyncContext errorAsyncContext = EaseAgent.getContext().exportAsync();
         RuntimeException runtimeException = new RuntimeException();
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, errorMethodInfo, errorAsyncContext, (methodInfo, asyncContext) -> {
             assertNotNull(methodInfo);
@@ -87,7 +87,7 @@ public class AgentCoreSubscriberTest {
     public void onComplete() {
         MockCoreSubscriber mockCoreSubscriber = new MockCoreSubscriber();
         MethodInfo completeMethodInfo = MethodInfo.builder().build();
-        AsyncContext completeAsyncContext = EaseAgent.getOrCreateTracingContext().exportAsync();
+        AsyncContext completeAsyncContext = EaseAgent.getContext().exportAsync();
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, completeMethodInfo, completeAsyncContext, (methodInfo, asyncContext) -> {
             assertNotNull(methodInfo);
             assertNotNull(asyncContext);

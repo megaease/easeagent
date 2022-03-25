@@ -51,7 +51,7 @@ public class KafkaUtilsTest {
         String headerValue = "testHeaderValue";
         record.headers().add(headerKey, headerValue.getBytes());
         assertEquals(1, record.headers().toArray().length);
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         Span span = context.nextSpan();
         KafkaConsumerRequest kafkaConsumerRequest = new KafkaConsumerRequest(null, record);
         context.consumerInject(span, kafkaConsumerRequest);

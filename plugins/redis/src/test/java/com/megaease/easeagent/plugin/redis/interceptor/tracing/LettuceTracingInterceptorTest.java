@@ -40,7 +40,7 @@ public class LettuceTracingInterceptorTest {
     @Test
     public void doTraceBefore() {
         LettuceTracingInterceptor lettuceTracingInterceptor = new LettuceTracingInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder().invoker("tttt").args(new Object[]{"get"}).build();
         lettuceTracingInterceptor.doTraceBefore(methodInfo, context);
         Span span = context.remove(CommonRedisTracingInterceptorTest.SPAN_KEY);

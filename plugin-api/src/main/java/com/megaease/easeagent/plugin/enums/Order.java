@@ -30,32 +30,25 @@ public enum Order {
     REDIRECT(19, ConfigConst.PluginID.REDIRECT),
     HIGH(20, "high"),
     FORWARDED(30, ConfigConst.PluginID.FORWARDED),
-    TRACING_INIT(90, ConfigConst.PluginID.TRACING_INIT),
-    /**
-     * if there is not tracing started, start a new tracing
-     * if there is tracing started, append span to current tracing
-     */
+
+    TRACING_INIT(90, ConfigConst.PluginID.TRACING),
     TRACING(100, ConfigConst.PluginID.TRACING),
-    /**
-     * if there is not tracing started, don't generate root span
-     * if there is tracing started, append span to current tracing
-     */
-    TRACING_APPEND(101, ConfigConst.PluginID.TRACING),
+
     METRIC(200, ConfigConst.PluginID.METRIC),
     LOG(201, ConfigConst.PluginID.LOG),
     LOW(210, "low"),
     LOWEST(255, "lowest");
 
-    private final int order;
+    private final int value;
     private final String name;
 
     Order(int s, String name) {
-        this.order = s;
+        this.value = s;
         this.name = name;
     }
 
     public int getOrder() {
-        return this.order;
+        return this.value;
     }
 
     public String getName() {

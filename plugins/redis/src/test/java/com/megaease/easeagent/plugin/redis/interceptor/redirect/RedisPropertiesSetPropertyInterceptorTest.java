@@ -33,15 +33,15 @@ public class RedisPropertiesSetPropertyInterceptorTest {
         RedisPropertiesSetPropertyInterceptor redisPropertiesSetPropertyInterceptor = new RedisPropertiesSetPropertyInterceptor();
         RedisUtils.mockRedirect(() -> {
             MethodInfo methodInfo = MethodInfo.builder().method("setHost").args(new Object[]{"12.0.0.1"}).build();
-            redisPropertiesSetPropertyInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+            redisPropertiesSetPropertyInterceptor.before(methodInfo, EaseAgent.getContext());
             assertEquals(TestConst.REDIRECT_HOST, methodInfo.getArgs()[0]);
 
             methodInfo = MethodInfo.builder().method("setPort").args(new Object[]{8080}).build();
-            redisPropertiesSetPropertyInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+            redisPropertiesSetPropertyInterceptor.before(methodInfo, EaseAgent.getContext());
             assertEquals(TestConst.REDIRECT_PORT, methodInfo.getArgs()[0]);
 
             methodInfo = MethodInfo.builder().method("setPassword").args(new Object[]{"aaaa"}).build();
-            redisPropertiesSetPropertyInterceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+            redisPropertiesSetPropertyInterceptor.before(methodInfo, EaseAgent.getContext());
             assertEquals(TestConst.REDIRECT_PASSWORD, methodInfo.getArgs()[0]);
         });
 

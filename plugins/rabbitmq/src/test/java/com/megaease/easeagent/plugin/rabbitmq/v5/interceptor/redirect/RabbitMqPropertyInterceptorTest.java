@@ -43,7 +43,7 @@ public class RabbitMqPropertyInterceptorTest {
     @Test
     public void before() throws URISyntaxException {
         RabbitMqPropertyInterceptor interceptor = new RabbitMqPropertyInterceptor();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
 
         MethodInfo methodInfo = MethodInfo.builder().method("setHost").args(new Object[]{null}).build();
         interceptor.before(methodInfo, context);

@@ -23,7 +23,6 @@ import com.megaease.easeagent.context.log.LoggerFactoryImpl;
 import com.megaease.easeagent.context.log.LoggerMdc;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.InitializeContext;
 import com.megaease.easeagent.plugin.api.Reporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
@@ -48,7 +47,6 @@ public class ContextManager implements IContextManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class.getName());
     private static final ThreadLocal<SessionContext> LOCAL_SESSION_CONTEXT = ThreadLocal.withInitial(SessionContext::new);
     private final PluginConfigManager pluginConfigManager;
-    private final Supplier<InitializeContext> tracingSessionContextSupplier;
     private final Supplier<InitializeContext> sessionContextSupplier;
     private final GlobalContext globalContext;
     private volatile TracingSupplier tracingSupplier = (supplier) -> null;
@@ -57,7 +55,6 @@ public class ContextManager implements IContextManager {
 
     private ContextManager(@Nonnull Configs conf, @Nonnull PluginConfigManager pluginConfigManager, @Nonnull ILoggerFactory loggerFactory, @Nonnull Mdc mdc) {
         this.pluginConfigManager = pluginConfigManager;
-        this.tracingSessionContextSupplier = new TracingSessionContextSupplier();
         this.sessionContextSupplier = new SessionContextSupplier();
         this.globalContext = new GlobalContext(conf, new MetricRegistrySupplierImpl(), loggerFactory, mdc);
     }
@@ -83,12 +80,8 @@ public class ContextManager implements IContextManager {
     }
 
     @Override
-    public InitializeContext getContext(boolean tracingRoot) {
-        if (tracingRoot) {
-            return this.tracingSessionContextSupplier.get();
-        } else {
-            return this.sessionContextSupplier.get();
-        }
+    public InitializeContext getContext() {
+        return this.sessionContextSupplier.get();
     }
 
     public void setTracing(@Nonnull TracingProvider tracing) {
@@ -101,7 +94,7 @@ public class ContextManager implements IContextManager {
         this.metric = metricProvider.metricSupplier();
     }
 
-    private class TracingSessionContextSupplier implements Supplier<InitializeContext> {
+    private class SessionContextSupplier implements Supplier<InitializeContext> {
         @Override
         public InitializeContext get() {
             SessionContext context = LOCAL_SESSION_CONTEXT.get();
@@ -110,21 +103,6 @@ public class ContextManager implements IContextManager {
                 context.setCurrentTracing(NoNull.of(tracingSupplier.get(this), NoOpTracer.NO_OP_TRACING));
             }
             context.setSupplier(this);
-            return context;
-        }
-    }
-
-    private class SessionContextSupplier implements Supplier<InitializeContext> {
-        @Override
-        public InitializeContext get() {
-            SessionContext context = LOCAL_SESSION_CONTEXT.get();
-            ITracing tracing = context.getTracing();
-            if (tracing == null) {
-                context.setCurrentTracing(NoOpTracer.NO_OP_TRACING);
-            }
-            if (context.getSupplier() == null) {
-                context.setSupplier(this);
-            }
             return context;
         }
     }

@@ -58,7 +58,7 @@ public class OkHttpAsyncTracingInterceptorTest {
         assertEquals(TestConst.RESPONSE_TAG_VALUE, mockSpan.tag(TestConst.RESPONSE_TAG_NAME));
         assertNull(mockSpan.parentId());
 
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         Span span = context.nextSpan();
         try (Scope ignored = span.maybeScope()) {
             mockSpan = runOne((call, callback) -> {
@@ -99,7 +99,7 @@ public class OkHttpAsyncTracingInterceptorTest {
             }
         });
         MethodInfo methodInfo = methodInfoBuilder.build();
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         OkHttpAsyncTracingInterceptor okHttpAsyncTracingInterceptor = new OkHttpAsyncTracingInterceptor();
         MockEaseAgent.cleanLastSpan();
 

@@ -39,7 +39,7 @@ public class LettuceRedisClientConstructInterceptorTest {
         RedisClient redisClient = RedisClient.create(r);
         RedisUtils.mockRedirect(() -> {
             MethodInfo methodInfo = MethodInfo.builder().invoker(redisClient).build();
-            lettuceRedisClientConstructInterceptor.doAfter(methodInfo, EaseAgent.getOrCreateTracingContext());
+            lettuceRedisClientConstructInterceptor.doAfter(methodInfo, EaseAgent.getContext());
             RedisURI redisURI = RedisClientUtils.getRedisURI((RedisClient) methodInfo.getInvoker(), null);
             assertEquals(TestConst.REDIRECT_HOST, redisURI.getHost());
             assertEquals(TestConst.REDIRECT_PORT, redisURI.getPort());

@@ -63,7 +63,7 @@ public class JdbcDataSourceMetricInterceptorTest {
     public void doAfter() throws SQLException {
         JdbcDataSourceMetricInterceptor interceptor = new JdbcDataSourceMetricInterceptor();
         InterceptorTestUtils.init(interceptor, new JdbcConnectionMetricPlugin());
-        Context context = EaseAgent.getOrCreateTracingContext();
+        Context context = EaseAgent.getContext();
         ContextUtils.setBeginTime(context);
 
         MethodInfo methodInfo = MethodInfo.builder().build();

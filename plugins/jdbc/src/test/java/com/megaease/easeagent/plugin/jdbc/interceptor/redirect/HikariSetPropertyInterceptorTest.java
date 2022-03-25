@@ -36,19 +36,19 @@ public class HikariSetPropertyInterceptorTest {
     public void before() {
         HikariSetPropertyInterceptor interceptor = new HikariSetPropertyInterceptor();
         MethodInfo methodInfo = MethodInfo.builder().method("setJdbcUrl").args(new Object[]{null}).build();
-        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.before(methodInfo, EaseAgent.getContext());
         assertNull(methodInfo.getArgs()[0]);
 
         TestUtils.setRedirect();
-        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.before(methodInfo, EaseAgent.getContext());
         assertEquals(TestUtils.FULL_URI, methodInfo.getArgs()[0]);
 
         methodInfo = MethodInfo.builder().method("setUsername").args(new Object[]{null}).build();
-        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.before(methodInfo, EaseAgent.getContext());
         assertEquals(TestUtils.REDIRECT_USERNAME, methodInfo.getArgs()[0]);
 
         methodInfo = MethodInfo.builder().method("setPassword").args(new Object[]{null}).build();
-        interceptor.before(methodInfo, EaseAgent.getOrCreateTracingContext());
+        interceptor.before(methodInfo, EaseAgent.getContext());
         assertEquals(TestUtils.REDIRECT_PASSWORD, methodInfo.getArgs()[0]);
     }
 
