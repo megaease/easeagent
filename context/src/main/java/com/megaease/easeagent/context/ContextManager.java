@@ -102,7 +102,9 @@ public class ContextManager implements IContextManager {
             if (tracing == null || tracing.isNoop()) {
                 context.setCurrentTracing(NoNull.of(tracingSupplier.get(this), NoOpTracer.NO_OP_TRACING));
             }
-            context.setSupplier(this);
+            if (context.getSupplier() == null) {
+                context.setSupplier(this);
+            }
             return context;
         }
     }
