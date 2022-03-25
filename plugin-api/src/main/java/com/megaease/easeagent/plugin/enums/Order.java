@@ -20,7 +20,7 @@ package com.megaease.easeagent.plugin.enums;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 /**
- * Priority definition, lower value with higher priority
+ * Priority definition, lower value with higher priority.
  * Higher priority interceptor run enter before lower ones
  * but exit after lower priority interceptors.
  */
@@ -29,23 +29,26 @@ public enum Order {
     HIGHEST(10, "highest"),
     REDIRECT(19, ConfigConst.PluginID.REDIRECT),
     HIGH(20, "high"),
-    TRACING_INIT(21, ConfigConst.PluginID.TRACING_INIT),
+    FORWARDED(30, ConfigConst.PluginID.FORWARDED),
+
+    TRACING_INIT(90, ConfigConst.PluginID.TRACING),
     TRACING(100, ConfigConst.PluginID.TRACING),
+
     METRIC(200, ConfigConst.PluginID.METRIC),
     LOG(201, ConfigConst.PluginID.LOG),
     LOW(210, "low"),
     LOWEST(255, "lowest");
 
-    private final int order;
+    private final int value;
     private final String name;
 
     Order(int s, String name) {
-        this.order = s;
+        this.value = s;
         this.name = name;
     }
 
     public int getOrder() {
-        return this.order;
+        return this.value;
     }
 
     public String getName() {

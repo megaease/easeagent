@@ -25,4 +25,9 @@ public abstract class MongoBaseTraceInterceptor extends MongoBaseInterceptor {
     public String getType() {
         return Order.TRACING.getName();
     }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
+    }
 }

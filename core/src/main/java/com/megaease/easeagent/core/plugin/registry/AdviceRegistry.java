@@ -17,8 +17,6 @@
 
 package com.megaease.easeagent.core.plugin.registry;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.Dispatcher;
 import com.megaease.easeagent.core.plugin.transformer.advice.AgentAdvice.OffsetMapping;
@@ -27,6 +25,7 @@ import com.megaease.easeagent.core.plugin.transformer.advice.MethodIdentityJavaC
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.interceptor.AgentInterceptorChain;
+import com.megaease.easeagent.plugin.utils.common.WeakConcurrentMap;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
@@ -44,29 +43,29 @@ public class AdviceRegistry {
 
     private static final ThreadLocal<WeakReference<ClassLoader>> CURRENT_CLASS_LOADER = new ThreadLocal<>();
     private static final Logger log = LoggerFactory.getLogger(AdviceRegistry.class);
-    static Map<String, IdentityPointcuts> methodsSet = new ConcurrentHashMap<>();
+    static Map<String, PointcutsUniqueId> methodsSet = new ConcurrentHashMap<>();
 
     public static Integer check(TypeDescription instrumentedType,
                                 MethodDescription instrumentedMethod,
                                 Dispatcher.Resolved.ForMethodEnter methodEnter,
                                 Dispatcher.Resolved.ForMethodExit methodExit) {
-        String type = instrumentedType.getName();
+        String clazz = instrumentedType.getName();
         String method = instrumentedMethod.getName();
         String methodDescriptor = instrumentedMethod.getDescriptor();
-        String key = type + ":" + method + methodDescriptor;
-        IdentityPointcuts newIdentity = new IdentityPointcuts();
-        IdentityPointcuts identityPointcuts = methodsSet.putIfAbsent(key, newIdentity);
+        String key = clazz + ":" + method + methodDescriptor;
+        PointcutsUniqueId newIdentity = new PointcutsUniqueId();
+        PointcutsUniqueId pointcutsUniqueId = methodsSet.putIfAbsent(key, newIdentity);
 
         Integer pointcutIndex;
         boolean merge = false;
 
         // already exist
-        if (identityPointcuts != null) {
+        if (pointcutsUniqueId != null) {
             newIdentity.tryRelease();
             pointcutIndex = getPointcutIndex(methodEnter);
             // this pointcut's interceptors have injected into chain
-            if (identityPointcuts.checkPointcutExist(pointcutIndex)) {
-                if (identityPointcuts.checkClassloaderExist()) {
+            if (pointcutsUniqueId.checkPointcutExist(pointcutIndex)) {
+                if (pointcutsUniqueId.checkClassloaderExist()) {
                     // don't need to instrumented again.
                     return 0;
                 } else {
@@ -74,9 +73,9 @@ public class AdviceRegistry {
                      * Although the interceptor of the pointcut has been injected,
                      * the method of this class owned by current loader has not been instrumented
                      */
-                    updateStackManipulation(methodEnter, identityPointcuts.getIdentify());
-                    updateStackManipulation(methodExit, identityPointcuts.getIdentify());
-                    return identityPointcuts.getIdentify();
+                    updateStackManipulation(methodEnter, pointcutsUniqueId.getUniqueId());
+                    updateStackManipulation(methodExit, pointcutsUniqueId.getUniqueId());
+                    return pointcutsUniqueId.getUniqueId();
                 }
             } else {
                 // Orchestration
@@ -84,9 +83,9 @@ public class AdviceRegistry {
             }
         } else {
             // new
-            identityPointcuts = newIdentity;
-            pointcutIndex = updateStackManipulation(methodEnter, identityPointcuts.getIdentify());
-            updateStackManipulation(methodExit, identityPointcuts.getIdentify());
+            pointcutsUniqueId = newIdentity;
+            pointcutIndex = updateStackManipulation(methodEnter, pointcutsUniqueId.getUniqueId());
+            updateStackManipulation(methodExit, pointcutsUniqueId.getUniqueId());
         }
 
         // merge or registry
@@ -95,35 +94,35 @@ public class AdviceRegistry {
             log.error("MethodTransformation get fail for {}", pointcutIndex);
             return 0;
         }
-        int identity = identityPointcuts.getIdentify();
+        int uniqueId = pointcutsUniqueId.getUniqueId();
         AgentInterceptorChain chain = methodTransformation
-            .getAgentInterceptorChain(identity, type, method, methodDescriptor);
+            .getAgentInterceptorChain(uniqueId, clazz, method, methodDescriptor);
 
         try {
-            identityPointcuts.lock();
-            AgentInterceptorChain previousChain = com.megaease.easeagent.core.plugin.Dispatcher.getChain(identity);
+            pointcutsUniqueId.lock();
+            AgentInterceptorChain previousChain = com.megaease.easeagent.core.plugin.Dispatcher.getChain(uniqueId);
             if (previousChain == null) {
-                com.megaease.easeagent.core.plugin.Dispatcher.register(identity, chain);
+                com.megaease.easeagent.core.plugin.Dispatcher.register(uniqueId, chain);
             } else {
                 chain.merge(previousChain);
-                com.megaease.easeagent.core.plugin.Dispatcher.updateChain(identity, chain);
+                com.megaease.easeagent.core.plugin.Dispatcher.updateChain(uniqueId, chain);
             }
         } finally {
-            identityPointcuts.unlock();
+            pointcutsUniqueId.unlock();
         }
 
         if (merge) {
             return 0;
         }
 
-        return identity;
+        return uniqueId;
     }
 
     static Integer getPointcutIndex(Dispatcher.Resolved resolved) {
         int index = 0;
         Map<Integer, OffsetMapping> enterMap = resolved.getOffsetMapping();
-        for (Integer offset : enterMap.keySet()) {
-            OffsetMapping om = enterMap.get(offset);
+        for (Map.Entry<Integer, OffsetMapping> offset : enterMap.entrySet()) {
+            OffsetMapping om = offset.getValue();
             if (!(om instanceof OffsetMapping.ForStackManipulation)) {
                 continue;
             }
@@ -142,8 +141,9 @@ public class AdviceRegistry {
     static Integer updateStackManipulation(Dispatcher.Resolved resolved, Integer value) {
         int index = 0;
         Map<Integer, OffsetMapping> enterMap = resolved.getOffsetMapping();
-        for (Integer offset : enterMap.keySet()) {
-            OffsetMapping om = enterMap.get(offset);
+
+        for (Map.Entry<Integer, OffsetMapping> offset : enterMap.entrySet()) {
+            OffsetMapping om = offset.getValue();
             if (!(om instanceof OffsetMapping.ForStackManipulation)) {
                 continue;
             }
@@ -157,7 +157,8 @@ public class AdviceRegistry {
 
             MethodIdentityJavaConstant constant = new MethodIdentityJavaConstant(value);
             StackManipulation stackManipulation = new AgentJavaConstantValue(constant, index);
-            enterMap.put(offset, forStackManipulation.with(stackManipulation));
+            enterMap.put(offset.getKey(), forStackManipulation.with(stackManipulation));
+
             return index;
         }
         return index;
@@ -171,32 +172,32 @@ public class AdviceRegistry {
         return CURRENT_CLASS_LOADER.get().get();
     }
 
-    public static class IdentityPointcuts {
+    public static void cleanCurrentClassLoader() {
+        CURRENT_CLASS_LOADER.remove();
+    }
+
+    private static class PointcutsUniqueId {
         static AtomicInteger index = new AtomicInteger(1);
         ReentrantLock lock = new ReentrantLock();
-        int identify;
+        int uniqueId;
         ConcurrentHashMap<Integer, Integer> pointcutIndexSet = new ConcurrentHashMap<>();
-        Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
+        WeakConcurrentMap<ClassLoader, Boolean> cache = new WeakConcurrentMap<>();
 
-        public IdentityPointcuts() {
-            this.identify = index.incrementAndGet();
+        public PointcutsUniqueId() {
+            this.uniqueId = index.incrementAndGet();
         }
 
-        public Boolean checkPointcutExist(Integer pointcutIndex) {
+        public boolean checkPointcutExist(Integer pointcutIndex) {
             return this.pointcutIndexSet.putIfAbsent(pointcutIndex, pointcutIndex) != null;
         }
 
-        public int getIdentify() {
-            return this.identify;
+        public int getUniqueId() {
+            return this.uniqueId;
         }
 
         public boolean checkClassloaderExist() {
             ClassLoader loader = getCurrentClassLoader();
-            if (cache.getIfPresent(loader) == null) {
-                cache.put(loader, true);
-                return false;
-            }
-            return true;
+            return cache.putIfProbablyAbsent(loader, true) != null;
         }
 
         public void lock() {
@@ -211,7 +212,7 @@ public class AdviceRegistry {
          * Some empty slots may appear, the effect can be ignored and can be optimized later
          */
         public void tryRelease() {
-            int id = this.identify;
+            int id = this.uniqueId;
             index.compareAndSet(id, id - 1);
         }
     }

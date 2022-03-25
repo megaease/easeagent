@@ -192,7 +192,7 @@ public class SessionContextTest {
     @Test
     public void exportAsync() {
         SessionContext sessionContext = new SessionContext();
-        sessionContext.setSupplier(EaseAgent.initializeContextSupplier);
+        sessionContext.setSupplier(() -> EaseAgent.initializeContextSupplier.getContext());
         MockITracing iTracing = new MockITracing();
         sessionContext.setCurrentTracing(iTracing);
         String name = "test_name";

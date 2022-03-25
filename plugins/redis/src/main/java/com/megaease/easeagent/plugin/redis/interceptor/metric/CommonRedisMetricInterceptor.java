@@ -58,6 +58,11 @@ public abstract class CommonRedisMetricInterceptor implements NonReentrantInterc
     }
 
     @Override
+    public int order() {
+        return Order.METRIC.getOrder();
+    }
+
+    @Override
     public Object getEnterKey(MethodInfo methodInfo, Context context) {
         return ENTER;
     }

@@ -42,7 +42,7 @@ public class CommonInlineAdvice {
                                    @Advice.Origin("#m") String method,
                                    @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                                    @Advice.Local(CONTEXT) InitializeContext context) {
-        context = EaseAgent.initializeContextSupplier.get();
+        context = EaseAgent.initializeContextSupplier.getContext();
         if (context.isNoop()) {
             return null;
         }

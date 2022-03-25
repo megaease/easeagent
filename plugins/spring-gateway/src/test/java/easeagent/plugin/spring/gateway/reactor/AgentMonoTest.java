@@ -27,7 +27,6 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 

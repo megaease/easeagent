@@ -21,7 +21,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.bridge.NoOpTracer;
 
 /**
- * This provides utilities needed for trace instrumentation..
+ * This provides utilities needed for trace instrumentation.
  *
  * <p>This type can be extended so that the object graph can be built differently or overridden,
  * for example via zipkin or when mocking.

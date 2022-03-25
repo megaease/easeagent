@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor.redirect;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;

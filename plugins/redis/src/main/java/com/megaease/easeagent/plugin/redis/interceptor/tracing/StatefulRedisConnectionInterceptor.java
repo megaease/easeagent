@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.redis.interceptor.tracing;
 
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
@@ -28,6 +29,10 @@ import com.megaease.easeagent.plugin.redis.advice.StatefulRedisConnectionAdvice;
 public class StatefulRedisConnectionInterceptor implements Interceptor {
     @Override
     public void before(MethodInfo methodInfo, Context context) {
+    }
 
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 }

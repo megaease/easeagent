@@ -63,7 +63,7 @@ public class MongoBaseTest {
 
     @Before
     public void before() {
-        EaseAgent.initializeContextSupplier.get().clear();
+        EaseAgent.initializeContextSupplier.getContext().clear();
         config = new AutoRefreshPluginConfigImpl();
         IPluginConfig iPluginConfig = mock(IPluginConfig.class);
         when(iPluginConfig.enabled()).thenReturn(true);

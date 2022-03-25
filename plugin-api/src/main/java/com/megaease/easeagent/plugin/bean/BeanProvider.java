@@ -42,4 +42,9 @@ public interface BeanProvider extends Ordered {
             return this.name;
         }
     }
+
+    @Override
+    default int order() {
+        return BeanOrder.HIGH.getOrder();
+    }
 }

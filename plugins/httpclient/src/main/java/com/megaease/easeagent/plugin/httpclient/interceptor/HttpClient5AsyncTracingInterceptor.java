@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.httpclient.HttpClientPlugin;
 import com.megaease.easeagent.plugin.httpclient.advice.HttpClient5AsyncAdvice;
@@ -36,10 +37,8 @@ import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 
 import java.net.URISyntaxException;
 
-@AdviceTo(value = HttpClient5AsyncAdvice.class, qualifier = "default", plugin = HttpClientPlugin.class)
+@AdviceTo(value = HttpClient5AsyncAdvice.class, plugin = HttpClientPlugin.class)
 public class HttpClient5AsyncTracingInterceptor implements NonReentrantInterceptor {
-
-
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         AsyncRequestProducer requestProducer = (AsyncRequestProducer) methodInfo.getArgs()[0];
@@ -66,6 +65,11 @@ public class HttpClient5AsyncTracingInterceptor implements NonReentrantIntercept
             }
             requestContext.span().error(methodInfo.getThrowable()).finish();
         }
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 
     public static class InternalFutureCallback implements FutureCallback<HttpResponse> {

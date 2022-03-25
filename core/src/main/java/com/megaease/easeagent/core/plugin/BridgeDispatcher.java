@@ -26,7 +26,8 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 public class BridgeDispatcher implements IDispatcher {
     @Override
     public void enter(int chainIndex, MethodInfo info) {
-        InitializeContext context = EaseAgent.initializeContextSupplier.get();
+        InitializeContext context = EaseAgent.initializeContextSupplier
+            .getContext();
         if (context.isNoop()) {
             return;
         }

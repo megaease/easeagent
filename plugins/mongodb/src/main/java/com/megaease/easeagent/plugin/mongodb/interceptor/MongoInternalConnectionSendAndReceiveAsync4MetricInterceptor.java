@@ -20,7 +20,6 @@ package com.megaease.easeagent.plugin.mongodb.interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigImpl;
-import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -50,6 +49,11 @@ public class MongoInternalConnectionSendAndReceiveAsync4MetricInterceptor implem
     @Override
     public String getType() {
         return Order.METRIC.getName();
+    }
+
+    @Override
+    public int order() {
+        return Order.METRIC.getOrder();
     }
 
     public static class SingleResultCallbackProxy<T> implements SingleResultCallback<T> {

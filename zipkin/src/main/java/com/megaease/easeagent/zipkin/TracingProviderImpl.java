@@ -30,6 +30,7 @@ import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.bean.BeanProvider;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.AdditionalAttributes;
 import com.megaease.easeagent.plugin.report.AgentReport;
@@ -68,30 +69,6 @@ public class TracingProviderImpl implements BeanProvider, AgentReportAware, Conf
 
         serviceName = new AutoRefreshConfigItem<>(config, ConfigConst.SERVICE_NAME, Config::getString);
 
-        /*
-        String target = config.getString("observability.tracings.output.target");
-        String zipkinUrl = config.getString("observability.tracings.output.target.zipkinUrl");
-        Boolean compressionEnabled = config.getBoolean("observability.tracings.output.target.zipkin.compressionEnabled");
-
-        boolean toZipkin = false;
-        if (target != null && target.equalsIgnoreCase("zipkin") && StringUtils.isNotEmpty(zipkinUrl)) {
-            toZipkin = true;
-        }
-        String zipkinUrlFromEnv = System.getenv(ENV_ZIPKIN_SERVER_URL);
-        if (StringUtils.isNotEmpty(zipkinUrlFromEnv)) {
-            toZipkin = true;
-            zipkinUrl = zipkinUrlFromEnv;
-        }
-        Reporter<Span> reporter;
-        if (toZipkin) {
-            reporter = AsyncReporter.create(URLConnectionSender.newBuilder()
-                .endpoint(zipkinUrl)
-                .compressionEnabled(compressionEnabled == null || compressionEnabled).build());
-        } else {
-            reporter = span -> agentReport.report(span);
-        }
-        */
-
         Reporter<ReportSpan> reporter;
         reporter = span -> agentReport.report(span);
         this.tracing = Tracing.newBuilder()
@@ -107,6 +84,7 @@ public class TracingProviderImpl implements BeanProvider, AgentReportAware, Conf
             .currentTraceContext(traceContext)
             .build();
     }
+
 
     @Injection.Bean
     public Tracing tracing() {

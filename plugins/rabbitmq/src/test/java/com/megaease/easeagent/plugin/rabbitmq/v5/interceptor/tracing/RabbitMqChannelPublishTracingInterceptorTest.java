@@ -33,7 +33,6 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.rabbitmq.TestUtils;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Envelope;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -107,7 +106,7 @@ public class RabbitMqChannelPublishTracingInterceptorTest {
     @Test
     public void order() {
         RabbitMqChannelPublishTracingInterceptor interceptor = new RabbitMqChannelPublishTracingInterceptor();
-        assertEquals(Order.HIGHEST.getOrder(), interceptor.order());
+        assertEquals(Order.TRACING.getOrder(), interceptor.order());
     }
 
     @Test

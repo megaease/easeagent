@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.ForwardedPlugin;
 import com.megaease.easeagent.plugin.httpservlet.advice.DoFilterPoints;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -52,6 +53,11 @@ public class DoFilterForwardedInterceptor implements NonReentrantInterceptor {
     @Override
     public String getType() {
         return ConfigConst.PluginID.FORWARDED;
+    }
+
+    @Override
+    public int order() {
+        return Order.FORWARDED.getOrder();
     }
 }
 

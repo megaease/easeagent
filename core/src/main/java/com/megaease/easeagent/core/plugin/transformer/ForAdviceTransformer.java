@@ -59,8 +59,11 @@ public class ForAdviceTransformer implements AgentBuilder.Transformer {
     @Override
     public DynamicType.Builder<?> transform(DynamicType.Builder<?> b, TypeDescription td, ClassLoader cl, JavaModule m) {
         CompoundClassloader.compound(this.getClass().getClassLoader(), cl);
-        AdviceRegistry.setCurrentClassLoader(cl);
 
-        return transformer.transform(b, td, cl, m);
+        AdviceRegistry.setCurrentClassLoader(cl);
+        DynamicType.Builder<?> bd = transformer.transform(b, td, cl, m);
+        AdviceRegistry.cleanCurrentClassLoader();
+
+        return bd;
     }
 }

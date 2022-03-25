@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.httpclient.interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.httpclient.ForwardedPlugin;
 import com.megaease.easeagent.plugin.httpclient.advice.HttpClient5AsyncAdvice;
@@ -28,7 +29,7 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 
-@AdviceTo(value = HttpClient5AsyncAdvice.class, qualifier = "default", plugin = ForwardedPlugin.class)
+@AdviceTo(value = HttpClient5AsyncAdvice.class, plugin = ForwardedPlugin.class)
 public class HttpClient5AsyncForwardedInterceptor implements Interceptor {
 
     @Override
@@ -46,5 +47,8 @@ public class HttpClient5AsyncForwardedInterceptor implements Interceptor {
         return ConfigConst.PluginID.FORWARDED;
     }
 
+    @Override
+    public int order() {
+        return Order.FORWARDED.getOrder();
+    }
 }
-

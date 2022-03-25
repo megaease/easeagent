@@ -61,4 +61,9 @@ public class KafkaAbstractConfigConstructInterceptor implements NonReentrantInte
     public String getType() {
         return Order.REDIRECT.getName();
     }
+
+    @Override
+    public int order() {
+        return Order.REDIRECT.getOrder();
+    }
 }

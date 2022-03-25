@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.tools.trace;
 
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
@@ -45,6 +46,11 @@ public abstract class BaseHttpClientTracingInterceptor implements NonReentrantIn
         } finally {
             requestContext.scope().close();
         }
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 
     public abstract Object getProgressKey();

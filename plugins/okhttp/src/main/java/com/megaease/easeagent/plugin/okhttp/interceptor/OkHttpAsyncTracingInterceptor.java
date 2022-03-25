@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
@@ -67,6 +68,11 @@ public class OkHttpAsyncTracingInterceptor implements NonReentrantInterceptor {
             }
             requestContext.span().error(methodInfo.getThrowable()).finish();
         }
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 
     public static class InternalCallback implements Callback {

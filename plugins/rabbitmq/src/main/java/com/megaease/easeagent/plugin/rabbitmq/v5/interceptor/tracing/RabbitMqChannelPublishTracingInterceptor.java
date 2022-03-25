@@ -94,7 +94,7 @@ public class RabbitMqChannelPublishTracingInterceptor implements Interceptor {
 
     @Override
     public int order() {
-        return Order.HIGHEST.getOrder();
+        return Order.TRACING.getOrder();
     }
 
     static class RabbitProducerRequest implements MessagingRequest {

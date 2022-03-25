@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
@@ -79,6 +80,11 @@ public class DoFilterTraceInterceptor implements NonReentrantInterceptor {
         } finally {
             requestContext.scope().close();
         }
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 
 

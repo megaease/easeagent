@@ -65,6 +65,11 @@ public class RabbitMqOnMessageTracingInterceptor implements Interceptor {
         }
     }
 
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
+    }
+
     protected void after4Single(MethodInfo methodInfo, Context context) {
         this.processMessageAfter(methodInfo, context, 0);
     }

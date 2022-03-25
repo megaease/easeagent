@@ -22,6 +22,7 @@ import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpUtils;
@@ -76,6 +77,10 @@ public class HttpHeadersFilterTracingInterceptor implements NonReentrantIntercep
         }
     }
 
+    @Override
+    public int order() {
+        return Order.HIGH.getOrder();
+    }
 
     private Map<String, String> getHeadersFromExchange(ServerWebExchange exchange) {
         Map<String, String> headers = exchange.getAttribute(CLIENT_HEADER_ATTR);

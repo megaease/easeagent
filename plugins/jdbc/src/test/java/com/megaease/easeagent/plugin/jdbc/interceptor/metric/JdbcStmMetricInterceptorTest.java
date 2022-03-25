@@ -32,7 +32,6 @@ import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.jdbc.JdbcDataSourceMetricPlugin;
 import com.megaease.easeagent.plugin.jdbc.TestUtils;
-import com.megaease.easeagent.plugin.jdbc.common.MD5SQLCompression;
 import com.megaease.easeagent.plugin.jdbc.common.SQLCompressionFactory;
 import com.megaease.easeagent.plugin.jdbc.common.SqlInfo;
 import org.junit.Test;

@@ -41,6 +41,11 @@ public class ClassTransformation implements Ordered {
         this.hasDynamicField = hasDynamicField;
     }
 
+    @Override
+    public int order() {
+        return this.order;
+    }
+
     public static Builder builder() {
         return new Builder();
     }

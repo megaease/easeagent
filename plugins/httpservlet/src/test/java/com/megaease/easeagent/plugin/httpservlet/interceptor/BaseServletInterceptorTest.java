@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.httpservlet.interceptor;
 
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.junit.Test;
@@ -134,6 +135,11 @@ public class BaseServletInterceptorTest {
         private HttpServletRequest httpServletRequest;
         private HttpServletResponse httpServletResponse;
         private long start;
+
+        @Override
+        public int order() {
+            return Order.HIGH.getOrder();
+        }
 
 
         @Override

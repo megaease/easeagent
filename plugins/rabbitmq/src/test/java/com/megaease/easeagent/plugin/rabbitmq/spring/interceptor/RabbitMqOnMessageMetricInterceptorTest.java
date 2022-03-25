@@ -36,7 +36,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.junit.Assert.*;
 

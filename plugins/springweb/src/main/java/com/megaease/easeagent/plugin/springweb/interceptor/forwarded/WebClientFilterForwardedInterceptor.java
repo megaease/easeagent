@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.trace.Setter;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.springweb.ForwardedPlugin;
@@ -52,12 +53,15 @@ public class WebClientFilterForwardedInterceptor implements Interceptor {
         }
     }
 
-
     @Override
     public String getType() {
         return ConfigConst.PluginID.FORWARDED;
     }
 
+    @Override
+    public int order() {
+        return Order.FORWARDED.getOrder();
+    }
 
     public class WebClientForwardedFilter implements ExchangeFilterFunction {
 

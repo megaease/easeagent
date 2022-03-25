@@ -25,8 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.reactivestreams.Subscription;
 
-import java.util.function.BiConsumer;
-
 import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)

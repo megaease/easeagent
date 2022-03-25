@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin;
 
+import com.megaease.easeagent.plugin.enums.Order;
+
 public interface AgentPlugin extends Ordered {
     /**
      * define the plugin name, avoiding conflicts with others
@@ -29,6 +31,10 @@ public interface AgentPlugin extends Ordered {
      * it will be used to get configuration when loaded:
      */
     String getDomain();
+
+    default int order() {
+        return Order.HIGH.getOrder();
+    }
 }
 
 

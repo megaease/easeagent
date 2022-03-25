@@ -97,4 +97,8 @@ public class JedisConstructorInterceptor implements Interceptor {
         return Order.REDIRECT.getName();
     }
 
+    @Override
+    public int order() {
+        return Order.REDIRECT.getOrder();
+    }
 }

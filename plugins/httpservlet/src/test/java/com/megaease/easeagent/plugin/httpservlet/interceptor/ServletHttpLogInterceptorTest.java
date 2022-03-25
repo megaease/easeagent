@@ -25,7 +25,6 @@ import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.httpservlet.AccessPlugin;
 import com.megaease.easeagent.plugin.httpservlet.utils.ServletUtils;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;

@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.springweb.interceptor.tracing;
 
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
@@ -71,6 +72,11 @@ public class WebClientFilterTracingInterceptor implements NonReentrantIntercepto
                 span.finish();
             }
         }
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 
     protected HttpRequest getRequest(MethodInfo methodInfo) {

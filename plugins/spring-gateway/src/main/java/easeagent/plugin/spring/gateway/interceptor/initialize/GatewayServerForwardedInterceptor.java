@@ -21,6 +21,7 @@ import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Cleaner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import easeagent.plugin.spring.gateway.ForwardedPlugin;
@@ -52,5 +53,10 @@ public class GatewayServerForwardedInterceptor implements NonReentrantIntercepto
     @Override
     public String getType() {
         return ConfigConst.PluginID.FORWARDED;
+    }
+
+    @Override
+    public int order() {
+        return Order.FORWARDED.getOrder();
     }
 }

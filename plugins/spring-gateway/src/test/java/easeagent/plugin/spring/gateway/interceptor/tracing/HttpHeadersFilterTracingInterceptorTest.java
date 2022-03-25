@@ -18,7 +18,6 @@
 package easeagent.plugin.spring.gateway.interceptor.tracing;
 
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
@@ -26,7 +25,6 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import easeagent.plugin.spring.gateway.TestServerWebExchangeUtils;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
-import org.bouncycastle.cert.ocsp.Req;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.HttpHeaders;

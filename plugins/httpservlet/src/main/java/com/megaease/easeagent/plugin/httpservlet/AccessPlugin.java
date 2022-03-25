@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.httpservlet;
 
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 
 public class AccessPlugin implements AgentPlugin {
     @Override
@@ -29,5 +30,10 @@ public class AccessPlugin implements AgentPlugin {
     @Override
     public String getDomain() {
         return ConfigConst.OBSERVABILITY;
+    }
+
+    @Override
+    public int order() {
+        return Order.HIGH.getOrder();
     }
 }

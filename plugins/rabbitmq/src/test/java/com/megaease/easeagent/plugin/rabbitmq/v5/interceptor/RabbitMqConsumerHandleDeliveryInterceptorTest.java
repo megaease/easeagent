@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.plugin.rabbitmq.v5.interceptor;
 
-import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextCons;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;

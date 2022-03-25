@@ -20,6 +20,7 @@ package com.megaease.easeagent.plugin.httpclient.interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpclient.ForwardedPlugin;
 import com.megaease.easeagent.plugin.httpclient.advice.HttpClientDoExecuteAdvice;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
@@ -48,5 +49,8 @@ public class HttpClientDoExecuteForwardedInterceptor implements Interceptor {
         return ConfigConst.PluginID.FORWARDED;
     }
 
-
+    @Override
+    public int order() {
+        return Order.FORWARDED.getOrder();
+    }
 }

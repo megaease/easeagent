@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.MessagingRequest;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
@@ -69,5 +70,10 @@ public class KafkaMessageListenerTracingInterceptor implements NonReentrantInter
         } finally {
             span.finish();
         }
+    }
+
+    @Override
+    public int order() {
+        return Order.TRACING.getOrder();
     }
 }
