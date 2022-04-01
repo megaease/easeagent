@@ -68,7 +68,7 @@
         <version.commons-lang3>3.11</version.commons-lang3>
         <version.commons-codec>1.15</version.commons-codec>
         <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
-        <version.spring>5.2.6.RELEASE</version.spring>
+        <version.spring>5.3.18</version.spring>
         <version.spring-kafka>2.3.13.RELEASE</version.spring-kafka>
         <version.spring.cloud>Hoxton.SR5</version.spring.cloud>
         <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
