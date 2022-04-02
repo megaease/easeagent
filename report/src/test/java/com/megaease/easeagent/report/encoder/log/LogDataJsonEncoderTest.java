@@ -76,7 +76,7 @@ public class LogDataJsonEncoderTest {
     public void test_encoder() {
         // size = 208
         int size = encoder.sizeInBytes(data);
-        Assert.assertEquals(208, size);
+        Assert.assertEquals(207, size);
         EncodedData encoded = encoder.encode(data);
         Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
         Assert.assertEquals("encoder.log.LogDataJsonEncoderTest", jsonMap.get(LOCATION));
@@ -90,7 +90,7 @@ public class LogDataJsonEncoderTest {
         this.config.updateConfigs(changes);
 
         int size = encoder.sizeInBytes(data);
-        Assert.assertEquals(200, size);
+        Assert.assertEquals(199, size);
         EncodedData encoded = encoder.encode(data);
         Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
         Assert.assertEquals("log.LogDataJsonEncoderTest", jsonMap.get(LOCATION));
