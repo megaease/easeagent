@@ -12,6 +12,7 @@
         - [Tracing config](#tracing-config)
     - [Plugin Configuration](#plugin-configuration)
       - [Tracing and Metric](#tracing-and-metric)
+      - [Application Log](#application-log)
       - [Redirect](#redirect)
       - [Forwarded headers plugin enabled](#forwarded-headers-plugin-enabled)
       - [Service Name Head](#service-name-head)
@@ -39,6 +40,7 @@
       - [Spring AMQP on Message Listener](#spring-amqp-on-message-listener)
       - [Elasticsearch](#elasticsearch)
       - [MongoDB](#mongodb)
+  - [Application Log](#application-log-1)
 
 ## Configuration
 The EaseAgent configuration information can be divided into two categories, one is the **global configuration** and the other is the **plugin configuration**.  
@@ -241,6 +243,45 @@ Supported components and corresponding namespaces:
 | rabbitmq          | `rabbitmq`       | RabbitMQ Metric                                                                                                                                                                                                                                                                                                                                                            |
 | jvmGc             | `jvmGc`          | JVM GC Metric                                                                                                                                                                                                                                                                                                                                                              |
 | JVM Memory        | `jvmMemory`      | JVM Memory Metric                                                                                                                                                                                                                                                                                                                                                          |
+
+#### Application Log
+Application log modules collecting application logs printed by the application.
+
+Supported components/plugins and corresponding namespaces:
+
+| Plugin/Components | Namespace       | Description               |
+| ----------------- | --------------- | ------------------------- |
+| logback           | `logback`       | Support logback library   |
+| log4j2            | `log4j2 `       | Support log4j2 library         |
+| access            | `access`        | Access log module         |
+
+The default configuration is as follows:
+
+```
+plugin.observability.global.log.enabled=true
+plugin.observability.global.log.appendType=console
+plugin.observability.global.log.topic=application-log
+plugin.observability.global.log.url=/application-log
+plugin.observability.global.log.level=INFO
+
+
+plugin.observability.global.log.encoder=LogDataJsonEncoder
+plugin.observability.global.log.encoder.timestamp=%d{UNIX_MILLIS}
+plugin.observability.global.log.encoder.logLevel=%-5level
+plugin.observability.global.log.encoder.threadId=%thread
+plugin.observability.global.log.encoder.location=%logger{36}
+plugin.observability.global.log.encoder.message=%msg%n
+
+plugin.observability.access.log.encoder=AccessLogJsonEncoder
+
+plugin.observability.logback.log.enabled=false
+plugin.observability.log4j2.log.enabled=false
+```
+
+The `logback` and `log4j2` modules are disabled by default, and they can be `enabled` in the user configuration file to enable collecting logs printed by the application.
+The `LogDataJsonEncoder` supports `log4j2` style pattern configuration for each field.
+
+To send logs data to `Opentelemetry` compatible backend, the corresponding `Encoder` need to be developed.
 
 #### Redirect
 Redirection feature combined with `EaseMesh` to direct traffic to shadow services to simulate real traffic for the whole site performance test in the production environment in an effective and safe way.
@@ -751,3 +792,6 @@ MongoDB schema describes key metrics of MongoDB client invoking, which include:
 | p95       | double  | TP95: The MongoDB execution duration in milliseconds for 95% user.                                        |
 | p98       | double  | TP98: The MongoDB execution duration in milliseconds for 98% user.                                        |
 | p99       | double  | TP99: The MongoDB execution duration in milliseconds for 99% user.                                        |
+
+## Application Log
+

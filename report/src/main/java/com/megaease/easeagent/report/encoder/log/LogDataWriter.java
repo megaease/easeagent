@@ -60,7 +60,7 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
     static final String MESSAGE = "message";
 
     static final int STATIC_SIZE = 2 +
-        + TYPE_FIELD_NAME.length() + 1
+        + TYPE_FIELD_NAME.length()
         + SERVICE_FIELD_NAME.length() + 1
         + SYSTEM_FIELD_NAME.length() + 1;
 

@@ -78,7 +78,8 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
 
 * Standardization
     * The tracing data format is fully compatible with the Zipkin data format.
-    * Metric data format fully supports integration with Prometheus.
+    * Metric data format fully supports integration with `Prometheus`.
+    * The application log format is fully compatible with the `Opentelemetry` data format.
 
 
 ## Architecture Diagram
