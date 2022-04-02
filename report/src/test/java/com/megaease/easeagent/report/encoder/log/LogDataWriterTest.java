@@ -40,7 +40,7 @@ public class LogDataWriterTest {
         cfg.put("logLevel", "%-5level");
         cfg.put("threadId", "%thread");
         cfg.put("location", "%logger{36}");
-        cfg.put("message", "%msg%n");
+        cfg.put("message", "%msg");
         this.config = new Configs(cfg);
     }
 

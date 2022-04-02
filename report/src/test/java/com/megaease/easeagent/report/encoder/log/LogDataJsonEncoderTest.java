@@ -53,7 +53,7 @@ public class LogDataJsonEncoderTest {
         cfg.put(join(ENCODER_KEY, "logLevel"), "%-5level");
         cfg.put(join(ENCODER_KEY, "threadId"), "%thread");
         cfg.put(join(ENCODER_KEY, "location"), "%logger{3}");
-        cfg.put(join(ENCODER_KEY, "message"), "%msg%n");
+        cfg.put(join(ENCODER_KEY, "message"), "%msg");
         cfg.put("name", "demo-service");
         cfg.put("system", "demo-system");
         this.config = new Configs(cfg);
@@ -65,7 +65,7 @@ public class LogDataJsonEncoderTest {
                 .severity(Severity.INFO)
                 .severityText(Level.INFO.toString())
                 .threadName(Thread.currentThread().getName())
-                .body("Hello\n")
+                .body("Hello")
                 .build();
 
         encoder = new LogDataJsonEncoder();
@@ -76,7 +76,7 @@ public class LogDataJsonEncoderTest {
     public void test_encoder() {
         // size = 208
         int size = encoder.sizeInBytes(data);
-        Assert.assertEquals(207, size);
+        Assert.assertEquals(203, size);
         EncodedData encoded = encoder.encode(data);
         Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
         Assert.assertEquals("encoder.log.LogDataJsonEncoderTest", jsonMap.get(LOCATION));
@@ -90,7 +90,7 @@ public class LogDataJsonEncoderTest {
         this.config.updateConfigs(changes);
 
         int size = encoder.sizeInBytes(data);
-        Assert.assertEquals(199, size);
+        Assert.assertEquals(195, size);
         EncodedData encoded = encoder.encode(data);
         Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
         Assert.assertEquals("log.LogDataJsonEncoderTest", jsonMap.get(LOCATION));
