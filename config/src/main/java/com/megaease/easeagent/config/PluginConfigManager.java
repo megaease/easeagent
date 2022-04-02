@@ -56,6 +56,11 @@ public class PluginConfigManager implements IConfigFactory {
         return configs.getString(property);
     }
 
+    @Override
+    public String getConfig(String property, String defaultValue) {
+        return configs.getString(property, defaultValue);
+    }
+
     public PluginConfig getConfig(String domain, String namespace, String id) {
         return getConfig(domain, namespace, id, null);
     }

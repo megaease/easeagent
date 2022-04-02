@@ -57,19 +57,19 @@ public class ServletHttpLogInterceptorTest {
         internalAfter();
     }
 
-    public void verify(AccessLogInfo accessLogInfo, long startTime) {
-        assertEquals(EaseAgent.getConfig("system"), accessLogInfo.getSystem());
-        assertEquals(EaseAgent.getConfig("name"), accessLogInfo.getService());
-        assertEquals(HostAddress.localhost(), accessLogInfo.getHostName());
-        assertEquals(HostAddress.getHostIpv4(), accessLogInfo.getHostIpv4());
-        assertEquals(TestConst.METHOD + " " + TestConst.URL, accessLogInfo.getUrl());
-        assertEquals(TestConst.METHOD, accessLogInfo.getMethod());
-        assertEquals(TestConst.FORWARDED_VALUE, accessLogInfo.getHeaders().get(TestConst.FORWARDED_NAME));
-        assertEquals(startTime, accessLogInfo.getBeginTime());
-        assertEquals("10", accessLogInfo.getQueries().get("q1"));
-        assertEquals("testq", accessLogInfo.getQueries().get("q2"));
-        assertEquals(TestConst.FORWARDED_VALUE, accessLogInfo.getClientIP());
-        assertTrue(accessLogInfo.getBeginCpuTime() > 0);
+    public void verify(AccessLogInfo accessLog, long startTime) {
+        assertEquals(EaseAgent.getConfig("system"), accessLog.getSystem());
+        assertEquals(EaseAgent.getConfig("name"), accessLog.getService());
+        assertEquals(HostAddress.localhost(), accessLog.getHostName());
+        assertEquals(HostAddress.getHostIpv4(), accessLog.getHostIpv4());
+        assertEquals(TestConst.METHOD + " " + TestConst.URL, accessLog.getUrl());
+        assertEquals(TestConst.METHOD, accessLog.getMethod());
+        assertEquals(TestConst.FORWARDED_VALUE, accessLog.getHeaders().get(TestConst.FORWARDED_NAME));
+        assertEquals(startTime, accessLog.getBeginTime());
+        assertEquals("10", accessLog.getQueries().get("q1"));
+        assertEquals("testq", accessLog.getQueries().get("q2"));
+        assertEquals(TestConst.FORWARDED_VALUE, accessLog.getClientIP());
+        assertTrue(accessLog.getBeginCpuTime() > 0);
     }
 
     @Test
@@ -99,9 +99,9 @@ public class ServletHttpLogInterceptorTest {
         Object requestInfoO = httpServletRequest.getAttribute(AccessLogInfo.class.getName());
         assertNotNull(requestInfoO);
         assertTrue(requestInfoO instanceof AccessLogInfo);
-        AccessLogInfo accessLogInfo = (AccessLogInfo) requestInfoO;
+        AccessLogInfo accessLog = (AccessLogInfo) requestInfoO;
         long start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
-        verify(accessLogInfo, start);
+        verify(accessLog, start);
         LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(stringObjectMap -> {
             Object type = stringObjectMap.get("type");
             return type instanceof String && "access-log".equals(type);
@@ -128,6 +128,6 @@ public class ServletHttpLogInterceptorTest {
     @Test
     public void getType() {
         ServletHttpLogInterceptor servletHttpLogInterceptor = new ServletHttpLogInterceptor();
-        assertEquals(Order.METRIC.getName(), servletHttpLogInterceptor.getType());
+        assertEquals(Order.LOG.getName(), servletHttpLogInterceptor.getType());
     }
 }

@@ -77,12 +77,23 @@ public final class EaseAgent {
     }
 
     /**
-     * Returns a configuration property from the agent's all configuration.
+     * Returns a configuration property from the agent's global configuration.
      *
      * @return The configuration of this Java agent.
      */
     public static String getConfig(String property) {
         return configFactory.getConfig(property);
+    }
+
+    /**
+     * find the configuration property from the agent's global configuration.
+     * if not exist, then return @{defaultValue}
+     *
+     * @param defaultValue default value returned when the property is not exist
+     * @return The configuration of this Java agent.
+     */
+    public static String getConfig(String property, String defaultValue) {
+        return configFactory.getConfig(property, defaultValue);
     }
 
     /**

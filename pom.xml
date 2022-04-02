@@ -60,6 +60,7 @@
         <version.servlet>3.1.0</version.servlet>
         <version.brave>5.13.3</version.brave>
         <version.otel>1.12.0</version.otel>
+        <version.otel-alpha>1.12.0-alpha</version.otel-alpha>
         <version.zipkin-sender-kafka11>2.8.0</version.zipkin-sender-kafka11>
         <version.zipkin-reporter2>2.15.0</version.zipkin-reporter2>
         <version.moco>1.1.0</version.moco>
@@ -210,6 +211,24 @@
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-sdk</artifactId>
                 <version>${version.otel}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-common</artifactId>
+                <version>${version.otel}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-semconv</artifactId>
+                <version>${version.otel-alpha}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-logs</artifactId>
+                <version>${version.otel-alpha}</version>
             </dependency>
 
             <dependency>

@@ -33,6 +33,7 @@ public interface ConfigConst {
 
     // ServiceId
     String METRIC_SERVICE_ID = "metric";
+    String LOG_SERVICE_ID = "log";
     String TRACING_SERVICE_ID = "tracing";
     String SERVICE_ID_ENABLED_KEY = "enabled";
 
@@ -157,7 +158,7 @@ public interface ConfigConst {
     interface PluginID {
         String TRACING = "tracing";
         String METRIC = "metric";
-        String LOG = "access-log";
+        String LOG = "log";
         String REDIRECT = "redirect";
         String FORWARDED = "forwarded";
     }

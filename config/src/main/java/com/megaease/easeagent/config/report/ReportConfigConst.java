@@ -28,7 +28,8 @@ public class ReportConfigConst {
 
     public static final String SPAN_JSON_ENCODER_NAME = "SpanJsonEncoder";
     public static final String METRIC_JSON_ENCODER_NAME = "MetricJsonEncoder";
-    public static final String LOG_JSON_ENCODER_NAME = "LogJsonEncoder";
+    public static final String LOG_DATA_JSON_ENCODER_NAME = "LogDataJsonEncoder";
+    public static final String ACCESS_LOG_JSON_ENCODER_NAME = "AccessLogJsonEncoder";
 
     public static final String HTTP_SPAN_JSON_ENCODER_NAME = "HttpSpanJsonEncoder";
 
@@ -69,9 +70,14 @@ public class ReportConfigConst {
     public static final String OUTPUT_SECURITY_PROTOCOL_V2 = join(OUTPUT_SERVER_V2, "security.protocol");
     public static final String OUTPUT_SERVERS_SSL = join(OUTPUT_SERVER_V2, "ssl");
 
+    public static final String LOG_ASYNC = join(LOGS, ASYNC_KEY);
+
     public static final String LOG_SENDER = join(LOGS, SENDER_KEY);
     public static final String LOG_ENCODER = join(LOGS, ENCODER_KEY);
-    public static final String LOG_ASYNC = join(LOGS, ASYNC_KEY);
+
+    public static final String LOG_ACCESS = join(LOGS, "access");
+    public static final String LOG_ACCESS_SENDER = join(LOG_ACCESS, SENDER_KEY);
+    public static final String LOG_ACCESS_ENCODER = join(LOG_ACCESS, ENCODER_KEY);
 
     public static final String TRACE_SENDER = join(TRACE_V2, SENDER_KEY);
     public static final String TRACE_ENCODER = join(TRACE_V2, ENCODER_KEY);
@@ -82,9 +88,12 @@ public class ReportConfigConst {
     public static final String METRIC_ASYNC = join(METRIC_V2, ASYNC_KEY);
 
     // -------- lv4  --------
+    public static final String LOG_SENDER_TOPIC = join(LOG_SENDER, TOPIC_KEY);
     public static final String LOG_SENDER_NAME = join(LOG_SENDER, APPEND_TYPE_KEY);
-    public static final String LOG_SENDER_ENABLED_V2 = join(LOG_SENDER, ENABLED_KEY);
-    public static final String LOG_SENDER_TOPIC_V2 = join(LOG_SENDER, TOPIC_KEY);
+
+    public static final String LOG_ACCESS_SENDER_NAME = join(LOG_ACCESS_SENDER, APPEND_TYPE_KEY);
+    public static final String LOG_ACCESS_SENDER_ENABLED = join(LOG_ACCESS_SENDER, ENABLED_KEY);
+    public static final String LOG_ACCESS_SENDER_TOPIC = join(LOG_ACCESS_SENDER, TOPIC_KEY);
 
     public static final String LOG_ASYNC_MESSAGE_MAX_BYTES = join(LOG_ASYNC, ASYNC_MSG_MAX_BYTES_KEY);
     public static final String LOG_ASYNC_REPORT_THREAD = join(LOG_ASYNC, ASYNC_THREAD_KEY);

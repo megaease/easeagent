@@ -134,12 +134,12 @@ public class ConfigFactory {
 
         // load yaml configuration file if exist
         GlobalConfigs yConfigs = ConfigFactory.loadFromClasspath(loader, CONFIG_YAML_FILE);
-        configs.updateConfigsNotNotify(yConfigs.getConfigs());
+        configs.mergeConfigs(yConfigs);
 
         // override by user special config file
         if (StringUtils.isNotEmpty(pathname)) {
-            Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
-            configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
+            GlobalConfigs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
+            configs.mergeConfigs(configsFromOuterFile);
         }
 
         // check environment cfg override

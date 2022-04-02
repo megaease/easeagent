@@ -24,7 +24,6 @@ import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.async.AsyncProps;
 import com.megaease.easeagent.report.async.AsyncReporter;
@@ -40,17 +39,18 @@ import java.util.concurrent.TimeUnit;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
 
 @SuppressWarnings("unused")
-public class LogReporter implements ConfigChangeListener {
+public class AccessLogReporter implements ConfigChangeListener {
     Config config;
     AsyncReporter<AccessLogInfo> asyncReporter;
 
-    public LogReporter(Config configs) {
-        Map<String, String> cfg = ConfigUtils.extractByPrefix(configs.getConfigs(), LOGS);
+    public AccessLogReporter(Config configs) {
+        Map<String, String> cfg = ConfigUtils.extractByPrefix(configs.getConfigs(), LOG_ACCESS);
         cfg.putAll(ConfigUtils.extractByPrefix(configs.getConfigs(), OUTPUT_SERVER_V2));
+        cfg.putAll(ConfigUtils.extractByPrefix(configs.getConfigs(), LOG_ASYNC));
         this.config = new Configs(cfg);
         configs.addChangeListener(this);
 
-        SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.LOG_SENDER, configs);
+        SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.LOG_ACCESS_SENDER, configs);
         AsyncProps asyncProperties = new LogAsyncProps(this.config);
         this.asyncReporter = DefaultAsyncReporter.builderAsyncReporter(sender, asyncProperties);
         this.asyncReporter.startFlushThread();
@@ -73,14 +73,15 @@ public class LogReporter implements ConfigChangeListener {
     private Map<String, String> filterChanges(List<ChangeItem> list) {
         Map<String, String> cfg = new HashMap<>();
         list.stream()
-            .filter(item -> item.getFullName().startsWith(LOGS)
+            .filter(item -> item.getFullName().startsWith(LOG_ACCESS)
+                || item.getFullName().startsWith(LOG_ASYNC)
                 || item.getFullName().startsWith(OUTPUT_SERVER_V2))
             .forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
         return cfg;
     }
 
     public synchronized void refresh(Map<String, String> cfg) {
-        String name = cfg.get(LOG_SENDER_NAME);
+        String name = cfg.get(LOG_ACCESS_SENDER_NAME);
         SenderWithEncoder sender = asyncReporter.getSender();
         if (sender != null) {
             if (StringUtils.isNotEmpty(name) && !sender.name().equals(name)) {
@@ -89,11 +90,11 @@ public class LogReporter implements ConfigChangeListener {
                 } catch (Exception ignored) {
                     // ignored
                 }
-                sender = ReporterRegistry.getSender(LOG_SENDER, this.config);
+                sender = ReporterRegistry.getSender(LOG_ACCESS_SENDER, this.config);
                 asyncReporter.setSender(sender);
             }
         } else {
-            sender = ReporterRegistry.getSender(LOG_SENDER, this.config);
+            sender = ReporterRegistry.getSender(LOG_ACCESS_SENDER, this.config);
             asyncReporter.setSender(sender);
         }
 

@@ -21,4 +21,16 @@ public interface EncodedData {
     int size();
 
     byte[] getData();
+
+    EncodedData EMPTY = new EncodedData() {
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public byte[] getData() {
+            return new byte[0];
+        }
+    };
 }

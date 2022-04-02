@@ -28,7 +28,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-public class ServletAccessLogServerInfoTest {
+public class ServletAccessLogInfoServerInfoTest {
 
     private ServletAccessLogServerInfo loadMock() {
         ServletAccessLogServerInfo servletAccessLogServerInfo = new ServletAccessLogServerInfo();

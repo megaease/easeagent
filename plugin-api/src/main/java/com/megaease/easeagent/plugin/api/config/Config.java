@@ -27,6 +27,8 @@ public interface Config {
 
     String getString(String name);
 
+    String getString(String name, String defVal);
+
     Integer getInt(String name);
 
     Integer getInt(String name, int defValue);

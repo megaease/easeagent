@@ -33,7 +33,6 @@
             <groupId>com.squareup</groupId>
             <artifactId>javapoet</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -47,10 +46,34 @@
             <artifactId>auto-service</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value-annotations</artifactId>
+            <version>1.9</version>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-semconv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-logs</artifactId>
         </dependency>
     </dependencies>
     <build>

@@ -19,10 +19,9 @@ package easeagent.plugin.spring.gateway.interceptor.metric.log;
 
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
@@ -30,7 +29,6 @@ import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
 import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
-import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import easeagent.plugin.spring.gateway.AccessPlugin;
 import easeagent.plugin.spring.gateway.advice.AgentGlobalFilterAdvice;
 import easeagent.plugin.spring.gateway.interceptor.GatewayCons;
@@ -44,22 +42,16 @@ import static easeagent.plugin.spring.gateway.interceptor.metric.TimeUtils.start
 @AdviceTo(value = AgentGlobalFilterAdvice.class, plugin = AccessPlugin.class)
 public class GatewayAccessLogInterceptor implements Interceptor {
     private static final Object START_TIME = new Object();
-    private static Reporter reportConsumer;
     private final HttpLog httpLog = new HttpLog();
-
-    @Override
-    public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
-        reportConsumer = EaseAgent.metricReporter(config);
-    }
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
         Long beginTime = startTime(context, START_TIME);
-        AccessLogInfo accessLogInfo = this.httpLog.prepare(getSystem(),
+        AccessLogInfo accessLog = this.httpLog.prepare(getSystem(),
             getServiceName(), beginTime, getSpan(exchange), serverInfo);
-        exchange.getAttributes().put(AccessLogInfo.class.getName(), accessLogInfo);
+        exchange.getAttributes().put(AccessLogInfo.class.getName(), accessLog);
     }
 
     @Override
@@ -84,18 +76,14 @@ public class GatewayAccessLogInterceptor implements Interceptor {
 
     private void finishCallback(MethodInfo methodInfo, AsyncContext ctx) {
         ServerWebExchange exchange = (ServerWebExchange) methodInfo.getArgs()[0];
-        AccessLogInfo accessLogInfo = exchange.getAttribute(AccessLogInfo.class.getName());
-        if (accessLogInfo == null) {
+        AccessLogInfo accessLog = exchange.getAttribute(AccessLogInfo.class.getName());
+        if (accessLog == null) {
             return;
         }
         Long beginTime = ctx.get(START_TIME);
         AccessLogServerInfo serverInfo = this.serverInfo(exchange);
-        this.httpLog.finish(accessLogInfo, methodInfo.isSuccess(), beginTime, serverInfo);
-        EaseAgent.getAgentReport().report(accessLogInfo);
-        /*
-        String logString = this.httpLog.getLogString(accessLogInfo, methodInfo.isSuccess(), beginTime, serverInfo);
-        reportConsumer.report(logString);
-        */
+        this.httpLog.finish(accessLog, methodInfo.isSuccess(), beginTime, serverInfo);
+        EaseAgent.getAgentReport().report(accessLog);
     }
 
     AccessLogServerInfo serverInfo(ServerWebExchange exchange) {
@@ -114,11 +102,11 @@ public class GatewayAccessLogInterceptor implements Interceptor {
 
     @Override
     public String getType() {
-        return Order.METRIC.getName();
+        return Order.LOG.getName();
     }
 
     @Override
     public int order() {
-        return Order.METRIC.getOrder();
+        return Order.LOG.getOrder();
     }
 }

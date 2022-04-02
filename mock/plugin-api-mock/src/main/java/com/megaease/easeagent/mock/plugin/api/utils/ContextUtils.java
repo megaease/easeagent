@@ -40,7 +40,7 @@ public class ContextUtils {
         OldRedirect.resetRedirect();
         MockTracingProvider.cleanPendingSpans();
         MockReport.cleanLastSpan();
-        MockReport.cleanLastLog();
+        MockReport.cleanLastAccessLog();
         MockReport.cleanSkipSpan();
     }
 

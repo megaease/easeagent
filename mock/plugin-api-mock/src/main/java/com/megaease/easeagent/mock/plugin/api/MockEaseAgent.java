@@ -116,14 +116,14 @@ public class MockEaseAgent {
      * @return Access Log
      */
     public static AccessLogInfo getLastLog() {
-        return MockReport.getLastLog();
+        return MockReport.getLastAccessLog();
     }
 
     /**
      * clean last Span cache from Report
      */
     public static void clearLastLog() {
-        MockReport.cleanLastLog();
+        MockReport.cleanLastAccessLog();
     }
 
     /**
