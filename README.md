@@ -130,6 +130,10 @@ The `./build/target/easeagent-dep.jar` is the agent jar with all the dependencie
 > For the Windows platform, please make sure git `core.autocrlf` is set to false before git clone.
 > You can use `git config --global core.autocrlf false` to modify `core.autocrlf`.
 
+[How to use easeagent.jar on host?](doc/how-to-use/use-on-host.md)
+
+[How to use easeagent.jar in docker?](doc/how-to-use/use-in-docker.md)
+
 #### Get Configuration file
 Extracting the default configuration file.
 ```
