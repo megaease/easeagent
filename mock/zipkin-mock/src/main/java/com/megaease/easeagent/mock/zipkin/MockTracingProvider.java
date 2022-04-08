@@ -19,6 +19,8 @@ package com.megaease.easeagent.mock.zipkin;
 
 import brave.TracerTestUtils;
 import brave.Tracing;
+import brave.propagation.CurrentTraceContext;
+import brave.propagation.ThreadLocalCurrentTraceContext;
 import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.report.MockReport;
 import com.megaease.easeagent.mock.utils.MockProvider;
@@ -50,5 +52,12 @@ public class MockTracingProvider implements MockProvider {
 
     public static synchronized void cleanPendingSpans() {
         TracerTestUtils.clean(TRACING.tracer());
+    }
+
+    public static synchronized void cleanCurrentSpan() {
+        CurrentTraceContext currentContext = TRACING.currentTraceContext();
+        if (currentContext instanceof ThreadLocalCurrentTraceContext) {
+            ((ThreadLocalCurrentTraceContext) currentContext).clear();
+        }
     }
 }
