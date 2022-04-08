@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, MegaEase
+ * Copyright (c) 2022, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +13,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
+package com.megaease.easeagent.log4j2;
 
-package com.megaease.easeagent.plugin.field;
+import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.enums.Order;
 
-/**
- * default value for Agent Dynamic Field,
- * avoiding NullPointerException when serialized
- */
-public class NullObject {
-    public static final Object NULL = new Object();
+public class Log4j2Plugin implements AgentPlugin {
+    @Override
+    public String getNamespace() {
+        return "log4j2";
+    }
 
-    public String toString() {
-        return "null";
+    @Override
+    public String getDomain() {
+        return ConfigConst.OBSERVABILITY;
+    }
+
+    @Override
+    public int order() {
+        return Order.LOG.getOrder();
     }
 }

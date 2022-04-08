@@ -19,6 +19,8 @@ package com.megaease.easeagent.plugin;
 
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
+import com.megaease.easeagent.plugin.matcher.loader.ClassLoaderMatcher;
+import com.megaease.easeagent.plugin.matcher.loader.IClassLoaderMatcher;
 
 import java.util.Set;
 
@@ -34,11 +36,10 @@ public interface Points {
      *      .hadInterface(A)
      *      .isPublic()
      *      .isAbstract()
-     *      .build()
      *      .or()
      *        .hasSuperClass(B)
      *        .isPublic()
-     *        .build())
+     *        .build()
      */
     IClassMatcher getClassMatcher();
 
@@ -75,5 +76,15 @@ public interface Points {
      */
     default boolean isAddDynamicField() {
         return false;
+    }
+
+    /**
+     * Only match classes loaded by the ClassLoaderMatcher
+     * default as all classloader
+     *
+     * @return classloader matcher
+     */
+    default IClassLoaderMatcher getClassLoaderMatcher() {
+        return ClassLoaderMatcher.ALL;
     }
 }

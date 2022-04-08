@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.logback.points;
+package com.megaease.easeagent.log4j2.points;
 
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
@@ -27,21 +27,27 @@ import com.megaease.easeagent.plugin.matcher.loader.IClassLoaderMatcher;
 
 import java.util.Set;
 
-public class LoggerPoints implements Points {
+public class AbstractLoggerPoints implements Points {
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
-            .hasClassName("ch.qos.logback.classic.Logger")
+            .hasSuperClass("org.apache.logging.log4j.spi.AbstractLogger")
             .build();
     }
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
-        return MethodMatcher.builder()
-            .named("callAppenders")
-            .argsLength(1)
-            .arg(0, "ch.qos.logback.classic.spi.ILoggingEvent")
-            .build().toSet();
+    return MethodMatcher.builder()
+        .named("log")
+        .argsLength(6)
+        .arg(0, "org.apache.logging.log4j.Level")
+        .arg(1, "org.apache.logging.log4j.Marker")
+        .arg(2, "java.lang.String")
+        .arg(3, "java.lang.StackTraceElement")
+        .arg(4, "org.apache.logging.log4j.message.Message")
+        .arg(5, "java.lang.Throwable")
+        .build()
+        .toSet();
     }
 
     /**

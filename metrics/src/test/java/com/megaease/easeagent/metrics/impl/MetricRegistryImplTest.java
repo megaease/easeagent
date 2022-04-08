@@ -176,6 +176,7 @@ public class MetricRegistryImplTest {
         context.stop();
         assertEquals(3, timer.getCount());
         Snapshot snapshot = timer.getSnapshot();
+
         assertEquals(3, snapshot.size());
         assertEquals(TimeUnit.MILLISECONDS.toNanos(10), snapshot.getMin());
 
@@ -187,7 +188,7 @@ public class MetricRegistryImplTest {
         double median = snapshot.getMedian();
         String info = "median = " + (int) median;
         Assert.assertTrue(info, median > TimeUnit.MILLISECONDS.toNanos(20));
-        Assert.assertTrue(info, median < TimeUnit.MILLISECONDS.toNanos(80));
+        Assert.assertTrue(info, median < TimeUnit.MILLISECONDS.toNanos(120));
         assertEquals(TimeUnit.MILLISECONDS.toNanos(200), snapshot.getMax());
     }
 

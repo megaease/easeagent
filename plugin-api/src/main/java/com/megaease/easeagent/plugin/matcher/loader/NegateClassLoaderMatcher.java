@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, MegaEase
+ * Copyright (c) 2022, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +13,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
+package com.megaease.easeagent.plugin.matcher.loader;
 
-package com.megaease.easeagent.plugin.field;
+public class NegateClassLoaderMatcher implements IClassLoaderMatcher {
+    IClassLoaderMatcher matcher;
 
-/**
- * default value for Agent Dynamic Field,
- * avoiding NullPointerException when serialized
- */
-public class NullObject {
-    public static final Object NULL = new Object();
+    public NegateClassLoaderMatcher(IClassLoaderMatcher matcher) {
+        this.matcher = matcher;
+    }
 
-    public String toString() {
-        return "null";
+    @Override
+    public String getClassLoaderName() {
+        return this.matcher.getClassLoaderName();
+    }
+
+    @Override
+    public IClassLoaderMatcher negate() {
+        return this.matcher;
     }
 }

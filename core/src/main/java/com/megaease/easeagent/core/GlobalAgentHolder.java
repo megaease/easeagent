@@ -21,10 +21,13 @@ import com.megaease.easeagent.config.WrappedConfigManager;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.plugin.report.AgentReport;
 
+import java.net.URLClassLoader;
+
 public class GlobalAgentHolder {
     private static WrappedConfigManager wrappedConfigManager;
     private static AgentHttpServer agentHttpServer;
     private static AgentReport agentReport;
+    private static URLClassLoader agentLoader;
 
     private GlobalAgentHolder() {}
 
@@ -50,5 +53,13 @@ public class GlobalAgentHolder {
 
     public static AgentReport getAgentReport() {
         return agentReport;
+    }
+
+    public static void setAgentClassLoader(URLClassLoader loader) {
+        agentLoader = loader;
+    }
+
+    public static URLClassLoader getAgentClassLoader() {
+        return agentLoader;
     }
 }

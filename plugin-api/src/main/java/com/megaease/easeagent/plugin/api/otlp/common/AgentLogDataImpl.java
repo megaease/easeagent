@@ -139,12 +139,15 @@ public class AgentLogDataImpl implements AgentLogData {
             return this;
         }
 
-        public Builder threadName(String threadName) {
-            this.threadName = threadName;
+        public Builder thread(Thread thread) {
+            this.threadName = thread.getName();
+            AttributesBuilder attributes = getAttributesBuilder();
+            attributes.put(SemanticAttributes.THREAD_NAME, threadName);
+            attributes.put(SemanticAttributes.THREAD_ID, thread.getId());
             return this;
         }
 
-        public Builder setThrowable(Throwable throwable) {
+        public Builder throwable(Throwable throwable) {
             AttributesBuilder attrsBuilder = getAttributesBuilder();
             attrsBuilder.put(SemanticAttributes.EXCEPTION_TYPE, throwable.getClass().getName());
             attrsBuilder.put(SemanticAttributes.EXCEPTION_MESSAGE, throwable.getMessage());

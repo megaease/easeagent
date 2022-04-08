@@ -3,6 +3,7 @@ package io.opentelemetry.sdk.resources;
 import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.ConfigChangeListener;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentAttributes;
+import com.megaease.easeagent.plugin.api.otlp.common.SemanticKey;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import io.opentelemetry.api.common.Attributes;
 import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
@@ -18,6 +19,7 @@ public class EaseAgentResource extends Resource implements ConfigChangeListener 
         super();
         this.system = EaseAgent.getConfig("system", "demo-system");
         this.service = EaseAgent.getConfig("name", "demo-service");
+        EaseAgent.getConfig().addChangeListener(this);
 
         this.resource = Resource.getDefault()
             .merge(Resource.create(
@@ -54,7 +56,7 @@ public class EaseAgentResource extends Resource implements ConfigChangeListener 
     @Nullable
     @Override
     public String getSchemaUrl() {
-        return null;
+        return SemanticKey.SCHEMA_URL;
     }
 
     @Override

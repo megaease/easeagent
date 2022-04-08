@@ -21,20 +21,18 @@ import com.google.common.base.Strings;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain.Builder;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderPluginDecorator;
-import com.megaease.easeagent.core.plugin.matcher.ClassMatcherConvert;
-import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
-import com.megaease.easeagent.core.plugin.matcher.MethodMatcherConvert;
-import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
+import com.megaease.easeagent.core.plugin.matcher.*;
 import com.megaease.easeagent.core.utils.AgentArray;
 import com.megaease.easeagent.plugin.AgentPlugin;
 import com.megaease.easeagent.plugin.Points;
-import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 import java.util.Objects;
@@ -68,6 +66,8 @@ public class PluginRegistry {
         IClassMatcher classMatcher = points.getClassMatcher();
         boolean hasDynamicField = points.isAddDynamicField();
         Junction<TypeDescription> innerClassMatcher = ClassMatcherConvert.INSTANCE.convert(classMatcher);
+        ElementMatcher<ClassLoader> loaderMatcher = ClassLoaderMatcherConvert.INSTANCE
+            .convert(points.getClassLoaderMatcher());
 
         Set<IMethodMatcher> methodMatchers = points.getMethodMatcher();
 
@@ -87,12 +87,14 @@ public class PluginRegistry {
             }
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
+
         AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
         int order = plugin.order();
 
         return ClassTransformation.builder().classMatcher(innerClassMatcher)
             .hasDynamicField(hasDynamicField)
             .methodTransformations(mInfo)
+            .classloaderMatcher(loaderMatcher)
             .order(order).build();
     }
 

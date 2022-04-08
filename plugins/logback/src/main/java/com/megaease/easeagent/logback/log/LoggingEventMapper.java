@@ -32,6 +32,7 @@ import java.io.StringWriter;
 public class LoggingEventMapper {
     public static final LoggingEventMapper INSTANCE = new LoggingEventMapper();
 
+    // reference to Opentelemetry instrumentation
     public AgentLogData mapLoggingEvent(ILoggingEvent loggingEvent) {
         AgentLogDataImpl.Builder builder = AgentLogDataImpl.builder();
         // logger
@@ -57,7 +58,6 @@ public class LoggingEventMapper {
             builder.severityText(level.levelStr);
         }
 
-        AttributesBuilder attrBuilder = builder.getAttributesBuilder();
         // throwable
         Object throwableProxy = loggingEvent.getThrowableProxy();
         Throwable throwable = null;
@@ -67,26 +67,16 @@ public class LoggingEventMapper {
             throwable = ((ThrowableProxy) throwableProxy).getThrowable();
         }
         if (throwable != null) {
-            setThrowable(attrBuilder, throwable);
+            builder.throwable(throwable);
         }
 
         Thread currentThread = Thread.currentThread();
-        builder.threadName(currentThread.getName());
-        attrBuilder.put(SemanticAttributes.THREAD_NAME, currentThread.getName());
-        attrBuilder.put(SemanticAttributes.THREAD_ID, currentThread.getId());
+        builder.thread(currentThread);
 
         // span context
         builder.spanContext();
 
         return builder.build();
-    }
-
-    private static void setThrowable(AttributesBuilder attrsBuilder, Throwable throwable) {
-        attrsBuilder.put(SemanticAttributes.EXCEPTION_TYPE, throwable.getClass().getName());
-        attrsBuilder.put(SemanticAttributes.EXCEPTION_MESSAGE, throwable.getMessage());
-        StringWriter writer = new StringWriter();
-        throwable.printStackTrace(new PrintWriter(writer));
-        attrsBuilder.put(SemanticAttributes.EXCEPTION_STACKTRACE, writer.toString());
     }
 
     private static Severity levelToSeverity(Level level) {

@@ -30,6 +30,9 @@ import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.report.AgentReport;
 
+import java.net.URLClassLoader;
+import java.util.function.Supplier;
+
 /**
  * the bridge api will be initiated when agent startup
  */
@@ -42,6 +45,12 @@ public final class EaseAgent {
     public static AgentReport agentReport = new NoOpAgentReporter();
 
     public static IDispatcher dispatcher = new NoOpDispatcher();
+
+    public static Supplier<URLClassLoader> agentClassloader = () -> null;
+
+    public static URLClassLoader getAgentClassLoader() {
+        return agentClassloader.get();
+    }
 
     public static AgentReport getAgentReport() {
         return agentReport;

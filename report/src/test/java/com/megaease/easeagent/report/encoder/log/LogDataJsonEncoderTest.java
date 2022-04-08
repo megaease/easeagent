@@ -64,7 +64,7 @@ public class LogDataJsonEncoderTest {
                 .logger(log.getName())
                 .severity(Severity.INFO)
                 .severityText(Level.INFO.toString())
-                .threadName(Thread.currentThread().getName())
+                .thread(Thread.currentThread())
                 .body("Hello")
                 .build();
 
