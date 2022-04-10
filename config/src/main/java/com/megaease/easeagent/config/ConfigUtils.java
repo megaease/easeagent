@@ -171,7 +171,7 @@ public class ConfigUtils {
     }
 
     public static Map<String, String> extractByPrefix(Map<String, String> cfg, String prefix) {
-        Map<String, String> extract = new HashMap<>();
+        Map<String, String> extract = new TreeMap<>();
 
         // override, new configuration KV override previous KV
         cfg.forEach((key, value) -> {
