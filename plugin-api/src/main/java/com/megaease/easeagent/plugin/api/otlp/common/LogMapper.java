@@ -13,12 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
+
 package com.megaease.easeagent.plugin.api.otlp.common;
 
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 
 public interface LogMapper {
-    AgentLogData mapLoggingEvent(MethodInfo logInfo, int level);
+    public String MDC_KEYS = "encoder.collectMDCKeys";
+
+    AgentLogData mapLoggingEvent(MethodInfo methodInfo, int levelInt, IPluginConfig config);
 }

@@ -52,7 +52,7 @@ public final class AgentAttributes extends HashMap<AttributeKey<?>, Object> impl
 
     @Override
     public AttributesBuilder toBuilder() {
-        return new Builder().putAll(this);
+        return new Builder(this);
     }
 
     public static AttributesBuilder builder() {
@@ -60,17 +60,24 @@ public final class AgentAttributes extends HashMap<AttributeKey<?>, Object> impl
     }
 
     static class Builder implements AttributesBuilder {
-        AgentAttributes attrs = new AgentAttributes();
+        AgentAttributes attrs;
         private final long capacity;
         private final int lengthLimit;
 
-        public Builder() {
+        public Builder(AgentAttributes from) {
+            this.attrs = from;
             this.capacity = Integer.MAX_VALUE;
             this.lengthLimit = Integer.MAX_VALUE;
         }
+
+        public Builder() {
+            this(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        }
+
         public Builder(int capacity, int limit) {
             this.capacity = capacity;
             this.lengthLimit = limit;
+            this.attrs = new AgentAttributes();
         }
 
         @Override

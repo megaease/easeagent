@@ -17,6 +17,7 @@
  */
 package com.megaease.easeagent.report.encoder.log;
 
+import com.google.common.base.CharMatcher;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentLogDataImpl;
@@ -65,6 +66,7 @@ public class LogDataJsonEncoderTest {
                 .severity(Severity.INFO)
                 .severityText(Level.INFO.toString())
                 .thread(Thread.currentThread())
+                .throwable(new NullPointerException("test"))
                 .body("Hello")
                 .build();
 
@@ -86,6 +88,7 @@ public class LogDataJsonEncoderTest {
     @Test
     public void test_encoder_update() {
         Map<String, String> changes = new HashMap<>();
+        String original = this.config.getString(join(ENCODER_KEY, "location"));
         changes.put(join(ENCODER_KEY, "location"), "%logger{2}");
         this.config.updateConfigs(changes);
 
@@ -94,5 +97,112 @@ public class LogDataJsonEncoderTest {
         EncodedData encoded = encoder.encode(data);
         Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
         Assert.assertEquals("log.LogDataJsonEncoderTest", jsonMap.get(LOCATION));
+
+        changes.put(join(ENCODER_KEY, "location"), original);
+        this.config.updateConfigs(changes);
+    }
+
+    @Test
+    public void test_throwable_encoder() {
+        Map<String, String> changes = new HashMap<>();
+
+        String key = join(ENCODER_KEY, "message");
+        String original = this.config.getString(key);
+        changes.put(key, "%msg%n%xEx");
+        this.config.updateConfigs(changes);
+
+        AgentLogData exceptionData = AgentLogDataImpl.builder()
+            .epochMills(1648878722451L)
+            .logger(log.getName())
+            .severity(Severity.INFO)
+            .severityText(Level.INFO.toString())
+            .thread(Thread.currentThread())
+            .throwable(new NullPointerException("test"))
+            .body("Hello")
+            .build();
+
+        EncodedData encoded = encoder.encode(exceptionData);
+        Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
+
+        Assert.assertTrue(jsonMap.get("message").toString().contains(NullPointerException.class.getCanonicalName()));
+
+        changes.put(key, original);
+        this.config.updateConfigs(changes);
+    }
+
+    @Test
+    public void test_throwable_short_encoder() {
+        Map<String, String> changes = new HashMap<>();
+
+        String key = join(ENCODER_KEY, "message");
+        String original = this.config.getString(key);
+        changes.put(key, "%msg%xEx{5,separator(|)}");
+        this.config.updateConfigs(changes);
+
+        AgentLogData exceptionData = AgentLogDataImpl.builder()
+            .epochMills(1648878722451L)
+            .logger(log.getName())
+            .severity(Severity.INFO)
+            .severityText(Level.INFO.toString())
+            .thread(Thread.currentThread())
+            .throwable(new NullPointerException("test"))
+            .body("Hello")
+            .build();
+
+        int size = encoder.sizeInBytes(exceptionData);
+        Assert.assertEquals(668, size);
+        EncodedData encoded = encoder.encode(exceptionData);
+        Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
+
+        String message = jsonMap.get("message").toString();
+        Assert.assertTrue(message.contains(NullPointerException.class.getCanonicalName()));
+        int count = CharMatcher.is('|').countIn(message);
+        Assert.assertEquals(4, count);
+
+        changes.put(key, original);
+        this.config.updateConfigs(changes);
+    }
+
+    @Test
+    public void test_mdc_selected() {
+        Map<String, String> changes = new HashMap<>();
+
+        String key = join(ENCODER_KEY, "message");
+        String original = this.config.getString(key);
+        changes.put(key, "%X{name, number}-%msg%xEx{5,separator(|)}");
+        this.config.updateConfigs(changes);
+
+        AgentLogDataImpl.Builder builder = AgentLogDataImpl.builder()
+            .epochMills(1648878722451L)
+            .logger(log.getName())
+            .severity(Severity.INFO)
+            .severityText(Level.INFO.toString())
+            .thread(Thread.currentThread())
+            .body("Hello");
+
+        AgentLogData noMdcData = builder.build();
+        int size = encoder.sizeInBytes(noMdcData);
+        Assert.assertEquals(206, size);
+        EncodedData encoded = encoder.encode(noMdcData);
+        Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
+        String message = jsonMap.get("message").toString();
+        Assert.assertTrue(message.startsWith("{}-Hello"));
+
+        // test mdc
+        Map<String, String> ctxData = new HashMap<>();
+        ctxData.put("name", "easeagent");
+        ctxData.put("number", "v2.2");
+        builder.contextData(null, ctxData);
+        AgentLogData mdcData = builder.build();
+
+        size = encoder.sizeInBytes(mdcData);
+        Assert.assertEquals(233, size);
+        encoded = encoder.encode(mdcData);
+        jsonMap = JsonUtil.toMap(new String(encoded.getData()));
+        message = jsonMap.get("message").toString();
+        Assert.assertTrue(message.startsWith("{name=easeagent, number=v2.2}-Hello"));
+
+        changes.put(key, original);
+        this.config.updateConfigs(changes);
     }
 }

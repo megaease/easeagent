@@ -18,6 +18,7 @@
 
 package com.megaease.easeagent.log4j2.log;
 
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentLogDataImpl;
 import com.megaease.easeagent.plugin.api.otlp.common.LogMapper;
@@ -26,19 +27,21 @@ import com.megaease.easeagent.plugin.utils.SystemClock;
 import io.opentelemetry.sdk.logs.data.Severity;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.message.MapMessage;
 import org.apache.logging.log4j.message.Message;
+
+import java.util.Map;
 
 /**
  * reference to Opentelemetry instrumentation
  */
 public class Log4jLogMapper implements LogMapper {
-    public static final LogMapper INSTANCE = new Log4jLogMapper();
     private static final String SPECIAL_MAP_MESSAGE_ATTRIBUTE = "message";
 
     public Log4jLogMapper() {}
 
-    public AgentLogData mapLoggingEvent(MethodInfo logInfo, int levelInt) {
+    public AgentLogData mapLoggingEvent(MethodInfo logInfo, int levelInt, IPluginConfig config) {
         // level
         Level level = (Level)logInfo.getArgs()[0];
         if (level.intLevel() < levelInt) {
@@ -80,9 +83,14 @@ public class Log4jLogMapper implements LogMapper {
         if (throwable != null) {
             builder.throwable(throwable);
         }
+
         // thread
         builder.thread(Thread.currentThread());
         builder.epochMills(SystemClock.now());
+
+        // MDC
+        Map<String, String> contextData = ThreadContext.getImmutableContext();
+        builder.contextData(config.getStringList(LogMapper.MDC_KEYS), contextData);
 
         // span context
         builder.spanContext();

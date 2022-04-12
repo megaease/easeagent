@@ -38,7 +38,7 @@ public interface AgentLogData extends LogData {
 
     /**
      * get unix timestamp in milliseconds
-     * @return
+     * @return timestamp
      */
     long getEpochMillis();
 
@@ -49,10 +49,21 @@ public interface AgentLogData extends LogData {
     EaseAgentResource getAgentResource();
 
     /**
+     * complete attributes
+     */
+    void completeAttributes();
+
+    /**
      * return pattern map
      * @return pattern map
      */
     Map<String, String> getPatternMap();
+
+    /**
+     * return throwable/Exception
+     * @return throwbale
+     */
+    Throwable getThrowable();
 
     /**
      * return encoded data

@@ -21,6 +21,7 @@ import com.megaease.easeagent.log4j2.points.AbstractLoggerPoints;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.api.otlp.common.LogMapper;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
@@ -35,7 +36,7 @@ import org.apache.logging.log4j.Level;
 import java.lang.reflect.InvocationTargetException;
 
 @AdviceTo(AbstractLoggerPoints.class)
-public class Log4j2AppenderInterceptor implements NonReentrantInterceptor {
+public class Log4j2AppenderInterceptor implements NonReentrantInterceptor, PluginConfigChangeListener {
     static WeakConcurrentMap<ClassLoader, LogMapper> logMappers = new WeakConcurrentMap<>();
 
     int collectLevel = Level.INFO.intLevel();
@@ -66,7 +67,7 @@ public class Log4j2AppenderInterceptor implements NonReentrantInterceptor {
             }
         }
 
-        AgentLogData log = mapper.mapLoggingEvent(methodInfo, this.collectLevel);
+        AgentLogData log = mapper.mapLoggingEvent(methodInfo, this.collectLevel, context.getConfig());
         if (log != null) {
             EaseAgent.getAgentReport().report(log);
         }
@@ -80,5 +81,16 @@ public class Log4j2AppenderInterceptor implements NonReentrantInterceptor {
     @Override
     public int order() {
         return Order.LOG.getOrder();
+    }
+
+    @Override
+    public void onChange(IPluginConfig oldConfig, IPluginConfig newConfig) {
+        String lv = newConfig.getString("level");
+
+        if (!StringUtils.isEmpty(lv)) {
+            this.collectLevel = Level.toLevel(lv, Level.OFF).intLevel();
+        } else {
+            this.collectLevel = Level.OFF.intLevel();
+        }
     }
 }

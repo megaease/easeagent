@@ -25,11 +25,11 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.Severity;
 import io.opentelemetry.sdk.resources.EaseAgentResource;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import lombok.Data;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -44,25 +44,32 @@ public class AgentLogDataImpl implements AgentLogData {
     private Severity severity;
     private String severityText;
     private String name = null;
+
     private Body body;
     private Attributes attributes;
 
     private String threadName;
+    private long threadId;
+    private Throwable throwable;
 
     private Map<String, String> patternMap = null;
     private EncodedData encodedData;
 
-    public AgentLogDataImpl(String logger, String threadName,
-                            long epochMills, SpanContext sc, Severity level,
-                            String levelText, Body body, Attributes attrs) {
-        this.epochMillis = epochMills;
-        this.spanContext = sc == null ? SpanContext.getInvalid() : sc;
-        this.severity = level;
-        this.severityText = levelText != null ? levelText : level.name();
-        this.body = body;
-        this.attributes = attrs;
-        this.instrumentationLibraryInfo = AgentInstrumentLibInfo.getInfo(logger);
-        this.threadName = threadName;
+    public AgentLogDataImpl(Builder builder) {
+        this.epochMillis = builder.epochMills;
+        this.spanContext = builder.spanContext == null ? SpanContext.getInvalid() : builder.spanContext;
+        this.severity = builder.severity;
+        this.severityText = builder.severityText != null ? builder.severityText : this.severity.name();
+        this.body = builder.body;
+
+        this.attributes = builder.attributesBuilder != null
+            ? builder.attributesBuilder.build()
+            : AgentAttributes.builder().build();
+
+        this.instrumentationLibraryInfo = AgentInstrumentLibInfo.getInfo(builder.logger);
+        this.threadName = builder.threadName;
+        this.threadId = builder.threadId;
+        this.throwable = builder.throwable;
     }
 
     @Override
@@ -78,6 +85,22 @@ public class AgentLogDataImpl implements AgentLogData {
     @Override
     public EaseAgentResource getAgentResource() {
         return this.resource;
+    }
+
+    @Override
+    public void completeAttributes() {
+        AttributesBuilder attrsBuilder = this.attributes.toBuilder();
+        if (this.throwable != null) {
+            attrsBuilder.put(SemanticKey.EXCEPTION_TYPE, throwable.getClass().getName());
+            attrsBuilder.put(SemanticKey.EXCEPTION_MESSAGE, throwable.getMessage());
+
+            StringWriter writer = new StringWriter();
+            throwable.printStackTrace(new PrintWriter(writer));
+            attrsBuilder.put(SemanticKey.EXCEPTION_STACKTRACE, writer.toString());
+        }
+
+        attrsBuilder.put(SemanticKey.THREAD_NAME, threadName);
+        attrsBuilder.put(SemanticKey.THREAD_ID, threadId);
     }
 
     @Override
@@ -105,9 +128,12 @@ public class AgentLogDataImpl implements AgentLogData {
         private Severity severity;
         private String severityText;
         private Body body;
+        private Throwable throwable;
+
         private AttributesBuilder attributesBuilder = null;
 
         private String threadName;
+        private long threadId;
 
         public Builder logger(String logger) {
             this.logger = logger;
@@ -141,19 +167,27 @@ public class AgentLogDataImpl implements AgentLogData {
 
         public Builder thread(Thread thread) {
             this.threadName = thread.getName();
-            AttributesBuilder attributes = getAttributesBuilder();
-            attributes.put(SemanticAttributes.THREAD_NAME, threadName);
-            attributes.put(SemanticAttributes.THREAD_ID, thread.getId());
+            this.threadId = thread.getId();
             return this;
         }
 
         public Builder throwable(Throwable throwable) {
-            AttributesBuilder attrsBuilder = getAttributesBuilder();
-            attrsBuilder.put(SemanticAttributes.EXCEPTION_TYPE, throwable.getClass().getName());
-            attrsBuilder.put(SemanticAttributes.EXCEPTION_MESSAGE, throwable.getMessage());
-            StringWriter writer = new StringWriter();
-            throwable.printStackTrace(new PrintWriter(writer));
-            attrsBuilder.put(SemanticAttributes.EXCEPTION_STACKTRACE, writer.toString());
+            this.throwable = throwable;
+            return this;
+        }
+
+        public Builder contextData(Collection<String> keys, Map<String, String> data) {
+            if (keys == null || keys.isEmpty()) {
+                if (data.isEmpty()) {
+                    return this;
+                }
+                keys = data.keySet();
+            }
+
+            AttributesBuilder ab = getAttributesBuilder();
+            for (String key : keys) {
+                ab.put(SemanticKey.stringKey(key), data.get(key));
+            }
             return this;
         }
 
@@ -165,9 +199,7 @@ public class AgentLogDataImpl implements AgentLogData {
         }
 
         public AgentLogData build() {
-            return new AgentLogDataImpl(logger, threadName, epochMills, spanContext,
-                severity, severityText, body,
-                getAttributesBuilder().build());
+            return new AgentLogDataImpl(this);
         }
     }
 }

@@ -20,20 +20,29 @@ package com.megaease.easeagent.logback.log;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.api.otlp.common.AgentLogDataImpl;
-import io.opentelemetry.api.common.AttributesBuilder;
+import com.megaease.easeagent.plugin.api.otlp.common.LogMapper;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import io.opentelemetry.sdk.logs.data.Severity;
-import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.util.Map;
 
-public class LoggingEventMapper {
-    public static final LoggingEventMapper INSTANCE = new LoggingEventMapper();
+/**
+ * reference to opentelemetry logback instrumentation lib
+ */
+public class LogbackLogMapper implements LogMapper {
+    public static final LogbackLogMapper INSTANCE = new LogbackLogMapper();
 
-    // reference to Opentelemetry instrumentation
-    public AgentLogData mapLoggingEvent(ILoggingEvent loggingEvent) {
+    @Override
+    public AgentLogData mapLoggingEvent(MethodInfo methodInfo, int levelInt, IPluginConfig config) {
+        ILoggingEvent loggingEvent = (ILoggingEvent)methodInfo.getArgs()[0];
+        Level level = loggingEvent.getLevel();
+        if (level == null || level.levelInt < levelInt) {
+            return null;
+        }
+
         AgentLogDataImpl.Builder builder = AgentLogDataImpl.builder();
         // logger
         String logger = loggingEvent.getLoggerName();
@@ -52,11 +61,8 @@ public class LoggingEventMapper {
         builder.epochMills(timestamp);
 
         // level
-        Level level = loggingEvent.getLevel();
-        if (level != null) {
-            builder.severity(levelToSeverity(level));
-            builder.severityText(level.levelStr);
-        }
+        builder.severity(levelToSeverity(level));
+        builder.severityText(level.levelStr);
 
         // throwable
         Object throwableProxy = loggingEvent.getThrowableProxy();
@@ -72,6 +78,10 @@ public class LoggingEventMapper {
 
         Thread currentThread = Thread.currentThread();
         builder.thread(currentThread);
+
+        // MDC
+        Map<String, String> contextData = loggingEvent.getMDCPropertyMap();
+        builder.contextData(config.getStringList(LogMapper.MDC_KEYS), contextData);
 
         // span context
         builder.spanContext();
@@ -97,4 +107,5 @@ public class LoggingEventMapper {
                 return Severity.UNDEFINED_SEVERITY_NUMBER;
         }
     }
+
 }

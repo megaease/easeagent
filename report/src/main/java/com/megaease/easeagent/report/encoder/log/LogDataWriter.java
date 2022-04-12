@@ -23,14 +23,11 @@ import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.encoder.log.pattern.LogDataPatternFormatter;
 import io.opentelemetry.api.trace.SpanContext;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.apache.logging.log4j.core.pattern.PatternFormatter;
 import org.apache.logging.log4j.core.pattern.PatternParser;
 import zipkin2.internal.JsonEscaper;
 import zipkin2.internal.WriteBuffer;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
 <providers>
@@ -227,17 +224,7 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
 
     private void initFormatters() {
         this.config.getConfigs().forEach((k, v) -> {
-            List<PatternFormatter> formatters = this.parser.parse(v,
-                false, false, false);
-
-            List<LogDataPatternFormatter> logDataFormatters = new ArrayList<>();
-            AtomicInteger patternOffset = new AtomicInteger(0);
-            formatters.forEach(f -> {
-                if (!f.getConverter().getName().equals("SimpleLiteral")) {
-                    patternOffset.set(v.indexOf('%', patternOffset.get()));
-                }
-                logDataFormatters.add(new LogDataPatternFormatter(v, patternOffset.get(), f));
-            });
+            List<LogDataPatternFormatter> logDataFormatters = LogDataPatternFormatter.transform(v, this.parser);
 
             switch (k) {
                 case LOG_LEVEL:

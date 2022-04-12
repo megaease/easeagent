@@ -22,6 +22,7 @@ import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.config.Const;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.config.PluginConfigChangeListener;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -162,10 +163,12 @@ public class PluginConfig implements IPluginConfig {
     @Override
     public List<String> getStringList(String property) {
         String value = this.getString(property);
-        if (value == null) {
+        if (StringUtils.isEmpty(value)) {
             return Collections.emptyList();
         }
-        return Arrays.stream(value.split(",")).filter(Objects::nonNull).collect(Collectors.toList());
+        return Arrays.stream(value.split(","))
+            .map(String::trim)
+            .collect(Collectors.toList());
     }
 
     @Override
