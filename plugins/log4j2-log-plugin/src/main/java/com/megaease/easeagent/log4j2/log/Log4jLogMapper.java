@@ -53,7 +53,7 @@ public class Log4jLogMapper implements LogMapper {
                 case 0:
                     // level
                     Level level = (Level)args[i];
-                    if (level.intLevel() < levelInt) {
+                    if (level.intLevel() > levelInt) {
                         return null;
                     }
                     builder.severity(levelToSeverity(level));

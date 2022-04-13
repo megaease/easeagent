@@ -38,15 +38,14 @@ import java.lang.reflect.InvocationTargetException;
 @AdviceTo(AbstractLoggerPoints.class)
 public class Log4j2AppenderInterceptor implements NonReentrantInterceptor, PluginConfigChangeListener {
     static WeakConcurrentMap<ClassLoader, LogMapper> logMappers = new WeakConcurrentMap<>();
-
     int collectLevel = Level.INFO.intLevel();
-
     @Override
     public void init(IPluginConfig config, int uniqueIndex) {
         String lv = config.getString("level");
         if (StringUtils.isNotEmpty(lv)) {
             collectLevel = Level.toLevel(lv, Level.OFF).intLevel();
         }
+        config.addChangeListener(this);
         AgentHelperClassLoader.registryUrls(this.getClass());
     }
 
