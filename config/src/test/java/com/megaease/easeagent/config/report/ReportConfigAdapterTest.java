@@ -180,4 +180,48 @@ public class ReportConfigAdapterTest {
         configs.updateConfigs(changes);
         Assert.assertEquals(KAFKA_SENDER_NAME, configs.getString(LOG_ACCESS_SENDER_NAME));
     }
-}
+
+    @Test
+    public void test_log_global_async() {
+        HashMap<String, String> cfg = new HashMap<>();
+        cfg.put("plugin.observability.global.log.topic", "application-log");
+        cfg.put("plugin.observability.global.log.url", "/application-log");
+        cfg.put("plugin.observability.global.log.appendType", "kafka");
+        cfg.put("plugin.observability.global.log.output.messageMaxBytes", "100");
+        cfg.put("plugin.observability.access.log.topic", "access-log");
+        cfg.put("plugin.observability.access.log.encoder", "LOG_ACCESS_JSON");
+
+        cfg.put(LOG_ASYNC_MESSAGE_MAX_BYTES, "1000");
+        cfg.put(LOG_ASYNC_QUEUED_MAX_LOGS, "200");
+
+        GlobalConfigs configs = new GlobalConfigs(cfg);
+        Assert.assertEquals("application-log", configs.getString(LOG_SENDER_TOPIC));
+        Assert.assertEquals("access-log", configs.getString(LOG_ACCESS_SENDER_TOPIC));
+        Assert.assertEquals("LOG_ACCESS_JSON", configs.getString(LOG_ACCESS_ENCODER));
+        Assert.assertEquals(KAFKA_SENDER_NAME, configs.getString(LOG_ACCESS_SENDER_NAME));
+
+        Assert.assertEquals("1000", configs.getString(LOG_ASYNC_MESSAGE_MAX_BYTES));
+        Assert.assertEquals("1000", configs.getString(join(LOG_ACCESS, ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY)));
+    }
+
+    @Test
+    public void test_log_async_update() {
+        HashMap<String, String> cfg = new HashMap<>();
+        cfg.put("plugin.observability.global.log.output.messageMaxBytes", "100");
+        cfg.put("plugin.observability.access.log.output.queuedMaxLogs", "100");
+        cfg.put(LOG_ASYNC_MESSAGE_MAX_BYTES, "1000");
+        cfg.put(LOG_ASYNC_QUEUED_MAX_LOGS, "200");
+
+        GlobalConfigs configs = new GlobalConfigs(cfg);
+        Assert.assertEquals("1000", configs.getString(LOG_ASYNC_MESSAGE_MAX_BYTES));
+        Assert.assertEquals("1000", configs.getString(join(LOG_ACCESS, ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY)));
+        Assert.assertEquals("100", configs.getString(join(LOG_ACCESS, ASYNC_KEY, ASYNC_QUEUE_MAX_LOGS_KEY)));
+
+        HashMap<String, String> changes = new HashMap<>();
+        changes.put(LOG_ASYNC_MESSAGE_MAX_BYTES, "2000");
+        changes.put(LOG_ASYNC_QUEUED_MAX_LOGS, "150");
+        configs.updateConfigs(changes);
+        Assert.assertEquals("2000", configs.getString(join(LOG_ACCESS, ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY)));
+        Assert.assertEquals("2000", configs.getString(LOG_ASYNC_MESSAGE_MAX_BYTES));
+        Assert.assertEquals("100", configs.getString(join(LOG_ACCESS, ASYNC_KEY, ASYNC_QUEUE_MAX_LOGS_KEY)));
+    }}

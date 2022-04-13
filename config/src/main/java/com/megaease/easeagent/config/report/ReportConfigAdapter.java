@@ -259,7 +259,7 @@ public class ReportConfigAdapter {
 
         Map<String, String> global = extractGlobalLogConfig(srcCfg);
         HashSet<String> namespaces = new HashSet<>();
-        Map<String, String> outputConfigs = new HashMap<>(global);
+        Map<String, String> outputConfigs = new TreeMap<>(global);
 
         for (Map.Entry<String, String> e : srcCfg.entrySet()) {
             String key = e.getKey();
@@ -287,7 +287,7 @@ public class ReportConfigAdapter {
                 }
             }
 
-            if (suffix.startsWith(ENCODER_KEY)) {
+            if (suffix.startsWith(ENCODER_KEY) || suffix.startsWith(ASYNC_KEY)) {
                 newKey = reporterPrefix + namespaceWithSeparator + suffix;
             } else {
                 newKey = reporterPrefix + namespaceWithSeparator + join(SENDER_KEY, suffix);
@@ -298,7 +298,6 @@ public class ReportConfigAdapter {
 
         return outputConfigs;
     }
-
 
     /**
      * extract `plugin.observability.global.log.*` config items to `reporter.log.sender.*`
@@ -324,6 +323,11 @@ public class ReportConfigAdapter {
                 global.put(e.getKey(), e.getValue());
             }
         }
+
+        // global log level (async)
+        global.putAll(extractByPrefix(srcCfg, LOG_SENDER));
+        global.putAll(extractByPrefix(srcCfg, LOG_ASYNC));
+        global.putAll(extractByPrefix(srcCfg, LOG_ENCODER));
 
         return global;
     }

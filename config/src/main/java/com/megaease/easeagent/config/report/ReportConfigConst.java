@@ -50,6 +50,8 @@ public class ReportConfigConst {
     public static final String ASYNC_MSG_MAX_BYTES_KEY = "messageMaxBytes";
     public static final String ASYNC_MSG_TIMEOUT_KEY = "messageTimeout";
     public static final String ASYNC_QUEUE_MAX_SIZE_KEY = "queuedMaxSize";
+    public static final String ASYNC_QUEUE_MAX_LOGS_KEY = "queuedMaxLogs";
+    public static final String ASYNC_QUEUE_MAX_ITEMS_KEY = "queuedMaxItems";
 
     /**
      * Reporter v2 configuration
@@ -98,7 +100,7 @@ public class ReportConfigConst {
     public static final String LOG_ASYNC_MESSAGE_MAX_BYTES = join(LOG_ASYNC, ASYNC_MSG_MAX_BYTES_KEY);
     public static final String LOG_ASYNC_REPORT_THREAD = join(LOG_ASYNC, ASYNC_THREAD_KEY);
     public static final String LOG_ASYNC_MESSAGE_TIMEOUT = join(LOG_ASYNC, ASYNC_MSG_TIMEOUT_KEY);
-    public static final String LOG_ASYNC_QUEUED_MAX_LOGS = join(LOG_ASYNC, "queuedMaxLogs");
+    public static final String LOG_ASYNC_QUEUED_MAX_LOGS = join(LOG_ASYNC, ASYNC_QUEUE_MAX_LOGS_KEY);
     public static final String LOG_ASYNC_QUEUED_MAX_SIZE = join(LOG_ASYNC, ASYNC_QUEUE_MAX_SIZE_KEY);
 
     public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, APPEND_TYPE_KEY);

@@ -72,6 +72,9 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
 
     public void mergeConfigs(GlobalConfigs configs) {
         Map<String, String> merged = configs.getOriginalConfig().getConfigs();
+        if (merged.isEmpty()) {
+            return;
+        }
         this.updateConfigsNotNotify(merged);
         return;
     }

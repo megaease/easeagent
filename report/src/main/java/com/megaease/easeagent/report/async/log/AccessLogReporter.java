@@ -47,11 +47,12 @@ public class AccessLogReporter implements ConfigChangeListener {
         Map<String, String> cfg = ConfigUtils.extractByPrefix(configs.getConfigs(), LOG_ACCESS);
         cfg.putAll(ConfigUtils.extractByPrefix(configs.getConfigs(), OUTPUT_SERVER_V2));
         cfg.putAll(ConfigUtils.extractByPrefix(configs.getConfigs(), LOG_ASYNC));
+
         this.config = new Configs(cfg);
         configs.addChangeListener(this);
 
-        SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.LOG_ACCESS_SENDER, configs);
-        AsyncProps asyncProperties = new LogAsyncProps(this.config);
+        AsyncProps asyncProperties = new LogAsyncProps(this.config, LOG_ACCESS);
+        SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.LOG_ACCESS_SENDER, this.config);
         this.asyncReporter = DefaultAsyncReporter.builderAsyncReporter(sender, asyncProperties);
         this.asyncReporter.startFlushThread();
     }
@@ -98,7 +99,7 @@ public class AccessLogReporter implements ConfigChangeListener {
             asyncReporter.setSender(sender);
         }
 
-        AsyncProps asyncProperties = new LogAsyncProps(this.config);
+        AsyncProps asyncProperties = new LogAsyncProps(this.config, LOG_ACCESS);
         asyncReporter.closeFlushThread();
         asyncReporter.setPending(asyncProperties.getQueuedMaxItems(), asyncProperties.getQueuedMaxSize());
         asyncReporter.setMessageTimeoutNanos(messageTimeout(asyncProperties.getMessageTimeout()));

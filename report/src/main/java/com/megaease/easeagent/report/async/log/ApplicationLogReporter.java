@@ -52,7 +52,7 @@ public class ApplicationLogReporter implements ConfigChangeListener {
         configs.addChangeListener(this);
 
         SenderWithEncoder sender = ReporterRegistry.getSender(ReportConfigConst.LOG_SENDER, configs);
-        AsyncProps asyncProperties = new LogAsyncProps(this.config);
+        AsyncProps asyncProperties = new LogAsyncProps(this.config, null);
         this.asyncReporter = DefaultAsyncReporter.builderAsyncReporter(sender, asyncProperties);
         this.asyncReporter.startFlushThread();
     }
@@ -98,7 +98,7 @@ public class ApplicationLogReporter implements ConfigChangeListener {
             asyncReporter.setSender(sender);
         }
 
-        AsyncProps asyncProperties = new LogAsyncProps(this.config);
+        AsyncProps asyncProperties = new LogAsyncProps(this.config, null);
         asyncReporter.closeFlushThread();
         asyncReporter.setPending(asyncProperties.getQueuedMaxItems(), asyncProperties.getQueuedMaxSize());
         asyncReporter.setMessageTimeoutNanos(messageTimeout(asyncProperties.getMessageTimeout()));
