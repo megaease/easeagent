@@ -15,7 +15,7 @@ import java.util.List;
 public class EaseAgentResource extends Resource implements ConfigChangeListener {
     static volatile EaseAgentResource agentResource = null;
 
-    public EaseAgentResource() {
+    private EaseAgentResource() {
         super();
         this.system = EaseAgent.getConfig("system", "demo-system");
         this.service = EaseAgent.getConfig("name", "demo-service");
