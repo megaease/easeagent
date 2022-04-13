@@ -24,6 +24,7 @@ import com.megaease.easeagent.report.encoder.log.pattern.LogDataPatternFormatter
 import io.opentelemetry.api.trace.SpanContext;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.pattern.PatternParser;
+import zipkin2.internal.JsonEscaper;
 import zipkin2.internal.WriteBuffer;
 
 import java.util.HashMap;
@@ -107,8 +108,8 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
     public int sizeInBytes(AgentLogData value) {
         int size = STATIC_SIZE;
 
-        size += LogJsonEscaper.jsonEscapedSizeInBytes(value.getAgentResource().getService());
-        size += LogJsonEscaper.jsonEscapedSizeInBytes(value.getAgentResource().getSystem());
+        size += JsonEscaper.jsonEscapedSizeInBytes(value.getAgentResource().getService());
+        size += JsonEscaper.jsonEscapedSizeInBytes(value.getAgentResource().getSystem());
 
         if (!value.getSpanContext().equals(SpanContext.getInvalid())) {
             size += TRACE_ID_FIELD_NAME.length() + value.getSpanContext().getTraceId().length() + 1;
@@ -161,11 +162,11 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
 
         // resource - system/service
         b.writeAscii(SERVICE_FIELD_NAME);
-        b.writeUtf8(LogJsonEscaper.jsonEscape(value.getAgentResource().getService()));
+        b.writeUtf8(JsonEscaper.jsonEscape(value.getAgentResource().getService()));
         b.writeByte('\"');
 
         b.writeAscii(SYSTEM_FIELD_NAME);
-        b.writeUtf8(LogJsonEscaper.jsonEscape(value.getAgentResource().getSystem()));
+        b.writeUtf8(JsonEscaper.jsonEscape(value.getAgentResource().getSystem()));
         b.writeByte('\"');
 
         if (this.dateTypeIsNumber) {
@@ -211,7 +212,7 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
             return 0;
         } else {
             if (escape) {
-                return key.length() + LogJsonEscaper.jsonEscapedSizeInBytes(d) + 1;
+                return key.length() + JsonEscaper.jsonEscapedSizeInBytes(d) + 1;
             } else {
                 return key.length() + d.length() + 1;
             }
@@ -230,7 +231,7 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
         if (!StringUtils.isEmpty(d)) {
             b.writeAscii(key);
             if (escape) {
-                b.writeUtf8(LogJsonEscaper.jsonEscape(d));
+                b.writeUtf8(JsonEscaper.jsonEscape(d));
             } else {
                 b.writeAscii(d);
             }
