@@ -205,4 +205,36 @@ public class LogDataJsonEncoderTest {
         changes.put(key, original);
         this.config.updateConfigs(changes);
     }
+
+    @Test
+    public void test_custom() {
+        Map<String, String> original = this.config.getConfigs();
+        Map<String, String> changes = new HashMap<>();
+        changes.put("encoder.custom", "%X{custom}");
+
+        this.config.updateConfigs(changes);
+
+        AgentLogDataImpl.Builder builder = AgentLogDataImpl.builder()
+            .epochMills(1648878722451L)
+            .logger(log.getName())
+            .severity(Severity.INFO)
+            .severityText(Level.INFO.toString())
+            .thread(Thread.currentThread())
+            .body("Hello");
+
+        // test mdc
+        Map<String, String> ctxData = new HashMap<>();
+        ctxData.put("custom", "easeagent");
+        builder.contextData(null, ctxData);
+        AgentLogData mdcData = builder.build();
+
+        int size = encoder.sizeInBytes(mdcData);
+        Assert.assertEquals(224, size);
+        EncodedData encoded = encoder.encode(mdcData);
+        Map<String, Object> jsonMap = JsonUtil.toMap(new String(encoded.getData()));
+        String custom = jsonMap.get("custom").toString();
+        Assert.assertEquals("easeagent", custom);
+
+        this.config = new Configs(original);
+    }
 }
