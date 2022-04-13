@@ -197,7 +197,7 @@ public class ReportConfigAdapter {
                 }
             }
 
-            if (suffix.startsWith(ENCODER_KEY)) {
+            if (suffix.startsWith(ENCODER_KEY) || suffix.startsWith(ASYNC_KEY)) {
                 newKey = METRIC_V2 + namespaceWithSeparator + suffix;
             } else if (suffix.equals(INTERVAL_KEY)) {
                 newKey = METRIC_V2 + namespaceWithSeparator + join(ASYNC_KEY, suffix);
@@ -233,9 +233,15 @@ public class ReportConfigAdapter {
                 global.put(e.getKey(), e.getValue());
             }
         }
+
+
+        // global log level (async)
+        global.putAll(extractByPrefix(srcCfg, METRIC_SENDER));
+        global.putAll(extractByPrefix(srcCfg, METRIC_ASYNC));
+        global.putAll(extractByPrefix(srcCfg, METRIC_ENCODER));
+
         return global;
     }
-
 
     /**
      * metric report configuration

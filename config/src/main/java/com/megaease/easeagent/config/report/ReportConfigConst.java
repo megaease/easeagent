@@ -119,6 +119,8 @@ public class ReportConfigConst {
     public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, LOG_APPENDER_KEY);
 
     public static final String METRIC_ASYNC_INTERVAL = join(METRIC_ASYNC, INTERVAL_KEY);
+    public static final String METRIC_ASYNC_QUEUED_MAX_ITEMS = join(METRIC_ASYNC, ASYNC_QUEUE_MAX_ITEMS_KEY);
+    public static final String METRIC_ASYNC_MESSAGE_MAX_BYTES = join(METRIC_ASYNC, ASYNC_MSG_MAX_BYTES_KEY);
 
     public static final String OUTPUT_SSL_KEYSTORE_TYPE_V2 = join(OUTPUT_SERVERS_SSL, "keystore.type");
     public static final String OUTPUT_KEY_V2 = join(OUTPUT_SERVERS_SSL, "keystore.key");

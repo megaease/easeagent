@@ -118,6 +118,28 @@ public class ReportConfigAdapterTest {
     }
 
     @Test
+    public void test_metric_async_update() {
+        HashMap<String, String> cfg = new HashMap<>();
+        cfg.put("plugin.observability.global.metric.output.messageMaxBytes", "100");
+        cfg.put("plugin.observability.access.metric.output.interval", "100");
+        cfg.put(METRIC_ASYNC_MESSAGE_MAX_BYTES, "1000");
+        cfg.put(METRIC_ASYNC_INTERVAL, "200");
+
+        GlobalConfigs configs = new GlobalConfigs(cfg);
+        Assert.assertEquals("1000", configs.getString(METRIC_ASYNC_MESSAGE_MAX_BYTES));
+        Assert.assertEquals("1000", configs.getString(join(METRIC_V2, "access", ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY)));
+        Assert.assertEquals("100", configs.getString(join(METRIC_V2, "access", ASYNC_KEY, INTERVAL_KEY)));
+
+        HashMap<String, String> changes = new HashMap<>();
+        changes.put(METRIC_ASYNC_MESSAGE_MAX_BYTES, "2000");
+        changes.put(METRIC_ASYNC_INTERVAL, "150");
+        configs.updateConfigs(changes);
+        Assert.assertEquals("2000", configs.getString(join(METRIC_V2, "access", ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY)));
+        Assert.assertEquals("2000", configs.getString(METRIC_ASYNC_MESSAGE_MAX_BYTES));
+        Assert.assertEquals("100", configs.getString(join(METRIC_V2, "access", ASYNC_KEY, INTERVAL_KEY)));
+    }
+
+    @Test
     public void test_log_global() {
         HashMap<String, String> cfg = new HashMap<>();
         cfg.put("plugin.observability.global.log.topic", "application-log");
@@ -224,4 +246,5 @@ public class ReportConfigAdapterTest {
         Assert.assertEquals("2000", configs.getString(join(LOG_ACCESS, ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY)));
         Assert.assertEquals("2000", configs.getString(LOG_ASYNC_MESSAGE_MAX_BYTES));
         Assert.assertEquals("100", configs.getString(join(LOG_ACCESS, ASYNC_KEY, ASYNC_QUEUE_MAX_LOGS_KEY)));
-    }}
+    }
+}
