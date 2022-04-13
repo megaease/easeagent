@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static com.megaease.easeagent.config.ConfigUtils.extractByPrefix;
 import static com.megaease.easeagent.config.report.ReportConfigConst.*;
@@ -39,7 +40,8 @@ public class SenderConfigDecorator
 
     protected Sender sender;
     String prefix;
-    Config config;
+    Config senderConfig;
+    Config packerConfig;
     String encoderKey;
     Encoder<?> packer;
 
@@ -48,7 +50,8 @@ public class SenderConfigDecorator
         this.prefix = prefix;
         this.encoderKey = getEncoderKey(prefix);
         config.addChangeListener(this);
-        this.config = new Configs(extractSenderConfig(this.prefix, config));
+        this.senderConfig = new Configs(extractSenderConfig(this.prefix, config));
+        this.packerConfig = new Configs(extractSenderConfig(encoderKey, config));
     }
 
     @Override
@@ -64,8 +67,8 @@ public class SenderConfigDecorator
     @Override
     public void init(Config config, String prefix) {
         this.packer = ReporterRegistry.getEncoder(config.getString(this.encoderKey));
-        this.packer.init(this.config);
-        this.sender.init(this.config, prefix);
+        this.packer.init(this.packerConfig);
+        this.sender.init(this.senderConfig, prefix);
     }
 
     @Override
@@ -99,7 +102,6 @@ public class SenderConfigDecorator
                 log.warn("Sender update fail, can not close sender:{}", this.sender.name());
             }
         }
-        updateEncoder(changes);
     }
 
     // checkEncoder update
@@ -108,8 +110,8 @@ public class SenderConfigDecorator
         if (name == null || name.equals(this.packer.name())) {
             return;
         }
-        this.packer = ReporterRegistry.getEncoder(config.getString(this.encoderKey));
-        this.packer.init(config);
+        this.packer = ReporterRegistry.getEncoder(packerConfig.getString(this.encoderKey));
+        this.packer.init(packerConfig);
     }
 
     @Override
@@ -123,8 +125,26 @@ public class SenderConfigDecorator
         if (changes.isEmpty()) {
             return;
         }
-        this.config.updateConfigs(changes);
-        this.updateConfigs(changes);
+        Map<String, String> senderChanges = new TreeMap<>();
+        Map<String, String> packerChanges = new TreeMap<>();
+
+        changes.forEach((key, value) -> {
+            if (key.startsWith(encoderKey)) {
+                packerChanges.put(key, value);
+            } else {
+                senderChanges.put(key, value);
+            }
+        });
+
+        if (!packerChanges.isEmpty()) {
+            this.packerConfig.updateConfigs(packerChanges);
+            this.updateEncoder(packerChanges);
+        }
+
+        if (!senderChanges.isEmpty()) {
+            this.senderConfig.updateConfigs(senderChanges);
+            this.updateConfigs(senderChanges);
+        }
     }
 
     private static String getEncoderKey(String cfgPrefix) {
@@ -152,7 +172,7 @@ public class SenderConfigDecorator
             .filter(one -> {
                 String name = one.getFullName();
                 return name.startsWith(REPORT)
-                    || name.startsWith(this.encoderKey)
+                    || name.startsWith(encoderKey)
                     || name.startsWith(prefix);
             }).forEach(one -> cfg.put(one.getFullName(), one.getNewValue()));
 

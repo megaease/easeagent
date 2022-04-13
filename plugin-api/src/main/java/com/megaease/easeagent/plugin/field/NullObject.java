@@ -22,7 +22,7 @@ package com.megaease.easeagent.plugin.field;
  * avoiding NullPointerException when serialized
  */
 public class NullObject {
-    public static Object NULL = new Object();
+    public static final Object NULL = new Object();
 
     public String toString() {
         return "null";

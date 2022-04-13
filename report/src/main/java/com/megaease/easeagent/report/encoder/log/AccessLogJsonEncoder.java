@@ -17,8 +17,6 @@
  */
 package com.megaease.easeagent.report.encoder.log;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auto.service.AutoService;
 import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
@@ -30,10 +28,10 @@ import com.megaease.easeagent.plugin.report.encoder.JsonEncoder;
 import zipkin2.internal.JsonCodec;
 
 @AutoService(Encoder.class)
-public class LogJsonEncoder extends JsonEncoder<AccessLogInfo> {
-    public static final String ENCODER_NAME = ReportConfigConst.LOG_JSON_ENCODER_NAME;
+public class AccessLogJsonEncoder extends JsonEncoder<AccessLogInfo> {
+    public static final String ENCODER_NAME = ReportConfigConst.ACCESS_LOG_JSON_ENCODER_NAME;
 
-    LogWriter writer;
+    AccessLogWriter writer;
 
     @Override
     public String name() {
@@ -42,7 +40,7 @@ public class LogJsonEncoder extends JsonEncoder<AccessLogInfo> {
 
     @Override
     public void init(Config config) {
-        this.writer = new LogWriter();
+        this.writer = new AccessLogWriter();
     }
 
     @Override

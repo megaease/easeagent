@@ -31,7 +31,6 @@ public class ClassMatcher implements IClassMatcher {
     private ClassMatch matchType;
     private int modifier = Modifier.ACC_NONE;
     private int notModifier = Modifier.ACC_NONE;
-    private String classLoader;
 
     public static final int MODIFIER_MASK = Modifier.ACC_ABSTRACT | Modifier.ACC_INTERFACE
         | Modifier.ACC_PRIVATE | Modifier.ACC_PUBLIC | Modifier.ACC_PROTECTED;
@@ -39,12 +38,11 @@ public class ClassMatcher implements IClassMatcher {
     protected ClassMatcher() {
     }
 
-    private ClassMatcher(String name, ClassMatch type, int modifier, int notModifier, String loaderName) {
+    private ClassMatcher(String name, ClassMatch type, int modifier, int notModifier) {
         this.name = name;
         this.matchType = type;
         this.modifier = modifier;
         this.notModifier = notModifier;
-        this.classLoader = loaderName;
     }
 
     public static ClassMatcherBuilder builder() {
@@ -56,7 +54,6 @@ public class ClassMatcher implements IClassMatcher {
         private ClassMatch matchType;
         private int modifier;
         private int notModifier;
-        private String classLoader;
 
         private IClassMatcher left;
         private Operator operator = Operator.AND;
@@ -131,7 +128,6 @@ public class ClassMatcher implements IClassMatcher {
             return this.name(className).matchType(ClassMatch.INTERFACE);
         }
 
-
         public ClassMatcherBuilder matchType(ClassMatch matchType) {
             this.matchType = matchType;
             return this;
@@ -144,11 +140,6 @@ public class ClassMatcher implements IClassMatcher {
 
         public ClassMatcherBuilder notModifier(int notModifier) {
             this.notModifier = notModifier;
-            return this;
-        }
-
-        public ClassMatcherBuilder classLoader(String classLoader) {
-            this.classLoader = classLoader;
             return this;
         }
 
@@ -193,7 +184,7 @@ public class ClassMatcher implements IClassMatcher {
         }
 
         public IClassMatcher build() {
-            IClassMatcher matcher = new ClassMatcher(name, matchType, modifier, notModifier, classLoader);
+            IClassMatcher matcher = new ClassMatcher(name, matchType, modifier, notModifier);
 
             if (this.isNegate) {
                 matcher = matcher.negate();
@@ -203,6 +194,7 @@ public class ClassMatcher implements IClassMatcher {
                 return matcher;
             }
 
+            IClassMatcher points;
             switch (this.operator) {
                 case OR:
                     return new OrClassMatcher(this.left, matcher);
@@ -220,8 +212,7 @@ public class ClassMatcher implements IClassMatcher {
                 + ", notModifier=" + this.notModifier
                 + ", isNegate=" + this.isNegate
                 + ", operate=" + this.operator
-                + ", left=" + this.left
-                + ", classLoader=" + this.classLoader + ")";
+                + ", left=" + this.left + ")";
         }
     }
 }

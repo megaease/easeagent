@@ -38,9 +38,10 @@ public class ContextUtils {
         EaseAgent.initializeContextSupplier.getContext().clear();
         MockMetricProvider.clearAll();
         OldRedirect.resetRedirect();
+        MockTracingProvider.cleanCurrentSpan();
         MockTracingProvider.cleanPendingSpans();
         MockReport.cleanLastSpan();
-        MockReport.cleanLastLog();
+        MockReport.cleanLastAccessLog();
         MockReport.cleanSkipSpan();
     }
 

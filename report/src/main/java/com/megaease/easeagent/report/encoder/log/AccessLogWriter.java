@@ -23,7 +23,7 @@ import zipkin2.internal.WriteBuffer;
 
 import java.util.Map;
 
-public class LogWriter implements WriteBuffer.Writer<AccessLogInfo> {
+public class AccessLogWriter implements WriteBuffer.Writer<AccessLogInfo> {
     static final String TYPE_FIELD_NAME = "\"type\":\"";
     static final String TRACE_ID_FIELD_NAME = ",\"trace_id\":\"";
     static final String SPAN_ID_FIELD_NAME = ",\"span_id\":\"";

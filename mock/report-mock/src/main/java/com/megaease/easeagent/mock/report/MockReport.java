@@ -22,9 +22,9 @@ import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
+import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -44,7 +44,8 @@ public class MockReport {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockReport.class);
     private static final AgentReport AGENT_REPORT = new MockAgentReport(DefaultAgentReport.create(MockConfig.getCONFIGS()));
 
-    private static final AtomicReference<AccessLogInfo> LAST_LOG = new AtomicReference<>();
+    private static final AtomicReference<AccessLogInfo> LAST_ACCESS_LOG = new AtomicReference<>();
+    private static final AtomicReference<io.opentelemetry.sdk.logs.data.LogData> LAST_APP_LOG = new AtomicReference<>();
     private static final AtomicReference<ReportSpan> LAST_SPAN = new AtomicReference<>();
     private static final AtomicReference<ReportSpan> LAST_SKIP_SPAN = new AtomicReference<>();
     private static volatile MetricFlushable metricFlushable;
@@ -136,7 +137,12 @@ public class MockReport {
         @Override
         public void report(AccessLogInfo log) {
             // this.agentReport.report(log);
-            LAST_LOG.set(log);
+            LAST_ACCESS_LOG.set(log);
+        }
+
+        @Override
+        public void report(AgentLogData log) {
+            LAST_APP_LOG.set(log);
         }
 
         @Override
@@ -193,12 +199,20 @@ public class MockReport {
         LAST_SPAN.set(null);
     }
 
-    public static AccessLogInfo getLastLog() {
-        return LAST_LOG.get();
+    public static AccessLogInfo getLastAccessLog() {
+        return LAST_ACCESS_LOG.get();
     }
 
-    public static void cleanLastLog() {
-        LAST_LOG.set(null);
+    public static void cleanLastAccessLog() {
+        LAST_ACCESS_LOG.set(null);
+    }
+
+    public static io.opentelemetry.sdk.logs.data.LogData getLastAppLog() {
+        return LAST_APP_LOG.get();
+    }
+
+    public static void cleanLastAppLog() {
+        LAST_APP_LOG.set(null);
     }
 
     public static ReportSpan getLastSkipSpan() {

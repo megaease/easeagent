@@ -28,7 +28,8 @@ public class ReportConfigConst {
 
     public static final String SPAN_JSON_ENCODER_NAME = "SpanJsonEncoder";
     public static final String METRIC_JSON_ENCODER_NAME = "MetricJsonEncoder";
-    public static final String LOG_JSON_ENCODER_NAME = "LogJsonEncoder";
+    public static final String LOG_DATA_JSON_ENCODER_NAME = "LogDataJsonEncoder";
+    public static final String ACCESS_LOG_JSON_ENCODER_NAME = "AccessLogJsonEncoder";
 
     public static final String HTTP_SPAN_JSON_ENCODER_NAME = "HttpSpanJsonEncoder";
 
@@ -49,6 +50,8 @@ public class ReportConfigConst {
     public static final String ASYNC_MSG_MAX_BYTES_KEY = "messageMaxBytes";
     public static final String ASYNC_MSG_TIMEOUT_KEY = "messageTimeout";
     public static final String ASYNC_QUEUE_MAX_SIZE_KEY = "queuedMaxSize";
+    public static final String ASYNC_QUEUE_MAX_LOGS_KEY = "queuedMaxLogs";
+    public static final String ASYNC_QUEUE_MAX_ITEMS_KEY = "queuedMaxItems";
 
     /**
      * Reporter v2 configuration
@@ -69,9 +72,14 @@ public class ReportConfigConst {
     public static final String OUTPUT_SECURITY_PROTOCOL_V2 = join(OUTPUT_SERVER_V2, "security.protocol");
     public static final String OUTPUT_SERVERS_SSL = join(OUTPUT_SERVER_V2, "ssl");
 
+    public static final String LOG_ASYNC = join(LOGS, ASYNC_KEY);
+
     public static final String LOG_SENDER = join(LOGS, SENDER_KEY);
     public static final String LOG_ENCODER = join(LOGS, ENCODER_KEY);
-    public static final String LOG_ASYNC = join(LOGS, ASYNC_KEY);
+
+    public static final String LOG_ACCESS = join(LOGS, "access");
+    public static final String LOG_ACCESS_SENDER = join(LOG_ACCESS, SENDER_KEY);
+    public static final String LOG_ACCESS_ENCODER = join(LOG_ACCESS, ENCODER_KEY);
 
     public static final String TRACE_SENDER = join(TRACE_V2, SENDER_KEY);
     public static final String TRACE_ENCODER = join(TRACE_V2, ENCODER_KEY);
@@ -82,14 +90,17 @@ public class ReportConfigConst {
     public static final String METRIC_ASYNC = join(METRIC_V2, ASYNC_KEY);
 
     // -------- lv4  --------
+    public static final String LOG_SENDER_TOPIC = join(LOG_SENDER, TOPIC_KEY);
     public static final String LOG_SENDER_NAME = join(LOG_SENDER, APPEND_TYPE_KEY);
-    public static final String LOG_SENDER_ENABLED_V2 = join(LOG_SENDER, ENABLED_KEY);
-    public static final String LOG_SENDER_TOPIC_V2 = join(LOG_SENDER, TOPIC_KEY);
+
+    public static final String LOG_ACCESS_SENDER_NAME = join(LOG_ACCESS_SENDER, APPEND_TYPE_KEY);
+    public static final String LOG_ACCESS_SENDER_ENABLED = join(LOG_ACCESS_SENDER, ENABLED_KEY);
+    public static final String LOG_ACCESS_SENDER_TOPIC = join(LOG_ACCESS_SENDER, TOPIC_KEY);
 
     public static final String LOG_ASYNC_MESSAGE_MAX_BYTES = join(LOG_ASYNC, ASYNC_MSG_MAX_BYTES_KEY);
     public static final String LOG_ASYNC_REPORT_THREAD = join(LOG_ASYNC, ASYNC_THREAD_KEY);
     public static final String LOG_ASYNC_MESSAGE_TIMEOUT = join(LOG_ASYNC, ASYNC_MSG_TIMEOUT_KEY);
-    public static final String LOG_ASYNC_QUEUED_MAX_LOGS = join(LOG_ASYNC, "queuedMaxLogs");
+    public static final String LOG_ASYNC_QUEUED_MAX_LOGS = join(LOG_ASYNC, ASYNC_QUEUE_MAX_LOGS_KEY);
     public static final String LOG_ASYNC_QUEUED_MAX_SIZE = join(LOG_ASYNC, ASYNC_QUEUE_MAX_SIZE_KEY);
 
     public static final String TRACE_SENDER_NAME = join(TRACE_SENDER, APPEND_TYPE_KEY);
@@ -108,6 +119,8 @@ public class ReportConfigConst {
     public static final String METRIC_SENDER_APPENDER = join(METRIC_SENDER, LOG_APPENDER_KEY);
 
     public static final String METRIC_ASYNC_INTERVAL = join(METRIC_ASYNC, INTERVAL_KEY);
+    public static final String METRIC_ASYNC_QUEUED_MAX_ITEMS = join(METRIC_ASYNC, ASYNC_QUEUE_MAX_ITEMS_KEY);
+    public static final String METRIC_ASYNC_MESSAGE_MAX_BYTES = join(METRIC_ASYNC, ASYNC_MSG_MAX_BYTES_KEY);
 
     public static final String OUTPUT_SSL_KEYSTORE_TYPE_V2 = join(OUTPUT_SERVERS_SSL, "keystore.type");
     public static final String OUTPUT_KEY_V2 = join(OUTPUT_SERVERS_SSL, "keystore.key");

@@ -43,15 +43,17 @@ public class ReportConfigAdapter {
     }
 
     public static Map<String, String> extractReporterConfig(Config configs) {
-        Map<String, String> cfg = extractAndConvertReporterConfig(configs.getConfigs());
+        Map<String, String> cfg = extractByPrefix(configs.getConfigs(), REPORT);
 
         // default config
         cfg.put(TRACE_ENCODER, NoNull.of(cfg.get(TRACE_ENCODER), SPAN_JSON_ENCODER_NAME));
         cfg.put(METRIC_ENCODER, NoNull.of(cfg.get(METRIC_ENCODER), METRIC_JSON_ENCODER_NAME));
-        cfg.put(LOG_ENCODER, NoNull.of(cfg.get(LOG_ENCODER), LOG_JSON_ENCODER_NAME));
+        cfg.put(LOG_ENCODER, NoNull.of(cfg.get(LOG_ENCODER), LOG_DATA_JSON_ENCODER_NAME));
+        cfg.put(LOG_ACCESS_ENCODER, NoNull.of(cfg.get(LOG_ACCESS_ENCODER), ACCESS_LOG_JSON_ENCODER_NAME));
 
         cfg.put(TRACE_SENDER_NAME, NoNull.of(cfg.get(TRACE_SENDER_NAME), getDefaultAppender(cfg)));
         cfg.put(METRIC_SENDER_NAME, NoNull.of(cfg.get(METRIC_SENDER_NAME), getDefaultAppender(cfg)));
+        cfg.put(LOG_ACCESS_SENDER_NAME, NoNull.of(cfg.get(LOG_ACCESS_SENDER_NAME), getDefaultAppender(cfg)));
         cfg.put(LOG_SENDER_NAME, NoNull.of(cfg.get(LOG_SENDER_NAME), getDefaultAppender(cfg)));
 
         return cfg;
@@ -75,10 +77,14 @@ public class ReportConfigAdapter {
         extract = extractMetricPluginConfig(srcConfig);
         outputCfg.putAll(extract);
 
-        // access metric access log
+        // log config
+        extract = extractLogPluginConfig(srcConfig);
+        outputCfg.putAll(extract);
+
+        // if there are access log in metric
         updateAccessLogCfg(outputCfg);
 
-        // all extract configuration will be override by config items start with "report" in srcConfig
+        // all extract configuration will be overridden by config items start with "report" in srcConfig
         extract = extractByPrefix(srcConfig, REPORT);
         outputCfg.putAll(extract);
 
@@ -129,14 +135,20 @@ public class ReportConfigAdapter {
     }
 
     /**
-     * call after metric config adapter
+     * For Compatibility, call after metric config adapter
      *
-     * extract 'reporter.metric.access.*' to 'reporter.log.*'
+     * extract 'reporter.metric.access.*' to 'reporter.log.access.*'
      */
     private static void updateAccessLogCfg(Map<String, String> outputCfg) {
         // reporter.metric.access.*
         String prefix = join(METRIC_V2, ConfigConst.Namespace.ACCESS);
-        Map<String, String> accessLog = extractAndConvertPrefix(outputCfg, prefix, LOGS);
+        Map<String, String> metricAccess = extractByPrefix(outputCfg, prefix);
+        Map<String, String> accessLog = extractAndConvertPrefix(metricAccess, prefix, LOG_ACCESS);
+
+        // access log use `kafka` sender
+        if (METRIC_KAFKA_SENDER_NAME.equals(accessLog.get(LOG_ACCESS_SENDER_NAME))) {
+            accessLog.put(LOG_ACCESS_SENDER_NAME, KAFKA_SENDER_NAME);
+        }
 
         outputCfg.putAll(accessLog);
     }
@@ -170,27 +182,27 @@ public class ReportConfigAdapter {
             if (idx < 0) {
                 continue;
             }
-            String namespace = key.substring(prefix.length(), idx);
+            String namespaceWithSeparator = key.substring(prefix.length(), idx);
             String suffix = key.substring(idx + metricKeyLength + 1);
             String newKey;
 
-            if (namespace.equals(globalKey)) {
+            if (namespaceWithSeparator.equals(globalKey)) {
                 continue;
             } else {
-                if (!namespaces.contains(namespace)) {
-                    namespaces.add(namespace);
+                if (!namespaces.contains(namespaceWithSeparator)) {
+                    namespaces.add(namespaceWithSeparator);
                     Map<String, String> d = extractAndConvertPrefix(global,
-                        METRIC_V2 + ".", METRIC_V2 + namespace);
+                        METRIC_V2 + ".", METRIC_V2 + namespaceWithSeparator);
                     metricConfigs.putAll(d);
                 }
             }
 
-            if (suffix.equals(ENCODER_KEY)) {
-                newKey = METRIC_V2 + namespace + ENCODER_KEY;
+            if (suffix.startsWith(ENCODER_KEY) || suffix.startsWith(ASYNC_KEY)) {
+                newKey = METRIC_V2 + namespaceWithSeparator + suffix;
             } else if (suffix.equals(INTERVAL_KEY)) {
-                newKey = METRIC_V2 + namespace + join(ASYNC_KEY, suffix);
+                newKey = METRIC_V2 + namespaceWithSeparator + join(ASYNC_KEY, suffix);
             } else {
-                newKey = METRIC_V2 + namespace + join(SENDER_KEY, suffix);
+                newKey = METRIC_V2 + namespaceWithSeparator + join(SENDER_KEY, suffix);
             }
 
             if (newKey.endsWith(APPEND_TYPE_KEY) && e.getValue().equals("kafka")) {
@@ -211,8 +223,8 @@ public class ReportConfigAdapter {
         Map<String, String> extract = extractAndConvertPrefix(srcCfg, prefix, METRIC_SENDER);
 
         for (Map.Entry<String, String> e : extract.entrySet()) {
-            if (e.getKey().endsWith(ENCODER_KEY)) {
-                global.put(join(METRIC_V2, ENCODER_KEY), e.getValue());
+            if (e.getKey().startsWith(ENCODER_KEY, METRIC_SENDER.length() + 1)) {
+                global.put(join(METRIC_V2, e.getKey().substring(METRIC_SENDER.length() + 1)), e.getValue());
             } else if (e.getKey().endsWith(INTERVAL_KEY)) {
                 global.put(join(METRIC_ASYNC, INTERVAL_KEY), e.getValue());
             } else if (e.getKey().endsWith(APPEND_TYPE_KEY) && e.getValue().equals("kafka")) {
@@ -221,6 +233,108 @@ public class ReportConfigAdapter {
                 global.put(e.getKey(), e.getValue());
             }
         }
+
+
+        // global log level (async)
+        global.putAll(extractByPrefix(srcCfg, METRIC_SENDER));
+        global.putAll(extractByPrefix(srcCfg, METRIC_ASYNC));
+        global.putAll(extractByPrefix(srcCfg, METRIC_ENCODER));
+
+        return global;
+    }
+
+    /**
+     * metric report configuration
+     *
+     * extract `plugin.observability.global.metric.*` config items to reporter.metric.sender.*`
+     *
+     * extract `plugin.observability.[namespace].metric.*` config items
+     * to reporter.metric.[namespace].sender.*`
+     *
+     * @param srcCfg source configuration map
+     * @return metric reporter config start with 'reporter.metric.[namespace].sender'
+     */
+    private static Map<String, String> extractLogPluginConfig(Map<String, String> srcCfg) {
+        final String globalKey = "." + ConfigConst.PLUGIN_GLOBAL + ".";
+        final String prefix = join(ConfigConst.PLUGIN, ConfigConst.OBSERVABILITY);
+
+        String typeKey = join("", ConfigConst.PluginID.LOG, "");
+        int typeKeyLength = ConfigConst.PluginID.LOG.length();
+
+        final String reporterPrefix = LOGS;
+
+        Map<String, String> global = extractGlobalLogConfig(srcCfg);
+        HashSet<String> namespaces = new HashSet<>();
+        Map<String, String> outputConfigs = new TreeMap<>(global);
+
+        for (Map.Entry<String, String> e : srcCfg.entrySet()) {
+            String key = e.getKey();
+            if (!key.startsWith(prefix)) {
+                continue;
+            }
+            int idx = key.indexOf(typeKey, prefix.length());
+            if (idx < 0) {
+                continue;
+            } else {
+                idx += 1;
+            }
+            String namespaceWithSeparator = key.substring(prefix.length(), idx);
+            String suffix = key.substring(idx + typeKeyLength + 1);
+            String newKey;
+
+            if (namespaceWithSeparator.equals(globalKey)) {
+                continue;
+            } else {
+                if (!namespaces.contains(namespaceWithSeparator)) {
+                    namespaces.add(namespaceWithSeparator);
+                    Map<String, String> d = extractAndConvertPrefix(global,
+                        reporterPrefix + ".", reporterPrefix + namespaceWithSeparator);
+                    outputConfigs.putAll(d);
+                }
+            }
+
+            if (suffix.startsWith(ENCODER_KEY) || suffix.startsWith(ASYNC_KEY)) {
+                newKey = reporterPrefix + namespaceWithSeparator + suffix;
+            } else {
+                newKey = reporterPrefix + namespaceWithSeparator + join(SENDER_KEY, suffix);
+            }
+
+            outputConfigs.put(newKey, e.getValue());
+        }
+
+        return outputConfigs;
+    }
+
+    /**
+     * extract `plugin.observability.global.log.*` config items to `reporter.log.sender.*`
+     * extract `plugin.observability.global.log.output.*` config items to `reporter.log.output.*`
+     *
+     * @param srcCfg source config map
+     * @return reporter log config
+     */
+    private static Map<String, String> extractGlobalLogConfig(Map<String, String> srcCfg) {
+        final String prefix = join(ConfigConst.PLUGIN, ConfigConst.OBSERVABILITY,
+            ConfigConst.PLUGIN_GLOBAL,
+            ConfigConst.PluginID.LOG);
+        Map<String, String> global = new TreeMap<>();
+        Map<String, String> extract = extractAndConvertPrefix(srcCfg, prefix, LOG_SENDER);
+
+        for (Map.Entry<String, String> e : extract.entrySet()) {
+            String key = e.getKey();
+            if (key.startsWith(ENCODER_KEY, LOG_SENDER.length() + 1)) {
+                global.put(join(LOGS, key.substring(LOG_SENDER.length() + 1)), e.getValue());
+            } else if (key.startsWith(ASYNC_KEY, LOG_SENDER.length() + 1)) {
+                global.put(join(LOGS, key.substring(LOG_SENDER.length() + 1)), e.getValue());
+            } else {
+                global.put(e.getKey(), e.getValue());
+            }
+        }
+
+        // global log level (async)
+        global.putAll(extractByPrefix(srcCfg, LOG_SENDER));
+        global.putAll(extractByPrefix(srcCfg, LOG_ASYNC));
+        global.putAll(extractByPrefix(srcCfg, LOG_ENCODER));
+
         return global;
     }
 }

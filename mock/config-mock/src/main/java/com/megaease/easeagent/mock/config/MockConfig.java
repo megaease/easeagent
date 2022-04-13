@@ -19,6 +19,7 @@ package com.megaease.easeagent.mock.config;
 
 import com.megaease.easeagent.config.ConfigFactory;
 import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.config.GlobalConfigs;
 import com.megaease.easeagent.config.PluginConfigManager;
 
 import java.io.File;
@@ -29,7 +30,7 @@ import java.util.Map;
 public class MockConfig {
     private static final String MOCK_CONFIG_YAML_FILE = "mock_agent.yaml";
     private static final String MOCK_CONFIG_PROP_FILE = "mock_agent.properties";
-    private static final Configs CONFIGS;
+    private static final GlobalConfigs CONFIGS;
     private static final PluginConfigManager PLUGIN_CONFIG_MANAGER;
 
     static {
@@ -42,15 +43,15 @@ public class MockConfig {
         initConfigs.put("observability.tracings.output.enabled", "true");
         initConfigs.put("plugin.observability.global.tracing.enabled", "true");
         initConfigs.put("plugin.observability.global.metric.enabled", "true");
-        CONFIGS = new Configs(initConfigs);
+        CONFIGS = new GlobalConfigs(initConfigs);
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL url = classLoader.getResource(MOCK_CONFIG_YAML_FILE);
         if (url == null) {
              url = classLoader.getResource(MOCK_CONFIG_PROP_FILE);
         }
         if (url != null) {
-            Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(url.getFile()));
-            CONFIGS.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
+            GlobalConfigs configsFromOuterFile = ConfigFactory.loadFromFile(new File(url.getFile()));
+            CONFIGS.mergeConfigs(configsFromOuterFile);
         }
         PLUGIN_CONFIG_MANAGER = PluginConfigManager.builder(CONFIGS).build();
     }

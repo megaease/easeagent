@@ -18,6 +18,7 @@
 package com.megaease.easeagent.plugin.report;
 
 import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
+import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 
@@ -33,10 +34,16 @@ public interface AgentReport {
     void report(ReportSpan span);
 
     /**
-     * report log
+     * report access-log
      * @param log log info
      */
     void report(AccessLogInfo log);
+
+    /**
+     * report application log
+     * @param log log info
+     */
+    void report(AgentLogData log);
 
     /**
      * Metric reporters factory

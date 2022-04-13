@@ -47,6 +47,8 @@
         <module>elasticsearch</module>
         <module>healthy</module>
         <module>mongodb</module>
+        <module>logback</module>
+        <module>log4j2-log-plugin</module>
     </modules>
 
     <properties>

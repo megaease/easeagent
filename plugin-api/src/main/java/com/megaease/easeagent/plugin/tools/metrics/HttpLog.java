@@ -33,30 +33,30 @@ import java.util.Map;
 public class HttpLog {
 
     public AccessLogInfo prepare(String system, String serviceName, Long beginTime, Span span, AccessLogServerInfo serverInfo) {
-        AccessLogInfo accessLogInfo = prepare(system, serviceName, beginTime, serverInfo);
+        AccessLogInfo accessLog = prepare(system, serviceName, beginTime, serverInfo);
         if (span == null) {
-            return accessLogInfo;
+            return accessLog;
         }
-        accessLogInfo.setTraceId(span.traceIdString());
-        accessLogInfo.setSpanId(span.spanIdString());
-        accessLogInfo.setParentSpanId(span.parentIdString());
-        return accessLogInfo;
+        accessLog.setTraceId(span.traceIdString());
+        accessLog.setSpanId(span.spanIdString());
+        accessLog.setParentSpanId(span.parentIdString());
+        return accessLog;
     }
 
     private AccessLogInfo prepare(String system, String serviceName, Long beginTime, AccessLogServerInfo serverInfo) {
-        AccessLogInfo accessLogInfo = new AccessLogInfo();
-        accessLogInfo.setSystem(system);
-        accessLogInfo.setService(serviceName);
-        accessLogInfo.setHostName(HostAddress.localhost());
-        accessLogInfo.setHostIpv4(HostAddress.getHostIpv4());
-        accessLogInfo.setUrl(serverInfo.getMethod() + " " + serverInfo.getRequestURI());
-        accessLogInfo.setMethod(serverInfo.getMethod());
-        accessLogInfo.setHeaders(serverInfo.findHeaders());
-        accessLogInfo.setBeginTime(beginTime);
-        accessLogInfo.setQueries(getQueries(serverInfo));
-        accessLogInfo.setClientIP(serverInfo.getClientIP());
-        accessLogInfo.setBeginCpuTime(System.nanoTime());
-        return accessLogInfo;
+        AccessLogInfo accessLog = new AccessLogInfo();
+        accessLog.setSystem(system);
+        accessLog.setService(serviceName);
+        accessLog.setHostName(HostAddress.localhost());
+        accessLog.setHostIpv4(HostAddress.getHostIpv4());
+        accessLog.setUrl(serverInfo.getMethod() + " " + serverInfo.getRequestURI());
+        accessLog.setMethod(serverInfo.getMethod());
+        accessLog.setHeaders(serverInfo.findHeaders());
+        accessLog.setBeginTime(beginTime);
+        accessLog.setQueries(getQueries(serverInfo));
+        accessLog.setClientIP(serverInfo.getClientIP());
+        accessLog.setBeginCpuTime(System.nanoTime());
+        return accessLog;
     }
 
     private Map<String, String> getQueries(AccessLogServerInfo serverInfo) {
@@ -71,26 +71,26 @@ public class HttpLog {
         return queries;
     }
 
-    public String getLogString(AccessLogInfo accessLogInfo, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
-        this.finish(accessLogInfo, success, beginTime, serverInfo);
+    public String getLogString(AccessLogInfo accessLog, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
+        this.finish(accessLog, success, beginTime, serverInfo);
 
         List<AccessLogInfo> list = new ArrayList<>(1);
-        list.add(accessLogInfo);
+        list.add(accessLog);
 
         return JsonUtil.toJson(list);
     }
 
 
-    public void finish(AccessLogInfo accessLogInfo, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
-        accessLogInfo.setStatusCode(serverInfo.getStatusCode());
+    public void finish(AccessLogInfo accessLog, boolean success, Long beginTime, AccessLogServerInfo serverInfo) {
+        accessLog.setStatusCode(serverInfo.getStatusCode());
         if (!success) {
-            accessLogInfo.setStatusCode("500");
+            accessLog.setStatusCode("500");
         }
         long now = SystemClock.now();
-        accessLogInfo.setTimestamp(now);
-        accessLogInfo.setRequestTime(now - beginTime);
-        accessLogInfo.setCpuElapsedTime(System.nanoTime() - accessLogInfo.getBeginCpuTime());
-        accessLogInfo.setResponseSize(serverInfo.getResponseBufferSize());
-        accessLogInfo.setMatchUrl(serverInfo.getMatchURL());
+        accessLog.setTimestamp(now);
+        accessLog.setRequestTime(now - beginTime);
+        accessLog.setCpuElapsedTime(System.nanoTime() - accessLog.getBeginCpuTime());
+        accessLog.setResponseSize(serverInfo.getResponseBufferSize());
+        accessLog.setMatchUrl(serverInfo.getMatchURL());
     }
 }

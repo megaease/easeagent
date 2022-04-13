@@ -18,6 +18,7 @@
 package com.megaease.easeagent.report.async.log;
 
 import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.async.AsyncProps;
 
 import static com.megaease.easeagent.config.ConfigUtils.bindProp;
@@ -30,13 +31,24 @@ public class LogAsyncProps implements AsyncProps {
     private volatile int messageTimeout;
     private volatile int messageMaxBytes;
 
-    public LogAsyncProps(Config config) {
+    public LogAsyncProps(Config config, String prefix) {
         int onePercentageMemory = AsyncProps.onePercentOfMemory();
-        bindProp(LOG_ASYNC_REPORT_THREAD, config, Config::getInt, v -> this.reportThread = v, 1);
-        bindProp(LOG_ASYNC_QUEUED_MAX_SIZE, config, Config::getInt, v -> this.queuedMaxSize = v, onePercentageMemory);
-        bindProp(LOG_ASYNC_QUEUED_MAX_LOGS, config, Config::getInt, v -> this.queuedMaxLogs = v, 500);
-        bindProp(LOG_ASYNC_MESSAGE_MAX_BYTES, config, Config::getInt, v -> this.messageMaxBytes = v, 999900);
-        bindProp(LOG_ASYNC_MESSAGE_TIMEOUT, config, Config::getInt, v -> this.messageTimeout = v, 1000);
+        String keyPrefix = StringUtils.isEmpty(prefix) ? LOG_ASYNC : prefix;
+
+        bindProp(join(keyPrefix, join(ASYNC_KEY, ASYNC_THREAD_KEY)),
+            config, Config::getInt, v -> this.reportThread = v, 1);
+
+        bindProp(join(keyPrefix, join(ASYNC_KEY, ASYNC_QUEUE_MAX_SIZE_KEY)),
+            config, Config::getInt, v -> this.queuedMaxSize = v, onePercentageMemory);
+
+        bindProp(join(keyPrefix, join(ASYNC_KEY, ASYNC_QUEUE_MAX_LOGS_KEY)),
+            config, Config::getInt, v -> this.queuedMaxLogs = v, 500);
+
+        bindProp(join(keyPrefix, join(ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY)),
+            config, Config::getInt, v -> this.messageMaxBytes = v, 999900);
+
+        bindProp(join(keyPrefix, join(ASYNC_KEY, ASYNC_MSG_TIMEOUT_KEY)),
+            config, Config::getInt, v -> this.messageTimeout = v, 1000);
     }
 
     @Override

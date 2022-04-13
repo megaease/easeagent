@@ -40,7 +40,7 @@ public class KafkaMessageListenerMetricInterceptorTest {
     public void init() {
         KafkaMessageListenerMetricInterceptor interceptor = new KafkaMessageListenerMetricInterceptor();
         KafkaMetricTest.init(interceptor);
-        assertNotNull(KafkaConsumerMetricInterceptor.getKafkaMetric());
+        assertNotNull(KafkaMessageListenerMetricInterceptor.getKafkaMetric());
     }
 
     @Test

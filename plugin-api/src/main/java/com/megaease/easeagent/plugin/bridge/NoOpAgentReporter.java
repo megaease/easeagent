@@ -18,14 +18,12 @@
 package com.megaease.easeagent.plugin.bridge;
 
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
+import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
-
-import java.util.List;
 
 public class NoOpAgentReporter implements AgentReport {
     @Override
@@ -35,6 +33,11 @@ public class NoOpAgentReporter implements AgentReport {
 
     @Override
     public void report(AccessLogInfo log) {
+        // ignored
+    }
+
+    @Override
+    public void report(AgentLogData log) {
         // ignored
     }
 

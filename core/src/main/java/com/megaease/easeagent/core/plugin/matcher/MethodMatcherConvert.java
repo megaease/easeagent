@@ -25,6 +25,7 @@ import com.megaease.easeagent.plugin.matcher.operator.AndMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.NegateMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.operator.OrMethodMatcher;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.NegatingMatcher;
 
@@ -121,7 +122,8 @@ public class MethodMatcherConvert
         }
 
         if (matcher.getOverriddenFrom() != null) {
-            mc = isOverriddenFrom(ClassMatcherConvert.INSTANCE.convert(matcher.getOverriddenFrom()));
+            Junction<TypeDescription> cls = ClassMatcherConvert.INSTANCE.convert(matcher.getOverriddenFrom());
+            mc = isOverriddenFrom(cls);
             c = c == null ? mc : c.and(mc);
         }
 

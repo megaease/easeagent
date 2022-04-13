@@ -83,6 +83,12 @@ public class Configs implements Config {
         return this.source.get(name);
     }
 
+    public String getString(String name, String defVal) {
+        String val = this.source.get(name);
+
+        return val == null ? defVal : val;
+    }
+
     public Integer getInt(String name) {
         String value = this.source.get(name);
         if (value == null) {

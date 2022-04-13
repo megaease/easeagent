@@ -47,8 +47,14 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
     @Override
     public void updateConfigsNotNotify(Map<String, String> changes) {
         // update original config
+        Map<String, String> newGlobalCfg = new TreeMap<>(this.originalConfig.getConfigs());
+        newGlobalCfg.putAll(changes);
         this.originalConfig.updateConfigsNotNotify(changes);
-        super.updateConfigsNotNotify(changes);
+
+        // report adapter
+        ReportConfigAdapter.convertConfig(newGlobalCfg);
+
+        super.updateConfigsNotNotify(newGlobalCfg);
     }
 
     @Override
@@ -62,6 +68,15 @@ public class GlobalConfigs extends Configs implements ConfigManagerMXBean {
         ReportConfigAdapter.convertConfig(newGlobalCfg);
 
         super.updateConfigs(newGlobalCfg);
+    }
+
+    public void mergeConfigs(GlobalConfigs configs) {
+        Map<String, String> merged = configs.getOriginalConfig().getConfigs();
+        if (merged.isEmpty()) {
+            return;
+        }
+        this.updateConfigsNotNotify(merged);
+        return;
     }
 
     @Override

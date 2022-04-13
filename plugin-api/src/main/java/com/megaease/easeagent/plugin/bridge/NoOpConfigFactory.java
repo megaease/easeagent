@@ -36,6 +36,11 @@ public class NoOpConfigFactory implements IConfigFactory {
     }
 
     @Override
+    public String getConfig(String property, String defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
     public IPluginConfig getConfig(String domain, String namespace, String id) {
         return new NoOpIPluginConfig(domain, namespace, id);
     }
@@ -52,6 +57,11 @@ public class NoOpConfigFactory implements IConfigFactory {
         @Override
         public String getString(String name) {
             return null;
+        }
+
+        @Override
+        public String getString(String name, String defVal) {
+            return defVal;
         }
 
         @Override
@@ -94,11 +104,7 @@ public class NoOpConfigFactory implements IConfigFactory {
 
         @Override
         public Double getDouble(String name, double defValue) {
-            Double aDouble = getDouble(name);
-            if (aDouble == null) {
-                return defValue;
-            }
-            return aDouble;
+            return defValue;
         }
 
         @Override
@@ -108,11 +114,7 @@ public class NoOpConfigFactory implements IConfigFactory {
 
         @Override
         public Long getLong(String name, long defValue) {
-            Long aLong = getLong(name);
-            if (aLong == null) {
-                return defValue;
-            }
-            return aLong;
+            return defValue;
         }
 
         @Override

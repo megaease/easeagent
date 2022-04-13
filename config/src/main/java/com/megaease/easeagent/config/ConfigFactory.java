@@ -54,17 +54,19 @@ public class ConfigFactory {
         envKeys.add(AGENT_SERVER_PORT_KEY);
     }
 
-    static Map<String, String> updateEnvCfg(Map<String, String> fileCfgMap) {
+    static Map<String, String> updateEnvCfg() {
+        Map<String, String> envCfg = new TreeMap<>();
+
         for (String key : subEnvKeys) {
             String value = System.getProperty(key);
             if (!StringUtils.isEmpty(value)) {
-                fileCfgMap.put(key.substring("easeagent.".length()), value);
+                envCfg.put(key.substring("easeagent.".length()), value);
             }
         }
         for (String key : envKeys) {
             String value = System.getProperty(key);
             if (!StringUtils.isEmpty(value)) {
-                fileCfgMap.put(key, value);
+                envCfg.put(key, value);
             }
         }
 
@@ -77,10 +79,10 @@ public class ConfigFactory {
                     strMap.put(entry.getKey(), entry.getValue().toString());
                 }
             }
-            fileCfgMap.putAll(strMap);
+            envCfg.putAll(strMap);
         }
 
-        return fileCfgMap;
+        return envCfg;
     }
 
     private ConfigFactory() {
@@ -134,16 +136,16 @@ public class ConfigFactory {
 
         // load yaml configuration file if exist
         GlobalConfigs yConfigs = ConfigFactory.loadFromClasspath(loader, CONFIG_YAML_FILE);
-        configs.updateConfigsNotNotify(yConfigs.getConfigs());
+        configs.mergeConfigs(yConfigs);
 
         // override by user special config file
         if (StringUtils.isNotEmpty(pathname)) {
-            Configs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
-            configs.updateConfigsNotNotify(configsFromOuterFile.getConfigs());
+            GlobalConfigs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
+            configs.mergeConfigs(configsFromOuterFile);
         }
 
         // check environment cfg override
-        configs.updateConfigsNotNotify(updateEnvCfg(configs.getConfigs()));
+        configs.updateConfigsNotNotify(updateEnvCfg());
 
         if (LOGGER.isDebugEnabled()) {
             final String display = configs.toPrettyDisplay();

@@ -20,25 +20,39 @@ package com.megaease.easeagent.core.plugin.matcher;
 import com.megaease.easeagent.plugin.Ordered;
 import lombok.Data;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 import java.util.Set;
+
+import static net.bytebuddy.matcher.ElementMatchers.any;
 
 @Data
 public class ClassTransformation implements Ordered {
     private int order;
     private Junction<TypeDescription> classMatcher;
+    private ElementMatcher<ClassLoader> classloaderMatcher;
     private Set<MethodTransformation>  methodTransformations;
     private boolean hasDynamicField;
 
     public ClassTransformation(int order,
+                               ElementMatcher<ClassLoader> classloaderMatcher,
                                Junction<TypeDescription> classMatcher,
                                Set<MethodTransformation> methodTransformations,
                                boolean hasDynamicField) {
         this.order = order;
+        if (classloaderMatcher == null) {
+            this.classloaderMatcher = any();
+        } else {
+            this.classloaderMatcher = classloaderMatcher;
+        }
         this.classMatcher = classMatcher;
         this.methodTransformations = methodTransformations;
         this.hasDynamicField = hasDynamicField;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override
@@ -46,13 +60,10 @@ public class ClassTransformation implements Ordered {
         return this.order;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static class Builder {
         private int order;
         private Junction<TypeDescription> classMatcher;
+        private ElementMatcher<ClassLoader> classloaderMatcher = null;
         private Set<MethodTransformation> methodTransformations;
         private boolean hasDynamicField;
 
@@ -61,6 +72,11 @@ public class ClassTransformation implements Ordered {
 
         public Builder order(int order) {
             this.order = order;
+            return this;
+        }
+
+        public Builder classloaderMatcher(ElementMatcher<ClassLoader> clmMatcher) {
+            this.classloaderMatcher = clmMatcher;
             return this;
         }
 
@@ -80,7 +96,8 @@ public class ClassTransformation implements Ordered {
         }
 
         public ClassTransformation build() {
-            return new ClassTransformation(order, classMatcher, methodTransformations, hasDynamicField);
+            return new ClassTransformation(order, classloaderMatcher, classMatcher,
+                methodTransformations, hasDynamicField);
         }
 
         public String toString() {

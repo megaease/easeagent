@@ -32,6 +32,8 @@ public interface IConfigFactory {
      */
     String getConfig(String property);
 
+    String getConfig(String property, String defaultValue);
+
     /**
      * Returns the agent's plugin configuration.
      *

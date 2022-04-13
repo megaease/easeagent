@@ -50,7 +50,7 @@ public class PluginLoader {
         Set<ClassTransformation> sortedTransformations = pointsLoad();
 
         for (ClassTransformation transformation : sortedTransformations) {
-            ab = ab.type(transformation.getClassMatcher())
+            ab = ab.type(transformation.getClassMatcher(), transformation.getClassloaderMatcher())
                 .transform(compound(transformation.isHasDynamicField(), transformation.getMethodTransformations()));
         }
         return ab;

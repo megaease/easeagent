@@ -19,18 +19,16 @@ package com.megaease.easeagent.metrics;
 
 import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.plugin.api.Reporter;
-import com.megaease.easeagent.plugin.api.config.ChangeItem;
 import com.megaease.easeagent.plugin.api.config.IPluginConfig;
 import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
 import com.megaease.easeagent.plugin.api.metric.MetricRegistrySupplier;
+import com.megaease.easeagent.plugin.api.otlp.common.AgentLogData;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.report.EncodedData;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.plugin.report.metric.MetricReporterFactory;
 import org.junit.Test;
-
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -48,6 +46,11 @@ public class MetricProviderImplTest {
 
             @Override
             public void report(AccessLogInfo log) {
+                // skip
+            }
+
+            @Override
+            public void report(AgentLogData log) {
                 // skip
             }
 

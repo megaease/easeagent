@@ -50,6 +50,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -93,6 +94,10 @@ public class Bootstrap {
 
         final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, Bootstrap.class.getClassLoader());
         wrapConfig(conf);
+
+        // loader check
+        GlobalAgentHolder.setAgentClassLoader((URLClassLoader) Bootstrap.class.getClassLoader());
+        EaseAgent.agentClassloader = GlobalAgentHolder::getAgentClassLoader;
 
         // init Context/API
         contextManager = ContextManager.build(conf);
@@ -194,7 +199,8 @@ public class Bootstrap {
             .or(nameStartsWith("brave."))
             .or(nameStartsWith("zipkin2."))
             .or(nameStartsWith("com.fasterxml"))
-            .or(nameStartsWith("org.apache.logging"))
+            .or(nameStartsWith("org.apache.logging")
+                .and(not(hasSuperClass(named("org.apache.logging.log4j.spi.AbstractLogger")))))
             .or(nameStartsWith("kotlin."))
             .or(nameStartsWith("javax."))
             .or(nameStartsWith("net.bytebuddy."))
