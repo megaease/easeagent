@@ -39,18 +39,55 @@ import java.util.Map;
 public class Log4jLogMapper implements LogMapper {
     private static final String SPECIAL_MAP_MESSAGE_ATTRIBUTE = "message";
 
-    public Log4jLogMapper() {}
-
     public AgentLogData mapLoggingEvent(MethodInfo logInfo, int levelInt, IPluginConfig config) {
-        // level
-        Level level = (Level)logInfo.getArgs()[0];
-        if (level.intLevel() < levelInt) {
+        Object[] args = logInfo.getArgs();
+
+        if (args == null) {
             return null;
         }
 
         AgentLogDataImpl.Builder builder = AgentLogDataImpl.builder();
-        builder.severity(levelToSeverity(level));
-        builder.severityText(level.name());
+
+        for (int i = 0; i < args.length; i++) {
+            switch (i) {
+                case 0:
+                    // level
+                    Level level = (Level)args[i];
+                    if (level.intLevel() < levelInt) {
+                        return null;
+                    }
+                    builder.severity(levelToSeverity(level));
+                    builder.severityText(level.name());
+                    break;
+                case 4:
+                    // message
+                    Message message = (Message)args[i];
+                    if (!(message instanceof MapMessage)) {
+                        builder.body(message.getFormattedMessage());
+                    } else {
+                        MapMessage<?, ?> mapMessage = (MapMessage<?, ?>) message;
+
+                        String body = mapMessage.getFormat();
+                        boolean checkSpecialMapMessageAttribute = (body == null || body.isEmpty());
+                        if (checkSpecialMapMessageAttribute) {
+                            body = mapMessage.get(SPECIAL_MAP_MESSAGE_ATTRIBUTE);
+                        }
+                        if (body != null && !body.isEmpty()) {
+                            builder.body(body);
+                        }
+                    }
+                    break;
+                case 5:
+                    // throwable
+                    Throwable throwable = (Throwable) args[5];
+                    if (throwable != null) {
+                        builder.throwable(throwable);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
         // logger
         Logger logger = (Logger)logInfo.getInvoker();
@@ -58,30 +95,6 @@ public class Log4jLogMapper implements LogMapper {
             builder.logger("ROOT");
         } else {
             builder.logger(logger.getName());
-        }
-
-        // message
-        Message message = (Message)logInfo.getArgs()[4];
-        if (!(message instanceof MapMessage)) {
-            builder.body(message.getFormattedMessage());
-        } else {
-            MapMessage<?, ?> mapMessage = (MapMessage<?, ?>) message;
-
-            String body = mapMessage.getFormat();
-            boolean checkSpecialMapMessageAttribute = (body == null || body.isEmpty());
-            if (checkSpecialMapMessageAttribute) {
-                body = mapMessage.get(SPECIAL_MAP_MESSAGE_ATTRIBUTE);
-            }
-            if (body != null && !body.isEmpty()) {
-                builder.body(body);
-            }
-        }
-
-
-        // throwable
-        Throwable throwable = (Throwable) logInfo.getArgs()[5];
-        if (throwable != null) {
-            builder.throwable(throwable);
         }
 
         // thread

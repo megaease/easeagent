@@ -37,6 +37,10 @@ public class LogbackLogMapper implements LogMapper {
 
     @Override
     public AgentLogData mapLoggingEvent(MethodInfo methodInfo, int levelInt, IPluginConfig config) {
+        if (methodInfo.getArgs() == null || methodInfo.getArgs().length < 1) {
+            return null;
+        }
+
         ILoggingEvent loggingEvent = (ILoggingEvent)methodInfo.getArgs()[0];
         Level level = loggingEvent.getLevel();
         if (level == null || level.levelInt < levelInt) {
@@ -107,5 +111,4 @@ public class LogbackLogMapper implements LogMapper {
                 return Severity.UNDEFINED_SEVERITY_NUMBER;
         }
     }
-
 }
