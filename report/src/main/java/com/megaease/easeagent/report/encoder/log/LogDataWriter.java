@@ -26,7 +26,9 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.pattern.PatternParser;
 import zipkin2.internal.WriteBuffer;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
 <providers>
@@ -93,6 +95,8 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
     List<LogDataPatternFormatter> locationFormats;
     List<LogDataPatternFormatter> messageFormats;
 
+    Map<String, List<LogDataPatternFormatter>> customFields = new HashMap<>();
+
     public LogDataWriter(Config cfg) {
         this.config = cfg;
         this.parser = PatternLayout.createPatternParser(null);
@@ -124,6 +128,12 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
 
         // instrumentInfo - loggerName
         size += kvLength(LOCATION_FIELD_NAME, value, this.locationFormats, sb, false);
+
+        if (!this.customFields.isEmpty()) {
+            for (Map.Entry<String, List<LogDataPatternFormatter>> c : this.customFields.entrySet()) {
+                size += kvLength(c.getKey(), value, c.getValue(), sb, true);
+            }
+        }
 
         size += kvLength(MESSAGE_FIELD_NAME, value, this.messageFormats, sb, true);
 
@@ -171,10 +181,17 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
         // instrumentInfo - loggerName
         writeKeyValue(b, LOCATION_FIELD_NAME, value, this.locationFormats, sb, false);
 
+        // attribute and custom
+        if (!this.customFields.isEmpty()) {
+            for (Map.Entry<String, List<LogDataPatternFormatter>> c : this.customFields.entrySet()) {
+                writeKeyValue(b, c.getKey(), value, c.getValue(), sb, true);
+            }
+        }
+
         writeKeyValue(b, MESSAGE_FIELD_NAME, value, this.messageFormats, sb, true);
+
         b.writeByte(125);
 
-        // attribute - ignored
     }
 
     /**
@@ -244,7 +261,9 @@ public class LogDataWriter implements WriteBuffer.Writer<AgentLogData> {
                     this.messageFormats = logDataFormatters;
                     break;
                 default:
-                    // attribute encoder
+                    // custom attribute encoder
+                    String key = ",\"" + k + "\":\"";
+                    this.customFields.put(key, logDataFormatters);
                     break;
             }
         });
