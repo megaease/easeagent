@@ -38,8 +38,8 @@ For each value pair in the table, the former is the baseline value and the latte
 
 | URI-Label                | CPU (baseline/agent/diff) | Heap Memory        | P75 Latency               | Throughput (15s) |
 |----------------------|:--------------------------|:-------------------|:--------------------------|------------------|
-| API-URI-owner-3spans | 10.3% / 12.8% / 2.5%      | 263M / 296M / 33M  | 214ms / 241ms / 27ms      | 357 / 300 / 57   |
-| API-URI-vets-10spans | 8.12% / 10.5% / 2.38%     | 175M / 191M / 16M  | 117ms / 161ms / 44ms      | 357 / 300 / 57   |
+| API-URI-owner-3spans | 10.3% / 12.8% / 2.5%      | 263M / 296M / 33M  | 214ms / 241ms / 27ms      | 357 / 300 / -57   |
+| API-URI-vets-10spans | 8.12% / 10.5% / 2.38%     | 175M / 191M / 16M  | 117ms / 161ms / 44ms      | 357 / 300 / -57   |
 
 
 - Process CPU Load: Easeagent will increase the process CPU load by about 3%.
@@ -55,7 +55,7 @@ CPU, Process CPU Load, collected through JMX:java_lang_OperatingSystem_ProcessCp
 #### Heap
 ![Process CPU Load](./images/benchmark/10t-mem-heap.png)
 
-#### Lagency && Throuthput
+#### Lagency & Throuthput
 ![Process CPU Load](./images/benchmark/10t-resp-time-p75.png)
 ![Process CPU Load](./images/benchmark/10t-resp-per-15seconds.png)
 
@@ -66,7 +66,7 @@ CPU, Process CPU Load, collected through JMX:java_lang_OperatingSystem_ProcessCp
 #### Heap
 ![Process CPU Load](./images/benchmark/20t-mem-heap.png)
 
-#### Lagency && Throuthput
+#### Lagency & Throuthput
 ![Process CPU Load](./images/benchmark/20t-resp-time-p75.png)
 ![Process CPU Load](./images/benchmark/20t-resp-per-15seconds.png)
 
@@ -77,7 +77,7 @@ CPU, Process CPU Load, collected through JMX:java_lang_OperatingSystem_ProcessCp
 #### Heap
 ![Process CPU Load](./images/benchmark/50t-mem-heap.png)
 
-#### Lagency && Throuthput
+#### Lagency & Throuthput
 ![Process CPU Load](./images/benchmark/50t-resp-time-p75.png)
 ![Process CPU Load](./images/benchmark/50t-resp-per-15seconds.png)
 
