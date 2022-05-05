@@ -143,8 +143,7 @@ public class HttpSender implements Sender {
         this.tlsCert = config.getString(TLS_CERT);
         this.tlsCaCert = config.getString(TLS_CA_CERT);
 
-        this.gzip = NoNull.of(config.getBooleanNullForUnset(gzipKey),
-            NoNull.of(config.getBooleanNullForUnset(SERVER_GZIP_KEY), true));
+        this.gzip = NoNull.of(config.getBooleanNullForUnset(gzipKey), NoNull.of(config.getBooleanNullForUnset(SERVER_GZIP_KEY), true));
 
         this.timeout = NoNull.of(config.getInt(OUTPUT_SERVERS_TIMEOUT), MIN_TIMEOUT);
         if (this.timeout < MIN_TIMEOUT) {
@@ -215,12 +214,7 @@ public class HttpSender implements Sender {
         String newUserName = StringUtils.noEmptyOf(config.getString(usernameKey), config.getString(SERVER_USER_NAME_KEY));
         String newPwd = StringUtils.noEmptyOf(config.getString(passwordKey), config.getString(SERVER_PASSWORD_KEY));
         // check new client
-        boolean renewClient = !getUrl(this.config).equals(this.url)
-            || !org.apache.commons.lang3.StringUtils.equals(newUserName, this.username)
-            || !org.apache.commons.lang3.StringUtils.equals(newPwd, this.password)
-            || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CA_CERT), this.tlsCaCert)
-            || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CERT), this.tlsCert)
-            || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_KEY), this.tlsKey);
+        boolean renewClient = !getUrl(this.config).equals(this.url) || !org.apache.commons.lang3.StringUtils.equals(newUserName, this.username) || !org.apache.commons.lang3.StringUtils.equals(newPwd, this.password) || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CA_CERT), this.tlsCaCert) || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_CERT), this.tlsCert) || !org.apache.commons.lang3.StringUtils.equals(this.config.getString(TLS_KEY), this.tlsKey);
 
         if (renewClient) {
             clearClient();
@@ -295,8 +289,7 @@ public class HttpSender implements Sender {
     public static void appendBasicAuth(OkHttpClient.Builder builder, String basicUser, String basicPassword) {
         builder.addInterceptor(chain -> {
             Request request = chain.request();
-            Request authRequest = request.newBuilder()
-                .header(AUTH_HEADER, Credentials.basic(basicUser, basicPassword)).build();
+            Request authRequest = request.newBuilder().header(AUTH_HEADER, Credentials.basic(basicUser, basicPassword)).build();
             return chain.proceed(authRequest);
         });
     }
@@ -304,22 +297,22 @@ public class HttpSender implements Sender {
     public static void appendBasicAuth(OkHttpClient.Builder builder, String basicCredential) {
         builder.addInterceptor(chain -> {
             Request request = chain.request();
-            Request authRequest = request.newBuilder()
-                .header(AUTH_HEADER, basicCredential).build();
+            Request authRequest = request.newBuilder().header(AUTH_HEADER, basicCredential).build();
             return chain.proceed(authRequest);
         });
     }
 
     public static void appendTLS(OkHttpClient.Builder builder, String tlsCaCert, String tlsCert, String tlsKey) {
-        // Create the root for client and server to trust. We could also use different roots for each!
         X509Certificate clientX509Certificate = Certificates.decodeCertificatePem(tlsCert);
-        X509Certificate rootX509Certificate = Certificates.decodeCertificatePem(tlsCaCert);
-        // Create a client certificate and a client that uses it.
         HeldCertificate clientCertificateKey = HeldCertificate.decode(tlsCert + tlsKey);
-        HandshakeCertificates clientCertificates = new HandshakeCertificates.Builder()
-            .addTrustedCertificate(rootX509Certificate)
-            .heldCertificate(clientCertificateKey, clientX509Certificate)
-            .build();
+        HandshakeCertificates.Builder handshakeCertificatesBuilder = new HandshakeCertificates.Builder();
+        handshakeCertificatesBuilder.addPlatformTrustedCertificates();
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(tlsCaCert)) {
+            X509Certificate rootX509Certificate = Certificates.decodeCertificatePem(tlsCaCert);
+            handshakeCertificatesBuilder.addTrustedCertificate(rootX509Certificate);
+        }
+        handshakeCertificatesBuilder.heldCertificate(clientCertificateKey, clientX509Certificate);
+        HandshakeCertificates clientCertificates = handshakeCertificatesBuilder.build();
         builder.sslSocketFactory(clientCertificates.sslSocketFactory(), clientCertificates.trustManager());
     }
 
@@ -353,14 +346,12 @@ public class HttpSender implements Sender {
 
     static Dispatcher newDispatcher(int maxRequests) {
         // bound the executor so that we get consistent performance
-        ThreadPoolExecutor dispatchExecutor =
-            new ThreadPoolExecutor(0, maxRequests, 60, TimeUnit.SECONDS,
-                // Using a synchronous queue means messages will send immediately until we hit max
-                // in-flight requests. Once max requests are hit, send will block the caller, which is
-                // the AsyncReporter flush thread. This is ok, as the AsyncReporter has a buffer of
-                // unsent spans for this purpose.
-                new SynchronousQueue<>(),
-                OkHttpSenderThreadFactory.INSTANCE);
+        ThreadPoolExecutor dispatchExecutor = new ThreadPoolExecutor(0, maxRequests, 60, TimeUnit.SECONDS,
+            // Using a synchronous queue means messages will send immediately until we hit max
+            // in-flight requests. Once max requests are hit, send will block the caller, which is
+            // the AsyncReporter flush thread. This is ok, as the AsyncReporter has a buffer of
+            // unsent spans for this purpose.
+            new SynchronousQueue<>(), OkHttpSenderThreadFactory.INSTANCE);
 
         Dispatcher dispatcher = new Dispatcher(dispatchExecutor);
         dispatcher.setMaxRequests(maxRequests);
