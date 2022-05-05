@@ -86,6 +86,7 @@ CPU, Process CPU Load, collected through JMX:java_lang_OperatingSystem_ProcessCp
 if you want to reproduce this test, reference to the document in [Easeagent-spring-petclinic](https://github.com/megaease/easeagent-spring-petclinic/blob/main/doc/benchmark.md).
 
 ## Conclusion
+The deployment of services all in the same node, which lead to each service can only occupy limited  CPU.
 The bottleneck of Easeagent is mainly in latency and throughput, which requires optimization of the asynchronous processing module, such as introducing a lock-free mechanism.
 
 
