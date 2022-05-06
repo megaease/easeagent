@@ -91,7 +91,7 @@ For each value pair in the table, the former is the baseline value and the latte
 ![Heap](./images/benchmark/agent-320vus-mem.png)
 
 
-#### Lagency & Throuthput
+#### Latency & Throuthput
 
 | Label     |  P90 Latency (ms) | Throughput (reqs/s)   |
 |-----------|:------------------|:----------------------|
@@ -188,7 +188,7 @@ CPU, Process CPU Load, collected through JMX:java_lang_OperatingSystem_ProcessCp
 - Agent:
 ![Heap](./images/benchmark/agent-mem.png)
 
-#### Lagency & Throuthput
+#### Latency & Throuthput
 | Label     |  P90 Latency (ms) | Throughput (reqs/s)   |
 |-----------|:------------------|:----------------------|
 | Baseline  | 564.69            |  1800                 |
@@ -254,4 +254,4 @@ default ✓ [======================================] 000/700 VUs  13m20s
 ## Conclusion
 
 Optimisation is required in terms of cpu efficiency/memory usage and latency throughput.
-The average heap memory has been growing slowly, so there may be a memory leak that needs to be addressed.
+
