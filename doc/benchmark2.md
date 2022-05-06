@@ -7,6 +7,17 @@ We use three AWS EC2 machines in a subnet for the benchmark test:
 - Service EC2: deploy `customers-service`, `vets-service`, and `visits-service` on this node.
 - Tester EC2: we initiate testing requests and collect testing metric data on this node.
 
+All three AWS EC2 machines have the exact same configuration, and in a subnet:
+```
+CPU: 2 cores, Intel(R) Xeon(R) Platinum 8175M CPU @ 2.50GHz
+MEM: 7850092 kB
+SSD: XFS 100G
+
+OS: CentOS Linux release 8.5.2111
+Docker version 20.10.14, build a224086
+docker-compose version 1.27.4, build 40524192
+```
+
 On Gateway EC2 node:
 ```
 # lunch up without EaseAgent
