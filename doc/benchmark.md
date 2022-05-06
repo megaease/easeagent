@@ -9,6 +9,8 @@ We use three AWS EC2 machines in a subnet for the benchmark test:
 
 All three AWS EC2 machines have the exact same configuration, and in a subnet:
 ```
+EC2 Instance Type: t3-large, cn-northwest-1c
+
 CPU: 2 cores, Intel(R) Xeon(R) Platinum 8175M CPU @ 2.50GHz
 MEM: 7850092 kB
 SSD: XFS 100G
