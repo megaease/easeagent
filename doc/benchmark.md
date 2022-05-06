@@ -253,5 +253,5 @@ default ✓ [======================================] 000/700 VUs  13m20s
 
 ## Conclusion
 
-Optimisation is required in terms of cpu efficiency/memory usage and latency throughput.
+**Optimization is required in terms of CPU efficiency/memory usage and latency throughput.** 
 
