@@ -60,6 +60,100 @@ By comparing the results of the two services, the impact of the number of SPANs 
 
 For each value pair in the table, the former is the baseline value and the latter is the agent value (baseline / agent / difference value).
 
+### 320 virtual users
+
+| URI-Label               | CPU (baseline/agent/diff) | Heap Memory    | P90 Latency                 | Throughput (15s) |
+|-------------------------|:-----------------------|:------------------|:----------------------------|-----------------------|
+| jmx-api-gateway: 1spans | 33.2% / 44.4% / 21.2%  | 208M / 253M / 45M |                             |                       |
+| jmx-vets: 9spans        | 40.2% / 65.2% / 25.0%  | 236M / 284M / 48M | 28.94 ms / 189.39 ms / 553% | 1164 / 1057 / -9.2%  |
+
+#### CPU
+
+| Label     |  jmx-api-gateway  | jmx-vets              |
+|-----------|:------------------|:----------------------|
+| Baseline  | 33.2%             |  40.2%                |
+| Agent     | 44.4%             |  65.2%                |
+| Diff      | 21.2%             |  25.0%                |
+
+- Baseline:
+![Process CPU Load](./images/benchmark/baseline-320vus-process-cpu-load.png)
+
+- Agent:
+![Process CPU Load](./images/benchmark/agent-320vus-process-cpu-load.png)
+
+
+#### Heap
+- Baseline:
+![Heap](./images/benchmark/baseline-320vus-mem.png)
+- Agent:
+![Heap](./images/benchmark/agent-320vus-mem.png)
+
+
+#### Lagency & Throuthput
+
+| Label     |  P90 Latency (ms) | Throughput (reqs/s)   |
+|-----------|:------------------|:----------------------|
+| Baseline  | 28.94             |  1164                 |
+| Agent     | 189.39            |  1057                 |
+
+- Baseline
+
+```
+running (11m40.4s), 000/320 VUs, 203885 complete and 0 interrupted iterations
+default ✓ [======================================] 000/320 VUs  11m40s
+
+     data_received..................: 637 MB 910 kB/s
+     data_sent......................: 78 MB  111 kB/s
+     http_req_blocked...............: avg=3.98µs   min=687ns  med=1.84µs  max=13.63ms  p(90)=3.44µs   p(95)=4.86µs
+     http_req_connecting............: avg=741ns    min=0s     med=0s      max=13.58ms  p(90)=0s       p(95)=0s
+
+     http_req_duration..............: avg=14.2ms   min=1.1ms  med=7.83ms  max=475.17ms p(90)=28.94ms  p(95)=45.38ms
+       { expected_response:true }...: avg=14.2ms   min=1.1ms  med=7.83ms  max=475.17ms p(90)=28.94ms  p(95)=45.38ms
+
+     http_req_failed................: 0.00%  ✓ 0           ✗ 815540
+     http_req_receiving.............: avg=285.63µs min=8.6µs  med=73.14µs max=89.64ms  p(90)=462.23µs p(95)=889.81µs
+     http_req_sending...............: avg=18.85µs  min=3.83µs med=8.29µs  max=54.16ms  p(90)=16.14µs  p(95)=22.15µs
+     http_req_tls_handshaking.......: avg=0s       min=0s     med=0s      max=0s       p(90)=0s       p(95)=0s
+     http_req_waiting...............: avg=13.9ms   min=1.04ms med=7.57ms  max=475.02ms p(90)=28.36ms  p(95)=44.63ms
+
+     http_reqs......................: 815540 1164.420944/s
+
+     iteration_duration.............: avg=1.02s    min=1s     med=1.01s   max=1.47s    p(90)=1.04s    p(95)=1.06s
+     iterations.....................: 203885 291.105236/s
+     vus............................: 5      min=5         max=320
+     vus_max........................: 320    min=320       max=320
+
+```
+- Agent
+```
+running (11m40.8s), 000/320 VUs, 185219 complete and 0 interrupted iterations
+default ↓ [======================================] 005/320 VUs  11m40s
+
+     data_received..................: 579 MB 827 kB/s
+     data_sent......................: 70 MB  100 kB/s
+     http_req_blocked...............: avg=4.45µs  min=700ns  med=1.9µs   max=71.05ms  p(90)=3.47µs   p(95)=4.51µs
+     http_req_connecting............: avg=1.39µs  min=0s     med=0s      max=70.99ms  p(90)=0s       p(95)=0s
+
+     http_req_duration..............: avg=75.71ms min=1.52ms med=38.65ms max=1.18s    p(90)=189.39ms p(95)=275.46ms
+       { expected_response:true }...: avg=75.71ms min=1.52ms med=38.65ms max=1.18s    p(90)=189.39ms p(95)=275.46ms
+
+     http_req_failed................: 0.00%  ✓ 0           ✗ 740876
+     http_req_receiving.............: avg=1.37ms  min=9.07µs med=54.95µs max=333.25ms p(90)=1.44ms   p(95)=6.48ms
+     http_req_sending...............: avg=49.77µs min=3.85µs med=8.36µs  max=228.08ms p(90)=16.97µs  p(95)=23.34µs
+     http_req_tls_handshaking.......: avg=0s      min=0s     med=0s      max=0s       p(90)=0s       p(95)=0s
+     http_req_waiting...............: avg=74.29ms min=1.47ms med=37.3ms  max=1.18s    p(90)=186.62ms p(95)=273.55ms
+
+     http_reqs......................: 740876 1057.248498/s
+
+     iteration_duration.............: avg=1.12s   min=1s     med=1.07s   max=2.18s    p(90)=1.3s     p(95)=1.39s
+     iterations.....................: 185219 264.312124/s
+     vus............................: 5      min=5         max=320
+     vus_max........................: 320    min=320       max=320
+
+```
+
+### 700 virtual users
+
 | URI-Label                | CPU (baseline/agent/diff) | Heap Memory    | P90 Latency               | Throughput (15s) |
 |----------------------|:--------------------------|:-------------------|:----------------------------------|-----------------------|
 | jmx-api-gateway: 1spans | 57.5% / 61.1% / 3.6%   | 385M / 583M / 200M |                                   |                       |
@@ -72,21 +166,32 @@ For each value pair in the table, the former is the baseline value and the latte
 
 CPU, Process CPU Load, collected through JMX:java_lang_OperatingSystem_ProcessCpuLoad.
 
-## Testing Data 
-### CPU
+#### CPU
+| Label     |  jmx-api-gateway  | jmx-vets              |
+|-----------|:------------------|:----------------------|
+| Baseline  | 57.5%             |  69.0%                |
+| Agent     | 61.1%             |  81.2%                |
+| Diff      | 3.60%             |  12.2%                |
+
 - Baseline:
 ![Process CPU Load](./images/benchmark/baseline-process-cpu-load.png)
 
 - Agent:
 ![Process CPU Load](./images/benchmark/agent-process-cpu-load.png)
 
-### Heap
+#### Heap
+
 - Baseline:
 ![Heap](./images/benchmark/baseline-mem.png)
 - Agent:
 ![Heap](./images/benchmark/agent-mem.png)
 
-### Lagency & Throuthput
+#### Lagency & Throuthput
+| Label     |  P90 Latency (ms) | Throughput (reqs/s)   |
+|-----------|:------------------|:----------------------|
+| Baseline  | 564.69            |  1800                 |
+| Agent     | 737.55            |  1526                 |
+
 - Baseline:
 ```
 running (13m20.6s), 000/700 VUs, 360354 complete and 0 interrupted iterations
@@ -140,9 +245,11 @@ default ✓ [======================================] 000/700 VUs  13m20s
      iterations.....................: 305670  381.643662/s
      vus............................: 6       min=5         max=700
      vus_max........................: 700     min=700       max=700
-
 ```
+
+
 
 ## Conclusion
 
 Optimisation is required in terms of cpu efficiency/memory usage and latency throughput.
+The average heap memory has been growing slowly, so there may be a memory leak that needs to be addressed.
