@@ -26,6 +26,8 @@ public class ReportConfigConst {
     public static final String CONSOLE_SENDER_NAME = "console";
     public static final String ZIPKIN_SENDER_NAME = "http";
 
+    public static final String NOOP_SENDER_NAME = "noop";
+
     public static final String SPAN_JSON_ENCODER_NAME = "SpanJsonEncoder";
     public static final String METRIC_JSON_ENCODER_NAME = "MetricJsonEncoder";
     public static final String LOG_DATA_JSON_ENCODER_NAME = "LogDataJsonEncoder";

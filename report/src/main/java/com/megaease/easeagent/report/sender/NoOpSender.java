@@ -17,6 +17,8 @@
  */
 package com.megaease.easeagent.report.sender;
 
+import com.google.auto.service.AutoService;
+import com.megaease.easeagent.config.report.ReportConfigConst;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.EncodedData;
@@ -26,12 +28,13 @@ import com.megaease.easeagent.report.plugin.NoOpCall;
 import java.io.IOException;
 import java.util.Map;
 
+@AutoService(Sender.class)
 public class NoOpSender implements Sender {
     public static final NoOpSender INSTANCE = new NoOpSender();
 
     @Override
     public String name() {
-        return "noop";
+        return ReportConfigConst.NOOP_SENDER_NAME;
     }
 
     @Override
@@ -41,12 +44,12 @@ public class NoOpSender implements Sender {
 
     @Override
     public Call<Void> send(EncodedData encodedData) {
-        return new NoOpCall<>();
+        return NoOpCall.getInstance(NoOpSender.class);
     }
 
     @Override
     public boolean isAvailable() {
-        return false;
+        return true;
     }
 
     @Override
