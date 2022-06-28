@@ -16,7 +16,7 @@ To use the EaseAgent with your JVM, you’ll need to pass the -javaagent argumen
 ## Spring Boot
 Pass the -javaagent argument to the command line where you start your app. Make sure to add it before the -jar argument:
 ```
-java -javaagent:EASE_AGENT_PATH/easeagent.jar -jar app.jar
+java -javaagent:$EASE_AGENT_PATH/easeagent.jar -jar app.jar
 ```
 
 ## Tomcat
