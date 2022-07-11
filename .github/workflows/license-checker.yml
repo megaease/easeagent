@@ -1,30 +1,18 @@
-name: License checker
+name: License Checking
 
 on:
   push:
     branches:
-      - maste
-    paths-ignore:
-      - 'doc/**'
-      - 'resources/**'
-      - '**.md'
+      - master
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - 'doc/**'
-      - 'resources/**'
-      - '**.md'
 
 jobs:
-  check-license:
+  license:
+    name: License Checking
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-      - name: Check License Header
-        uses: apache/skywalking-eyes@main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          log: info
+      - uses: actions/checkout@master
+      - name: Check License Lines
+        uses: kt3k/license_checker@v1.0.6
