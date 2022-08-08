@@ -30,7 +30,7 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
 
 ## Overview
 - EaseAgent is the underlying component that provides non-intrusive extensions to applications of the Java ecosystem. 
-- EaseAGent can collect distributed application tracing, metrics, and logs, which could be used in the APM system and improve the observability of a distributed system. for the tracing, EaseAgent follows the [Google Dapper](https://research.google/pubs/pub36356/) paper.
+- EaseAgent can collect distributed application tracing, metrics, and logs, which could be used in the APM system and improve the observability of a distributed system. for the tracing, EaseAgent follows the [Google Dapper](https://research.google/pubs/pub36356/) paper.
 - EaseAgent also can work with Cloud-Native architecture. For example, it can help Service Mesh (especially for [EaseMesh](https://github.com/megaease/easemesh/) ) to do some control panel work.
 - EaseAgent supports plugins mechanism development, which is easy to extend or add new functionality.
 
