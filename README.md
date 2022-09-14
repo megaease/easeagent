@@ -21,7 +21,7 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
       - [Metric](#metric)
       - [Tracing](#tracing)
       - [Build Spring Petclinic](#build-spring-petclinic)
-    - [Add a Enhancement Plugin](#add-a-enhancement-plugin)
+    - [Add an Enhancement Plugin](#add-an-enhancement-plugin)
   - [User Manual](#user-manual)
   - [Enhancement Plugin Development Guide](#enhancement-plugin-development-guide)
   - [Report Plugin Development Guide](#report-plugin-development-guide)
@@ -30,7 +30,7 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
 
 ## Overview
 - EaseAgent is the underlying component that provides non-intrusive extensions to applications of the Java ecosystem. 
-- EaseAGent can collect distributed application tracing, metrics, and logs, which could be used in the APM system and improve the observability of a distributed system. for the tracing, EaseAgent follows the [Google Dapper](https://research.google/pubs/pub36356/) paper.
+- EaseAgent can collect distributed application tracing, metrics, and logs, which could be used in the APM system and improve the observability of a distributed system. for the tracing, EaseAgent follows the [Google Dapper](https://research.google/pubs/pub36356/) paper.
 - EaseAgent also can work with Cloud-Native architecture. For example, it can help Service Mesh (especially for [EaseMesh](https://github.com/megaease/easemesh/) ) to do some control panel work.
 - EaseAgent supports plugins mechanism development, which is easy to extend or add new functionality.
 
@@ -94,7 +94,7 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
 4. According to call the `Metric API` and `Tracing API` in interceptors, the `Metric` and `Tracing` information will be stored in `MetricRegistry` and `Tracing`.
 5. The `Reporter` module will get information from `MetricRegistry` and `Tracing` and send it to `Kafka`.
 6. The `after` method of each interceptor in the `Agent Interceptor Chain` will be invoked in the reverse order of the `before` invoked at last.
-7. The `tracing` data can be send to `kafka` server or `zipkin` server, the `metric` data can be send to `kafka` server and pull by `Prometheus` server.
+7. The `tracing` data can be sent to `kafka` server or `zipkin` server, the `metric` data can be sent to `kafka` server and pull by `Prometheus` server.
 
 ## QuickStart
 
@@ -171,7 +171,7 @@ Open Browser to visit grafana UI: [http://localhost:3000](http://localhost:3000)
 #### Metric
 Click the `search dashboards`, the first icon in the left menu bar. Choose the `spring-petclinic-easeagent` to open the dashboard we prepare for you.
 
-Prometheus Metric Schedule: [Prometheus Metric](./prometheus-metric-schedule.md)
+Prometheus Metric Schedule: [Prometheus Metric](doc/prometheus-metric-schedule.md)
 
 ![metric](doc/images/grafana-metric.png)
 
@@ -185,7 +185,7 @@ If you want to check the tracing-data, you could click the explore in the left m
 
 [Spring Petclinic Demo](doc/spring-petclinic-demo.md)
 
-### Add a Enhancement Plugin
+### Add an Enhancement Plugin
 [Add a Demo Plugin to EaseAgent](doc/add-plugin-demo.md)
 
 ## User Manual
