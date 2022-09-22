@@ -18,8 +18,10 @@ import lombok.Data;
 
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.IntUnaryOperator;
 
 /**
  * Multi-producer, multi-consumer queue that is bounded by both count and size.
@@ -27,13 +29,12 @@ import java.util.concurrent.atomic.LongAdder;
  * <p>This is similar to {@link java.util.concurrent.ArrayBlockingQueue} in implementation.
  */
 public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
-    private final LinkedTransferQueue<DataWrapper<S>> queue = new LinkedTransferQueue<>();
+
+    private final AtomicReference<State<S>> state = new AtomicReference<>(new State<>());
 
     private final int maxSize;
 
     private final int maxBytes;
-
-    private final AtomicLong sizeInBytes = new AtomicLong(0L);
 
     private final LongAdder loseCounter = new LongAdder();
 
@@ -44,28 +45,30 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
 
     @Override
     public boolean offer(S next, int nextSizeInBytes) {
-        if (maxSize == queue.size()) {
+        State<S> sState = state.get();
+        if (maxSize == sState.getQueueSize()) {
             loseCounter.increment();
             return false;
         }
-        if (sizeInBytes.updateAndGet(pre -> pre + nextSizeInBytes) > maxBytes) {
+        if (sState.updateAndGet(pre -> pre + nextSizeInBytes) > maxBytes) {
             loseCounter.increment();
-            sizeInBytes.updateAndGet(pre -> pre - nextSizeInBytes);
+            sState.updateAndGet(pre -> pre - nextSizeInBytes);
             return false;
         }
-        queue.offer(new DataWrapper<>(next, nextSizeInBytes));
+        sState.offer(new DataWrapper<>(next, nextSizeInBytes));
         return true;
     }
 
     int doDrain(WithSizeConsumer<S> consumer, DataWrapper<S> firstPoll) {
+        State<S> sState = state.get();
         int drainedCount = 0;
         int drainedSizeInBytes = 0;
         DataWrapper<S> next = null;
-        while (drainedCount < queue.size()) {
+        while (drainedCount < sState.getQueueSize()) {
             if (next == null) {
                 next = firstPoll;
             } else {
-                next = queue.poll();
+                next = sState.poll();
             }
             if (next == null) break;
             int nextSizeInBytes = next.getSizeInBytes();
@@ -77,14 +80,15 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
             }
         }
         final int updateValue = drainedSizeInBytes;
-        sizeInBytes.updateAndGet(pre -> pre - updateValue);
+        sState.updateAndGet(pre -> pre - updateValue);
         return drainedCount;
     }
 
     public int drainTo(WithSizeConsumer<S> consumer, long nanosTimeout) {
+        State<S> sState = state.get();
         DataWrapper<S> firstPoll;
         try {
-            firstPoll = queue.poll(nanosTimeout, TimeUnit.NANOSECONDS);
+            firstPoll = sState.poll(nanosTimeout, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             return 0;
         }
@@ -95,20 +99,15 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
     }
 
     public int getCount() {
-        return queue.size();
+        return state.get().getQueueSize();
     }
 
     public int getSizeInBytes() {
-        return sizeInBytes.intValue();
+        return state.get().getSizeInBytes();
     }
 
     public int clear() {
-        if (sizeInBytes.getAndUpdate(pre -> 0) > 0) {
-            int result = queue.size();
-            queue.clear();
-            return result;
-        }
-        return 0;
+        return state.getAndSet(new State<>()).getQueueSize();
     }
 
     public long getLoseCount() {
@@ -122,5 +121,38 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
 
         private final int sizeInBytes;
     }
+
+    private static class State<S> {
+
+        private final LinkedTransferQueue<DataWrapper<S>> queue = new LinkedTransferQueue<>();
+
+        private final AtomicInteger sizeInBytes = new AtomicInteger(0);
+
+        public int getQueueSize() {
+            return queue.size();
+        }
+
+        public DataWrapper<S> poll() {
+            return queue.poll();
+        }
+
+        public boolean offer(DataWrapper<S> data) {
+            return queue.offer(data);
+        }
+
+        public DataWrapper<S> poll(long nanosTimeout, TimeUnit unit) throws InterruptedException {
+            return queue.poll(nanosTimeout, unit);
+        }
+
+        public long updateAndGet(IntUnaryOperator updateFunction) {
+            return sizeInBytes.getAndUpdate(updateFunction);
+        }
+
+        public int getSizeInBytes() {
+            return sizeInBytes.get();
+        }
+
+    }
+
 }
 
