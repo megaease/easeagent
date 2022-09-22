@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>This is similar to {@link java.util.concurrent.ArrayBlockingQueue} in implementation.
  */
 public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
-    private final LinkedTransferQueue<DataWrapper<S>> queue = new LinkedTransferQueue<>();
+    private LinkedTransferQueue<DataWrapper<S>> queue = new LinkedTransferQueue<>();
 
     private final int maxSize;
 
@@ -54,8 +54,14 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
     int doDrain(WithSizeConsumer<S> consumer, DataWrapper<S> firstPoll) {
         int drainedCount = 0;
         int drainedSizeInBytes = 0;
-        DataWrapper<S> next = firstPoll;
-        do {
+        DataWrapper<S> next = null;
+        while (drainedCount < queue.size()) {
+            if (next == null) {
+                next = firstPoll;
+            } else {
+                next = queue.poll();
+            }
+            if (next == null) break;
             int nextSizeInBytes = next.getSizeInBytes();
             if (consumer.offer(next.getElement(), nextSizeInBytes)) {
                 drainedCount++;
@@ -63,9 +69,7 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
             } else {
                 break;
             }
-            next = queue.poll();
-            if (next == null) break;
-        } while (drainedCount < queue.size());
+        }
         final int updateValue = drainedSizeInBytes;
         sizeInBytes.updateAndGet(pre -> pre - updateValue);
         return drainedCount;
@@ -93,10 +97,12 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
     }
 
     public int clear() {
-        int result = queue.size();
-        queue.clear();
-        sizeInBytes.set(0L);
-        return result;
+        if (sizeInBytes.getAndUpdate(pre -> 0) > 0) {
+            int result = queue.size();
+            queue = new LinkedTransferQueue<>();
+            return result;
+        }
+        return 0;
     }
 
     @Data
