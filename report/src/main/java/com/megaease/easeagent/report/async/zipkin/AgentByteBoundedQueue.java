@@ -145,7 +145,7 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
         }
 
         public long updateAndGet(IntUnaryOperator updateFunction) {
-            return sizeInBytes.getAndUpdate(updateFunction);
+            return sizeInBytes.updateAndGet(updateFunction);
         }
 
         public int getSizeInBytes() {
