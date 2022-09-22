@@ -14,9 +14,11 @@ package com.megaease.easeagent.report.async.zipkin;
  * the License.
  */
 
-import java.util.Arrays;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+import lombok.Data;
+
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Multi-producer, multi-consumer queue that is bounded by both count and size.
@@ -24,116 +26,85 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>This is similar to {@link java.util.concurrent.ArrayBlockingQueue} in implementation.
  */
 public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
-    final ReentrantLock lock = new ReentrantLock(false);
-    final Condition available = lock.newCondition();
+    private final LinkedTransferQueue<DataWrapper<S>> queue = new LinkedTransferQueue<>();
 
-    final int maxSize;
-    final int maxBytes;
+    private final int maxSize;
 
-    final S[] elements;
-    final int[] sizesInBytes;
-    int count;
-    int sizeInBytes;
-    int writePos;
-    int readPos;
+    private final int maxBytes;
 
-    @SuppressWarnings("unchecked")
+    private final AtomicLong sizeInBytes = new AtomicLong(0L);
+
     public AgentByteBoundedQueue(int maxSize, int maxBytes) {
-        this.elements = (S[]) new Object[maxSize];
-        this.sizesInBytes = new int[maxSize];
         this.maxSize = maxSize;
         this.maxBytes = maxBytes;
     }
 
-    /**
-     * Returns true if the element could be added or false if it could not due to its size.
-     */
     @Override
     public boolean offer(S next, int nextSizeInBytes) {
-        lock.lock();
-        try {
-            if (count == maxSize) return false;
-            if (sizeInBytes + nextSizeInBytes > maxBytes) return false;
-
-            elements[writePos] = next;
-            sizesInBytes[writePos++] = nextSizeInBytes;
-
-            if (writePos == maxSize) writePos = 0; // circle back to the front of the array
-
-            count++;
-            sizeInBytes += nextSizeInBytes;
-
-            available.signal(); // alert any drainers
-            return true;
-        } finally {
-            lock.unlock();
+        if (maxSize == queue.size()) {
+            return false;
         }
-    }
-
-    /** Blocks for up to nanosTimeout for spans to appear. Then, consume as many as possible. */
-    public int drainTo(WithSizeConsumer<S> consumer, long nanosTimeout) {
-        try {
-            // This may be called by multiple threads. If one is holding a lock, another is waiting. We
-            // use lockInterruptibly to ensure the one waiting can be interrupted.
-            lock.lockInterruptibly();
-            try {
-                long nanosLeft = nanosTimeout;
-                while (count == 0) {
-                    if (nanosLeft <= 0) return 0;
-                    nanosLeft = available.awaitNanos(nanosLeft);
-                }
-                return doDrain(consumer);
-            } finally {
-                lock.unlock();
-            }
-        } catch (InterruptedException e) {
-            // use lockInterruptibly to ensure the one waiting can be interrupted.
-            return 0;
+        if (sizeInBytes.updateAndGet(pre -> pre + nextSizeInBytes) > maxBytes) {
+            return false;
         }
+        queue.offer(new DataWrapper<>(next, nextSizeInBytes));
+        return true;
     }
 
-    public int getCount() {
-        return count;
-    }
-
-    public int getSizeInBytes() {
-        return sizeInBytes;
-    }
-
-    /** Clears the queue unconditionally and returns count of spans cleared. */
-    public int clear() {
-        lock.lock();
-        try {
-            int result = count;
-            count = sizeInBytes = readPos = writePos = 0;
-            Arrays.fill(elements, null);
-            return result;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    int doDrain(WithSizeConsumer<S> consumer) {
+    int doDrain(WithSizeConsumer<S> consumer, DataWrapper<S> firstPoll) {
         int drainedCount = 0;
         int drainedSizeInBytes = 0;
-        while (drainedCount < count) {
-            S next = elements[readPos];
-            int nextSizeInBytes = sizesInBytes[readPos];
-
-            if (next == null) break;
-            if (consumer.offer(next, nextSizeInBytes)) {
+        DataWrapper<S> next = firstPoll;
+        do {
+            int nextSizeInBytes = next.getSizeInBytes();
+            if (consumer.offer(next.getElement(), nextSizeInBytes)) {
                 drainedCount++;
                 drainedSizeInBytes += nextSizeInBytes;
-
-                elements[readPos] = null;
-                if (++readPos == elements.length) readPos = 0; // circle back to the front of the array
             } else {
                 break;
             }
-        }
-        count -= drainedCount;
-        sizeInBytes -= drainedSizeInBytes;
+            next = queue.poll();
+            if (next == null) break;
+        } while (drainedCount < queue.size());
+        final int updateValue = drainedSizeInBytes;
+        sizeInBytes.updateAndGet(pre -> pre - updateValue);
         return drainedCount;
+    }
+
+    public int drainTo(WithSizeConsumer<S> consumer, long nanosTimeout) {
+        DataWrapper<S> firstPoll;
+        try {
+            firstPoll = queue.poll(nanosTimeout, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            return 0;
+        }
+        if (firstPoll == null) {
+            return 0;
+        }
+        return doDrain(consumer, firstPoll);
+    }
+
+    public int getCount() {
+        return queue.size();
+    }
+
+    public int getSizeInBytes() {
+        return sizeInBytes.intValue();
+    }
+
+    public int clear() {
+        int result = queue.size();
+        queue.clear();
+        sizeInBytes.set(0L);
+        return result;
+    }
+
+    @Data
+    private static class DataWrapper<S> {
+
+        private final S element;
+
+        private final int sizeInBytes;
     }
 }
 
