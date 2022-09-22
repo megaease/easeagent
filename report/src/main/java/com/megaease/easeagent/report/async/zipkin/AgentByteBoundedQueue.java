@@ -19,6 +19,7 @@ import lombok.Data;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Multi-producer, multi-consumer queue that is bounded by both count and size.
@@ -26,13 +27,15 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>This is similar to {@link java.util.concurrent.ArrayBlockingQueue} in implementation.
  */
 public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
-    private LinkedTransferQueue<DataWrapper<S>> queue = new LinkedTransferQueue<>();
+    private final LinkedTransferQueue<DataWrapper<S>> queue = new LinkedTransferQueue<>();
 
     private final int maxSize;
 
     private final int maxBytes;
 
     private final AtomicLong sizeInBytes = new AtomicLong(0L);
+
+    private final LongAdder loseCounter = new LongAdder();
 
     public AgentByteBoundedQueue(int maxSize, int maxBytes) {
         this.maxSize = maxSize;
@@ -42,9 +45,12 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
     @Override
     public boolean offer(S next, int nextSizeInBytes) {
         if (maxSize == queue.size()) {
+            loseCounter.increment();
             return false;
         }
         if (sizeInBytes.updateAndGet(pre -> pre + nextSizeInBytes) > maxBytes) {
+            loseCounter.increment();
+            sizeInBytes.updateAndGet(pre -> pre - nextSizeInBytes);
             return false;
         }
         queue.offer(new DataWrapper<>(next, nextSizeInBytes));
@@ -99,10 +105,14 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
     public int clear() {
         if (sizeInBytes.getAndUpdate(pre -> 0) > 0) {
             int result = queue.size();
-            queue = new LinkedTransferQueue<>();
+            queue.clear();
             return result;
         }
         return 0;
+    }
+
+    public long getLoseCount() {
+        return loseCounter.longValue();
     }
 
     @Data
