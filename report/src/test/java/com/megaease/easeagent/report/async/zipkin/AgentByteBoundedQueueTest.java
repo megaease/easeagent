@@ -4,7 +4,8 @@ import com.megaease.easeagent.report.plugin.NoOpEncoder;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
+import java.util.concurrent.*;
 
 public class AgentByteBoundedQueueTest {
 
@@ -51,6 +52,39 @@ public class AgentByteBoundedQueueTest {
         Assert.assertEquals("The queue should be empty now.", 0, queue.getCount());
         Assert.assertEquals("The number of bytes of the remaining data in the queue should be 0", 0, queue.getSizeInBytes());
         Assert.assertEquals("The amount of data lost should be 90.", 90, queue.getLoseCount());
+    }
+
+    @Test
+    public void multiThreadProductConsumerTest() throws InterruptedException {
+        AgentByteBoundedQueue<String> queue = new AgentByteBoundedQueue<>(100, 100);
+        int threadCount = Runtime.getRuntime().availableProcessors();
+        final CountDownLatch latch = new CountDownLatch(threadCount);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                for (int j = 0; j < 100; j++) {
+                    queue.offer(UUID.randomUUID().toString(), 1);
+                }
+                latch.countDown();
+            });
+        }
+
+        new Thread(() -> {
+            AgentBufferNextMessage<String> consumer = AgentBufferNextMessage.create(new NoOpEncoder<>(), 1000000, TimeUnit.SECONDS.toNanos(1));
+            queue.drainTo(consumer, TimeUnit.SECONDS.toNanos(1));
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            queue.drainTo(consumer, TimeUnit.SECONDS.toNanos(1));
+            synchronousQueue.offer(new Object());
+        }).start();
+        synchronousQueue.take();
+        Assert.assertEquals("The data of the queue should be 0", 0, queue.getCount());
+        Assert.assertEquals("The number of bytes of data stored in the queue should be 0", 0, queue.getSizeInBytes());
+        Assert.assertTrue("There is data loss in the queue. LoseCount should be greater than 0.", queue.getLoseCount() > 0L);
     }
 
     @Test
