@@ -106,10 +106,12 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
     public int clear() {
         DataWrapper<S> data;
         int result = 0;
+        int removeBytes = 0;
         while ((data = queue.poll()) != null) {
-            sizeInBytes.addAndGet(data.getSizeInBytes() * -1);
+            removeBytes += data.getSizeInBytes();
             result++;
         }
+        sizeInBytes.addAndGet(removeBytes * -1);
         return result;
     }
 
