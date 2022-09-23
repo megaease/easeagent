@@ -62,7 +62,8 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
         int drainedCount = 0;
         int drainedSizeInBytes = 0;
         DataWrapper<S> next = null;
-        while (drainedCount < queue.size()) {
+        int count = queue.size() + 1;
+        while (drainedCount < count) {
             if (next == null) {
                 next = firstPoll;
             } else {

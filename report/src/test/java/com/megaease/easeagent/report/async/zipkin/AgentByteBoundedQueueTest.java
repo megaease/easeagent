@@ -38,18 +38,18 @@ public class AgentByteBoundedQueueTest {
             queue.offer("test" + i, 1);
         }
         result = queue.drainTo(consumer, TimeUnit.SECONDS.toNanos(1));
-        Assert.assertEquals("The normal result should be 5..", 5, result);
-        Assert.assertEquals("There should be half the elements in the queue.", 5, queue.getCount());
-        Assert.assertEquals("The number of bytes of the remaining data in the queue should be 5", 5, queue.getSizeInBytes());
+        Assert.assertEquals("The normal result should be 10..", 10, result);
+        Assert.assertEquals("The queue should be empty now.", 0, queue.getCount());
+        Assert.assertEquals("The number of bytes of the remaining data in the queue should be 0", 0, queue.getSizeInBytes());
         //3. add 100 object and then consumer object
         queue = new AgentByteBoundedQueue<>(10, 100);
         for (int i = 0; i < 100; i++) {
             queue.offer("test" + i, 1);
         }
         result = queue.drainTo(consumer, TimeUnit.SECONDS.toNanos(1));
-        Assert.assertEquals("Teh normal result should be 5..", 5, result);
-        Assert.assertEquals("There should be half the elements in the queue.", 5, queue.getCount());
-        Assert.assertEquals("The number of bytes of the remaining data in the queue should be 5", 5, queue.getSizeInBytes());
+        Assert.assertEquals("Teh normal result should be 10..", 10, result);
+        Assert.assertEquals("The queue should be empty now.", 0, queue.getCount());
+        Assert.assertEquals("The number of bytes of the remaining data in the queue should be 0", 0, queue.getSizeInBytes());
         Assert.assertEquals("The amount of data lost should be 90.", 90, queue.getLoseCount());
     }
 
