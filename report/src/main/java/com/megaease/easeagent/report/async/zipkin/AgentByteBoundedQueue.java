@@ -17,9 +17,9 @@ package com.megaease.easeagent.report.async.zipkin;
 import lombok.Data;
 
 import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Multi-producer, multi-consumer queue that is bounded by both count and size.
@@ -61,34 +61,30 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
     int doDrain(WithSizeConsumer<S> consumer, DataWrapper<S> firstPoll) {
         int drainedCount = 0;
         int drainedSizeInBytes = 0;
-        DataWrapper<S> next = null;
-        int count = queue.size() + 1;
-        while (drainedCount < count) {
-            if (next == null) {
-                next = firstPoll;
-            } else {
-                next = queue.poll();
-            }
-            if (next == null) break;
+        DataWrapper<S> next = firstPoll;
+        do {
             int nextSizeInBytes = next.getSizeInBytes();
             if (consumer.offer(next.getElement(), nextSizeInBytes)) {
+                queue.poll();
                 drainedCount++;
                 drainedSizeInBytes += nextSizeInBytes;
             } else {
                 break;
             }
-        }
+        } while ((next = queue.peek()) != null);
         final int updateValue = drainedSizeInBytes;
         sizeInBytes.updateAndGet(pre -> pre - updateValue);
         return drainedCount;
     }
 
     public int drainTo(WithSizeConsumer<S> consumer, long nanosTimeout) {
-        DataWrapper<S> firstPoll;
-        try {
-            firstPoll = queue.poll(nanosTimeout, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            return 0;
+        DataWrapper<S> firstPoll = queue.peek();
+        if (firstPoll == null) {
+            LockSupport.parkNanos(this, nanosTimeout);
+            firstPoll = queue.peek();
+            if (firstPoll == null && Thread.interrupted()) {
+                return 0;
+            }
         }
         if (firstPoll == null) {
             return 0;

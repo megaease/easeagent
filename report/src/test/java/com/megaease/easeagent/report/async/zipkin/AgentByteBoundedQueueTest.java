@@ -97,6 +97,49 @@ public class AgentByteBoundedQueueTest {
         Assert.assertEquals("The amount of consumption should be consistent with the number of successes.", successCount.intValue(), consumerCount.intValue());
     }
 
+
+    @Test
+    public void testDatNotLostOnDrainToFail() throws Exception {
+        AgentByteBoundedQueue<String> queue = new AgentByteBoundedQueue<>(1000, 1000);
+        int threadCount = Runtime.getRuntime().availableProcessors();
+        final CountDownLatch latch = new CountDownLatch(threadCount);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger loseCount = new AtomicInteger();
+        AtomicInteger consumerCount = new AtomicInteger();
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                for (int j = 0; j < 100; j++) {
+                    if (queue.offer(UUID.randomUUID().toString(), 1)) {
+                        successCount.incrementAndGet();
+                    } else {
+                        loseCount.incrementAndGet();
+                    }
+                }
+                latch.countDown();
+            });
+        }
+
+        new Thread(() -> {
+            AgentBufferNextMessage<String> consumer = AgentBufferNextMessage.create(new NoOpEncoder<>(), 500, TimeUnit.SECONDS.toNanos(1));
+            consumerCount.addAndGet(queue.drainTo(consumer, TimeUnit.SECONDS.toNanos(1)));
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            consumerCount.addAndGet(queue.drainTo(consumer, TimeUnit.SECONDS.toNanos(1)));
+            synchronousQueue.offer(new Object());
+        }).start();
+        synchronousQueue.take();
+        Assert.assertEquals("The data of the queue should be 500", 500, queue.getCount());
+        Assert.assertEquals("The number of bytes of data stored in the queue should be 0", 500, queue.getSizeInBytes());
+        Assert.assertTrue("There is data loss in the queue. LoseCount should be greater than 0.", queue.getLoseCount() == 0L);
+        Assert.assertEquals("The amount of consumption should be consistent with the number of successes.", 500, consumerCount.intValue());
+    }
+
+
     @Test
     public void clear() {
         for (int i = 0; i < 10; i++) {
@@ -107,4 +150,5 @@ public class AgentByteBoundedQueueTest {
         Assert.assertEquals("The queue size should be 0", 0, queue.getCount());
         Assert.assertEquals("The number of bytes of data in the queue should be 0", 0, queue.getSizeInBytes());
     }
+
 }
