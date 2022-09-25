@@ -17,6 +17,7 @@ package com.megaease.easeagent.report.async.zipkin;
 import lombok.Data;
 
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.LockSupport;
@@ -65,26 +66,24 @@ public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
         do {
             int nextSizeInBytes = next.getSizeInBytes();
             if (consumer.offer(next.getElement(), nextSizeInBytes)) {
-                queue.poll();
                 drainedCount++;
                 drainedSizeInBytes += nextSizeInBytes;
             } else {
+                queue.offer(next);
                 break;
             }
-        } while ((next = queue.peek()) != null);
+        } while ((next = queue.poll()) != null);
         final int updateValue = drainedSizeInBytes;
         sizeInBytes.updateAndGet(pre -> pre - updateValue);
         return drainedCount;
     }
 
     public int drainTo(WithSizeConsumer<S> consumer, long nanosTimeout) {
-        DataWrapper<S> firstPoll = queue.peek();
-        if (firstPoll == null) {
-            LockSupport.parkNanos(this, nanosTimeout);
-            firstPoll = queue.peek();
-            if (firstPoll == null && Thread.interrupted()) {
-                return 0;
-            }
+        DataWrapper<S> firstPoll;
+        try {
+            firstPoll = queue.poll(nanosTimeout, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            return 0;
         }
         if (firstPoll == null) {
             return 0;
