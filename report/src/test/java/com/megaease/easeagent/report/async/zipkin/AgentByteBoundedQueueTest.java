@@ -58,7 +58,7 @@ public class AgentByteBoundedQueueTest {
     @Test
     public void multiThreadProductConsumerTest() throws InterruptedException {
         AgentByteBoundedQueue<String> queue = new AgentByteBoundedQueue<>(100, 100);
-        int threadCount = Runtime.getRuntime().availableProcessors();
+        int threadCount = 10;
         final CountDownLatch latch = new CountDownLatch(threadCount);
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
@@ -101,7 +101,7 @@ public class AgentByteBoundedQueueTest {
     @Test
     public void testDatNotLostOnDrainToFail() throws Exception {
         AgentByteBoundedQueue<String> queue = new AgentByteBoundedQueue<>(1000, 1000);
-        int threadCount = Runtime.getRuntime().availableProcessors();
+        int threadCount = 10;
         final CountDownLatch latch = new CountDownLatch(threadCount);
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
