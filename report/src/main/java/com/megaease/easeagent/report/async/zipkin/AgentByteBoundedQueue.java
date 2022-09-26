@@ -25,7 +25,11 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * Multi-producer, multi-consumer queue that is bounded by both count and size.
  *
- * <p>This is similar to {@link java.util.concurrent.ArrayBlockingQueue} in implementation.
+ * <p>
+ * This queue is implemented based on LinkedTransferQueue and implements the maximum number and the maximum number of bytes
+ * on the basis of LinkedTransferQueue. Taking advantage of the lock-free performance of LinkedTransferQueue in
+ * inserting data, the performance problem of locking in the old version can be avoided.
+ * </p>
  */
 public final class AgentByteBoundedQueue<S> implements WithSizeConsumer<S> {
 
