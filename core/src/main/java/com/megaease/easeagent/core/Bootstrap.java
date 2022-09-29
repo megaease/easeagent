@@ -20,6 +20,7 @@ package com.megaease.easeagent.core;
 import com.megaease.easeagent.config.*;
 import com.megaease.easeagent.context.ContextManager;
 import com.megaease.easeagent.core.config.*;
+import com.megaease.easeagent.core.info.AgentInfoFactory;
 import com.megaease.easeagent.core.plugin.BaseLoader;
 import com.megaease.easeagent.core.plugin.BridgeDispatcher;
 import com.megaease.easeagent.core.plugin.PluginLoader;
@@ -32,6 +33,7 @@ import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.bean.BeanProvider;
+import com.megaease.easeagent.plugin.bridge.AgentInfo;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
@@ -92,7 +94,10 @@ public class Bootstrap {
             configPath = args;
         }
 
-        final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, Bootstrap.class.getClassLoader());
+        ClassLoader classLoader = Bootstrap.class.getClassLoader();
+        final AgentInfo agentInfo = AgentInfoFactory.loadAgentInfo(classLoader);
+        EaseAgent.agentInfo = agentInfo;
+        final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, classLoader);
         wrapConfig(conf);
 
         // loader check

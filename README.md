@@ -64,6 +64,7 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
     * Instrumenting the `traceId` and `spanId` into user application logging automatically
     * Supplying the `health check` endpoint
     * Supplying the `readiness check` endpoint for `SpringBoot2.2.x`
+    * Supplying the `agent info` endpoint
     
 *  Data Reports
     * Console Reporter.
