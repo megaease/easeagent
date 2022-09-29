@@ -20,6 +20,7 @@
   - [Logging](#logging)
   - [Prometheus Support](#prometheus-support)
   - [Health Check and Readiness Check Endpoint](#health-check-and-readiness-check-endpoint)
+  - [Agent info Endpoint](#agent-info-endpoint)
   - [Tracing](#tracing)
     - [Tracing Component](#tracing-component)
     - [Custom Span Tag](#custom-span-tag)
@@ -72,7 +73,7 @@ EaseAgent opens port `9900` by default to receive configuration change notificat
 
 | Key                        | Default Value | Description                                                                                                                                                                                                                                                                             |
 | -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `easeagent.server.enabled` | true          | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override. |
+| `easeagent.server.enabled` | true          | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`、`Agent Info`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override. |
 | `easeagent.server.port`    | 9900          | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override.                                                                                                                                                                                  |
 
 #### Output Data Server: Kafka and HTTP/Zipkin Server
@@ -382,6 +383,20 @@ After Spring sending `ApplicationReadyEvent`, EaseAgent will change readiness st
 ```
 [GET] http://[ip]:[easeagent.server.port]/health/readiness
 The response status will be 200(OK)
+```
+
+## Agent info Endpoint
+EaseAgent supply the `agent info` http api.
+```
+[GET] http://[ip]:[easeagent.server.port]/agent-info
+```
+The response status will be 200(OK)
+Response Body:
+```json
+{
+    "type": "EaseAgent",
+    "version": "x.x.x"
+}
 ```
 
 ## Tracing

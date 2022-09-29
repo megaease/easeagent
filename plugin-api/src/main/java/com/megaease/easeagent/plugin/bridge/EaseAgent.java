@@ -37,6 +37,7 @@ import java.util.function.Supplier;
  * the bridge api will be initiated when agent startup
  */
 public final class EaseAgent {
+    public static AgentInfo agentInfo;
     public static MetricRegistrySupplier metricRegistrySupplier = NoOpMetrics.NO_OP_METRIC_SUPPLIER;
     public static IContextManager initializeContextSupplier = () -> NoOpContext.NO_OP_CONTEXT;
     public static ILoggerFactory loggerFactory = NoOpLoggerFactory.INSTANCE;
@@ -135,5 +136,9 @@ public final class EaseAgent {
      */
     public static Context getContext() {
         return initializeContextSupplier.getContext();
+    }
+
+    public static AgentInfo getAgentInfo() {
+        return agentInfo;
     }
 }

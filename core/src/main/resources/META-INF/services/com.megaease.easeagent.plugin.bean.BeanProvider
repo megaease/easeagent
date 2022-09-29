@@ -1,1 +1,2 @@
 com.megaease.easeagent.core.health.HealthProvider
+com.megaease.easeagent.core.info.AgentInfoProvider
