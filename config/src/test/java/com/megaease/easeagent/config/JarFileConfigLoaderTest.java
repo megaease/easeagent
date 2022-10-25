@@ -54,5 +54,13 @@ public class JarFileConfigLoaderTest {
 
         config = JarFileConfigLoader.load("agentaaaa.yaml");
         assertNull(config);
+
+
+        String nullJarPath = new File("easeagent_config_null.jar").getPath();
+        System.setProperty(ConfigConst.AGENT_JAR_PATH, nullJarPath);
+
+        config = JarFileConfigLoader.load("agent.yaml");
+        assertNull(config);
+
     }
 }
