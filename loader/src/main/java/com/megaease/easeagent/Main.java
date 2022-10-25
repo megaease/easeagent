@@ -77,8 +77,8 @@ public class Main {
         switchLoggingProperty(loader, loggingProperty, () -> {
             initAgentSlf4jMDC(loader);
             loader.loadClass(bootstrap)
-                .getMethod("premain", String.class, Instrumentation.class)
-                .invoke(null, args, inst);
+                .getMethod("premain", String.class, Instrumentation.class, String.class)
+                .invoke(null, args, inst, jar.getPath());
             return null;
         });
     }

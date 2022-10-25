@@ -17,18 +17,13 @@
 
 package com.megaease.easeagent.config;
 
-import com.megaease.easeagent.config.yaml.YamlReader;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.utils.SystemEnv;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
-import org.yaml.snakeyaml.parser.ParserException;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 public class ConfigFactory {
@@ -88,59 +83,18 @@ public class ConfigFactory {
     private ConfigFactory() {
     }
 
-    private static boolean checkYaml(String filename) {
-        return filename.endsWith(".yaml") || filename.endsWith(".yml");
-    }
-
-    private static GlobalConfigs loadFromStream(InputStream in, String filename) throws IOException {
-        if (in != null) {
-            Map<String, String> map;
-            if (checkYaml(filename)) {
-                try {
-                    map = new YamlReader().load(in).compress();
-                } catch (ParserException e) {
-                    LOGGER.warn("Wrong Yaml format, load config file failure: {}", filename);
-                    map = Collections.emptyMap();
-                }
-            } else {
-                map = extractPropsMap(in);
-            }
-            return new GlobalConfigs(map);
-        } else {
-            return new GlobalConfigs(Collections.emptyMap());
-        }
-    }
-
-    private static GlobalConfigs loadFromClasspath(ClassLoader classLoader, String file) {
-        try (InputStream in = classLoader.getResourceAsStream(file)) {
-            return loadFromStream(in, file);
-        } catch (IOException e) {
-            LOGGER.warn("Load config file:{} by classloader:{} failure: {}", file, classLoader.toString(), e);
-        }
-
-        return new GlobalConfigs(Collections.emptyMap());
-    }
-
-    public static GlobalConfigs loadFromFile(File file) {
-        try (FileInputStream in = new FileInputStream(file)) {
-            return loadFromStream(in, file.getAbsolutePath());
-        } catch (IOException e) {
-            LOGGER.warn("Load config file failure: {}", file.getAbsolutePath());
-        }
-        return new GlobalConfigs(Collections.emptyMap());
-    }
 
     public static GlobalConfigs loadConfigs(String pathname, ClassLoader loader) {
         // load property configuration file if exist
-        GlobalConfigs configs = ConfigFactory.loadFromClasspath(loader, CONFIG_PROP_FILE);
+        GlobalConfigs configs = loadDefaultConfigs(loader, CONFIG_PROP_FILE);
 
         // load yaml configuration file if exist
-        GlobalConfigs yConfigs = ConfigFactory.loadFromClasspath(loader, CONFIG_YAML_FILE);
+        GlobalConfigs yConfigs = loadDefaultConfigs(loader, CONFIG_YAML_FILE);
         configs.mergeConfigs(yConfigs);
 
         // override by user special config file
         if (StringUtils.isNotEmpty(pathname)) {
-            GlobalConfigs configsFromOuterFile = ConfigFactory.loadFromFile(new File(pathname));
+            GlobalConfigs configsFromOuterFile = ConfigLoader.loadFromFile(new File(pathname));
             configs.mergeConfigs(configsFromOuterFile);
         }
 
@@ -154,13 +108,12 @@ public class ConfigFactory {
         return configs;
     }
 
-    private static HashMap<String, String> extractPropsMap(InputStream in) throws IOException {
-        Properties properties = new Properties();
-        properties.load(in);
-        HashMap<String, String> map = new HashMap<>();
-        for (String one : properties.stringPropertyNames()) {
-            map.put(one, properties.getProperty(one));
+    private static GlobalConfigs loadDefaultConfigs(ClassLoader loader, String file) {
+        GlobalConfigs globalConfigs = JarFileConfigLoader.load(file);
+        if (globalConfigs != null) {
+            return globalConfigs;
         }
-        return map;
+        return ConfigLoader.loadFromClasspath(loader, file);
     }
+
 }

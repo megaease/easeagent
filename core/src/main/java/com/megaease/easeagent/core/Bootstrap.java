@@ -28,6 +28,7 @@ import com.megaease.easeagent.httpserver.nano.AgentHttpHandlerProvider;
 import com.megaease.easeagent.httpserver.nano.AgentHttpServer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.metric.MetricProvider;
 import com.megaease.easeagent.plugin.api.middleware.RedirectProcessor;
 import com.megaease.easeagent.plugin.api.trace.TracingProvider;
@@ -79,8 +80,9 @@ public class Bootstrap {
     }
 
     @SneakyThrows
-    public static void start(String args, Instrumentation inst) {
+    public static void start(String args, Instrumentation inst, String javaAgentJarPath) {
         long begin = System.nanoTime();
+        System.setProperty(ConfigConst.AGENT_JAR_PATH, javaAgentJarPath);
 
         // add bootstrap classes
         Set<String> bootstrapClassSet = AppendBootstrapClassLoaderSearch.by(inst, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP);
