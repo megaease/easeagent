@@ -17,9 +17,9 @@
 
 package com.megaease.easeagent.mock.config;
 
-import com.megaease.easeagent.config.ConfigFactory;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.GlobalConfigs;
+import com.megaease.easeagent.config.MockConfigLoader;
 import com.megaease.easeagent.config.PluginConfigManager;
 
 import java.io.File;
@@ -50,7 +50,7 @@ public class MockConfig {
              url = classLoader.getResource(MOCK_CONFIG_PROP_FILE);
         }
         if (url != null) {
-            GlobalConfigs configsFromOuterFile = ConfigFactory.loadFromFile(new File(url.getFile()));
+            GlobalConfigs configsFromOuterFile = MockConfigLoader.loadFromFile(new File(url.getFile()));
             CONFIGS.mergeConfigs(configsFromOuterFile);
         }
         PLUGIN_CONFIG_MANAGER = PluginConfigManager.builder(CONFIGS).build();
