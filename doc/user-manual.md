@@ -233,7 +233,7 @@ The following sections describe the metric and tracing configuration items,  as 
 Supported components and corresponding namespaces:
 
 | Plugin/Components | Namespace        | Description                                                                                                                                                                                                                                                                                                                                                                |
-| ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-------------------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | httpservlet       | `httpServlet`    | Http Request Metric                                                                                                                                                                                                                                                                                                                                                        |
 | spring-gateway    | `springGateway`  | Http Request Metric                                                                                                                                                                                                                                                                                                                                                        |
 | jdbcConnection    | `jdbcConnection` | JDBC Connection Metric                                                                                                                                                                                                                                                                                                                                                     |
@@ -244,6 +244,7 @@ Supported components and corresponding namespaces:
 | rabbitmq          | `rabbitmq`       | RabbitMQ Metric                                                                                                                                                                                                                                                                                                                                                            |
 | jvmGc             | `jvmGc`          | JVM GC Metric                                                                                                                                                                                                                                                                                                                                                              |
 | JVM Memory        | `jvmMemory`      | JVM Memory Metric                                                                                                                                                                                                                                                                                                                                                          |
+| dubbo             | `dubbo`          | dubbo Metric                                                                                                                                                                                                                                                                                                                                                               |
 
 #### Application Log
 Application log modules collecting application logs printed by the application.
@@ -403,14 +404,20 @@ Response Body:
 EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing logs.The data format stored in `Kafka`  is [Zipkin Data Model](https://zipkin.io/pages/data_model.html). User can send tracing logs to [Zipkin server](https://zipkin.io/pages/quickstart.html).
 
 ### Tracing Component
-| Component Type | Component                                    | Reference                                                                                                                                                                                                                   |
-| -------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| HTTP Client    | `RestTemplate`、 `WebClient`、 `FeignClient` | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                                                                                          |
-| HTTP Server    | `Servlet`、`Filter`                          | [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                                                                                          |
-| DataBase       | `JDBC`                                       | [Brave](https://github.com/openzipkin/brave/tree/master/brave)                                                                                                                                                              |
-| Cache          | `Jedis`、`Lettuce`                           | [Brave](https://github.com/openzipkin/brave/tree/master/brave)                                                                                                                                                              |
-| Message        | `RabbitMQ`、`Kafka`                          | [brave-instrumentation-messaging](https://github.com/openzipkin/brave/tree/master/instrumentation/messaging) 、[Brave Kafka instrumentation](https://github.com/openzipkin/brave/tree/master/instrumentation/kafka-clients) |
-| Logging        | `Log4j2`、`Logback`                          | [brave-context-log4j2](https://github.com/openzipkin/brave/tree/master/context/log4j2) 、[brave-context-slf4j](https://github.com/openzipkin/brave/tree/master/context/slf4j)                                               |
+| Component Type | Component                                  |                                                                                                           Reference                                                                                                           |
+| -------------- |--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| HTTP Client    | `RestTemplate`、 `WebClient`、 `FeignClient` |                                                              [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                               |
+| HTTP Server    | `Servlet`、`Filter`                         |                                                              [brave-instrumentation-http](https://github.com/openzipkin/brave/tree/master/instrumentation/http)                                                               |
+| DataBase       | `JDBC`                                     |                                                                                [Brave](https://github.com/openzipkin/brave/tree/master/brave)                                                                                 |
+| Cache          | `Jedis`、`Lettuce`                          |                                                                                [Brave](https://github.com/openzipkin/brave/tree/master/brave)                                                                                 |
+| Message        | `RabbitMQ`、`Kafka`                         |  [brave-instrumentation-messaging](https://github.com/openzipkin/brave/tree/master/instrumentation/messaging) 、[Brave Kafka instrumentation](https://github.com/openzipkin/brave/tree/master/instrumentation/kafka-clients)   |
+| Logging        | `Log4j2`、`Logback`                         |                         [brave-context-log4j2](https://github.com/openzipkin/brave/tree/master/context/log4j2) 、[brave-context-slf4j](https://github.com/openzipkin/brave/tree/master/context/slf4j)                          |
+| RPC            | `AlibabaDubbo`、`ApacheDubbo`             |      [brave-instrumentation-dubbo](https://github.com/openzipkin/brave/tree/master/instrumentation/dubbo) 、[brave-instrumentation-dubbo-rpc](https://github.com/openzipkin/brave/tree/master/instrumentation/dubbo-rpc)       |
+
+### Tracing Component Config Description
+| Component Type | Component                                   | Description                                                                                                                                                                                                                                                                                        |
+| -------------- |---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| RPC            | `AlibabaDubbo`、`ApacheDubbo`                | The dubbo plugin is convenient for troubleshooting, adding dynamic switches for collecting interface parameters and return values. The display format is json, which is disabled by default. You can enable `plugin.observability.dubbo.tracing.args.collect.enabled=ture` with this configuration. |
 
 ### Custom Span Tag
 
@@ -440,6 +447,18 @@ EaseAgent use [brave](https://github.com/openzipkin/brave) to collect tracing lo
 | kafka.key    | Kafka consumer record Key |
 | kafka.topic  | Kafka topic               |
 | kafka.broker | Kafka url                 |
+
+#### Dubbo Client and Server
+| Tag                      | Description                       |
+|--------------------------|-----------------------------------|
+| dubbo.args               | dubbo interface arguments         |
+| dubbo.result             | dubbo interface return value      |
+| dubbo.group              | dubbo client group name           |
+| dubbo.service            | dubbo service interface full name |
+| dubbo.method             | dubbo service method signature    |
+| dubbo.service.version    | dubbo service interface version   |
+| dubbo.client.application | dubbo client application name     |
+| dubbo.server.application | dubbo server application name     |
 
 ## Metric
 EaseAgent use [io.dropwizard.metrics](https://github.com/dropwizard/metrics) to collect metric information.
@@ -807,6 +826,40 @@ MongoDB schema describes key metrics of MongoDB client invoking, which include:
 | p95       | double  | TP95: The MongoDB execution duration in milliseconds for 95% user.                                        |
 | p98       | double  | TP98: The MongoDB execution duration in milliseconds for 98% user.                                        |
 | p99       | double  | TP99: The MongoDB execution duration in milliseconds for 99% user.                                        |
+
+#### Dubbo
+Dubbo schema describes key metrics of Dubbo client invoking, which include:
+* Total execution count (cnt, errcnt, m1cnt, m5cnt, m15cnt)
+* Throughput (m1, m5, m15, mean_rate)
+* Error throughput (m1err, m5err, m15err)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99, p999)
+
+| Field     |  Type   | Description                                                                                            |
+|:----------| :-----: |:-------------------------------------------------------------------------------------------------------|
+| service   | string  | Dubbo method signature.                                                                                |
+| cnt       | integer | The total count of the Dubbo method executed                                                           |
+| errcnt    | integer | The total error count of the Dubbo method executed                                                     |
+| m1cnt     | integer | The total count of the Dubbo method executed in last 1 minute                                          |
+| m5cnt     | integer | The total count of the Dubbo method executed in last 5 minute                                          |
+| m15cnt    | integer | The total count of the Dubbo method executed in last 15 minute                                         |
+| m1        | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 1 minute        |
+| m5        | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 5 minute.       |
+| m15       | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| mean_rate | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| m1err     | double  | The Dubbo method error executions per second (exponentially-weighted moving average) in last 1 minute  |
+| m5err     | double  | The Dubbo method error executions per second (exponentially-weighted moving average) in last 5 minute. |
+| m15err    | double  | The Dubbo method error executions per second (exponentially-weighted moving average) in last 15 minute |
+| min       | double  | The Dubbo method minimal execution duration in milliseconds.                                           |
+| max       | double  | The Dubbo method maximal execution duration in milliseconds.                                           |
+| mean      | double  | The Dubbo method mean execution duration in milliseconds.                                              |
+| p25       | double  | TP25: The Dubbo method execution duration in milliseconds for 25% user.                                |
+| p50       | double  | TP50: The Dubbo method execution duration in milliseconds for 50% user.                                |
+| p75       | double  | TP75: The Dubbo method execution duration in milliseconds for 75% user.                                |
+| p95       | double  | TP95: The Dubbo method execution duration in milliseconds for 95% user.                                |
+| p98       | double  | TP98: The Dubbo method execution duration in milliseconds for 98% user.                                |
+| p99       | double  | TP99: The Dubbo method execution duration in milliseconds for 99% user.                                |
+| p999      | double  | TP999: The Dubbo method execution duration in milliseconds for 99.9% user.                             |
 
 ## Application Log
 

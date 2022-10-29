@@ -382,6 +382,39 @@ MongoDB schema describes key metrics of MongoDB client invoking, which include:
 | application_mongodbclient_p98       | double  | TP98: The MongoDB execution duration in milliseconds for 98% user.                                        |
 | application_mongodbclient_p99       | double  | TP99: The MongoDB execution duration in milliseconds for 99% user.                                        |
 
+### Dubbo
+Dubbo schema describes key metrics of Dubbo client invoking, which include:
+* Total execution count (cnt, errcnt, m1cnt, m5cnt, m15cnt)
+* Throughput (m1, m5, m15, mean_rate)
+* Error throughput (m1err, m5err, m15err)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99, p999)
+
+| Metric Name                         |  Type   | Description                                                                                               |
+|:------------------------------------| :-----: |:----------------------------------------------------------------------------------------------------------|
+| application_dubbo_cnt               | integer | The total count of the Dubbo method executed                                                              |
+| application_dubbo_errcnt            | integer | The total error count of the Dubbo method executed                                                        |
+| application_dubbo_m1cnt             | integer | The total count of the Dubbo method executed in last 1 minute                                             |
+| application_dubbo_m5cnt             | integer | The total count of the Dubbo method executed in last 5 minute                                             |
+| application_dubbo_m15cnt            | integer | The total count of the Dubbo method executed in last 15 minute                                            |
+| application_dubbo_m1                | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 1 minute           |
+| application_dubbo_m5                | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 5 minute.          |
+| application_dubbo_m15               | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 15 minute.         |
+| application_dubbo_mean_rate         | double  | The Dubbo method executions per second (exponentially-weighted moving average) in last 15 minute.         |
+| application_dubbo_m1err             | double  | The Dubbo method error executions per second (exponentially-weighted moving average) in last 1 minute     |
+| application_dubbo_m5err             | double  | The Dubbo method error executions per second (exponentially-weighted moving average) in last 5 minute.    |
+| application_dubbo_m15err            | double  | The Dubbo method error executions per second (exponentially-weighted moving average) in last 15 minute    |
+| application_dubbo_min               | double  | The Dubbo method minimal execution duration in milliseconds.                                              |
+| application_dubbo_max               | double  | The Dubbo method maximal execution duration in milliseconds.                                              |
+| application_dubbo_mean              | double  | The Dubbo method mean execution duration in milliseconds.                                                 |
+| application_dubbo_p25               | double  | TP25: The Dubbo method execution duration in milliseconds for 25% user.                                   |
+| application_dubbo_p50               | double  | TP50: The Dubbo method execution duration in milliseconds for 50% user.                                   |
+| application_dubbo_p75               | double  | TP75: The Dubbo method execution duration in milliseconds for 75% user.                                   |
+| application_dubbo_p95               | double  | TP95: The Dubbo method execution duration in milliseconds for 95% user.                                   |
+| application_dubbo_p98               | double  | TP98: The Dubbo method execution duration in milliseconds for 98% user.                                   |
+| application_dubbo_p99               | double  | TP99: The Dubbo method execution duration in milliseconds for 99% user.                                   |
+| application_dubbo_p999              | double  | TP999: The Dubbo method execution duration in milliseconds for 99.9% user.                                |
+
 #### Dedicated label
 | Label Name | Essential | Value Example | Description                                                                                                                            |
 |:-----------|:---------:|:-------------:|:---------------------------------------------------------------------------------------------------------------------------------------|

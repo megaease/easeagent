@@ -146,6 +146,8 @@ public interface ConfigConst {
         String ACCESS = "access";
         String SPRING_GATEWAY = "springGateway";
         String MD5_DICTIONARY = "md5Dictionary";
+        String DUBBO = "dubbo";
+
         // -------------  request  ------------------
         String HTTPCLIENT = "httpclient";
         String OK_HTTP = "okHttp";
