@@ -107,7 +107,7 @@ public abstract class AlibabaDubboBaseTest {
 			assertEquals(AlibabaDubboCtxUtils.method(invocation), mockSpan.tag(DubboTags.METHOD.name));
 			assertEquals(url.getPath(), mockSpan.tag(DubboTags.SERVICE.name));
 			String expectedArgs = dubboTraceConfig.argsCollectEnabled() ? JsonUtil.toJson(invocation.getArguments()) : null;
-			String expectedResult = dubboTraceConfig.argsCollectEnabled() && retValue != null ? JsonUtil.toJson(retValue) : null;
+			String expectedResult = dubboTraceConfig.resultCollectEnabled() && retValue != null ? JsonUtil.toJson(retValue) : null;
 			assertEquals(expectedArgs, mockSpan.tag(DubboTags.ARGS.name));
 			assertEquals(expectedResult, mockSpan.tag(DubboTags.RESULT.name));
 		} else {

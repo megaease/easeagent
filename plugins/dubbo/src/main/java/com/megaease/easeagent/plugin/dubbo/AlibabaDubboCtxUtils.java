@@ -136,7 +136,9 @@ public class AlibabaDubboCtxUtils {
 				if (result.getException() != null) {
 					span.error(result.getException());
 				} else {
-					span.tag(RESULT.name, config.argsCollectEnabled() ? JsonUtil.toJson(result.getValue()) : null);
+                    if (config.resultCollectEnabled() && result.getValue() != null) {
+    					span.tag(RESULT.name, config.resultCollectEnabled() ? JsonUtil.toJson(result.getValue()) : null);
+                    }
 				}
 			}
 			span.finish();

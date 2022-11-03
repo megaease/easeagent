@@ -110,7 +110,9 @@ public class ApacheDubboCtxUtils {
 				if (result.getException() != null) {
 					span.error(result.getException());
 				} else {
-					span.tag(DubboTags.RESULT.name, dubboTraceConfig.argsCollectEnabled() ? JsonUtil.toJson(result.getValue()) : null);
+                    if (dubboTraceConfig.resultCollectEnabled() && result.getValue() != null) {
+    					span.tag(DubboTags.RESULT.name, JsonUtil.toJson(result.getValue()));
+                    }
 				}
 			}
 			span.finish();
