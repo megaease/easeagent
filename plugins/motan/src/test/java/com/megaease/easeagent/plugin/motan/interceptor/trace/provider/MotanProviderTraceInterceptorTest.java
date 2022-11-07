@@ -16,11 +16,10 @@ import com.megaease.easeagent.plugin.motan.MotanPlugin;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTraceInterceptorTest;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
-import com.weibo.api.motan.rpc.Provider;
+import com.weibo.api.motan.rpc.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -30,13 +29,13 @@ public class MotanProviderTraceInterceptorTest extends MotanTraceInterceptorTest
 
     private MotanProviderTraceInterceptor motanProviderTraceInterceptor;
 
-    @Mock
-    Provider<?> provider;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         motanProviderTraceInterceptor = new MotanProviderTraceInterceptor();
+        InterceptorTestUtils.init(motanProviderTraceInterceptor, new MotanPlugin());
+        motanPluginConfig = AgentFieldReflectAccessor.getStaticFieldValue(MotanProviderTraceInterceptor.class, "MOTAN_PLUGIN_CONFIG");
     }
 
 
@@ -57,7 +56,7 @@ public class MotanProviderTraceInterceptorTest extends MotanTraceInterceptorTest
     }
 
     @Test
-    public void before() {
+    public void rpcProviderCallSuccess() {
         Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(this)
@@ -65,30 +64,46 @@ public class MotanProviderTraceInterceptorTest extends MotanTraceInterceptorTest
             .retValue(successResponse)
             .build();
 
-        InterceptorTestUtils.init(motanProviderTraceInterceptor, new MotanPlugin());
         motanProviderTraceInterceptor.before(methodInfo, context);
         Span span = ((RequestContext) context.get(MotanCtxUtils.SERVER_REQUEST_CONTEXT)).span();
         motanProviderTraceInterceptor.after(methodInfo, context);
         ReportSpan reportSpan = MockEaseAgent.getLastSpan();
-        assertEquals(reportSpan.kind(), Span.Kind.SERVER.name());
-        assertEquals(reportSpan.name(), (request.getMethodName() +"("+ request.getParamtersDesc()+")").toLowerCase());
-        SpanTestUtils.sameId(span, reportSpan);
-        MockEaseAgent.cleanLastSpan();
-
-        methodInfo.setRetValue(failureResponse);
-        InterceptorTestUtils.init(motanProviderTraceInterceptor, new MotanPlugin());
-        motanProviderTraceInterceptor.before(methodInfo, context);
-        span = ((RequestContext) context.get(MotanCtxUtils.SERVER_REQUEST_CONTEXT)).span();
-        motanProviderTraceInterceptor.after(methodInfo, context);
-        reportSpan = MockEaseAgent.getLastSpan();
-        assertEquals(reportSpan.kind(), Span.Kind.SERVER.name());
-        assertEquals(reportSpan.name(), (request.getMethodName() +"("+ request.getParamtersDesc()+")").toLowerCase());
-        assertEquals(motanException.getMessage(),reportSpan.errorInfo());
+        Response retValue = (Response) methodInfo.getRetValue();
+        assertProviderTrace(retValue.getValue(),null);
         SpanTestUtils.sameId(span, reportSpan);
     }
 
     @Test
-    public void after() {
-        before();
+    public void rpcProviderCallFailure() {
+        Context context = EaseAgent.getContext();
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(this)
+                .args(new Object[]{request, provider})
+                .retValue(failureResponse)
+                .build();
+
+        motanProviderTraceInterceptor.before(methodInfo, context);
+        Span span = ((RequestContext) context.get(MotanCtxUtils.SERVER_REQUEST_CONTEXT)).span();
+        motanProviderTraceInterceptor.after(methodInfo, context);
+        ReportSpan reportSpan = MockEaseAgent.getLastSpan();
+        assertProviderTrace(null, failureResponse.getException().getMessage());
+        SpanTestUtils.sameId(span, reportSpan);
+    }
+
+    @Test
+    public void rpcProviderCallException() {
+        Context context = EaseAgent.getContext();
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(this)
+                .args(new Object[]{request, provider})
+                .throwable(motanException)
+                .build();
+
+        motanProviderTraceInterceptor.before(methodInfo, context);
+        Span span = ((RequestContext) context.get(MotanCtxUtils.SERVER_REQUEST_CONTEXT)).span();
+        motanProviderTraceInterceptor.after(methodInfo, context);
+        ReportSpan reportSpan = MockEaseAgent.getLastSpan();
+        assertProviderTrace(null, methodInfo.getThrowable().getMessage());
+        SpanTestUtils.sameId(span, reportSpan);
     }
 }

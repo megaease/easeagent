@@ -5,7 +5,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>com.megaease.easeagent</groupId>
-        <version>2.0.0</version>
+        <version>2.2.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,8 @@
         <maven.compiler.source>18</maven.compiler.source>
         <maven.compiler.target>18</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <motan.version>[1.0.0,)</motan.version>
+        <motan.low-version>0.0.1</motan.low-version>
+        <motan.version>1.0.0</motan.version>
     </properties>
 
     <dependencies>
@@ -35,11 +36,18 @@
         <!-- Motan -->
         <dependency>
             <groupId>com.weibo</groupId>
+            <artifactId>motan-transport-netty</artifactId>
+            <version>${motan.low-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.weibo</groupId>
             <artifactId>motan-core</artifactId>
             <version>${motan.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.weibo</groupId>
             <artifactId>motan-transport-netty</artifactId>
             <version>${motan.version}</version>
@@ -50,7 +58,7 @@
             <artifactId>motan-springsupport</artifactId>
             <version>${motan.version}</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
 </project>

@@ -8,7 +8,7 @@ import com.megaease.easeagent.plugin.motan.config.MotanPluginConfig;
 
 public abstract class MotanBaseInterceptor implements Interceptor {
 
-    protected static volatile MotanPluginConfig MOTAN_PLUGIN_CONFIG = null;
+    public static volatile MotanPluginConfig MOTAN_PLUGIN_CONFIG = null;
 
     @Override
     public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {

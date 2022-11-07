@@ -11,7 +11,7 @@ import java.util.Set;
 public class MotanConsumerAdvice implements Points {
     private static final String ENHANCE_CLASS = "com.weibo.api.motan.rpc.AbstractReferer";
 
-    private static final String ENHANCE_METHOD = "call";
+    private static final String ENHANCE_METHOD = "doCall";
 
     @Override
     public IClassMatcher getClassMatcher() {

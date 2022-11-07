@@ -4,16 +4,15 @@ import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.plugin.api.context.RequestContext;
-import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.motan.MotanPlugin;
-import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTraceInterceptorTest;
 import com.weibo.api.motan.rpc.DefaultResponseFuture;
+import com.weibo.api.motan.rpc.ResponseFuture;
+import com.weibo.api.motan.transport.netty.NettyResponseFuture;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,87 +51,87 @@ public class MotanConsumerTraceInterceptorTest extends MotanTraceInterceptorTest
     }
 
     @Test
-    public void rpcConsumerAsyncCallFail() {
-
-        Context context = EaseAgent.getContext();
-        MethodInfo methodInfo = MethodInfo.builder()
-            .invoker(defaultRpcReferer)
-            .args(new Object[]{request})
-            .retValue(successResponse)
-            .build();
-
-        DefaultResponseFuture successResponseFuture = new DefaultResponseFuture(null, 0, null);
-        methodInfo.setRetValue(successResponseFuture);
-        motanConsumerTraceInterceptor.before(methodInfo, context);
-        Span span = ((RequestContext) context.get(MotanCtxUtils.CLIENT_REQUEST_CONTEXT)).span();
-        motanConsumerTraceInterceptor.after(methodInfo, context);
-        successResponseFuture.onSuccess(successResponse);
-        assertTrace(successResponse, null);
-    }
-
-    @Test
-    public void rpcConsumerAsyncCallSuccess() {
+    public void rpcConsumerAsyncCallFail() throws InterruptedException {
         DefaultResponseFuture failureResponseFuture = new DefaultResponseFuture(null, 0, null);
+        Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(defaultRpcReferer)
             .args(new Object[]{request})
             .retValue(failureResponseFuture)
             .build();
 
-        Context context = EaseAgent.getContext();
         motanConsumerTraceInterceptor.before(methodInfo, context);
-        Span span = ((RequestContext) context.get(MotanCtxUtils.CLIENT_REQUEST_CONTEXT)).span();
         motanConsumerTraceInterceptor.after(methodInfo, context);
-        failureResponseFuture.onFailure(failureResponse);
-        assertTrace(failureResponseFuture, motanException.getMessage());
+        ResponseFuture responseFuture = (ResponseFuture) methodInfo.getRetValue();
+        Thread thread = new Thread(() -> {
+            responseFuture.onFailure(failureResponse);
+        });
+        thread.start();
+        thread.join();
+        assertConsumerTrace(null, responseFuture.getException().getMessage());
     }
 
     @Test
-    public void rpcConsumerCallException() {
-
-        Context context = EaseAgent.getContext();
+    public void rpcConsumerAsyncCallSuccess() throws InterruptedException {
+        DefaultResponseFuture successResponseFuture = new DefaultResponseFuture(null, 0, null);
         MethodInfo methodInfo = MethodInfo.builder()
             .invoker(defaultRpcReferer)
             .args(new Object[]{request})
-            .throwable(motanException)
+            .retValue(successResponseFuture)
             .build();
 
+        Context context = EaseAgent.getContext();
         motanConsumerTraceInterceptor.before(methodInfo, context);
-        Span span = ((RequestContext) context.get(MotanCtxUtils.CLIENT_REQUEST_CONTEXT)).span();
         motanConsumerTraceInterceptor.after(methodInfo, context);
-        assertTrace(null, motanException.getMessage());
+        ResponseFuture retValue = (ResponseFuture) methodInfo.getRetValue();
+        Thread thread = new Thread(() -> {
+            retValue.onSuccess(successResponse);
+        });
+        thread.start();
+        thread.join();
+        assertConsumerTrace(retValue.getValue(), null);
+    }
+
+
+    @Test
+    public void rpcConsumerNettyAsyncCallSuccess() throws InterruptedException {
+        NettyResponseFuture successResponseFuture = new NettyResponseFuture(null, 0, null);
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(defaultRpcReferer)
+                .args(new Object[]{request})
+                .retValue(successResponseFuture)
+                .build();
+
+        Context context = EaseAgent.getContext();
+        motanConsumerTraceInterceptor.before(methodInfo, context);
+        motanConsumerTraceInterceptor.after(methodInfo, context);
+        NettyResponseFuture retValue = (NettyResponseFuture) methodInfo.getRetValue();
+        Thread thread = new Thread(() -> {
+            retValue.onSuccess(successResponse);
+        });
+        thread.start();
+        thread.join();
+        assertConsumerTrace(retValue.getValue(), null);
     }
 
     @Test
-    public void rpcConsumerCallFail() {
-
+    public void rpcConsumerNettyAsyncCallFail() throws InterruptedException {
+        NettyResponseFuture failureResponseFuture = new NettyResponseFuture(null, 0, null);
         Context context = EaseAgent.getContext();
         MethodInfo methodInfo = MethodInfo.builder()
-            .invoker(defaultRpcReferer)
-            .args(new Object[]{request})
-            .retValue(failureResponse)
-            .build();
-
-
-        motanConsumerTraceInterceptor.before(methodInfo, context);
-        Span span = ((RequestContext) context.get(MotanCtxUtils.CLIENT_REQUEST_CONTEXT)).span();
-        motanConsumerTraceInterceptor.after(methodInfo, context);
-        assertTrace(failureResponse, motanException.getMessage());
-    }
-
-    @Test
-    public void rpcConsumerCallSuccess() {
-        Context context = EaseAgent.getContext();
-        MethodInfo methodInfo = MethodInfo.builder()
-            .invoker(defaultRpcReferer)
-            .args(new Object[]{request})
-            .retValue(successResponse)
-            .build();
+                .invoker(defaultRpcReferer)
+                .args(new Object[]{request})
+                .retValue(failureResponseFuture)
+                .build();
 
         motanConsumerTraceInterceptor.before(methodInfo, context);
-        Span span = ((RequestContext) context.get(MotanCtxUtils.CLIENT_REQUEST_CONTEXT)).span();
         motanConsumerTraceInterceptor.after(methodInfo, context);
-        assertTrace(successResponse, null);
+        NettyResponseFuture responseFuture = (NettyResponseFuture) methodInfo.getRetValue();
+        Thread thread = new Thread(() -> {
+            responseFuture.onFailure(failureResponse);
+        });
+        thread.start();
+        thread.join();
+        assertConsumerTrace(null, responseFuture.getException().getMessage());
     }
-
 }

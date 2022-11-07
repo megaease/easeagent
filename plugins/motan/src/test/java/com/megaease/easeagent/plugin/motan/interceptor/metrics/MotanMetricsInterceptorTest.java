@@ -16,10 +16,7 @@ import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.motan.MotanPlugin;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.weibo.api.motan.protocol.rpc.DefaultRpcReferer;
-import com.weibo.api.motan.rpc.DefaultRequest;
-import com.weibo.api.motan.rpc.DefaultResponse;
-import com.weibo.api.motan.rpc.DefaultResponseFuture;
-import com.weibo.api.motan.rpc.URL;
+import com.weibo.api.motan.rpc.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +48,6 @@ public class MotanMetricsInterceptorTest {
         MotanMetricsInterceptor motanMetricsInterceptor = new MotanMetricsInterceptor();
         assertEquals(ConfigConst.PluginID.METRIC, motanMetricsInterceptor.getType());
     }
-
     @Test
     public void order() {
         MotanMetricsInterceptor motanMetricsInterceptor = new MotanMetricsInterceptor();
@@ -97,63 +93,113 @@ public class MotanMetricsInterceptorTest {
     }
 
     @Test
-    public void after() {
+    public void rpcCallFailure() {
         MotanMetricsInterceptor motanMetricsInterceptor = new MotanMetricsInterceptor();
         InterceptorTestUtils.init(motanMetricsInterceptor, new MotanPlugin());
         Context context = EaseAgent.getContext();
-        ContextUtils.setBeginTime(context);
 
         MethodInfo methodInfo = MethodInfo.builder()
-            .invoker(defaultRpcReferer)
-            .args(new Object[]{request})
-            .retValue(failureResponse)
-            .build();
+                .invoker(defaultRpcReferer)
+                .args(new Object[]{request})
+                .retValue(failureResponse)
+                .build();
+        motanMetricsInterceptor.before(methodInfo, context);
         motanMetricsInterceptor.after(methodInfo, context);
 
         TagVerifier tagVerifier = new TagVerifier()
-            .add("category", "application")
-            .add("type", "motan")
-            .add("service", MotanCtxUtils.endpoint(defaultRpcReferer.getUrl(), request));
+                .add("category", "application")
+                .add("type", "motan")
+                .add("service", MotanCtxUtils.interfaceSignature(request));
         LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
         Map<String, Object> metrics = lastJsonReporter.flushAndOnlyOne();
         assertEquals(1, metrics.get(MetricField.EXECUTION_COUNT.getField()));
         assertEquals(1, metrics.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
+    }
 
-        //1-15 minute rate
-        assertNotNull(metrics.get(MetricField.M1_ERROR_RATE.getField()));
-        assertNotNull(metrics.get(MetricField.M5_ERROR_RATE.getField()));
-        assertNotNull(metrics.get(MetricField.M15_ERROR_RATE.getField()));
-        assertNotNull(metrics.get(MetricField.M1_RATE.getField()));
-        assertNotNull(metrics.get(MetricField.M5_RATE.getField()));
-        assertNotNull(metrics.get(MetricField.M15_RATE.getField()));
-        assertNotNull(metrics.get(MetricField.MEAN_RATE.getField()));
+    @Test
+    public void rpcCallSuccess() {
+        MotanMetricsInterceptor motanMetricsInterceptor = new MotanMetricsInterceptor();
+        InterceptorTestUtils.init(motanMetricsInterceptor, new MotanPlugin());
+        Context context = EaseAgent.getContext();
 
-
-        // execution time
-        assertNotNull(metrics.get(MetricField.MIN_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.MAX_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.MEAN_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.P25_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.P50_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.P75_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.P95_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.P98_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.P99_EXECUTION_TIME.getField()));
-        assertNotNull(metrics.get(MetricField.P999_EXECUTION_TIME.getField()));
-
-        methodInfo.setRetValue(successResponse);
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(defaultRpcReferer)
+                .args(new Object[]{request})
+                .retValue(successResponse)
+                .build();
+        motanMetricsInterceptor.before(methodInfo, context);
         motanMetricsInterceptor.after(methodInfo, context);
-        lastJsonReporter.clean();
-        metrics = lastJsonReporter.flushAndOnlyOne();
-        assertEquals(2, metrics.get(MetricField.EXECUTION_COUNT.getField()));
+
+        TagVerifier tagVerifier = new TagVerifier()
+                .add("category", "application")
+                .add("type", "motan")
+                .add("service", MotanCtxUtils.interfaceSignature(request));
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        Map<String, Object> metrics = lastJsonReporter.flushAndOnlyOne();
+        assertEquals(1, metrics.get(MetricField.EXECUTION_COUNT.getField()));
+        assertEquals(0, metrics.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
+    }
+
+
+    @Test
+    public void rpcAsyncCallFailure() throws InterruptedException {
+        MotanMetricsInterceptor motanMetricsInterceptor = new MotanMetricsInterceptor();
+        InterceptorTestUtils.init(motanMetricsInterceptor, new MotanPlugin());
+        Context context = EaseAgent.getContext();
+        DefaultResponseFuture defaultResponseFuture = new DefaultResponseFuture(null, 0, null);
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(defaultRpcReferer)
+                .args(new Object[]{request})
+                .retValue(defaultResponseFuture)
+                .build();
+        motanMetricsInterceptor.before(methodInfo, context);
+        motanMetricsInterceptor.after(methodInfo, context);
+        ResponseFuture retValue = (ResponseFuture) methodInfo.getRetValue();
+        Thread thread = new Thread(() -> {
+            retValue.onFailure(failureResponse);
+        });
+        thread.start();
+        thread.join();
+
+        TagVerifier tagVerifier = new TagVerifier()
+                .add("category", "application")
+                .add("type", "motan")
+                .add("service", MotanCtxUtils.interfaceSignature(request));
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        Map<String, Object> metrics = lastJsonReporter.flushAndOnlyOne();
+        assertEquals(1, metrics.get(MetricField.EXECUTION_COUNT.getField()));
         assertEquals(1, metrics.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
+    }
 
-        DefaultResponseFuture asyncResponse = new DefaultResponseFuture(null, -1, null);
-        methodInfo.setRetValue(asyncResponse);
+    @Test
+    public void rpcAsyncCallSuccess() throws InterruptedException {
+        MotanMetricsInterceptor motanMetricsInterceptor = new MotanMetricsInterceptor();
+        InterceptorTestUtils.init(motanMetricsInterceptor, new MotanPlugin());
+        Context context = EaseAgent.getContext();
+        DefaultResponseFuture defaultResponseFuture = new DefaultResponseFuture(null, 0, null);
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(defaultRpcReferer)
+                .args(new Object[]{request})
+                .retValue(defaultResponseFuture)
+                .build();
+        motanMetricsInterceptor.before(methodInfo, context);
         motanMetricsInterceptor.after(methodInfo, context);
-        asyncResponse.onSuccess(successResponse);
-        lastJsonReporter.clean();
-        metrics = lastJsonReporter.flushAndOnlyOne();
-        assertEquals(3, metrics.get(MetricField.EXECUTION_COUNT.getField()));
+        ResponseFuture retValue = (ResponseFuture) methodInfo.getRetValue();
+        Thread thread = new Thread(() -> {
+            retValue.onSuccess(successResponse);
+        });
+        thread.start();
+        thread.join();
+
+        TagVerifier tagVerifier = new TagVerifier()
+                .add("category", "application")
+                .add("type", "motan")
+                .add("service", MotanCtxUtils.interfaceSignature(request));
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        Map<String, Object> metrics = lastJsonReporter.flushAndOnlyOne();
+        assertEquals(1, metrics.get(MetricField.EXECUTION_COUNT.getField()));
+        assertEquals(0, metrics.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
     }
 }

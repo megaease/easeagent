@@ -13,16 +13,25 @@ public class MotanPluginConfig implements AutoRefreshPluginConfig {
     };
 
     public static final String ARGS_COLLECT_ENABLED = "args.collect.enabled";
+    public static final String RESULT_COLLECT_ENABLED = "args.collect.enabled";
 
     private volatile Boolean argsCollectEnabled = false;
+    private volatile Boolean resultCollectEnabled = false;
 
     public Boolean argsCollectEnabled() {
         return argsCollectEnabled;
+    }
+
+    public Boolean resultCollectEnabled() {
+        return resultCollectEnabled;
     }
 
     @Override
     public void onChange(IPluginConfig oldConfig, IPluginConfig newConfig) {
         String argsCollectEnabled = newConfig.getString(ARGS_COLLECT_ENABLED);
         this.argsCollectEnabled = Boolean.parseBoolean(argsCollectEnabled);
+
+        String resultCollectEnabled = newConfig.getString(RESULT_COLLECT_ENABLED);
+        this.resultCollectEnabled = Boolean.parseBoolean(resultCollectEnabled);
     }
 }

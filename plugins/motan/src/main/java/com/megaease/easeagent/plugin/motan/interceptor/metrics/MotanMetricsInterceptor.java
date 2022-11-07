@@ -6,8 +6,10 @@ import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.motan.MotanPlugin;
 import com.megaease.easeagent.plugin.motan.advice.MotanConsumerAdvice;
+import com.megaease.easeagent.plugin.motan.interceptor.MotanClassUtils;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.weibo.api.motan.rpc.*;
+import com.weibo.api.motan.transport.netty.NettyResponseFuture;
 
 @AdviceTo(value = MotanConsumerAdvice.class, plugin = MotanPlugin.class)
 public class MotanMetricsInterceptor extends MotanBaseMetricsInterceptor {
@@ -24,15 +26,18 @@ public class MotanMetricsInterceptor extends MotanBaseMetricsInterceptor {
         Throwable throwable = methodInfo.getThrowable();
         String interfaceSignature = MotanCtxUtils.interfaceSignature(request);
         Long duration = ContextUtils.getDuration(context);
-        Response retValue = (Response) methodInfo.getRetValue();
+        Response response = (Response) methodInfo.getRetValue();
 
         if (throwable != null) {
             motanMetric.collectMetric(interfaceSignature, duration, false);
-        } else if (retValue instanceof DefaultResponseFuture) {
-            DefaultResponseFuture defaultResponseFuture = (DefaultResponseFuture) retValue;
+        } else if (MotanClassUtils.NettyResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)){
+            NettyResponseFuture nettyResponseFuture = (NettyResponseFuture) response;
+            nettyResponseFuture.addListener(listener(interfaceSignature, duration));
+        } else if (MotanClassUtils.DefaultResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)) {
+            DefaultResponseFuture defaultResponseFuture = (DefaultResponseFuture) response;
             defaultResponseFuture.addListener(listener(interfaceSignature, duration));
         } else {
-            boolean callResult = retValue != null && retValue.getException() == null;
+            boolean callResult = response != null && response.getException() == null;
             motanMetric.collectMetric(interfaceSignature, duration, callResult);
         }
     }

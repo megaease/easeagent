@@ -10,6 +10,7 @@ import com.megaease.easeagent.plugin.motan.interceptor.MotanBaseInterceptor;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.weibo.api.motan.rpc.Provider;
 import com.weibo.api.motan.rpc.Request;
+import com.weibo.api.motan.rpc.Response;
 
 @AdviceTo(value = MotanProviderAdvice.class, plugin = MotanPlugin.class)
 public class MotanProviderTraceInterceptor extends MotanBaseInterceptor {
@@ -23,18 +24,14 @@ public class MotanProviderTraceInterceptor extends MotanBaseInterceptor {
     public void before(MethodInfo methodInfo, Context context) {
         Request request = (Request) methodInfo.getArgs()[0];
         Provider<?> provider = (Provider<?>) methodInfo.getArgs()[1];
-
-        MotanCtxUtils.initSpan(
-            context,
-            provider.getUrl(),
-            request,
-            MOTAN_PLUGIN_CONFIG);
+        MotanCtxUtils.initProviderSpan(context, provider.getUrl(), request);
     }
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        Provider<?> provider = (Provider<?>) methodInfo.getArgs()[1];
-        MotanCtxUtils.finishSpan(methodInfo, provider.getUrl(), context, MOTAN_PLUGIN_CONFIG);
+        Response response = (Response) methodInfo.getRetValue();
+        Throwable throwable = methodInfo.getThrowable();
+        MotanCtxUtils.finishProviderSpan(response, throwable, context);
     }
 
 }
