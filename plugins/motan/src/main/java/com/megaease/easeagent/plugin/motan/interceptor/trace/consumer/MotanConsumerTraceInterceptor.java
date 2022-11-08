@@ -10,7 +10,6 @@ import com.megaease.easeagent.plugin.motan.interceptor.MotanBaseInterceptor;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanClassUtils;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.weibo.api.motan.rpc.*;
-import com.weibo.api.motan.transport.netty.NettyResponseFuture;
 
 @AdviceTo(value = MotanConsumerAdvice.class, plugin = MotanPlugin.class)
 public class MotanConsumerTraceInterceptor extends MotanBaseInterceptor {
@@ -30,16 +29,12 @@ public class MotanConsumerTraceInterceptor extends MotanBaseInterceptor {
 	@Override
 	public void after(MethodInfo methodInfo, Context context) {
 		Response response = (Response) methodInfo.getRetValue();
-		if(MotanClassUtils.NettyResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)){
-			NettyResponseFuture nettyResponseFuture = (NettyResponseFuture) response;
-			nettyResponseFuture.addListener(new TraceFutureListener(context.exportAsync()));
-		} else if (MotanClassUtils.DefaultResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)) {
+		if (MotanClassUtils.DefaultResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)) {
 			DefaultResponseFuture defaultResponseFuture = (DefaultResponseFuture) response;
 			defaultResponseFuture.addListener(new TraceFutureListener(context.exportAsync()));
 		} else {
 			MotanCtxUtils.finishConsumerSpan(response, methodInfo.getThrowable(), context);
 		}
 	}
-
 
 }

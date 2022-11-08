@@ -5,7 +5,7 @@ import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.motan.MotanTags;
-import com.megaease.easeagent.plugin.motan.config.MotanPluginConfig;
+import com.megaease.easeagent.plugin.motan.interceptor.MotanBaseInterceptor;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -34,8 +34,6 @@ public abstract class MotanTraceInterceptorTest {
 
 	protected DefaultResponse failureResponse;
 
-	protected MotanPluginConfig motanPluginConfig;
-
 	protected RuntimeException motanException = new RuntimeException("motan exception");
 
 
@@ -43,10 +41,8 @@ public abstract class MotanTraceInterceptorTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
-		URL clientUrl = URL.valueOf("motan://127.0.0.1:1234/com.megaease.easeagent.motan.TestService.test(String,Integer)?nodeType=referer");
-		when(defaultRpcReferer.getUrl()).thenReturn(clientUrl);
-
-		URL url = URL.valueOf("motan://127.0.0.1:1234/com.megaease.easeagent.motan.TestService.test(String,Integer)?nodeType=service");
+		URL url = URL.valueOf("motan://127.0.0.1:1234/com.megaease.easeagent.motan.TestService.test(String,Integer)");
+		when(defaultRpcReferer.getUrl()).thenReturn(url);
 		when(provider.getUrl()).thenReturn(url);
 
 		Map<String, String> attachments = new HashMap<>();
@@ -78,8 +74,14 @@ public abstract class MotanTraceInterceptorTest {
 		assertEquals(request.getInterfaceName(), reportSpan.tag(MotanTags.SERVICE.name));
 		assertEquals(clientUrl.getVersion(), reportSpan.tag(MotanTags.SERVICE_VERSION.name));
 		assertEquals(MotanCtxUtils.method(request), reportSpan.tag(MotanTags.METHOD.name));
-		String expectedArgs = motanPluginConfig.argsCollectEnabled() ? JsonUtil.toJson(request.getArguments()) : null;
-		String expectedResult = motanPluginConfig.resultCollectEnabled() && result != null ? JsonUtil.toJson(result) : null;
+		String expectedArgs = null;
+		if (MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG.argsCollectEnabled()) {
+			expectedArgs = JsonUtil.toJson(request.getArguments());
+		}
+		String expectedResult = null;
+		if (MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG.resultCollectEnabled() && result != null) {
+			expectedResult = JsonUtil.toJson(result);
+		}
 		assertEquals(expectedArgs, reportSpan.tag(MotanTags.ARGUMENTS.name));
 		assertEquals(expectedResult, reportSpan.tag(MotanTags.RESULT.name));
 		if (result != null) {
@@ -97,7 +99,10 @@ public abstract class MotanTraceInterceptorTest {
 		assertNotNull(reportSpan);
 		assertEquals(reportSpan.name(), MotanCtxUtils.name(request).toLowerCase());
 		assertEquals(Span.Kind.SERVER.name(), reportSpan.kind());
-		String expectedResult = motanPluginConfig.resultCollectEnabled() && result != null ? JsonUtil.toJson(result) : null;
+		String expectedResult = null;
+		if (MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG.resultCollectEnabled() && result != null) {
+			expectedResult = JsonUtil.toJson(result);
+		}
 		assertEquals(expectedResult, reportSpan.tag(MotanTags.RESULT.name));
 		if (result != null) {
 			assertFalse(reportSpan.hasError());

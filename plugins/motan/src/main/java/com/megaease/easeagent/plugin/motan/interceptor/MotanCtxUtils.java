@@ -50,18 +50,6 @@ public class MotanCtxUtils {
 		return String.format("%s/%s(%s)", interfaceName, request.getMethodName(), argsStringBuilder);
 	}
 
-	public static String endpoint(URL url, Request request) {
-		StringBuilder endpointBuilder = new StringBuilder();
-		endpointBuilder.append(url.getProtocol())
-				.append("://")
-				.append(url.getHost())
-				.append(":")
-				.append(url.getPort())
-				.append("/")
-				.append(interfaceSignature(request));
-		return endpointBuilder.toString();
-	}
-
 	public static void initProviderSpan(Context context, URL url, Request request) {
 		MotanProviderRequest motanProviderRequest = new MotanProviderRequest(request);
 		RequestContext requestContext = context.serverReceive(motanProviderRequest);
@@ -108,6 +96,7 @@ public class MotanCtxUtils {
 			finishSpan(future.getValue(), null, requestContext);
 		}
 	}
+
 	public static void finishProviderSpan(Response response, Throwable throwable, Context context) {
 		RequestContext requestContext = context.get(SERVER_REQUEST_CONTEXT);
 		judgmentFinishSpan(response, throwable, requestContext);

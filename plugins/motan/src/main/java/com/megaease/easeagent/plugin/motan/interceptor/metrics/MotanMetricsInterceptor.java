@@ -9,7 +9,6 @@ import com.megaease.easeagent.plugin.motan.advice.MotanConsumerAdvice;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanClassUtils;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.weibo.api.motan.rpc.*;
-import com.weibo.api.motan.transport.netty.NettyResponseFuture;
 
 @AdviceTo(value = MotanConsumerAdvice.class, plugin = MotanPlugin.class)
 public class MotanMetricsInterceptor extends MotanBaseMetricsInterceptor {
@@ -21,7 +20,6 @@ public class MotanMetricsInterceptor extends MotanBaseMetricsInterceptor {
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        URL url = ((AbstractReferer<?>) methodInfo.getInvoker()).getUrl();
         Request request = (Request) methodInfo.getArgs()[0];
         Throwable throwable = methodInfo.getThrowable();
         String interfaceSignature = MotanCtxUtils.interfaceSignature(request);
@@ -30,9 +28,6 @@ public class MotanMetricsInterceptor extends MotanBaseMetricsInterceptor {
 
         if (throwable != null) {
             motanMetric.collectMetric(interfaceSignature, duration, false);
-        } else if (MotanClassUtils.NettyResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)){
-            NettyResponseFuture nettyResponseFuture = (NettyResponseFuture) response;
-            nettyResponseFuture.addListener(listener(interfaceSignature, duration));
         } else if (MotanClassUtils.DefaultResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)) {
             DefaultResponseFuture defaultResponseFuture = (DefaultResponseFuture) response;
             defaultResponseFuture.addListener(listener(interfaceSignature, duration));

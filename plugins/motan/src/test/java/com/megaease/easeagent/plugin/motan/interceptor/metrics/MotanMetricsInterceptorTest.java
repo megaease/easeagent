@@ -57,7 +57,7 @@ public class MotanMetricsInterceptorTest {
     @Before
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        URL clientUrl = URL.valueOf("motan://127.0.0.1:1234/com.megaease.easeagent.motan.TestService.test(String,Integer)?nodeType=referer");
+        URL clientUrl = URL.valueOf("motan://127.0.0.1:1234/com.megaease.easeagent.motan.TestService.test(String,Integer)");
         when(defaultRpcReferer.getUrl()).thenReturn(clientUrl);
         when(request.getInterfaceName()).thenReturn("com.megaease.easeagent.motan.TestService");
         when(request.getMethodName()).thenReturn("test");
@@ -102,6 +102,30 @@ public class MotanMetricsInterceptorTest {
                 .invoker(defaultRpcReferer)
                 .args(new Object[]{request})
                 .retValue(failureResponse)
+                .build();
+        motanMetricsInterceptor.before(methodInfo, context);
+        motanMetricsInterceptor.after(methodInfo, context);
+
+        TagVerifier tagVerifier = new TagVerifier()
+                .add("category", "application")
+                .add("type", "motan")
+                .add("service", MotanCtxUtils.interfaceSignature(request));
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
+        Map<String, Object> metrics = lastJsonReporter.flushAndOnlyOne();
+        assertEquals(1, metrics.get(MetricField.EXECUTION_COUNT.getField()));
+        assertEquals(1, metrics.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
+    }
+
+    @Test
+    public void rpcCallException() {
+        MotanMetricsInterceptor motanMetricsInterceptor = new MotanMetricsInterceptor();
+        InterceptorTestUtils.init(motanMetricsInterceptor, new MotanPlugin());
+        Context context = EaseAgent.getContext();
+
+        MethodInfo methodInfo = MethodInfo.builder()
+                .invoker(defaultRpcReferer)
+                .args(new Object[]{request})
+                .throwable(failureResponse.getException())
                 .build();
         motanMetricsInterceptor.before(methodInfo, context);
         motanMetricsInterceptor.after(methodInfo, context);
