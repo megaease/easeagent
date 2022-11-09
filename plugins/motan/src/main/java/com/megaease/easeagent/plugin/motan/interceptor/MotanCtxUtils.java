@@ -17,6 +17,7 @@ public class MotanCtxUtils {
 
 	public static final String CLIENT_REQUEST_CONTEXT = MotanCtxUtils.class.getName() + ".CLIENT_REQUEST_CONTEXT";
 	public static final String SERVER_REQUEST_CONTEXT = MotanCtxUtils.class.getName() + ".SERVER_REQUEST_CONTEXT";
+	public static final String METRICS_SERVICE_NAME = MotanCtxUtils.class.getName() + ".METRICS_SERVICE_NAME";
 
 	public static String interfaceSignature(Request request) {
 		return new StringBuilder(request.getInterfaceName())
