@@ -8,7 +8,7 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.motan.MotanPlugin;
-import com.megaease.easeagent.plugin.motan.interceptor.MotanBaseInterceptor;
+import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanBaseInterceptor;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTraceInterceptorTest;
 import com.weibo.api.motan.rpc.DefaultResponse;
 import com.weibo.api.motan.rpc.DefaultResponseFuture;

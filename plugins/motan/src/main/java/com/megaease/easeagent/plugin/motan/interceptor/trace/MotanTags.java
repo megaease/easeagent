@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.motan;
+package com.megaease.easeagent.plugin.motan.interceptor.trace;
 
 public enum MotanTags {
     APPLICATION("motan.application"),

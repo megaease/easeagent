@@ -4,8 +4,6 @@ import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.motan.MotanTags;
-import com.megaease.easeagent.plugin.motan.interceptor.MotanBaseInterceptor;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;

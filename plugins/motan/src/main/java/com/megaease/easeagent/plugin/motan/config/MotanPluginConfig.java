@@ -12,8 +12,8 @@ public class MotanPluginConfig implements AutoRefreshPluginConfig {
         }
     };
 
-    public static final String ARGS_COLLECT_ENABLED = "args.collect.enabled";
-    public static final String RESULT_COLLECT_ENABLED = "args.collect.enabled";
+    private static final String ARGS_COLLECT_ENABLED = "args.collect.enabled";
+    private static final String RESULT_COLLECT_ENABLED = "args.collect.enabled";
 
     private volatile Boolean argsCollectEnabled = false;
     private volatile Boolean resultCollectEnabled = false;

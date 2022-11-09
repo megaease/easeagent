@@ -1,4 +1,4 @@
-package com.megaease.easeagent.plugin.motan.interceptor;
+package com.megaease.easeagent.plugin.motan.interceptor.trace;
 
 import com.megaease.easeagent.plugin.api.config.AutoRefreshPluginConfigRegistry;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
