@@ -65,19 +65,26 @@ public class AutoRefreshPluginConfigRegistry {
         Key key = new Key(domain, namespace, id, supplier.getType());
         AutoRefreshPluginConfig autoRefreshConfig = configs.get(key);
         if (autoRefreshConfig != null) {
+            triggerChange(domain,namespace,id,autoRefreshConfig);
             return (C) autoRefreshConfig;
         }
         synchronized (configs) {
             autoRefreshConfig = configs.get(key);
             if (autoRefreshConfig != null) {
+                triggerChange(domain,namespace,id,autoRefreshConfig);
                 return (C) autoRefreshConfig;
             }
             C newConfig = supplier.newInstance();
-            IPluginConfig config = EaseAgent.getConfig(domain, namespace, id);
-            newConfig.onChange(null, config);
-            config.addChangeListener(newConfig);
+            triggerChange(domain, namespace, id, newConfig);
+            configs.put(key, newConfig);
             return newConfig;
         }
+    }
+
+    private static <C extends AutoRefreshPluginConfig> void triggerChange(String domain, String namespace, String id, C newConfig) {
+        IPluginConfig config = EaseAgent.getConfig(domain, namespace, id);
+        newConfig.onChange(null, config);
+        config.addChangeListener(newConfig);
     }
 
     static class Key {

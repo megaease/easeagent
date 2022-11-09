@@ -12,7 +12,7 @@ import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Result;
 
 @AdviceTo(value = ApacheDubboAdvice.class, plugin = DubboPlugin.class)
-public class ApacheDubboTracingInterceptor extends DubboBaseInterceptor {
+public class ApacheDubboTraceInterceptor extends DubboBaseInterceptor {
 
 
 	@Override
@@ -27,14 +27,14 @@ public class ApacheDubboTracingInterceptor extends DubboBaseInterceptor {
 
 	@Override
 	public void before(MethodInfo methodInfo, Context context) {
-		ApacheDubboCtxUtils.initSpan(methodInfo, context, DUBBO_TRACE_CONFIG);
+		ApacheDubboCtxUtils.initSpan(methodInfo, context);
 	}
 
 	@Override
 	public void after(MethodInfo methodInfo, Context context) {
 		Result result = (Result) methodInfo.getRetValue();
 		Invoker<?> invoker = (Invoker<?>) methodInfo.getArgs()[0];
-		ApacheDubboCtxUtils.finishSpan(invoker.getUrl(), DUBBO_TRACE_CONFIG, context, result, methodInfo.getThrowable());
+		ApacheDubboCtxUtils.finishSpan(invoker.getUrl(), context, result, methodInfo.getThrowable());
 	}
 
 }

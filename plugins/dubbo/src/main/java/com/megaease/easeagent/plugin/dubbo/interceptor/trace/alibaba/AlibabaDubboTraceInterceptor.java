@@ -10,7 +10,7 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 
 @AdviceTo(value = AlibabaDubboAdvice.class, plugin = DubboPlugin.class)
-public class AlibabaDubboTracingInterceptor extends DubboBaseInterceptor {
+public class AlibabaDubboTraceInterceptor extends DubboBaseInterceptor {
 
 
 	@Override
@@ -25,12 +25,12 @@ public class AlibabaDubboTracingInterceptor extends DubboBaseInterceptor {
 
 	@Override
 	public void before(MethodInfo methodInfo, Context context) {
-		AlibabaDubboCtxUtils.initSpan(methodInfo, context, DUBBO_TRACE_CONFIG);
+		AlibabaDubboCtxUtils.initSpan(methodInfo, context);
 	}
 
 	@Override
 	public void after(MethodInfo methodInfo, Context context) {
-		AlibabaDubboCtxUtils.finishSpan(context, methodInfo, DUBBO_TRACE_CONFIG);
+		AlibabaDubboCtxUtils.finishSpan(context, methodInfo);
 	}
 
 }

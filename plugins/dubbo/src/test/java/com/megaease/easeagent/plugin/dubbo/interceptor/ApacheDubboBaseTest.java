@@ -3,16 +3,12 @@ package com.megaease.easeagent.plugin.dubbo.interceptor;
 import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.plugin.api.metric.Metric;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.dubbo.ApacheDubboCtxUtils;
 import com.megaease.easeagent.plugin.dubbo.DubboTags;
 import com.megaease.easeagent.plugin.dubbo.config.DubboTraceConfig;
-import com.megaease.easeagent.plugin.dubbo.interceptor.trace.apache.ApacheDubboTracingInterceptor;
+import com.megaease.easeagent.plugin.dubbo.interceptor.trace.apache.ApacheDubboTraceInterceptor;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -45,13 +41,12 @@ public abstract class ApacheDubboBaseTest {
 
 	protected Invocation providerInvocation;
 
-	protected AppResponse successResult = new AppResponse("test");
+	protected AppResponse successResponse = new AppResponse("test");
 
-	protected AppResponse failureResult = new AppResponse(new RuntimeException("mock exception"));
+	protected AppResponse failureResponse = new AppResponse(new RuntimeException("mock exception"));
 
-	protected AsyncRpcResult asyncSuccessResult = AsyncRpcResult.newDefaultAsyncResult("test", null);
+    protected AsyncRpcResult asyncRpcResult = new AsyncRpcResult((Invocation) null);
 
-	protected AsyncRpcResult asyncFailureResult = AsyncRpcResult.newDefaultAsyncResult(new RuntimeException("mock async call fail"), null);
 
 	@Before
 	public void setup() {
@@ -80,7 +75,7 @@ public abstract class ApacheDubboBaseTest {
 
 
 	protected void assertTrace(Invocation invocation, Object retValue, String errorMessage) {
-		DubboTraceConfig dubboTraceConfig = AgentFieldReflectAccessor.getStaticFieldValue(ApacheDubboTracingInterceptor.class, "DUBBO_TRACE_CONFIG");
+		DubboTraceConfig dubboTraceConfig = AgentFieldReflectAccessor.getStaticFieldValue(ApacheDubboTraceInterceptor.class, "DUBBO_TRACE_CONFIG");
 		URL url = invocation.getInvoker().getUrl();
 		boolean isConsumer = url.getParameter(SIDE_KEY).equals(CONSUMER_SIDE);
 		ReportSpan mockSpan = MockEaseAgent.getLastSpan();
@@ -104,7 +99,7 @@ public abstract class ApacheDubboBaseTest {
 		assertEquals(ConfigConst.Namespace.DUBBO, mockSpan.remoteServiceName());
 		if (retValue != null) {
 			assertFalse(mockSpan.hasError());
-			assertEquals(successResult.getValue(), retValue);
+			assertEquals(successResponse.getValue(), retValue);
 		} else {
 			assertTrue(mockSpan.hasError());
 			assertEquals(errorMessage, mockSpan.errorInfo());
@@ -112,23 +107,4 @@ public abstract class ApacheDubboBaseTest {
 		assertNull(mockSpan.parentId());
 	}
 
-	protected void assertMetric(String interfaceSignature, NameFactory nameFactory, MetricRegistry metricRegistry, boolean success) {
-		final Map<String, Metric> metrics = metricRegistry.getMetrics();
-		assertFalse(metrics.isEmpty());
-		assertNotNull(metrics.get(nameFactory.timerName(interfaceSignature, MetricSubType.DEFAULT)));
-		assertNotNull(metrics.get(nameFactory.meterName(interfaceSignature, MetricSubType.DEFAULT)));
-		assertNotNull(metrics.get(nameFactory.counterName(interfaceSignature, MetricSubType.DEFAULT)));
-		assertNotNull(metrics.get(nameFactory.gaugeName(interfaceSignature, MetricSubType.DEFAULT)));
-
-		if (success) {
-			assertNull(metrics.get(nameFactory.meterName(interfaceSignature, MetricSubType.ERROR)));
-			assertNull(metrics.get(nameFactory.counterName(interfaceSignature, MetricSubType.ERROR)));
-		} else {
-			assertNotNull(metrics.get(nameFactory.meterName(interfaceSignature, MetricSubType.ERROR)));
-			assertNotNull(metrics.get(nameFactory.counterName(interfaceSignature, MetricSubType.ERROR)));
-		}
-
-		//clean up metrics
-		MockEaseAgent.cleanAllMetric();
-	}
 }

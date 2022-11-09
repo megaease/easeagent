@@ -1,6 +1,5 @@
 package com.megaease.easeagent.plugin.dubbo.interceptor.metrics.alibaba;
 
-import com.alibaba.dubbo.rpc.RpcContext;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
@@ -16,14 +15,12 @@ import com.megaease.easeagent.plugin.dubbo.interceptor.AlibabaDubboBaseTest;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import org.apache.dubbo.rpc.AppResponse;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,6 +34,7 @@ public class AlibabaDubboMetricsInterceptorTest extends AlibabaDubboBaseTest {
 	public void setup() {
 		super.setup();
 		alibabaDubboMetricsInterceptor = new AlibabaDubboMetricsInterceptor();
+		initDubboMetrics();
 	}
 
 	@Test
@@ -51,14 +49,17 @@ public class AlibabaDubboMetricsInterceptorTest extends AlibabaDubboBaseTest {
 
 	@Test
 	public void init() {
-		initDubboMetrics();
 		assertNotNull(AgentFieldReflectAccessor.getStaticFieldValue(AlibabaDubboMetricsInterceptor.class, "DUBBO_METRICS"));
 	}
 
 	@Test
 	public void before() {
-		final Context context = EaseAgent.getContext();
-		alibabaDubboMetricsInterceptor.before(null, context);
+        MethodInfo methodInfo = MethodInfo.builder()
+            .args(new Object[]{consumerInvoker, consumerInvocation})
+            .build();
+
+		Context context = EaseAgent.getContext();
+		alibabaDubboMetricsInterceptor.before(methodInfo, context);
 		assertNotNull(ContextUtils.getBeginTime(context));
 	}
 
@@ -73,7 +74,6 @@ public class AlibabaDubboMetricsInterceptorTest extends AlibabaDubboBaseTest {
 				.build();
 
 		Context context = EaseAgent.getContext();
-		initDubboMetrics();
 		alibabaDubboMetricsInterceptor.before(methodInfo, context);
 		alibabaDubboMetricsInterceptor.after(methodInfo, context);
 		LastJsonReporter lastJsonReporter = getLastJsonReporter();
@@ -93,7 +93,6 @@ public class AlibabaDubboMetricsInterceptorTest extends AlibabaDubboBaseTest {
 				.build();
 
 		Context context = EaseAgent.getContext();
-		initDubboMetrics();
 		alibabaDubboMetricsInterceptor.before(methodInfo, context);
 		alibabaDubboMetricsInterceptor.after(methodInfo, context);
 		LastJsonReporter lastJsonReporter = getLastJsonReporter();
@@ -103,111 +102,25 @@ public class AlibabaDubboMetricsInterceptorTest extends AlibabaDubboBaseTest {
 		lastJsonReporter.clean();
 	}
 
-	@Test
-	public void rpcConsumerAsyncCallSuccess() {
-		MethodInfo methodInfo = MethodInfo.builder()
-				.invoker(asyncConsumerInvocation.getInvoker())
-				.method(asyncConsumerInvocation.getMethodName())
-				.args(new Object[]{asyncConsumerInvocation.getInvoker(), asyncConsumerInvocation})
-				.build();
 
-		initDubboMetrics();
-		Context context = EaseAgent.getContext();
-		CompletableFuture<AppResponse> completeFuture = new CompletableFuture<>();
-		RpcContext.getContext().setFuture(completeFuture);
+    @Test
+    public void rpcConsumerCallException() {
+        MethodInfo methodInfo = MethodInfo.builder()
+            .invoker(consumerInvoker)
+            .method(consumerInvocation.getMethodName())
+            .args(new Object[]{consumerInvoker, consumerInvocation})
+            .throwable(new RuntimeException("mock exception"))
+            .build();
 
-		alibabaDubboMetricsInterceptor.before(methodInfo, context);
-		alibabaDubboMetricsInterceptor.after(methodInfo, context);
-
-		AppResponse appResponse = new AppResponse(successResult);
-		completeFuture.complete(appResponse);
-
-		LastJsonReporter lastJsonReporter = getLastJsonReporter();
-		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
-		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
-		assertEquals(0, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
-		lastJsonReporter.clean();
-	}
-
-	@Test
-	public void rpcConsumerAsyncCallFailure() {
-		MethodInfo methodInfo = MethodInfo.builder()
-				.invoker(asyncConsumerInvocation.getInvoker())
-				.method(asyncConsumerInvocation.getMethodName())
-				.args(new Object[]{asyncConsumerInvocation.getInvoker(), asyncConsumerInvocation})
-				.build();
-
-		initDubboMetrics();
-		Context context = EaseAgent.getContext();
-		CompletableFuture<AppResponse> completeFuture = new CompletableFuture<>();
-		RpcContext.getContext().setFuture(completeFuture);
-
-		alibabaDubboMetricsInterceptor.before(methodInfo, context);
-		alibabaDubboMetricsInterceptor.after(methodInfo, context);
-
-		completeFuture.completeExceptionally(failureResult.getException());
-//		AppResponse appResponse = new AppResponse(failureResult.getException());
-//		completeFuture.complete(appResponse);
-
-		LastJsonReporter lastJsonReporter = getLastJsonReporter();
-		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
-		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
-		assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
-		lastJsonReporter.clean();
-	}
-
-	@Test
-	public void rpcProviderAsyncCallSuccess() {
-		MethodInfo methodInfo = MethodInfo.builder()
-				.invoker(asyncProviderInvocation.getInvoker())
-				.method(asyncProviderInvocation.getMethodName())
-				.args(new Object[]{asyncProviderInvocation.getInvoker(), asyncProviderInvocation})
-				.build();
-
-		initDubboMetrics();
-		Context context = EaseAgent.getContext();
-		CompletableFuture<AppResponse> completeFuture = new CompletableFuture<>();
-		RpcContext.getContext().setFuture(completeFuture);
-
-		alibabaDubboMetricsInterceptor.before(methodInfo, context);
-		alibabaDubboMetricsInterceptor.after(methodInfo, context);
-
-		AppResponse appResponse = new AppResponse(successResult);
-		completeFuture.complete(appResponse);
-
-		LastJsonReporter lastJsonReporter = getLastJsonReporter();
-		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
-		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
-		assertEquals(0, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
-		lastJsonReporter.clean();
-	}
-
-
-	@Test
-	public void rpcProviderAsyncCallFailure() {
-		MethodInfo methodInfo = MethodInfo.builder()
-				.invoker(asyncProviderInvocation.getInvoker())
-				.method(asyncProviderInvocation.getMethodName())
-				.args(new Object[]{asyncProviderInvocation.getInvoker(), asyncProviderInvocation})
-				.build();
-
-		initDubboMetrics();
-		Context context = EaseAgent.getContext();
-		CompletableFuture<AppResponse> completeFuture = new CompletableFuture<>();
-		RpcContext.getContext().setFuture(completeFuture);
-
-		alibabaDubboMetricsInterceptor.before(methodInfo, context);
-		alibabaDubboMetricsInterceptor.after(methodInfo, context);
-
-		AppResponse appResponse = new AppResponse(failureResult.getException());
-		completeFuture.complete(appResponse);
-
-		LastJsonReporter lastJsonReporter = getLastJsonReporter();
-		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
-		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
-		assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
-		lastJsonReporter.clean();
-	}
+        Context context = EaseAgent.getContext();
+        alibabaDubboMetricsInterceptor.before(methodInfo, context);
+        alibabaDubboMetricsInterceptor.after(methodInfo, context);
+        LastJsonReporter lastJsonReporter = getLastJsonReporter();
+        Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
+        assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
+        assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
+        lastJsonReporter.clean();
+    }
 
 	private void initDubboMetrics() {
 		DubboPlugin dubboPlugin = new DubboPlugin();

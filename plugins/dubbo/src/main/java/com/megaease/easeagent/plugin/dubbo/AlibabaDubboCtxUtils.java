@@ -2,8 +2,6 @@ package com.megaease.easeagent.plugin.dubbo;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
-import com.alibaba.dubbo.remoting.exchange.ResponseCallback;
-import com.alibaba.dubbo.remoting.exchange.ResponseFuture;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
@@ -15,6 +13,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.dubbo.config.DubboTraceConfig;
+import com.megaease.easeagent.plugin.dubbo.interceptor.DubboBaseInterceptor;
 import com.megaease.easeagent.plugin.dubbo.interceptor.trace.alibaba.AlibabaDubboClientRequest;
 import com.megaease.easeagent.plugin.dubbo.interceptor.trace.alibaba.AlibabaDubboServerRequest;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -26,10 +25,11 @@ import static com.alibaba.dubbo.common.Constants.*;
 import static com.megaease.easeagent.plugin.dubbo.DubboTags.RESULT;
 
 public class AlibabaDubboCtxUtils {
-	private static final String CLIENT_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class + ".CLIENT_REQUEST_CONTEXT";
-	private static final String SERVICE_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class + ".SERVICE_REQUEST_CONTEXT";
+	private static final String CLIENT_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class.getName() + ".CLIENT_REQUEST_CONTEXT";
+	private static final String SERVICE_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class.getName() + ".SERVICE_REQUEST_CONTEXT";
+	public static final String METRICS_SERVICE_NAME = AlibabaDubboCtxUtils.class.getName() + ".METRICS_SERVICE_NAME";
 
-	public static void initSpan(MethodInfo methodInfo, Context context, DubboTraceConfig config) {
+	public static void initSpan(MethodInfo methodInfo, Context context) {
 		Invoker<?> invoker = (Invoker<?>) methodInfo.getArgs()[0];
 		Invocation invocation = (Invocation) methodInfo.getArgs()[1];
 
@@ -37,7 +37,6 @@ public class AlibabaDubboCtxUtils {
 		RpcContext rpcContext = RpcContext.getContext();
 		String applicationName = requestUrl.getParameter(Constants.APPLICATION_KEY);
 		boolean isConsumer = requestUrl.getParameter(SIDE_KEY, PROVIDER_SIDE).equals(CONSUMER_SIDE);
-
 		if (isConsumer) {
 			String groupName = requestUrl.getParameter(Constants.GROUP_KEY);
 			String version = requestUrl.getParameter(Constants.VERSION_KEY);
@@ -50,7 +49,7 @@ public class AlibabaDubboCtxUtils {
 			span.remoteServiceName(ConfigConst.Namespace.DUBBO);
 			span.remoteIpAndPort(rpcContext.getRemoteHost(), rpcContext.getRemotePort());
 
-			String argsList = config.argsCollectEnabled() ? JsonUtil.toJson(invocation.getArguments()) : null;
+			String argsList = DubboBaseInterceptor.DUBBO_TRACE_CONFIG.argsCollectEnabled() ? JsonUtil.toJson(invocation.getArguments()) : null;
 			span.tag(DubboTags.CLIENT_APPLICATION.name, applicationName);
 			span.tag(DubboTags.GROUP.name, groupName);
 			span.tag(DubboTags.SERVICE.name, requestUrl.getPath());
@@ -74,81 +73,66 @@ public class AlibabaDubboCtxUtils {
 		}
 	}
 
-	public static void finishSpan(Context context, MethodInfo methodInfo, DubboTraceConfig config) {
+	public static void finishSpan(Context context, MethodInfo methodInfo) {
 		Result result = (Result) methodInfo.getRetValue();
 		Invoker<?> invoker = (Invoker<?>) methodInfo.getArgs()[0];
 		Invocation invocation = (Invocation) methodInfo.getArgs()[1];
 		Throwable throwable = methodInfo.getThrowable();
 
+        boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
+        Future<?> f = RpcContext.getContext().getFuture();
+        if (isAsync && f instanceof FutureAdapter) {
+            return;
+        }
+
 		boolean isConsumer = invoker.getUrl().getParameter(SIDE_KEY, PROVIDER_SIDE).equals(CONSUMER_SIDE);
-		boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
-		if (isAsync) {
-			Future<?> f = RpcContext.getContext().getFuture();
-			if (f instanceof FutureAdapter) {
-				ResponseFuture future = ((FutureAdapter<?>) f).getFuture();
-				future.setCallback(new ResponseCallback() {
-					@Override
-					public void done(Object response) {
-						if (response == null) {
-							doFinishSpan(isConsumer, config, context, null, new IllegalStateException("invalid result value : null, expected " + Result.class.getName()));
-							return;
-						}
-						if (!(response instanceof Result)) {
-							doFinishSpan(isConsumer, config, context, null, new IllegalStateException("invalid result type :" + response.getClass() + ", expected " + Result.class.getName()));
-							return;
-						}
-						Result result = (Result) response;
-						doFinishSpan(isConsumer, config, context, result, null);
-					}
-
-					@Override
-					public void caught(Throwable exception) {
-						doFinishSpan(isConsumer, config, context, null, exception);
-					}
-				});
-				return;
-			}
-		}
-		doFinishSpan(isConsumer, config, context, result, throwable);
+        RequestContext requestContext = requestContext(isConsumer,context);
+        if (requestContext == null) {
+            return;
+        }
+        Span span = requestContext.span();
+        doFinishSpan(span, result, throwable);
 	}
 
-	private static void doFinishSpan(boolean isConsumer, DubboTraceConfig config, Context context, Result result, Throwable throwable) {
-		RequestContext requestContext;
-		if (isConsumer) {
-			requestContext = context.remove(CLIENT_REQUEST_CONTEXT);
-		} else {
-			requestContext = context.remove(SERVICE_REQUEST_CONTEXT);
-		}
+    public static void finishSpan(Context context, Result result, Throwable throwable) {
+        RequestContext requestContext = context.get(CLIENT_REQUEST_CONTEXT);
+        Span span = requestContext.span();
+        doFinishSpan(span,result,throwable);
+    }
 
-		if (requestContext == null) {
-			return;
-		}
 
-		try {
-			Span span = requestContext.span();
-			if (span == null || span.isNoop()) {
-				return;
-			}
-			if (throwable != null) {
-				span.error(throwable);
-			}
-			if (result != null) {
-				if (result.getException() != null) {
-					span.error(result.getException());
-				} else {
-                    if (config.resultCollectEnabled() && result.getValue() != null) {
-    					span.tag(RESULT.name, config.resultCollectEnabled() ? JsonUtil.toJson(result.getValue()) : null);
-                    }
-				}
-			}
-			span.finish();
-		} finally {
-			requestContext.scope().close();
-		}
+	private static void doFinishSpan(Span span, Result result, Throwable throwable) {
+        if (span == null || span.isNoop()) {
+            return;
+        }
+        DubboTraceConfig config = DubboBaseInterceptor.DUBBO_TRACE_CONFIG;
+        if (throwable != null) {
+            span.error(throwable);
+        }
+        if (result != null) {
+            if (result.getException() != null) {
+                span.error(result.getException());
+            } else {
+                if (config.resultCollectEnabled() && result.getValue() != null) {
+                    span.tag(RESULT.name, config.resultCollectEnabled() ? JsonUtil.toJson(result.getValue()) : null);
+                }
+            }
+        }
+        span.finish();
 	}
 
+    private static RequestContext requestContext(boolean isConsumer, Context context) {
+        RequestContext requestContext;
+        if (isConsumer) {
+            requestContext = context.remove(CLIENT_REQUEST_CONTEXT);
+        } else {
+            requestContext = context.remove(SERVICE_REQUEST_CONTEXT);
+        }
+        return requestContext;
+    }
 
-	/**
+
+    /**
 	 * Format method name. e.g. test(String)
 	 *
 	 * @param invocation

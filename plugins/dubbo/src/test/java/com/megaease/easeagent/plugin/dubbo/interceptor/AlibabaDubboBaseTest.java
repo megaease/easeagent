@@ -2,24 +2,23 @@ package com.megaease.easeagent.plugin.dubbo.interceptor;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
+import com.alibaba.dubbo.remoting.Channel;
+import com.alibaba.dubbo.remoting.exchange.Request;
+import com.alibaba.dubbo.remoting.exchange.ResponseCallback;
+import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcInvocation;
 import com.alibaba.dubbo.rpc.RpcResult;
+import com.alibaba.dubbo.rpc.protocol.dubbo.FutureAdapter;
 import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
-import com.megaease.easeagent.plugin.api.metric.Metric;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.name.MetricSubType;
-import com.megaease.easeagent.plugin.api.metric.name.NameFactory;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.dubbo.AlibabaDubboCtxUtils;
 import com.megaease.easeagent.plugin.dubbo.DubboTags;
 import com.megaease.easeagent.plugin.dubbo.config.DubboTraceConfig;
-import com.megaease.easeagent.plugin.dubbo.interceptor.trace.alibaba.AlibabaDubboTracingInterceptor;
-import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import org.junit.Before;
@@ -32,6 +31,7 @@ import java.util.Map;
 import static com.alibaba.dubbo.common.Constants.CONSUMER_SIDE;
 import static com.alibaba.dubbo.common.Constants.SIDE_KEY;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
@@ -49,13 +49,31 @@ public abstract class AlibabaDubboBaseTest {
 
 	protected Invocation providerInvocation;
 
-	protected Invocation asyncProviderInvocation;
-
 	protected RpcResult successResult = new RpcResult("hello");
 
 	protected RpcResult failureResult = new RpcResult(new IllegalArgumentException("mock exception"));
+    protected FutureAdapter<Object> futureAdapter;
 
-	@Before
+    protected EmptyResponseCallback responseCallback = new EmptyResponseCallback();
+
+    protected static class EmptyResponseCallback implements ResponseCallback{
+        private Throwable throwable;
+
+        public Throwable throwable() {
+            return throwable;
+        }
+
+        @Override
+        public void done(Object response) {
+        }
+
+        @Override
+        public void caught(Throwable exception) {
+            this.throwable = exception;
+        }
+    }
+
+    @Before
 	public void setup() {
 		MockitoAnnotations.openMocks(this);
 
@@ -68,17 +86,17 @@ public abstract class AlibabaDubboBaseTest {
 		asyncConsumerAttachment.put(Constants.ASYNC_KEY, Boolean.TRUE.toString());
 		asyncConsumerInvocation = new RpcInvocation("sayHello", new Class<?>[]{String.class}, new Object[]{"hello"}, asyncConsumerAttachment, consumerInvoker);
 
-
 		Map<String, String> providerAttachment = new HashMap<>();
 		URL providerURL = URL.valueOf("dubbo://127.0.0.1:20880/com.magaease.easeagent.service.DubboService?side=provider&application=dubbo-provider&group=provider&version=1.0.0");
 		when(providerInvoker.getUrl()).thenReturn(providerURL);
 		providerInvocation = new RpcInvocation("sayHello", new Class[]{String.class}, new Object[]{"hello"}, providerAttachment, providerInvoker);
 
-		Map<String, String> asyncProviderAttachment = new HashMap<>();
-		asyncProviderAttachment.put(Constants.ASYNC_KEY, Boolean.TRUE.toString());
-		asyncProviderInvocation = new RpcInvocation("sayHello", new Class[]{String.class}, new Object[]{"hello"}, asyncProviderAttachment, providerInvoker);
+        Request request = new Request(1);
+        Channel channel = mock(Channel.class);
+        DefaultFuture defaultFuture = new DefaultFuture(channel,request,300);
+        futureAdapter = new FutureAdapter<>(defaultFuture);
 
-		EaseAgent.configFactory = MockConfig.getPluginConfigManager();
+        EaseAgent.configFactory = MockConfig.getPluginConfigManager();
 	}
 
 	protected void assertConsumerTrace(Object retValue, String errorMessage) {
@@ -91,7 +109,7 @@ public abstract class AlibabaDubboBaseTest {
 
 
 	protected void assertTrace(Invocation invocation, Object retValue, String errorMessage) {
-		DubboTraceConfig dubboTraceConfig = AgentFieldReflectAccessor.getStaticFieldValue(AlibabaDubboTracingInterceptor.class, "DUBBO_TRACE_CONFIG");
+		DubboTraceConfig dubboTraceConfig = DubboBaseInterceptor.DUBBO_TRACE_CONFIG;
 		URL url = invocation.getInvoker().getUrl();
 		boolean isConsumer = url.getParameter(SIDE_KEY).equals(CONSUMER_SIDE);
 
@@ -120,28 +138,11 @@ public abstract class AlibabaDubboBaseTest {
 			assertEquals(successResult.getValue(), retValue);
 		} else {
 			assertTrue(mockSpan.hasError());
-			assertEquals(errorMessage, mockSpan.errorInfo());
+            if (errorMessage != null) {
+    			assertEquals(errorMessage, mockSpan.errorInfo());
+            }
 		}
 		assertNull(mockSpan.parentId());
 	}
 
-	protected void assertMetric(String interfaceSignature, NameFactory nameFactory, MetricRegistry metricRegistry, boolean success) {
-		final Map<String, Metric> metrics = metricRegistry.getMetrics();
-		assertFalse(metrics.isEmpty());
-		assertNotNull(metrics.get(nameFactory.timerName(interfaceSignature, MetricSubType.DEFAULT)));
-		assertNotNull(metrics.get(nameFactory.meterName(interfaceSignature, MetricSubType.DEFAULT)));
-		assertNotNull(metrics.get(nameFactory.counterName(interfaceSignature, MetricSubType.DEFAULT)));
-		assertNotNull(metrics.get(nameFactory.gaugeName(interfaceSignature, MetricSubType.DEFAULT)));
-
-		if (success) {
-			assertNull(metrics.get(nameFactory.meterName(interfaceSignature, MetricSubType.ERROR)));
-			assertNull(metrics.get(nameFactory.counterName(interfaceSignature, MetricSubType.ERROR)));
-		} else {
-			assertNotNull(metrics.get(nameFactory.meterName(interfaceSignature, MetricSubType.ERROR)));
-			assertNotNull(metrics.get(nameFactory.counterName(interfaceSignature, MetricSubType.ERROR)));
-		}
-
-		//clean up metrics
-		MockEaseAgent.cleanAllMetric();
-	}
 }

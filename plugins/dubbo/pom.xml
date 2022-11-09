@@ -14,8 +14,8 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <alibaba-dubbo.version>2.5.0</alibaba-dubbo.version>
         <apache-dubbo.version>2.7.3</apache-dubbo.version>
-        <alibaba-dubbo.version>[2.5.0,)</alibaba-dubbo.version>
     </properties>
 
     <dependencies>
@@ -28,18 +28,24 @@
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>plugin-api-mock</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.megaease.easeagent</groupId>
+            <artifactId>plugin-api-mock</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+            <version>${alibaba-dubbo.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
             <version>${apache-dubbo.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-            <version>${alibaba-dubbo.version}</version>
             <scope>provided</scope>
         </dependency>
 

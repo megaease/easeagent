@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
-public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest {
+public class ApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest {
 
 	private ApacheDubboMetricsInterceptor apacheDubboMetricsInterceptor;
 
@@ -34,6 +34,7 @@ public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest
 	public void setup() {
 		super.setup();
 		apacheDubboMetricsInterceptor = new ApacheDubboMetricsInterceptor();
+		initDubboMetrics();
 	}
 
 	@Test
@@ -48,7 +49,6 @@ public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest
 
 	@Test
 	public void init() {
-		initDubboMetrics();
 		assertNotNull(AgentFieldReflectAccessor.getStaticFieldValue(ApacheDubboMetricsInterceptor.class, "DUBBO_METRICS"));
 	}
 
@@ -66,10 +66,9 @@ public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest
 				.invoker(consumerInvoker)
 				.method(consumerInvocation.getMethodName())
 				.args(new Object[]{consumerInvoker, consumerInvocation})
-				.retValue(successResult)
+				.retValue(successResponse)
 				.build();
 
-		initDubboMetrics();
 		Context context = EaseAgent.getContext();
 		LastJsonReporter lastJsonReporter = getLastJsonReporter();
 
@@ -87,10 +86,9 @@ public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest
 				.invoker(consumerInvoker)
 				.method(consumerInvocation.getMethodName())
 				.args(new Object[]{consumerInvoker, consumerInvocation})
-				.retValue(failureResult)
+				.retValue(failureResponse)
 				.build();
 
-		initDubboMetrics();
 		Context context = EaseAgent.getContext();
 		LastJsonReporter lastJsonReporter = getLastJsonReporter();
 
@@ -108,10 +106,9 @@ public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest
 				.invoker(consumerInvoker)
 				.method(consumerInvocation.getMethodName())
 				.args(new Object[]{consumerInvoker, consumerInvocation})
-				.throwable(failureResult.getException())
+				.throwable(failureResponse.getException())
 				.build();
 
-		initDubboMetrics();
 		Context context = EaseAgent.getContext();
 		LastJsonReporter lastJsonReporter = getLastJsonReporter();
 
@@ -125,20 +122,28 @@ public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest
 
 
 	@Test
-	public void rpcConsumerAsyncCallSuccess() {
-		MethodInfo methodInfo = MethodInfo.builder()
+	public void rpcConsumerAsyncCallSuccess() throws InterruptedException {
+        MethodInfo methodInfo = MethodInfo.builder()
 				.invoker(consumerInvoker)
 				.method(consumerInvocation.getMethodName())
 				.args(new Object[]{consumerInvoker, consumerInvocation})
-				.retValue(asyncSuccessResult)
+				.retValue(asyncRpcResult)
 				.build();
 
-		initDubboMetrics();
 		Context context = EaseAgent.getContext();
-		LastJsonReporter lastJsonReporter = getLastJsonReporter();
-
 		apacheDubboMetricsInterceptor.before(methodInfo, context);
 		apacheDubboMetricsInterceptor.after(methodInfo, context);
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                asyncRpcResult.complete(successResponse);
+            }
+        });
+        thread.start();
+        thread.join();
+
+        LastJsonReporter lastJsonReporter = getLastJsonReporter();
 		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
 		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
 		assertEquals(0, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
@@ -146,20 +151,28 @@ public class ApacheApacheDubboMetricsInterceptorTest extends ApacheDubboBaseTest
 	}
 
 	@Test
-	public void rpcConsumerAsyncCallFailure() {
+	public void rpcConsumerAsyncCallFailure() throws InterruptedException {
 		MethodInfo methodInfo = MethodInfo.builder()
 				.invoker(consumerInvoker)
 				.method(consumerInvocation.getMethodName())
 				.args(new Object[]{consumerInvoker, consumerInvocation})
-				.retValue(asyncFailureResult)
+				.retValue(asyncRpcResult)
 				.build();
 
-		initDubboMetrics();
 		Context context = EaseAgent.getContext();
-		LastJsonReporter lastJsonReporter = getLastJsonReporter();
-
 		apacheDubboMetricsInterceptor.before(methodInfo, context);
 		apacheDubboMetricsInterceptor.after(methodInfo, context);
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                asyncRpcResult.complete(failureResponse);
+            }
+        });
+        thread.start();
+        thread.join();
+
+		LastJsonReporter lastJsonReporter = getLastJsonReporter();
 		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
 		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
 		assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));

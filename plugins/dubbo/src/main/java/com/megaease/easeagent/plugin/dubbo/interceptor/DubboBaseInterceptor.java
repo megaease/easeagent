@@ -8,7 +8,7 @@ import com.megaease.easeagent.plugin.interceptor.Interceptor;
 
 public abstract class DubboBaseInterceptor implements Interceptor {
 
-	protected static volatile DubboTraceConfig DUBBO_TRACE_CONFIG;
+	public static volatile DubboTraceConfig DUBBO_TRACE_CONFIG;
 
 	@Override
 	public void init(IPluginConfig config, String className, String methodName, String methodDescriptor) {
