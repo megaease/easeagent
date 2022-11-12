@@ -87,6 +87,7 @@ public class FeignClientTracingInterceptorTest {
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());
         }
+        span.finish();
     }
 
     @Test

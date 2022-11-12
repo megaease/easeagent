@@ -50,6 +50,10 @@ public class MockTracingProvider implements MockProvider {
         return getTracingProvider();
     }
 
+    public static synchronized boolean hasPendingSpans() {
+        return TracerTestUtils.hashPendingSpans(TRACING.tracer());
+    }
+
     public static synchronized void cleanPendingSpans() {
         TracerTestUtils.clean(TRACING.tracer());
     }
@@ -59,5 +63,9 @@ public class MockTracingProvider implements MockProvider {
         if (currentContext instanceof ThreadLocalCurrentTraceContext) {
             ((ThreadLocalCurrentTraceContext) currentContext).clear();
         }
+    }
+
+    public static synchronized boolean hashCurrentConetxt() {
+        return TRACING.currentTraceContext().get() != null;
     }
 }

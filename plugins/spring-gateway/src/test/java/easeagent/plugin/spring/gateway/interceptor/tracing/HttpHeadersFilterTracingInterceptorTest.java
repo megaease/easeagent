@@ -47,6 +47,7 @@ public class HttpHeadersFilterTracingInterceptorTest {
         assertNull(mockServerWebExchange.getAttribute(GatewayCons.CHILD_SPAN_KEY));
 
 
+
         mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         methodInfo = MethodInfo.builder().args(new Object[]{null, mockServerWebExchange}).retValue(new HttpHeaders()).build();
 
@@ -63,7 +64,9 @@ public class HttpHeadersFilterTracingInterceptorTest {
             assertEquals(span.traceIdString(), clientContext.span().traceIdString());
             assertEquals(span.spanIdString(), clientContext.span().parentIdString());
             clientContext.scope().close();
+            clientContext.span().abandon();
         }
+        span.abandon();
     }
 
     @Test

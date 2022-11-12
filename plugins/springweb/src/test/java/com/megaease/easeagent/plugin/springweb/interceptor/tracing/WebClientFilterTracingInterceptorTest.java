@@ -105,6 +105,8 @@ public class WebClientFilterTracingInterceptorTest {
         assertFalse(context.currentTracing().hasCurrentSpan());
         assertNull(MockEaseAgent.getLastSpan());
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
+        RequestContext pCtx =  context.get(interceptor.getProgressKey());
+        pCtx.span().abandon();
 
         String errorInfo = "test error";
         clientRequest = MockClientRequest.build(uri);

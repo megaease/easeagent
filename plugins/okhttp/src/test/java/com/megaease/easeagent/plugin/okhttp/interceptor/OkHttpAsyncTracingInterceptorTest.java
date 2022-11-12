@@ -76,6 +76,7 @@ public class OkHttpAsyncTracingInterceptorTest {
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());
         }
+        span.abandon();
 
         mockSpan = runOne((call, callback) -> {
             callback.onFailure(call, new IOException("test error"));

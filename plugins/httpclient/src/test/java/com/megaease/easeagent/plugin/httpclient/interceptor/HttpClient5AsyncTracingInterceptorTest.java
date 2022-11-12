@@ -64,6 +64,7 @@ public class HttpClient5AsyncTracingInterceptorTest {
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());
         }
+        span.abandon();
 
         mockSpan = runOne(httpResponseFutureCallback -> {
             httpResponseFutureCallback.failed(new RuntimeException("test error"));
