@@ -11,6 +11,7 @@ import com.alibaba.dubbo.rpc.support.RpcUtils;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.dubbo.config.DubboTraceConfig;
 import com.megaease.easeagent.plugin.dubbo.interceptor.DubboBaseInterceptor;
@@ -90,14 +91,21 @@ public class AlibabaDubboCtxUtils {
         if (requestContext == null) {
             return;
         }
-        Span span = requestContext.span();
-        doFinishSpan(span, result, throwable);
+        try (Scope scope = requestContext.scope()){
+            Span span = requestContext.span();
+            doFinishSpan(span, result, throwable);
+        }
 	}
 
     public static void finishSpan(Context context, Result result, Throwable throwable) {
-        RequestContext requestContext = context.get(CLIENT_REQUEST_CONTEXT);
-        Span span = requestContext.span();
-        doFinishSpan(span,result,throwable);
+        RequestContext requestContext = context.remove(CLIENT_REQUEST_CONTEXT);
+        if (requestContext == null) {
+            return;
+        }
+        try (Scope scope = requestContext.scope()){
+            Span span = requestContext.span();
+            doFinishSpan(span, result, throwable);
+        }
     }
 
 

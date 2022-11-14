@@ -4,6 +4,7 @@ import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.dubbo.config.DubboTraceConfig;
 import com.megaease.easeagent.plugin.dubbo.interceptor.DubboBaseInterceptor;
@@ -88,12 +89,13 @@ public class ApacheDubboCtxUtils {
         if (requestContext == null) {
             return;
         }
-
-        Span span = requestContext.span();
-        if (result instanceof AsyncRpcResult) {
-            result.whenCompleteWithContext(new ApacheDubboTraceCallback(span));
-        } else {
-            doFinishSpan(span, result, throwable);
+        try (Scope scope = requestContext.scope()) {
+            Span span = requestContext.span();
+            if (result instanceof AsyncRpcResult) {
+                result.whenCompleteWithContext(new ApacheDubboTraceCallback(span));
+            } else {
+                doFinishSpan(span, result, throwable);
+            }
         }
     }
 
