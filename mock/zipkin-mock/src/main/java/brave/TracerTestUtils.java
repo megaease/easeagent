@@ -17,12 +17,23 @@
 
 package brave;
 
-import brave.internal.collect.WeakConcurrentMapTestUtils;
+import brave.internal.recorder.PendingSpan;
 import brave.internal.recorder.PendingSpans;
+import brave.propagation.TraceContext;
+
+import java.util.Iterator;
+import java.util.Map;
 
 public class TracerTestUtils {
     public static void clean(Tracer tracer) {
         PendingSpans pendingSpans = tracer.pendingSpans;
-        WeakConcurrentMapTestUtils.runExpungeStaleEntries(pendingSpans);
+        Iterator<Map.Entry<TraceContext, PendingSpan>> iterator = pendingSpans.iterator();
+        while (iterator.hasNext()) {
+            pendingSpans.remove(iterator.next().getKey());
+        }
+    }
+
+    public static boolean hashPendingSpans(Tracer tracer) {
+        return tracer.pendingSpans.iterator().hasNext();
     }
 }

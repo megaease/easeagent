@@ -77,6 +77,7 @@ public class GatewayAccessLogInfoInterceptorTest {
             assertEquals(span.spanIdString(), accessLog.getSpanId());
             assertEquals(span.parentIdString(), accessLog.getParentSpanId());
         }
+        span.finish();
     }
 
 

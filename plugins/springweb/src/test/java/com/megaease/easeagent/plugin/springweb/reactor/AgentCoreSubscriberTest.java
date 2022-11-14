@@ -114,6 +114,7 @@ public class AgentCoreSubscriberTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
         interceptor.doBefore(methodInfo, context);
         RequestContext requestContext = context.get(interceptor.getProgressKey());
+        interceptor.doAfter(methodInfo, context);
 
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, methodInfo, requestContext);
         agentCoreSubscriber.onError(new RuntimeException(errorInfo));
@@ -128,6 +129,7 @@ public class AgentCoreSubscriberTest {
         methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
         interceptor.doBefore(methodInfo, context);
         requestContext = context.get(interceptor.getProgressKey());
+        interceptor.doAfter(methodInfo, context);
         agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, methodInfo, requestContext);
         ClientResponse clientResponse = MockDefaultClientResponse.builder(500).build();
         agentCoreSubscriber.onNext(clientResponse);
@@ -151,6 +153,7 @@ public class AgentCoreSubscriberTest {
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
         interceptor.doBefore(methodInfo, context);
         RequestContext requestContext = context.get(interceptor.getProgressKey());
+        interceptor.doAfter(methodInfo, context);
         AgentCoreSubscriber agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, methodInfo, requestContext);
         agentCoreSubscriber.onComplete();
         assertTrue(mockCoreSubscriber.onComplete.get());
@@ -161,6 +164,7 @@ public class AgentCoreSubscriberTest {
         methodInfo = MethodInfo.builder().args(new Object[]{clientRequest}).retValue(new MockMono()).build();
         interceptor.doBefore(methodInfo, context);
         requestContext = context.get(interceptor.getProgressKey());
+        interceptor.doAfter(methodInfo, context);
         agentCoreSubscriber = new AgentCoreSubscriber(mockCoreSubscriber, methodInfo, requestContext);
         ClientResponse clientResponse = MockDefaultClientResponse.builder(203).build();
         agentCoreSubscriber.onNext(clientResponse);

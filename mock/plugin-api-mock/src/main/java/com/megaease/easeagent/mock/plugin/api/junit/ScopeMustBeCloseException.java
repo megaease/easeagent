@@ -17,26 +17,8 @@
 
 package com.megaease.easeagent.mock.plugin.api.junit;
 
-import com.megaease.easeagent.mock.plugin.api.utils.ContextUtils;
-import com.megaease.easeagent.mock.report.MockReport;
-import org.junit.runners.model.Statement;
-
-public class ResetStatement extends Statement {
-    private final Statement after;
-
-    public ResetStatement(Statement after) {
-        this.after = after;
+public class ScopeMustBeCloseException extends RuntimeException{
+    public ScopeMustBeCloseException(String message) {
+        super(message);
     }
-
-    @Override
-    public void evaluate() throws Throwable {
-        cleanAll();
-        after.evaluate();
-    }
-
-    private void cleanAll() {
-        ContextUtils.resetAll();
-        MockReport.cleanReporter();
-    }
-
 }

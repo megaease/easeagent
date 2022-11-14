@@ -67,6 +67,7 @@ public class HttpClientDoExecuteInterceptorTest {
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());
         }
+        span.abandon();
     }
 
     @Test
