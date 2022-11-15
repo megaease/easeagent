@@ -3,6 +3,7 @@ package com.megaease.easeagent.plugin.motan.interceptor;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.middleware.Type;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTags;
 import com.megaease.easeagent.plugin.motan.config.MotanPluginConfig;
@@ -86,12 +87,12 @@ public class MotanCtxUtils {
 	}
 
 	public static void finishConsumerSpan(Response response, Throwable throwable, Context context) {
-		RequestContext requestContext = context.get(CLIENT_REQUEST_CONTEXT);
+		RequestContext requestContext = context.remove(CLIENT_REQUEST_CONTEXT);
 		judgmentFinishSpan(response, throwable, requestContext);
 	}
 
 	public static void finishConsumerSpan(Future future, Context context) {
-		RequestContext requestContext = context.get(CLIENT_REQUEST_CONTEXT);
+		RequestContext requestContext = context.remove(CLIENT_REQUEST_CONTEXT);
 		if (future.getException() != null) {
 			finishSpan(null, future.getException(), requestContext);
 		} else {
@@ -100,7 +101,7 @@ public class MotanCtxUtils {
 	}
 
 	public static void finishProviderSpan(Response response, Throwable throwable, Context context) {
-		RequestContext requestContext = context.get(SERVER_REQUEST_CONTEXT);
+		RequestContext requestContext = context.remove(SERVER_REQUEST_CONTEXT);
 		judgmentFinishSpan(response, throwable, requestContext);
 	}
 
@@ -115,17 +116,22 @@ public class MotanCtxUtils {
 	}
 
 	private static void finishSpan(Object retValue, Throwable throwable, RequestContext requestContext) {
-		MotanPluginConfig motanPluginConfig = MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG;
-		Span span = requestContext.span();
-		if (span.isNoop()) {
+		if (requestContext == null) {
 			return;
 		}
-		if (throwable != null) {
-			span.error(throwable);
+		MotanPluginConfig motanPluginConfig = MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG;
+		try (Scope scope = requestContext.scope()) {
+			Span span = requestContext.span();
+			if (span.isNoop()) {
+				return;
+			}
+			if (throwable != null) {
+				span.error(throwable);
+			}
+			if (motanPluginConfig.resultCollectEnabled() && retValue != null) {
+				span.tag(MotanTags.RESULT.name, JsonUtil.toJson(retValue));
+			}
+			span.finish();
 		}
-		if (motanPluginConfig.resultCollectEnabled() && retValue != null) {
-			span.tag(MotanTags.RESULT.name, JsonUtil.toJson(retValue));
-		}
-		span.finish();
 	}
 }
