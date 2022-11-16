@@ -5,14 +5,17 @@ import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTags;
 import com.megaease.easeagent.plugin.motan.config.MotanPluginConfig;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanBaseInterceptor;
+import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTags;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.consumer.MotanConsumerRequest;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.provider.MotanProviderRequest;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.weibo.api.motan.common.URLParamType;
-import com.weibo.api.motan.rpc.*;
+import com.weibo.api.motan.rpc.Future;
+import com.weibo.api.motan.rpc.Request;
+import com.weibo.api.motan.rpc.Response;
+import com.weibo.api.motan.rpc.URL;
 
 
 public class MotanCtxUtils {
@@ -26,7 +29,7 @@ public class MotanCtxUtils {
 				.append(".")
 				.append(request.getMethodName())
 				.append("(")
-				.append(request.getParamtersDesc())
+				.append(getParametersDesc(request))
 				.append(")")
 				.toString();
 	}
@@ -34,22 +37,28 @@ public class MotanCtxUtils {
 	public static String method(Request request) {
 		return new StringBuilder(request.getMethodName())
 				.append("(")
-				.append(request.getParamtersDesc())
+				.append(getParametersDesc(request))
 				.append(")")
 				.toString();
 	}
 
-	public static String name(Request request) {
+    private static String getParametersDesc(Request request) {
+        return request.getParamtersDesc().equals(void.class.getSimpleName()) ? "" : request.getParamtersDesc();
+    }
+
+    public static String name(Request request) {
 		String interfaceFullName = request.getInterfaceName();
 		String interfaceName = interfaceFullName.substring(interfaceFullName.lastIndexOf(".") + 1);
 		StringBuilder argsStringBuilder = new StringBuilder();
 		Object[] arguments = request.getArguments();
-		for (int i = 0; i < arguments.length; i++) {
-			argsStringBuilder.append(arguments[i].getClass().getSimpleName());
-			if (i != arguments.length - 1) {
-				argsStringBuilder.append(",");
-			}
-		}
+        if (arguments != null) {
+            for (int i = 0; i < arguments.length; i++) {
+                argsStringBuilder.append(arguments[i].getClass().getSimpleName());
+                if (i != arguments.length - 1) {
+                    argsStringBuilder.append(",");
+                }
+            }
+        }
 		return String.format("%s/%s(%s)", interfaceName, request.getMethodName(), argsStringBuilder);
 	}
 
