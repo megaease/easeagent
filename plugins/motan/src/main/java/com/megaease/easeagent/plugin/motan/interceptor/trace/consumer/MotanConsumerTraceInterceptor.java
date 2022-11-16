@@ -2,13 +2,15 @@ package com.megaease.easeagent.plugin.motan.interceptor.trace.consumer;
 
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.motan.MotanPlugin;
 import com.megaease.easeagent.plugin.motan.advice.MotanConsumerAdvice;
-import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanBaseInterceptor;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanClassUtils;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
+import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanBaseInterceptor;
 import com.weibo.api.motan.rpc.*;
 
 @AdviceTo(value = MotanConsumerAdvice.class, plugin = MotanPlugin.class)
@@ -30,8 +32,14 @@ public class MotanConsumerTraceInterceptor extends MotanBaseInterceptor {
 	public void after(MethodInfo methodInfo, Context context) {
 		Response response = (Response) methodInfo.getRetValue();
 		if (MotanClassUtils.DefaultResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)) {
-			DefaultResponseFuture defaultResponseFuture = (DefaultResponseFuture) response;
-			defaultResponseFuture.addListener(new TraceFutureListener(context.exportAsync()));
+            RequestContext requestContext = context.get(MotanCtxUtils.CLIENT_REQUEST_CONTEXT);
+            if (requestContext == null) {
+                return;
+            }
+            try(Scope scope = requestContext.scope()) {
+                DefaultResponseFuture defaultResponseFuture = (DefaultResponseFuture) response;
+                defaultResponseFuture.addListener(new TraceFutureListener(context.exportAsync()));
+            }
 		} else {
 			MotanCtxUtils.finishConsumerSpan(response, methodInfo.getThrowable(), context);
 		}
