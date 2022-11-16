@@ -4,6 +4,9 @@ import com.alibaba.dubbo.remoting.exchange.ResponseCallback;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.dubbo.AlibabaDubboCtxUtils;
 import com.megaease.easeagent.plugin.dubbo.DubboPlugin;
 import com.megaease.easeagent.plugin.dubbo.advice.AlibabaDubboResponseFutureAdvice;
 import com.megaease.easeagent.plugin.dubbo.interceptor.DubboBaseInterceptor;
@@ -21,6 +24,9 @@ public class AlibabaDubboAsyncTraceInterceptor extends DubboBaseInterceptor {
     public void before(MethodInfo methodInfo, Context context) {
         ResponseCallback responseCallback = (ResponseCallback) methodInfo.getArgs()[0];
         AsyncContext asyncContext = context.exportAsync();
-        methodInfo.changeArg(0, new AlibabaDubboTraceCallback(responseCallback, asyncContext));
+        RequestContext requestContext = context.get(AlibabaDubboCtxUtils.CLIENT_REQUEST_CONTEXT);
+        try(Scope scope = requestContext.scope()) {
+            methodInfo.changeArg(0, new AlibabaDubboTraceCallback(responseCallback, asyncContext));
+        }
     }
 }

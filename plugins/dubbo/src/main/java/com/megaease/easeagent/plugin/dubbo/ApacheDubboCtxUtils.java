@@ -197,7 +197,7 @@ public class ApacheDubboCtxUtils {
         StringBuilder argsStringBuilder = new StringBuilder();
         Class<?>[] parameterTypes = invocation.getParameterTypes();
         for (int i = 0; i < parameterTypes.length; i++) {
-            argsStringBuilder.append(parameterTypes[0].getSimpleName());
+            argsStringBuilder.append(parameterTypes[i].getSimpleName());
             if (i != parameterTypes.length - 1) {
                 argsStringBuilder.append(",");
             }

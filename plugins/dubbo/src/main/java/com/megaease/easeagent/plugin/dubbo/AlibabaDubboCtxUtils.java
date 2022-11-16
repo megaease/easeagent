@@ -15,6 +15,7 @@ import com.megaease.easeagent.plugin.api.trace.Scope;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.dubbo.config.DubboTraceConfig;
 import com.megaease.easeagent.plugin.dubbo.interceptor.DubboBaseInterceptor;
+import com.megaease.easeagent.plugin.dubbo.interceptor.trace.alibaba.AlibabaDubboAsyncTraceInterceptor;
 import com.megaease.easeagent.plugin.dubbo.interceptor.trace.alibaba.AlibabaDubboClientRequest;
 import com.megaease.easeagent.plugin.dubbo.interceptor.trace.alibaba.AlibabaDubboServerRequest;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -26,7 +27,7 @@ import static com.alibaba.dubbo.common.Constants.*;
 import static com.megaease.easeagent.plugin.dubbo.DubboTags.RESULT;
 
 public class AlibabaDubboCtxUtils {
-	private static final String CLIENT_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class.getName() + ".CLIENT_REQUEST_CONTEXT";
+	public static final String CLIENT_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class.getName() + ".CLIENT_REQUEST_CONTEXT";
 	private static final String SERVICE_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class.getName() + ".SERVICE_REQUEST_CONTEXT";
 	public static final String METRICS_SERVICE_NAME = AlibabaDubboCtxUtils.class.getName() + ".METRICS_SERVICE_NAME";
 
@@ -80,6 +81,10 @@ public class AlibabaDubboCtxUtils {
 		Invocation invocation = (Invocation) methodInfo.getArgs()[1];
 		Throwable throwable = methodInfo.getThrowable();
 
+        /**
+         * requestContext.scope() will be closed in
+         * {@link AlibabaDubboAsyncTraceInterceptor#before(MethodInfo, Context)}
+         */
         boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
         Future<?> f = RpcContext.getContext().getFuture();
         if (isAsync && f instanceof FutureAdapter) {
@@ -174,7 +179,7 @@ public class AlibabaDubboCtxUtils {
 		StringBuilder argsStringBuilder = new StringBuilder();
 		final Class<?>[] parameterTypes = invocation.getParameterTypes();
 		for (int i = 0; i < parameterTypes.length; i++) {
-			argsStringBuilder.append(parameterTypes[0].getSimpleName());
+			argsStringBuilder.append(parameterTypes[i].getSimpleName());
 			if (i != parameterTypes.length - 1) {
 				argsStringBuilder.append(",");
 			}
