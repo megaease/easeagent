@@ -243,11 +243,6 @@
             </dependency>
             <dependency>
                 <groupId>io.zipkin.brave</groupId>
-                <artifactId>brave-instrumentation-servlet</artifactId>
-                <version>${version.brave}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-context-log4j2</artifactId>
                 <version>${version.brave}</version>
             </dependency>
@@ -369,6 +364,11 @@
             <dependency>
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-instrumentation-messaging</artifactId>
+                <version>${version.brave}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-instrumentation-rpc</artifactId>
                 <version>${version.brave}</version>
             </dependency>
             <!--

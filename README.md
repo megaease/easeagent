@@ -58,6 +58,7 @@ A lightweight & opening Java Agent for Cloud-Native and APM system
         * `Jedis 3.5.x`、 `Lettuce 5.3.x (sync、async)`
         * `ElasticSearch Client >= 7.x (sync、async)`
         * `Mongodb Client >=4.0.x (sync、async)`
+        * `Motan >= 1.2.0`
     * Collecting Access Logs.
         * `HTTP Servlet`、`HTTP Filter`
         * `Spring Cloud Gateway`
