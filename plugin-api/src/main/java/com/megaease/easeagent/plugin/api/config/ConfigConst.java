@@ -148,7 +148,9 @@ public interface ConfigConst {
         String MD5_DICTIONARY = "md5Dictionary";
 
         // ------------ rpc ----------------------
+        String DUBBO = "dubbo";
         String MOTAN = "motan";
+
 
         // -------------  request  ------------------
         String HTTPCLIENT = "httpclient";
