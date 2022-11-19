@@ -48,6 +48,7 @@ public class RunnableInterceptorTest {
             assertEquals(span.traceId(), span1.traceId());
             assertEquals(span.spanId(), span1.parentId());
             assertNotEquals(span.spanId(), span1.spanId());
+            span1.finish();
             run.incrementAndGet();
         };
         MethodInfo methodInfo = MethodInfo.builder()

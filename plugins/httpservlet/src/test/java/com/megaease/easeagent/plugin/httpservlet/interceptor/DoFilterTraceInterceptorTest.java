@@ -106,6 +106,7 @@ public class DoFilterTraceInterceptorTest {
         RequestContext requestContext = context.clientRequest(new MockClientRequest(httpServletRequest::addHeader));
         requestContext.scope().close();
         assertFalse(context.currentTracing().hasCurrentSpan());
+        requestContext.span().abandon();
 
         HttpServletResponse response = TestServletUtils.buildMockResponse();
         MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();

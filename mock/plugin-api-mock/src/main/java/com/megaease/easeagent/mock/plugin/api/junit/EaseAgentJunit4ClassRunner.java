@@ -33,6 +33,11 @@ public final class EaseAgentJunit4ClassRunner extends BlockJUnit4ClassRunner {
 
     @Override
     protected Statement withBefores(FrameworkMethod method, Object target, Statement statement) {
-        return new ResetStatement(super.withBefores(method, target, statement));
+        return new BeforeStatement(super.withBefores(method, target, statement));
+    }
+
+    @Override
+    protected Statement withAfters(FrameworkMethod method, Object target, Statement statement) {
+        return new AfterStatement(method, target, super.withAfters(method, target, statement));
     }
 }

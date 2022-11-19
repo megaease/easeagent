@@ -24,6 +24,7 @@ public enum Type {
     RABBITMQ(MiddlewareConstants.TYPE_RABBITMQ),
     ELASTICSEARCH(MiddlewareConstants.TYPE_ES),
     MONGODB(MiddlewareConstants.TYPE_MONGODB),
+    MOTAN(MiddlewareConstants.TYPE_MOTAN)
     ;
 
     final String remoteType;

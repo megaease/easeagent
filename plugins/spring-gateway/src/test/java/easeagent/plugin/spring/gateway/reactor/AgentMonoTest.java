@@ -82,6 +82,7 @@ public class AgentMonoTest {
         }
         thread.start();
         thread.join();
+        span.finish();
     }
 
 }

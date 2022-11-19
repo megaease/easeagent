@@ -50,6 +50,7 @@
         <module>logback</module>
         <module>log4j2-log-plugin</module>
         <module>dubbo</module>
+        <module>motan</module>
     </modules>
 
     <properties>

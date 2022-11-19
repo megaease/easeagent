@@ -59,6 +59,7 @@ public class GatewayServerTracingInterceptorTest {
         requestContext.scope().close();
         assertFalse(context.currentTracing().hasCurrentSpan());
         context.remove(FluxHttpServerRequest.class);
+        requestContext.span().abandon();
 
 
         MockServerHttpRequest.BaseBuilder<?> baseBuilder = TestServerWebExchangeUtils.builder();
@@ -100,6 +101,7 @@ public class GatewayServerTracingInterceptorTest {
         mockServerWebExchange = TestServerWebExchangeUtils.mockServerWebExchange();
         methodInfo = MethodInfo.builder().args(new Object[]{mockServerWebExchange}).build();
         interceptor.before(methodInfo, context);
+        RequestContext requestContext = context.get(GatewayServerTracingInterceptor.SPAN_CONTEXT_KEY);
         interceptor.after(methodInfo, context);
         assertNull(context.get(GatewayServerTracingInterceptor.SPAN_CONTEXT_KEY));
         assertNull(context.get(FluxHttpServerRequest.class));
@@ -107,6 +109,7 @@ public class GatewayServerTracingInterceptorTest {
         assertTrue(methodInfo.getRetValue() instanceof AgentMono);
 
         assertFalse(context.currentTracing().hasCurrentSpan());
+        requestContext.span().abandon();
     }
 
 

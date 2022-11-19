@@ -116,6 +116,39 @@ JDBC Connection schema describes key metrics of Getting Connection, which includ
 | application_jdbc_connection_p99    | double  | TP99: The JDBC connection establishment duration in milliseconds for 99% user.                            |
 | application_jdbc_connection_p999   | double  | TP99.9: The JDBC connection establishment duration in milliseconds for 99.9% user.                        |
 
+### Motan
+Motan schema describes key metrics of Motan client invoking, which include:
+* Total execution count (cnt, errcnt, m1cnt, m5cnt, m15cnt)
+* Throughput (m1, m5, m15, mean_rate)
+* Error throughput (m1err, m5err, m15err)
+* Execution duration (min, mean, max)
+* Latency (p25, p50, p75, p95, p98, p99, p999)
+
+| Metric Name                         |  Type   | Description                                                                                               |
+|:------------------------------------| :-----: |:----------------------------------------------------------------------------------------------------------|
+| application_motan_cnt               | integer | The total count of the Motan method executed                                                              |
+| application_motan_errcnt            | integer | The total error count of the Motan method executed                                                        |
+| application_motan_m1cnt             | integer | The total count of the Motan method executed in last 1 minute                                             |
+| application_motan_m5cnt             | integer | The total count of the Motan method executed in last 5 minute                                             |
+| application_motan_m15cnt            | integer | The total count of the Motan method executed in last 15 minute                                            |
+| application_motan_m1                | double  | The Motan method executions per second (exponentially-weighted moving average) in last 1 minute           |
+| application_motan_m5                | double  | The Motan method executions per second (exponentially-weighted moving average) in last 5 minute.          |
+| application_motan_m15               | double  | The Motan method executions per second (exponentially-weighted moving average) in last 15 minute.         |
+| application_motan_mean_rate         | double  | The Motan method executions per second (exponentially-weighted moving average) in last 15 minute.         |
+| application_motan_m1err             | double  | The Motan method error executions per second (exponentially-weighted moving average) in last 1 minute     |
+| application_motan_m5err             | double  | The Motan method error executions per second (exponentially-weighted moving average) in last 5 minute.    |
+| application_motan_m15err            | double  | The Motan method error executions per second (exponentially-weighted moving average) in last 15 minute    |
+| application_motan_min               | double  | The Motan method minimal execution duration in milliseconds.                                              |
+| application_motan_max               | double  | The Motan method maximal execution duration in milliseconds.                                              |
+| application_motan_mean              | double  | The Motan method mean execution duration in milliseconds.                                                 |
+| application_motan_p25               | double  | TP25: The Motan method execution duration in milliseconds for 25% user.                                   |
+| application_motan_p50               | double  | TP50: The Motan method execution duration in milliseconds for 50% user.                                   |
+| application_motan_p75               | double  | TP75: The Motan method execution duration in milliseconds for 75% user.                                   |
+| application_motan_p95               | double  | TP95: The Motan method execution duration in milliseconds for 95% user.                                   |
+| application_motan_p98               | double  | TP98: The Motan method execution duration in milliseconds for 98% user.                                   |
+| application_motan_p99               | double  | TP99: The Motan method execution duration in milliseconds for 99% user.                                   |
+| application_motan_p999              | double  | TP999: The Motan method execution duration in milliseconds for 99.9% user.                                |
+
 #### Dedicated label
 | Label Name | Essential |    Value Example     | Description                     |
 |:-----------|:---------:|:--------------------:|:--------------------------------|

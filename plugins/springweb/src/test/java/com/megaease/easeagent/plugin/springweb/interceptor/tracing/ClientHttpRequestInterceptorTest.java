@@ -92,6 +92,7 @@ public class ClientHttpRequestInterceptorTest {
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());
         }
+        span.finish();
     }
 
     @Test

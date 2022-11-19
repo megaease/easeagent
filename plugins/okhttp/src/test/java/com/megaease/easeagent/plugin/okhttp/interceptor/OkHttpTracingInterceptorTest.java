@@ -89,7 +89,7 @@ public class OkHttpTracingInterceptorTest {
             assertEquals(span.spanIdString(), mockSpan.parentId());
             assertNotNull(mockSpan.id());
         }
-
+        span.abandon();
     }
 
 

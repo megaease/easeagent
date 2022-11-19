@@ -61,6 +61,7 @@ public class KafkaUtilsTest {
         assertEquals(traceHeadersSize, traceHeaders.size());
         assertEquals(1, record.headers().toArray().length);
         assertEquals(headerValue, new String(record.headers().lastHeader(headerKey).value()));
+        span.abandon();
     }
 
     @Test

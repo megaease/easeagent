@@ -47,6 +47,10 @@
             <artifactId>brave-instrumentation-messaging</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-instrumentation-rpc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-sender-urlconnection</artifactId>
         </dependency>
