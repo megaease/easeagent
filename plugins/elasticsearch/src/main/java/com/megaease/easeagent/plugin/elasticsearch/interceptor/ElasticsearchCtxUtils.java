@@ -18,6 +18,8 @@
 package com.megaease.easeagent.plugin.elasticsearch.interceptor;
 
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.middleware.MiddlewareConstants;
+import com.megaease.easeagent.plugin.api.middleware.Type;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
@@ -40,6 +42,7 @@ public class ElasticsearchCtxUtils {
         Span span = context.nextSpan();
         span.kind(Span.Kind.CLIENT);
         span.remoteServiceName("elasticsearch");
+        span.tag(MiddlewareConstants.TYPE_TAG_NAME, Type.ELASTICSEARCH.getRemoteType());
         span.tag("es.index", getIndex(request.getEndpoint()));
         span.tag("es.operation", request.getMethod() + " " + request.getEndpoint());
         if (entity != null) {
