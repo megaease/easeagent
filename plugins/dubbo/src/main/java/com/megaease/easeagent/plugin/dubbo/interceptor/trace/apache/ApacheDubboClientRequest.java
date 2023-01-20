@@ -23,7 +23,7 @@ public class ApacheDubboClientRequest implements Request {
 
 	@Override
 	public String header(String name) {
-		return invocation.getAttachment(name);
+		return invocation.getAttachment(name.toLowerCase());
 	}
 
 	@Override
