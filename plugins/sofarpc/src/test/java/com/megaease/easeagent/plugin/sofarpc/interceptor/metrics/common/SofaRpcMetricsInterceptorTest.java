@@ -15,9 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
 import static org.mockito.Mockito.when;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
@@ -54,7 +51,6 @@ public class SofaRpcMetricsInterceptorTest extends BaseMetricsInterceptorTest {
 
 		Context context = EaseAgent.getContext();
 		sofaRpcMetricsInterceptor.before(methodInfo, context);
-		TimeUnit.MILLISECONDS.sleep(new Random().nextInt(100));
 		sofaRpcMetricsInterceptor.after(methodInfo, context);
 
 		assertMetrics(sofaRequest, sofaResponse.getAppResponse());
@@ -76,7 +72,6 @@ public class SofaRpcMetricsInterceptorTest extends BaseMetricsInterceptorTest {
 
 		Context context = EaseAgent.getContext();
 		sofaRpcMetricsInterceptor.before(methodInfo, context);
-		TimeUnit.MILLISECONDS.sleep(new Random().nextInt(100));
 		sofaRpcMetricsInterceptor.after(methodInfo, context);
 
 		assertMetrics(sofaRequest, sofaResponse.getAppResponse());
@@ -95,7 +90,6 @@ public class SofaRpcMetricsInterceptorTest extends BaseMetricsInterceptorTest {
 
 		Context context = EaseAgent.getContext();
 		sofaRpcMetricsInterceptor.before(methodInfo, context);
-		TimeUnit.MILLISECONDS.sleep(new Random().nextInt(100));
 		sofaRpcMetricsInterceptor.after(methodInfo, context);
 
 		assertMetrics(sofaRequest, executeException);
