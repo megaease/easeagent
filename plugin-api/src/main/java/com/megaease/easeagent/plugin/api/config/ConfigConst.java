@@ -150,6 +150,7 @@ public interface ConfigConst {
         // ------------ rpc ----------------------
         String DUBBO = "dubbo";
         String MOTAN = "motan";
+        String SOFARPC = "sofarpc";
 
 
         // -------------  request  ------------------
