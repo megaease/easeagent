@@ -8,8 +8,8 @@ import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.sofarpc.SofaRpcCtxUtils;
 
 public class SofaClientTraceRequest implements Request {
-	private ConsumerInvoker consumerInvoker;
-	private SofaRequest sofaRequest;
+	private final ConsumerInvoker consumerInvoker;
+	private final SofaRequest sofaRequest;
 
 	public SofaClientTraceRequest(ConsumerInvoker consumerInvoker, SofaRequest sofaRequest) {
 		this.consumerInvoker = consumerInvoker;

@@ -4,7 +4,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 
-class MockSofaResponseCallback implements SofaResponseCallback<Object> {
+public class MockSofaResponseCallback implements SofaResponseCallback<Object> {
 	private Object result;
 
 	public Object getResult() {

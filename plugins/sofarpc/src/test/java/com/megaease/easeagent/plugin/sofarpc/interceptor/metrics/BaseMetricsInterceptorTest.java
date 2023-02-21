@@ -101,7 +101,7 @@ public abstract class BaseMetricsInterceptorTest {
 		TagVerifier tagVerifier = new TagVerifier()
 				.add("category", "application")
 				.add("type", "sofarpc")
-				.add(SofaRpcTags.METRICS_KEY.name, SofaRpcCtxUtils.interfaceSignature(sofaRequest));
+				.add(SofaRpcTags.METRICS_KEY.name, SofaRpcCtxUtils.methodSignature(sofaRequest));
 		LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
 		Map<String, Object> metrics = lastJsonReporter.flushAndOnlyOne();
 

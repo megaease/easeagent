@@ -11,10 +11,10 @@ import java.net.InetSocketAddress;
 
 public class SofaServerTraceRequest implements Request {
 
-	private ProviderInvoker providerInvoker;
-	private SofaRequest sofaRequest;
+	private final ProviderInvoker<?> providerInvoker;
+	private final SofaRequest sofaRequest;
 
-	public SofaServerTraceRequest(ProviderInvoker providerInvoker, SofaRequest sofaRequest) {
+	public SofaServerTraceRequest(ProviderInvoker<?> providerInvoker, SofaRequest sofaRequest) {
 		this.providerInvoker = providerInvoker;
 		this.sofaRequest = sofaRequest;
 	}

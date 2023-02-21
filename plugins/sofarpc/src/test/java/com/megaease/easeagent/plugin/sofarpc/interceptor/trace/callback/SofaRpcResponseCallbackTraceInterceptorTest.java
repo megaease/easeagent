@@ -168,7 +168,8 @@ public class SofaRpcResponseCallbackTraceInterceptorTest extends BaseInterceptor
 			@Override
 			public void run() {
 				SofaRpcResponseCallbackTrace sofaRpcResponseCallbackTrace = (SofaRpcResponseCallbackTrace) methodInfo.getArgs()[2];
-				AsyncContext asyncContext = (AsyncContext) AgentFieldReflectAccessor.getFieldValue(sofaRpcResponseCallbackTrace, "asyncContext");
+				AsyncContext asyncContext = AgentFieldReflectAccessor.getFieldValue(sofaRpcResponseCallbackTrace, "asyncContext");
+				Assert.assertNotNull(asyncContext);
 				RequestContext requestContext = asyncContext.get(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
 				asyncContext.put(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY, null);
 				requestContext.span().finish();

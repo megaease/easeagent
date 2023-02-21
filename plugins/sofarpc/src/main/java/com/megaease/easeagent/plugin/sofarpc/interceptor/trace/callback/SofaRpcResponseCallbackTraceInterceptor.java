@@ -17,10 +17,10 @@ public class SofaRpcResponseCallbackTraceInterceptor extends SofaRpcTraceBaseInt
 
 	@Override
 	public void before(MethodInfo methodInfo, Context context) {
-		SofaResponseCallback sofaResponseCallback = (SofaResponseCallback) methodInfo.getArgs()[2];
+		SofaResponseCallback<?> sofaResponseCallback = (SofaResponseCallback<?>) methodInfo.getArgs()[2];
 
-		RequestContext requestContext = (RequestContext) context.get(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
-		try (Scope scope = requestContext.scope()) {
+		RequestContext requestContext = context.get(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
+		try (Scope ignore = requestContext.scope()) {
 			AsyncContext asyncContext = context.exportAsync();
 			methodInfo.changeArg(2, new SofaRpcResponseCallbackTrace(sofaResponseCallback, asyncContext));
 		}

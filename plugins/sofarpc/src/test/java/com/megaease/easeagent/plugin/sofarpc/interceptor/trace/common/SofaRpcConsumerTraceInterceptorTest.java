@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class SofaRpcConsumerTraceInterceptorTest extends BaseInterceptorTest {
-	private SofaRpcConsumerTraceInterceptor consumerTraceInterceptor = new SofaRpcConsumerTraceInterceptor();
+	private final SofaRpcConsumerTraceInterceptor consumerTraceInterceptor = new SofaRpcConsumerTraceInterceptor();
 
 	@Override
 	protected SofaRpcTraceBaseInterceptor getInterceptor() {
@@ -27,7 +27,7 @@ public class SofaRpcConsumerTraceInterceptorTest extends BaseInterceptorTest {
 	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		when(sofaRequest.getInvokeType()).thenReturn(RpcConstants.INVOKER_TYPE_SYNC);
 
 		ProviderInfo providerInfo = new ProviderInfo();
@@ -103,7 +103,7 @@ public class SofaRpcConsumerTraceInterceptorTest extends BaseInterceptorTest {
 
 		Context context = EaseAgent.getContext();
 		consumerTraceInterceptor.before(methodInfo, context);
-		RequestContext requestContext = (RequestContext)context.remove(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
+		RequestContext requestContext = context.remove(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
 		requestContext.span().finish();
 		requestContext.scope().close();
 		consumerTraceInterceptor.after(methodInfo, context);

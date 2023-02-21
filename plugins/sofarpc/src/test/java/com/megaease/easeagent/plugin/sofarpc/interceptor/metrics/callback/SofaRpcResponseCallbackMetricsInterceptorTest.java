@@ -14,6 +14,7 @@ import com.megaease.easeagent.plugin.sofarpc.interceptor.metrics.BaseMetricsInte
 import com.megaease.easeagent.plugin.sofarpc.interceptor.metrics.SofaRpcMetricsBaseInterceptor;
 import com.megaease.easeagent.plugin.sofarpc.interceptor.metrics.common.SofaRpcMetricsInterceptor;
 import lombok.SneakyThrows;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,7 +132,7 @@ public class SofaRpcResponseCallbackMetricsInterceptorTest extends BaseMetricsIn
 
 	@SneakyThrows
 	@Test
-	public void testConsumerCallbackNoObtainedRequestContext() {
+	public void testConsumerCallbackNoObtainedMethodFullName() {
 		MethodInfo methodInfo = MethodInfo.builder()
 				.invoker(consumerInvoker)
 				.args(allArguments)
@@ -150,7 +151,8 @@ public class SofaRpcResponseCallbackMetricsInterceptorTest extends BaseMetricsIn
 			public void run() {
 				SofaRpcResponseCallbackMetrics sofaRpcResponseCallbackMetrics = (SofaRpcResponseCallbackMetrics) methodInfo.getArgs()[2];
 				AsyncContext asyncContext = AgentFieldReflectAccessor.getFieldValue(sofaRpcResponseCallbackMetrics, "asyncContext");
-				asyncContext.put(SofaRpcCtxUtils.METRICS_INTERFACE_NAME, null);
+				Assert.assertNotNull(asyncContext);
+				asyncContext.put(SofaRpcCtxUtils.METRICS_KEY_NAME, null);
 				sofaRpcResponseCallbackMetrics.onSofaException(sofaTimeOutException, sofaRequest.getMethod().getName(), sofaRequest);
 			}
 		});

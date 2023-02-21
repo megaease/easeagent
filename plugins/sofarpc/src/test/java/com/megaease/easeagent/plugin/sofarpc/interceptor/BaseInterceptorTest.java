@@ -88,13 +88,8 @@ public abstract class BaseInterceptorTest {
 		when(declaringClass).thenReturn(BaseInterceptorTest.class);
 		when(mockMethod.getName()).thenReturn("mock");
 		when(mockMethod.getParameterTypes()).thenReturn(new Class[]{String.class, Integer.class});
-
 		when(sofaRequest.getInvokeType()).thenReturn(RpcConstants.INVOKER_TYPE_SYNC);
-
-//		when(sofaRequest.getMethodName()).thenReturn("test");
-//		when(sofaRequest.getMethodArgSigs()).thenReturn(new String[]{"java.lang.String"});
 		when(sofaRequest.getMethodArgs()).thenReturn(new Object[]{"abc", 3});
-//		when(sofaRequest.getInterfaceName()).thenReturn("org.apache.skywalking.apm.test.TestSofaRpcService");
 
 		allArguments = new Object[]{sofaRequest};
 

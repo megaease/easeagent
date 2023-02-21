@@ -16,8 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.ExecutionException;
-
 import static org.mockito.Mockito.when;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
@@ -45,7 +43,7 @@ public class SofaRpcResponseFutureMetricsInterceptorTest extends BaseMetricsInte
 
 
 	@Test
-	public void testConsumerFutureInvokeSuccess() throws InterruptedException, ExecutionException {
+	public void testConsumerFutureInvokeSuccess() throws InterruptedException {
 
 		MethodInfo methodInfo = MethodInfo.builder()
 				.invoker(consumerInvoker)

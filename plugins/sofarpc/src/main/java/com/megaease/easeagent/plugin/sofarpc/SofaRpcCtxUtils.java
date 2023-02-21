@@ -24,7 +24,7 @@ import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 
 public class SofaRpcCtxUtils {
 	private static final Logger LOG = EaseAgent.getLogger(SofaRpcCtxUtils.class);
-	public static final String METRICS_INTERFACE_NAME = SofaRpcCtxUtils.class.getName() + ".METRICS_INTERFACE_NAME";
+	public static final String METRICS_KEY_NAME = SofaRpcCtxUtils.class.getName() + ".METRICS_KEY_NAME";
 	private static final String METRICS_IS_ASYNC = SofaRpcCtxUtils.class.getName() + ".METRICS_IS_ASYNC";
 	private static final String TRACE_IS_ASYNC = SofaRpcCtxUtils.class.getName() + ".TRACE_IS_ASYNC";
 	private static final String BEGIN_TIME = SofaRpcCtxUtils.class.getName() + ".BEGIN_TIME";
@@ -33,9 +33,9 @@ public class SofaRpcCtxUtils {
 	public static final String SERVER_REQUEST_CONTEXT_KEY = SofaRpcCtxUtils.class.getName() + ".SERVER_REQUEST_CONTEXT";
 
 	/**
-	 * sofarpc span name, e.g. TestService/test(String)
+	 * SOFARPC span name, e.g. TestService/test(String)
 	 *
-	 * @param sofaRequest
+	 * @param sofaRequest sofa rpc request
 	 * @return
 	 */
 	public static String name(SofaRequest sofaRequest) {
@@ -82,7 +82,7 @@ public class SofaRpcCtxUtils {
 	 * @param sofaRequest
 	 * @return
 	 */
-	public static String interfaceSignature(SofaRequest sofaRequest) {
+	public static String methodSignature(SofaRequest sofaRequest) {
 		StringBuilder operationName = new StringBuilder();
 		operationName.append(sofaRequest.getMethod().getDeclaringClass().getName());
 		operationName.append("/").append(sofaRequest.getMethod().getName()).append("(");
@@ -130,9 +130,9 @@ public class SofaRpcCtxUtils {
 
 	/**
 	 * Start server span
-	 * @param context
-	 * @param providerInvoker
-	 * @param sofaRequest
+	 * @param context interceptor context
+	 * @param providerInvoker sofa rpc provider invoker
+	 * @param sofaRequest sofa request
 	 */
 	public static void startServerSpan(Context context, ProviderInvoker<?> providerInvoker, SofaRequest sofaRequest) {
 		SofaServerTraceRequest sofaServerTraceRequest = new SofaServerTraceRequest(providerInvoker, sofaRequest);
@@ -149,9 +149,9 @@ public class SofaRpcCtxUtils {
 
 	/**
 	 * Finish server span
-	 * @param context
-	 * @param sofaResponse
-	 * @param throwable
+	 * @param context interceptor context
+	 * @param sofaResponse sofa response
+	 * @param throwable rpc server exception
 	 */
 	public static void finishServerSpan(Context context, SofaResponse sofaResponse, Throwable throwable) {
 		finishSpan(SERVER_REQUEST_CONTEXT_KEY, context, sofaResponse, throwable);
@@ -159,9 +159,9 @@ public class SofaRpcCtxUtils {
 
 	/**
 	 * Sync finish client span
-	 * @param context
-	 * @param sofaResponse
-	 * @param throwable
+	 * @param context interceptor context
+	 * @param sofaResponse sofa response
+	 * @param throwable rpc client call exception
 	 */
 	public static void finishClientSpan(Context context, SofaResponse sofaResponse, Throwable throwable) {
 		if (throwable != null) {
@@ -179,15 +179,15 @@ public class SofaRpcCtxUtils {
 
 	/**
 	 * Async finish client span
-	 * @param asyncContext
-	 * @param result
+	 * @param asyncContext interceptor async context
+	 * @param result rpc call return value
 	 */
 	public static void asyncFinishClientSpan(AsyncContext asyncContext, Object result) {
-		try (Cleaner cleaner = asyncContext.importToCurrent()) {
+		try (Cleaner ignored = asyncContext.importToCurrent()) {
 			Context context = EaseAgent.getContext();
 			RequestContext requestContext = context.remove(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
 
-			try (Scope scope = requestContext.scope()) {
+			try (Scope ignoredScope = requestContext.scope()) {
 				Span span = requestContext.span();
 				if (result instanceof Throwable) {
 					span.error((Throwable) result);
@@ -199,9 +199,16 @@ public class SofaRpcCtxUtils {
 		}
 	}
 
-	private static void finishSpan(String requestContextKey, Context context, SofaResponse retValue, Throwable throwable) {
-		RequestContext requestContext = (RequestContext) context.remove(requestContextKey);
-		try (Scope scope = requestContext.scope()) {
+	/**
+	 * Finish span
+	 * @param requestContextKey get the key of request context
+	 * @param context interceptor context
+	 * @param sofaResponse sofa rpc response
+	 * @param throwable rpc call exception
+	 */
+	private static void finishSpan(String requestContextKey, Context context, SofaResponse sofaResponse, Throwable throwable) {
+		RequestContext requestContext = context.remove(requestContextKey);
+		try (Scope ignored = requestContext.scope()) {
 			Span span = requestContext.span();
 			try {
 				if (!CLIENT_REQUEST_CONTEXT_KEY.equals(requestContextKey)) {
@@ -209,11 +216,11 @@ public class SofaRpcCtxUtils {
 				}
 				if (throwable != null) {
 					span.error(throwable);
-				} else if (retValue != null) {
-					if (retValue.isError() || retValue.getAppResponse() instanceof Throwable) {
-						span.error((Throwable) retValue.getAppResponse());
+				} else if (sofaResponse != null) {
+					if (sofaResponse.isError() || sofaResponse.getAppResponse() instanceof Throwable) {
+						span.error((Throwable) sofaResponse.getAppResponse());
 					} else if (SofaRpcTraceBaseInterceptor.SOFA_RPC_TRACE_CONFIG.resultCollectEnabled()) {
-						span.tag(SofaRpcTags.RESULT.name, JsonUtil.toJson(retValue.getAppResponse()));
+						span.tag(SofaRpcTags.RESULT.name, JsonUtil.toJson(sofaResponse.getAppResponse()));
 					}
 				}
 			} finally {
@@ -226,21 +233,21 @@ public class SofaRpcCtxUtils {
 
 	/**
 	 * Start collect metrics
-	 * @param context
-	 * @param sofaRequest
+	 * @param context interceptor context
+	 * @param sofaRequest sofa rpc request
 	 */
 	public static void startCollectMetrics(Context context, SofaRequest sofaRequest) {
-		String interfaceSignature = interfaceSignature(sofaRequest);
+		String methodSignature = methodSignature(sofaRequest);
 		context.put(BEGIN_TIME, SystemClock.now());
 		context.put(METRICS_IS_ASYNC, isAsync(sofaRequest.getInvokeType()));
-		context.put(METRICS_INTERFACE_NAME, interfaceSignature);
+		context.put(METRICS_KEY_NAME, methodSignature);
 	}
 
 	/**
 	 * Finish collect metrics
-	 * @param context
-	 * @param sofaResponse
-	 * @param throwable
+	 * @param context interceptor context
+	 * @param sofaResponse sofa rpc response
+	 * @param throwable call exception
 	 */
 	public static void finishCollectMetrics(Context context, SofaResponse sofaResponse, Throwable throwable) {
 		if (throwable != null) {
@@ -258,41 +265,41 @@ public class SofaRpcCtxUtils {
 
 	private static void collectMetrics(Context context, SofaResponse sofaResponse, Throwable throwable) {
 		long duration = ContextUtils.getDuration(context, BEGIN_TIME);
-		String interfaceSignature = context.remove(METRICS_INTERFACE_NAME);
-		if (interfaceSignature == null) {
-			LOG.error("interface signature is null");
+		String methodSignature = context.remove(METRICS_KEY_NAME);
+		if (methodSignature == null) {
+			LOG.error("method signature is null");
 			return;
 		}
 		boolean callResult = sofaResponse != null
 				&& !sofaResponse.isError()
 				&& !(sofaResponse.getAppResponse() instanceof Throwable)
 				&& throwable == null;
-		SofaRpcMetricsBaseInterceptor.SOFARPC_METRICS.collect(interfaceSignature, duration, callResult);
+		SofaRpcMetricsBaseInterceptor.SOFARPC_METRICS.collect(methodSignature, duration, callResult);
 	}
 
 	/**
 	 * Async finish collect metrics
-	 * @param asyncContext
-	 * @param result
+	 * @param asyncContext interceptor async context
+	 * @param result sofa rpc call return value
 	 */
 	public static void asyncFinishCollectMetrics(AsyncContext asyncContext, Object result) {
-		try (Cleaner cleaner = asyncContext.importToCurrent()) {
-			String interfaceSignature = EaseAgent.getContext().remove(METRICS_INTERFACE_NAME);
-			if (interfaceSignature == null) {
-				LOG.error("interface signature is null");
+		try (Cleaner ignored = asyncContext.importToCurrent()) {
+			String methodSignature = EaseAgent.getContext().remove(METRICS_KEY_NAME);
+			if (methodSignature == null) {
+				LOG.error("method signature is null");
 				return;
 			}
 
 			Long duration = ContextUtils.getDuration(EaseAgent.getContext(), BEGIN_TIME);
 			boolean callResult = result != null && !(result instanceof Throwable);
-			SofaRpcMetricsBaseInterceptor.SOFARPC_METRICS.collect(interfaceSignature, duration, callResult);
+			SofaRpcMetricsBaseInterceptor.SOFARPC_METRICS.collect(methodSignature, duration, callResult);
 		}
 	}
 
 	/**
 	 * Check if the invoke type is async call
-	 * @param invokeType
-	 * @return
+	 * @param invokeType sofa rpc invoke type
+	 * @return returns true if the invoke type is future or callback, otherwise it returns false.
 	 */
 	private static boolean isAsync(String invokeType) {
 		return RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType) || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType);

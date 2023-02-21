@@ -19,12 +19,12 @@ public class SofaRpcFutureInvokeCallbackConstructInterceptor extends SofaRpcTrac
 	@Override
 	public void before(MethodInfo methodInfo, Context context) {
 		RequestContext requestContext = context.get(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
-		String interfaceSignature = context.get(SofaRpcCtxUtils.METRICS_INTERFACE_NAME);
+		String methodSignature = context.get(SofaRpcCtxUtils.METRICS_KEY_NAME);
 		if (requestContext != null) {
-			try (Scope scope = requestContext.scope()) {
+			try (Scope ignore = requestContext.scope()) {
 				AgentDynamicFieldAccessor.setDynamicFieldValue(methodInfo.getArgs()[2], context.exportAsync());
 			}
-		} else if (interfaceSignature != null) {
+		} else if (methodSignature != null) {
 			AgentDynamicFieldAccessor.setDynamicFieldValue(methodInfo.getArgs()[2], context.exportAsync());
 		}
 	}

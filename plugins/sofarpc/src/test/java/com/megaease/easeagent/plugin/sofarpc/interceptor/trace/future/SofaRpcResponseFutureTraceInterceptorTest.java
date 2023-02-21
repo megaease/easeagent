@@ -21,8 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.ExecutionException;
-
 import static org.mockito.Mockito.when;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
@@ -51,7 +49,7 @@ public class SofaRpcResponseFutureTraceInterceptorTest extends BaseInterceptorTe
 
 
 	@Test
-	public void testConsumerFutureInvokeSuccess() throws InterruptedException, ExecutionException {
+	public void testConsumerFutureInvokeSuccess() throws InterruptedException {
 
 		MethodInfo methodInfo = MethodInfo.builder()
 				.invoker(consumerInvoker)
@@ -115,7 +113,6 @@ public class SofaRpcResponseFutureTraceInterceptorTest extends BaseInterceptorTe
 		MethodInfo methodInfo = MethodInfo.builder()
 				.invoker(consumerInvoker)
 				.args(allArguments)
-				.throwable(illegalStateException)
 				.build();
 
 		Context context = EaseAgent.getContext();
@@ -126,6 +123,7 @@ public class SofaRpcResponseFutureTraceInterceptorTest extends BaseInterceptorTe
 		Thread asyncThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				methodInfo.throwable(illegalStateException);
 				methodInfo.setInvoker(futureInvokeCallbackConstructTracingInterceptorArgs[2]);
 				sofaRpcResponseFutureTraceInterceptor.after(methodInfo, context);
 			}
@@ -168,7 +166,8 @@ public class SofaRpcResponseFutureTraceInterceptorTest extends BaseInterceptorTe
 			@Override
 			public void run() {
 				AsyncContext asyncContext = AgentDynamicFieldAccessor.getDynamicFieldValue(mockBoltResponseFuture);
-				RequestContext requestContext = (RequestContext) asyncContext.get(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
+				Assert.assertNotNull(asyncContext);
+				RequestContext requestContext = asyncContext.get(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY);
 				requestContext.span().finish();
 				asyncContext.put(SofaRpcCtxUtils.CLIENT_REQUEST_CONTEXT_KEY, null);
 				methodInfo.setInvoker(futureInvokeCallbackConstructTracingInterceptorArgs[2]);

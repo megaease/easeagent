@@ -4,16 +4,13 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.megaease.easeagent.plugin.api.context.AsyncContext;
-import com.megaease.easeagent.plugin.api.logging.Logger;
-import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.sofarpc.SofaRpcCtxUtils;
 
-public class SofaRpcResponseCallbackTrace implements SofaResponseCallback {
-	private static final Logger LOG = EaseAgent.getLogger(SofaRpcResponseCallbackTrace.class);
-	private SofaResponseCallback sofaResponseCallback;
-	private AsyncContext asyncContext;
+public class SofaRpcResponseCallbackTrace implements SofaResponseCallback<Object> {
+	private final SofaResponseCallback<?> sofaResponseCallback;
+	private final AsyncContext asyncContext;
 
-	public SofaRpcResponseCallbackTrace(SofaResponseCallback sofaResponseCallback, AsyncContext asyncContext) {
+	public SofaRpcResponseCallbackTrace(SofaResponseCallback<?> sofaResponseCallback, AsyncContext asyncContext) {
 		this.sofaResponseCallback = sofaResponseCallback;
 		this.asyncContext = asyncContext;
 	}
