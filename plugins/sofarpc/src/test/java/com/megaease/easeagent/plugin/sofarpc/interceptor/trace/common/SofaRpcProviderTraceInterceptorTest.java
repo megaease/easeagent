@@ -1,7 +1,6 @@
 package com.megaease.easeagent.plugin.sofarpc.interceptor.trace.common;
 
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
@@ -27,8 +26,6 @@ public class SofaRpcProviderTraceInterceptorTest extends BaseInterceptorTest {
 
 	@Before
 	public void setUp() {
-		EaseAgent.configFactory = MockConfig.getPluginConfigManager();
-
 		rpcContext.setRemoteAddress("127.0.0.1",12200);
 	}
 

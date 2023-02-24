@@ -6,7 +6,7 @@
     - [Getting the configuration file](#getting-the-configuration-file)
     - [Global Configuration](#global-configuration)
       - [Internal HTTP Server](#internal-http-server)
-      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server-kafka-and-httpzipkin-server)
+      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server:-kafka-and-httpzipkin-server)
       - [Progress Configuration](#progress-configuration)
         - [Forwarded headers config](#forwarded-headers-config)
         - [Tracing config](#tracing-config)
@@ -148,7 +148,7 @@ In the process of supporting easemesh traffic coloring, the request header `X-Me
                                                                                          |_____> servcieB-canary(X-Mesh-Canary=lv1)
 ```
 
-plugin enabled config: [Enabled](#Forwarded headers plugin enabled)
+plugin enabled config: [Enabled](#forwarded-headers-plugin-enabled)
 
 
 ##### Tracing config
@@ -867,7 +867,7 @@ Dubbo schema describes key metrics of Dubbo client invoking, which include:
 
 | Field     |  Type   | Description                                                                                            |
 |:----------| :-----: |:-------------------------------------------------------------------------------------------------------|
-| method    | string  | Dubbo full method signature.                                                                           |
+| interface | string  | Dubbo full method signature.                                                                 |
 | cnt       | integer | The total count of the Dubbo method executed                                                           |
 | errcnt    | integer | The total error count of the Dubbo method executed                                                     |
 | m1cnt     | integer | The total count of the Dubbo method executed in last 1 minute                                          |
@@ -901,7 +901,7 @@ Motan schema describes key metrics of Motan client invoking, which include:
 
 | Field     |  Type   | Description                                                                                            |
 |:----------| :-----: |:-------------------------------------------------------------------------------------------------------|
-| method    | string  | Motan full method signature.                                                                           |
+| interface | string  | Motan full method signature.                                                                           |
 | cnt       | integer | The total count of the Motan method executed                                                           |
 | errcnt    | integer | The total error count of the Motan method executed                                                     |
 | m1cnt     | integer | The total count of the Motan method executed in last 1 minute                                          |

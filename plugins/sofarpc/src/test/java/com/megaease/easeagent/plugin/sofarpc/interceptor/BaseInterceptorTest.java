@@ -17,7 +17,7 @@ import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.sofarpc.SofaRpcCtxUtils;
 import com.megaease.easeagent.plugin.sofarpc.SofaRpcPlugin;
-import com.megaease.easeagent.plugin.sofarpc.SofaRpcTags;
+import com.megaease.easeagent.plugin.sofarpc.SofaRpcTraceTags;
 import com.megaease.easeagent.plugin.sofarpc.interceptor.trace.SofaRpcTraceBaseInterceptor;
 import com.megaease.easeagent.plugin.sofarpc.interceptor.trace.common.SofaRpcConsumerTraceInterceptor;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
@@ -53,6 +53,8 @@ public abstract class BaseInterceptorTest {
 
 	protected Object[] allArguments;
 
+    private AutoCloseable autoCloseable;
+
 	@BeforeClass
 	public static void beforeClass() {
 	}
@@ -75,7 +77,7 @@ public abstract class BaseInterceptorTest {
 
 	@Before
 	public void init() {
-		MockitoAnnotations.openMocks(this);
+		autoCloseable = MockitoAnnotations.openMocks(this);
 		when(consumerInvoker.getConfig()).thenReturn(consumerConfig);
 		when(consumerConfig.getAppName()).thenReturn("sofa-client");
 
@@ -99,6 +101,11 @@ public abstract class BaseInterceptorTest {
 		InterceptorTestUtils.init(sofaRpcTraceBaseInterceptor, sofaRpcPlugin);
 	}
 
+    @After
+    public void destroy() throws Exception {
+        autoCloseable.close();
+    }
+
 	protected abstract SofaRpcTraceBaseInterceptor getInterceptor();
 
 	protected void assertProviderTrace(SofaRequest sofaRequest, Object result) {
@@ -117,24 +124,24 @@ public abstract class BaseInterceptorTest {
 		Assert.assertEquals(SofaRpcCtxUtils.name(sofaRequest).toLowerCase(), lastSpan.name());
 		if (isClientSide) {
 			Assert.assertEquals(Span.Kind.CLIENT.name(), lastSpan.kind());
-			Assert.assertEquals(consumerConfig.getAppName(), lastSpan.tag(SofaRpcTags.CLIENT_APPLICATION.name));
+			Assert.assertEquals(consumerConfig.getAppName(), lastSpan.tag(SofaRpcTraceTags.CLIENT_APPLICATION.name));
 			Assert.assertEquals(rpcContext.getProviderInfo().getHost(), lastSpan.remoteEndpoint().ipv4());
 			Assert.assertEquals(rpcContext.getProviderInfo().getPort(), lastSpan.remoteEndpoint().port());
-			Assert.assertEquals(SofaRpcCtxUtils.method(sofaRequest), lastSpan.tag(SofaRpcTags.METHOD.name));
+			Assert.assertEquals(SofaRpcCtxUtils.method(sofaRequest), lastSpan.tag(SofaRpcTraceTags.METHOD.name));
 			if (SofaRpcConsumerTraceInterceptor.SOFA_RPC_TRACE_CONFIG.argsCollectEnabled()) {
-				Assert.assertEquals(JsonUtil.toJson(sofaRequest.getMethodArgs()), lastSpan.tag(SofaRpcTags.ARGS.name));
+				Assert.assertEquals(JsonUtil.toJson(sofaRequest.getMethodArgs()), lastSpan.tag(SofaRpcTraceTags.ARGS.name));
 			}
 			if (result instanceof Throwable) {
 				Assert.assertTrue(lastSpan.hasError());
-				Assert.assertNull(lastSpan.tag(SofaRpcTags.RESULT.name));
+				Assert.assertNull(lastSpan.tag(SofaRpcTraceTags.RESULT.name));
 				Assert.assertEquals(lastSpan.errorInfo(), ((Throwable) result).getMessage());
 			} else if (SofaRpcConsumerTraceInterceptor.SOFA_RPC_TRACE_CONFIG.resultCollectEnabled()) {
 				Assert.assertFalse(lastSpan.hasError());
-				Assert.assertEquals(JsonUtil.toJson(result), lastSpan.tag(SofaRpcTags.RESULT.name));
+				Assert.assertEquals(JsonUtil.toJson(result), lastSpan.tag(SofaRpcTraceTags.RESULT.name));
 			}
 		} else {
 			Assert.assertEquals(Span.Kind.SERVER.name(), lastSpan.kind());
-			Assert.assertEquals(providerConfig.getAppName(), lastSpan.tag(SofaRpcTags.SERVER_APPLICATION.name));
+			Assert.assertEquals(providerConfig.getAppName(), lastSpan.tag(SofaRpcTraceTags.SERVER_APPLICATION.name));
 			Assert.assertEquals(rpcContext.getRemoteAddress().getHostString(), lastSpan.remoteEndpoint().ipv4());
 			Assert.assertEquals(rpcContext.getRemoteAddress().getPort(), lastSpan.remoteEndpoint().port());
 		}

@@ -12,10 +12,11 @@ import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
 import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.metric.name.MetricField;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.sofarpc.SofaRpcCtxUtils;
+import com.megaease.easeagent.plugin.sofarpc.SofaRpcMetricsTags;
 import com.megaease.easeagent.plugin.sofarpc.SofaRpcPlugin;
-import com.megaease.easeagent.plugin.sofarpc.SofaRpcTags;
 import org.junit.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -29,26 +30,20 @@ import static org.mockito.Mockito.when;
 public abstract class BaseMetricsInterceptorTest {
 
 	protected RpcInternalContext rpcContext = RpcInternalContext.getContext();
-
 	@Mock
 	protected SofaRequest sofaRequest;
-
 	@Mock
 	protected ConsumerInvoker consumerInvoker;
-
 	@Mock
 	protected ConsumerConfig<?> consumerConfig;
-
 	@Mock
 	protected ProviderInvoker<?> providerInvoker;
-
 	@Mock
 	protected ProviderConfig<?> providerConfig;
-
 	@Mock
 	protected Method mockMethod;
-
 	protected Object[] allArguments;
+    private AutoCloseable autoCloseable;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -69,10 +64,14 @@ public abstract class BaseMetricsInterceptorTest {
 		int order = getInterceptor().order();
 		Assert.assertEquals(Order.METRIC.getOrder(), order);
 	}
+    @After
+    public void destroy() throws Exception {
+        autoCloseable.close();
+    }
 
 	@Before
 	public void init() {
-		MockitoAnnotations.openMocks(this);
+		autoCloseable = MockitoAnnotations.openMocks(this);
 		when(consumerInvoker.getConfig()).thenReturn(consumerConfig);
 		when(consumerConfig.getAppName()).thenReturn("sofa-client");
 
@@ -99,32 +98,16 @@ public abstract class BaseMetricsInterceptorTest {
 
 	protected void assertMetrics(SofaRequest sofaRequest, Object result) {
 		TagVerifier tagVerifier = new TagVerifier()
-				.add("category", "application")
-				.add("type", "sofarpc")
-				.add(SofaRpcTags.METRICS_KEY.name, SofaRpcCtxUtils.methodSignature(sofaRequest));
+				.add(Tags.CATEGORY, SofaRpcMetricsTags.CATEGORY.name)
+				.add(Tags.TYPE, SofaRpcMetricsTags.TYPE.name)
+				.add(SofaRpcMetricsTags.LABEL_NAME.name, SofaRpcCtxUtils.methodSignature(sofaRequest));
 		LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
 		Map<String, Object> metrics = lastJsonReporter.flushAndOnlyOne();
-
-//		assertTrue(greaterThanZero(metrics, MetricField.MAX_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics, MetricField.MIN_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics, MetricField.MEAN_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.P25_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.P50_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.P75_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.P95_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.P98_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.P99_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.P999_EXECUTION_TIME));
-//		assertTrue(greaterThanZero(metrics,MetricField.MEAN_RATE));
 
 		assertEquals(1, metrics.get(MetricField.EXECUTION_COUNT.getField()));
 		if (result instanceof Throwable) {
 			assertEquals(1, metrics.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
 		}
-	}
-
-	private static boolean greaterThanZero(Map<String, Object> metrics, MetricField metricField) {
-		return metricValue(metrics, metricField) > 0;
 	}
 
 	private static double metricValue(Map<String,Object> metrics, MetricField metricField) {

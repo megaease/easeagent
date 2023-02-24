@@ -423,9 +423,9 @@ Motan schema describes key metrics of Motan client invoking, which include:
 | application_motan_p999              | double  | TP999: The Motan method execution duration in milliseconds for 99.9% user.                                |
 
 #### Dedicated label
-| Label Name | Essential |                        Value Example                         | Description                                                                                                                                                         |
-|:-----------|:---------:|:------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| method     |   true    | `com.megaease.easeagent.motan.api.TestService/sayHi(String)` | The full signature of the Motan call method, like this `com.megaease.easyagent.motan.api.TestService/sayHi(String)`. [Details](./user-manual.md#tracing-and-metric) |
+| Label Name | Essential |                        Value Example                         | Description                                                                                                                                                            |
+|:-----------|:---------:|:------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| interface  |   true    | `com.megaease.easeagent.motan.api.TestService/sayHi(String)` | The full signature of the `Motan` call interface, like this `com.megaease.easyagent.motan.api.TestService/sayHi(String)`. [Details](./user-manual.md#tracing-and-metric) |
 
 
 ### Dubbo
@@ -462,9 +462,9 @@ Dubbo schema describes key metrics of Dubbo client invoking, which include:
 | application_dubbo_p999              | double  | TP999: The Dubbo method execution duration in milliseconds for 99.9% user.                                |
 
 #### Dedicated label
-| Label Name | Essential |                        Value Example                         | Description                                                                                                                                                         |
-|:-----------|:---------:|:------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| method     |   true    | `com.megaease.easeagent.dubbo.api.TestService/sayHi(String)` | The full signature of the Dubbo call method, like this `com.megaease.easyagent.dubbo.api.TestService/sayHi(String)`. [Details](./user-manual.md#tracing-and-metric) |
+| Label Name | Essential |                        Value Example                         | Description                                                                                                                                                              |
+|:-----------|:---------:|:------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| interface  |   true    | `com.megaease.easeagent.dubbo.api.TestService/sayHi(String)` | The full signature of the `Dubbo` call interface, like this `com.megaease.easyagent.dubbo.api.TestService/sayHi(String)`. [Details](./user-manual.md#tracing-and-metric) |
 
 
 ### SOFARPC
@@ -475,32 +475,32 @@ SOFARPC schema describes key metrics of SOFARPC client invoking, which include:
 * Execution duration (min, mean, max)
 * Latency (p25, p50, p75, p95, p98, p99, p999)
 
-| Metric Name                         |  Type   | Description                                                                                               |
-|:------------------------------------| :-----: |:----------------------------------------------------------------------------------------------------------|
-| application_sofarpc_cnt               | integer | The total count of the SOFARPC method executed                                                              |
-| application_sofarpc_errcnt            | integer | The total error count of the SOFARPC method executed                                                        |
-| application_sofarpc_m1cnt             | integer | The total count of the SOFARPC method executed in last 1 minute                                             |
-| application_sofarpc_m5cnt             | integer | The total count of the SOFARPC method executed in last 5 minute                                             |
-| application_sofarpc_m15cnt            | integer | The total count of the SOFARPC method executed in last 15 minute                                            |
-| application_sofarpc_m1                | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 1 minute           |
-| application_sofarpc_m5                | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 5 minute.          |
-| application_sofarpc_m15               | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 15 minute.         |
-| application_sofarpc_mean_rate         | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 15 minute.         |
-| application_sofarpc_m1err             | double  | The SOFARPC method error executions per second (exponentially-weighted moving average) in last 1 minute     |
-| application_sofarpc_m5err             | double  | The SOFARPC method error executions per second (exponentially-weighted moving average) in last 5 minute.    |
-| application_sofarpc_m15err            | double  | The SOFARPC method error executions per second (exponentially-weighted moving average) in last 15 minute    |
-| application_sofarpc_min               | double  | The SOFARPC method minimal execution duration in milliseconds.                                              |
-| application_sofarpc_max               | double  | The SOFARPC method maximal execution duration in milliseconds.                                              |
-| application_sofarpc_mean              | double  | The SOFARPC method mean execution duration in milliseconds.                                                 |
-| application_sofarpc_p25               | double  | TP25: The SOFARPC method execution duration in milliseconds for 25% user.                                   |
-| application_sofarpc_p50               | double  | TP50: The SOFARPC method execution duration in milliseconds for 50% user.                                   |
-| application_sofarpc_p75               | double  | TP75: The SOFARPC method execution duration in milliseconds for 75% user.                                   |
-| application_sofarpc_p95               | double  | TP95: The SOFARPC method execution duration in milliseconds for 95% user.                                   |
-| application_sofarpc_p98               | double  | TP98: The SOFARPC method execution duration in milliseconds for 98% user.                                   |
-| application_sofarpc_p99               | double  | TP99: The SOFARPC method execution duration in milliseconds for 99% user.                                   |
-| application_sofarpc_p999              | double  | TP999: The SOFARPC method execution duration in milliseconds for 99.9% user.                                |
+| Metric Name                         |  Type   | Description                                                                                              |
+|:------------------------------------| :-----: |:---------------------------------------------------------------------------------------------------------|
+| application_sofarpc_cnt               | integer | The total count of the SOFARPC method executed                                                           |
+| application_sofarpc_errcnt            | integer | The total error count of the SOFARPC method executed                                                     |
+| application_sofarpc_m1cnt             | integer | The total count of the SOFARPC method executed in last 1 minute                                          |
+| application_sofarpc_m5cnt             | integer | The total count of the SOFARPC method executed in last 5 minute                                          |
+| application_sofarpc_m15cnt            | integer | The total count of the SOFARPC method executed in last 15 minute                                         |
+| application_sofarpc_m1                | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 1 minute        |
+| application_sofarpc_m5                | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 5 minute.       |
+| application_sofarpc_m15               | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| application_sofarpc_mean_rate         | double  | The SOFARPC method executions per second (exponentially-weighted moving average) in last 15 minute.      |
+| application_sofarpc_m1err             | double  | The SOFARPC method error executions per second (exponentially-weighted moving average) in last 1 minute  |
+| application_sofarpc_m5err             | double  | The SOFARPC method error executions per second (exponentially-weighted moving average) in last 5 minute. |
+| application_sofarpc_m15err            | double  | The SOFARPC method error executions per second (exponentially-weighted moving average) in last 15 minute |
+| application_sofarpc_min               | double  | The SOFARPC method minimal execution duration in milliseconds.                                           |
+| application_sofarpc_max               | double  | The SOFARPC method maximal execution duration in milliseconds.                                           |
+| application_sofarpc_mean              | double  | The SOFARPC method mean execution duration in milliseconds.                                              |
+| application_sofarpc_p25               | double  | TP25: The SOFARPC method execution duration in milliseconds for 25% user.                      |
+| application_sofarpc_p50               | double  | TP50: The SOFARPC method execution duration in milliseconds for 50% user.                      |
+| application_sofarpc_p75               | double  | TP75: The SOFARPC method execution duration in milliseconds for 75% user.                                |
+| application_sofarpc_p95               | double  | TP95: The SOFARPC method execution duration in milliseconds for 95% user.                                |
+| application_sofarpc_p98               | double  | TP98: The SOFARPC method execution duration in milliseconds for 98% user.                                |
+| application_sofarpc_p99               | double  | TP99: The SOFARPC method execution duration in milliseconds for 99% user.                                |
+| application_sofarpc_p999              | double  | TP999: The SOFARPC method execution duration in milliseconds for 99.9% user.                             |
 
 #### Dedicated label
-| Label Name | Essential |                        Value Example                         | Description                                                                                                                                                                                              |
-|:-----------|:---------:|:------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| interface  |   true    | `com.megaease.easeagent.sofarpc.api.TestService/sayHi(String)` | The full signature of the SOFARPC call method, like this `com.megaease.easyagent.sofarpc.api.TestService/sayHi(String)`. [Details](./user-manual.md#tracing-and-metric)                                   |
+| Label Name | Essential |                        Value Example                         | Description                                                                                                                                                                  |
+|:-----------|:---------:|:------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| interface  |   true    | `com.megaease.easeagent.sofarpc.api.TestService/sayHi(String)` | The full signature of the `SOFARPC` call interface, like this `com.megaease.easyagent.sofarpc.api.TestService/sayHi(String)`. [Details](./user-manual.md#tracing-and-metric) |

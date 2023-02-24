@@ -117,12 +117,12 @@ public class SofaRpcCtxUtils {
 		span.remoteServiceName(ConfigConst.Namespace.SOFARPC);
 		span.remoteIpAndPort(sofaClientTraceRequest.remoteHost(), sofaClientTraceRequest.remotePort());
 		if (SofaRpcTraceBaseInterceptor.SOFA_RPC_TRACE_CONFIG.argsCollectEnabled()) {
-			span.tag(SofaRpcTags.ARGS.name, JsonUtil.toJson(sofaRequest.getMethodArgs()));
+			span.tag(SofaRpcTraceTags.ARGS.name, JsonUtil.toJson(sofaRequest.getMethodArgs()));
 		}
-		span.tag(SofaRpcTags.CLIENT_APPLICATION.name, sofaClientTraceRequest.appName());
-		span.tag(SofaRpcTags.SERVICE_UNIQUE_ID.name, sofaClientTraceRequest.uniqueId());
-		span.tag(SofaRpcTags.SERVICE.name, sofaClientTraceRequest.service());
-		span.tag(SofaRpcTags.METHOD.name, sofaClientTraceRequest.method());
+		span.tag(SofaRpcTraceTags.CLIENT_APPLICATION.name, sofaClientTraceRequest.appName());
+		span.tag(SofaRpcTraceTags.SERVICE_UNIQUE_ID.name, sofaClientTraceRequest.uniqueId());
+		span.tag(SofaRpcTraceTags.SERVICE.name, sofaClientTraceRequest.service());
+		span.tag(SofaRpcTraceTags.METHOD.name, sofaClientTraceRequest.method());
 
 		context.put(TRACE_IS_ASYNC, SofaRpcCtxUtils.isAsync(sofaRequest.getInvokeType()));
 		context.put(CLIENT_REQUEST_CONTEXT_KEY, requestContext);
@@ -142,7 +142,7 @@ public class SofaRpcCtxUtils {
 		span.kind(sofaServerTraceRequest.kind());
 		span.name(sofaServerTraceRequest.name());
 		span.remoteServiceName(ConfigConst.Namespace.SOFARPC);
-		span.tag(SofaRpcTags.SERVER_APPLICATION.name, sofaServerTraceRequest.appName());
+		span.tag(SofaRpcTraceTags.SERVER_APPLICATION.name, sofaServerTraceRequest.appName());
 		span.remoteIpAndPort(sofaServerTraceRequest.remoteHost(), sofaServerTraceRequest.remotePort());
 		context.put(SERVER_REQUEST_CONTEXT_KEY, requestContext);
 	}
@@ -192,7 +192,7 @@ public class SofaRpcCtxUtils {
 				if (result instanceof Throwable) {
 					span.error((Throwable) result);
 				} else if (SofaRpcTraceBaseInterceptor.SOFA_RPC_TRACE_CONFIG.resultCollectEnabled()) {
-					span.tag(SofaRpcTags.RESULT.name, JsonUtil.toJson(result));
+					span.tag(SofaRpcTraceTags.RESULT.name, JsonUtil.toJson(result));
 				}
 				span.finish();
 			}
@@ -220,7 +220,7 @@ public class SofaRpcCtxUtils {
 					if (sofaResponse.isError() || sofaResponse.getAppResponse() instanceof Throwable) {
 						span.error((Throwable) sofaResponse.getAppResponse());
 					} else if (SofaRpcTraceBaseInterceptor.SOFA_RPC_TRACE_CONFIG.resultCollectEnabled()) {
-						span.tag(SofaRpcTags.RESULT.name, JsonUtil.toJson(sofaResponse.getAppResponse()));
+						span.tag(SofaRpcTraceTags.RESULT.name, JsonUtil.toJson(sofaResponse.getAppResponse()));
 					}
 				}
 			} finally {
