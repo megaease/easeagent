@@ -51,6 +51,7 @@
         <module>log4j2-log-plugin</module>
         <module>dubbo</module>
         <module>motan</module>
+        <module>sofarpc</module>
     </modules>
 
     <dependencyManagement>

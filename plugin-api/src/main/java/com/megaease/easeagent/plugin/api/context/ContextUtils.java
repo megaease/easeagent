@@ -60,4 +60,15 @@ public class ContextUtils {
     public static <T> T getFromContext(Context context, Object key) {
         return context.get(key);
     }
+
+    /**
+     * Remove data from context
+     * @param context data store
+     * @param key key is the type of data.
+     * @return
+     * @param <T> the type of data
+     */
+    public static <T> T removeFromContext(Context context, Object key) {
+        return context.remove(key);
+    }
 }
