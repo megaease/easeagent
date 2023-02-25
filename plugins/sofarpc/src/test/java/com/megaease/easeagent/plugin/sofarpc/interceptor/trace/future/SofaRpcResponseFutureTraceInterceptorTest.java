@@ -173,9 +173,11 @@ public class SofaRpcResponseFutureTraceInterceptorTest extends BaseInterceptorTe
 				methodInfo.setInvoker(futureInvokeCallbackConstructTracingInterceptorArgs[2]);
 				try {
 					sofaRpcResponseFutureTraceInterceptor.after(methodInfo, context);
-				} catch (Exception e) {
-					Assert.assertTrue(e instanceof NullPointerException);
+				} catch (NullPointerException ignore) {
+				    //Must be throw NullPointerException
+				    return;
 				}
+				throw new RuntimeException("Must be throw NullPointerException");
 			}
 		});
 		asyncThread.start();
