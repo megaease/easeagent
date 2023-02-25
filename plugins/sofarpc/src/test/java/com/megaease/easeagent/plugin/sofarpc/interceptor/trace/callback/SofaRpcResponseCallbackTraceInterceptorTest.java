@@ -176,9 +176,11 @@ public class SofaRpcResponseCallbackTraceInterceptorTest extends BaseInterceptor
 				requestContext.scope().close();
 				try {
 					sofaRpcResponseCallbackTrace.onSofaException(sofaTimeOutException, sofaRequest.getMethod().getName(), sofaRequest);
-				} catch (Exception ignore) {
-					Assert.assertTrue(ignore instanceof NullPointerException);
+				} catch (NullPointerException ignore) {
+				    //Must be throw NullPointerException
+				    return;
 				}
+				throw new RuntimeException("Must be throw NullPointerException");
 			}
 		});
 		asyncThread.start();
