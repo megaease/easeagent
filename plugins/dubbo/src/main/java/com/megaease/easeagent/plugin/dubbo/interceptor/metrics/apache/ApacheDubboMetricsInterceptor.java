@@ -8,6 +8,7 @@ import com.megaease.easeagent.plugin.dubbo.DubboPlugin;
 import com.megaease.easeagent.plugin.dubbo.advice.ApacheDubboAdvice;
 import com.megaease.easeagent.plugin.dubbo.interceptor.metrics.DubboBaseMetricsInterceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.utils.SystemClock;
 import org.apache.dubbo.rpc.AsyncRpcResult;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
@@ -18,7 +19,7 @@ public class ApacheDubboMetricsInterceptor extends DubboBaseMetricsInterceptor {
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        ContextUtils.setBeginTime(context);
+        context.put(ApacheDubboCtxUtils.BEGIN_TIME, SystemClock.now());
     }
 
     @Override
@@ -33,9 +34,9 @@ public class ApacheDubboMetricsInterceptor extends DubboBaseMetricsInterceptor {
         context.put(ApacheDubboCtxUtils.METRICS_SERVICE_NAME, service);
         Result retValue = (Result) methodInfo.getRetValue();
         if (retValue instanceof AsyncRpcResult) {
-            retValue.whenCompleteWithContext(new ApacheDubboMetricsAsyncCallback(context.exportAsync(), DUBBO_METRICS));
+            retValue.whenCompleteWithContext(new ApacheDubboMetricsAsyncCallback(context.exportAsync()));
         } else {
-            Long duration = ContextUtils.getDuration(context);
+            Long duration = ContextUtils.getDuration(context, ApacheDubboCtxUtils.BEGIN_TIME);
             boolean callResult = ApacheDubboCtxUtils.checkCallResult(retValue, methodInfo.getThrowable());
             DUBBO_METRICS.collect(service, duration, callResult);
         }

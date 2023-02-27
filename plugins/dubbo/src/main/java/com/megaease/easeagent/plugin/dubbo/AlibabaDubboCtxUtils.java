@@ -24,12 +24,14 @@ import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import java.util.concurrent.Future;
 
 import static com.alibaba.dubbo.common.Constants.*;
-import static com.megaease.easeagent.plugin.dubbo.DubboTags.RESULT;
+import static com.megaease.easeagent.plugin.dubbo.DubboTraceTags.RESULT;
 
 public class AlibabaDubboCtxUtils {
 	public static final String CLIENT_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class.getName() + ".CLIENT_REQUEST_CONTEXT";
 	private static final String SERVICE_REQUEST_CONTEXT = AlibabaDubboCtxUtils.class.getName() + ".SERVICE_REQUEST_CONTEXT";
 	public static final String METRICS_SERVICE_NAME = AlibabaDubboCtxUtils.class.getName() + ".METRICS_SERVICE_NAME";
+	public static final String BEGIN_TIME = AlibabaDubboCtxUtils.class.getName() + ".BEGIN_TIME";
+
 
 	public static void initSpan(MethodInfo methodInfo, Context context) {
 		Invoker<?> invoker = (Invoker<?>) methodInfo.getArgs()[0];
@@ -52,12 +54,12 @@ public class AlibabaDubboCtxUtils {
 			span.remoteIpAndPort(rpcContext.getRemoteHost(), rpcContext.getRemotePort());
 
 			String argsList = DubboBaseInterceptor.DUBBO_TRACE_CONFIG.argsCollectEnabled() ? JsonUtil.toJson(invocation.getArguments()) : null;
-			span.tag(DubboTags.CLIENT_APPLICATION.name, applicationName);
-			span.tag(DubboTags.GROUP.name, groupName);
-			span.tag(DubboTags.SERVICE.name, requestUrl.getPath());
-			span.tag(DubboTags.METHOD.name, method(invocation));
-			span.tag(DubboTags.SERVICE_VERSION.name, version);
-			span.tag(DubboTags.ARGS.name, argsList);
+			span.tag(DubboTraceTags.CLIENT_APPLICATION.name, applicationName);
+			span.tag(DubboTraceTags.GROUP.name, groupName);
+			span.tag(DubboTraceTags.SERVICE.name, requestUrl.getPath());
+			span.tag(DubboTraceTags.METHOD.name, method(invocation));
+			span.tag(DubboTraceTags.SERVICE_VERSION.name, version);
+			span.tag(DubboTraceTags.ARGS.name, argsList);
 
 			context.put(CLIENT_REQUEST_CONTEXT, requestContext);
 		} else {
@@ -69,7 +71,7 @@ public class AlibabaDubboCtxUtils {
 			span.name(alibabaDubboServerRequest.name());
 			span.remoteServiceName(ConfigConst.Namespace.DUBBO);
 			span.remoteIpAndPort(rpcContext.getRemoteHost(), rpcContext.getRemotePort());
-			span.tag(DubboTags.SERVER_APPLICATION.name, applicationName);
+			span.tag(DubboTraceTags.SERVER_APPLICATION.name, applicationName);
 
 			context.put(SERVICE_REQUEST_CONTEXT, requestContext);
 		}

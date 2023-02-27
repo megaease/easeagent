@@ -7,18 +7,16 @@ import com.megaease.easeagent.plugin.api.context.AsyncContext;
 import com.megaease.easeagent.plugin.api.context.ContextUtils;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.dubbo.AlibabaDubboCtxUtils;
-import com.megaease.easeagent.plugin.dubbo.interceptor.metrics.DubboMetrics;
+
+import static com.megaease.easeagent.plugin.dubbo.interceptor.metrics.DubboBaseMetricsInterceptor.DUBBO_METRICS;
 
 public class AlibabaDubboMetricsCallback implements ResponseCallback {
     private ResponseCallback responseCallback;
     private AsyncContext asyncContext;
 
-    private DubboMetrics dubboMetrics;
-
-    public AlibabaDubboMetricsCallback(ResponseCallback responseCallback, AsyncContext asyncContext, DubboMetrics dubboMetrics) {
+    public AlibabaDubboMetricsCallback(ResponseCallback responseCallback, AsyncContext asyncContext) {
         this.responseCallback = responseCallback;
         this.asyncContext = asyncContext;
-        this.dubboMetrics = dubboMetrics;
     }
 
     @Override
@@ -43,9 +41,9 @@ public class AlibabaDubboMetricsCallback implements ResponseCallback {
         try(Cleaner cleaner = asyncContext.importToCurrent()) {
             Context context = EaseAgent.getContext();
             boolean callResult = AlibabaDubboCtxUtils.checkCallResult(response, throwable);
-            Long duration = ContextUtils.getDuration(context);
+            Long duration = ContextUtils.getDuration(context, AlibabaDubboCtxUtils.BEGIN_TIME);
             String service = context.get(AlibabaDubboCtxUtils.METRICS_SERVICE_NAME);
-            dubboMetrics.collect(service, duration, callResult);
+            DUBBO_METRICS.collect(service, duration, callResult);
         }
     }
 }

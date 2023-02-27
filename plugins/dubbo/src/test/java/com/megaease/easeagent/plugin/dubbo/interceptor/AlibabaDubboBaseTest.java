@@ -13,12 +13,20 @@ import com.alibaba.dubbo.rpc.RpcResult;
 import com.alibaba.dubbo.rpc.protocol.dubbo.FutureAdapter;
 import com.megaease.easeagent.mock.config.MockConfig;
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
+import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
+import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.metric.name.MetricField;
+import com.megaease.easeagent.plugin.api.metric.name.Tags;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.dubbo.AlibabaDubboCtxUtils;
-import com.megaease.easeagent.plugin.dubbo.DubboTags;
+import com.megaease.easeagent.plugin.dubbo.DubboMetricTags;
+import com.megaease.easeagent.plugin.dubbo.DubboPlugin;
+import com.megaease.easeagent.plugin.dubbo.DubboTraceTags;
 import com.megaease.easeagent.plugin.dubbo.config.DubboTraceConfig;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import org.junit.Before;
@@ -38,14 +46,14 @@ import static org.mockito.Mockito.when;
 public abstract class AlibabaDubboBaseTest {
 
 	@Mock
-	protected Invoker consumerInvoker;
+	protected Invoker<?> consumerInvoker;
 
 	protected Invocation consumerInvocation;
 
 	protected Invocation asyncConsumerInvocation;
 
 	@Mock
-	protected Invoker providerInvoker;
+	protected Invoker<?> providerInvoker;
 
 	protected Invocation providerInvocation;
 
@@ -73,8 +81,10 @@ public abstract class AlibabaDubboBaseTest {
         }
     }
 
+	protected abstract Interceptor createInterceptor();
+
     @Before
-	public void setup() {
+	public void init() {
 		MockitoAnnotations.openMocks(this);
 
 		URL consumerURL = URL.valueOf("dubbo://127.0.0.1:0/com.magaease.easeagent.service.DubboService?side=consumer&application=dubbo-consumer&group=consumer&version=1.0.0");
@@ -97,6 +107,31 @@ public abstract class AlibabaDubboBaseTest {
         futureAdapter = new FutureAdapter<>(defaultFuture);
 
         EaseAgent.configFactory = MockConfig.getPluginConfigManager();
+	    DubboPlugin dubboPlugin = new DubboPlugin();
+	    InterceptorTestUtils.init(createInterceptor(),dubboPlugin);
+	}
+
+	protected void assertSuccessMetrics() {
+		assertMetrics(true);
+	}
+
+	protected void assertFailureMetrics() {
+		assertMetrics(false);
+	}
+
+	private void assertMetrics(boolean success) {
+		TagVerifier tagVerifier = new TagVerifier()
+				.add(Tags.CATEGORY, DubboMetricTags.CATEGORY.name)
+				.add(Tags.TYPE, DubboMetricTags.TYPE.name)
+				.add(DubboMetricTags.LABEL_NAME.name, AlibabaDubboCtxUtils.interfaceSignature(asyncConsumerInvocation));
+		LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
+		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
+		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
+		if (success) {
+			assertEquals(0, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
+		} else {
+			assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
+		}
 	}
 
 	protected void assertConsumerTrace(Object retValue, String errorMessage) {
@@ -119,18 +154,18 @@ public abstract class AlibabaDubboBaseTest {
 		assertEquals(ConfigConst.Namespace.DUBBO, mockSpan.remoteServiceName());
 		if (isConsumer) {
 			assertEquals(Span.Kind.CLIENT.name(), mockSpan.kind());
-			assertEquals(url.getParameter(Constants.APPLICATION_KEY), mockSpan.tag(DubboTags.CLIENT_APPLICATION.name));
-			assertEquals(url.getParameter(Constants.GROUP_KEY), mockSpan.tag(DubboTags.GROUP.name));
-			assertEquals(url.getParameter(Constants.VERSION_KEY), mockSpan.tag(DubboTags.SERVICE_VERSION.name));
-			assertEquals(AlibabaDubboCtxUtils.method(invocation), mockSpan.tag(DubboTags.METHOD.name));
-			assertEquals(url.getPath(), mockSpan.tag(DubboTags.SERVICE.name));
+			assertEquals(url.getParameter(Constants.APPLICATION_KEY), mockSpan.tag(DubboTraceTags.CLIENT_APPLICATION.name));
+			assertEquals(url.getParameter(Constants.GROUP_KEY), mockSpan.tag(DubboTraceTags.GROUP.name));
+			assertEquals(url.getParameter(Constants.VERSION_KEY), mockSpan.tag(DubboTraceTags.SERVICE_VERSION.name));
+			assertEquals(AlibabaDubboCtxUtils.method(invocation), mockSpan.tag(DubboTraceTags.METHOD.name));
+			assertEquals(url.getPath(), mockSpan.tag(DubboTraceTags.SERVICE.name));
 			String expectedArgs = dubboTraceConfig.argsCollectEnabled() ? JsonUtil.toJson(invocation.getArguments()) : null;
 			String expectedResult = dubboTraceConfig.resultCollectEnabled() && retValue != null ? JsonUtil.toJson(retValue) : null;
-			assertEquals(expectedArgs, mockSpan.tag(DubboTags.ARGS.name));
-			assertEquals(expectedResult, mockSpan.tag(DubboTags.RESULT.name));
+			assertEquals(expectedArgs, mockSpan.tag(DubboTraceTags.ARGS.name));
+			assertEquals(expectedResult, mockSpan.tag(DubboTraceTags.RESULT.name));
 		} else {
 			assertEquals(Span.Kind.SERVER.name(), mockSpan.kind());
-			assertEquals(url.getParameter(Constants.APPLICATION_KEY), mockSpan.tag(DubboTags.SERVER_APPLICATION.name));
+			assertEquals(url.getParameter(Constants.APPLICATION_KEY), mockSpan.tag(DubboTraceTags.SERVER_APPLICATION.name));
 		}
 
 		if (retValue != null) {

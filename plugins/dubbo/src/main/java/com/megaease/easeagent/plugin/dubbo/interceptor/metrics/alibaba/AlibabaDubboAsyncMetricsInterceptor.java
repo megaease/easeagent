@@ -16,7 +16,7 @@ public class AlibabaDubboAsyncMetricsInterceptor extends DubboBaseMetricsInterce
     public void before(MethodInfo methodInfo, Context context) {
         ResponseCallback responseCallback = (ResponseCallback) methodInfo.getArgs()[0];
         AsyncContext asyncContext = context.exportAsync();
-        AlibabaDubboMetricsCallback alibabaDubboMetricsCallback = new AlibabaDubboMetricsCallback(responseCallback, asyncContext, DUBBO_METRICS);
+        AlibabaDubboMetricsCallback alibabaDubboMetricsCallback = new AlibabaDubboMetricsCallback(responseCallback, asyncContext);
         methodInfo.changeArg(0, alibabaDubboMetricsCallback);
     }
 }

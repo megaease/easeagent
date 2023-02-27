@@ -1,36 +1,31 @@
 package com.megaease.easeagent.plugin.motan.interceptor.trace.consumer;
 
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.motan.MotanPlugin;
 import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanBaseInterceptor;
-import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTraceInterceptorTest;
+import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanInterceptorTest;
 import com.weibo.api.motan.rpc.DefaultResponse;
 import com.weibo.api.motan.rpc.DefaultResponseFuture;
 import com.weibo.api.motan.rpc.ResponseFuture;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
-public class MotanConsumerTraceInterceptorTest extends MotanTraceInterceptorTest {
+public class MotanConsumerInterceptorTest extends MotanInterceptorTest {
 
-    private MotanConsumerTraceInterceptor motanConsumerTraceInterceptor;
+    private static final MotanConsumerTraceInterceptor motanConsumerTraceInterceptor = new MotanConsumerTraceInterceptor();
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        motanConsumerTraceInterceptor = new MotanConsumerTraceInterceptor();
-        InterceptorTestUtils.init(motanConsumerTraceInterceptor, new MotanPlugin());
+    @Override
+    protected Interceptor createInterceptor() {
+        return motanConsumerTraceInterceptor;
     }
-
 
     @Test
     public void order() {
@@ -43,7 +38,7 @@ public class MotanConsumerTraceInterceptorTest extends MotanTraceInterceptorTest
     }
 
     @Test
-    public void init() {
+    public void testExternalConfig() {
         assertNotNull(MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG);
         assertTrue(MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG.argsCollectEnabled());
         assertTrue(MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG.resultCollectEnabled());

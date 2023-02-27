@@ -1,6 +1,6 @@
 package com.megaease.easeagent.plugin.dubbo;
 
-public enum DubboTags {
+public enum DubboTraceTags {
 	SERVICE("dubbo.service"),
 	METHOD("dubbo.method"),
 	SERVICE_VERSION("dubbo.service.version"),
@@ -13,7 +13,7 @@ public enum DubboTags {
 
 	public final String name;
 
-	DubboTags(String name) {
+	DubboTraceTags(String name) {
 		this.name = name;
 	}
 }

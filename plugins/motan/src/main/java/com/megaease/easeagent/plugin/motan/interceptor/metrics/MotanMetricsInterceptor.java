@@ -8,6 +8,7 @@ import com.megaease.easeagent.plugin.motan.MotanPlugin;
 import com.megaease.easeagent.plugin.motan.advice.MotanConsumerAdvice;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanClassUtils;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
+import com.megaease.easeagent.plugin.utils.SystemClock;
 import com.weibo.api.motan.rpc.DefaultResponseFuture;
 import com.weibo.api.motan.rpc.Request;
 import com.weibo.api.motan.rpc.Response;
@@ -17,7 +18,7 @@ public class MotanMetricsInterceptor extends MotanBaseMetricsInterceptor {
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
-        ContextUtils.setBeginTime(context);
+        context.put(MotanCtxUtils.BEGIN_TIME, SystemClock.now());
     }
 
     @Override
@@ -30,11 +31,11 @@ public class MotanMetricsInterceptor extends MotanBaseMetricsInterceptor {
 
         if (MotanClassUtils.DefaultResponseFutureTypeChecker.getTypeChecker().hasClassAndIsType(response)) {
             DefaultResponseFuture defaultResponseFuture = (DefaultResponseFuture) response;
-            defaultResponseFuture.addListener(new MetricsFutureListener(motanMetric,context.exportAsync()));
+            defaultResponseFuture.addListener(new MetricsFutureListener(context.exportAsync()));
         } else {
-            Long duration = ContextUtils.getDuration(context);
+            Long duration = ContextUtils.getDuration(context,MotanCtxUtils.BEGIN_TIME);
             boolean callResult = throwable == null && response != null && response.getException() == null;
-            motanMetric.collectMetric(interfaceSignature, duration, callResult);
+            MOTAN_METRIC.collectMetric(interfaceSignature, duration, callResult);
         }
     }
 }

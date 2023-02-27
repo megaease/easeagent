@@ -24,6 +24,7 @@ public class ApacheDubboCtxUtils {
     private static final String CLIENT_REQUEST_CONTEXT = ApacheDubboCtxUtils.class.getName() + ".CLIENT_REQUEST_CONTEXT";
     private static final String SERVICE_REQUEST_CONTEXT = ApacheDubboCtxUtils.class.getName() + ".SERVICE_REQUEST_CONTEXT";
     public static final String METRICS_SERVICE_NAME = ApacheDubboCtxUtils.class.getName() + ".METRICS_SERVICE_NAME";
+    public static final String BEGIN_TIME = ApacheDubboCtxUtils.class.getName() + ".BEGIN_TIME";
     //dubbo get metadata interface
     public static final String METADATA_INTERFACE = "org.apache.dubbo.metadata.MetadataService";
 
@@ -60,12 +61,12 @@ public class ApacheDubboCtxUtils {
             span.remoteIpAndPort(requestUrl.getIp(), requestUrl.getPort());
 
             String argsList = DubboBaseInterceptor.DUBBO_TRACE_CONFIG.argsCollectEnabled() ? JsonUtil.toJson(invocation.getArguments()) : null;
-            span.tag(DubboTags.CLIENT_APPLICATION.name, applicationName);
-            span.tag(DubboTags.GROUP.name, groupName);
-            span.tag(DubboTags.SERVICE.name, requestUrl.getPath());
-            span.tag(DubboTags.METHOD.name, method(invocation));
-            span.tag(DubboTags.SERVICE_VERSION.name, version);
-            span.tag(DubboTags.ARGS.name, argsList);
+            span.tag(DubboTraceTags.CLIENT_APPLICATION.name, applicationName);
+            span.tag(DubboTraceTags.GROUP.name, groupName);
+            span.tag(DubboTraceTags.SERVICE.name, requestUrl.getPath());
+            span.tag(DubboTraceTags.METHOD.name, method(invocation));
+            span.tag(DubboTraceTags.SERVICE_VERSION.name, version);
+            span.tag(DubboTraceTags.ARGS.name, argsList);
 
             context.put(CLIENT_REQUEST_CONTEXT, requestContext);
         } else {
@@ -77,7 +78,7 @@ public class ApacheDubboCtxUtils {
             span.name(apacheDubboServerRequest.name());
             span.remoteServiceName(CommonConstants.DUBBO);
             span.remoteIpAndPort(rpcContext.getRemoteHost(), rpcContext.getRemotePort());
-            span.tag(DubboTags.SERVER_APPLICATION.name, applicationName);
+            span.tag(DubboTraceTags.SERVER_APPLICATION.name, applicationName);
 
             context.put(SERVICE_REQUEST_CONTEXT, requestContext);
         }
@@ -113,7 +114,7 @@ public class ApacheDubboCtxUtils {
                 span.error(result.getException());
             } else {
                 if (dubboTraceConfig.resultCollectEnabled() && result.getValue() != null) {
-                    span.tag(DubboTags.RESULT.name, JsonUtil.toJson(result.getValue()));
+                    span.tag(DubboTraceTags.RESULT.name, JsonUtil.toJson(result.getValue()));
                 }
             }
         }
