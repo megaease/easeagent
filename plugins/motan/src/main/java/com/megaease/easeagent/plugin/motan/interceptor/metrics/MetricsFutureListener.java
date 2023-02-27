@@ -9,13 +9,13 @@ import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
 import com.weibo.api.motan.rpc.Future;
 import com.weibo.api.motan.rpc.FutureListener;
 
+import static com.megaease.easeagent.plugin.motan.interceptor.metrics.MotanBaseMetricsInterceptor.MOTAN_METRIC;
+
 public class MetricsFutureListener implements FutureListener {
-	private MotanMetric motanMetric;
-	private AsyncContext asyncContext;
+	private final AsyncContext asyncContext;
 
 
-	public MetricsFutureListener(MotanMetric motanMetric, AsyncContext asyncContext) {
-		this.motanMetric = motanMetric;
+	public MetricsFutureListener(AsyncContext asyncContext) {
 		this.asyncContext = asyncContext;
 	}
 
@@ -23,10 +23,10 @@ public class MetricsFutureListener implements FutureListener {
 	public void operationComplete(Future future) throws Exception {
 		try(Cleaner cleaner = asyncContext.importToCurrent()){
 			Context context = EaseAgent.getContext();
-			Long duration = ContextUtils.getDuration(context);
+			Long duration = ContextUtils.getDuration(context,MotanCtxUtils.BEGIN_TIME);
 			String service = context.get(MotanCtxUtils.METRICS_SERVICE_NAME);
 			boolean callResult = future.getException() == null;
-			motanMetric.collectMetric(service, duration, callResult);
+            MOTAN_METRIC.collectMetric(service, duration, callResult);
 		}
 	}
 }

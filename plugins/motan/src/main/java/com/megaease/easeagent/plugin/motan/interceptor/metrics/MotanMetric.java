@@ -17,10 +17,7 @@
 
 package com.megaease.easeagent.plugin.motan.interceptor.metrics;
 
-import com.megaease.easeagent.plugin.api.metric.Counter;
-import com.megaease.easeagent.plugin.api.metric.Meter;
-import com.megaease.easeagent.plugin.api.metric.MetricRegistry;
-import com.megaease.easeagent.plugin.api.metric.ServiceMetric;
+import com.megaease.easeagent.plugin.api.metric.*;
 import com.megaease.easeagent.plugin.api.metric.name.*;
 import com.megaease.easeagent.plugin.tools.metrics.LastMinutesCounterGauge;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
@@ -30,9 +27,22 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class MotanMetric extends ServiceMetric {
+
     public MotanMetric(@Nonnull MetricRegistry metricRegistry, @Nonnull NameFactory nameFactory) {
         super(metricRegistry, nameFactory);
     }
+
+    public static final ServiceMetricSupplier<MotanMetric> MOTAN_METRIC_SUPPLIER = new ServiceMetricSupplier<MotanMetric>() {
+        @Override
+        public NameFactory newNameFactory() {
+            return MotanMetric.nameFactory();
+        }
+
+        @Override
+        public MotanMetric newInstance(MetricRegistry metricRegistry, NameFactory nameFactory) {
+            return new MotanMetric(metricRegistry, nameFactory);
+        }
+    };
 
     public static NameFactory nameFactory() {
         return NameFactory.createBuilder()

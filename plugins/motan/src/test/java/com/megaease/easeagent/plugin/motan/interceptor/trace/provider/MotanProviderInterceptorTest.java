@@ -2,7 +2,6 @@ package com.megaease.easeagent.plugin.motan.interceptor.trace.provider;
 
 import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.mock.plugin.api.utils.SpanTestUtils;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -10,31 +9,26 @@ import com.megaease.easeagent.plugin.api.context.RequestContext;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import com.megaease.easeagent.plugin.motan.MotanPlugin;
-import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanBaseInterceptor;
 import com.megaease.easeagent.plugin.motan.interceptor.MotanCtxUtils;
-import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanTraceInterceptorTest;
+import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanBaseInterceptor;
+import com.megaease.easeagent.plugin.motan.interceptor.trace.MotanInterceptorTest;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.weibo.api.motan.rpc.Response;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
-public class MotanProviderTraceInterceptorTest extends MotanTraceInterceptorTest {
+public class MotanProviderInterceptorTest extends MotanInterceptorTest {
 
-    private MotanProviderTraceInterceptor motanProviderTraceInterceptor;
+    private static final MotanProviderTraceInterceptor motanProviderTraceInterceptor = new MotanProviderTraceInterceptor();
 
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        motanProviderTraceInterceptor = new MotanProviderTraceInterceptor();
-        InterceptorTestUtils.init(motanProviderTraceInterceptor, new MotanPlugin());
+    @Override
+    protected Interceptor createInterceptor() {
+        return motanProviderTraceInterceptor;
     }
 
 
@@ -49,7 +43,7 @@ public class MotanProviderTraceInterceptorTest extends MotanTraceInterceptorTest
     }
 
     @Test
-    public void init() {
+    public void testExternalConfig() {
         assertNotNull(MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG);
         assertTrue(MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG.argsCollectEnabled());
         assertTrue(MotanBaseInterceptor.MOTAN_PLUGIN_CONFIG.resultCollectEnabled());

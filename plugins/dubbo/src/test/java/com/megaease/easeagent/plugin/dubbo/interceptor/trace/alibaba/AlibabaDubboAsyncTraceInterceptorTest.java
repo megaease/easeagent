@@ -8,6 +8,7 @@ import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.dubbo.DubboPlugin;
 import com.megaease.easeagent.plugin.dubbo.interceptor.AlibabaDubboBaseTest;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,21 +21,17 @@ import static org.junit.Assert.*;
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class AlibabaDubboAsyncTraceInterceptorTest extends AlibabaDubboBaseTest {
 
-    private AlibabaDubboAsyncTraceInterceptor alibabaDubboAsyncTraceInterceptor;
-    private AlibabaDubboTraceInterceptor alibabaDubboTraceInterceptor;
+    private static final AlibabaDubboAsyncTraceInterceptor alibabaDubboAsyncTraceInterceptor = new AlibabaDubboAsyncTraceInterceptor();
+    private static final AlibabaDubboTraceInterceptor alibabaDubboTraceInterceptor = new AlibabaDubboTraceInterceptor();
 
 
-	@Before
-	public void setup() {
-		super.setup();
-		DubboPlugin dubboPlugin = new DubboPlugin();
-		this.alibabaDubboAsyncTraceInterceptor = new AlibabaDubboAsyncTraceInterceptor();
-		this.alibabaDubboTraceInterceptor = new AlibabaDubboTraceInterceptor();
-		InterceptorTestUtils.init(alibabaDubboAsyncTraceInterceptor, dubboPlugin);
+	@Override
+	protected Interceptor createInterceptor() {
+		return alibabaDubboAsyncTraceInterceptor;
 	}
 
 	@Test
-	public void init() {
+	public void testExternalConfig() {
         assertNotNull(AlibabaDubboTraceInterceptor.DUBBO_TRACE_CONFIG);
         assertTrue(AlibabaDubboTraceInterceptor.DUBBO_TRACE_CONFIG.resultCollectEnabled());
         assertTrue(AlibabaDubboTraceInterceptor.DUBBO_TRACE_CONFIG.argsCollectEnabled());

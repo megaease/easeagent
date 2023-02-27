@@ -15,6 +15,7 @@ import com.megaease.easeagent.plugin.dubbo.DubboPlugin;
 import com.megaease.easeagent.plugin.dubbo.advice.AlibabaDubboAdvice;
 import com.megaease.easeagent.plugin.dubbo.interceptor.metrics.DubboBaseMetricsInterceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.utils.SystemClock;
 
 import java.util.concurrent.Future;
 
@@ -24,7 +25,7 @@ public class AlibabaDubboMetricsInterceptor extends DubboBaseMetricsInterceptor 
 
 	@Override
 	public void before(MethodInfo methodInfo, Context context) {
-		ContextUtils.setBeginTime(context);
+		context.put(AlibabaDubboCtxUtils.BEGIN_TIME, SystemClock.now());
         Invoker<?> invoker = (Invoker<?>) methodInfo.getArgs()[0];
         Invocation invocation = (Invocation) methodInfo.getArgs()[1];
         boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
@@ -46,7 +47,7 @@ public class AlibabaDubboMetricsInterceptor extends DubboBaseMetricsInterceptor 
             return;
 		}
 
-        Long duration = ContextUtils.getDuration(context);
+		Long duration = ContextUtils.getDuration(context, AlibabaDubboCtxUtils.BEGIN_TIME);
 		Result retValue = (Result) methodInfo.getRetValue();
 		String interfaceSignature = AlibabaDubboCtxUtils.interfaceSignature(invocation);
         boolean callResult = AlibabaDubboCtxUtils.checkCallResult(retValue, methodInfo.getThrowable());

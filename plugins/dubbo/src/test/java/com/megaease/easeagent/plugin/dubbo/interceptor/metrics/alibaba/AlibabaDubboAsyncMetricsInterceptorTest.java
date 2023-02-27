@@ -1,45 +1,26 @@
 package com.megaease.easeagent.plugin.dubbo.interceptor.metrics.alibaba;
 
 import com.alibaba.dubbo.rpc.RpcContext;
-import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
-import com.megaease.easeagent.mock.plugin.api.utils.TagVerifier;
-import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
 import com.megaease.easeagent.plugin.api.Context;
-import com.megaease.easeagent.plugin.api.metric.name.MetricField;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.dubbo.AlibabaDubboCtxUtils;
-import com.megaease.easeagent.plugin.dubbo.DubboPlugin;
 import com.megaease.easeagent.plugin.dubbo.interceptor.AlibabaDubboBaseTest;
 import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class AlibabaDubboAsyncMetricsInterceptorTest extends AlibabaDubboBaseTest {
 
-	private AlibabaDubboMetricsInterceptor alibabaDubboMetricsInterceptor;
-	private AlibabaDubboAsyncMetricsInterceptor alibabaDubboAsyncMetricsInterceptor;
+	private static final AlibabaDubboMetricsInterceptor alibabaDubboMetricsInterceptor = new AlibabaDubboMetricsInterceptor();
+	private static final AlibabaDubboAsyncMetricsInterceptor alibabaDubboAsyncMetricsInterceptor = new AlibabaDubboAsyncMetricsInterceptor();
 
-
-	@Before
-	public void setup() {
-		super.setup();
-		alibabaDubboMetricsInterceptor = new AlibabaDubboMetricsInterceptor();
-        alibabaDubboAsyncMetricsInterceptor = new AlibabaDubboAsyncMetricsInterceptor();
-		initDubboMetrics();
-	}
 
 	@Test
 	public void order() {
@@ -51,9 +32,9 @@ public class AlibabaDubboAsyncMetricsInterceptorTest extends AlibabaDubboBaseTes
 		assertEquals(Order.METRIC.getName(), alibabaDubboAsyncMetricsInterceptor.getType());
 	}
 
-	@Test
-	public void init() {
-		assertNotNull(AgentFieldReflectAccessor.getStaticFieldValue(AlibabaDubboAsyncMetricsInterceptor.class, "DUBBO_METRICS"));
+	@Override
+	protected Interceptor createInterceptor() {
+		return alibabaDubboMetricsInterceptor;
 	}
 
 	@Test
@@ -80,11 +61,7 @@ public class AlibabaDubboAsyncMetricsInterceptorTest extends AlibabaDubboBaseTes
         thread.start();
         thread.join();
 
-        LastJsonReporter lastJsonReporter = getLastJsonReporter();
-		Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
-		assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
-		assertEquals(0, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
-		lastJsonReporter.clean();
+		assertSuccessMetrics();
 	}
 
 	@Test
@@ -111,11 +88,7 @@ public class AlibabaDubboAsyncMetricsInterceptorTest extends AlibabaDubboBaseTes
         thread.start();
         thread.join();
 
-        LastJsonReporter lastJsonReporter = getLastJsonReporter();
-        Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
-        assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
-        assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
-        lastJsonReporter.clean();
+        assertFailureMetrics();
 	}
 
 	@Test
@@ -136,27 +109,6 @@ public class AlibabaDubboAsyncMetricsInterceptorTest extends AlibabaDubboBaseTes
         futureAdapter.getFuture().setCallback(alibabaDubboMetricsCallback);
         TimeUnit.SECONDS.sleep(1);
 
-        LastJsonReporter lastJsonReporter = getLastJsonReporter();
-        Map<String, Object> metric = lastJsonReporter.flushAndOnlyOne();
-        assertEquals(1, metric.get(MetricField.EXECUTION_COUNT.getField()));
-        assertEquals(1, metric.get(MetricField.EXECUTION_ERROR_COUNT.getField()));
-        lastJsonReporter.clean();
+		assertFailureMetrics();
 	}
-
-
-	private void initDubboMetrics() {
-		DubboPlugin dubboPlugin = new DubboPlugin();
-		InterceptorTestUtils.init(alibabaDubboMetricsInterceptor, dubboPlugin);
-	}
-
-	@NotNull
-	private LastJsonReporter getLastJsonReporter() {
-		TagVerifier tagVerifier = new TagVerifier()
-				.add("category", "application")
-				.add("type", "dubbo")
-				.add("service", AlibabaDubboCtxUtils.interfaceSignature(asyncConsumerInvocation));
-		LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(tagVerifier::verifyAnd);
-		return lastJsonReporter;
-	}
-
 }

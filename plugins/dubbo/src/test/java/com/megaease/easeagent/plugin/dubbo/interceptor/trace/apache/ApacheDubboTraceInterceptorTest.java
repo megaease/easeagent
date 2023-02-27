@@ -1,16 +1,14 @@
 package com.megaease.easeagent.plugin.dubbo.interceptor.trace.apache;
 
 import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
-import com.megaease.easeagent.mock.plugin.api.utils.InterceptorTestUtils;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
-import com.megaease.easeagent.plugin.dubbo.DubboPlugin;
 import com.megaease.easeagent.plugin.dubbo.interceptor.ApacheDubboBaseTest;
 import com.megaease.easeagent.plugin.dubbo.interceptor.trace.alibaba.AlibabaDubboTraceInterceptor;
 import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import org.apache.dubbo.rpc.Result;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,18 +17,15 @@ import static org.junit.Assert.*;
 @RunWith(EaseAgentJunit4ClassRunner.class)
 public class ApacheDubboTraceInterceptorTest extends ApacheDubboBaseTest {
 
-	private ApacheDubboTraceInterceptor apacheDubboTraceInterceptor;
+	private static final ApacheDubboTraceInterceptor apacheDubboTraceInterceptor = new ApacheDubboTraceInterceptor();
 
-	@Before
-	public void setup() {
-		super.setup();
-		DubboPlugin dubboPlugin = new DubboPlugin();
-		this.apacheDubboTraceInterceptor = new ApacheDubboTraceInterceptor();
-		InterceptorTestUtils.init(apacheDubboTraceInterceptor, dubboPlugin);
+	@Override
+	public Interceptor createInterceptor() {
+		return apacheDubboTraceInterceptor;
 	}
 
 	@Test
-	public void init() {
+	public void testExternalConfig() {
         assertNotNull(AlibabaDubboTraceInterceptor.DUBBO_TRACE_CONFIG);
         assertTrue(AlibabaDubboTraceInterceptor.DUBBO_TRACE_CONFIG.resultCollectEnabled());
         assertTrue(AlibabaDubboTraceInterceptor.DUBBO_TRACE_CONFIG.argsCollectEnabled());
