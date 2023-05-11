@@ -6,7 +6,7 @@
     - [Getting the configuration file](#getting-the-configuration-file)
     - [Global Configuration](#global-configuration)
       - [Internal HTTP Server](#internal-http-server)
-      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server:-kafka-and-httpzipkin-server)
+      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server:-kafka-and-http/zipkin-server)
       - [Progress Configuration](#progress-configuration)
         - [Forwarded headers config](#forwarded-headers-config)
         - [Tracing config](#tracing-config)
@@ -18,6 +18,8 @@
       - [Service Name Head](#service-name-head)
       - [Plugin Http configuration modification api](#plugin-http-configuration-modification-api)
   - [Logging](#logging)
+    - [EaseAgent log](#easeagent-log)
+    - [MDC](#mdc)
   - [Prometheus Support](#prometheus-support)
   - [Health Check and Readiness Check Endpoint](#health-check-and-readiness-check-endpoint)
   - [Agent info Endpoint](#agent-info-endpoint)
@@ -354,12 +356,33 @@ the {version} can be any information
 
 
 ## Logging
+
+### EaseAgent log
 EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `easeagent-log4j2.xml` file.
 
 After modification, User can run the application with EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/easeagent-log4j2.xml" -jar user-app.jar
+```
+
+### MDC
+Easeagent will add TraceId and SpanId to MDC when creating a Span, you can add parameters to your slf4j or logback configuration files to display them, or retrieve them from MDC in your code.
+
+Here is an example of the configuration file to get `traceId` and `spanId`:
+
+```xml
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+        <pattern>!-%d{HH:mm:ss.SSS} [%thread] %-5level %logger{16} - [%X{traceId}/%X{spanId}] %msg%n</pattern>
+    </encoder>
+</appender>
+```
+
+Here is how to retrieve `traceId` and `spanId` in code:
+```java
+String traceId = org.slf4j.MDC.get("traceId");
+String spanId = org.slf4j.MDC.get("spanId");
 ```
 
 ## Prometheus Support
