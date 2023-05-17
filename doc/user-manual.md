@@ -386,7 +386,7 @@ Here is an example configuration file that displays `traceId` and `spaceId` in t
 </appender>
 ```
 
-Here is how to retrieve `traceId` and `spanId` in code:
+Here is an example of how to retrieve `traceId` and `spanId` in code.
 ```java
 String traceId = org.slf4j.MDC.get("traceId");
 String spanId = org.slf4j.MDC.get("spanId");
