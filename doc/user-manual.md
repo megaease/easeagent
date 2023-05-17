@@ -376,7 +376,7 @@ $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_
 ### MDC
 Easeagent automatically adds TraceId and SpanId to the MDC (Mapped Diagnostic Context) when creating a new Span. You can configure your slf4j or logback files by adding parameters to display these IDs, or retrieve them directly from the MDC in your code.
 
-Here is an example of the configuration file to get `traceId` and `spanId`:
+Here is an example configuration file that displays `traceId` and `spaceId` in the log output::
 
 ```xml
 <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
