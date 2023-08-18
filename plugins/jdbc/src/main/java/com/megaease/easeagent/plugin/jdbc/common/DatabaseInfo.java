@@ -28,6 +28,7 @@ import java.sql.SQLException;
 @Builder
 @Data
 public class DatabaseInfo {
+    private String databaseType;
     private String database;
     private String host;
     private int port;
@@ -36,14 +37,9 @@ public class DatabaseInfo {
         try {
             String jdbcURL = connection.getMetaData().getURL();
             URI url = URI.create(jdbcURL.substring(5)); // strip "jdbc:"
-            String remoteServiceName;
+            String remoteServiceName = url.getScheme(); // e.g. mysql, postgresql, oracle
             String databaseName = connection.getCatalog();
-            if (databaseName != null && !databaseName.isEmpty()) {
-                remoteServiceName = databaseName;
-            } else {
-                remoteServiceName = "";
-            }
-            return new DatabaseInfo(remoteServiceName,
+            return new DatabaseInfo(remoteServiceName, databaseName,
                 StringUtils.isNotEmpty(url.getHost()) ? url.getHost() : "",
                 url.getPort() == -1 ? 3306 : url.getPort());
         } catch (SQLException ignored) {

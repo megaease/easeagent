@@ -34,7 +34,6 @@ import com.megaease.easeagent.plugin.interceptor.NonReentrantInterceptor;
 import com.megaease.easeagent.plugin.jdbc.JdbcTracingPlugin;
 import com.megaease.easeagent.plugin.jdbc.advice.JdbcStatementAdvice;
 import com.megaease.easeagent.plugin.jdbc.common.*;
-import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.sql.Connection;
@@ -84,19 +83,20 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
         RedirectProcessor.setTagsIfRedirected(Redirect.DATABASE, span, url);
         DatabaseInfo databaseInfo = DatabaseInfo.getFromConnection(conn);
         if (databaseInfo != null) {
-            span.remoteServiceName(remoteServiceName(databaseInfo.getDatabase()));
+            span.remoteServiceName(remoteServiceName(databaseInfo));
             span.remoteIpAndPort(databaseInfo.getHost(), databaseInfo.getPort());
         }
         span.start();
         context.put(SPAN_KEY, span);
     }
 
-    public String remoteServiceName(String database) {
-        if (StringUtils.isEmpty(database)) {
-            return "mysql";
-        } else {
-            return "mysql-" + database;
-        }
+    public String remoteServiceName(DatabaseInfo info) {
+        return String.format("%s:%s", info.getDatabaseType(), info.getDatabase());
+//        if (StringUtils.isEmpty(info.getServiceName())) {
+//            return "mysql";
+//        } else {
+//            return "mysql-" + database;
+//        }
     }
 
     @Override
