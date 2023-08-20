@@ -6,7 +6,7 @@
     - [Getting the configuration file](#getting-the-configuration-file)
     - [Global Configuration](#global-configuration)
       - [Internal HTTP Server](#internal-http-server)
-      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server:-kafka-and-httpzipkin-server)
+      - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server-kafka-and-httpzipkin-server)
       - [Progress Configuration](#progress-configuration)
         - [Forwarded headers config](#forwarded-headers-config)
         - [Tracing config](#tracing-config)
@@ -18,16 +18,22 @@
       - [Service Name Head](#service-name-head)
       - [Plugin Http configuration modification api](#plugin-http-configuration-modification-api)
   - [Logging](#logging)
+    - [EaseAgent log](#easeagent-log)
+    - [MDC](#mdc)
   - [Prometheus Support](#prometheus-support)
   - [Health Check and Readiness Check Endpoint](#health-check-and-readiness-check-endpoint)
   - [Agent info Endpoint](#agent-info-endpoint)
   - [Tracing](#tracing)
     - [Tracing Component](#tracing-component)
+    - [Tracing Component Config Description](#tracing-component-config-description)
     - [Custom Span Tag](#custom-span-tag)
       - [JDBC](#jdbc)
       - [Cache](#cache)
       - [RabbitMQ Producer And Consumer](#rabbitmq-producer-and-consumer)
       - [Kafka Producer And Consumer](#kafka-producer-and-consumer)
+      - [Dubbo Client and Server](#dubbo-client-and-server)
+      - [Motan Client and Server](#motan-client-and-server)
+      - [SOFARPC Client and Server](#sofarpc-client-and-server)
   - [Metric](#metric)
     - [Metric Field](#metric-field)
       - [HTTP Request](#http-request)
@@ -41,6 +47,9 @@
       - [Spring AMQP on Message Listener](#spring-amqp-on-message-listener)
       - [Elasticsearch](#elasticsearch)
       - [MongoDB](#mongodb)
+      - [Dubbo](#dubbo)
+      - [Motan](#motan)
+      - [SOFARPC](#sofarpc)
   - [Application Log](#application-log-1)
 
 ## Configuration
@@ -354,12 +363,33 @@ the {version} can be any information
 
 
 ## Logging
+
+### EaseAgent log
 EaseAgent use `Log4j2` for all internal logging, the default log level is `INFO`, and the logs will be outputted to the `Console`. User can modify the log level and appender in the `easeagent-log4j2.xml` file.
 
 After modification, User can run the application with EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/easeagent-log4j2.xml" -jar user-app.jar
+```
+
+### MDC
+Easeagent automatically adds TraceId and SpanId to the MDC (Mapped Diagnostic Context) when creating a new Span. You can configure your slf4j or logback files by adding parameters to display these IDs, or retrieve them directly from the MDC in your code.
+
+Here is an example configuration file that displays `traceId` and `spaceId` in the log output::
+
+```xml
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+        <pattern>!-%d{HH:mm:ss.SSS} [%thread] %-5level %logger{16} - [%X{traceId}/%X{spanId}] %msg%n</pattern>
+    </encoder>
+</appender>
+```
+
+Here is an example of how to retrieve `traceId` and `spanId` in code.
+```java
+String traceId = org.slf4j.MDC.get("traceId");
+String spanId = org.slf4j.MDC.get("spanId");
 ```
 
 ## Prometheus Support
