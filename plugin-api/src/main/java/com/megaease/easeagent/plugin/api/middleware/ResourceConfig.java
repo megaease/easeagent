@@ -56,9 +56,6 @@ public class ResourceConfig {
             return;
         }
         String[] list = uris.split(",");
-        if (list == null) {
-            return;
-        }
         for (String uri : list) {
             uriList.add(uri);
             int begin = uri.indexOf(":");
