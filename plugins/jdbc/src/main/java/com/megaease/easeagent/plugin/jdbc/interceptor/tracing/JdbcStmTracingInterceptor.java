@@ -91,7 +91,7 @@ public class JdbcStmTracingInterceptor implements NonReentrantInterceptor {
     }
 
     public String remoteServiceName(DatabaseInfo info) {
-        return String.format("%s:%s", info.getDatabaseType(), info.getDatabase());
+        return String.format("%s-%s", info.getDatabaseType(), info.getDatabase());
 //        if (StringUtils.isEmpty(info.getServiceName())) {
 //            return "mysql";
 //        } else {
