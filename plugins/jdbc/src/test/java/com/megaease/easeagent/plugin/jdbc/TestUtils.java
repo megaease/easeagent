@@ -31,10 +31,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TestUtils {
+    public static final String DATABASE_TYPE = "mysql";
     public static final String DATABASE = "db_damo";
     public static final String HOST = "192.168.1.14";
     public static final int PORT = 1234;
-    public static final String URI = String.format("jdbc:mysql://%s:%s/%s", HOST, PORT, DATABASE);
+    public static final String URI = String.format("jdbc:%s://%s:%s/%s", DATABASE_TYPE, HOST, PORT, DATABASE);
     public static final String FULL_URI = URI + "?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true";
     public static final String REDIRECT_USERNAME = "testUserName";
     public static final String REDIRECT_PASSWORD = "testPassword";

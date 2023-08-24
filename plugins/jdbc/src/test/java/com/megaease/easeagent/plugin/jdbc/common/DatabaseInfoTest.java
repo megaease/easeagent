@@ -33,6 +33,7 @@ public class DatabaseInfoTest {
         Connection connection = TestUtils.mockConnection();
         DatabaseInfo databaseInfo = DatabaseInfo.getFromConnection(connection);
         assertNotNull(databaseInfo);
+        assertEquals(TestUtils.DATABASE_TYPE, databaseInfo.getDatabaseType());
         assertEquals(TestUtils.DATABASE, databaseInfo.getDatabase());
         assertEquals(TestUtils.HOST, databaseInfo.getHost());
         assertEquals(TestUtils.PORT, databaseInfo.getPort());

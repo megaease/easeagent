@@ -95,6 +95,7 @@ public class ConfigFactory {
         // override by user special config file
         if (StringUtils.isNotEmpty(pathname)) {
             GlobalConfigs configsFromOuterFile = ConfigLoader.loadFromFile(new File(pathname));
+            LOGGER.info("Loaded user special config file: {}", pathname);
             configs.mergeConfigs(configsFromOuterFile);
         }
 

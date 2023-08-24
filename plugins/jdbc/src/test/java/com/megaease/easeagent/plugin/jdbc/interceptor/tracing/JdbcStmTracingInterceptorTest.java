@@ -82,7 +82,7 @@ public class JdbcStmTracingInterceptorTest {
         assertEquals("database", reportSpan.tag(JdbcStmTracingInterceptor.SPAN_LOCAL_COMPONENT_TAG_NAME));
         assertEquals(TestUtils.URI, reportSpan.tag(JdbcStmTracingInterceptor.SPAN_URL));
         assertEquals(Type.DATABASE.getRemoteType(), reportSpan.tag(MiddlewareConstants.TYPE_TAG_NAME));
-        assertEquals("mysql-" + TestUtils.DATABASE, reportSpan.remoteServiceName());
+        assertEquals(TestUtils.DATABASE_TYPE + "-" + TestUtils.DATABASE, reportSpan.remoteServiceName());
         assertEquals(TestUtils.HOST, reportSpan.remoteEndpoint().ipv4());
         assertEquals(TestUtils.PORT, reportSpan.remoteEndpoint().port());
 
