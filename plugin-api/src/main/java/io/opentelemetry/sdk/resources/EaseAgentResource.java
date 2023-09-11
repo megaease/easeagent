@@ -6,11 +6,12 @@ import com.megaease.easeagent.plugin.api.otlp.common.AgentAttributes;
 import com.megaease.easeagent.plugin.api.otlp.common.SemanticKey;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import io.opentelemetry.api.common.Attributes;
-import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
-import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAMESPACE;
 
 import javax.annotation.Nullable;
 import java.util.List;
+
+import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SERVICE_NAMESPACE;
 
 public class EaseAgentResource extends Resource implements ConfigChangeListener {
     static volatile EaseAgentResource agentResource = null;

@@ -47,7 +47,6 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassInjector;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -64,9 +63,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public class Bootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 
-    private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
-    private static final String AGENT_CONFIG_PATH = "easeagent.config.path";
-    private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
+    private static final String AGENT_SERVER_PORT_KEY = ConfigFactory.AGENT_SERVER_PORT;
+    private static final String AGENT_SERVER_ENABLED_KEY = ConfigFactory.AGENT_SERVER_ENABLED;
 
     private static final String AGENT_MIDDLEWARE_UPDATE = "easeagent.middleware.update";
 
@@ -90,16 +88,10 @@ public class Bootstrap {
             LOGGER.debug("Injected class: {}", bootstrapClassSet);
         }
 
-        // initiate configuration
-        String configPath = System.getProperty(AGENT_CONFIG_PATH);
-        if (StringUtils.isEmpty(configPath)) {
-            configPath = args;
-        }
-
         ClassLoader classLoader = Bootstrap.class.getClassLoader();
         final AgentInfo agentInfo = AgentInfoFactory.loadAgentInfo(classLoader);
         EaseAgent.agentInfo = agentInfo;
-        final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, classLoader);
+        final GlobalConfigs conf = ConfigFactory.loadConfigs(classLoader);
         wrapConfig(conf);
 
         // loader check
@@ -141,8 +133,6 @@ public class Bootstrap {
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
         }
-        String portStr = System.getProperty(AGENT_SERVER_PORT_KEY, String.valueOf(port));
-        port = Integer.parseInt(portStr);
 
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
 

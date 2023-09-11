@@ -17,53 +17,66 @@
 
 package com.megaease.easeagent.config;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Strings;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
+import com.megaease.easeagent.plugin.utils.ImmutableMap;
 import com.megaease.easeagent.plugin.utils.SystemEnv;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
+import io.opentelemetry.sdk.resources.OtelSdkConfigs;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ConfigFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFactory.class);
     private static final String CONFIG_PROP_FILE = "agent.properties";
     private static final String CONFIG_YAML_FILE = "agent.yaml";
 
-    private static final String AGENT_SERVICE_NAME = "easeagent.name";
-    private static final String AGENT_SYSTEM_NAME = "easeagent.system";
+    public static final String AGENT_CONFIG_PATH = "config.path";
 
-    private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
-    private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
+    public static final String AGENT_SERVICE = "name";
+    public static final String AGENT_SYSTEM = "system";
+
+    public static final String AGENT_SERVER_PORT = "easeagent.server.port";
+    public static final String AGENT_SERVER_ENABLED = "easeagent.server.enabled";
 
     public static final String EASEAGENT_ENV_CONFIG = "EASEAGENT_ENV_CONFIG";
 
-    private static final List<String> subEnvKeys = new LinkedList<>();
-    private static final List<String> envKeys = new LinkedList<>();
+    private static final Map<String, String> AGENT_CONFIG_KEYS_TO_PROPS =
+        ImmutableMap.<String, String>builder()
+            .put("easeagent.config.path", AGENT_CONFIG_PATH)
+            .put("easeagent.name", AGENT_SERVICE)
+            .put("easeagent.system", AGENT_SYSTEM)
+            .put("easeagent.server.port", AGENT_SERVER_PORT)
+            .put("easeagent.server.enabled", AGENT_SERVER_ENABLED)
+            .build();
+
+    // OTEL_SERVICE_NAME=xxx
+    private static final Map<String, String> AGENT_ENV_KEY_TO_PROPS = new HashMap<>();
+
 
     static {
-        subEnvKeys.add(AGENT_SERVICE_NAME);
-        subEnvKeys.add(AGENT_SYSTEM_NAME);
-        envKeys.add(AGENT_SERVER_ENABLED_KEY);
-        envKeys.add(AGENT_SERVER_PORT_KEY);
+        for (Map.Entry<String, String> entry : AGENT_CONFIG_KEYS_TO_PROPS.entrySet()) {
+            // lower.hyphen -> UPPER_UNDERSCORE
+            AGENT_ENV_KEY_TO_PROPS.put(
+                CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey().replace('.', '-')),
+                entry.getValue()
+            );
+        }
     }
 
+    /**
+     * update config value from environment variables and java properties
+     * <p>
+     * java properties > environment variables > env:EASEAGENT_ENV_CONFIG={} > default
+     */
     static Map<String, String> updateEnvCfg() {
         Map<String, String> envCfg = new TreeMap<>();
-
-        for (String key : subEnvKeys) {
-            String value = System.getProperty(key);
-            if (!StringUtils.isEmpty(value)) {
-                envCfg.put(key.substring("easeagent.".length()), value);
-            }
-        }
-        for (String key : envKeys) {
-            String value = System.getProperty(key);
-            if (!StringUtils.isEmpty(value)) {
-                envCfg.put(key, value);
-            }
-        }
 
         String configEnv = SystemEnv.get(EASEAGENT_ENV_CONFIG);
         if (StringUtils.isNotEmpty(configEnv)) {
@@ -77,12 +90,45 @@ public class ConfigFactory {
             envCfg.putAll(strMap);
         }
 
+        // override by environment variables, eg: export EASEAGENT_NAME=xxx
+        for (Map.Entry<String, String> entry : AGENT_ENV_KEY_TO_PROPS.entrySet()) {
+            String value = SystemEnv.get(entry.getKey());
+            if (!StringUtils.isEmpty(value)) {
+                envCfg.put(entry.getValue(), value);
+            }
+        }
+
+        // override by java properties; eg: java -Deaseagent.name=xxx
+        for (Map.Entry<String, String> entry : AGENT_CONFIG_KEYS_TO_PROPS.entrySet()) {
+            String value = System.getProperty(entry.getKey());
+            if (!StringUtils.isEmpty(value)) {
+                envCfg.put(entry.getValue(), value);
+            }
+        }
+
         return envCfg;
     }
 
     private ConfigFactory() {
     }
 
+    /**
+     * load config from environment variables and java properties and default config file.
+     * <p>
+     * user special config:
+     * -Deaseagent.config.path=/easeagent/agent.properties || export EASEAGENT_CONFIG_PATH=/easeagent/agent.properties
+     * or OTEL config format
+     * -Dotel.javaagent.configuration-file=/easeagent/agent.properties || export OTEL_JAVAAGENT_CONFIGURATION_FILE=/easeagent/agent.properties
+     */
+    public static GlobalConfigs loadConfigs(ClassLoader loader) {
+        Map<String, String> envCfg = updateEnvCfg();
+        String configFile = envCfg.get(AGENT_CONFIG_PATH);
+        if (Strings.isNullOrEmpty(configFile)) {
+            envCfg = OtelSdkConfigs.updateEnvCfg();
+            configFile = envCfg.get(AGENT_CONFIG_PATH);
+        }
+        return loadConfigs(configFile, loader);
+    }
 
     public static GlobalConfigs loadConfigs(String pathname, ClassLoader loader) {
         // load property configuration file if exist
@@ -98,6 +144,9 @@ public class ConfigFactory {
             LOGGER.info("Loaded user special config file: {}", pathname);
             configs.mergeConfigs(configsFromOuterFile);
         }
+
+        // override by opentelemetry sdk env config
+        configs.updateConfigsNotNotify(OtelSdkConfigs.updateEnvCfg());
 
         // check environment cfg override
         configs.updateConfigsNotNotify(updateEnvCfg());
