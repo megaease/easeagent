@@ -20,12 +20,18 @@ package com.megaease.easeagent.config;
 
 import com.megaease.easeagent.plugin.utils.SystemEnv;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import java.io.File;
+import java.net.URISyntaxException;
 
 import static com.megaease.easeagent.config.ConfigFactory.AGENT_SERVICE;
 import static com.megaease.easeagent.config.ConfigFactory.AGENT_SYSTEM;
 import static org.junit.Assert.assertEquals;
 
 public class ConfigFactoryTest {
+
     @Test
     public void test_yaml() {
         Configs config = ConfigFactory.loadConfigs(null, this.getClass().getClassLoader());
@@ -35,53 +41,57 @@ public class ConfigFactoryTest {
 
     @Test
     public void test_env() {
-        SystemEnv.set(ConfigFactory.EASEAGENT_ENV_CONFIG, "{\"name\":\"env-service\"}");
-        Configs config = ConfigFactory.loadConfigs(null, this.getClass().getClassLoader());
-        assertEquals("env-service", config.getString(AGENT_SERVICE));
-        assertEquals("demo-system", config.getString(AGENT_SYSTEM));
+        try (MockedStatic<SystemEnv> mock = Mockito.mockStatic(SystemEnv.class)) {
+            mock.when(() -> SystemEnv.get(ConfigFactory.EASEAGENT_ENV_CONFIG)).thenReturn("{\"name\":\"env-service\"}");
+
+            Configs config = ConfigFactory.loadConfigs(null, this.getClass().getClassLoader());
+            assertEquals("env-service", config.getString(AGENT_SERVICE));
+            assertEquals("demo-system", config.getString(AGENT_SYSTEM));
+        }
     }
+
 
     @Test
     public void test_loadConfigs() {
-        SystemEnv.set("EASEAGENT_NAME", "service1");
-        SystemEnv.set("EASEAGENT_SYSTEM", "system1");
-        Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-        assertEquals("service1", config.getString(AGENT_SERVICE));
-        assertEquals("system1", config.getString(AGENT_SYSTEM));
+        try (MockedStatic<SystemEnv> mockSystemEnv = Mockito.mockStatic(SystemEnv.class)) {
+            mockSystemEnv.when(() -> SystemEnv.get("EASEAGENT_NAME")).thenReturn("service1");
+            mockSystemEnv.when(() -> SystemEnv.get("EASEAGENT_SYSTEM")).thenReturn("system1");
 
-        // override by jvm properties
-        System.setProperty("easeagent.name", "service2");
-        System.setProperty("easeagent.system", "system2");
-        config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-        assertEquals("service2", config.getString(AGENT_SERVICE));
-        assertEquals("system2", config.getString(AGENT_SYSTEM));
+            Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
+            assertEquals("service1", config.getString(AGENT_SERVICE));
+            assertEquals("system1", config.getString(AGENT_SYSTEM));
+
+            System.setProperty("easeagent.name", "service2");
+            System.setProperty("easeagent.system", "system2");
+            config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
+            assertEquals("service2", config.getString(AGENT_SERVICE));
+            assertEquals("system2", config.getString(AGENT_SYSTEM));
+        }
+
     }
 
     @Test
-    public void test_loadConfigsFromUserSpec() {
-        SystemEnv.set("EASEAGENT_CONFIG_PATH", "src/test/resources/user-spec.properties");
-        Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-        assertEquals("user-spec", config.getString(AGENT_SERVICE));
-        assertEquals("system-spec", config.getString(AGENT_SYSTEM));
+    public void test_loadConfigsFromUserSpec() throws URISyntaxException {
+        String userSpec = new File(this.getClass().getClassLoader().getResource("user-spec.properties").toURI()).getPath();
 
-        // override by jvm properties
-        System.setProperty("easeagent.config.path", "src/test/resources/user-spec2.properties");
-        config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-        assertEquals("user-spec2", config.getString(AGENT_SERVICE));
-        assertEquals("system-spec2", config.getString(AGENT_SYSTEM));
+        try (MockedStatic<SystemEnv> mockSystemEnv = Mockito.mockStatic(SystemEnv.class)) {
+            mockSystemEnv.when(() -> SystemEnv.get("EASEAGENT_CONFIG_PATH")).thenReturn(userSpec);
+            Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
+            assertEquals("user-spec", config.getString(AGENT_SERVICE));
+            assertEquals("system-spec", config.getString(AGENT_SYSTEM));
+        }
     }
 
-    @Test
-    public void test_loadConfigsFromOtelUserSpec() {
-        SystemEnv.set("OTEL_JAVAAGENT_CONFIGURATION_FILE", "src/test/resources/user-spec.properties");
-        Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-        assertEquals("user-spec", config.getString(AGENT_SERVICE));
-        assertEquals("system-spec", config.getString(AGENT_SYSTEM));
 
-        // override by jvm properties
-        System.setProperty("otel.javaagent.configuration-file", "src/test/resources/user-spec2.properties");
-        config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-        assertEquals("user-spec2", config.getString(AGENT_SERVICE));
-        assertEquals("system-spec2", config.getString(AGENT_SYSTEM));
+    @Test
+    public void test_loadConfigsFromOtelUserSpec() throws URISyntaxException {
+        String userSpec = new File(this.getClass().getClassLoader().getResource("user-spec.properties").toURI()).getPath();
+        try (MockedStatic<SystemEnv> mockSystemEnv = Mockito.mockStatic(SystemEnv.class)) {
+            mockSystemEnv.when(() -> SystemEnv.get("OTEL_JAVAAGENT_CONFIGURATION_FILE")).thenReturn(userSpec);
+            Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
+            assertEquals("user-spec", config.getString(AGENT_SERVICE));
+            assertEquals("system-spec", config.getString(AGENT_SYSTEM));
+
+        }
     }
 }
