@@ -123,7 +123,7 @@ public class ConfigFactory {
     public static GlobalConfigs loadConfigs(ClassLoader loader) {
         Map<String, String> envCfg = updateEnvCfg();
         String configFile = envCfg.get(AGENT_CONFIG_PATH);
-        if (Strings.isNullOrEmpty(configFile)) {
+        if (StringUtils.isEmpty(configFile)) {
             envCfg = OtelSdkConfigs.updateEnvCfg();
             configFile = envCfg.get(AGENT_CONFIG_PATH);
         }
