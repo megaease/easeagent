@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.config;
 
-import com.google.common.base.CaseFormat;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
@@ -36,7 +35,6 @@ public class ConfigFactory {
     private static final String CONFIG_YAML_FILE = "agent.yaml";
 
     public static final String AGENT_CONFIG_PATH_PROP_KEY = "easeagent.config.path";
-    public static final String AGENT_CONFIG_PATH_ENV_KEY = "EASEAGENT_CONFIG_PATH";
 
     public static final String AGENT_SERVICE = "name";
     public static final String AGENT_SYSTEM = "system";
@@ -60,9 +58,9 @@ public class ConfigFactory {
 
     static {
         for (Map.Entry<String, String> entry : AGENT_CONFIG_KEYS_TO_PROPS.entrySet()) {
-            // lower.hyphen -> UPPER_UNDERSCORE
+            // dot.case -> UPPER_UNDERSCORE
             AGENT_ENV_KEY_TO_PROPS.put(
-                CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey().replace('.', '-')),
+                ConfigPropertiesUtils.toEnvVarName(entry.getKey()),
                 entry.getValue()
             );
         }
@@ -112,22 +110,12 @@ public class ConfigFactory {
 
     /**
      * Get config file path from system properties or environment variables
-     * <p>
-     * user special config:
-     * -Deaseagent.config.path=/easeagent/agent.properties || export EASEAGENT_CONFIG_PATH=/easeagent/agent.properties
-     * or OTEL config format
-     * -Dotel.javaagent.configuration-file=/easeagent/agent.properties || export OTEL_JAVAAGENT_CONFIGURATION_FILE=/easeagent/agent.properties
      */
     public static String getConfigPath() {
-        // get config path from -Deaseagent.config.path=xxx
-        String path = System.getProperty(AGENT_CONFIG_PATH_PROP_KEY);
-        if (StringUtils.isEmpty(path)) {
-            // get config path from export EASEAGENT_CONFIG_PATH=xxx
-            path = SystemEnv.get(AGENT_CONFIG_PATH_ENV_KEY);
-        }
+        // get config path from -Deaseagent.config.path=/easeagent/agent.properties || export EASEAGENT_CONFIG_PATH=/easeagent/agent.properties
+        String path = ConfigPropertiesUtils.getString(AGENT_CONFIG_PATH_PROP_KEY);
 
         if (StringUtils.isEmpty(path)) {
-            // get config path from OTEL configuration
             // eg: -Dotel.javaagent.configuration-file=/easeagent/agent.properties || export OTEL_JAVAAGENT_CONFIGURATION_FILE=/easeagent/agent.properties
             path = OtelSdkConfigs.getConfigPath();
         }

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2021, MegaEase
+ * Copyright (c) 2022, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 
 package com.megaease.easeagent.config;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.base.Splitter;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 import com.megaease.easeagent.plugin.utils.SystemEnv;
@@ -34,10 +33,9 @@ import java.util.TreeMap;
  * {@see https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#disabling-opentelemetrysdk}
  */
 public class OtelSdkConfigs {
-    private static final String OTEL_RESOURCE_ATTRIBUTES = "OTEL_RESOURCE_ATTRIBUTES";
+    private static final String OTEL_RESOURCE_ATTRIBUTES_KEY = "otel.resource.attributes";
 
     private static final String CONFIG_PATH_PROP_KEY = "otel.javaagent.configuration-file";
-    private static final String CONFIG_PATH_ENV_KEY = "OTEL_JAVAAGENT_CONFIGURATION_FILE";
 
     private static final Splitter.MapSplitter OTEL_RESOURCE_ATTRIBUTES_SPLITTER
         = Splitter.on(",")
@@ -67,9 +65,9 @@ public class OtelSdkConfigs {
         }
 
         for (Map.Entry<String, String> entry : OTEL_SDK_PROPS_TO_EASE_AGENT_PROPS.entrySet()) {
-            // lower.hyphen -> UPPER_UNDERSCORE
+            // dot.case -> UPPER_UNDERSCORE
             OTEL_SDK_ENV_VAR_TO_EASE_AGENT_PROPS.put(
-                CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey().replace('.', '-')),
+                ConfigPropertiesUtils.toEnvVarName(entry.getKey()),
                 entry.getValue()
             );
         }
@@ -79,12 +77,7 @@ public class OtelSdkConfigs {
      * Get config path from java properties or environment variables
      */
     static String getConfigPath() {
-        String path = System.getProperty(CONFIG_PATH_PROP_KEY);
-        if (StringUtils.isEmpty(path)) {
-            path = SystemEnv.get(CONFIG_PATH_ENV_KEY);
-        }
-
-        return path;
+        return ConfigPropertiesUtils.getString(CONFIG_PATH_PROP_KEY);
     }
 
 
@@ -96,7 +89,7 @@ public class OtelSdkConfigs {
     static Map<String, String> updateEnvCfg() {
         Map<String, String> envCfg = new TreeMap<>();
 
-        String configEnv = SystemEnv.get(OTEL_RESOURCE_ATTRIBUTES);
+        String configEnv = ConfigPropertiesUtils.getString(OTEL_RESOURCE_ATTRIBUTES_KEY);
         if (StringUtils.isNotEmpty(configEnv)) {
             Map<String, String> map = OTEL_RESOURCE_ATTRIBUTES_SPLITTER.split(configEnv);
             if (!map.isEmpty()) {
