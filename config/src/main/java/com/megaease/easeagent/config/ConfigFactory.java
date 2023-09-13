@@ -18,14 +18,12 @@
 package com.megaease.easeagent.config;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.base.Strings;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.utils.ImmutableMap;
 import com.megaease.easeagent.plugin.utils.SystemEnv;
 import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.plugin.utils.common.StringUtils;
-import io.opentelemetry.sdk.resources.OtelSdkConfigs;
 
 import java.io.File;
 import java.util.HashMap;
@@ -37,7 +35,8 @@ public class ConfigFactory {
     private static final String CONFIG_PROP_FILE = "agent.properties";
     private static final String CONFIG_YAML_FILE = "agent.yaml";
 
-    public static final String AGENT_CONFIG_PATH = "config.path";
+    public static final String AGENT_CONFIG_PATH_PROP_KEY = "easeagent.config.path";
+    public static final String AGENT_CONFIG_PATH_ENV_KEY = "EASEAGENT_CONFIG_PATH";
 
     public static final String AGENT_SERVICE = "name";
     public static final String AGENT_SYSTEM = "system";
@@ -49,7 +48,6 @@ public class ConfigFactory {
 
     private static final Map<String, String> AGENT_CONFIG_KEYS_TO_PROPS =
         ImmutableMap.<String, String>builder()
-            .put("easeagent.config.path", AGENT_CONFIG_PATH)
             .put("easeagent.name", AGENT_SERVICE)
             .put("easeagent.system", AGENT_SYSTEM)
             .put("easeagent.server.port", AGENT_SERVER_PORT)
@@ -113,21 +111,27 @@ public class ConfigFactory {
     }
 
     /**
-     * load config from environment variables and java properties and default config file.
+     * Get config file path from system properties or environment variables
      * <p>
      * user special config:
      * -Deaseagent.config.path=/easeagent/agent.properties || export EASEAGENT_CONFIG_PATH=/easeagent/agent.properties
      * or OTEL config format
      * -Dotel.javaagent.configuration-file=/easeagent/agent.properties || export OTEL_JAVAAGENT_CONFIGURATION_FILE=/easeagent/agent.properties
      */
-    public static GlobalConfigs loadConfigs(ClassLoader loader) {
-        Map<String, String> envCfg = updateEnvCfg();
-        String configFile = envCfg.get(AGENT_CONFIG_PATH);
-        if (StringUtils.isEmpty(configFile)) {
-            envCfg = OtelSdkConfigs.updateEnvCfg();
-            configFile = envCfg.get(AGENT_CONFIG_PATH);
+    public static String getConfigPath() {
+        // get config path from -Deaseagent.config.path=xxx
+        String path = System.getProperty(AGENT_CONFIG_PATH_PROP_KEY);
+        if (StringUtils.isEmpty(path)) {
+            // get config path from export EASEAGENT_CONFIG_PATH=xxx
+            path = SystemEnv.get(AGENT_CONFIG_PATH_ENV_KEY);
         }
-        return loadConfigs(configFile, loader);
+
+        if (StringUtils.isEmpty(path)) {
+            // get config path from OTEL configuration
+            // eg: -Dotel.javaagent.configuration-file=/easeagent/agent.properties || export OTEL_JAVAAGENT_CONFIGURATION_FILE=/easeagent/agent.properties
+            path = OtelSdkConfigs.getConfigPath();
+        }
+        return path;
     }
 
     public static GlobalConfigs loadConfigs(String pathname, ClassLoader loader) {

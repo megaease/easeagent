@@ -57,13 +57,13 @@ public class ConfigFactoryTest {
             mockSystemEnv.when(() -> SystemEnv.get("EASEAGENT_NAME")).thenReturn("service1");
             mockSystemEnv.when(() -> SystemEnv.get("EASEAGENT_SYSTEM")).thenReturn("system1");
 
-            Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
+            Configs config = ConfigFactory.loadConfigs(null, this.getClass().getClassLoader());
             assertEquals("service1", config.getString(AGENT_SERVICE));
             assertEquals("system1", config.getString(AGENT_SYSTEM));
 
             System.setProperty("easeagent.name", "service2");
             System.setProperty("easeagent.system", "system2");
-            config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
+            config = ConfigFactory.loadConfigs(null, this.getClass().getClassLoader());
             assertEquals("service2", config.getString(AGENT_SERVICE));
             assertEquals("system2", config.getString(AGENT_SYSTEM));
         }
@@ -76,9 +76,8 @@ public class ConfigFactoryTest {
 
         try (MockedStatic<SystemEnv> mockSystemEnv = Mockito.mockStatic(SystemEnv.class)) {
             mockSystemEnv.when(() -> SystemEnv.get("EASEAGENT_CONFIG_PATH")).thenReturn(userSpec);
-            Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-            assertEquals("user-spec", config.getString(AGENT_SERVICE));
-            assertEquals("system-spec", config.getString(AGENT_SYSTEM));
+            String path = ConfigFactory.getConfigPath();
+            assertEquals(userSpec, path);
         }
     }
 
@@ -86,12 +85,11 @@ public class ConfigFactoryTest {
     @Test
     public void test_loadConfigsFromOtelUserSpec() throws URISyntaxException {
         String userSpec = new File(this.getClass().getClassLoader().getResource("user-spec.properties").toURI()).getPath();
+
         try (MockedStatic<SystemEnv> mockSystemEnv = Mockito.mockStatic(SystemEnv.class)) {
             mockSystemEnv.when(() -> SystemEnv.get("OTEL_JAVAAGENT_CONFIGURATION_FILE")).thenReturn(userSpec);
-            Configs config = ConfigFactory.loadConfigs(this.getClass().getClassLoader());
-            assertEquals("user-spec", config.getString(AGENT_SERVICE));
-            assertEquals("system-spec", config.getString(AGENT_SYSTEM));
-
+            String path = ConfigFactory.getConfigPath();
+            assertEquals(userSpec, path);
         }
     }
 }

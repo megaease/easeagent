@@ -37,6 +37,7 @@ import com.megaease.easeagent.plugin.bean.BeanProvider;
 import com.megaease.easeagent.plugin.bridge.AgentInfo;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.report.AgentReport;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.DefaultAgentReport;
 import lombok.SneakyThrows;
@@ -88,10 +89,16 @@ public class Bootstrap {
             LOGGER.debug("Injected class: {}", bootstrapClassSet);
         }
 
+        // initiate configuration
+        String configPath = ConfigFactory.getConfigPath();
+        if (StringUtils.isEmpty(configPath)) {
+            configPath = args;
+        }
+
         ClassLoader classLoader = Bootstrap.class.getClassLoader();
         final AgentInfo agentInfo = AgentInfoFactory.loadAgentInfo(classLoader);
         EaseAgent.agentInfo = agentInfo;
-        final GlobalConfigs conf = ConfigFactory.loadConfigs(classLoader);
+        final GlobalConfigs conf = ConfigFactory.loadConfigs(configPath, classLoader);
         wrapConfig(conf);
 
         // loader check
@@ -133,6 +140,8 @@ public class Bootstrap {
         if (port == null) {
             port = DEF_AGENT_SERVER_PORT;
         }
+        String portStr = System.getProperty(AGENT_SERVER_PORT_KEY, String.valueOf(port));
+        port = Integer.parseInt(portStr);
 
         AgentHttpServer agentHttpServer = new AgentHttpServer(port);
 
