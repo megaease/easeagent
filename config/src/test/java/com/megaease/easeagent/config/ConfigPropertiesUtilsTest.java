@@ -17,9 +17,7 @@
 
 package com.megaease.easeagent.config;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
@@ -32,6 +30,15 @@ public class ConfigPropertiesUtilsTest {
     @Rule
     public final RestoreSystemProperties restoreSystemProperties
         = new RestoreSystemProperties();
+
+    @BeforeClass
+    public static void beforeClass() {
+        // EnvironmentVariables and restoreSystemProperties does not work with Java 16
+        Assume.assumeTrue(
+            System.getProperty("java.version").startsWith("1.8")
+                || System.getProperty("java.version").startsWith("11")
+        );
+    }
 
     @Test
     public void getString_systemProperty() {
