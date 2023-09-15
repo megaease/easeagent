@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
@@ -48,6 +49,8 @@ public class Main {
     private static final String PLUGINS = "plugins/";
     private static final String LOGGING_PROPERTY = "Logging-Property";
     private static final String EASEAGENT_LOG_CONF = "easeagent.log.conf";
+    private static final String EASEAGENT_LOG_CONF_ENV_KEY = "EASEAGENT_LOG_CONF";
+    private static final String DEFAULT_AGENT_LOG_CONF = "easeagent-log4j2.xml";
     private static ClassLoader loader;
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
@@ -124,8 +127,9 @@ public class Main {
 
         t.setContextClassLoader(loader);
 
+        // get config from system properties
         final String host = System.getProperty(hostKey);
-        final String agent = System.getProperty(Main.EASEAGENT_LOG_CONF, "easeagent-log4j2.xml");
+        final String agent = getLogConfigPath();
 
         // Redirect config of host to agent
         System.setProperty(hostKey, agent);
@@ -141,6 +145,20 @@ public class Main {
                 System.setProperty(hostKey, host);
             }
         }
+    }
+
+    private static String getLogConfigPath() {
+        String logConfigPath = System.getProperty(EASEAGENT_LOG_CONF);
+        if (Strings.isNullOrEmpty(logConfigPath)) {
+            logConfigPath = System.getenv(EASEAGENT_LOG_CONF_ENV_KEY);
+
+        }
+        // if not set, use default
+        if (Strings.isNullOrEmpty(logConfigPath)) {
+            logConfigPath = DEFAULT_AGENT_LOG_CONF;
+
+        }
+        return logConfigPath;
     }
 
     private static ArrayList<URL> nestArchiveUrls(JarFileArchive archive, String prefix) throws IOException {
