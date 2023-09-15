@@ -394,6 +394,12 @@ After modification, User can run the application with EaseAgent.
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/easeagent-log4j2.xml" -jar user-app.jar
 ```
+or
+```
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ export EASEAGENT_LOG_CONF=/your/log4j2/config/filepath
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -jar user-app.jar
+```
 
 ### MDC
 Easeagent automatically adds TraceId and SpanId to the MDC (Mapped Diagnostic Context) when creating a new Span. You can configure your slf4j or logback files by adding parameters to display these IDs, or retrieve them directly from the MDC in your code.
