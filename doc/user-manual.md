@@ -64,6 +64,13 @@ Global configuration include dedicated parameters for controlling metrics and tr
 
 Plugin level configuration provides more granular control and customizable configuration.
 
+## Configuring priority
+The agent can consume configuration from one or more of the following sources (ordered from highest to lowest priority):
+
+- system properties
+- environment variables
+- the configuration file
+
 ### Getting the configuration file
 You may extract default configuration from the JAR file or create new properties from a blank file.
 ```
@@ -73,17 +80,32 @@ Run the user application with EaseAgent
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -Deaseagent.config.path=${EASE_AGENT_PATH}/agent.properties -jar user-app.jar
+
+or
+
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ export EASEAGENT_CONFIG_PATH=${EASE_AGENT_PATH}/agent.properties
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -jar user-app.jar
 ```
 
 
 ### Global Configuration
+
+#### Agent Configuration
+
+| System property   | Environment variable 	 | Configuration File Key | Description                   |
+|-------------------|------------------------|------------------------|-------------------------------|
+| `easeagent.name`  | `EASEAGENT_NAME`       | `name`                 | Specify logical service name. |
+| `easeagent.system` | `EASEAGENT_SYSTEM`     | `system`               | Specify logical service system. |
+
 #### Internal HTTP Server
 EaseAgent opens port `9900` by default to receive configuration change notifications and Prometheus requests.
 
-| Key                        | Default Value | Description                                                                                                                                                                                                                                                                             |
-| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `easeagent.server.enabled` | true          | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`、`Agent Info`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override. |
-| `easeagent.server.port`    | 9900          | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override.                                                                                                                                                                                  |
+| System property            | Environment variable 	 | DefaultValue | Description                                                                                                                                                                                                                                                                            |
+|----------------------------|---------------------------|------| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `easeagent.server.enabled` | `EASEAGENT_SERVER_ENABLED` | true | Enable Internal HTTP Server. `false` can disable it. EaseAgent will no longer accept any HTTP requests (`Prometheus`、`Health Check`、`Readiness Check`、`Agent Info`) when the Internal HTTP Server is disabled. User can add VM parameter:`-Deaseagent.server.enabled=[true or false]` to override. |
+| `easeagent.server.port`    | `EASEAGENT_SERVER_PORT`    | 9900 | Internal HTTP Server port. User can add VM parameter:`-Deaseagent.server.port=[new port]` to override.                                                                                                                                                                                 |
+
 
 #### Output Data Server: Kafka and HTTP/Zipkin Server
 Tracing and metric data can be output to kafka server.
@@ -371,6 +393,12 @@ After modification, User can run the application with EaseAgent.
 ```
 $ export EASE_AGENT_PATH=[Replace with agent path]
 $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -Deaseagent.log.conf=${EASE_AGENT_PATH}/easeagent-log4j2.xml" -jar user-app.jar
+```
+or
+```
+$ export EASE_AGENT_PATH=[Replace with agent path]
+$ export EASEAGENT_LOG_CONF=/your/log4j2/config/filepath
+$ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar -jar user-app.jar
 ```
 
 ### MDC

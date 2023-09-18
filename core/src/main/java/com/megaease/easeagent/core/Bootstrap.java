@@ -37,6 +37,7 @@ import com.megaease.easeagent.plugin.bean.BeanProvider;
 import com.megaease.easeagent.plugin.bridge.AgentInfo;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.report.AgentReport;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.report.DefaultAgentReport;
 import lombok.SneakyThrows;
@@ -47,7 +48,6 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassInjector;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -64,9 +64,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public class Bootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
 
-    private static final String AGENT_SERVER_PORT_KEY = "easeagent.server.port";
-    private static final String AGENT_CONFIG_PATH = "easeagent.config.path";
-    private static final String AGENT_SERVER_ENABLED_KEY = "easeagent.server.enabled";
+    private static final String AGENT_SERVER_PORT_KEY = ConfigFactory.AGENT_SERVER_PORT;
+    private static final String AGENT_SERVER_ENABLED_KEY = ConfigFactory.AGENT_SERVER_ENABLED;
 
     private static final String AGENT_MIDDLEWARE_UPDATE = "easeagent.middleware.update";
 
@@ -91,7 +90,7 @@ public class Bootstrap {
         }
 
         // initiate configuration
-        String configPath = System.getProperty(AGENT_CONFIG_PATH);
+        String configPath = ConfigFactory.getConfigPath();
         if (StringUtils.isEmpty(configPath)) {
             configPath = args;
         }
