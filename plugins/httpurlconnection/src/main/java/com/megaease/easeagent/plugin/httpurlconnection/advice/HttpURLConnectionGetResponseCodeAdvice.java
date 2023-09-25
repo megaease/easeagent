@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpclient.advice;
+package com.megaease.easeagent.plugin.httpurlconnection.advice;
 
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;

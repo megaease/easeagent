@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpclient.interceptor;
+package com.megaease.easeagent.plugin.httpurlconnection.interceptor;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.trace.Span;
-import com.megaease.easeagent.plugin.httpclient.HttpClientPlugin;
-import com.megaease.easeagent.plugin.httpclient.advice.HttpURLConnectionGetResponseCodeAdvice;
+import com.megaease.easeagent.plugin.httpurlconnection.HttpURLConnectionPlugin;
+import com.megaease.easeagent.plugin.httpurlconnection.advice.HttpURLConnectionGetResponseCodeAdvice;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 
-@AdviceTo(value = HttpURLConnectionGetResponseCodeAdvice.class, qualifier = "default", plugin = HttpClientPlugin.class)
+@AdviceTo(value = HttpURLConnectionGetResponseCodeAdvice.class, qualifier = "default", plugin = HttpURLConnectionPlugin.class)
 public class HttpURLConnectionGetResponseCodeInterceptor extends BaseHttpClientTracingInterceptor {
     @Override
     public Object getProgressKey() {

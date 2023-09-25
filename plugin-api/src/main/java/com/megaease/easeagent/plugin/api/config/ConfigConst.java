@@ -159,6 +159,7 @@ public interface ConfigConst {
         String WEB_CLIENT = "webclient";
         String FEIGN_CLIENT = "feignClient";
         String REST_TEMPLATE = "resTemplate";
+        String HTTPURLCONNECTION = "httpURLConnection";
 
         String FORWARDED = "forwarded";
     }
