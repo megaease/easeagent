@@ -52,6 +52,7 @@
         <module>dubbo</module>
         <module>motan</module>
         <module>sofarpc</module>
+        <module>httpurlconnection</module>
     </modules>
 
     <dependencyManagement>
