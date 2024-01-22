@@ -64,16 +64,18 @@ public class InterceptorPluginDecorator implements Interceptor {
     public void after(MethodInfo methodInfo, Context context) {
         IPluginConfig cfg = context.getConfig();
         InitializeContext innerContext = (InitializeContext) context;
-
-        if (cfg == null || cfg.enabled() || cfg instanceof NoOpIPluginConfig) {
-            try {
-                this.interceptor.after(methodInfo, context);
-            } finally {
-                innerContext.popToBound();
-                innerContext.popRetBound();
+        try {
+            if (cfg == null || cfg.enabled() || cfg instanceof NoOpIPluginConfig) {
+                try {
+                    this.interceptor.after(methodInfo, context);
+                } finally {
+                    innerContext.popToBound();
+                    innerContext.popRetBound();
+                }
             }
+        } finally {
+            innerContext.popConfig();
         }
-        innerContext.popConfig();
     }
 
     @Override
