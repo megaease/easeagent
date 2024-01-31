@@ -78,7 +78,7 @@
         <version.log4j>2.17.1</version.log4j>
         <version.kafka>2.7.2</version.kafka>
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
-        <version.metrics>4.1.17</version.metrics>
+        <version.metrics>4.2.23</version.metrics>
         <version.jedis>3.5.2</version.jedis>
         <version.amqp-client>5.11.0</version.amqp-client>
         <version.prometheus>0.10.0</version.prometheus>
