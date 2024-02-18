@@ -54,7 +54,7 @@
         <version.auto-service>1.0.1</version.auto-service>
         <version.javapoet>1.13.0</version.javapoet>
         <version.jsr305>3.0.2</version.jsr305>
-        <version.lombok>1.18.20</version.lombok>
+        <version.lombok>1.18.30</version.lombok>
         <version.config>1.2.1</version.config>
         <version.jackson>2.12.7</version.jackson>
         <version.servlet>3.1.0</version.servlet>
