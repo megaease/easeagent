@@ -88,7 +88,7 @@ public interface ITracing extends Tracing {
     List<String> propagationKeys();
 
     /**
-     * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rebbitmq consumer
+     * Obtain key:value from the message request and create a Span, Examples: kafka consumer, rabbitmq consumer
      * <p>
      * It will set the Span's kind, name and cached scope through {@link Request#kind()}, {@link Request#name()}
      * and {@link Request#cacheScope()}.
@@ -109,7 +109,7 @@ public interface ITracing extends Tracing {
 
 
     /**
-     * Create a Span for message producer. Examples: kafka producer, rebbitmq producer
+     * Create a Span for message producer. Examples: kafka producer, rabbitmq producer
      * <p>
      * It will set the Span's tags "messaging.operation", "messaging.channel_kind", "messaging.channel_name" from request
      * {@link MessagingRequest#operation()} {@link MessagingRequest#channelKind()} {@link MessagingRequest#channelName()}
