@@ -48,17 +48,17 @@
         <version.mockito>1.10.19</version.mockito>
         -->
         <version.mockito>4.2.0</version.mockito>
-        <version.guava>30.1-jre</version.guava>
+        <version.guava>32.0.0-jre</version.guava>
         <version.slf4j>1.7.21</version.slf4j>
         <version.byte-buddy>1.11.21</version.byte-buddy>
         <version.auto-service>1.0.1</version.auto-service>
         <version.javapoet>1.13.0</version.javapoet>
         <version.jsr305>3.0.2</version.jsr305>
-        <version.lombok>1.18.20</version.lombok>
+        <version.lombok>1.18.30</version.lombok>
         <version.config>1.2.1</version.config>
         <version.jackson>2.12.7</version.jackson>
         <version.servlet>3.1.0</version.servlet>
-        <version.brave>5.13.3</version.brave>
+        <version.brave>5.18.1</version.brave>
         <version.otel>1.12.0</version.otel>
         <version.otel-alpha>1.12.0-alpha</version.otel-alpha>
         <version.zipkin-sender-kafka11>2.8.0</version.zipkin-sender-kafka11>
@@ -76,15 +76,15 @@
         <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
         <version.log4j>2.17.1</version.log4j>
-        <version.kafka>2.7.2</version.kafka>
+        <version.kafka>2.8.2</version.kafka>
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
-        <version.metrics>4.1.17</version.metrics>
+        <version.metrics>4.2.23</version.metrics>
         <version.jedis>3.5.2</version.jedis>
         <version.amqp-client>5.11.0</version.amqp-client>
-        <version.prometheus>0.10.0</version.prometheus>
+        <version.prometheus>0.16.0</version.prometheus>
         <version.sparkjava>2.9.2</version.sparkjava>
         <version.httpclient>4.5.13</version.httpclient>
-        <version.yaml>1.31</version.yaml>
+        <version.yaml>1.32</version.yaml>
     </properties>
 
     <dependencies>

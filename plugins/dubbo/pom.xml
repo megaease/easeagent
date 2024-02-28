@@ -14,7 +14,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <alibaba-dubbo.version>2.5.0</alibaba-dubbo.version>
+        <alibaba-dubbo.version>2.6.12</alibaba-dubbo.version>
         <apache-dubbo.version>2.7.3</apache-dubbo.version>
     </properties>
 
