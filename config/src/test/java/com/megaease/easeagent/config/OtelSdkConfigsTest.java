@@ -18,13 +18,29 @@
 package com.megaease.easeagent.config;
 
 import com.megaease.easeagent.plugin.utils.SystemEnv;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 
 
 public class OtelSdkConfigsTest {
+
+    @After
+    public void after() throws NoSuchFieldException, IllegalAccessException {
+        Field field = SystemEnv.class.getDeclaredField("ENVIRONMENTS");
+        field.setAccessible(true);
+        Object env = field.get(null);
+        field.setAccessible(false);
+        Map<String, String> envMap = (Map<String, String>) env;
+        envMap.remove("OTEL_RESOURCE_ATTRIBUTES");
+        envMap.remove("OTEL_SERVICE_NAME");
+        envMap.remove("OTEL_SERVICE_NAMESPACE");
+        System.clearProperty("otel.service.name");
+        System.clearProperty("otel.service.namespace");
+    }
 
     @Test
     public void updateEnvCfg() {
