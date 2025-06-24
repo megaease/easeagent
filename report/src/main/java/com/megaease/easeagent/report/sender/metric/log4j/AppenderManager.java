@@ -105,12 +105,12 @@ public interface AppenderManager {
         }
 
         private Appender newAppender(OutputProperties outputProperties, String topic) {
-            if (StringUtils.isEmpty(outputProperties.getServers())) {
-                return null;
-            }
             if (!Boolean.TRUE.equals(outputProperties.isEnabled())) {
                 String s = RandomStringUtils.randomAscii(8);
                 return NullAppender.createAppender(topic + "_kafka_disabled_" + s);
+            }
+            if (StringUtils.isEmpty(outputProperties.getServers())) {
+                return null;
             }
             try {
                 String s = RandomStringUtils.randomAscii(8);
