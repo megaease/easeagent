@@ -28,6 +28,7 @@ import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.NullAppender;
 import org.apache.logging.log4j.core.appender.mom.kafka.KafkaAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.layout.PatternLayout;
@@ -106,6 +107,10 @@ public interface AppenderManager {
         private Appender newAppender(OutputProperties outputProperties, String topic) {
             if (StringUtils.isEmpty(outputProperties.getServers())) {
                 return null;
+            }
+            if (!Boolean.TRUE.equals(outputProperties.isEnabled())) {
+                String s = RandomStringUtils.randomAscii(8);
+                return NullAppender.createAppender(topic + "_kafka_disabled_" + s);
             }
             try {
                 String s = RandomStringUtils.randomAscii(8);

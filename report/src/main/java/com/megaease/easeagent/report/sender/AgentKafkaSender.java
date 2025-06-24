@@ -70,6 +70,9 @@ public class AgentKafkaSender implements Sender {
         int msgMaxBytes = config.getInt(this.maxByteKey);
         this.ssl = ConfigUtils.extractByPrefix(config, OUTPUT_SERVERS_SSL);
 
+        if (!enabled) {
+            return;
+        }
         this.sender = SDKKafkaSender.wrap(KafkaSender.newBuilder()
             .bootstrapServers(outputServer)
             .topic(this.topic)
@@ -84,7 +87,7 @@ public class AgentKafkaSender implements Sender {
         if (!enabled) {
             return new NoOpCall<>();
         }
-        zipkin2.Call<Void> call =  this.sender.sendSpans(encodedData.getData());
+        zipkin2.Call<Void> call = this.sender.sendSpans(encodedData.getData());
         return new ZipkinCallWrapper<>(call);
     }
 
@@ -115,7 +118,9 @@ public class AgentKafkaSender implements Sender {
 
         if (refresh) {
             try {
-                this.sender.close();
+                if(this.sender!=null){
+                    this.sender.close();
+                }
             } catch (IOException e) {
                 // ignored
             }
