@@ -85,6 +85,18 @@ public interface OutputProperties {
             changeItems += isChanged(OUTPUT_TRUST_CERT, changed, this.trustCertificate);
             changeItems += isChanged(OUTPUT_TRUST_CERT_TYPE, changed, this.trustCertificateType);
             changeItems += isChanged(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM, changed, this.endpointAlgorithm);
+
+            // if there are v2 configuration items, override with v2 config.
+            changeItems += isChanged(BOOTSTRAP_SERVERS, changed, this.servers);
+            changeItems += isChanged(OUTPUT_SERVERS_TIMEOUT, changed, this.timeout);
+            changeItems += isChanged(OUTPUT_SERVERS_ENABLE, changed, String.valueOf(this.enabled));
+            changeItems += isChanged(OUTPUT_SECURITY_PROTOCOL_V2, changed, this.protocol);
+            changeItems += isChanged(OUTPUT_SSL_KEYSTORE_TYPE_V2, changed, this.sslKeyStoreType);
+            changeItems += isChanged(OUTPUT_KEY_V2, changed, this.sslKey);
+            changeItems += isChanged(OUTPUT_CERT_V2, changed, this.certificate);
+            changeItems += isChanged(OUTPUT_TRUST_CERT_V2, changed, this.trustCertificate);
+            changeItems += isChanged(OUTPUT_TRUST_CERT_TYPE_V2, changed, this.trustCertificateType);
+            changeItems += isChanged(OUTPUT_ENDPOINT_IDENTIFICATION_ALGORITHM_V2, changed, this.endpointAlgorithm);
             if (changeItems == 0) {
                 return false;
             }

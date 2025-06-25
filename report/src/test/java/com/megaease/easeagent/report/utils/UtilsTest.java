@@ -17,11 +17,25 @@
 
 package com.megaease.easeagent.report.utils;
 
+import com.megaease.easeagent.config.Configs;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 public class UtilsTest {
+
+    public static Map<String, String> readMap(String path) throws IOException {
+        String config = UtilsTest.readFromResourcePath(path);
+        return (Map<String, String>) (Map) JsonUtil.toMap(config);
+    }
+
+    public static Configs readConfigs(String path) throws IOException {
+        return new Configs(readMap(path));
+    }
+
     public static String readFromResourcePath(String resourcePath) throws IOException {
         try (InputStream in = ClassLoader.getSystemResource(resourcePath).openStream()) {
             int size = in.available();

@@ -20,7 +20,6 @@ package com.megaease.easeagent.report.sender;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.plugin.report.Call;
 import com.megaease.easeagent.plugin.report.EncodedData;
-import com.megaease.easeagent.plugin.utils.common.JsonUtil;
 import com.megaease.easeagent.report.plugin.NoOpCall;
 import com.megaease.easeagent.report.utils.UtilsTest;
 import org.junit.After;
@@ -62,7 +61,7 @@ public class AgentKafkaSenderTest {
 
     @Test
     public void test_outputServer_disabled() throws IOException, NoSuchFieldException, IllegalAccessException {
-        Configs configs = readConfigs("sender/outputServer_disabled.json");
+        Configs configs = UtilsTest.readConfigs("sender/outputServer_disabled.json");
         AgentKafkaSender agentKafkaSender = new AgentKafkaSender();
         agentKafkaSender.init(configs, "reporter.log.access.sender");
         SDKKafkaSender sender = UtilsTest.getFiled(agentKafkaSender, "sender");
@@ -75,7 +74,7 @@ public class AgentKafkaSenderTest {
 
     @Test
     public void test_outputServer_enabled() throws IOException, NoSuchFieldException, IllegalAccessException {
-        Configs configs = readConfigs("sender/outputServer_enabled.json");
+        Configs configs = UtilsTest.readConfigs("sender/outputServer_enabled.json");
         AgentKafkaSender agentKafkaSender = new AgentKafkaSender();
 
         SDKKafkaSender sdkKafkaSender = mockKafkaSender();
@@ -92,13 +91,12 @@ public class AgentKafkaSenderTest {
 
     @Test
     public void test_outputServer_updateConfigs() throws IOException, NoSuchFieldException, IllegalAccessException {
-        Configs configs = readConfigs("sender/outputServer_disabled.json");
+        Configs configs = UtilsTest.readConfigs("sender/outputServer_disabled.json");
         AgentKafkaSender agentKafkaSender = new AgentKafkaSender();
         agentKafkaSender.init(configs, "reporter.log.access.sender");
         assertFalse(agentKafkaSender.isAvailable());
 
-        String config = UtilsTest.readFromResourcePath("sender/outputServer_enabled.json");
-        Map<String, String> map = (Map<String, String>) (Map) JsonUtil.toMap(config);
+        Map<String, String> map = UtilsTest.readMap("sender/outputServer_enabled.json");
         SDKKafkaSender sdkKafkaSender = mockKafkaSender();
         agentKafkaSender.updateConfigs(map);
         SDKKafkaSender sender = UtilsTest.getFiled(agentKafkaSender, "sender");
@@ -108,22 +106,20 @@ public class AgentKafkaSenderTest {
 
     @Test
     public void test_outputServer_empty_bootstrapServer_updateConfigs() throws IOException, NoSuchFieldException, IllegalAccessException {
-        Configs configs = readConfigs("sender/outputServer_empty_bootstrapServer_disabled.json");
+        Configs configs = UtilsTest.readConfigs("sender/outputServer_empty_bootstrapServer_disabled.json");
         AgentKafkaSender agentKafkaSender = new AgentKafkaSender();
         agentKafkaSender.init(configs, "reporter.log.access.sender");
         assertFalse(agentKafkaSender.isAvailable());
 
         {
-            String config = UtilsTest.readFromResourcePath("sender/outputServer_empty_bootstrapServer_enabled.json");
-            Map<String, String> map = (Map<String, String>) (Map) JsonUtil.toMap(config);
+            Map<String, String> map = UtilsTest.readMap("sender/outputServer_empty_bootstrapServer_enabled.json");
             agentKafkaSender.updateConfigs(map);
             SDKKafkaSender sender = UtilsTest.getFiled(agentKafkaSender, "sender");
             assertNull(sender);
         }
 
         {
-            String config = UtilsTest.readFromResourcePath("sender/outputServer_enabled.json");
-            Map<String, String> map = (Map<String, String>) (Map) JsonUtil.toMap(config);
+            Map<String, String> map = UtilsTest.readMap("sender/outputServer_enabled.json");
             SDKKafkaSender sdkKafkaSender = mockKafkaSender();
             agentKafkaSender.updateConfigs(map);
             SDKKafkaSender sender = UtilsTest.getFiled(agentKafkaSender, "sender");
@@ -150,12 +146,6 @@ public class AgentKafkaSenderTest {
         sdkKafkaSenderMockedStatic = mockStatic(SDKKafkaSender.class);
         when(SDKKafkaSender.wrap(kafkaSender)).thenReturn(sdkKafkaSender);
         return sdkKafkaSender;
-    }
-
-    public Configs readConfigs(String path) throws IOException {
-        String config = UtilsTest.readFromResourcePath(path);
-        Map<String, String> map = (Map<String, String>) (Map) JsonUtil.toMap(config);
-        return new Configs(map);
     }
 
 
