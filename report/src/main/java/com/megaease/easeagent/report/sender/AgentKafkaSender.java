@@ -56,6 +56,7 @@ public class AgentKafkaSender implements Sender {
     public void init(Config config, String prefix) {
         this.config = config;
         this.prefix = prefix;
+        this.topicKey = join(this.prefix, TOPIC_KEY);
         String outputServer = config.getString(BOOTSTRAP_SERVERS);
         if (StringUtils.isEmpty(outputServer)) {
             this.enabled = false;
@@ -63,13 +64,15 @@ public class AgentKafkaSender implements Sender {
         } else {
             enabled = checkEnable(config);
         }
-        this.topicKey = join(this.prefix, TOPIC_KEY);
         this.topic = config.getString(this.topicKey);
 
         this.maxByteKey = StringUtils.replaceSuffix(this.prefix, join(ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY));
         int msgMaxBytes = config.getInt(this.maxByteKey);
         this.ssl = ConfigUtils.extractByPrefix(config, OUTPUT_SERVERS_SSL);
 
+        if (!enabled) {
+            return;
+        }
         this.sender = SDKKafkaSender.wrap(KafkaSender.newBuilder()
             .bootstrapServers(outputServer)
             .topic(this.topic)
@@ -84,7 +87,7 @@ public class AgentKafkaSender implements Sender {
         if (!enabled) {
             return new NoOpCall<>();
         }
-        zipkin2.Call<Void> call =  this.sender.sendSpans(encodedData.getData());
+        zipkin2.Call<Void> call = this.sender.sendSpans(encodedData.getData());
         return new ZipkinCallWrapper<>(call);
     }
 
@@ -115,7 +118,9 @@ public class AgentKafkaSender implements Sender {
 
         if (refresh) {
             try {
-                this.sender.close();
+                if(this.sender!=null){
+                    this.sender.close();
+                }
             } catch (IOException e) {
                 // ignored
             }
