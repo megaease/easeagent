@@ -56,6 +56,7 @@ public class AgentKafkaSender implements Sender {
     public void init(Config config, String prefix) {
         this.config = config;
         this.prefix = prefix;
+        this.topicKey = join(this.prefix, TOPIC_KEY);
         String outputServer = config.getString(BOOTSTRAP_SERVERS);
         if (StringUtils.isEmpty(outputServer)) {
             this.enabled = false;
@@ -63,7 +64,6 @@ public class AgentKafkaSender implements Sender {
         } else {
             enabled = checkEnable(config);
         }
-        this.topicKey = join(this.prefix, TOPIC_KEY);
         this.topic = config.getString(this.topicKey);
 
         this.maxByteKey = StringUtils.replaceSuffix(this.prefix, join(ASYNC_KEY, ASYNC_MSG_MAX_BYTES_KEY));
