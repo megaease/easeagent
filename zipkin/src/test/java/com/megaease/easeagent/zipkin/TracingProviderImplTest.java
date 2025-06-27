@@ -17,8 +17,29 @@
 
 package com.megaease.easeagent.zipkin;
 
+import brave.Tracing;
+import brave.handler.MutableSpan;
+import brave.propagation.TraceContext;
+import brave.sampler.BoundarySampler;
+import brave.sampler.CountingSampler;
+import brave.sampler.RateLimitingSampler;
+import brave.sampler.Sampler;
+import com.megaease.easeagent.config.GlobalConfigs;
+import com.megaease.easeagent.mock.report.MockReport;
+import com.megaease.easeagent.plugin.api.config.Config;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.trace.ITracing;
+import com.megaease.easeagent.plugin.api.trace.Scope;
+import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
+import com.megaease.easeagent.plugin.field.AgentFieldReflectAccessor;
+import com.megaease.easeagent.zipkin.impl.RequestMock;
+import com.megaease.easeagent.zipkin.impl.SpanImpl;
+import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -53,4 +74,70 @@ public class TracingProviderImplTest {
     public void tracingSupplier() {
         afterPropertiesSet();
     }
+
+    @Test
+    public void getSampler() {
+        TracingProviderImpl tracingProvider = new TracingProviderImpl();
+        {
+            Map<String, String> initConfigs = new HashMap<>();
+            Config config = new GlobalConfigs(initConfigs);
+            tracingProvider.setConfig(config);
+            Sampler sampler = tracingProvider.getSampler();
+            assertSame(sampler, Sampler.ALWAYS_SAMPLE);
+        }
+        {
+            Map<String, String> initConfigs = new HashMap<>();
+            initConfigs.put("observability.tracings.sampledType", TracingProviderImpl.SAMPLER_TYPE_COUNTING);
+            Config config = new GlobalConfigs(initConfigs);
+            tracingProvider.setConfig(config);
+            Sampler sampler = tracingProvider.getSampler();
+            assertSame(sampler, Sampler.ALWAYS_SAMPLE);
+        }
+        {
+            Map<String, String> initConfigs = new HashMap<>();
+            initConfigs.put("observability.tracings.sampledType", "error");
+            initConfigs.put("observability.tracings.sampled", "1");
+            Config config = new GlobalConfigs(initConfigs);
+            tracingProvider.setConfig(config);
+            Sampler sampler = tracingProvider.getSampler();
+            assertSame(sampler, Sampler.ALWAYS_SAMPLE);
+        }
+        {
+            Map<String, String> initConfigs = new HashMap<>();
+            initConfigs.put("observability.tracings.sampledType", TracingProviderImpl.SAMPLER_TYPE_COUNTING);
+            initConfigs.put("observability.tracings.sampled", "10");
+            Config config = new GlobalConfigs(initConfigs);
+            tracingProvider.setConfig(config);
+            Sampler sampler = tracingProvider.getSampler();
+            assertSame(sampler, Sampler.ALWAYS_SAMPLE);
+        }
+        {
+            Map<String, String> initConfigs = new HashMap<>();
+            initConfigs.put("observability.tracings.sampledType", TracingProviderImpl.SAMPLER_TYPE_COUNTING);
+            initConfigs.put("observability.tracings.sampled", "0.1");
+            Config config = new GlobalConfigs(initConfigs);
+            tracingProvider.setConfig(config);
+            Sampler sampler = tracingProvider.getSampler();
+            assertTrue(sampler instanceof CountingSampler);
+        }
+        {
+            Map<String, String> initConfigs = new HashMap<>();
+            initConfigs.put("observability.tracings.sampledType", TracingProviderImpl.SAMPLER_TYPE_RATE_LIMITING);
+            initConfigs.put("observability.tracings.sampled", "10");
+            Config config = new GlobalConfigs(initConfigs);
+            tracingProvider.setConfig(config);
+            Sampler sampler = tracingProvider.getSampler();
+            assertTrue(sampler instanceof RateLimitingSampler);
+        }
+        {
+            Map<String, String> initConfigs = new HashMap<>();
+            initConfigs.put("observability.tracings.sampledType", TracingProviderImpl.SAMPLER_TYPE_BOUNDARY);
+            initConfigs.put("observability.tracings.sampled", "0.0001");
+            Config config = new GlobalConfigs(initConfigs);
+            tracingProvider.setConfig(config);
+            Sampler sampler = tracingProvider.getSampler();
+            assertTrue(sampler instanceof BoundarySampler);
+        }
+    }
+
 }

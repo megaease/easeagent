@@ -26,6 +26,13 @@ easeagent:
 ###
 ### default tracings reporter configuration
 ###
+# sampledType:
+## counting: percentage sampling, sampled limit 0.01 to 1, 1 is always sample, 0 is never sample, 0.1 is ten samples per hundred
+## rate_limiting: traces per second, sampled >= 0, 0 is never sample, 10 is max 10 traces per second
+## boundary: percentage sampling by traceId, sampled limit 0.0001 to 1, 1 is always sample, 0 is never sample
+##           if sampled=0.001, when (traceId^random)%10000<=(0.001*10000) sampled
+## sampledType must be used with sampled, otherwise the default value is used Sampler.ALWAYS_SAMPLE
+#
 # get header from response headers then tag to tracing span
 # format: observability.tracings.tag.response.headers.{key}={value}
 # support ease mesh
@@ -35,7 +42,8 @@ easeagent:
 # X-EG-Time-Limiter
 observability:
     tracings:
-        sampledByQPS: 100
+        sampledType: ""
+        sampled: 1
         tag:
             response:
                 headers:

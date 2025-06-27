@@ -63,7 +63,8 @@ public class CompatibilityConversion {
 
         TRACING_SKIP = new HashSet<>();
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_ENABLED);
-        TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_SAMPLED_BY_QPS);
+        TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_SAMPLED_TYPE);
+        TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_SAMPLED);
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_OUTPUT);
         TRACING_SKIP.add(ConfigConst.Observability.KEY_COMM_TAG);
 
