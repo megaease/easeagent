@@ -71,9 +71,13 @@ public class CompatibilityConversionTest {
         assertEquals("true", newMap.get("observability.metrics.jvmGc.enabled"));
 
 
-        newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.tracings.sampledByQPS", "100"));
+        newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.tracings.sampledType", "counting"));
         assertEquals(1, newMap.size());
-        assertEquals("100", newMap.get("observability.tracings.sampledByQPS"));
+        assertEquals("counting", newMap.get("observability.tracings.sampledType"));
+
+        newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.tracings.sampled", "100"));
+        assertEquals(1, newMap.size());
+        assertEquals("100", newMap.get("observability.tracings.sampled"));
 
 
         newMap = CompatibilityConversion.transform(Collections.singletonMap("observability.tracings.output.enabled", "true"));

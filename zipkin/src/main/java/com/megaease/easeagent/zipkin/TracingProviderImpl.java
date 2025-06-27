@@ -19,9 +19,14 @@ package com.megaease.easeagent.zipkin;
 
 import brave.Tracing;
 import brave.propagation.ThreadLocalCurrentTraceContext;
+import brave.sampler.BoundarySampler;
 import brave.sampler.CountingSampler;
+import brave.sampler.RateLimitingSampler;
+import brave.sampler.Sampler;
 import com.megaease.easeagent.config.AutoRefreshConfigItem;
 import com.megaease.easeagent.config.ConfigAware;
+import com.megaease.easeagent.log4j2.Logger;
+import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.annotation.Injection;
 import com.megaease.easeagent.plugin.api.config.Config;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
@@ -30,10 +35,9 @@ import com.megaease.easeagent.plugin.api.trace.TracingProvider;
 import com.megaease.easeagent.plugin.api.trace.TracingSupplier;
 import com.megaease.easeagent.plugin.bean.AgentInitializingBean;
 import com.megaease.easeagent.plugin.bean.BeanProvider;
-import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.utils.AdditionalAttributes;
-import com.megaease.easeagent.plugin.report.AgentReport;
 import com.megaease.easeagent.report.AgentReportAware;
 import com.megaease.easeagent.zipkin.impl.TracingImpl;
 import com.megaease.easeagent.zipkin.logging.AgentMDCScopeDecorator;
@@ -41,7 +45,12 @@ import zipkin2.reporter.Reporter;
 import zipkin2.reporter.brave.ConvertZipkinSpanHandler;
 
 public class TracingProviderImpl implements BeanProvider, AgentReportAware, ConfigAware, AgentInitializingBean, TracingProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TracingProviderImpl.class);
     private static final String ENV_ZIPKIN_SERVER_URL = "ZIPKIN_SERVER_URL";
+
+    public static final String SAMPLER_TYPE_COUNTING = "counting";
+    public static final String SAMPLER_TYPE_RATE_LIMITING = "rate_limiting";
+    public static final String SAMPLER_TYPE_BOUNDARY = "boundary";
     private Tracing tracing;
     private volatile ITracing iTracing;
     private AgentReport agentReport;
@@ -74,7 +83,7 @@ public class TracingProviderImpl implements BeanProvider, AgentReportAware, Conf
         this.tracing = Tracing.newBuilder()
             .localServiceName(getServiceName())
             .traceId128Bit(false)
-            .sampler(CountingSampler.create(1))
+            .sampler(getSampler())
             .addSpanHandler(new CustomTagsSpanHandler(this::getServiceName, AdditionalAttributes.getHostName()))
             .addSpanHandler(ConvertZipkinSpanHandler
                 .builder(reporter)
@@ -83,6 +92,33 @@ public class TracingProviderImpl implements BeanProvider, AgentReportAware, Conf
             )
             .currentTraceContext(traceContext)
             .build();
+    }
+
+
+    protected Sampler getSampler() {
+        String sampledType = this.config.getString(ConfigConst.Observability.TRACE_SAMPLED_TYPE);
+        if (sampledType == null) {
+            return Sampler.ALWAYS_SAMPLE;
+        }
+        Double probability = this.config.getDouble(ConfigConst.Observability.TRACE_SAMPLED);
+        if (probability == null) {
+            return Sampler.ALWAYS_SAMPLE;
+        }
+        try {
+            switch (sampledType) {
+                case SAMPLER_TYPE_COUNTING:
+                    return CountingSampler.create(probability.floatValue());
+                case SAMPLER_TYPE_RATE_LIMITING:
+                    return RateLimitingSampler.create(probability.intValue());
+                case SAMPLER_TYPE_BOUNDARY:
+                    return BoundarySampler.create(probability.floatValue());
+                default:
+                    return Sampler.ALWAYS_SAMPLE;
+            }
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("observability.tracings.sampled error, use Sampler.ALWAYS_SAMPLE for.", e.getMessage());
+            return Sampler.ALWAYS_SAMPLE;
+        }
     }
 
 

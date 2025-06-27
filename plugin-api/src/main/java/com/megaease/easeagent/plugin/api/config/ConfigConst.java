@@ -66,7 +66,8 @@ public interface ConfigConst {
 
     interface Observability {
         String KEY_COMM_ENABLED = "enabled";
-        String KEY_COMM_SAMPLED_BY_QPS = "sampledByQPS";
+        String KEY_COMM_SAMPLED_TYPE = "sampledType";
+        String KEY_COMM_SAMPLED = "sampled";
         String KEY_COMM_OUTPUT = "output";
         String KEY_COMM_TAG = "tag";
         String KEY_COMM_SERVICE_PREFIX = "servicePrefix";
@@ -95,8 +96,8 @@ public interface ConfigConst {
         String METRICS_ENABLED = join(METRICS, "enabled");
 
         String TRACE_ENABLED = join(TRACE, "enabled");
-        String TRACE_SAMPLED_BY_QPS = join(TRACE, KEY_COMM_SAMPLED_BY_QPS);
-
+        String TRACE_SAMPLED_TYPE = join(TRACE, KEY_COMM_SAMPLED_TYPE);
+        String TRACE_SAMPLED = join(TRACE, KEY_COMM_SAMPLED);
         String TRACE_OUTPUT = join(TRACE, KEY_COMM_OUTPUT);
         String TRACE_OUTPUT_ENABLED = join(TRACE_OUTPUT, "enabled");
         String TRACE_OUTPUT_TOPIC = join(TRACE_OUTPUT, "topic");
