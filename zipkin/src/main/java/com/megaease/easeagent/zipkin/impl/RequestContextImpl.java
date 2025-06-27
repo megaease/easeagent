@@ -38,7 +38,7 @@ public class RequestContextImpl implements RequestContext {
 
     @Override
     public boolean isNoop() {
-        return false;
+        return span.isNoop();
     }
 
     @Override

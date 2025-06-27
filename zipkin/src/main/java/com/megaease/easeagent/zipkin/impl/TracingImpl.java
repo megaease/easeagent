@@ -175,9 +175,6 @@ public class TracingImpl implements ITracing {
             span = tracing.tracer().newChild(maybeParent);
         }
 
-        if (span.isNoop()) {
-            return NoOpContext.NO_OP_PROGRESS_CONTEXT;
-        }
         setInfo(span, request);
         AsyncRequest asyncRequest = new AsyncRequest(request);
         defaultZipkinInjector.inject(span.context(), asyncRequest);

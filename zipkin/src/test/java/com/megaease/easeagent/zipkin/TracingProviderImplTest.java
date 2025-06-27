@@ -140,4 +140,81 @@ public class TracingProviderImplTest {
         }
     }
 
+    @Test
+    public void testCountingSampler() throws InterruptedException {
+        String name = "test_name";
+        Map<String, String> initConfigs = new HashMap<>();
+        initConfigs.put("observability.tracings.sampledType", TracingProviderImpl.SAMPLER_TYPE_COUNTING);
+        initConfigs.put("observability.tracings.sampled", "0.01");
+        initConfigs.put("name", "test_name");
+        Config config = new GlobalConfigs(initConfigs);
+        TracingProviderImpl tracingProvider = new TracingProviderImpl();
+        tracingProvider.setConfig(config);
+        tracingProvider.setAgentReport(MockReport.getAgentReport());
+        tracingProvider.afterPropertiesSet();
+        Tracing tracing = tracingProvider.tracing();
+        ITracing iTracing = TracingImpl.build(() -> null, tracing);
+        int noopCount = 0;
+        for (int i = 0; i < 100; i++) {
+            RequestMock requestMock = new RequestMock().setKind(Span.Kind.SERVER).setName(name);
+            assertFalse(iTracing.hasCurrentSpan());
+            RequestContext requestContext = iTracing.serverReceive(requestMock);
+            assertTrue(iTracing.hasCurrentSpan());
+            boolean isNoop = requestContext.isNoop();
+            if (isNoop) {
+                noopCount++;
+            }
+            String id;
+            if (isNoop) {
+                TraceContext traceContext = AgentFieldReflectAccessor.getFieldValue(requestContext.span().unwrap(), "context");
+                id = traceContext.traceIdString();
+                Span span = iTracing.currentSpan();
+                assertTrue(span instanceof SpanImpl);
+                assertTrue(span.isNoop());
+                Span nextSpan = iTracing.nextSpan();
+                assertTrue(nextSpan instanceof SpanImpl);
+                assertTrue(nextSpan.isNoop());
+                nextSpan.finish();
+            } else {
+                MutableSpan mutableSpan = TracingProviderImplMock.getMutableSpan(requestContext.span());
+                assertEquals(brave.Span.Kind.SERVER, mutableSpan.kind());
+                assertEquals(name, mutableSpan.name());
+                assertNull(mutableSpan.parentId());
+                id = mutableSpan.id();
+            }
+
+            RequestContext requestContext2 = iTracing.serverReceive(requestMock);
+            try (Scope scope = requestContext2.scope()) {
+                assertNotNull(requestContext2.span().parentIdString());
+                assertEquals(id, requestContext2.span().parentIdString());
+            }
+
+            try (Scope scope = requestContext.scope()) {
+                assertNull(requestContext.span().parentIdString());
+                assertTrue(iTracing.hasCurrentSpan());
+
+                RequestMock clientRequest = new RequestMock().setKind(Span.Kind.SERVER).setName(name);
+                RequestContext clientRequestContext = iTracing.clientRequest(clientRequest);
+                assertEquals(requestContext.span().traceIdString(), clientRequestContext.span().traceIdString());
+                assertEquals(requestContext.span().spanIdString(), clientRequestContext.span().parentIdString());
+
+                Thread thread = new Thread(() -> {
+                    RequestMock serverRequest = new RequestMock().setHeaders(clientRequest.getHeaders()).setKind(Span.Kind.SERVER);
+                    RequestContext serverReceive = iTracing.serverReceive(serverRequest);
+                    try (Scope scope1 = serverReceive.scope()) {
+                        assertNotNull(serverReceive.span().parentIdString());
+                        assertEquals(clientRequestContext.span().traceIdString(), serverReceive.span().traceIdString());
+                        assertEquals(clientRequestContext.span().spanIdString(), serverReceive.span().spanIdString());
+                        assertEquals(clientRequestContext.span().parentIdString(), serverReceive.span().parentIdString());
+                    }
+                });
+                thread.start();
+                thread.join();
+
+                clientRequestContext.scope().close();
+            }
+            assertFalse(iTracing.hasCurrentSpan());
+        }
+        assertEquals(99, noopCount);
+    }
 }
