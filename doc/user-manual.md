@@ -184,6 +184,23 @@ plugin enabled config: [Enabled](#forwarded-headers-plugin-enabled)
 
 ##### Tracing config
 
+Easeagent supports the original sampling model of zipkin. Currently, there are three types of models supported: `counting`, `rate_limiting`, and `boundary`.
+
+Use the configuration control: `observability.tracings.sampledType`
+
+1. `counting`: percentage sampling, sampled limit 0.01 to 1, 1 is always sample, 0 is never sample, 0.1 is ten samples per hundred
+2. `rate_limiting`: traces per second, sampled >= 0, 0 is never sample, 10 is max 10 traces per second
+3. `boundary`: percentage sampling by traceId, sampled limit 0.0001 to 1, 1 is always sample, 0 is never sample.
+               if sampled=0.001, when (traceId^random)%10000<=(0.001*10000) sampled
+
+sampledType must be used with sampled, otherwise the default value is used Sampler.ALWAYS_SAMPLE
+
+Config format:
+```properties
+observability.tracings.sampledType=counting
+observability.tracings.sampled=0.01
+```
+
 Easeagent will grab the header from the response of the process, and put the name and value of the header as a tag in the Span of Tracing.
 
 Config format:
