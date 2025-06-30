@@ -21,7 +21,6 @@ package com.megaease.easeagent.core;
 import com.j256.simplejmx.client.JmxClient;
 import com.j256.simplejmx.common.IoUtils;
 import com.j256.simplejmx.server.JmxServer;
-import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.config.GlobalConfigs;
 import lombok.SneakyThrows;
 import org.hamcrest.CoreMatchers;
