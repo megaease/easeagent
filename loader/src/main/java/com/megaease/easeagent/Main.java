@@ -18,11 +18,8 @@
 package com.megaease.easeagent;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.springframework.boot.loader.LaunchedURLClassLoader;
-import org.springframework.boot.loader.archive.Archive;
-import org.springframework.boot.loader.archive.JarFileArchive;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,12 +52,12 @@ public class Main {
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
         File jar = getArchiveFileContains();
-        final JarFileArchive archive = new JarFileArchive(jar);
+        final JarFileArchive archive = JarFileArchive.load(jar);
 
         // custom classloader
-        ArrayList<URL> urls = nestArchiveUrls(archive, LIB);
-        urls.addAll(nestArchiveUrls(archive, PLUGINS));
-        urls.addAll(nestArchiveUrls(archive, SLf4J2));
+        ArrayList<URL> urls = archive.nestJarUrls(LIB);
+        urls.addAll(archive.nestJarUrls(PLUGINS));
+        urls.addAll(archive.nestJarUrls(SLf4J2));
         File p = new File(jar.getParent() + File.separator + "plugins");
         if (p.exists()) {
             urls.addAll(directoryPluginUrls(p));
@@ -69,7 +66,7 @@ public class Main {
         loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
 
         // install bootstrap jar
-        final ArrayList<URL> bootUrls = nestArchiveUrls(archive, BOOTSTRAP);
+        final ArrayList<URL> bootUrls = archive.nestJarUrls(BOOTSTRAP);
         bootUrls.forEach(url -> installBootstrapJar(url, inst));
 
         final Attributes attributes = archive.getManifest().getMainAttributes();
@@ -109,7 +106,7 @@ public class Main {
     }
 
     private static void initEaseAgentSlf4j2Dir(JarFileArchive archive, final ClassLoader bootstrapLoader) throws Exception {
-        final URL[] slf4j2Urls = nestArchiveUrls(archive, SLf4J2).toArray(new URL[0]);
+        final URL[] slf4j2Urls = archive.nestJarUrls(SLf4J2).toArray(new URL[0]);
         final ClassLoader slf4j2Loader = new URLClassLoader(slf4j2Urls, null);
         Class<?> classLoaderSupplier = bootstrapLoader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
         Field field = classLoaderSupplier.getDeclaredField("CLASSLOADER");
@@ -159,25 +156,6 @@ public class Main {
 
         }
         return logConfigPath;
-    }
-
-    private static ArrayList<URL> nestArchiveUrls(JarFileArchive archive, String prefix) throws IOException {
-        ArrayList<Archive> archives = Lists.newArrayList(
-            archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(prefix),
-                entry -> true
-            ));
-
-        final ArrayList<URL> urls = new ArrayList<>(archives.size());
-
-        archives.forEach(item -> {
-            try {
-                urls.add(item.getUrl());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-        });
-
-        return urls;
     }
 
     private static ArrayList<URL> directoryPluginUrls(File directory) {
