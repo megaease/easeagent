@@ -59,7 +59,7 @@ public class JarFileArchive {
                             childByteArrays.put(childName, reader.readByte(childInput));
                         }
                     }
-                    childJarFiles.put(name, new URL("jar", "", -1, nestedJarUrl, new CustomJarURLStreamHandler(name, childByteArrays)));
+                    childJarFiles.put(name, new URL("jar", "", -1, nestedJarUrl, new CustomJarURLStreamHandler(nestedJarUrl, jarBytes, childByteArrays)));
                 }
             }
         }
@@ -82,48 +82,46 @@ public class JarFileArchive {
 
     private static class CustomJarURLStreamHandler extends URLStreamHandler {
         String name;
-        Map<String, byte[]> jarByteArrayMap;
 
-        public CustomJarURLStreamHandler(String name, Map<String, byte[]> jarByteArrayMap) throws IOException {
+        byte[] jarByteArray;
+        Map<String, byte[]> childArrayMap;
+
+        public CustomJarURLStreamHandler(String name, byte[] jarByteArray, Map<String, byte[]> childArrayMap) {
             this.name = name;
-            this.jarByteArrayMap = jarByteArrayMap;
+            this.jarByteArray = jarByteArray;
+            this.childArrayMap = childArrayMap;
         }
 
         @Override
         protected URLConnection openConnection(URL url) throws IOException {
-            return new CustomJarURLConnection(url, this.name, this.jarByteArrayMap);
+            String spec = url.getFile();
+            if (spec.equals(name)) {
+                return new CustomJarURLConnection(url, this.jarByteArray);
+            }
+            String childName = spec.replaceFirst(this.name, "");
+            byte[] childArray = childArrayMap.get(childName);
+            if (childArray == null) {
+                throw new FileNotFoundException("Entry not found: " + url);
+            }
+            return new CustomJarURLConnection(url, childArray);
         }
     }
 
     private static class CustomJarURLConnection extends URLConnection {
-        String name;
-        Map<String, byte[]> jarByteArrayMap;
+        byte[] jarByteArray;
 
-        public CustomJarURLConnection(URL url, String name, Map<String, byte[]> jarByteArrayMap) {
+        public CustomJarURLConnection(URL url, byte[] jarByteArray) {
             super(url);
-            this.name = name;
-            this.jarByteArrayMap = jarByteArrayMap;
+            this.jarByteArray = jarByteArray;
         }
 
         @Override
-        public void connect() throws IOException {
+        public void connect() {
         }
 
         @Override
-        public InputStream getInputStream() throws IOException {
-            String spec = url.getFile();
-            String[] parts = spec.split("!/", 3);
-            if (parts.length < 3 || !name.equals(parts[1])) {
-                System.out.println("Entry not found: " + url);
-                throw new FileNotFoundException("Entry not found: " + url);
-            }
-            String name = parts[2];
-            byte[] array = this.jarByteArrayMap.get(name);
-            if (array != null) {
-                return new ByteArrayInputStream(array);
-            }
-
-            throw new FileNotFoundException("Entry not found: " + url);
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(jarByteArray);
         }
     }
 
