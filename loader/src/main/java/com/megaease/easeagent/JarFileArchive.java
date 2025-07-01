@@ -20,11 +20,10 @@ package com.megaease.easeagent;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.jar.JarArchiveInputStream;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,17 +44,27 @@ public class JarFileArchive {
         Map<String, URL> childJarFiles = new HashMap<>();
         try (JarArchiveInputStream jarInput = new JarArchiveInputStream(Files.newInputStream(jarFile.toPath()))) {
             ArchiveEntry entry;
+            JarArchiveReader reader = new JarArchiveReader();
             while ((entry = jarInput.getNextEntry()) != null) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".jar")) {
                     String name = entry.getName();
-                    String nestedJarUrl = "jar:file:" + jarFile.getAbsolutePath() + "!/" + name + "!/";
-                    childJarFiles.put(name, new URL(nestedJarUrl));
+                    String nestedJarUrl = jarFile.toURI() + "!/" + name + "!/";
+                    nestedJarUrl = nestedJarUrl.replace("file:////", "file://");
+                    Map<String, byte[]> childByteArrays = new HashMap<>();
+                    byte[] jarBytes = reader.readByte(jarInput);
+                    try (JarArchiveInputStream childInput = new JarArchiveInputStream(new ByteArrayInputStream(jarBytes))) {
+                        ArchiveEntry childEntry;
+                        while ((childEntry = childInput.getNextEntry()) != null) {
+                            String childName = childEntry.getName();
+                            childByteArrays.put(childName, reader.readByte(childInput));
+                        }
+                    }
+                    childJarFiles.put(name, new URL("jar", "", -1, nestedJarUrl, new CustomJarURLStreamHandler(name, childByteArrays)));
                 }
             }
         }
         return new JarFileArchive(new JarFile(jarFile), childJarFiles);
     }
-
 
     public ArrayList<URL> nestJarUrls(String prefix) {
         ArrayList<URL> urls = new ArrayList<>();
@@ -69,5 +78,67 @@ public class JarFileArchive {
 
     public Manifest getManifest() throws IOException {
         return this.jarFile.getManifest();
+    }
+
+    private static class CustomJarURLStreamHandler extends URLStreamHandler {
+        String name;
+        Map<String, byte[]> jarByteArrayMap;
+
+        public CustomJarURLStreamHandler(String name, Map<String, byte[]> jarByteArrayMap) throws IOException {
+            this.name = name;
+            this.jarByteArrayMap = jarByteArrayMap;
+        }
+
+        @Override
+        protected URLConnection openConnection(URL url) throws IOException {
+            return new CustomJarURLConnection(url, this.name, this.jarByteArrayMap);
+        }
+    }
+
+    private static class CustomJarURLConnection extends URLConnection {
+        String name;
+        Map<String, byte[]> jarByteArrayMap;
+
+        public CustomJarURLConnection(URL url, String name, Map<String, byte[]> jarByteArrayMap) {
+            super(url);
+            this.name = name;
+            this.jarByteArrayMap = jarByteArrayMap;
+        }
+
+        @Override
+        public void connect() throws IOException {
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            String spec = url.getFile();
+            String[] parts = spec.split("!/", 3);
+            if (parts.length < 3 || !name.equals(parts[1])) {
+                throw new FileNotFoundException("Entry not found: " + url);
+            }
+            String name = parts[2];
+            byte[] array = this.jarByteArrayMap.get(name);
+            if (array != null) {
+                return new ByteArrayInputStream(array);
+            }
+
+            throw new FileNotFoundException("Entry not found: " + url);
+        }
+    }
+
+    public static class JarArchiveReader {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[8192];
+
+        public byte[] readByte(JarArchiveInputStream jarInput) throws IOException {
+            int bytesRead;
+            while ((bytesRead = jarInput.read(data)) != -1) {
+                buffer.write(data, 0, bytesRead);
+            }
+            byte[] array = buffer.toByteArray();
+            buffer.reset();
+            return array;
+        }
+
     }
 }
