@@ -114,6 +114,7 @@ public class JarFileArchive {
             String spec = url.getFile();
             String[] parts = spec.split("!/", 3);
             if (parts.length < 3 || !name.equals(parts[1])) {
+                System.out.println("Entry not found: " + url);
                 throw new FileNotFoundException("Entry not found: " + url);
             }
             String name = parts[2];
