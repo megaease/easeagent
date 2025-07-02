@@ -50,21 +50,30 @@ public class JarFileArchive {
                     String name = entry.getName();
                     String nestedJarUrl = jarFile.toURI() + "!/" + name + "!/";
                     nestedJarUrl = nestedJarUrl.replace("file:////", "file://");
-                    Map<String, byte[]> childByteArrays = new HashMap<>();
                     byte[] jarBytes = reader.readByte(jarInput);
-                    try (JarArchiveInputStream childInput = new JarArchiveInputStream(new ByteArrayInputStream(jarBytes))) {
-                        ArchiveEntry childEntry;
-                        while ((childEntry = childInput.getNextEntry()) != null) {
-                            String childName = childEntry.getName();
-                            childByteArrays.put(childName, reader.readByte(childInput));
-                        }
-                    }
+                    Map<String, byte[]> childByteArrays = readChildByteArrays(reader, jarBytes);
                     childJarFiles.put(name, new URL("jar", "", -1, nestedJarUrl, new CustomJarURLStreamHandler(nestedJarUrl, jarBytes, childByteArrays)));
                 }
             }
         }
         return new JarFileArchive(new JarFile(jarFile), childJarFiles);
     }
+
+    private static Map<String, byte[]> readChildByteArrays(JarArchiveReader reader, byte[] jarBytes) throws IOException {
+        Map<String, byte[]> childByteArrays = new HashMap<>();
+        try (JarArchiveInputStream childInput = new JarArchiveInputStream(new ByteArrayInputStream(jarBytes))) {
+            ArchiveEntry childEntry;
+            while ((childEntry = childInput.getNextEntry()) != null) {
+                if (childEntry.isDirectory()) {
+                    continue;
+                }
+                String childName = childEntry.getName();
+                childByteArrays.put(childName, reader.readByte(childInput));
+            }
+        }
+        return childByteArrays;
+    }
+
 
     public ArrayList<URL> nestJarUrls(String prefix) {
         ArrayList<URL> urls = new ArrayList<>();
