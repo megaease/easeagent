@@ -51,6 +51,7 @@ public class Main {
     private static ClassLoader loader;
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
+        long start = System.currentTimeMillis();
         File jar = getArchiveFileContains();
         final JarFileArchive archive = JarFileArchive.load(jar);
 
@@ -81,6 +82,8 @@ public class Main {
                 .invoke(null, args, inst, jar.getPath());
             return null;
         });
+        long end = System.currentTimeMillis();
+        System.out.println("init easeagent cost: " + (end - start));
     }
 
     private static void initAgentSlf4jMDC(ClassLoader loader) {
