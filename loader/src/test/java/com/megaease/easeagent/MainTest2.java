@@ -25,10 +25,11 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class MainTest2 {
+
     @Test
-    public void premain1() throws IOException, ClassNotFoundException {
+    public void premain2() throws IOException, ClassNotFoundException {
         File jar = new File("/Users/beyond/IdeaProjects/easeagent_dir/easeagent/build/target/easeagent-dep.jar");
-        JarFileArchive jarFileArchive = JarFileArchive.load(jar);
+        JarCache jarFileArchive = JarCache.build(jar);
         ArrayList<URL> urls = jarFileArchive.nestJarUrls("log4j2/");
         ClassLoader loader = new Main.CompoundableClassLoader(urls.toArray(new URL[0]));
         Class<?> classLoaderSupplier = loader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");

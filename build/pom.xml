@@ -192,6 +192,7 @@
                             <Premain-Class>com.megaease.easeagent.Main</Premain-Class>
                             <Bootstrap-Class>com.megaease.easeagent.StartBootstrap</Bootstrap-Class>
                             <Logging-Property>log4j.configurationFile</Logging-Property>
+                            <Easeagent-Version>${version}</Easeagent-Version>
                         </manifestEntries>
                     </archive>
                     <archiverConfig>

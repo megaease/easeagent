@@ -49,16 +49,16 @@ public class Main {
     private static final String EASEAGENT_LOG_CONF_ENV_KEY = "EASEAGENT_LOG_CONF";
     private static final String DEFAULT_AGENT_LOG_CONF = "easeagent-log4j2.xml";
     private static ClassLoader loader;
+    private static JarCache JAR_CACHE;
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-        long start = System.currentTimeMillis();
         File jar = getArchiveFileContains();
-        final JarFileArchive archive = JarFileArchive.load(jar);
+        JAR_CACHE = JarCache.build(jar);
 
         // custom classloader
-        ArrayList<URL> urls = archive.nestJarUrls(LIB);
-        urls.addAll(archive.nestJarUrls(PLUGINS));
-        urls.addAll(archive.nestJarUrls(SLf4J2));
+        ArrayList<URL> urls = JAR_CACHE.nestJarUrls(LIB);
+        urls.addAll(JAR_CACHE.nestJarUrls(PLUGINS));
+        urls.addAll(JAR_CACHE.nestJarUrls(SLf4J2));
         File p = new File(jar.getParent() + File.separator + "plugins");
         if (p.exists()) {
             urls.addAll(directoryPluginUrls(p));
@@ -67,13 +67,13 @@ public class Main {
         loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
 
         // install bootstrap jar
-        final ArrayList<URL> bootUrls = archive.nestJarUrls(BOOTSTRAP);
+        final ArrayList<JarFile> bootUrls = JAR_CACHE.nestJarFiles(BOOTSTRAP);
         bootUrls.forEach(url -> installBootstrapJar(url, inst));
 
-        final Attributes attributes = archive.getManifest().getMainAttributes();
+        final Attributes attributes = JAR_CACHE.getManifest().getMainAttributes();
         final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
         final String bootstrap = attributes.getValue("Bootstrap-Class");
-        initEaseAgentSlf4j2Dir(archive, loader);
+        initEaseAgentSlf4j2Dir(JAR_CACHE, loader);
 
         switchLoggingProperty(loader, loggingProperty, () -> {
             initAgentSlf4jMDC(loader);
@@ -82,8 +82,6 @@ public class Main {
                 .invoke(null, args, inst, jar.getPath());
             return null;
         });
-        long end = System.currentTimeMillis();
-        System.out.println("init easeagent cost: " + (end - start));
     }
 
     private static void initAgentSlf4jMDC(ClassLoader loader) {
@@ -99,16 +97,11 @@ public class Main {
         }
     }
 
-    private static void installBootstrapJar(URL url, Instrumentation inst) {
-        try {
-            JarFile file = JarUtils.getNestedJarFile(url);
-            inst.appendToBootstrapClassLoaderSearch(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private static void installBootstrapJar(JarFile file, Instrumentation inst) {
+        inst.appendToBootstrapClassLoaderSearch(file);
     }
 
-    private static void initEaseAgentSlf4j2Dir(JarFileArchive archive, final ClassLoader bootstrapLoader) throws Exception {
+    private static void initEaseAgentSlf4j2Dir(JarCache archive, final ClassLoader bootstrapLoader) throws Exception {
         final URL[] slf4j2Urls = archive.nestJarUrls(SLf4J2).toArray(new URL[0]);
         final ClassLoader slf4j2Loader = new URLClassLoader(slf4j2Urls, null);
         Class<?> classLoaderSupplier = bootstrapLoader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
