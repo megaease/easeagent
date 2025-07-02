@@ -17,47 +17,24 @@
 
 package com.megaease.easeagent;
 
-import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import org.springframework.boot.loader.archive.Archive;
-import org.springframework.boot.loader.archive.JarFileArchive;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 public class MainTest {
 
     @Test
-    public void premain1() throws IOException, ClassNotFoundException {
-        File jar = new File("/Users/beyond/IdeaProjects/easeagent_dir/easeagent/build/target/easeagent-dep.jar");
-        final JarFileArchive archive = new JarFileArchive(jar);
-        ArrayList<URL> urls = nestArchiveUrls(archive, "log4j2/");
-        ClassLoader loader = new Main.CompoundableClassLoader(urls.toArray(new URL[0]));
-        Class<?> classLoaderSupplier = loader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
-    }
-
-    private static ArrayList<URL> nestArchiveUrls(JarFileArchive archive, String prefix) throws IOException {
-        ArrayList<Archive> archives = Lists.newArrayList(
-            archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(prefix),
-                entry -> true
-            ));
-
-        final ArrayList<URL> urls = new ArrayList<>(archives.size());
-
-        archives.forEach(item -> {
-            try {
-                urls.add(item.getUrl());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-        });
-
-        return urls;
+    public void buildClassLoader() throws IOException, ClassNotFoundException {
+        File jar = new File(ClassLoader.getSystemResource("test-mock-load.jar").getPath());
+        JarCache jarFileArchive = JarCache.build(jar);
+        ArrayList<URL> urls = jarFileArchive.nestJarUrls("mock/");
+        ClassLoader loader = Main.buildClassLoader(urls.toArray(new URL[0]));
+        Class<?> logbackPlugin = loader.loadClass("com.megaease.easeagent.mock.utils.MockSystemEnv");
+        assertNotNull(logbackPlugin);
     }
 }

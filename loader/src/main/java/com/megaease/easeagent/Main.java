@@ -19,27 +19,20 @@ package com.megaease.easeagent;
 
 import com.google.common.base.Strings;
 import lombok.SneakyThrows;
-import org.springframework.boot.loader.LaunchedURLClassLoader;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
 public class Main {
-    private static final ClassLoader BOOTSTRAP_CLASS_LOADER = null;
     private static final String LIB = "lib/";
     private static final String BOOTSTRAP = "boot/";
     private static final String SLf4J2 = "log4j2/";
@@ -64,7 +57,7 @@ public class Main {
             urls.addAll(directoryPluginUrls(p));
         }
 
-        loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
+        loader = buildClassLoader(urls.toArray(new URL[0]));
 
         // install bootstrap jar
         final ArrayList<JarFile> bootUrls = JAR_CACHE.nestJarFiles(BOOTSTRAP);
@@ -197,63 +190,8 @@ public class Main {
         return root;
     }
 
-    public static class CompoundableClassLoader extends LaunchedURLClassLoader {
-        private final Set<WeakReference<ClassLoader>> externals = new CopyOnWriteArraySet<>();
-
-        CompoundableClassLoader(URL[] urls) {
-            super(urls, Main.BOOTSTRAP_CLASS_LOADER);
-        }
-
-        @SuppressWarnings("unused")
-        public void add(ClassLoader cl) {
-            if (cl != null && !Objects.equals(cl, this)) {
-                externals.add(new WeakReference<>(cl));
-            }
-        }
-
-        @Override
-        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-            try {
-                return super.loadClass(name, resolve);
-            } catch (ClassNotFoundException e) {
-                for (WeakReference<ClassLoader> external : externals) {
-                    try {
-                        ClassLoader cl = external.get();
-                        if (cl == null) {
-                            continue;
-                        }
-                        final Class<?> aClass = cl.loadClass(name);
-                        if (resolve) {
-                            resolveClass(aClass);
-                        }
-                        return aClass;
-                    } catch (ClassNotFoundException ignored) {
-                        // ignored
-                    }
-                }
-
-                throw e;
-            }
-        }
-
-        @Override
-        public URL findResource(String name) {
-            URL url = super.findResource(name);
-            if (url == null) {
-                for (WeakReference<ClassLoader> external : externals) {
-                    try {
-                        ClassLoader cl = external.get();
-                        url = cl.getResource(name);
-                        if (url != null) {
-                            return url;
-                        }
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
-                }
-            }
-            return url;
-        }
+    static ClassLoader buildClassLoader(URL[] urls) {
+        return new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
     }
 
     @SneakyThrows
