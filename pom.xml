@@ -353,17 +353,6 @@
                 <version>${version.brave}</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework.kafka</groupId>
-                <artifactId>spring-kafka</artifactId>
-                <version>${version.spring-kafka}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_dropwizard</artifactId>
                 <version>${version.prometheus}</version>

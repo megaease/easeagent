@@ -33,6 +33,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
 public class Main {
+    private static final ClassLoader BOOTSTRAP_CLASS_LOADER = null;
     private static final String LIB = "lib/";
     private static final String BOOTSTRAP = "boot/";
     private static final String SLf4J2 = "log4j2/";
@@ -191,7 +192,7 @@ public class Main {
     }
 
     static ClassLoader buildClassLoader(URL[] urls) {
-        return new EaseAgentClassLoader(urls, ClassLoader.getSystemClassLoader());
+        return new EaseAgentClassLoader(urls, BOOTSTRAP_CLASS_LOADER);
     }
 
     @SneakyThrows
