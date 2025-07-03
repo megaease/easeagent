@@ -20,6 +20,9 @@ package com.megaease.easeagent;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+/**
+ * EaseAgent's exclusive classloader, used to isolate classes
+ */
 public class EaseAgentClassLoader extends URLClassLoader {
     public EaseAgentClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);

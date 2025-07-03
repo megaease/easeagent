@@ -18,21 +18,24 @@
 package com.megaease.easeagent;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+/**
+ * EaseAgent's jar reading cache.
+ * Only one layer of sub-jar packages is read, and multi-layer nested reading is not supported.
+ * easeagent has only one layer of sub-jar packages, so only one layer needs to be read.
+ * It does not need to use spring-boot's loader, which reduces dependencies and facilitates spring-boot business upgrades
+ */
 public class JarCache {
     private static final int EOF = -1;
     private static final int BUFFER_SIZE = 4096;
@@ -125,7 +128,8 @@ public class JarCache {
         if (tmp != null && tmp.endsWith(String.valueOf(File.separatorChar))) {
             return tmp + "easeagent-" + getAttribute(jarFile, "Easeagent-Version") + File.separatorChar;
         }
-        return tmp + File.separatorChar + "easeagent-" + getAttribute(jarFile, "Easeagent-Version") + File.separatorChar;
+        Random random = new Random();
+        return tmp + File.separatorChar + "easeagent-" + getAttribute(jarFile, "Easeagent-Version") + "-" + Math.abs(random.nextLong()) + File.separatorChar;
 
     }
 
