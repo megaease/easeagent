@@ -191,7 +191,7 @@ public class Main {
     }
 
     static ClassLoader buildClassLoader(URL[] urls) {
-        return new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
+        return new EaseAgentClassLoader(urls, ClassLoader.getSystemClassLoader());
     }
 
     @SneakyThrows
