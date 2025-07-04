@@ -125,12 +125,12 @@ public class JarCache {
 
     public static String getTmpDir(JarFile jarFile) throws IOException {
         String tmp = System.getProperty("java.io.tmpdir");
-        if (tmp != null && tmp.endsWith(String.valueOf(File.separatorChar))) {
-            return tmp + "easeagent-" + getAttribute(jarFile, "Easeagent-Version") + File.separatorChar;
-        }
         Random random = new Random();
-        return tmp + File.separatorChar + "easeagent-" + getAttribute(jarFile, "Easeagent-Version") + "-" + Math.abs(random.nextLong()) + File.separatorChar;
-
+        String dirName = "easeagent-" + getAttribute(jarFile, "Easeagent-Version") + "-" + Math.abs(random.nextLong());
+        if (tmp != null && tmp.endsWith(String.valueOf(File.separatorChar))) {
+            return tmp + dirName + File.separatorChar;
+        }
+        return tmp + File.separatorChar + dirName + File.separatorChar;
     }
 
     public static String getAttribute(JarFile jarFile, String key) throws IOException {
