@@ -84,7 +84,7 @@
         <version.prometheus>0.16.0</version.prometheus>
         <version.sparkjava>2.9.2</version.sparkjava>
         <version.httpclient>4.5.13</version.httpclient>
-        <version.yaml>1.32</version.yaml>
+        <version.yaml>2.0</version.yaml>
     </properties>
 
     <dependencies>
