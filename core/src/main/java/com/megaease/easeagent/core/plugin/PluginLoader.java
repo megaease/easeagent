@@ -27,10 +27,10 @@ import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 import java.util.*;
@@ -47,7 +47,7 @@ public class PluginLoader {
     public static AgentBuilder load(AgentBuilder ab, Configs conf) {
         pluginLoad();
         providerLoad();
-        Set<ClassTransformation> sortedTransformations = pointsLoad();
+        Set<ClassTransformation> sortedTransformations = pointsLoad(conf);
 
         for (ClassTransformation transformation : sortedTransformations) {
             ab = ab.type(transformation.getClassMatcher(), transformation.getClassloaderMatcher())
@@ -73,11 +73,11 @@ public class PluginLoader {
         }
     }
 
-    public static Set<ClassTransformation> pointsLoad() {
+    public static Set<ClassTransformation> pointsLoad(Configs conf) {
         List<Points> points = BaseLoader.load(Points.class);
         return points.stream().map(point -> {
                 try {
-                    return PluginRegistry.register(point);
+                    return PluginRegistry.register(point, conf);
                 } catch (Exception e) {
                     log.error(
                         "Unable to load points in [class {}]",

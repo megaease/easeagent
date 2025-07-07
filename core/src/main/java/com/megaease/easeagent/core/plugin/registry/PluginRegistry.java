@@ -18,6 +18,8 @@
 package com.megaease.easeagent.core.plugin.registry;
 
 import com.google.common.base.Strings;
+import com.megaease.easeagent.config.ConfigUtils;
+import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain.Builder;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderPluginDecorator;
@@ -51,7 +53,8 @@ public class PluginRegistry {
     static final ConcurrentHashMap<Integer, MethodTransformation> INDEX_TO_METHOD_TRANSFORMATION = new ConcurrentHashMap<>();
     static final AgentArray<Builder> INTERCEPTOR_PROVIDERS = new AgentArray<>();
 
-    private PluginRegistry() {}
+    private PluginRegistry() {
+    }
 
     public static void register(AgentPlugin plugin) {
         PLUGIN_CLASSNAME_TO_PLUGIN.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
@@ -61,8 +64,12 @@ public class PluginRegistry {
         return classname + ":" + qualifier;
     }
 
-    public static ClassTransformation register(Points points) {
+    public static ClassTransformation register(Points points, Configs conf) {
         String pointsClassName = points.getClass().getCanonicalName();
+        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
+        if (!isVersion(points, plugin, conf)) {
+            return null;
+        }
         IClassMatcher classMatcher = points.getClassMatcher();
         boolean hasDynamicField = points.isAddDynamicField();
         Junction<TypeDescription> innerClassMatcher = ClassMatcherConvert.INSTANCE.convert(classMatcher);
@@ -88,14 +95,31 @@ public class PluginRegistry {
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
 
-        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
-        int order = plugin.order();
 
+        int order = plugin.order();
         return ClassTransformation.builder().classMatcher(innerClassMatcher)
             .hasDynamicField(hasDynamicField)
             .methodTransformations(mInfo)
             .classloaderMatcher(loaderMatcher)
             .order(order).build();
+    }
+
+    public static boolean isVersion(Points points, AgentPlugin plugin, Configs conf) {
+        String versionKey = ConfigUtils.buildVersionKey(plugin.getDomain(), plugin.getNamespace());
+        String version = conf.getString(versionKey);
+        if (Strings.isNullOrEmpty(version)) {
+            version = Points.DEFAULT_VERSION;
+        }
+        Set<String> pointVersions = points.codeVersions();
+        if (pointVersions == null || pointVersions.isEmpty()) {
+            pointVersions = Points.DEFAULT_VERSIONS;
+        }
+        if (!pointVersions.contains(version)) {
+            log.info("the plugin version[{}={}] not in Points<{}>.versions()=[{}], skip the points ClassTransformation",
+                versionKey, version, points.getClass().getCanonicalName(), String.join(",", pointVersions));
+            return false;
+        }
+        return true;
     }
 
     public static int register(InterceptorProvider provider) {

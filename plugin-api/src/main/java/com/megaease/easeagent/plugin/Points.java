@@ -22,6 +22,8 @@ import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.loader.ClassLoaderMatcher;
 import com.megaease.easeagent.plugin.matcher.loader.IClassLoaderMatcher;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -29,17 +31,38 @@ import java.util.Set;
  * and also can be defined through @OnClass and @OnMethod annotation
  */
 public interface Points {
+    String DEFAULT_VERSION = "default";
+
+    /*
+     * when plugin not set version config, point must have default value is "default"
+     */
+    Set<String> DEFAULT_VERSIONS = new HashSet<>(Collections.singletonList(DEFAULT_VERSION));
+
+    /**
+     * eg.
+     * domain=observability, namespace=feignClient, versions=new String[]{"spring_boot_2_x", "default"}
+     * do not set or set the following value to load: plugin.observability.httpServlet.version=spring_boot_2_x
+     * <p>
+     * when set for not load: plugin.observability.httpServlet.version=spring_boot_3_x
+     * but load from Points: domain=observability, namespace=feignClient, versions=[spring_boot_3_x]
+     *
+     * @return String[] of versions for control whether to load
+     */
+    default Set<String> codeVersions() {
+        return DEFAULT_VERSIONS;
+    }
+
     /**
      * return the defined class matcher matching a class or a group of classes
      * eg.
      * ClassMatcher.builder()
-     *      .hadInterface(A)
-     *      .isPublic()
-     *      .isAbstract()
-     *      .or()
-     *        .hasSuperClass(B)
-     *        .isPublic()
-     *        .build()
+     * .hadInterface(A)
+     * .isPublic()
+     * .isAbstract()
+     * .or()
+     * .hasSuperClass(B)
+     * .isPublic()
+     * .build()
      */
     IClassMatcher getClassMatcher();
 
@@ -47,30 +70,30 @@ public interface Points {
      * return the defined method matcher
      * eg.
      * MethodMatcher.builder().named("execute")
-     *      .isPublic()
-     *      .argNum(2)
-     *      .arg(1, "java.lang.String")
-     *      .build().toSet()
+     * .isPublic()
+     * .argNum(2)
+     * .arg(1, "java.lang.String")
+     * .build().toSet()
      * or
      * MethodMatcher.multiBuilder()
-     *      .match(MethodMatcher.builder().named("<init>")
-     *          .argsLength(3)
-     *          .arg(0, "org.apache.kafka.clients.consumer.ConsumerConfig")
-     *          .qualifier("constructor")
-     *          .build())
-     *      .match(MethodMatcher.builder().named("poll")
-     *          .argsLength(1)
-     *          .arg(0, "java.time.Duration")
-     *          .qualifier("poll")
-     *          .build())
-     *      .build();
+     * .match(MethodMatcher.builder().named("<init>")
+     * .argsLength(3)
+     * .arg(0, "org.apache.kafka.clients.consumer.ConsumerConfig")
+     * .qualifier("constructor")
+     * .build())
+     * .match(MethodMatcher.builder().named("poll")
+     * .argsLength(1)
+     * .arg(0, "java.time.Duration")
+     * .qualifier("poll")
+     * .build())
+     * .build();
      */
     Set<IMethodMatcher> getMethodMatcher();
 
     /**
      * when return true, the transformer will add a Object field and a accessor
      * The dynamically added member can be accessed by AgentDynamicFieldAccessor:
-     *
+     * <p>
      * AgentDynamicFieldAccessor.setDynamicFieldValue(instance, value)
      * value = AgentDynamicFieldAccessor.getDynamicFieldValue(instance)
      */

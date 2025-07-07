@@ -23,6 +23,7 @@ public interface ConfigConst {
     String PLUGIN_GLOBAL = "global";
     String DELIMITER = ".";
     String PLUGIN_PREFIX = PLUGIN + DELIMITER;
+    String PLUGIN_VERSION_FORMAT = join(PLUGIN, "%s", "%s", "version"); //plugin.<Domain>.<Namespace>.version
     String PLUGIN_FORMAT = join(PLUGIN, "%s", "%s", "%s", "%s");//plugin.<Domain>.<Namespace>.<ServiceId>.<Properties>
     String SERVICE_NAME = "name";
     String SYSTEM_NAME = "system";
