@@ -17,6 +17,8 @@
 
 package com.megaease.easeagent.plugin.utils;
 
+import java.lang.reflect.Field;
+
 public class ClassUtils {
     public static boolean hasClass(String className) {
         try {
@@ -24,6 +26,16 @@ public class ClassUtils {
             return true;
         } catch (ClassNotFoundException e) {
             return false;
+        }
+    }
+
+    public static Object getStaticField(String className, String fieldName) {
+        try {
+            Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
+            Field field = c.getDeclaredField(fieldName);
+            return field.get(null);
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            return null;
         }
     }
 

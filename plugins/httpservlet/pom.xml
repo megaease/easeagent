@@ -41,12 +41,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>5.3.18</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>plugin-api-mock</artifactId>
             <version>${project.version}</version>
