@@ -115,7 +115,7 @@ public class PluginRegistry {
             pointVersions = Points.DEFAULT_VERSIONS;
         }
         if (!pointVersions.contains(version)) {
-            log.info("the plugin version[{}={}] not in Points<{}>.versions()=[{}], skip the points ClassTransformation",
+            log.info("the plugin version[{}={}] not in Points<{}>.codeVersions()=[{}], skip the points ClassTransformation",
                 versionKey, version, points.getClass().getCanonicalName(), String.join(",", pointVersions));
             return false;
         }
