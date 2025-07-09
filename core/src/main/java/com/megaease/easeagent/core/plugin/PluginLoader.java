@@ -46,8 +46,9 @@ public class PluginLoader {
 
     public static AgentBuilder load(AgentBuilder ab, Configs conf) {
         pluginLoad();
-        providerLoad();
-        Set<ClassTransformation> sortedTransformations = pointsLoad(conf);
+        pointsLoad();
+        providerLoad(conf);
+        Set<ClassTransformation> sortedTransformations = classTransformationLoad();
 
         for (ClassTransformation transformation : sortedTransformations) {
             ab = ab.type(transformation.getClassMatcher(), transformation.getClassloaderMatcher())
@@ -56,9 +57,12 @@ public class PluginLoader {
         return ab;
     }
 
-    public static void providerLoad() {
+    public static void providerLoad(Configs conf) {
         for (InterceptorProvider provider : BaseLoader.load(InterceptorProvider.class)) {
             log.debug("loading provider:{}", provider.getClass().getName());
+            if (!PluginRegistry.isCodeVersion(provider, conf)) {
+                continue;
+            }
 
             try {
                 log.debug("provider for:{} at {}",
@@ -73,11 +77,11 @@ public class PluginLoader {
         }
     }
 
-    public static Set<ClassTransformation> pointsLoad(Configs conf) {
-        List<Points> points = BaseLoader.load(Points.class);
+    public static Set<ClassTransformation> classTransformationLoad() {
+        Collection<Points> points = PluginRegistry.getPoints();
         return points.stream().map(point -> {
                 try {
-                    return PluginRegistry.register(point, conf);
+                    return PluginRegistry.registerClassTransformation(point);
                 } catch (Exception e) {
                     log.error(
                         "Unable to load points in [class {}]",
@@ -106,6 +110,23 @@ public class PluginLoader {
                     plugin.getDomain(),
                     plugin.getNamespace(),
                     plugin.getClass().getName(),
+                    e);
+            }
+        }
+    }
+
+    public static void pointsLoad() {
+        for (Points points : BaseLoader.load(Points.class)) {
+            log.info(
+                "Loading points [class {}]",
+                points.getClass().getName());
+
+            try {
+                PluginRegistry.register(points);
+            } catch (Exception | LinkageError e) {
+                log.error(
+                    "Unable to load extension [class {}]",
+                    points.getClass().getName(),
                     e);
             }
         }

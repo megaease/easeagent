@@ -36,20 +36,20 @@ public interface Points {
     /*
      * when plugin not set version config, point must have default value is "default"
      */
-    Set<String> DEFAULT_VERSIONS = new HashSet<>(Collections.singletonList(DEFAULT_VERSION));
+    Set<String> EMPTY_VERSIONS = Collections.emptySet();
 
     /**
      * eg.
      * domain=observability, namespace=feignClient, versions=new String[]{"spring_boot_2_x", "default"}
      * do not set or set the following value to load: plugin.observability.httpServlet.version=spring_boot_2_x
      * <p>
-     * when set for not load: plugin.observability.httpServlet.version=spring_boot_3_x
+     * when set for not load: plugin.observability.httpServlet.code.version=spring_boot_3_x
      * but load from Points: domain=observability, namespace=feignClient, versions=[spring_boot_3_x]
      *
-     * @return String[] of versions for control whether to load
+     * @return String[] of versions for control whether to load, If EMPTY_VERSIONS is returned, it means it will load forever
      */
     default Set<String> codeVersions() {
-        return DEFAULT_VERSIONS;
+        return EMPTY_VERSIONS;
     }
 
     /**

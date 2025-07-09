@@ -37,6 +37,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +49,7 @@ public class PluginRegistry {
     static final ConcurrentHashMap<String, AgentPlugin> QUALIFIER_TO_PLUGIN = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<String, AgentPlugin> POINTS_TO_PLUGIN = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<String, AgentPlugin> PLUGIN_CLASSNAME_TO_PLUGIN = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, Points> POINTS_CLASSNAME_TO_POINTS = new ConcurrentHashMap<>();
 
     static final ConcurrentHashMap<String, Integer> QUALIFIER_TO_INDEX = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<Integer, MethodTransformation> INDEX_TO_METHOD_TRANSFORMATION = new ConcurrentHashMap<>();
@@ -60,16 +62,20 @@ public class PluginRegistry {
         PLUGIN_CLASSNAME_TO_PLUGIN.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
     }
 
+    public static void register(Points points) {
+        POINTS_CLASSNAME_TO_POINTS.putIfAbsent(points.getClass().getCanonicalName(), points);
+    }
+
+    public static Collection<Points> getPoints() {
+        return POINTS_CLASSNAME_TO_POINTS.values();
+    }
+
     private static String getMethodQualifier(String classname, String qualifier) {
         return classname + ":" + qualifier;
     }
 
-    public static ClassTransformation register(Points points, Configs conf) {
+    public static ClassTransformation registerClassTransformation(Points points) {
         String pointsClassName = points.getClass().getCanonicalName();
-        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
-        if (!isVersion(points, plugin, conf)) {
-            return null;
-        }
         IClassMatcher classMatcher = points.getClassMatcher();
         boolean hasDynamicField = points.isAddDynamicField();
         Junction<TypeDescription> innerClassMatcher = ClassMatcherConvert.INSTANCE.convert(classMatcher);
@@ -88,6 +94,9 @@ public class PluginRegistry {
                 return null;
             }
             Builder providerBuilder = INTERCEPTOR_PROVIDERS.get(index);
+            if (providerBuilder == null) {
+                return null;
+            }
             MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, providerBuilder);
             if (INDEX_TO_METHOD_TRANSFORMATION.putIfAbsent(index, mt) != null) {
                 log.error("There are duplicate qualifier in Points:{}!", qualifier);
@@ -96,6 +105,7 @@ public class PluginRegistry {
         }).filter(Objects::nonNull).collect(Collectors.toSet());
 
 
+        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
         int order = plugin.order();
         return ClassTransformation.builder().classMatcher(innerClassMatcher)
             .hasDynamicField(hasDynamicField)
@@ -104,19 +114,41 @@ public class PluginRegistry {
             .order(order).build();
     }
 
-    public static boolean isVersion(Points points, AgentPlugin plugin, Configs conf) {
-        String versionKey = ConfigUtils.buildVersionKey(plugin.getDomain(), plugin.getNamespace());
+    public static boolean isCodeVersion(InterceptorProvider provider, Configs config) {
+        String qualifier = provider.getAdviceTo();
+        // map interceptor/pointcut to plugin
+
+        AgentPlugin plugin = PLUGIN_CLASSNAME_TO_PLUGIN.get(provider.getPluginClassName());
+        if (plugin == null) {
+            // code autogenerate issues that are unlikely to occur!
+            throw new RuntimeException();
+        }
+        String pointsClassName = getPointsClassName(qualifier);
+        Points points = POINTS_CLASSNAME_TO_POINTS.get(pointsClassName);
+        if (points == null) {
+            // code autogenerate issues that are unlikely to occur!
+            throw new RuntimeException();
+        }
+        return isCodeVersion(points, provider, config);
+    }
+
+    public static boolean isCodeVersion(Points points, InterceptorProvider provider, Configs conf) {
+        String pluginClassName = provider.getPluginClassName();
+        AgentPlugin plugin = PLUGIN_CLASSNAME_TO_PLUGIN.get(pluginClassName);
+        String versionKey = ConfigUtils.buildCodeVersionKey(plugin.getDomain(), plugin.getNamespace());
         String version = conf.getString(versionKey);
         if (Strings.isNullOrEmpty(version)) {
             version = Points.DEFAULT_VERSION;
         }
         Set<String> pointVersions = points.codeVersions();
         if (pointVersions == null || pointVersions.isEmpty()) {
-            pointVersions = Points.DEFAULT_VERSIONS;
+            return true;
         }
         if (!pointVersions.contains(version)) {
-            log.info("the plugin version[{}={}] not in Points<{}>.codeVersions()=[{}], skip the points ClassTransformation",
-                versionKey, version, points.getClass().getCanonicalName(), String.join(",", pointVersions));
+            log.info("the plugin version[{}={}] not in Points<{}>.codeVersions()=[{}], skip the InterceptorProvider<{}>",
+                versionKey, version, points.getClass().getCanonicalName(), String.join(",", pointVersions),
+                provider.getClass().getCanonicalName()
+            );
             return false;
         }
         return true;
@@ -131,7 +163,6 @@ public class PluginRegistry {
             // code autogenerate issues that are unlikely to occur!
             throw new RuntimeException();
         }
-
         QUALIFIER_TO_PLUGIN.putIfAbsent(qualifier, plugin);
         POINTS_TO_PLUGIN.putIfAbsent(getPointsClassName(qualifier), plugin);
 
@@ -171,4 +202,5 @@ public class PluginRegistry {
     public static void addMethodTransformation(int pointcutIndex, MethodTransformation info) {
         INDEX_TO_METHOD_TRANSFORMATION.putIfAbsent(pointcutIndex, info);
     }
+
 }
