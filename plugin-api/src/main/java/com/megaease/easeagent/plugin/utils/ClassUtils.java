@@ -29,6 +29,15 @@ public class ClassUtils {
         }
     }
 
+    public static boolean isInstance(String className, Object obj) {
+        try {
+            Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
+            return c.isInstance(obj);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     public static Object getStaticField(String className, String fieldName) {
         try {
             Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);

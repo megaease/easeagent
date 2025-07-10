@@ -17,15 +17,13 @@
 
 package com.megaease.easeagent.plugin.healthy;
 
-import com.megaease.easeagent.plugin.enums.Order;
-import com.megaease.easeagent.plugin.interceptor.Interceptor;
-import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.health.AgentHealth;
-import org.springframework.boot.context.event.ApplicationFailedEvent;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationEvent;
+import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.Interceptor;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.utils.ClassUtils;
 
 @AdviceTo(value = SpringApplicationAdminMXBeanRegistrarAdvice.class)
 public class OnApplicationEventInterceptor implements Interceptor {
@@ -36,10 +34,10 @@ public class OnApplicationEventInterceptor implements Interceptor {
 
     @Override
     public void after(MethodInfo methodInfo, Context context) {
-        ApplicationEvent applicationEvent = (ApplicationEvent) methodInfo.getArgs()[0];
-        if (applicationEvent instanceof ApplicationReadyEvent) {
+        Object applicationEvent = methodInfo.getArgs()[0];
+        if (ClassUtils.isInstance("org.springframework.boot.context.event.ApplicationReadyEvent", applicationEvent)) {
             AgentHealth.INSTANCE.setReady(true);
-        } else if (applicationEvent instanceof ApplicationFailedEvent) {
+        } else if (ClassUtils.isInstance("org.springframework.boot.context.event.ApplicationFailedEvent", applicationEvent)) {
             AgentHealth.INSTANCE.setReady(false);
         }
     }
