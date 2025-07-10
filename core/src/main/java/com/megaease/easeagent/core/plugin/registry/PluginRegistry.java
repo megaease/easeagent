@@ -76,6 +76,11 @@ public class PluginRegistry {
 
     public static ClassTransformation registerClassTransformation(Points points) {
         String pointsClassName = points.getClass().getCanonicalName();
+        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
+        if (plugin == null) {
+            log.info("can not found plugin by Points<{}>, maybe it is not code version: [{}]", pointsClassName, String.join(",", points.codeVersions()));
+            return null;
+        }
         IClassMatcher classMatcher = points.getClassMatcher();
         boolean hasDynamicField = points.isAddDynamicField();
         Junction<TypeDescription> innerClassMatcher = ClassMatcherConvert.INSTANCE.convert(classMatcher);
@@ -104,8 +109,6 @@ public class PluginRegistry {
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
 
-
-        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
         int order = plugin.order();
         return ClassTransformation.builder().classMatcher(innerClassMatcher)
             .hasDynamicField(hasDynamicField)

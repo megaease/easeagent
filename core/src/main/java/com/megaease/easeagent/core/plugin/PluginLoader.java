@@ -84,7 +84,7 @@ public class PluginLoader {
                     return PluginRegistry.registerClassTransformation(point);
                 } catch (Exception e) {
                     log.error(
-                        "Unable to load points in [class {}]",
+                        "Unable to load classTransformation in [class {}]",
                         point.getClass().getName(),
                         e);
                     return null;
