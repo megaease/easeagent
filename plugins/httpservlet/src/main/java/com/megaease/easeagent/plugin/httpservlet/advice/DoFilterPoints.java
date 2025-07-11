@@ -23,21 +23,13 @@ import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class DoFilterPoints implements Points {
-    Set<String> VERSIONS = new HashSet<>(Arrays.asList("spring-boot_2_x", DEFAULT_VERSION));
     private static final String FILTER_NAME = "javax.servlet.Filter";
     private static final String HTTP_SERVLET_NAME = "javax.servlet.http.HttpServlet";
     static final String SERVLET_REQUEST = "javax.servlet.ServletRequest";
     static final String SERVLET_RESPONSE = "javax.servlet.ServletResponse";
-
-    @Override
-    public Set<String> codeVersions() {
-        return VERSIONS;
-    }
 
     @Override
     public IClassMatcher getClassMatcher() {
