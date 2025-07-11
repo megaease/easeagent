@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.api.config;
 
 public interface ConfigConst {
     String AGENT_JAR_PATH = "easeagent.jar.path";
+    String RUNTIME_CODE_VERSION_POINTS_PREFIX = "runtime.code.version.points.";
     String PLUGIN = "plugin";
     String PLUGIN_GLOBAL = "global";
     String DELIMITER = ".";

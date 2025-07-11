@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.httpurlconnection.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
@@ -29,10 +30,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class HttpURLConnectionGetResponseCodeAdvice implements Points {
-    Set<String> VERSIONS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(DEFAULT_VERSION, "jdk8")));
+    private final static CodeVersion VERSIONS = CodeVersion.builder().key("jdk").add(Points.DEFAULT_VERSION).add("jdk8").build();
 
     @Override
-    public Set<String> codeVersions() {
+    public CodeVersion codeVersions() {
         return VERSIONS;
     }
 

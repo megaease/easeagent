@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.core.plugin;
 
+import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
@@ -27,6 +28,7 @@ import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.AgentPlugin;
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
@@ -46,8 +48,8 @@ public class PluginLoader {
 
     public static AgentBuilder load(AgentBuilder ab, Configs conf) {
         pluginLoad();
-        pointsLoad();
-        providerLoad(conf);
+        pointsLoad(conf);
+        providerLoad();
         Set<ClassTransformation> sortedTransformations = classTransformationLoad();
 
         for (ClassTransformation transformation : sortedTransformations) {
@@ -57,11 +59,15 @@ public class PluginLoader {
         return ab;
     }
 
-    public static void providerLoad(Configs conf) {
+    public static void providerLoad() {
         for (InterceptorProvider provider : BaseLoader.load(InterceptorProvider.class)) {
-            log.debug("loading provider:{}", provider.getClass().getName());
-            if (!PluginRegistry.isCodeVersion(provider, conf)) {
+            String pointsClassName = PluginRegistry.getPointsClassName(provider.getAdviceTo());
+            Points points = PluginRegistry.getPoints(pointsClassName);
+            if (points == null) {
+                log.debug("Unload provider:{}, can not found Points<{}>", provider.getClass().getName(), pointsClassName);
                 continue;
+            } else {
+                log.debug("Loading provider:{}", provider.getClass().getName());
             }
 
             try {
@@ -115,11 +121,13 @@ public class PluginLoader {
         }
     }
 
-    public static void pointsLoad() {
+    public static void pointsLoad(Configs conf) {
         for (Points points : BaseLoader.load(Points.class)) {
-            log.info(
-                "Loading points [class {}]",
-                points.getClass().getName());
+            if (!isCodeVersion(points, conf)) {
+                continue;
+            } else {
+                log.info("Loading points [class Points<{}>]", points.getClass().getName());
+            }
 
             try {
                 PluginRegistry.register(points);
@@ -131,6 +139,29 @@ public class PluginLoader {
             }
         }
     }
+
+    public static boolean isCodeVersion(Points points, Configs conf) {
+        CodeVersion codeVersion = points.codeVersions();
+        if (codeVersion.isEmpty()) {
+            return true;
+        }
+        String versionKey = ConfigUtils.buildCodeVersionKey(codeVersion.getKey());
+        Set<String> versions = new HashSet<>(conf.getStringList(versionKey));
+        if (versions.isEmpty()) {
+            versions = Points.DEFAULT_VERSIONS;
+        }
+        Set<String> pointVersions = codeVersion.getVersions();
+        for (String version : versions) {
+            if (pointVersions.contains(version)) {
+                return true;
+            }
+        }
+        log.info("Unload points [class Points<{}>], the config [{}={}] is not in Points.codeVersions()=[{}:{}]",
+            points.getClass().getCanonicalName(), versionKey, String.join(",", versions),
+            codeVersion.getKey(), String.join(",", codeVersion.getVersions()));
+        return false;
+    }
+
 
     /**
      * @param methodTransformations method matchers under a special classMatcher

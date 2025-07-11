@@ -32,12 +32,10 @@ import java.util.Set;
  */
 public interface Points {
     String DEFAULT_VERSION = "default";
-    List<String> DEFAULT_VERSIONS = Collections.singletonList(DEFAULT_VERSION);
+    Set<String> DEFAULT_VERSIONS = Collections.singleton(DEFAULT_VERSION);
 
-    /*
-     * when plugin not set version config, point must have default value is "default"
-     */
-    Set<String> EMPTY_VERSIONS = Collections.emptySet();
+    CodeVersion EMPTY_VERSION = CodeVersion.builder().build();
+
 
     /**
      * eg.
@@ -49,8 +47,8 @@ public interface Points {
      *
      * @return String[] of versions for control whether to load, If EMPTY_VERSIONS is returned, it means it will load forever
      */
-    default Set<String> codeVersions() {
-        return EMPTY_VERSIONS;
+    default CodeVersion codeVersions() {
+        return EMPTY_VERSION;
     }
 
     /**

@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.springweb.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
@@ -29,11 +30,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ClientHttpRequestAdvice implements Points {
-    Set<String> VERSIONS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(DEFAULT_VERSION, "spring-boot_2_x")));
 
+    private final static CodeVersion VERSIONS = CodeVersion.builder().key("spring-boot").add(Points.DEFAULT_VERSION).add("2.x.x").build();
 
     @Override
-    public Set<String> codeVersions() {
+    public CodeVersion codeVersions() {
         return VERSIONS;
     }
 

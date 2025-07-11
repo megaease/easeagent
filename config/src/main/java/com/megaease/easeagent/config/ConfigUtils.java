@@ -135,8 +135,8 @@ public class ConfigUtils {
         return String.format(PLUGIN_FORMAT, domain, namespace, id, property);
     }
 
-    public static String buildCodeVersionKey(String domain, String namespace) {
-        return String.format(PLUGIN_FORMAT, domain, namespace, PluginID.CODE, VERSION_NAME);
+    public static String buildCodeVersionKey(String key) {
+        return RUNTIME_CODE_VERSION_POINTS_PREFIX + key;
     }
 
     /**

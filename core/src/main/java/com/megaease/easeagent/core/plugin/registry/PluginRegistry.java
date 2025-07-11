@@ -68,17 +68,16 @@ public class PluginRegistry {
         return POINTS_CLASSNAME_TO_POINTS.values();
     }
 
+    public static Points getPoints(String pointsClassName) {
+        return POINTS_CLASSNAME_TO_POINTS.get(pointsClassName);
+    }
+
     private static String getMethodQualifier(String classname, String qualifier) {
         return classname + ":" + qualifier;
     }
 
     public static ClassTransformation registerClassTransformation(Points points) {
         String pointsClassName = points.getClass().getCanonicalName();
-        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
-        if (plugin == null) {
-            log.info("can not found plugin by Points<{}>, maybe it is not code version: [{}]", pointsClassName, String.join(",", points.codeVersions()));
-            return null;
-        }
         IClassMatcher classMatcher = points.getClassMatcher();
         boolean hasDynamicField = points.isAddDynamicField();
         Junction<TypeDescription> innerClassMatcher = ClassMatcherConvert.INSTANCE.convert(classMatcher);
@@ -107,56 +106,13 @@ public class PluginRegistry {
             return mt;
         }).filter(Objects::nonNull).collect(Collectors.toSet());
 
+        AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
         int order = plugin.order();
         return ClassTransformation.builder().classMatcher(innerClassMatcher)
             .hasDynamicField(hasDynamicField)
             .methodTransformations(mInfo)
             .classloaderMatcher(loaderMatcher)
             .order(order).build();
-    }
-
-    public static boolean isCodeVersion(InterceptorProvider provider, Configs config) {
-        String qualifier = provider.getAdviceTo();
-        // map interceptor/pointcut to plugin
-
-        AgentPlugin plugin = PLUGIN_CLASSNAME_TO_PLUGIN.get(provider.getPluginClassName());
-        if (plugin == null) {
-            // code autogenerate issues that are unlikely to occur!
-            throw new RuntimeException();
-        }
-        String pointsClassName = getPointsClassName(qualifier);
-        Points points = POINTS_CLASSNAME_TO_POINTS.get(pointsClassName);
-        if (points == null) {
-            // code autogenerate issues that are unlikely to occur!
-            throw new RuntimeException();
-        }
-        return isCodeVersion(points, provider, config);
-    }
-
-    public static boolean isCodeVersion(Points points, InterceptorProvider provider, Configs conf) {
-        Set<String> pointVersions = points.codeVersions();
-        if (pointVersions == null || pointVersions.isEmpty()) {
-            return true;
-        }
-
-        String pluginClassName = provider.getPluginClassName();
-        AgentPlugin plugin = PLUGIN_CLASSNAME_TO_PLUGIN.get(pluginClassName);
-        String versionKey = ConfigUtils.buildCodeVersionKey(plugin.getDomain(), plugin.getNamespace());
-        List<String> versions = conf.getStringList(versionKey);
-        if (versions.isEmpty()) {
-            versions = Points.DEFAULT_VERSIONS;
-        }
-
-        for (String version : versions) {
-            if (pointVersions.contains(version)) {
-                return true;
-            }
-        }
-        log.info("the plugin version[{}={}] not in Points<{}>.codeVersions()=[{}], skip the InterceptorProvider<{}>",
-            versionKey, String.join(",", versions), points.getClass().getCanonicalName(), String.join(",", pointVersions),
-            provider.getClass().getCanonicalName()
-        );
-        return false;
     }
 
     public static int register(InterceptorProvider provider) {
@@ -188,7 +144,7 @@ public class PluginRegistry {
         return index;
     }
 
-    static String getPointsClassName(String name) {
+    public static String getPointsClassName(String name) {
         int index;
         if (Strings.isNullOrEmpty(name)) {
             return "unknown";
