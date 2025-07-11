@@ -37,9 +37,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -136,25 +134,29 @@ public class PluginRegistry {
     }
 
     public static boolean isCodeVersion(Points points, InterceptorProvider provider, Configs conf) {
-        String pluginClassName = provider.getPluginClassName();
-        AgentPlugin plugin = PLUGIN_CLASSNAME_TO_PLUGIN.get(pluginClassName);
-        String versionKey = ConfigUtils.buildCodeVersionKey(plugin.getDomain(), plugin.getNamespace());
-        String version = conf.getString(versionKey);
-        if (Strings.isNullOrEmpty(version)) {
-            version = Points.DEFAULT_VERSION;
-        }
         Set<String> pointVersions = points.codeVersions();
         if (pointVersions == null || pointVersions.isEmpty()) {
             return true;
         }
-        if (!pointVersions.contains(version)) {
-            log.info("the plugin version[{}={}] not in Points<{}>.codeVersions()=[{}], skip the InterceptorProvider<{}>",
-                versionKey, version, points.getClass().getCanonicalName(), String.join(",", pointVersions),
-                provider.getClass().getCanonicalName()
-            );
-            return false;
+
+        String pluginClassName = provider.getPluginClassName();
+        AgentPlugin plugin = PLUGIN_CLASSNAME_TO_PLUGIN.get(pluginClassName);
+        String versionKey = ConfigUtils.buildCodeVersionKey(plugin.getDomain(), plugin.getNamespace());
+        List<String> versions = conf.getStringList(versionKey);
+        if (versions.isEmpty()) {
+            versions = Points.DEFAULT_VERSIONS;
         }
-        return true;
+
+        for (String version : versions) {
+            if (pointVersions.contains(version)) {
+                return true;
+            }
+        }
+        log.info("the plugin version[{}={}] not in Points<{}>.codeVersions()=[{}], skip the InterceptorProvider<{}>",
+            versionKey, String.join(",", versions), points.getClass().getCanonicalName(), String.join(",", pointVersions),
+            provider.getClass().getCanonicalName()
+        );
+        return false;
     }
 
     public static int register(InterceptorProvider provider) {

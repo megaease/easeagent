@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.matcher.loader.ClassLoaderMatcher;
 import com.megaease.easeagent.plugin.matcher.loader.IClassLoaderMatcher;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,6 +32,7 @@ import java.util.Set;
  */
 public interface Points {
     String DEFAULT_VERSION = "default";
+    List<String> DEFAULT_VERSIONS = Collections.singletonList(DEFAULT_VERSION);
 
     /*
      * when plugin not set version config, point must have default value is "default"
