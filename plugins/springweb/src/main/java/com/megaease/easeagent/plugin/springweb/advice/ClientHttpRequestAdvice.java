@@ -23,9 +23,20 @@ import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
 import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ClientHttpRequestAdvice implements Points {
+    Set<String> VERSIONS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(DEFAULT_VERSION, "spring-boot_2_x")));
+
+
+    @Override
+    public Set<String> codeVersions() {
+        return VERSIONS;
+    }
+
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder().hasInterface("org.springframework.http.client.ClientHttpRequest").notInterface()
