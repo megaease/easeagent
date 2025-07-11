@@ -17,6 +17,7 @@
 
 package easeagent.plugin.spring.gateway.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
@@ -26,6 +27,11 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 public class AgentGlobalFilterAdvice implements Points {
+    @Override
+    public CodeVersion codeVersions() {
+        return CodeCons.VERSIONS;
+    }
+
     @Override
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
