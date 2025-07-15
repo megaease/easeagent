@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.servicename.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -28,6 +29,11 @@ import java.util.Set;
 import static com.megaease.easeagent.plugin.tools.matcher.ClassMatcherUtils.name;
 
 public class WebClientFilterAdvice implements Points {
+    @Override
+    public CodeVersion codeVersions() {
+        return Const.VERSIONS;
+    }
+
     //// WebClient
     //            .type(namedOneOf(ReactorLoadBalancerExchangeFilterFunction, LoadBalancerExchangeFilterFunction))
     //            .transform(webClientFilter(named("filter").and(takesArguments(2))

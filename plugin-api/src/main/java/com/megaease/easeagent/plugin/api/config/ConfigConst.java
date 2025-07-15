@@ -174,6 +174,16 @@ public interface ConfigConst {
         String LOG = "log";
         String REDIRECT = "redirect";
         String FORWARDED = "forwarded";
-        String CODE = "code";
     }
+
+    interface CodeVersion{
+        String KEY_JDK = "jdk";
+        String KEY_SPRING_BOOT = "spring-boot";
+
+        String VERSION_JDK8 = "jdk8";
+        String VERSION_JDK17 = "jdk17";
+        String VERSION_SPRING_BOOT2 = "2.x.x";
+        String VERSION_SPRING_BOOT3 = "3.x.x";
+    }
+
 }
