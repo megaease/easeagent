@@ -139,6 +139,8 @@ public interface ConfigConst {
         String ASYNC = "async";
         String ELASTICSEARCH = "elasticsearch";
         String HTTP_SERVLET = "httpServlet";
+
+        String TOMCAT = "tomcat";
         String JDBC = "jdbc";
         String JDBC_CONNECTION = "jdbcConnection";
         String JDBC_STATEMENT = "jdbcStatement";

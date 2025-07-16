@@ -53,6 +53,7 @@
         <module>motan</module>
         <module>sofarpc</module>
         <module>httpurlconnection</module>
+        <module>tomcat</module>
     </modules>
 
     <dependencyManagement>
