@@ -1,0 +1,106 @@
+/*
+ * Copyright (c) 2017, MegaEase
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.megaease.easeagent.plugin.tomcat.interceptor;
+
+import com.megaease.easeagent.plugin.annotation.AdviceTo;
+import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.context.RequestContext;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
+import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.tomcat.AccessPlugin;
+import com.megaease.easeagent.plugin.tomcat.advice.FilterChainPoints;
+import com.megaease.easeagent.plugin.tomcat.utils.ServletUtils;
+import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
+import com.megaease.easeagent.plugin.tools.metrics.HttpLog;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@AdviceTo(value = FilterChainPoints.class, plugin = AccessPlugin.class)
+public class TomcatHttpLogInterceptor extends BaseServletInterceptor {
+    private static final String BEFORE_MARK = TomcatHttpLogInterceptor.class.getName() + "$BeforeMark";
+    private static final String AFTER_MARK = TomcatHttpLogInterceptor.class.getName() + "$AfterMark";
+    private final HttpLog httpLog = new HttpLog();
+
+    public AccessLogServerInfo serverInfo(HttpServletRequest request, HttpServletResponse response) {
+        TomcatAccessLogServerInfo serverInfo = (TomcatAccessLogServerInfo) request.getAttribute(TomcatAccessLogServerInfo.class.getName());
+        if (serverInfo == null) {
+            serverInfo = new TomcatAccessLogServerInfo();
+            request.setAttribute(TomcatAccessLogServerInfo.class.getName(), serverInfo);
+        }
+        serverInfo.load(request, response);
+        return serverInfo;
+    }
+
+    private Span getSpan(HttpServletRequest httpServletRequest, Context context) {
+        RequestContext requestContext = (RequestContext) httpServletRequest.getAttribute(ServletUtils.PROGRESS_CONTEXT);
+        if (requestContext != null) {
+            return requestContext.span();
+        }
+        return context.currentTracing().currentSpan();
+    }
+
+    private String getSystem() {
+        return EaseAgent.getConfig("system");
+    }
+
+    private String getServiceName() {
+        return EaseAgent.getConfig("name");
+    }
+
+
+    @Override
+    public void doBefore(MethodInfo methodInfo, Context context) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) methodInfo.getArgs()[0];
+        if (ServletUtils.markProcessed(httpServletRequest, BEFORE_MARK)) {
+            return;
+        }
+        HttpServletResponse httpServletResponse = (HttpServletResponse) methodInfo.getArgs()[1];
+        Long beginTime = ServletUtils.startTime(httpServletRequest);
+        Span span = getSpan(httpServletRequest, context);
+        AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
+        AccessLogInfo accessLog = this.httpLog.prepare(getSystem(), getServiceName(), beginTime, span, serverInfo);
+        httpServletRequest.setAttribute(AccessLogInfo.class.getName(), accessLog);
+    }
+
+    @Override
+    protected String getAfterMark() {
+        return AFTER_MARK;
+    }
+
+    @Override
+    void internalAfter(Throwable throwable, String key, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, long start) {
+        Long beginTime = ServletUtils.startTime(httpServletRequest);
+        AccessLogInfo accessLog = (AccessLogInfo) httpServletRequest.getAttribute(AccessLogInfo.class.getName());
+        AccessLogServerInfo serverInfo = this.serverInfo(httpServletRequest, httpServletResponse);
+        this.httpLog.finish(accessLog, throwable == null, beginTime, serverInfo);
+        EaseAgent.agentReport.report(accessLog);
+    }
+
+    @Override
+    public String getType() {
+        return Order.LOG.getName();
+    }
+
+    @Override
+    public int order() {
+        return Order.LOG.getOrder();
+    }
+}
