@@ -1,0 +1,132 @@
+/*
+ * Copyright (c) 2021, MegaEase
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.megaease.easeagent.plugin.tomcat.interceptor;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.megaease.easeagent.mock.plugin.api.MockEaseAgent;
+import com.megaease.easeagent.mock.plugin.api.junit.EaseAgentJunit4ClassRunner;
+import com.megaease.easeagent.mock.report.MockReport;
+import com.megaease.easeagent.mock.report.impl.LastJsonReporter;
+import com.megaease.easeagent.plugin.api.config.IPluginConfig;
+import com.megaease.easeagent.plugin.api.logging.AccessLogInfo;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
+import com.megaease.easeagent.plugin.enums.Order;
+import com.megaease.easeagent.plugin.interceptor.MethodInfo;
+import com.megaease.easeagent.plugin.tomcat.AccessPlugin;
+import com.megaease.easeagent.plugin.tomcat.utils.ServletUtils;
+import com.megaease.easeagent.plugin.tools.metrics.AccessLogServerInfo;
+import com.megaease.easeagent.plugin.utils.common.HostAddress;
+import com.megaease.easeagent.plugin.utils.common.JsonUtil;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.mock.web.MockHttpServletRequest;
+
+import static org.junit.Assert.*;
+
+@RunWith(EaseAgentJunit4ClassRunner.class)
+public class TomcatHttpLogInterceptorTest {
+
+    @Test
+    public void serverInfo() {
+        MockHttpServletRequest httpServletRequest = TestServletUtils.buildMockRequest();
+        HttpServletResponse response = TestServletUtils.buildMockResponse();
+        TomcatHttpLogInterceptor tomcatHttpLogInterceptor = new TomcatHttpLogInterceptor();
+        AccessLogServerInfo accessLogServerInfo = tomcatHttpLogInterceptor.serverInfo(httpServletRequest, response);
+        assertSame(accessLogServerInfo, tomcatHttpLogInterceptor.serverInfo(httpServletRequest, response));
+    }
+
+    @Test
+    public void doBefore() throws JsonProcessingException {
+        internalAfter();
+    }
+
+    public void verify(AccessLogInfo accessLog, long startTime) {
+        assertEquals(EaseAgent.getConfig("system"), accessLog.getSystem());
+        assertEquals(EaseAgent.getConfig("name"), accessLog.getService());
+        assertEquals(HostAddress.localhost(), accessLog.getHostName());
+        assertEquals(HostAddress.getHostIpv4(), accessLog.getHostIpv4());
+        assertEquals(TestConst.METHOD + " " + TestConst.URL, accessLog.getUrl());
+        assertEquals(TestConst.METHOD, accessLog.getMethod());
+        assertEquals(TestConst.FORWARDED_VALUE, accessLog.getHeaders().get(TestConst.FORWARDED_NAME));
+        assertEquals(startTime, accessLog.getBeginTime());
+        assertEquals("10", accessLog.getQueries().get("q1"));
+        assertEquals("testq", accessLog.getQueries().get("q2"));
+        assertEquals(TestConst.FORWARDED_VALUE, accessLog.getClientIP());
+        assertTrue(accessLog.getBeginCpuTime() > 0);
+    }
+
+    @Test
+    public void getAfterMark() {
+        TomcatHttpLogInterceptor tomcatHttpLogInterceptor = new TomcatHttpLogInterceptor();
+        assertNotNull(tomcatHttpLogInterceptor.getAfterMark());
+    }
+
+    private AccessLogInfo getRequestInfo(LastJsonReporter lastJsonReporter) {
+        String result = JsonUtil.toJson(lastJsonReporter.getLastOnlyOne());
+        assertNotNull(result);
+        return JsonUtil.toObject(result, AccessLogInfo.TYPE_REFERENCE);
+    }
+
+    @Test
+    public void internalAfter() throws JsonProcessingException {
+        EaseAgent.agentReport = MockReport.getAgentReport();
+        MockHttpServletRequest httpServletRequest = TestServletUtils.buildMockRequest();
+        HttpServletResponse response = TestServletUtils.buildMockResponse();
+        TomcatHttpLogInterceptor tomcatHttpLogInterceptor = new TomcatHttpLogInterceptor();
+        AccessPlugin accessPlugin = new AccessPlugin();
+        IPluginConfig iPluginConfig = EaseAgent.getConfig(accessPlugin.getDomain(), accessPlugin.getNamespace(), tomcatHttpLogInterceptor.getType());
+        tomcatHttpLogInterceptor.init(iPluginConfig, "", "", "");
+
+        MethodInfo methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).build();
+        tomcatHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        Object requestInfoO = httpServletRequest.getAttribute(AccessLogInfo.class.getName());
+        assertNotNull(requestInfoO);
+        assertTrue(requestInfoO instanceof AccessLogInfo);
+        AccessLogInfo accessLog = (AccessLogInfo) requestInfoO;
+        long start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
+        verify(accessLog, start);
+        LastJsonReporter lastJsonReporter = MockEaseAgent.lastMetricJsonReporter(stringObjectMap -> {
+            Object type = stringObjectMap.get("type");
+            return type instanceof String && "access-log".equals(type);
+        });
+        tomcatHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        // AccessLogInfo info = getRequestInfo(lastJsonReporter);
+        AccessLogInfo info = MockEaseAgent.getLastLog();
+        verify(info, start);
+        assertEquals("200", info.getStatusCode());
+
+        lastJsonReporter.clean();
+        httpServletRequest = TestServletUtils.buildMockRequest();
+        response = TestServletUtils.buildMockResponse();
+        methodInfo = MethodInfo.builder().args(new Object[]{httpServletRequest, response}).throwable(new RuntimeException("test error")).build();
+        tomcatHttpLogInterceptor.doBefore(methodInfo, EaseAgent.getContext());
+        tomcatHttpLogInterceptor.doAfter(methodInfo, EaseAgent.getContext());
+        // info = getRequestInfo(lastJsonReporter);
+        info = MockEaseAgent.getLastLog();
+        start = (long) httpServletRequest.getAttribute(ServletUtils.START_TIME);
+        verify(info, start);
+        assertEquals("500", info.getStatusCode());
+    }
+
+    @Test
+    public void getType() {
+        TomcatHttpLogInterceptor tomcatHttpLogInterceptor = new TomcatHttpLogInterceptor();
+        assertEquals(Order.LOG.getName(), tomcatHttpLogInterceptor.getType());
+    }
+}
