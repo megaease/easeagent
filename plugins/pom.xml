@@ -53,7 +53,6 @@
         <module>motan</module>
         <module>sofarpc</module>
         <module>httpurlconnection</module>
-        <module>tomcat</module>
     </modules>
 
     <dependencyManagement>
@@ -104,5 +103,17 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>include-jdk17-module</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <modules>
+                <module>tomcat</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
 
