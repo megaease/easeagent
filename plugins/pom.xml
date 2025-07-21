@@ -111,7 +111,7 @@
                 <jdk>[17,)</jdk>
             </activation>
             <modules>
-                <module>tomcat</module>
+                <module>tomcat-jdk17</module>
             </modules>
         </profile>
     </profiles>

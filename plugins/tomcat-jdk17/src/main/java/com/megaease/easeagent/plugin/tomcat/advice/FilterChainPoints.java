@@ -1,6 +1,8 @@
 package com.megaease.easeagent.plugin.tomcat.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -13,6 +15,15 @@ public class FilterChainPoints implements Points {
     private static final String HTTP_SERVLET_NAME = "jakarta.servlet.http.HttpServlet";
     static final String SERVLET_REQUEST = "jakarta.servlet.ServletRequest";
     static final String SERVLET_RESPONSE = "jakarta.servlet.ServletResponse";
+
+    private final static CodeVersion VERSIONS = CodeVersion.builder()
+        .key(ConfigConst.CodeVersion.KEY_JDK)
+        .add(ConfigConst.CodeVersion.VERSION_JDK17).build();
+
+    @Override
+    public CodeVersion codeVersions() {
+        return VERSIONS;
+    }
 
     @Override
     public IClassMatcher getClassMatcher() {
