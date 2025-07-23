@@ -18,7 +18,6 @@
 package easeagent.plugin.spring353.gateway;
 
 import com.megaease.easeagent.plugin.CodeVersion;
-import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public interface GatewayCons {
@@ -28,6 +27,5 @@ public interface GatewayCons {
 
     CodeVersion VERSIONS = CodeVersion.builder()
         .key(ConfigConst.CodeVersion.KEY_SPRING_BOOT)
-        .add(Points.DEFAULT_VERSION)
         .add(ConfigConst.CodeVersion.VERSION_SPRING_BOOT3).build();
 }

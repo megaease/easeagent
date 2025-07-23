@@ -37,6 +37,7 @@ public class InitGlobalFilterAdvice implements Points {
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
             .hasClassName("org.springframework.cloud.gateway.config.GatewayAutoConfiguration")
+            .or().hasClassName("org.springframework.cloud.gateway.config.GatewayAutoConfiguration$GatewayActuatorConfiguration")
             .build();
     }
 

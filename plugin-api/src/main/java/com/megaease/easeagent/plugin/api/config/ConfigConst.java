@@ -174,6 +174,7 @@ public interface ConfigConst {
         String TRACING = "tracing";
         String METRIC = "metric";
         String LOG = "log";
+        String INIT = "init";
         String REDIRECT = "redirect";
         String FORWARDED = "forwarded";
     }

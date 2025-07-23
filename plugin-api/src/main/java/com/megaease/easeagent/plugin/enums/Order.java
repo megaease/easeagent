@@ -27,6 +27,7 @@ import com.megaease.easeagent.plugin.api.config.ConfigConst;
 public enum Order {
     FOUNDATION(0, "foundation"),
     HIGHEST(10, "highest"),
+    INIT(18, ConfigConst.PluginID.INIT),
     REDIRECT(19, ConfigConst.PluginID.REDIRECT),
     HIGH(20, "high"),
     FORWARDED(30, ConfigConst.PluginID.FORWARDED),

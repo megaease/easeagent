@@ -54,12 +54,12 @@ public class GlobalFilterInterceptorTest {
     @Test
     public void getType() {
         GlobalFilterInterceptor interceptor = new GlobalFilterInterceptor();
-        assertEquals(ConfigConst.PluginID.TRACING, interceptor.getType());
+        assertEquals(ConfigConst.PluginID.INIT, interceptor.getType());
     }
 
     @Test
     public void order() {
         GlobalFilterInterceptor interceptor = new GlobalFilterInterceptor();
-        assertEquals(Order.TRACING_INIT.getOrder(), interceptor.order());
+        assertEquals(Order.INIT.getOrder(), interceptor.order());
     }
 }
