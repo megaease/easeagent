@@ -38,12 +38,10 @@ public class GlobalFilterInterceptorTest {
         interceptor.before(methodInfo, null);
         assertEquals(1, arg.size());
         assertEquals(1, arg.size());
-        AgentFieldReflectAccessor.setStaticFieldValue(GlobalFilterInterceptor.class, "loadAgentFilter", false);
         arg.clear();
         methodInfo = MethodInfo.builder().method("gatewayControllerEndpoint").args(new Object[]{arg}).build();
         interceptor.before(methodInfo, null);
         assertEquals(1, arg.size());
-        AgentFieldReflectAccessor.setStaticFieldValue(GlobalFilterInterceptor.class, "loadAgentFilter", false);
         arg.clear();
         methodInfo = MethodInfo.builder().method("gatewayLegacyControllerEndpoint").args(new Object[]{null, arg}).build();
         interceptor.before(methodInfo, null);
@@ -54,12 +52,12 @@ public class GlobalFilterInterceptorTest {
     @Test
     public void getType() {
         GlobalFilterInterceptor interceptor = new GlobalFilterInterceptor();
-        assertEquals(ConfigConst.PluginID.TRACING, interceptor.getType());
+        assertEquals(ConfigConst.PluginID.INIT, interceptor.getType());
     }
 
     @Test
     public void order() {
         GlobalFilterInterceptor interceptor = new GlobalFilterInterceptor();
-        assertEquals(Order.TRACING_INIT.getOrder(), interceptor.order());
+        assertEquals(Order.INIT.getOrder(), interceptor.order());
     }
 }
