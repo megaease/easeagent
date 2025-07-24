@@ -38,12 +38,10 @@ public class GlobalFilterInterceptorTest {
         interceptor.before(methodInfo, null);
         assertEquals(1, arg.size());
         assertEquals(1, arg.size());
-        AgentFieldReflectAccessor.setStaticFieldValue(GlobalFilterInterceptor.class, "loadAgentFilter", false);
         arg.clear();
         methodInfo = MethodInfo.builder().method("gatewayControllerEndpoint").args(new Object[]{arg}).build();
         interceptor.before(methodInfo, null);
         assertEquals(1, arg.size());
-        AgentFieldReflectAccessor.setStaticFieldValue(GlobalFilterInterceptor.class, "loadAgentFilter", false);
         arg.clear();
         methodInfo = MethodInfo.builder().method("gatewayLegacyControllerEndpoint").args(new Object[]{null, arg}).build();
         interceptor.before(methodInfo, null);
