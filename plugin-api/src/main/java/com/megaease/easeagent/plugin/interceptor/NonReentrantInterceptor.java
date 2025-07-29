@@ -34,10 +34,16 @@ public interface NonReentrantInterceptor extends Interceptor {
 
     @Override
     default void after(MethodInfo methodInfo, Context context) {
-        if (!context.exit(getEnterKey(methodInfo, context), 1)) {
+        Object key = getEnterKey(methodInfo, context);
+        if (!context.exit(key, 1)) {
             return;
         }
-        doAfter(methodInfo, context);
+        try {
+            context.enter(key);
+            doAfter(methodInfo, context);
+        } finally {
+            context.exit(key);
+        }
     }
 
     default Object getEnterKey(MethodInfo methodInfo, Context context) {
