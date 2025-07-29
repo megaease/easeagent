@@ -112,6 +112,7 @@
             </activation>
             <modules>
                 <module>tomcat-jdk17</module>
+                <module>httpurlconnection-jdk17</module>
                 <module>spring-boot-3.5.3</module>
             </modules>
         </profile>
