@@ -28,27 +28,32 @@ import java.util.Set;
 
 import static com.megaease.easeagent.plugin.tools.matcher.ClassMatcherUtils.name;
 
-public class RestTemplateInterceptAdvice implements Points {
+// Spring Cloud Gateway
+public class FilteringWebHandlerAdvice implements Points {//FilteringWebHandlerInterceptor
+    //            .type(named(FilteringWebHandler))
+    //            .transform(filteringWebHandlerHandle(named("handle").and(takesArguments(1))
+    //                .and(takesArgument(0, named("org.springframework.web.server.ServerWebExchange")))
+    //            ))
+
     @Override
     public CodeVersion codeVersions() {
         return Const.VERSIONS;
     }
 
+
     @Override
     public IClassMatcher getClassMatcher() {
-        return name(Const.RetryLoadBalancerInterceptor).or(name(Const.LoadBalancerInterceptor));
+        return name(Const.FilteringWebHandler);
     }
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.multiBuilder()
-            .match(MethodMatcher.builder().named("intercept")
-                .argsLength(3)
-                .arg(0, "org.springframework.http.HttpRequest")
+            .match(MethodMatcher.builder().named("handle")
+                .argsLength(1)
+                .arg(0, "org.springframework.web.server.ServerWebExchange")
                 .qualifier("servicename")
                 .build())
             .build();
     }
-
-
 }

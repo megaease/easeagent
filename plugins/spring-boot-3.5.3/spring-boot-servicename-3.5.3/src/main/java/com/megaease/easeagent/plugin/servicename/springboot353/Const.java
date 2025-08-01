@@ -54,8 +54,6 @@ public interface Const {
 
     //----------------- spring gateway begin ---------------
     String FilteringWebHandler = "org.springframework.cloud.gateway.handler.FilteringWebHandler";
-
-    String SERVER_WEB_EXCHANGE_ROUTE_ATTRIBUTE = "org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRoute";
     //----------------- spring gateway end ---------------
     String DEFAULT_PROPAGATE_HEAD = "X-Mesh-RPC-Service";
     String PROPAGATE_HEAD_CONFIG = "propagate.head";

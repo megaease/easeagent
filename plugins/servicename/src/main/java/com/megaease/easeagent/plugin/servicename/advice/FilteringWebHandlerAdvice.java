@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.servicename.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -33,6 +34,12 @@ public class FilteringWebHandlerAdvice implements Points {//FilteringWebHandlerI
     //            .transform(filteringWebHandlerHandle(named("handle").and(takesArguments(1))
     //                .and(takesArgument(0, named("org.springframework.web.server.ServerWebExchange")))
     //            ))
+
+    @Override
+    public CodeVersion codeVersions() {
+        return Const.VERSIONS;
+    }
+
     @Override
     public IClassMatcher getClassMatcher() {
         return name(Const.FilteringWebHandler);
