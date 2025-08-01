@@ -22,20 +22,6 @@ import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
 
 public interface Const {
-    //----------------- FeignClient begin ---------------
-    /**
-     * The new version has been Deprecated
-     */
-    String FeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.FeignLoadBalancer";
-    /**
-     * The new version has been Deprecated
-     */
-    String RetryableFeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.RetryableFeignLoadBalancer";
-
-    /**
-     * The new version has been Deprecated
-     */
-    String LoadBalancerFeignClient = "org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient";
     String FeignBlockingLoadBalancerClient = "org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient";
     String RetryableFeignBlockingLoadBalancerClient = "org.springframework.cloud.openfeign.loadbalancer.RetryableFeignBlockingLoadBalancerClient";
     //----------------- FeignClient end ---------------
