@@ -19,7 +19,9 @@ package com.megaease.easeagent.plugin.httpurlconnection.jdk17.interceptor;
 
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
+import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.httpurlconnection.jdk17.HttpURLConnectionPlugin;
 import com.megaease.easeagent.plugin.httpurlconnection.jdk17.advice.HttpURLConnectionGetResponseCodeAdvice;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
@@ -37,6 +39,7 @@ import java.util.Map;
 
 @AdviceTo(value = HttpURLConnectionGetResponseCodeAdvice.class, qualifier = "default", plugin = HttpURLConnectionPlugin.class)
 public class HttpURLConnectionGetResponseCodeInterceptor extends BaseHttpClientTracingInterceptor {
+    private static final Logger log = EaseAgent.getLogger(HttpURLConnectionGetResponseCodeInterceptor.class);
 
     @Override
     public Object getProgressKey() {
@@ -45,6 +48,14 @@ public class HttpURLConnectionGetResponseCodeInterceptor extends BaseHttpClientT
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
+        Object invoker = methodInfo.getInvoker();
+        if (HttpURLConnectionUtils.isConnected(invoker)) {
+            if (log.isDebugEnabled()) {
+                log.debug("the HttpURLConnection Already connected, skip HttpURLConnectionGetResponseCodeInterceptor");
+            }
+            DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeInterceptor.connected");
+            return;
+        }
         if (DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeInterceptor.before")) {
             super.doBefore(methodInfo, context);
         }
@@ -52,7 +63,8 @@ public class HttpURLConnectionGetResponseCodeInterceptor extends BaseHttpClientT
 
     @Override
     public void doAfter(MethodInfo methodInfo, Context context) {
-        if (DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeInterceptor.after")) {
+        if (DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeInterceptor.connected")
+            && DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeInterceptor.after")) {
             super.doAfter(methodInfo, context);
         }
     }

@@ -25,6 +25,7 @@ import com.megaease.easeagent.core.plugin.registry.PluginRegistry;
 import com.megaease.easeagent.core.plugin.transformer.CompoundPluginTransformer;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldTransformer;
 import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
+import com.megaease.easeagent.core.plugin.transformer.TypeFieldTransformer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.AgentPlugin;
@@ -33,6 +34,7 @@ import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
 import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 import java.util.*;
@@ -54,7 +56,7 @@ public class PluginLoader {
 
         for (ClassTransformation transformation : sortedTransformations) {
             ab = ab.type(transformation.getClassMatcher(), transformation.getClassloaderMatcher())
-                .transform(compound(transformation.isHasDynamicField(), transformation.getMethodTransformations()));
+                .transform(compound(transformation.isHasDynamicField(), transformation.getMethodTransformations(), transformation.getTypeFieldAccessor()));
         }
         return ab;
     }
@@ -168,7 +170,7 @@ public class PluginLoader {
      * @return transform
      */
     public static AgentBuilder.Transformer compound(boolean hasDynamicField,
-                                                    Iterable<MethodTransformation> methodTransformations) {
+                                                    Iterable<MethodTransformation> methodTransformations, String typeFieldAccessor) {
         List<AgentBuilder.Transformer> agentTransformers = StreamSupport
             .stream(methodTransformations.spliterator(), false)
             .map(ForAdviceTransformer::new)
@@ -176,6 +178,10 @@ public class PluginLoader {
 
         if (hasDynamicField) {
             agentTransformers.add(new DynamicFieldTransformer(AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME));
+        }
+
+        if (StringUtils.hasText(typeFieldAccessor)) {
+            agentTransformers.add(new TypeFieldTransformer(typeFieldAccessor));
         }
 
         return new CompoundPluginTransformer(agentTransformers);

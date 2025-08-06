@@ -23,7 +23,6 @@ import com.megaease.easeagent.plugin.matcher.loader.ClassLoaderMatcher;
 import com.megaease.easeagent.plugin.matcher.loader.IClassLoaderMatcher;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -98,6 +97,10 @@ public interface Points {
      */
     default boolean isAddDynamicField() {
         return false;
+    }
+
+    default String getTypeFieldAccessor() {
+        return null;
     }
 
     /**

@@ -20,6 +20,8 @@ package com.megaease.easeagent.plugin.httpurlconnection.jdk17.interceptor;
 import com.megaease.easeagent.plugin.annotation.AdviceTo;
 import com.megaease.easeagent.plugin.api.Context;
 import com.megaease.easeagent.plugin.api.config.ConfigConst;
+import com.megaease.easeagent.plugin.api.logging.Logger;
+import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpurlconnection.jdk17.ForwardedPlugin;
 import com.megaease.easeagent.plugin.httpurlconnection.jdk17.advice.HttpURLConnectionGetResponseCodeAdvice;
@@ -30,9 +32,17 @@ import java.net.HttpURLConnection;
 
 @AdviceTo(value = HttpURLConnectionGetResponseCodeAdvice.class, qualifier = "default", plugin = ForwardedPlugin.class)
 public class HttpURLConnectionGetResponseCodeForwardedInterceptor implements Interceptor {
+    private static final Logger log = EaseAgent.getLogger(HttpURLConnectionGetResponseCodeForwardedInterceptor.class);
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
+        Object invoker = methodInfo.getInvoker();
+        if (HttpURLConnectionUtils.isConnected(invoker)) {
+            if (log.isDebugEnabled()) {
+                log.debug("the HttpURLConnection Already connected, skip HttpURLConnectionGetResponseCodeForwardedInterceptor");
+            }
+            return;
+        }
         if (DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeForwardedInterceptor.before")) {
             HttpURLConnection httpURLConnection = (HttpURLConnection) methodInfo.getInvoker();
             context.injectForwardedHeaders(httpURLConnection::setRequestProperty);

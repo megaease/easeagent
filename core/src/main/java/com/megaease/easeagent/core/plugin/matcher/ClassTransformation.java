@@ -32,14 +32,16 @@ public class ClassTransformation implements Ordered {
     private int order;
     private Junction<TypeDescription> classMatcher;
     private ElementMatcher<ClassLoader> classloaderMatcher;
-    private Set<MethodTransformation>  methodTransformations;
+    private Set<MethodTransformation> methodTransformations;
     private boolean hasDynamicField;
+    private String typeFieldAccessor;
 
     public ClassTransformation(int order,
                                ElementMatcher<ClassLoader> classloaderMatcher,
                                Junction<TypeDescription> classMatcher,
                                Set<MethodTransformation> methodTransformations,
-                               boolean hasDynamicField) {
+                               boolean hasDynamicField,
+                               String typeFieldAccessor) {
         this.order = order;
         if (classloaderMatcher == null) {
             this.classloaderMatcher = any();
@@ -49,6 +51,7 @@ public class ClassTransformation implements Ordered {
         this.classMatcher = classMatcher;
         this.methodTransformations = methodTransformations;
         this.hasDynamicField = hasDynamicField;
+        this.typeFieldAccessor = typeFieldAccessor;
     }
 
     public static Builder builder() {
@@ -66,6 +69,8 @@ public class ClassTransformation implements Ordered {
         private ElementMatcher<ClassLoader> classloaderMatcher = null;
         private Set<MethodTransformation> methodTransformations;
         private boolean hasDynamicField;
+
+        private String typeFieldAccessor;
 
         Builder() {
         }
@@ -95,9 +100,14 @@ public class ClassTransformation implements Ordered {
             return this;
         }
 
+        public Builder typeFieldAccessor(String typeFieldAccessor) {
+            this.typeFieldAccessor = typeFieldAccessor;
+            return this;
+        }
+
         public ClassTransformation build() {
             return new ClassTransformation(order, classloaderMatcher, classMatcher,
-                methodTransformations, hasDynamicField);
+                methodTransformations, hasDynamicField, typeFieldAccessor);
         }
 
         public String toString() {

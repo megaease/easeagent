@@ -18,8 +18,6 @@
 package com.megaease.easeagent.core.plugin.registry;
 
 import com.google.common.base.Strings;
-import com.megaease.easeagent.config.ConfigUtils;
-import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderChain.Builder;
 import com.megaease.easeagent.core.plugin.interceptor.ProviderPluginDecorator;
@@ -112,6 +110,7 @@ public class PluginRegistry {
             .hasDynamicField(hasDynamicField)
             .methodTransformations(mInfo)
             .classloaderMatcher(loaderMatcher)
+            .typeFieldAccessor(points.getTypeFieldAccessor())
             .order(order).build();
     }
 

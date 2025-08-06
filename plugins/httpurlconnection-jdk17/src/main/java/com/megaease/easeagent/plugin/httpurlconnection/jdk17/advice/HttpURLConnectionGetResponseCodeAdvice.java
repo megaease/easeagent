@@ -33,6 +33,8 @@ public class HttpURLConnectionGetResponseCodeAdvice implements Points {
         .add(Points.DEFAULT_VERSION)
         .add(ConfigConst.CodeVersion.VERSION_JDK17).build();
 
+    private final String typeFieldAccessor = "connected";
+
     @Override
     public CodeVersion codeVersions() {
         return VERSIONS;
@@ -55,5 +57,10 @@ public class HttpURLConnectionGetResponseCodeAdvice implements Points {
     @Override
     public boolean isAddDynamicField() {
         return true;
+    }
+
+    @Override
+    public String getTypeFieldAccessor() {
+        return typeFieldAccessor;
     }
 }
