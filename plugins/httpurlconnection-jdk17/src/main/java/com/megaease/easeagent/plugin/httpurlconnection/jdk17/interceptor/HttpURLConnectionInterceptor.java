@@ -23,7 +23,7 @@ import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.api.trace.Span;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.httpurlconnection.jdk17.HttpURLConnectionPlugin;
-import com.megaease.easeagent.plugin.httpurlconnection.jdk17.advice.HttpURLConnectionGetResponseCodeAdvice;
+import com.megaease.easeagent.plugin.httpurlconnection.jdk17.advice.HttpURLConnectionAdvice;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 import com.megaease.easeagent.plugin.tools.trace.BaseHttpClientTracingInterceptor;
 import com.megaease.easeagent.plugin.tools.trace.HttpRequest;
@@ -37,18 +37,21 @@ import java.util.List;
 import java.util.Map;
 
 
-@AdviceTo(value = HttpURLConnectionGetResponseCodeAdvice.class, qualifier = "default", plugin = HttpURLConnectionPlugin.class)
-public class HttpURLConnectionGetResponseCodeInterceptor extends BaseHttpClientTracingInterceptor {
-    private static final Logger log = EaseAgent.getLogger(HttpURLConnectionGetResponseCodeInterceptor.class);
+@AdviceTo(value = HttpURLConnectionAdvice.class, qualifier = "default", plugin = HttpURLConnectionPlugin.class)
+public class HttpURLConnectionInterceptor extends BaseHttpClientTracingInterceptor {
+    private static final Logger log = EaseAgent.getLogger(HttpURLConnectionInterceptor.class);
 
     @Override
     public Object getProgressKey() {
-        return HttpURLConnectionGetResponseCodeInterceptor.class;
+        return HttpURLConnectionInterceptor.class;
     }
 
     @Override
     public void doBefore(MethodInfo methodInfo, Context context) {
         Object invoker = methodInfo.getInvoker();
+        if (!DynamicFieldUtils.enterKey(invoker, "HttpURLConnectionGetResponseCodeInterceptor.before")) {
+            return;
+        }
         if (HttpURLConnectionUtils.isConnected(invoker)) {
             if (log.isDebugEnabled()) {
                 log.debug("the HttpURLConnection Already connected, skip HttpURLConnectionGetResponseCodeInterceptor");
@@ -56,9 +59,7 @@ public class HttpURLConnectionGetResponseCodeInterceptor extends BaseHttpClientT
             DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeInterceptor.connected");
             return;
         }
-        if (DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeInterceptor.before")) {
-            super.doBefore(methodInfo, context);
-        }
+        super.doBefore(methodInfo, context);
     }
 
     @Override

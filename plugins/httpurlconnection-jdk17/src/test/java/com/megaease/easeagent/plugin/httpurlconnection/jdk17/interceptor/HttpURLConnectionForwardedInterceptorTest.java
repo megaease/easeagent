@@ -32,14 +32,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
-public class HttpURLConnectionGetResponseCodeForwardedInterceptorTest {
+public class HttpURLConnectionForwardedInterceptorTest {
 
     @Test
     public void before() {
         Context context = EaseAgent.getContext();
         HttpURLConnection conn = TestUtils.mockHttpURLConnection();
         MethodInfo methodInfo = TestUtils.mockMethodInfo(conn);
-        HttpURLConnectionGetResponseCodeForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpURLConnectionGetResponseCodeForwardedInterceptor();
+        HttpURLConnectionForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpURLConnectionForwardedInterceptor();
 
         httpClientDoExecuteForwardedInterceptor.before(methodInfo, context);
         assertNull(conn.getRequestProperty(TestUtils.FORWARDED_NAME));
@@ -52,7 +52,7 @@ public class HttpURLConnectionGetResponseCodeForwardedInterceptorTest {
 
     @Test
     public void getType() {
-        HttpURLConnectionGetResponseCodeForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpURLConnectionGetResponseCodeForwardedInterceptor();
+        HttpURLConnectionForwardedInterceptor httpClientDoExecuteForwardedInterceptor = new HttpURLConnectionForwardedInterceptor();
         assertEquals(ConfigConst.PluginID.FORWARDED, httpClientDoExecuteForwardedInterceptor.getType());
     }
 }

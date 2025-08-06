@@ -27,7 +27,7 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 
 import java.util.Set;
 
-public class HttpURLConnectionGetResponseCodeAdvice implements Points {
+public class HttpURLConnectionAdvice implements Points {
     private final static CodeVersion VERSIONS = CodeVersion.builder()
         .key(ConfigConst.CodeVersion.KEY_JDK)
         .add(Points.DEFAULT_VERSION)
@@ -44,13 +44,17 @@ public class HttpURLConnectionGetResponseCodeAdvice implements Points {
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
             .hasSuperClass("java.net.HttpURLConnection")
+            .or().hasInterface("java.net.URLConnection")
             .build();
     }
 
     @Override
     public Set<IMethodMatcher> getMethodMatcher() {
         return MethodMatcher.multiBuilder()
-            .match(MethodMatcher.builder().isPublic().named("getResponseCode").build())
+            .match(MethodMatcher.builder().isPublic()
+                .named("getResponseCode")
+                .or().named("connect")
+                .build())
             .build();
     }
 

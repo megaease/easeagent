@@ -24,29 +24,30 @@ import com.megaease.easeagent.plugin.api.logging.Logger;
 import com.megaease.easeagent.plugin.bridge.EaseAgent;
 import com.megaease.easeagent.plugin.enums.Order;
 import com.megaease.easeagent.plugin.httpurlconnection.jdk17.ForwardedPlugin;
-import com.megaease.easeagent.plugin.httpurlconnection.jdk17.advice.HttpURLConnectionGetResponseCodeAdvice;
+import com.megaease.easeagent.plugin.httpurlconnection.jdk17.advice.HttpURLConnectionAdvice;
 import com.megaease.easeagent.plugin.interceptor.Interceptor;
 import com.megaease.easeagent.plugin.interceptor.MethodInfo;
 
 import java.net.HttpURLConnection;
 
-@AdviceTo(value = HttpURLConnectionGetResponseCodeAdvice.class, qualifier = "default", plugin = ForwardedPlugin.class)
-public class HttpURLConnectionGetResponseCodeForwardedInterceptor implements Interceptor {
-    private static final Logger log = EaseAgent.getLogger(HttpURLConnectionGetResponseCodeForwardedInterceptor.class);
+@AdviceTo(value = HttpURLConnectionAdvice.class, qualifier = "default", plugin = ForwardedPlugin.class)
+public class HttpURLConnectionForwardedInterceptor implements Interceptor {
+    private static final Logger log = EaseAgent.getLogger(HttpURLConnectionForwardedInterceptor.class);
 
     @Override
     public void before(MethodInfo methodInfo, Context context) {
         Object invoker = methodInfo.getInvoker();
+        if (!DynamicFieldUtils.enterKey(invoker, "HttpURLConnectionGetResponseCodeForwardedInterceptor.before")) {
+            return;
+        }
         if (HttpURLConnectionUtils.isConnected(invoker)) {
             if (log.isDebugEnabled()) {
                 log.debug("the HttpURLConnection Already connected, skip HttpURLConnectionGetResponseCodeForwardedInterceptor");
             }
             return;
         }
-        if (DynamicFieldUtils.enterKey(methodInfo.getInvoker(), "HttpURLConnectionGetResponseCodeForwardedInterceptor.before")) {
-            HttpURLConnection httpURLConnection = (HttpURLConnection) methodInfo.getInvoker();
-            context.injectForwardedHeaders(httpURLConnection::setRequestProperty);
-        }
+        HttpURLConnection httpURLConnection = (HttpURLConnection) methodInfo.getInvoker();
+        context.injectForwardedHeaders(httpURLConnection::setRequestProperty);
     }
 
     @Override

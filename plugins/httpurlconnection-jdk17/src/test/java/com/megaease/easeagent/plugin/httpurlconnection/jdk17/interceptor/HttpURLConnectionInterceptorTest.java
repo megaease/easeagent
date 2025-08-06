@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 @RunWith(EaseAgentJunit4ClassRunner.class)
-public class HttpURLConnectionGetResponseCodeInterceptorTest {
+public class HttpURLConnectionInterceptorTest {
 
     @SneakyThrows
     @Test
@@ -43,7 +43,7 @@ public class HttpURLConnectionGetResponseCodeInterceptorTest {
         Context context = EaseAgent.getContext();
         MethodInfo methodInfo = TestUtils.mockMethodInfo();
 
-        HttpURLConnectionGetResponseCodeInterceptor httpURLConnectionWriteRequestsInterceptor = new HttpURLConnectionGetResponseCodeInterceptor();
+        HttpURLConnectionInterceptor httpURLConnectionWriteRequestsInterceptor = new HttpURLConnectionInterceptor();
         MockEaseAgent.cleanLastSpan();
         httpURLConnectionWriteRequestsInterceptor.before(methodInfo, context);
         httpURLConnectionWriteRequestsInterceptor.after(methodInfo, context);
@@ -78,7 +78,7 @@ public class HttpURLConnectionGetResponseCodeInterceptorTest {
         Context context = EaseAgent.getContext();
         MethodInfo methodInfo = TestUtils.mockMethodInfo();
 
-        HttpURLConnectionGetResponseCodeInterceptor httpClientDoExecuteInterceptor = new HttpURLConnectionGetResponseCodeInterceptor();
+        HttpURLConnectionInterceptor httpClientDoExecuteInterceptor = new HttpURLConnectionInterceptor();
         HttpRequest request = httpClientDoExecuteInterceptor.getRequest(methodInfo, context);
         assertEquals(Span.Kind.CLIENT, request.kind());
         assertEquals("GET", request.method());
@@ -90,7 +90,7 @@ public class HttpURLConnectionGetResponseCodeInterceptorTest {
         Context context = EaseAgent.getContext();
         MethodInfo methodInfo = TestUtils.mockMethodInfo();
 
-        HttpURLConnectionGetResponseCodeInterceptor httpClientDoExecuteInterceptor = new HttpURLConnectionGetResponseCodeInterceptor();
+        HttpURLConnectionInterceptor httpClientDoExecuteInterceptor = new HttpURLConnectionInterceptor();
 
         HttpResponse httpResponse = httpClientDoExecuteInterceptor.getResponse(methodInfo, context);
         assertEquals(200, httpResponse.statusCode());
