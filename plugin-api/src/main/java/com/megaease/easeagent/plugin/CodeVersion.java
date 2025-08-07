@@ -4,6 +4,22 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * code of versions for control whether to load.
+ * <p>
+ * If CodeVersion.builder().build() is returned, it means it will load forever
+ * <p>
+ * The configuration format is as follows: runtime.code.version.points.{key}={version}
+ * <p>
+ * If CodeVersion.builder().key("jdk").add("default").build(), it means it will load by default,
+ * but not load by specified like runtime.code.version.points.jdk=jdk10
+ * <p>
+ * When multiple versions are specified, it means that it can be loaded by multiple versions:
+ * CodeVersion.builder().key("jdk").add("jdk10").add("jdk11").build()
+ * The following two configurations are load:
+ * runtime.code.version.points.jdk=jdk10
+ * runtime.code.version.points.jdk=jdk11
+ */
 public class CodeVersion {
     private final String key;
     private final Set<String> versions;

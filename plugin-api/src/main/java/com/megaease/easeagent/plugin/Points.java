@@ -38,13 +38,14 @@ public interface Points {
 
     /**
      * eg.
-     * domain=observability, namespace=feignClient, versions=new String[]{"spring_boot_2_x", "default"}
-     * do not set or set the following value to load: plugin.observability.httpServlet.version=spring_boot_2_x
+     * versions=CodeVersion.builder().key("jdk").add("default").add("jdk8").build()
+     * do not set or set the following value to load: runtime.code.version.points.jdk=jdk8
      * <p>
-     * when set for not load: plugin.observability.httpServlet.code.version=spring_boot_3_x
-     * but load from Points: domain=observability, namespace=feignClient, versions=[spring_boot_3_x]
+     * when set for not load: runtime.code.version.points.jdk=jdk17
+     * but load from Points: versions=CodeVersion.builder().key("jdk").add("jdk17").build()
      *
-     * @return String[] of versions for control whether to load, If EMPTY_VERSIONS is returned, it means it will load forever
+     * @see CodeVersion
+     * @return CodeVersion code of versions for control whether to load, If EMPTY_VERSIONS is returned, it means it will load forever
      */
     default CodeVersion codeVersions() {
         return EMPTY_VERSION;
@@ -99,6 +100,12 @@ public interface Points {
         return false;
     }
 
+    /**
+     * When a non-null string is returned, the converter will add an accessor to get the member variables inside the class.
+     * Get method: value = TypeFieldGetter.get(instance)
+     * @see com.megaease.easeagent.plugin.field.TypeFieldGetter#get(Object)
+     * @return String field name
+     */
     default String getTypeFieldAccessor() {
         return null;
     }

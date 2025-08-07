@@ -4,6 +4,7 @@
     - [Architecture](#architecture)
   - [Plugin Structure](#plugin-structure)
     - [Points](#points)
+      - [Code Version](#code-version)
     - [Interceptor](#interceptor)
       - [Plugin Orchestration](#plugin-orchestration)
       - [AdviceTo Annotation](#adviceto-annotation)
@@ -73,6 +74,23 @@ Decoupled from **ByteBuddy**, the EaseAgent "ClassMatcher" and "MethodMatcher" w
 The DSL of `ClassMatcher` and `MethodMatcher` is described in [Matcher DSL](./matcher-DSL.md)
 ```java
 public interface Points {
+    CodeVersion EMPTY_VERSION = CodeVersion.builder().build();
+
+
+    /**
+     * eg.
+     * versions=CodeVersion.builder().key("jdk").add("default").add("jdk8").build()
+     * do not set or set the following value to load: runtime.code.version.points.jdk=jdk8
+     * <p>
+     * when set for not load: runtime.code.version.points.jdk=jdk17
+     * but load from Points: versions=CodeVersion.builder().key("jdk").add("jdk17").build()
+     * @see com.megaease.easeagent.plugin.CodeVersion
+     * @return CodeVersion code of versions for control whether to load, If EMPTY_VERSIONS is returned, it means it will load forever
+     */
+    default CodeVersion codeVersions() {
+        return EMPTY_VERSION;
+    }
+    
     /**
      * return the defined class matcher matching a class or a group of classes
      * eg.
@@ -122,8 +140,37 @@ public interface Points {
     default boolean isAddDynamicField() {
         return false;
     }
+
+    /**
+     * When a non-null string is returned, the converter will add an accessor to get the member variables inside the class.
+     * Get method: value = TypeFieldGetter.get(instance)
+     * @see com.megaease.easeagent.plugin.field.TypeFieldGetter#get(Object)
+     * @return String field name
+     */
+    default String getTypeFieldAccessor() {
+        return null;
+    }
 }
 ```
+
+#### code-version
+The same function may be implemented differently in different versions of the runtime environment, which may cause errors in the Interceptor runtime, such as reporting ClassNotFoundException.
+
+In this case, different versions of Interceptor should use different `Points`.
+
+At this time, just implement the codeVersions() method of `Points`, return different version numbers, and specify a specific version number in the configuration at runtime.
+
+The configuration rules are as follows:
+
+* If `CodeVersion.builder().build()` is returned, it means it will load forever.
+* The configuration format is as follows: `runtime.code.version.points.{key}={version}`
+* There is a special string `default` in version, please do not occupy it.
+  * When the returned version has this `default`, it means that if there is no configuration for this key, Points will be used by default.
+* eg.
+  * CodeVersion.builder().key("jdk").add("default").build(), it means it will load by default. but not load by specified like `runtime.code.version.points.jdk=jdk10`
+  * CodeVersion.builder().key("jdk").add("jdk10").add("jdk11").build()
+    * When multiple versions are specified, it means that it can be loaded by multiple versions:
+    * `runtime.code.version.points.jdk=jdk10` or `runtime.code.version.points.jdk=jdk11`
 
 ### Interceptor
 `Interceptor` is the core of implementing specific enhancements.
