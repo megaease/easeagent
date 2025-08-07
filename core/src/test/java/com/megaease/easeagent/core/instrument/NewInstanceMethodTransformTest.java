@@ -95,7 +95,7 @@ public class NewInstanceMethodTransformTest extends TransformTestBase {
 
         ClassFileTransformer classFileTransformer = builder
             .type(hasSuperType(named(FooBase.class.getName())), ElementMatchers.is(classLoader))
-            .transform(PluginLoader.compound(true, transformations))
+            .transform(PluginLoader.compound(true, transformations, null))
             .installOnByteBuddyAgent();
         try {
             Class<?> type = classLoader.loadClass(Foo.class.getName());

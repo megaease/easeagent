@@ -89,8 +89,8 @@ public class OrchestrationTransformTest extends TransformTestBase {
 
         ClassFileTransformer classFileTransformer = builder
             .type(hasSuperType(named(FooBase.class.getName())), ElementMatchers.is(classLoader))
-            .transform(PluginLoader.compound(true, transformations))
-            .transform(PluginLoader.compound(true, secTransformations))
+            .transform(PluginLoader.compound(true, transformations, null))
+            .transform(PluginLoader.compound(true, secTransformations, null))
             .installOnByteBuddyAgent();
         try {
             Class<?> type = classLoader.loadClass(Foo.class.getName());

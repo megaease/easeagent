@@ -95,12 +95,12 @@ public class ClinitMethodTransformTest extends TransformTestBase {
 
         ClassFileTransformer classFileTransformer = builder
             .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
-            .transform(PluginLoader.compound(false, transformations))
+            .transform(PluginLoader.compound(false, transformations, null))
             .installOnByteBuddyAgent();
 
         try {
             Class<?> type = classLoader.loadClass(Foo.class.getName());
-            AgentFieldReflectAccessor.setStaticFieldValue(type, "clazzInitString", BAR+QUX);
+            AgentFieldReflectAccessor.setStaticFieldValue(type, "clazzInitString", BAR + QUX);
             testString = AgentFieldReflectAccessor.getStaticFieldValue(type, "clazzInitString");
             assertEquals(BAR + QUX, testString);
             // wait to finish

@@ -89,7 +89,7 @@ public class StaticMethodTransformTest extends TransformTestBase {
 
         ClassFileTransformer classFileTransformer = builder
             .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
-            .transform(PluginLoader.compound(false, transformations))
+            .transform(PluginLoader.compound(false, transformations, null))
             .installOnByteBuddyAgent();
 
         try {
@@ -117,7 +117,7 @@ public class StaticMethodTransformTest extends TransformTestBase {
 
         ClassFileTransformer classFileTransformer = builder
             .type(ElementMatchers.is(Foo.class), ElementMatchers.is(classLoader))
-            .transform(PluginLoader.compound(false, transformations))
+            .transform(PluginLoader.compound(false, transformations, null))
             .installOnByteBuddyAgent();
 
         try {
@@ -132,9 +132,11 @@ public class StaticMethodTransformTest extends TransformTestBase {
     @SuppressWarnings("unused")
     public static class Foo {
         static String clazzInitString = FOO;
+
         public static String fooStatic(String a) {
             return a;
         }
+
         public String foo(String a) {
             return a;
         }
