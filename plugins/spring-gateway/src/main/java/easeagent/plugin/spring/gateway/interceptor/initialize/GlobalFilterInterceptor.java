@@ -30,14 +30,10 @@ import java.util.List;
 
 @AdviceTo(value = InitGlobalFilterAdvice.class, plugin = SpringGatewayPlugin.class)
 public class GlobalFilterInterceptor implements Interceptor {
-    private static boolean loadAgentFilter = false;
 
     @Override
     @SuppressWarnings("unchecked")
     public void before(MethodInfo methodInfo, Context context) {
-        if (loadAgentFilter) {
-            return;
-        }
         List<GlobalFilter> list = null;
         switch (methodInfo.getMethod()) {
             case "filteringWebHandler":
@@ -48,20 +44,28 @@ public class GlobalFilterInterceptor implements Interceptor {
                 list = (List<GlobalFilter>) methodInfo.getArgs()[1];
                 break;
         }
-        if (list == null) {
+        if (list == null || hasAgentFilter(list)) {
             return;
         }
-        loadAgentFilter = true;
         list.add(0, new AgentGlobalFilter());
+    }
+
+    private boolean hasAgentFilter(List<GlobalFilter> list) {
+        for (GlobalFilter globalFilter : list) {
+            if (globalFilter instanceof AgentGlobalFilter) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public String getType() {
-        return Order.TRACING.getName();
+        return Order.INIT.getName();
     }
 
     @Override
     public int order() {
-        return Order.TRACING_INIT.getOrder();
+        return Order.INIT.getOrder();
     }
 }

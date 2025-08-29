@@ -21,7 +21,7 @@
     <parent>
         <artifactId>easeagent</artifactId>
         <groupId>com.megaease.easeagent</groupId>
-        <version>2.2.9</version>
+        <version>2.3.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -38,23 +38,6 @@
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${version.spring-boot}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>com.megaease.easeagent</groupId>
             <artifactId>metrics</artifactId>
@@ -209,6 +192,7 @@
                             <Premain-Class>com.megaease.easeagent.Main</Premain-Class>
                             <Bootstrap-Class>com.megaease.easeagent.StartBootstrap</Bootstrap-Class>
                             <Logging-Property>log4j.configurationFile</Logging-Property>
+                            <Easeagent-Version>${version}</Easeagent-Version>
                         </manifestEntries>
                     </archive>
                     <archiverConfig>

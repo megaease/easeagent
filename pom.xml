@@ -23,7 +23,7 @@
     <groupId>com.megaease.easeagent</groupId>
     <artifactId>easeagent</artifactId>
     <packaging>pom</packaging>
-    <version>2.2.9</version>
+    <version>2.3.0</version>
     <modules>
         <module>plugin-api</module>
         <module>log4j2</module>
@@ -68,12 +68,6 @@
         <version.disruptor>3.4.2</version.disruptor>
         <version.commons-lang3>3.11</version.commons-lang3>
         <version.commons-codec>1.15</version.commons-codec>
-        <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
-        <version.spring>5.3.18</version.spring>
-        <version.spring-kafka>2.3.13.RELEASE</version.spring-kafka>
-        <version.spring.cloud>Hoxton.SR5</version.spring.cloud>
-        <!--        <version.spring-cloud-openfeign>2.2.8.RELEASE</version.spring-cloud-openfeign>-->
-        <!--        <version.spring-cloud-starter-gateway>2.2.8.RELEASE</version.spring-cloud-starter-gateway>-->
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
         <version.log4j>2.17.1</version.log4j>
         <version.kafka>2.8.2</version.kafka>
@@ -177,13 +171,6 @@
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
                 <version>2020.0.4</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${version.spring.cloud}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -346,18 +333,6 @@
                 <version>${version.metrics}</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework.retry</groupId>
-                <artifactId>spring-retry</artifactId>
-                <version>1.2.5.RELEASE</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>spring-core</artifactId>
-                        <groupId>org.springframework</groupId>
-                    </exclusion>
-                </exclusions>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${version.jedis}</version>
@@ -376,36 +351,6 @@
                 <groupId>io.zipkin.brave</groupId>
                 <artifactId>brave-instrumentation-rpc</artifactId>
                 <version>${version.brave}</version>
-            </dependency>
-            <!--
-            <dependency>
-                <groupId>com.rabbitmq</groupId>
-                <artifactId>amqp-client</artifactId>
-                <version>${version.amqp-client}</version>
-            </dependency>
-            -->
-            <dependency>
-                <groupId>org.springframework.kafka</groupId>
-                <artifactId>spring-kafka</artifactId>
-                <version>${version.spring-kafka}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!--
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-amqp</artifactId>
-                <version>${version.spring-boot}</version>
-            </dependency>
-            -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webflux</artifactId>
-                <version>${version.spring}</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>

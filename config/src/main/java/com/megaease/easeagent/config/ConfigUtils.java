@@ -32,7 +32,8 @@ import java.util.stream.Collectors;
 import static com.megaease.easeagent.plugin.api.config.ConfigConst.*;
 
 public class ConfigUtils {
-    private ConfigUtils() {}
+    private ConfigUtils() {
+    }
 
     public static <R> void bindProp(String name, Config configs, BiFunction<Config, String, R> func, Consumer<R> consumer, R def) {
         Runnable process = () -> {
@@ -134,12 +135,16 @@ public class ConfigUtils {
         return String.format(PLUGIN_FORMAT, domain, namespace, id, property);
     }
 
+    public static String buildCodeVersionKey(String key) {
+        return RUNTIME_CODE_VERSION_POINTS_PREFIX + key;
+    }
+
     /**
      * extract config item with a fromPrefix to and convert the prefix to 'toPrefix' for configuration Compatibility
      *
-     * @param cfg config source map
+     * @param cfg        config source map
      * @param fromPrefix from
-     * @param toPrefix to
+     * @param toPrefix   to
      * @return Extracted and converted KV map
      */
     public static Map<String, String> extractAndConvertPrefix(Map<String, String> cfg, String fromPrefix, String toPrefix) {
@@ -162,8 +167,9 @@ public class ConfigUtils {
 
     /**
      * Extract config items from config by prefix
-     * @param config  config
-     * @param prefix  prefix
+     *
+     * @param config config
+     * @param prefix prefix
      * @return Extracted KV
      */
     public static Map<String, String> extractByPrefix(Config config, String prefix) {

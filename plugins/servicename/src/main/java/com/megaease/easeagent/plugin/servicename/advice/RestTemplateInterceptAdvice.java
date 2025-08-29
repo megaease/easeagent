@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.servicename.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -28,6 +29,10 @@ import java.util.Set;
 import static com.megaease.easeagent.plugin.tools.matcher.ClassMatcherUtils.name;
 
 public class RestTemplateInterceptAdvice implements Points {
+    @Override
+    public CodeVersion codeVersions() {
+        return Const.VERSIONS;
+    }
 
     //.type(namedOneOf(RetryLoadBalancerInterceptor, AsyncLoadBalancerInterceptor, LoadBalancerInterceptor))//
     //            .transform(restTemplateIntercept(named("intercept").and(takesArguments(3))

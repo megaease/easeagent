@@ -19,6 +19,7 @@ package com.megaease.easeagent.plugin.api.config;
 
 public interface ConfigConst {
     String AGENT_JAR_PATH = "easeagent.jar.path";
+    String RUNTIME_CODE_VERSION_POINTS_PREFIX = "runtime.code.version.points.";
     String PLUGIN = "plugin";
     String PLUGIN_GLOBAL = "global";
     String DELIMITER = ".";
@@ -26,6 +27,8 @@ public interface ConfigConst {
     String PLUGIN_FORMAT = join(PLUGIN, "%s", "%s", "%s", "%s");//plugin.<Domain>.<Namespace>.<ServiceId>.<Properties>
     String SERVICE_NAME = "name";
     String SYSTEM_NAME = "system";
+
+    String VERSION_NAME = "version";
 
     // domain
     String OBSERVABILITY = "observability";
@@ -136,6 +139,8 @@ public interface ConfigConst {
         String ASYNC = "async";
         String ELASTICSEARCH = "elasticsearch";
         String HTTP_SERVLET = "httpServlet";
+
+        String TOMCAT = "tomcat";
         String JDBC = "jdbc";
         String JDBC_CONNECTION = "jdbcConnection";
         String JDBC_STATEMENT = "jdbcStatement";
@@ -169,7 +174,19 @@ public interface ConfigConst {
         String TRACING = "tracing";
         String METRIC = "metric";
         String LOG = "log";
+        String INIT = "init";
         String REDIRECT = "redirect";
         String FORWARDED = "forwarded";
     }
+
+    interface CodeVersion{
+        String KEY_JDK = "jdk";
+        String KEY_SPRING_BOOT = "spring-boot";
+
+        String VERSION_JDK8 = "jdk8";
+        String VERSION_JDK17 = "jdk17";
+        String VERSION_SPRING_BOOT2 = "2.x.x";
+        String VERSION_SPRING_BOOT3 = "3.x.x";
+    }
+
 }

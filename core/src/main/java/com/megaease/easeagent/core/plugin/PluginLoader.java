@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.core.plugin;
 
+import com.megaease.easeagent.config.ConfigUtils;
 import com.megaease.easeagent.config.Configs;
 import com.megaease.easeagent.core.plugin.matcher.ClassTransformation;
 import com.megaease.easeagent.core.plugin.matcher.MethodTransformation;
@@ -24,13 +25,16 @@ import com.megaease.easeagent.core.plugin.registry.PluginRegistry;
 import com.megaease.easeagent.core.plugin.transformer.CompoundPluginTransformer;
 import com.megaease.easeagent.core.plugin.transformer.DynamicFieldTransformer;
 import com.megaease.easeagent.core.plugin.transformer.ForAdviceTransformer;
+import com.megaease.easeagent.core.plugin.transformer.TypeFieldTransformer;
 import com.megaease.easeagent.log4j2.Logger;
 import com.megaease.easeagent.log4j2.LoggerFactory;
 import com.megaease.easeagent.plugin.AgentPlugin;
-import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Ordered;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.field.AgentDynamicFieldAccessor;
+import com.megaease.easeagent.plugin.interceptor.InterceptorProvider;
+import com.megaease.easeagent.plugin.utils.common.StringUtils;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 import java.util.*;
@@ -46,19 +50,27 @@ public class PluginLoader {
 
     public static AgentBuilder load(AgentBuilder ab, Configs conf) {
         pluginLoad();
+        pointsLoad(conf);
         providerLoad();
-        Set<ClassTransformation> sortedTransformations = pointsLoad();
+        Set<ClassTransformation> sortedTransformations = classTransformationLoad();
 
         for (ClassTransformation transformation : sortedTransformations) {
             ab = ab.type(transformation.getClassMatcher(), transformation.getClassloaderMatcher())
-                .transform(compound(transformation.isHasDynamicField(), transformation.getMethodTransformations()));
+                .transform(compound(transformation.isHasDynamicField(), transformation.getMethodTransformations(), transformation.getTypeFieldAccessor()));
         }
         return ab;
     }
 
     public static void providerLoad() {
         for (InterceptorProvider provider : BaseLoader.load(InterceptorProvider.class)) {
-            log.debug("loading provider:{}", provider.getClass().getName());
+            String pointsClassName = PluginRegistry.getPointsClassName(provider.getAdviceTo());
+            Points points = PluginRegistry.getPoints(pointsClassName);
+            if (points == null) {
+                log.debug("Unload provider:{}, can not found Points<{}>", provider.getClass().getName(), pointsClassName);
+                continue;
+            } else {
+                log.debug("Loading provider:{}", provider.getClass().getName());
+            }
 
             try {
                 log.debug("provider for:{} at {}",
@@ -73,14 +85,14 @@ public class PluginLoader {
         }
     }
 
-    public static Set<ClassTransformation> pointsLoad() {
-        List<Points> points = BaseLoader.load(Points.class);
+    public static Set<ClassTransformation> classTransformationLoad() {
+        Collection<Points> points = PluginRegistry.getPoints();
         return points.stream().map(point -> {
                 try {
-                    return PluginRegistry.register(point);
+                    return PluginRegistry.registerClassTransformation(point);
                 } catch (Exception e) {
                     log.error(
-                        "Unable to load points in [class {}]",
+                        "Unable to load classTransformation in [class {}]",
                         point.getClass().getName(),
                         e);
                     return null;
@@ -111,12 +123,54 @@ public class PluginLoader {
         }
     }
 
+    public static void pointsLoad(Configs conf) {
+        for (Points points : BaseLoader.load(Points.class)) {
+            if (!isCodeVersion(points, conf)) {
+                continue;
+            } else {
+                log.info("Loading points [class Points<{}>]", points.getClass().getName());
+            }
+
+            try {
+                PluginRegistry.register(points);
+            } catch (Exception | LinkageError e) {
+                log.error(
+                    "Unable to load extension [class {}]",
+                    points.getClass().getName(),
+                    e);
+            }
+        }
+    }
+
+    public static boolean isCodeVersion(Points points, Configs conf) {
+        CodeVersion codeVersion = points.codeVersions();
+        if (codeVersion.isEmpty()) {
+            return true;
+        }
+        String versionKey = ConfigUtils.buildCodeVersionKey(codeVersion.getKey());
+        Set<String> versions = new HashSet<>(conf.getStringList(versionKey));
+        if (versions.isEmpty()) {
+            versions = Points.DEFAULT_VERSIONS;
+        }
+        Set<String> pointVersions = codeVersion.getVersions();
+        for (String version : versions) {
+            if (pointVersions.contains(version)) {
+                return true;
+            }
+        }
+        log.info("Unload points [class Points<{}>], the config [{}={}] is not in Points.codeVersions()=[{}:{}]",
+            points.getClass().getCanonicalName(), versionKey, String.join(",", versions),
+            codeVersion.getKey(), String.join(",", codeVersion.getVersions()));
+        return false;
+    }
+
+
     /**
      * @param methodTransformations method matchers under a special classMatcher
      * @return transform
      */
     public static AgentBuilder.Transformer compound(boolean hasDynamicField,
-                                                    Iterable<MethodTransformation> methodTransformations) {
+                                                    Iterable<MethodTransformation> methodTransformations, String typeFieldAccessor) {
         List<AgentBuilder.Transformer> agentTransformers = StreamSupport
             .stream(methodTransformations.spliterator(), false)
             .map(ForAdviceTransformer::new)
@@ -124,6 +178,10 @@ public class PluginLoader {
 
         if (hasDynamicField) {
             agentTransformers.add(new DynamicFieldTransformer(AgentDynamicFieldAccessor.DYNAMIC_FIELD_NAME));
+        }
+
+        if (StringUtils.hasText(typeFieldAccessor)) {
+            agentTransformers.add(new TypeFieldTransformer(typeFieldAccessor));
         }
 
         return new CompoundPluginTransformer(agentTransformers);

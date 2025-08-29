@@ -200,7 +200,7 @@ public class Bootstrap {
             .with(AgentBuilder.LocationStrategy.ForClassLoader.STRONG
                 .withFallbackTo(ClassFileLocator.ForClassLoader.ofSystemLoader()));
         AgentBuilder.Ignored ignore = builder.ignore(isSynthetic())
-            .or(nameStartsWith("sun."))
+            .or(nameStartsWith("sun.").and(not(nameStartsWith("sun.net.www.protocol.http")) ))
             .or(nameStartsWith("com.sun."))
             .or(nameStartsWith("brave."))
             .or(nameStartsWith("zipkin2."))

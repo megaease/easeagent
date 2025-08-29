@@ -35,20 +35,26 @@ public class ServletUtils {
     public static final String START_TIME = ServletUtils.class.getName() + "$StartTime";
     public static final String PROGRESS_CONTEXT = DoFilterTraceInterceptor.class.getName() + ".RequestContext";
     public static final String HANDLER_MAPPING_CLASS = "org.springframework.web.servlet.HandlerMapping";
+    public static final String BEST_MATCHING_PATTERN_ATTRIBUTE_FIELD_NAME = "BEST_MATCHING_PATTERN_ATTRIBUTE";
     public static final String BEST_MATCHING_PATTERN_ATTRIBUTE;
 
     static {
         String pattern = null;
-        if (ClassUtils.hasClass(HANDLER_MAPPING_CLASS)) {
-            pattern = SpringWebUtils.getBestMatchingPatternAttribute();
+        Object field = ClassUtils.getStaticField(HANDLER_MAPPING_CLASS, BEST_MATCHING_PATTERN_ATTRIBUTE_FIELD_NAME);
+        if (field == null) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("class<{}>.{} not found ", HANDLER_MAPPING_CLASS, BEST_MATCHING_PATTERN_ATTRIBUTE_FIELD_NAME);
+            }
+            pattern = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
+        } else if (field instanceof String) {
+            pattern = (String) field;
         } else {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("class<{}> not found ", HANDLER_MAPPING_CLASS);
+                LOGGER.debug("class<{}>.{} is not String", HANDLER_MAPPING_CLASS, BEST_MATCHING_PATTERN_ATTRIBUTE_FIELD_NAME);
             }
             pattern = "org.springframework.web.servlet.HandlerMapping.bestMatchingPattern";
         }
         BEST_MATCHING_PATTERN_ATTRIBUTE = pattern;
-
     }
 
     public static String matchUrlBySpringWeb(HttpServletRequest request) {

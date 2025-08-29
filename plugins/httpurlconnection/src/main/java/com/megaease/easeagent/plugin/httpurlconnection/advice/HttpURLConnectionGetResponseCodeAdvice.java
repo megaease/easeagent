@@ -17,7 +17,9 @@
 
 package com.megaease.easeagent.plugin.httpurlconnection.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
 import com.megaease.easeagent.plugin.matcher.ClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -26,6 +28,15 @@ import com.megaease.easeagent.plugin.matcher.MethodMatcher;
 import java.util.Set;
 
 public class HttpURLConnectionGetResponseCodeAdvice implements Points {
+    private final static CodeVersion VERSIONS = CodeVersion.builder()
+        .key(ConfigConst.CodeVersion.KEY_JDK)
+        .add(Points.DEFAULT_VERSION)
+        .add(ConfigConst.CodeVersion.VERSION_JDK8).build();
+
+    @Override
+    public CodeVersion codeVersions() {
+        return VERSIONS;
+    }
 
     @Override
     public IClassMatcher getClassMatcher() {

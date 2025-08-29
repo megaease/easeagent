@@ -18,26 +18,17 @@
 package com.megaease.easeagent;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
-import org.springframework.boot.loader.LaunchedURLClassLoader;
-import org.springframework.boot.loader.archive.Archive;
-import org.springframework.boot.loader.archive.JarFileArchive;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
@@ -52,30 +43,31 @@ public class Main {
     private static final String EASEAGENT_LOG_CONF_ENV_KEY = "EASEAGENT_LOG_CONF";
     private static final String DEFAULT_AGENT_LOG_CONF = "easeagent-log4j2.xml";
     private static ClassLoader loader;
+    private static JarCache JAR_CACHE;
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
         File jar = getArchiveFileContains();
-        final JarFileArchive archive = new JarFileArchive(jar);
+        JAR_CACHE = JarCache.build(jar);
 
         // custom classloader
-        ArrayList<URL> urls = nestArchiveUrls(archive, LIB);
-        urls.addAll(nestArchiveUrls(archive, PLUGINS));
-        urls.addAll(nestArchiveUrls(archive, SLf4J2));
+        ArrayList<URL> urls = JAR_CACHE.nestJarUrls(LIB);
+        urls.addAll(JAR_CACHE.nestJarUrls(PLUGINS));
+        urls.addAll(JAR_CACHE.nestJarUrls(SLf4J2));
         File p = new File(jar.getParent() + File.separator + "plugins");
         if (p.exists()) {
             urls.addAll(directoryPluginUrls(p));
         }
 
-        loader = new CompoundableClassLoader(urls.toArray(new URL[0]));
+        loader = buildClassLoader(urls.toArray(new URL[0]));
 
         // install bootstrap jar
-        final ArrayList<URL> bootUrls = nestArchiveUrls(archive, BOOTSTRAP);
+        final ArrayList<JarFile> bootUrls = JAR_CACHE.nestJarFiles(BOOTSTRAP);
         bootUrls.forEach(url -> installBootstrapJar(url, inst));
 
-        final Attributes attributes = archive.getManifest().getMainAttributes();
+        final Attributes attributes = JAR_CACHE.getManifest().getMainAttributes();
         final String loggingProperty = attributes.getValue(LOGGING_PROPERTY);
         final String bootstrap = attributes.getValue("Bootstrap-Class");
-        initEaseAgentSlf4j2Dir(archive, loader);
+        initEaseAgentSlf4j2Dir(JAR_CACHE, loader);
 
         switchLoggingProperty(loader, loggingProperty, () -> {
             initAgentSlf4jMDC(loader);
@@ -99,17 +91,12 @@ public class Main {
         }
     }
 
-    private static void installBootstrapJar(URL url, Instrumentation inst) {
-        try {
-            JarFile file = JarUtils.getNestedJarFile(url);
-            inst.appendToBootstrapClassLoaderSearch(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private static void installBootstrapJar(JarFile file, Instrumentation inst) {
+        inst.appendToBootstrapClassLoaderSearch(file);
     }
 
-    private static void initEaseAgentSlf4j2Dir(JarFileArchive archive, final ClassLoader bootstrapLoader) throws Exception {
-        final URL[] slf4j2Urls = nestArchiveUrls(archive, SLf4J2).toArray(new URL[0]);
+    private static void initEaseAgentSlf4j2Dir(JarCache archive, final ClassLoader bootstrapLoader) throws Exception {
+        final URL[] slf4j2Urls = archive.nestJarUrls(SLf4J2).toArray(new URL[0]);
         final ClassLoader slf4j2Loader = new URLClassLoader(slf4j2Urls, null);
         Class<?> classLoaderSupplier = bootstrapLoader.loadClass("com.megaease.easeagent.log4j2.FinalClassloaderSupplier");
         Field field = classLoaderSupplier.getDeclaredField("CLASSLOADER");
@@ -161,25 +148,6 @@ public class Main {
         return logConfigPath;
     }
 
-    private static ArrayList<URL> nestArchiveUrls(JarFileArchive archive, String prefix) throws IOException {
-        ArrayList<Archive> archives = Lists.newArrayList(
-            archive.getNestedArchives(entry -> !entry.isDirectory() && entry.getName().startsWith(prefix),
-                entry -> true
-            ));
-
-        final ArrayList<URL> urls = new ArrayList<>(archives.size());
-
-        archives.forEach(item -> {
-            try {
-                urls.add(item.getUrl());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-        });
-
-        return urls;
-    }
-
     private static ArrayList<URL> directoryPluginUrls(File directory) {
         if (!directory.isDirectory()) {
             return new ArrayList<>();
@@ -223,63 +191,8 @@ public class Main {
         return root;
     }
 
-    public static class CompoundableClassLoader extends LaunchedURLClassLoader {
-        private final Set<WeakReference<ClassLoader>> externals = new CopyOnWriteArraySet<>();
-
-        CompoundableClassLoader(URL[] urls) {
-            super(urls, Main.BOOTSTRAP_CLASS_LOADER);
-        }
-
-        @SuppressWarnings("unused")
-        public void add(ClassLoader cl) {
-            if (cl != null && !Objects.equals(cl, this)) {
-                externals.add(new WeakReference<>(cl));
-            }
-        }
-
-        @Override
-        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-            try {
-                return super.loadClass(name, resolve);
-            } catch (ClassNotFoundException e) {
-                for (WeakReference<ClassLoader> external : externals) {
-                    try {
-                        ClassLoader cl = external.get();
-                        if (cl == null) {
-                            continue;
-                        }
-                        final Class<?> aClass = cl.loadClass(name);
-                        if (resolve) {
-                            resolveClass(aClass);
-                        }
-                        return aClass;
-                    } catch (ClassNotFoundException ignored) {
-                        // ignored
-                    }
-                }
-
-                throw e;
-            }
-        }
-
-        @Override
-        public URL findResource(String name) {
-            URL url = super.findResource(name);
-            if (url == null) {
-                for (WeakReference<ClassLoader> external : externals) {
-                    try {
-                        ClassLoader cl = external.get();
-                        url = cl.getResource(name);
-                        if (url != null) {
-                            return url;
-                        }
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
-                }
-            }
-            return url;
-        }
+    static ClassLoader buildClassLoader(URL[] urls) {
+        return new EaseAgentClassLoader(urls, BOOTSTRAP_CLASS_LOADER);
     }
 
     @SneakyThrows

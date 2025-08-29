@@ -17,6 +17,7 @@
 
 package com.megaease.easeagent.plugin.servicename.advice;
 
+import com.megaease.easeagent.plugin.CodeVersion;
 import com.megaease.easeagent.plugin.Points;
 import com.megaease.easeagent.plugin.matcher.IClassMatcher;
 import com.megaease.easeagent.plugin.matcher.IMethodMatcher;
@@ -29,6 +30,11 @@ import static com.megaease.easeagent.plugin.tools.matcher.ClassMatcherUtils.name
 
 // OpenFeign
 public class LoadBalancerFeignClientAdvice implements Points {
+    @Override
+    public CodeVersion codeVersions() {
+        return Const.VERSIONS;
+    }
+
     //// OpenFeign
     //            .type(named(LoadBalancerFeignClient))
     //            .transform(loadBalancerFeignClientExecute(named("getClientConfig")

@@ -5,6 +5,10 @@
   - [Configuration](#configuration)
     - [Getting the configuration file](#getting-the-configuration-file)
     - [Global Configuration](#global-configuration)
+      - [Agent Configuration](#agent-configuration)
+      - [Runtime Code Version Configuration](#runtime-code-version-configuration)
+        - [Jdk](#jdk)
+        - [Spring Boot](#spring-boot)
       - [Internal HTTP Server](#internal-http-server)
       - [Output Data Server: Kafka and HTTP/Zipkin Server](#output-data-server-kafka-and-httpzipkin-server)
       - [Progress Configuration](#progress-configuration)
@@ -97,6 +101,42 @@ $ java "-javaagent:${EASE_AGENT_PATH}/easeagent.jar" -jar user-app.jar
 |-------------------|------------------------|------------------------|-------------------------------|
 | `easeagent.name`  | `EASEAGENT_NAME`       | `name`                 | Specify logical service name. |
 | `easeagent.system` | `EASEAGENT_SYSTEM`     | `system`               | Specify logical service system. |
+
+#### Runtime Code Version Configuration
+
+##### jdk
+
+* `System property`: `runtime.code.version.points.jdk`
+* `version`: `jdk8`,`jdk17`
+* `description`: specify the JDK version of the running environment
+* `plugins`:
+  * httpurlconnection: `default`,`jdk8` 
+  * httpurlconnection-jdk17: `jdk17`
+  * tomcat-jdk17: `jdk17`
+* eg. `runtime.code.version.points.jdk=jdk17`
+
+##### spring-boot
+
+* `System property`: `runtime.code.version.points.spring-boot`
+* `version`: `2.x.x`,`3.x.x`
+* `description`: specify the spring-boot version of the running environment
+* `plugins`:
+    * servicename: `default`,`2.x.x`
+    * spring-gateway: `default`,`2.x.x`
+    * springweb: `default`,`2.x.x`
+    * spring-boot-gateway-3.5.3: `3.x.x`
+    * spring-boot-rest-template-3.5.3: `3.x.x`
+    * spring-boot-servicename-3.5.3: `3.x.x`
+* eg. `runtime.code.version.points.spring-boot=3.x.x`
+
+###### about spring boot 3.x.x
+When your code uses Spring Boot 3.x.x, it means that your code depends on JDK 17+ and Spring Boot 3+.
+
+In this case, you need to add two configurations for the agent to take effect:
+```properties
+runtime.code.version.points.jdk=jdk17
+runtime.code.version.points.spring-boot=3.x.x
+```
 
 #### Internal HTTP Server
 EaseAgent opens port `9900` by default to receive configuration change notifications and Prometheus requests.

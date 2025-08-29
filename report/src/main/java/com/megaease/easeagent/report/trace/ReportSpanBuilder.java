@@ -23,7 +23,6 @@ import com.megaease.easeagent.plugin.report.tracing.ReportSpan;
 import com.megaease.easeagent.plugin.report.tracing.ReportSpanImpl;
 import zipkin2.Span;
 import zipkin2.Span.Kind;
-import zipkin2.internal.Platform;
 
 import java.util.*;
 import java.util.logging.Logger;

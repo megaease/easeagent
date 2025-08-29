@@ -17,19 +17,59 @@
 
 package com.megaease.easeagent.plugin.servicename;
 
+import com.megaease.easeagent.plugin.CodeVersion;
+import com.megaease.easeagent.plugin.Points;
+import com.megaease.easeagent.plugin.api.config.ConfigConst;
+
 public interface Const {
+    //----------------- FeignClient begin ---------------
+    /**
+     * The new version has been Deprecated
+     */
     String FeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.FeignLoadBalancer";
+    /**
+     * The new version has been Deprecated
+     */
     String RetryableFeignLoadBalancer = "org.springframework.cloud.openfeign.ribbon.RetryableFeignLoadBalancer";
+
+    /**
+     * The new version has been Deprecated
+     */
     String LoadBalancerFeignClient = "org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient";
     String FeignBlockingLoadBalancerClient = "org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient";
+    //----------------- FeignClient end ---------------
+
+    //----------------- RestTemplate begin ---------------
     String RetryLoadBalancerInterceptor = "org.springframework.cloud.client.loadbalancer.RetryLoadBalancerInterceptor";
+
+    /**
+     * The new version has been Deprecated
+     */
+    @Deprecated
     String AsyncLoadBalancerInterceptor = "org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerInterceptor";
     String LoadBalancerInterceptor = "org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor";
+    //----------------- RestTemplate end ---------------
+
+    //----------------- web client begin ---------------
     String ReactorLoadBalancerExchangeFilterFunction = "org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction";
+
+    /**
+     * The new version has been Deprecated
+     */
+    @Deprecated
     String LoadBalancerExchangeFilterFunction = "org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerExchangeFilterFunction";
+    //----------------- web client end ---------------
+
+    //----------------- spring gateway begin ---------------
     String FilteringWebHandler = "org.springframework.cloud.gateway.handler.FilteringWebHandler";
 
     String SERVER_WEB_EXCHANGE_ROUTE_ATTRIBUTE = "org.springframework.cloud.gateway.support.ServerWebExchangeUtils.gatewayRoute";
+    //----------------- spring gateway end ---------------
     String DEFAULT_PROPAGATE_HEAD = "X-Mesh-RPC-Service";
     String PROPAGATE_HEAD_CONFIG = "propagate.head";
+
+    CodeVersion VERSIONS = CodeVersion.builder()
+        .key(ConfigConst.CodeVersion.KEY_SPRING_BOOT)
+        .add(Points.DEFAULT_VERSION)
+        .add(ConfigConst.CodeVersion.VERSION_SPRING_BOOT2).build();
 }

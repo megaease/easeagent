@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, MegaEase
+ * Copyright (c) 2021, MegaEase
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,19 @@
  * limitations under the License.
  */
 
-package com.megaease.easeagent.plugin.httpservlet.utils;
+package easeagent.plugin.spring353.gateway.interceptor.initialize;
 
-public class SpringWebUtils {
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
-    public static String getBestMatchingPatternAttribute(){
-        return org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
+public class AgentGlobalFilter implements GlobalFilter {
+    public AgentGlobalFilter() {
+    }
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        return chain.filter(exchange);
     }
 }

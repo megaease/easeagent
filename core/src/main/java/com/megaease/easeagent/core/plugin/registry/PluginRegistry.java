@@ -35,8 +35,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -46,22 +45,36 @@ public class PluginRegistry {
     static final ConcurrentHashMap<String, AgentPlugin> QUALIFIER_TO_PLUGIN = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<String, AgentPlugin> POINTS_TO_PLUGIN = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<String, AgentPlugin> PLUGIN_CLASSNAME_TO_PLUGIN = new ConcurrentHashMap<>();
+    static final ConcurrentHashMap<String, Points> POINTS_CLASSNAME_TO_POINTS = new ConcurrentHashMap<>();
 
     static final ConcurrentHashMap<String, Integer> QUALIFIER_TO_INDEX = new ConcurrentHashMap<>();
     static final ConcurrentHashMap<Integer, MethodTransformation> INDEX_TO_METHOD_TRANSFORMATION = new ConcurrentHashMap<>();
     static final AgentArray<Builder> INTERCEPTOR_PROVIDERS = new AgentArray<>();
 
-    private PluginRegistry() {}
+    private PluginRegistry() {
+    }
 
     public static void register(AgentPlugin plugin) {
         PLUGIN_CLASSNAME_TO_PLUGIN.putIfAbsent(plugin.getClass().getCanonicalName(), plugin);
+    }
+
+    public static void register(Points points) {
+        POINTS_CLASSNAME_TO_POINTS.putIfAbsent(points.getClass().getCanonicalName(), points);
+    }
+
+    public static Collection<Points> getPoints() {
+        return POINTS_CLASSNAME_TO_POINTS.values();
+    }
+
+    public static Points getPoints(String pointsClassName) {
+        return POINTS_CLASSNAME_TO_POINTS.get(pointsClassName);
     }
 
     private static String getMethodQualifier(String classname, String qualifier) {
         return classname + ":" + qualifier;
     }
 
-    public static ClassTransformation register(Points points) {
+    public static ClassTransformation registerClassTransformation(Points points) {
         String pointsClassName = points.getClass().getCanonicalName();
         IClassMatcher classMatcher = points.getClassMatcher();
         boolean hasDynamicField = points.isAddDynamicField();
@@ -81,6 +94,9 @@ public class PluginRegistry {
                 return null;
             }
             Builder providerBuilder = INTERCEPTOR_PROVIDERS.get(index);
+            if (providerBuilder == null) {
+                return null;
+            }
             MethodTransformation mt = new MethodTransformation(index, bMethodMatcher, providerBuilder);
             if (INDEX_TO_METHOD_TRANSFORMATION.putIfAbsent(index, mt) != null) {
                 log.error("There are duplicate qualifier in Points:{}!", qualifier);
@@ -90,11 +106,11 @@ public class PluginRegistry {
 
         AgentPlugin plugin = POINTS_TO_PLUGIN.get(pointsClassName);
         int order = plugin.order();
-
         return ClassTransformation.builder().classMatcher(innerClassMatcher)
             .hasDynamicField(hasDynamicField)
             .methodTransformations(mInfo)
             .classloaderMatcher(loaderMatcher)
+            .typeFieldAccessor(points.getTypeFieldAccessor())
             .order(order).build();
     }
 
@@ -107,7 +123,6 @@ public class PluginRegistry {
             // code autogenerate issues that are unlikely to occur!
             throw new RuntimeException();
         }
-
         QUALIFIER_TO_PLUGIN.putIfAbsent(qualifier, plugin);
         POINTS_TO_PLUGIN.putIfAbsent(getPointsClassName(qualifier), plugin);
 
@@ -128,7 +143,7 @@ public class PluginRegistry {
         return index;
     }
 
-    static String getPointsClassName(String name) {
+    public static String getPointsClassName(String name) {
         int index;
         if (Strings.isNullOrEmpty(name)) {
             return "unknown";
@@ -147,4 +162,5 @@ public class PluginRegistry {
     public static void addMethodTransformation(int pointcutIndex, MethodTransformation info) {
         INDEX_TO_METHOD_TRANSFORMATION.putIfAbsent(pointcutIndex, info);
     }
+
 }

@@ -85,6 +85,9 @@ public class DynamicFieldTransformer implements AgentBuilder.Transformer {
         Cache<ClassLoader, Boolean> checkCache = FIELD_MAP.get(key);
         if (checkCache == null) {
             Cache<ClassLoader, Boolean> cache = CacheBuilder.newBuilder().weakKeys().build();
+            if (cl == null) {
+                cl = Thread.currentThread().getContextClassLoader();
+            }
             cache.put(cl, true);
             checkCache = FIELD_MAP.putIfAbsent(key, cache);
             if (checkCache == null) {
