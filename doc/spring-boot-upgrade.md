@@ -44,6 +44,9 @@ runtime.code.version.points.jdk=jdk17
 runtime.code.version.points.spring-boot=3.x.x
 ```
 
+## Change Tag
+release and change message: [Release-v2.3.0](https://github.com/megaease/easeagent/releases/tag/v2.3.0) 
+
 ## Features
 Easy to upgrade. If you upgrade your spring-boot version in the future, you only need to add the missing plugins.
 
