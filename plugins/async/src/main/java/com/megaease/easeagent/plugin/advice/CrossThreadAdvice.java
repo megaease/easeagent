@@ -30,7 +30,6 @@ public class CrossThreadAdvice implements Points {
     public IClassMatcher getClassMatcher() {
         return ClassMatcher.builder()
             .hasClassName("java.util.concurrent.ThreadPoolExecutor")
-            .or().hasClassName("reactor.core.scheduler.Schedulers")
             .build();
     }
 
