@@ -116,11 +116,6 @@ public class MethodMatcherConvert
             }
         }
 
-        if (matcher.getArgsLength() >= 0) {
-            mc = takesArguments(matcher.getArgsLength());
-            c = c == null ? mc : c.and(mc);
-        }
-
         if (matcher.getOverriddenFrom() != null) {
             Junction<TypeDescription> cls = ClassMatcherConvert.INSTANCE.convert(matcher.getOverriddenFrom());
             mc = isOverriddenFrom(cls);
