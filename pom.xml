@@ -69,7 +69,7 @@
         <version.commons-lang3>3.11</version.commons-lang3>
         <version.commons-codec>1.15</version.commons-codec>
         <version.maven-shade-plugin>3.2.4</version.maven-shade-plugin>
-        <version.log4j>2.17.1</version.log4j>
+        <version.log4j>2.22.1</version.log4j>
         <version.kafka>2.8.2</version.kafka>
         <version.lettuce>5.3.6.RELEASE</version.lettuce>
         <version.metrics>4.2.23</version.metrics>
