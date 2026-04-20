@@ -60,7 +60,7 @@
         <version.servlet>3.1.0</version.servlet>
         <version.brave>5.18.1</version.brave>
         <version.otel>1.12.0</version.otel>
-        <version.otel-alpha>1.12.0-alpha</version.otel-alpha>
+        <version.otel-alpha>1.34.1</version.otel-alpha>
         <version.zipkin-sender-kafka11>2.8.0</version.zipkin-sender-kafka11>
         <version.zipkin-reporter2>2.15.0</version.zipkin-reporter2>
         <version.moco>1.1.0</version.moco>
